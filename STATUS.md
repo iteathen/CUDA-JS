@@ -6,7 +6,7 @@
 
 ## Current phase
 
-The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, and `CJS-F6W / EXP-009` are accepted on their bounded evidence. The platform-neutral F3 through F6 control plane also passes without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work.
+The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, and `CJS-F7W` are accepted on their bounded evidence. The platform-neutral F3 through F7 control plane also passes without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work.
 
 ## Promoted F1A result
 
@@ -122,7 +122,24 @@ On the accepted Windows profile, NVRTC 13.3 produces a 1,123-byte PTX artifact w
 
 The human Linux F6 handoff is retained in [`conformance/f6/README.md`](conformance/f6/README.md). It specifies canonical ELF provider discovery, the Linux side-effect guard, independent oracle parity, cache filesystem partitions, evidence, and promotion rules. No Linux compiler/linker or Driver success is claimed.
 
-## Deferred incomplete Linux F2L–F6L
+## Accepted Windows F7W result
+
+The accepted F7 slice adds `runtime.platform-diagnostics` and hardens both native actors under [`SPEC-0007`](docs/specs/SPEC-0007-windows-platform-hardening.md):
+
+- exact host classification for native Windows x64, native Linux x64, native Linux ARM64, WSL1/WSL2 x64, and unsupported profiles;
+- fail-closed Node/FFI/permission and DriverActor support assessment;
+- CUDA-reported device-zero WDDM/TCC, kernel-timeout/watchdog, integration, and compute-mode facts without device mutation;
+- inherited permission-model flags for DriverActor and CompilerActor Workers, closing a discovered permission-bypass defect caused by replacement Worker flags;
+- sanitized unexpected errors and bounded CompilerActor public-result validation;
+- fixed-seed property partitions, finite injected compiler destruction/operation failures, cache failure containment, and existing Driver failure/loss partitions;
+- 24 DriverActor plus 24 CompilerActor portable lifecycle cycles and 8 plus 8 Windows native cycles with terminal resource balance;
+- broad elapsed-time and process-memory ceilings recorded only as regression observations.
+
+On the accepted Windows profile, CUDA reports Driver API 13030, WDDM with kernel execution timeout enabled, non-integrated device memory, and default compute mode for the GTX 1660 Ti. Both actors deny FFI when the Node permission model omits FFI authority, succeed with explicit FFI/Worker/filesystem authority, and close with Worker exit zero. The latest native hardening capsule records roughly 5.5 seconds and 38 MB process RSS growth; these are not product performance claims.
+
+The human F7 handoff in [`conformance/f7/README.md`](conformance/f7/README.md) separately specifies native Linux x86-64, Linux ARM64 SBSA, and WSL2 work. Portable classification and readiness run in Linux CI, but no Linux/ARM64/WSL CUDA support is claimed.
+
+## Deferred incomplete Linux F2L–F7L
 
 The Ubuntu Hyper-V VM remains useful for native Linux CPU/ABI work but has no NVIDIA GPU/Driver exposure. The host GTX 1660 Ti and client-Windows Hyper-V configuration do not provide a supported GPU partition/pass-through path. Windows results must never be labeled as Linux support.
 
@@ -139,8 +156,8 @@ GPU-free preparation passes in the available native Linux guest. The only unexec
 
 ## Claim limits
 
-F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. F4W proves only synchronous bounded device allocation and copied transfers on the exact Windows profile. F5W proves one tracked PTX vector kernel through one private stream and terminal event completion on that profile. F6W proves typed source-to-PTX, PTX-to-cubin, validated local caching, and copied artifact execution on the exact Windows profile. Native Linux F3 through F6 capsules prove platform-neutral control-plane behavior only. These results do not prove native Linux Driver/compiler execution, arbitrary returned-pointer invocation, Fast FFI dispatch, asynchronous or specialized memory, broader compiler options/artifact formats, concurrent launch/compile, performance, packaging, recovery without process restart, or consumer semantics.
+F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. F4W proves only synchronous bounded device allocation and copied transfers on the exact Windows profile. F5W proves one tracked PTX vector kernel through one private stream and terminal event completion on that profile. F6W proves typed source-to-PTX, PTX-to-cubin, validated local caching, and copied artifact execution on the exact Windows profile. F7W proves the bounded Windows diagnostic, permission, failure/property, repeated-lifecycle, and boundary-sanitization profile. Native Linux F3 through F7 capsules prove platform-neutral control-plane/readiness behavior only. These results do not prove native Linux/ARM64/WSL Driver/compiler execution, arbitrary returned-pointer invocation, Fast FFI dispatch, asynchronous or specialized memory, broader compiler options/artifact formats, concurrent launch/compile, performance, packaging, recovery without process restart, or consumer semantics.
 
 ## Immediate next boundary
 
-Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained F2L–F6L runbooks. The next boundary is a detailed Windows-first F7 platform-hardening specification covering security, permissions, failure injection, leak stress, and diagnostics; F7 implementation remains gated on that accepted contract. Linux qualification can resume independently when suitable hardware becomes available.
+Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained F2L–F7L runbooks. The next boundary is a detailed Windows-first F8 package/public-facade/second-consumer specification. Packaging and UMCGS work remain gated on that accepted contract; Linux qualification can resume independently when suitable hardware becomes available.

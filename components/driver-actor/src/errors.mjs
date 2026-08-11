@@ -16,15 +16,21 @@ export class DriverRuntimeError extends Error {
 }
 
 export function serializeError(error) {
+  const domainCode = typeof error?.code === 'string' && /^(?:CUDA|DRIVER|EXECUTION|MEMORY|RESOURCE)_[A-Z0-9_]+$/.test(error.code);
+  const structured = error instanceof DriverRuntimeError || (domainCode
+    && (error?.category === undefined || (typeof error.category === 'string' && /^[a-z][a-z-]{0,63}$/.test(error.category)))
+    && typeof error?.message === 'string'
+    && error.message.length <= 4_096);
+  const permissionDenied = error?.code === 'ERR_ACCESS_DENIED';
   const record = {
-    name: error?.name ?? 'Error',
-    code: error?.code ?? 'DRIVER_RUNTIME_INTERNAL',
-    category: error?.category ?? 'internal',
-    message: error?.message ?? String(error),
-    details: error?.details ?? {},
-    operationId: error?.operationId ?? null,
-    healthBefore: error?.healthBefore ?? null,
-    healthAfter: error?.healthAfter ?? null,
+    name: structured ? error.name ?? 'DriverRuntimeError' : permissionDenied ? 'Error' : 'DriverRuntimeError',
+    code: structured ? error.code : permissionDenied ? 'ERR_ACCESS_DENIED' : 'DRIVER_RUNTIME_INTERNAL',
+    category: structured ? error.category ?? 'internal' : permissionDenied ? 'permission' : 'internal',
+    message: structured ? error.message : permissionDenied ? 'DriverActor lacks required Node permission.' : 'DriverActor internal failure.',
+    details: structured ? error.details ?? {} : {},
+    operationId: structured ? error.operationId ?? null : null,
+    healthBefore: structured ? error.healthBefore ?? null : null,
+    healthAfter: structured ? error.healthAfter ?? null : null,
   };
   return Object.freeze(record);
 }

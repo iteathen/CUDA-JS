@@ -4,7 +4,7 @@
 
 ## Current phase
 
-`EXP-000` is promoted after exact Windows x64 and native Linux x86-64 profiles passed independently. F1B schema/ABI preparation is accepted. Windows `EXP-012` and `EXP-009` are promoted on exact independent MSVC parity for the Driver and compiler/linker boundaries. The F3 through F6 portable control plane also passes without native providers; Linux `EXP-001` and native Linux Driver/compiler execution remain retained, incomplete, deferred, and open for contribution.
+`EXP-000` is promoted after exact Windows x64 and native Linux x86-64 profiles passed independently. F1B schema/ABI preparation is accepted. Windows `EXP-012` and `EXP-009` are promoted on exact independent MSVC parity for the Driver and compiler/linker boundaries. The F3 through F7 portable control plane also passes without native providers, and F7W adds exact Windows platform/permission/stress evidence without a new experiment. Linux `EXP-001` and native Linux Driver/compiler execution remain retained, incomplete, deferred, and open for contribution.
 
 The executable capsules are owned by [`exp-000/`](exp-000/README.md), the incomplete native-Linux handoff in [`exp-001/`](exp-001/README.md), Windows compiler/linker [`exp-009/`](exp-009/README.md), and Windows Driver [`exp-012/`](exp-012/README.md).
 

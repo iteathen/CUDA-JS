@@ -3,14 +3,14 @@
   "component": {
     "id": "runtime.compiler-actor",
     "name": "CUDA CompilerActor",
-    "status": "accepted-f6w-internal-experimental",
+    "status": "accepted-f7w-internal-experimental",
     "product_area": "components",
     "path": "components/compiler-actor",
     "purpose": "Provide bounded typed NVRTC compilation, nvJitLink composition, validated artifact caching, and copied PTX/cubin handoff from a separate Worker.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "node-ffi-26.7.0", "canonical-cuda-13.3-nvrtc", "canonical-cuda-13.3-nvjitlink"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-option", "source-file", "raw-public-pointer", "driver-context", "consumer-semantics", "concurrent-compile"],
-    "validation": ["npm run f6:unit", "npm run f6:native"],
+    "validation": ["npm run f6:unit", "npm run f6:native", "npm run f7"],
     "owner": "runtime.compiler-actor",
     "lifecycle": "One Worker serially owns provider libraries and all temporary program/link handles. Every operation destroys native resources before resolving; graceful close unloads providers; unexpected loss requires a new runtime.",
     "design": {

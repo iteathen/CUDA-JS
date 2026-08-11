@@ -36,6 +36,10 @@ const ATTRIBUTES = Object.freeze({
   maxGridDimZ: 7,
   maxSharedMemoryPerBlock: 8,
   multiprocessorCount: 16,
+  kernelExecTimeout: 17,
+  integrated: 18,
+  computeMode: 20,
+  tccDriver: 35,
   computeCapabilityMajor: 75,
   computeCapabilityMinor: 76,
 });

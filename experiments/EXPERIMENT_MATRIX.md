@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W through CJS-F5W, and Windows EXP-009/CJS-F6W are accepted. The F3 through F6 platform-neutral capsules pass without native Linux providers. Native Linux EXP-001 and Linux DriverActor/compiler execution remain incomplete, hardware-deferred, and independently gated.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W through CJS-F5W, Windows EXP-009/CJS-F6W, and Windows CJS-F7W are accepted. The F3 through F7 platform-neutral capsules pass without native Linux providers. Native Linux EXP-001 and Linux DriverActor/compiler execution remain incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 

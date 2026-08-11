@@ -10,6 +10,16 @@ const DEFAULT_CACHE = path.join(root, 'build', 'cache', 'compiler-v1');
 const OPTION_FIELDS = Object.freeze(['cacheDirectory', 'cacheMode']);
 export const COMPILER_RUNTIME_TEST = Symbol('cuda-js.compiler-runtime.test');
 
+function workerExecArgv() {
+  return process.execArgv.filter((argument) => argument === '--experimental-ffi'
+    || argument === '--permission'
+    || argument === '--permission-audit'
+    || argument === '--allow-ffi'
+    || argument === '--allow-worker'
+    || argument.startsWith('--allow-fs-read=')
+    || argument.startsWith('--allow-fs-write='));
+}
+
 class CompilerRuntime {
   #backend;
   #testHooks;
@@ -26,6 +36,7 @@ class CompilerRuntime {
   #exitPromise;
   #exitResolve;
   #terminalReport = null;
+  #gracefulTerminal = null;
   #closePromise = null;
 
   constructor(options) {
@@ -110,9 +121,15 @@ class CompilerRuntime {
   }
 
   async #start() {
+    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) {
+      throw new CompilerRuntimeError('COMPILER_FFI_FLAG_REQUIRED', 'unsupported', 'The native CompilerActor requires Node to be launched with experimental FFI enabled.');
+    }
+    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) {
+      throw new CompilerRuntimeError('COMPILER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native CompilerActor requires permission flags to be explicit process arguments.');
+    }
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
       workerData: { backend: this.#backend, testHooks: this.#testHooks, cacheDirectory: this.#cacheDirectory, cacheMode: this.#cacheMode },
-      execArgv: this.#backend === 'windows-native' ? ['--experimental-ffi'] : [],
+      execArgv: workerExecArgv(),
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
     this.#worker.on('error', (error) => { if (this.#state === 'opening') this.#readyReject(error); });
@@ -143,6 +160,7 @@ class CompilerRuntime {
     this.#pending.delete(message.requestId);
     if (message.ok) {
       if (message.result?.health?.current) this.#health = message.result.health.current;
+      if (pending.operation === 'runtime.close') this.#gracefulTerminal = message.result;
       pending.resolve(message.result);
     } else {
       const error = deserializeError(message.error);
@@ -153,11 +171,11 @@ class CompilerRuntime {
 
   #onExit(code) {
     this.#exitResolve(code);
-    const graceful = this.#state === 'closing' && code === 0;
+    const graceful = this.#state === 'closing' && this.#gracefulTerminal?.graceful === true && code === 0;
     this.#terminalReport = Object.freeze({
-      ...(this.#terminalReport ?? {}),
+      ...(this.#gracefulTerminal ?? this.#terminalReport ?? {}),
       graceful,
-      cleanupClaim: graceful ? this.#terminalReport?.cleanupClaim ?? 'proved-by-close-command' : 'unproved-worker-loss',
+      cleanupClaim: graceful ? this.#gracefulTerminal.cleanupClaim : this.#gracefulTerminal?.cleanupClaim ?? 'unproved-worker-loss',
       workerExited: true,
       workerExitCode: code,
       restartRequired: !graceful,
@@ -179,7 +197,7 @@ class CompilerRuntime {
     if (!allowClosing && this.#pending.size >= 16) return Promise.reject(new CompilerRuntimeError('COMPILER_BACKPRESSURE', 'backpressure', 'CompilerActor command queue is full.', { maxPending: 16 }));
     const requestId = this.#nextRequestId++;
     return new Promise((resolve, reject) => {
-      this.#pending.set(requestId, { resolve, reject });
+      this.#pending.set(requestId, { operation, resolve, reject });
       this.#worker.postMessage({ schemaVersion: 1, requestId, operation, payload });
     });
   }

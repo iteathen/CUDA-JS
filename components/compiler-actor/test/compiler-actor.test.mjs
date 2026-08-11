@@ -4,7 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { COMPILER_RUNTIME_TEST, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting } from '../testing.mjs';
+import { assertCompilerPublicRecord, COMPILER_RUNTIME_TEST, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting } from '../testing.mjs';
+import { openCompilerRuntime } from '../index.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
 
@@ -76,4 +77,67 @@ test('unexpected CompilerActor loss is restart-required without a cleanup claim'
   assert.equal(runtime.health, 'restart-required');
   assert.equal(terminal.restartRequired, true);
   await assert.rejects(runtime.status(), { code: 'COMPILER_RUNTIME_CLOSED' });
+});
+
+test('CompilerActor public records reject native storage, paths, and source-shaped fields', () => {
+  assert.throws(() => assertCompilerPublicRecord({ pointer: 1n }), { code: 'COMPILER_RESULT_NATIVE_VALUE' });
+  assert.throws(() => assertCompilerPublicRecord({ bytes: Buffer.alloc(1) }), { code: 'COMPILER_RESULT_NATIVE_VALUE' });
+  assert.throws(() => assertCompilerPublicRecord({ source: 'copied input' }), { code: 'COMPILER_RESULT_KEY' });
+  assert.throws(() => assertCompilerPublicRecord({ message: 'failed at C:\\private\\provider.dll' }), { code: 'COMPILER_RESULT_PATH' });
+  assert.deepEqual(assertCompilerPublicRecord({ artifact: { bytes: Uint8Array.of(1, 2) } }), { artifact: { bytes: Uint8Array.of(1, 2) } });
+});
+
+test('CompilerActor injected creation and operation failures recover only when destruction is proved', async () => {
+  for (const mode of ['compile-create', 'compile-operation', 'link-create', 'link-operation']) {
+    const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
+    const compiled = mode.startsWith('link') ? await runtime.compile({ source }) : null;
+    await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode });
+    const operation = mode.startsWith('compile') ? runtime.compile({ source }) : runtime.link({ inputs: [compiled.artifact] });
+    const stage = mode.endsWith('create') ? 'CREATE' : 'OPERATION';
+    await assert.rejects(operation, { code: `${mode.startsWith('compile') ? 'COMPILER' : 'LINKER'}_INJECTED_${stage}_FAILURE` });
+    assert.equal(runtime.health, 'healthy');
+    const status = await runtime.status();
+    assert.equal(status.resources.programsCreated, status.resources.programsDestroyed);
+    assert.equal(status.resources.linksCreated, status.resources.linksDestroyed);
+    await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode: 'none' });
+    assert.equal((await runtime.close()).graceful, true);
+  }
+});
+
+test('CompilerActor injected destruction failure is restart-required and cleanup remains unproved', async () => {
+  for (const mode of ['compile-destroy', 'link-destroy']) {
+    const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
+    const compiled = mode.startsWith('link') ? await runtime.compile({ source }) : null;
+    await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode });
+    const operation = mode.startsWith('compile') ? runtime.compile({ source }) : runtime.link({ inputs: [compiled.artifact] });
+    await assert.rejects(operation, { code: mode.startsWith('compile') ? 'COMPILER_INJECTED_DESTROY_FAILURE' : 'LINKER_INJECTED_DESTROY_FAILURE' });
+    assert.equal(runtime.health, 'restart-required');
+    await assert.rejects(runtime.compile({ source }), { code: 'COMPILER_RESTART_REQUIRED' });
+    const terminal = await runtime.close();
+    assert.equal(terminal.graceful, false);
+    assert.equal(terminal.cleanupClaim, 'unproved');
+    assert.equal(terminal.restartRequired, true);
+  }
+});
+
+test('unexpected cache filesystem failures are sanitized before crossing the Worker boundary', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f7-cache-failure-'));
+  const file = path.join(directory, 'not-a-directory');
+  try {
+    await writeFile(file, 'occupied');
+    await assert.rejects(openCompilerRuntimeForTesting({ cacheDirectory: file }), (error) => {
+      assert.equal(error.code, 'COMPILER_INTERNAL');
+      assert.equal(error.message, 'CompilerActor internal failure.');
+      assert(!error.message.includes(directory));
+      assert.deepEqual(error.details, {});
+      return true;
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('native CompilerActor fails before Worker creation when the process FFI flag is absent', async () => {
+  if (process.execArgv.includes('--experimental-ffi')) return;
+  await assert.rejects(openCompilerRuntime({ cacheMode: 'disabled' }), { code: 'COMPILER_FFI_FLAG_REQUIRED' });
 });

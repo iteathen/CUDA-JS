@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.platform-diagnostics",
+    "name": "CUDA-JS Platform Diagnostics",
+    "status": "accepted-f7w-internal-experimental",
+    "product_area": "components",
+    "path": "components/platform-diagnostics",
+    "purpose": "Classify bounded host profiles and assess copied Windows DriverActor device facts without native calls, commands, paths, or state mutation.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library", "copied-driver-description"],
+    "forbidden_dependencies": ["node-ffi", "native-provider", "filesystem-path", "system-command", "raw-public-pointer", "device-state-mutation", "consumer-semantics"],
+    "validation": ["npm run f7:unit", "npm run f7:portable", "npm run f7:native"],
+    "owner": "runtime.platform-diagnostics",
+    "lifecycle": "Pure frozen records only; the component owns no Worker, provider, native resource, cache, or external process.",
+    "design": {
+      "owned_invariant": "No heuristic or portable record promotes native support, and every unknown or contradictory profile fails closed.",
+      "public_ports": ["classifyHost", "inspectHostProfile", "assessCudaSupport", "permissionState"],
+      "injected_dependencies": ["bounded host facts", "sanitized DriverActor description"],
+      "adapter_boundaries": ["operating-system facts", "DriverActor public description"],
+      "simplest_sufficient_total_system": "One pure classifier and one fail-closed CUDA-device assessment over copied ordinary records."
+    }
+  }
+}

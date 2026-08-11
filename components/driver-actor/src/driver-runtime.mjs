@@ -10,6 +10,16 @@ import { requestRecord } from './protocol.mjs';
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
 const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution']);
 
+function workerExecArgv() {
+  return process.execArgv.filter((argument) => argument === '--experimental-ffi'
+    || argument === '--permission'
+    || argument === '--permission-audit'
+    || argument === '--allow-ffi'
+    || argument === '--allow-worker'
+    || argument.startsWith('--allow-fs-read=')
+    || argument.startsWith('--allow-fs-write='));
+}
+
 function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const prototype = Object.getPrototypeOf(value);
@@ -221,10 +231,15 @@ class DriverRuntime {
   }
 
   async #start() {
-    const execArgv = this.#backend === 'windows-native' ? ['--experimental-ffi'] : [];
+    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) {
+      throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
+    }
+    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) {
+      throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
+    }
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
       workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy },
-      execArgv,
+      execArgv: workerExecArgv(),
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
     this.#worker.on('error', (error) => {

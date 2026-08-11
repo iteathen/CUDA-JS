@@ -1,6 +1,6 @@
 # CUDA-JS Validation Policy
 
-## Accepted Windows F4W / hardware-deferred Linux Driver phase
+## Accepted Windows F7W / hardware-deferred Linux Driver phase
 
 Run:
 
@@ -11,6 +11,9 @@ npm run verify
 npm run exp:012  # exact qualified Windows x64 Driver/GPU profile
 npm run f3  # exact Windows native F3 plus platform-neutral F3 capsule
 npm run f4  # exact Windows native F4 plus platform-neutral F4 capsule
+npm run f5  # exact Windows native F5 plus platform-neutral F5 capsule
+npm run f6  # exact Windows native F6 plus platform-neutral F6 capsule
+npm run f7  # exact Windows native F7 plus platform-neutral F7 capsule
 npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
@@ -32,6 +35,10 @@ F2W changes additionally require canonical Windows Driver discovery, exact Toolk
 F3W changes additionally require accepted SPEC-0003, one Worker-owned context, a closed command protocol, bounded pending work, opaque runtime/kind/slot/generation/state validation, parent/child dependencies, in-flight leases, conservative health, responsive application-thread behavior, deterministic graceful teardown, and restart-required unexpected-loss evidence that makes no inaccessible cleanup claim. Run `npm run f3:portable` on native Linux when shared F3 control-plane owners change. That result does not replace Linux Driver/GPU qualification.
 
 F4W changes additionally require accepted SPEC-0004, exact memory-policy validation, safe range partitions, quota reservation/rollback, failed-free accounting, copied-byte snapshot isolation, transfer leases, five generated named exports, independent MSVC byte parity, allocation-before-context teardown, zero terminal resources, and a human native Linux handoff. Run `npm run f4:portable` in native Linux CI whenever shared memory or protocol owners change. That result does not replace native Linux Driver/GPU/memory qualification.
+
+F5W and F6W changes require their accepted module/launch/completion and compiler/linker/cache contracts, exact independent Windows C parity, portable control-plane regressions, terminal native resources, and retained Linux runbooks.
+
+F7W changes additionally require accepted SPEC-0007, exact Node/permission flag inheritance, FFI denial and explicit-allow controls for both actors, sanitized errors/results, CUDA-reported WDDM/TCC/watchdog/compute-mode facts, deterministic property/failure partitions, repeated portable and native lifecycle balance, broad regression ceilings without performance claims, and separate native Linux x64, Linux ARM64 SBSA, and WSL2 handoffs. Run `npm run f7:portable` and `npm run f7:linux-readiness` in native Linux CI; neither establishes Linux CUDA support.
 
 F2L preparation changes additionally require the exact Ubuntu/Node profile, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support.
 

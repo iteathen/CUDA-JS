@@ -35,9 +35,17 @@ jobs:
       - run: npm run f5:portable
       - run: npm run f6:portable
       - run: node scripts/run-f6.mjs linux-readiness
+      - run: npm run f7:portable
+      - run: node scripts/run-f7.mjs linux-readiness
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: f6-linux-readiness-${{ github.sha }}
           path: build/f6/linux-x64/evidence/readiness.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f7-linux-readiness-${{ github.sha }}
+          path: build/f7/linux-x64/evidence/
           if-no-files-found: error

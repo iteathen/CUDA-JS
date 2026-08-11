@@ -9,5 +9,6 @@
 - [`SPEC-0004-device-memory-foundation.md`](SPEC-0004-device-memory-foundation.md) — accepted Windows-first F4 contract for bounded device allocations, copied host transfers, quotas, leases, release, teardown, and portable memory lifecycle validation.
 - [`SPEC-0005-module-launch-completion.md`](SPEC-0005-module-launch-completion.md) — accepted Windows-first F5 contract for bounded PTX modules, declared functions, packed launches, one private stream, event-polled completion, deferred-error attribution, and portable execution lifecycle validation.
 - [`SPEC-0006-compiler-linker-cache.md`](SPEC-0006-compiler-linker-cache.md) — accepted Windows-first F6 contract for a separate CompilerActor, canonical NVRTC/nvJitLink providers, typed options, PTX/cubin artifacts, validated content-addressed cache, and DriverActor handoff.
+- [`SPEC-0007-windows-platform-hardening.md`](SPEC-0007-windows-platform-hardening.md) — accepted Windows-first F7 contract for sanitized platform diagnostics, WDDM/TCC/watchdog facts, permission profiles, deterministic failure/property partitions, and repeated lifecycle stress with retained Linux/WSL handoffs.
 
 No production implementation is authorized merely because a function appears in generated schema. Each public component requires accepted ownership, lifecycle, safety, compatibility, conformance, and experiment evidence.

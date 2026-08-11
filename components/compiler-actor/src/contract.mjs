@@ -13,6 +13,9 @@ export const LIMITS = Object.freeze({
   logBytes: 1_048_576,
 });
 
+const PROHIBITED_PUBLIC_KEYS = new Set(['cacheDirectory', 'native', 'path', 'source']);
+const ABSOLUTE_PATH = /(?:^|[\s'\"])(?:[a-zA-Z]:[\\/]|\\\\|\/[^/\s])/;
+
 const COMPILE_FIELDS = Object.freeze(['headers', 'name', 'options', 'source']);
 const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'languageStandard']);
 const LINK_FIELDS = Object.freeze(['inputs', 'options']);
@@ -23,6 +26,45 @@ export function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const prototype = Object.getPrototypeOf(value);
   return prototype === Object.prototype || prototype === null;
+}
+
+export function assertCompilerPublicRecord(value, { maxDepth = 12, maxNodes = 2_000, maxByteLength = LIMITS.artifactBytes } = {}) {
+  let nodes = 0;
+  const visit = (current, depth) => {
+    nodes += 1;
+    if (nodes > maxNodes || depth > maxDepth) throw compilerError('COMPILER_RESULT_BOUNDS', 'Compiler result exceeds public record bounds.');
+    if (current === null || typeof current === 'boolean') return;
+    if (typeof current === 'number') {
+      if (!Number.isSafeInteger(current)) throw compilerError('COMPILER_RESULT_NUMBER', 'Compiler result contains a non-safe number.');
+      return;
+    }
+    if (typeof current === 'string') {
+      if (current.length > LIMITS.logBytes) throw compilerError('COMPILER_RESULT_STRING', 'Compiler result contains an oversized string.');
+      if (ABSOLUTE_PATH.test(current)) throw compilerError('COMPILER_RESULT_PATH', 'Compiler result contains an absolute path.');
+      return;
+    }
+    if (typeof current === 'bigint' || typeof current === 'function' || typeof current === 'symbol' || current === undefined) {
+      throw compilerError('COMPILER_RESULT_NATIVE_VALUE', 'Compiler result contains a prohibited native or executable value.');
+    }
+    if (current instanceof Uint8Array && !Buffer.isBuffer(current)) {
+      if (current.byteLength > maxByteLength) throw compilerError('COMPILER_RESULT_BOUNDS', 'Compiler result contains an oversized byte copy.');
+      return;
+    }
+    if (ArrayBuffer.isView(current) || current instanceof ArrayBuffer || current instanceof SharedArrayBuffer) {
+      throw compilerError('COMPILER_RESULT_NATIVE_VALUE', 'Compiler result contains raw storage.');
+    }
+    if (Array.isArray(current)) {
+      for (const item of current) visit(item, depth + 1);
+      return;
+    }
+    if (!plainObject(current)) throw compilerError('COMPILER_RESULT_OBJECT', 'Compiler result contains a non-plain object.');
+    for (const [key, item] of Object.entries(current)) {
+      if (key.length > 128 || PROHIBITED_PUBLIC_KEYS.has(key)) throw compilerError('COMPILER_RESULT_KEY', 'Compiler result contains a prohibited key.');
+      visit(item, depth + 1);
+    }
+  };
+  visit(value, 0);
+  return value;
 }
 
 function exactSubset(value, allowed) {

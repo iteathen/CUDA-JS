@@ -21,10 +21,10 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap through F6W compiler/linker/cache and PTX/cubin execution accepted; broader memory, concurrency, packaging, and public stability remain staged |
-| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F6 control plane complete; native Driver/compiler qualification deferred | run retained F2L readiness and Node/C Driver/provider/context/permission/teardown smoke on a qualified native NVIDIA host, then complete the documented native DriverActor/compiler stages |
-| Linux glibc | ARM64 AAPCS64/SBSA | third | loader/FFI/layout/cache/context/Driver capsules |
-| WSL2 | x86-64 | compatibility | Linux semantics plus environment diagnostics |
+| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap through F7W compiler/execution/platform hardening accepted; packaging, broader memory/concurrency, and public stability remain staged |
+| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F7 control plane complete; native Driver/compiler qualification deferred | run retained F2L through F7L Driver/provider/context/permission/stress/teardown gates on a qualified native NVIDIA host |
+| Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
+| WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
 | Windows ARM64 | ARM64 | deferred | CUDA/toolkit/Node qualification environment |
 | macOS | any | unsupported | no current CUDA deployment target |
@@ -73,7 +73,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Profile | V0 disposition |
 |---|---|
-| one private context per DriverActor Worker | accepted Windows F6W baseline; execution/memory children close first, graceful close is proven, unexpected Worker loss is restart-required until recovery is proven |
+| one private context per DriverActor Worker | accepted Windows F7W baseline; repeated native cycles close terminally, execution/memory children close first, and unexpected Worker loss remains restart-required |
 | multiple independent DriverActors/contexts | after single-actor lifecycle passes |
 | primary-context interop | later compatibility profile |
 | shared context across Workers | excluded pending explicit design |
@@ -114,6 +114,18 @@ Graphs are not a prerequisite for the first real-kernel slice. They become a per
 | nvJitLink in CompilerActor Worker | accepted Windows F6W for bounded PTX-to-cubin composition; each additional platform requires independent provider/resource/cache evidence |
 | child-process compiler provider | required alternative when a provider cannot satisfy the accepted process-global side-effect envelope or when stronger crash containment is selected |
 | implicit process-wide stack-limit mutation | prohibited in the default in-process profile |
+
+## Platform-hardening profiles
+
+| Capability | V0 disposition |
+|---|---|
+| sanitized host classification | accepted F7 control plane for Windows x64, native Linux x64, native Linux ARM64, WSL1/WSL2 x64, and unsupported hosts |
+| Windows device-zero WDDM/TCC/watchdog/compute-mode diagnostics | accepted F7W on exact Node 26.7.0 and Driver 13030; diagnostic only and never mutates device state |
+| Node permission-model inheritance into DriverActor and CompilerActor | accepted F7W; denial without FFI authority and explicit-allow success are mandatory |
+| deterministic failure/property and repeated lifecycle stress | accepted portable F7 and native Windows F7W; broad elapsed/RSS ceilings are regression checks, not performance claims |
+| native Linux x86-64 hardening | retained F7L handoff; blocked on native F2L through F6L qualification |
+| Linux ARM64 SBSA | independently classified; no ABI, Driver, compiler, GPU, or cleanup support claim |
+| WSL2 CUDA | diagnostics-only until an independent compatibility profile passes |
 
 A Worker isolates JavaScript execution and blocking from the main event loop, but it does not isolate process-global native state. Provider manifests and EXP-009 must account for that distinction.
 
