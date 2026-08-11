@@ -113,12 +113,14 @@ export function packParameterValues(parameters, values) {
   return Object.freeze({ buffer, layout });
 }
 
-function moduleBytes(value, maximum) {
+function moduleBytes(format, value, maximum) {
   if (!(value instanceof Uint8Array) || Buffer.isBuffer(value) || value.byteLength < 1 || value.byteLength > maximum) {
-    fail('EXECUTION_MODULE_BYTES', 'validation', 'PTX bytes must be a nonempty ordinary Uint8Array within policy.', { byteLength: value?.byteLength ?? null, maximum });
+    fail('EXECUTION_MODULE_BYTES', 'validation', 'Module bytes must be a nonempty ordinary Uint8Array within policy.', { byteLength: value?.byteLength ?? null, maximum });
   }
-  for (const byte of value) {
-    if (byte === 0 || byte > 0x7f) fail('EXECUTION_MODULE_TEXT', 'validation', 'PTX bytes must be NUL-free seven-bit text.');
+  if (format === 'ptx') {
+    for (const byte of value) {
+      if (byte === 0 || byte > 0x7f) fail('EXECUTION_MODULE_TEXT', 'validation', 'PTX bytes must be NUL-free seven-bit text.');
+    }
   }
   return Uint8Array.from(value);
 }
@@ -208,11 +210,11 @@ export class ExecutionManager {
   }
 
   async loadModule({ format, bytes, operationId = null }) {
-    if (format !== 'ptx') fail('EXECUTION_MODULE_FORMAT', 'unsupported', 'F5 supports only PTX modules.', { format });
-    const owned = moduleBytes(bytes, this.#policy.maxModuleBytes);
+    if (!['ptx', 'cubin'].includes(format)) fail('EXECUTION_MODULE_FORMAT', 'unsupported', 'Module format must be PTX or cubin.', { format });
+    const owned = moduleBytes(format, bytes, this.#policy.maxModuleBytes);
     if (this.#streamToken === null) await this.initialize(operationId);
     const sha256 = createHash('sha256').update(owned).digest('hex');
-    const native = await this.#operations.loadModule({ bytes: owned, operationId });
+    const native = await this.#operations.loadModule({ format, bytes: owned, operationId });
     let token;
     try {
       token = this.#registry.allocate({

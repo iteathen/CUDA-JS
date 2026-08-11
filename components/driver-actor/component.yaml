@@ -3,10 +3,10 @@
   "component": {
     "id": "runtime.driver-actor",
     "name": "CUDA DriverActor",
-    "status": "accepted-f5w-internal-experimental",
+    "status": "accepted-f6w-internal-experimental",
     "product_area": "components",
     "path": "components/driver-actor",
-    "purpose": "Provide a bounded asynchronous facade over one Worker-owned private CUDA context with opaque resources, synchronous copied device memory, PTX module launch and completion, conservative health, deterministic graceful teardown, and honest unexpected-loss reporting.",
+    "purpose": "Provide a bounded asynchronous facade over one Worker-owned private CUDA context with opaque resources, synchronous copied device memory, PTX/cubin module launch and completion, conservative health, deterministic graceful teardown, and honest unexpected-loss reporting.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "node-ffi-26.7.0", "runtime.resource-registry", "runtime.memory", "runtime.execution", "generated-tier-0-ffi-definitions", "canonical-windows-cuda-driver"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-signature", "returned-function-pointer-invocation", "raw-public-pointer", "consumer-semantics", "compiler", "concurrent-launch"],

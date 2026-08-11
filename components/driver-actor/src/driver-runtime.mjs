@@ -127,13 +127,13 @@ class DriverRuntime {
   }
 
   async loadModule(options) {
-    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || options.format !== 'ptx') {
-      throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" and bytes.');
+    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || !['ptx', 'cubin'].includes(options.format)) {
+      throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" or "cubin" and bytes.');
     }
     if (!(options.bytes instanceof Uint8Array) || Buffer.isBuffer(options.bytes) || options.bytes.byteLength < 1 || options.bytes.byteLength > this.#executionPolicy.maxModuleBytes) {
       throw validationError('EXECUTION_MODULE_BYTES', 'loadModule requires bounded ordinary Uint8Array bytes.');
     }
-    return this.#request('execution.module.load', { format: 'ptx', bytes: Uint8Array.from(options.bytes) });
+    return this.#request('execution.module.load', { format: options.format, bytes: Uint8Array.from(options.bytes) });
   }
 
   async moduleStatus(token) {

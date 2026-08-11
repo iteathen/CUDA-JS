@@ -100,7 +100,7 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (payload.byteLength > memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'Memory read exceeds the configured transfer limit.', {}, message.requestId);
   } else if (message.operation === 'execution.module.load') {
     const payload = message.payload;
-    if (!plainObject(payload) || !exactFields(payload, ['format', 'bytes']) || payload.format !== 'ptx' || !ordinaryBytes(payload.bytes)
+    if (!plainObject(payload) || !exactFields(payload, ['format', 'bytes']) || !['ptx', 'cubin'].includes(payload.format) || !ordinaryBytes(payload.bytes)
         || payload.bytes.byteLength < 1 || payload.bytes.byteLength > executionPolicy.maxModuleBytes) {
       throw validationError('EXECUTION_MODULE_BYTES', 'Module load payload is invalid.', {}, message.requestId);
     }

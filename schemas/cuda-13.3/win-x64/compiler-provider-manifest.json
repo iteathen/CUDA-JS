@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "profile": "cuda-13.3-windows-x64-compiler",
+  "node": "v26.7.0",
+  "toolkitVersion": "13.3",
+  "providers": {
+    "nvrtc": {
+      "file": "nvrtc64_130_0.dll",
+      "byteLength": 101385328,
+      "sha256": "c7af6b5dbd001852d1b4a18effc6fbcfc94787eddadffea629a8333cb25b05fe",
+      "version": "13.3"
+    },
+    "nvrtcBuiltins": {
+      "file": "nvrtc-builtins64_133.dll",
+      "byteLength": 6684784,
+      "sha256": "82c703802846329d3bab3d8df06f8c956516a0eeec568033092d6c0a69b2733a",
+      "version": "13.3"
+    },
+    "nvJitLink": {
+      "file": "nvJitLink_130_0.dll",
+      "byteLength": 92465776,
+      "sha256": "727a0acfc4495b229143b53843004eef36e0a3463fb2e1c7c4215468607fd613",
+      "version": "13.3"
+    }
+  },
+  "headers": {
+    "nvrtc.h": "316a1375c18c69c5f1857dfc154c47a58a6795ffe462d2fcb50f5272ea472d21",
+    "nvJitLink.h": "164d0a1109a316d07da012bd898af3c93cd896b0f3b4368844d1bcfc418c54d9"
+  },
+  "claim": "Exact reviewed local CUDA 13.3 Windows x64 compiler provider profile only."
+}

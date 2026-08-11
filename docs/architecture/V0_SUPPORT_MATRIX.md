@@ -21,8 +21,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap, F3W actor/resource lifecycle, bounded synchronous F4W memory, and PTX-only F5W launch/completion accepted; compilation and concurrency remain staged |
-| Linux glibc | x86-64 SysV | GPU-free schema plus F3/F4/F5 control plane complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then complete the documented native DriverActor/memory/execution stages |
+| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap through F6W compiler/linker/cache and PTX/cubin execution accepted; broader memory, concurrency, packaging, and public stability remain staged |
+| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F6 control plane complete; native Driver/compiler qualification deferred | run retained F2L readiness and Node/C Driver/provider/context/permission/teardown smoke on a qualified native NVIDIA host, then complete the documented native DriverActor/compiler stages |
 | Linux glibc | ARM64 AAPCS64/SBSA | third | loader/FFI/layout/cache/context/Driver capsules |
 | WSL2 | x86-64 | compatibility | Linux semantics plus environment diagnostics |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -73,7 +73,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Profile | V0 disposition |
 |---|---|
-| one private context per DriverActor Worker | accepted Windows F5W baseline; execution/memory children close first, graceful close is proven, unexpected Worker loss is restart-required until recovery is proven |
+| one private context per DriverActor Worker | accepted Windows F6W baseline; execution/memory children close first, graceful close is proven, unexpected Worker loss is restart-required until recovery is proven |
 | multiple independent DriverActors/contexts | after single-actor lifecycle passes |
 | primary-context interop | later compatibility profile |
 | shared context across Workers | excluded pending explicit design |
@@ -86,6 +86,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 |---|---|
 | device-local allocation and synchronous copied JS bytes | accepted Windows F4W; portable policy/control plane passes Linux CI; native Linux Driver memory remains incomplete |
 | bounded PTX module, declared function, one private stream, packed launch, event completion | accepted Windows F5W; portable orchestration passes Linux CI; native Linux Driver launch remains incomplete |
+| bounded cubin module handoff from CompilerActor | accepted Windows F6W; exact PTX/cubin output parity and execution pass; native Linux providers and Driver launch remain incomplete |
 | pinned host staging | after bounded lifetime/pressure experiment |
 | mapped host control windows | optional, small, explicit synchronization |
 | managed memory | opt-in experiment; no universal zero-copy claim |
@@ -108,9 +109,9 @@ Graphs are not a prerequisite for the first real-kernel slice. They become a per
 
 | Profile | V0 disposition |
 |---|---|
-| NVRTC in CompilerActor Worker with `-modify-stack-limit=false` on Linux | default in-process compile profile after EXP-009 |
-| GPU-free NVRTC compile-only qualification | required independently of module-load/launch evidence |
-| nvJitLink in CompilerActor Worker | optional after provider/resource/cache capsules |
+| NVRTC in CompilerActor Worker with `--modify-stack-limit=false` on Linux | accepted Windows F6W; mandatory generated Linux rule retained pending native qualification |
+| GPU-free NVRTC compile-only qualification | accepted on exact Windows profile and required independently of module-load/launch evidence on every additional platform |
+| nvJitLink in CompilerActor Worker | accepted Windows F6W for bounded PTX-to-cubin composition; each additional platform requires independent provider/resource/cache evidence |
 | child-process compiler provider | required alternative when a provider cannot satisfy the accepted process-global side-effect envelope or when stronger crash containment is selected |
 | implicit process-wide stack-limit mutation | prohibited in the default in-process profile |
 
@@ -120,9 +121,9 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 
 | Capability | V0 disposition |
 |---|---|
-| load precompiled PTX/cubin/fatbin | required before compiler provider |
-| NVRTC source to PTX/cubin | optional provider, required before beta if toolchain installed |
-| nvJitLink composition/LTO | optional provider after NVRTC/load foundation |
+| load precompiled PTX/cubin | accepted Windows F6W; fatbin remains outside the bounded module contract |
+| NVRTC source to PTX | accepted optional Windows F6W provider; other platforms require independent qualification |
+| nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; LTO remains deferred |
 | runtime host-code compilation | out of scope; NVRTC is device-only |
 
 ## Release maturity

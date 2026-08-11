@@ -10,7 +10,7 @@ The component surface is [`index.mjs`](index.mjs):
 - `runtime.describe()` returns bounded Driver/device metadata, health, inventory, and an opaque context token;
 - `runtime.contextStatus(token)` verifies on the owning Worker that the same private context remains current;
 - `runtime.allocateDevice`, `memoryStatus`, `writeDevice`, `readDevice`, and `releaseMemory` provide the bounded synchronous copied-byte contract from SPEC-0004;
-- `runtime.loadModule`, `moduleStatus`, `getFunction`, `functionStatus`, `launch`, `releaseFunction`, and `releaseModule` provide the PTX-only, declared-schema, one-in-flight completion contract from SPEC-0005;
+- `runtime.loadModule`, `moduleStatus`, `getFunction`, `functionStatus`, `launch`, `releaseFunction`, and `releaseModule` provide the PTX/cubin, declared-schema, one-in-flight completion contract from SPEC-0005 plus the bounded cubin handoff in SPEC-0006;
 - `runtime.close()` performs idempotent graceful teardown and returns a terminal report.
 
 Callers cannot provide a library, symbol, signature, pointer, device ordinal, context flags, or operation name. Tokens contain no native address. Any unexpected Worker exit invalidates the runtime epoch, reports the last known resources as inaccessible, and requires restart without claiming cleanup.
