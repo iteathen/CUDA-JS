@@ -18,7 +18,7 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 
 ## Mandatory startup
 
-1. Read this file, `agent_files/AI_RULES.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`.
+1. Read this file, `agent_files/AI_RULES.md`, `agent_files/AGENTS.md`, `agent_files/general_foundation/NO_PYTHON_POLICY.md`, `STATUS.md`, and `next_step.yaml`.
 2. Identify the exact work package, experiment, contract, target paths, and claim.
 3. Read the owning accepted ADR/specification and only objectively triggered supporting doctrine under `agent_files/general_foundation/`.
 4. Inspect exact Git state, generated artifacts, environment capabilities, and unrelated work.
@@ -28,6 +28,7 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 ## Non-negotiable boundaries
 
 - CUDA-JS is a generic Node/CUDA runtime. It contains no MCGS, minimax, graph-search, game, tensor, model, or evaluator semantics.
+- Python is prohibited throughout CUDA-JS and the wider UMCGS ecosystem, including source, dependencies, tooling, schema import, generators, tests, benchmarks, documentation automation, CI, packaging, installers, release work, experiments, and temporary scripts.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon.
 - Custom AsmJit/register stubs are a deferred measured-gap option, not the baseline.
@@ -50,7 +51,7 @@ The repository is in a **documentation-only foundation phase**. Research, assess
 
 `EXP-000`, `EXP-001`, schema importers, ABI probes, Node FFI bindings, DriverActor/resource code, native fixtures, generated bindings, benchmarks, and runtime packages remain future work until the project owner explicitly advances the phase. At that point, agents must re-read current authority and verify predecessor gates before mutation.
 
-Do not create implementation scaffolding “for later,” executable placeholders, premature workflows, or generated artifacts during this phase.
+Do not create implementation scaffolding “for later,” executable placeholders, premature workflows, generated artifacts, or Python-based support tooling during this phase.
 
 ## Reasoning and experiment gate
 
@@ -89,7 +90,7 @@ For the current planning phase:
 ./scripts/verify-docs.sh
 ```
 
-Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
+Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, compliance with the no-Python policy, and honest claim limits.
 
 ## Publication state
 
