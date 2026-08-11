@@ -1,11 +1,11 @@
 {
-  "schema_version": 17,
+  "schema_version": 18,
   "updated": "2026-08-11",
-  "status": "cjs_f8_windows_complete_accepted_protected_integration_authorized",
-  "objective": "Integrate the accepted Windows CJS-F8 package and public-facade result through protected main, keep native Linux x86-64, Linux ARM64 SBSA, and WSL2 work publicly retained and independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
+  "status": "cjs_f8_windows_complete_hardware_qualification_program_published",
+  "objective": "Operate an exact-evidence hardware qualification campaign without broadening current Windows claims, keep native Linux x86-64, Linux ARM64 SBSA, Jetson ARM64, and WSL2 independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "codex/windows-f8 pending authorized protected-main pull-request integration",
+  "current_branch": "main after protected hardware-qualification integration",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -244,6 +244,8 @@
     "Linux completion now depends on future qualified hardware or an external contributor; it no longer blocks Windows work."
   ],
   "completion_evidence": [
+    "The generated hardware support list records only the accepted exact GTX 1660 Ti Windows x64 profile and separates every candidate architecture/platform from support.",
+    "The hardware qualification runner composes the accepted Windows native chain, requires a clean exact commit, hashes phase evidence, emits a sanitized public summary, and refuses incomplete platform promotion.",
     "F1A passes independently on Windows x64 and native Linux x86-64.",
     "F1B/F5 deterministically generates 27 function facts, 16 type/layout facts, and fail-closed coverage for 456 unselected declarations.",
     "The Windows CUDA 13.3 cuda.h hash exactly matches the accepted F1B header hash.",

@@ -6,6 +6,8 @@
 
 This matrix defines planned qualification profiles, not current working support. A profile becomes supported only after its required capsules, packaging, teardown, and exact-version evidence pass.
 
+The current evidence-backed device list is generated separately in [`../HARDWARE_SUPPORT.md`](../HARDWARE_SUPPORT.md). CUDA-capable products and compiler targets remain candidates until the exact CUDA-JS profile is directly qualified.
+
 ## Node profiles
 
 | Profile | Host-call substrate | V0 disposition |
