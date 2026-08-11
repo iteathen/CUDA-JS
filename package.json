@@ -1,0 +1,32 @@
+{
+  "name": "cuda-js",
+  "version": "0.0.0-experimental",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "26.7.0"
+  },
+  "scripts": {
+    "exp:000:generate": "node scripts/run-exp-000.mjs generate",
+    "exp:000:build": "node scripts/run-exp-000.mjs build",
+    "exp:000:correctness": "node scripts/run-exp-000.mjs correctness",
+    "exp:000:lifecycle": "node scripts/run-exp-000.mjs lifecycle",
+    "exp:000:benchmark": "node scripts/run-exp-000.mjs benchmark",
+    "exp:000:case": "node scripts/run-exp-000.mjs case",
+    "exp:000": "node scripts/run-exp-000.mjs all",
+    "f1b:generate": "node scripts/run-f1b.mjs generate",
+    "f1b:check": "node scripts/run-f1b.mjs check",
+    "f1b:verify-native": "node scripts/run-f1b.mjs verify-native",
+    "exp:012:build": "node scripts/run-exp-012.mjs build",
+    "exp:012:smoke": "node scripts/run-exp-012.mjs smoke",
+    "exp:012:verify": "node scripts/run-exp-012.mjs verify",
+    "exp:012": "node scripts/run-exp-012.mjs all",
+    "exp:001:build": "node scripts/run-exp-001.mjs build",
+    "exp:001:readiness": "node scripts/run-exp-001.mjs readiness",
+    "exp:001:smoke": "node scripts/run-exp-001.mjs smoke",
+    "exp:001:prepare": "node scripts/run-exp-001.mjs prepare",
+    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify",
+    "test": "node scripts/run-exp-000.mjs test",
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check"
+  }
+}

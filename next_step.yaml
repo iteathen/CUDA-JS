@@ -1,73 +1,69 @@
 {
-  "schema_version": 7,
-  "updated": "2026-08-10",
-  "status": "ready_documentation_only",
-  "objective": "Maintain and adversarially refine the complete CUDA-JS foundational documentation and version-zero public contract proposals while keeping all experiment execution and runtime implementation blocked until explicit project-owner authorization.",
+  "schema_version": 11,
+  "updated": "2026-08-11",
+  "status": "ready_cjs_f3_windows",
+  "objective": "Specify and implement the Windows-only CJS-F3 DriverActor/resource vertical slice from the accepted CJS-F2W bootstrap while retaining Linux CJS-F2L as public, deferred, incomplete work.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "main after foundational-document publication and remote read-back",
+  "current_branch": "codex/windows-f2 published to the public iteathen/CUDA-JS repository",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
-      "status": "complete_documentation_foundation_published",
+      "status": "complete_publication_verified",
       "outputs": [
-        "complete reviewed documentation foundation on private GitHub",
-        "mandatory entry, registry, charter, decisions, architecture, specs, research, plans, experiment protocols, status, and next step",
-        "documentation/static validation and remote read-back",
-        "no implementation or experiment artifacts",
-        "UMCGS remains a public-contract consumer without private-source coupling",
-        "temporary bootstrap-transfer and premature implementation workflow residue removed"
+        "public https://github.com/iteathen/CUDA-JS repository",
+        "published codex/windows-f2 branch with exact remote commit read-back",
+        "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4",
+        "draft integration request https://github.com/iteathen/CUDA-JS/pull/5"
       ]
     },
     {
       "id": "CJS-F1A",
-      "status": "future_not_authorized_documentation_only",
+      "status": "complete_promoted_windows_x64_linux_x64",
       "outputs": [
-        "EXP-000 generated synthetic C library",
-        "direct C oracle",
-        "minimal generic Runtime IR",
-        "Node FFI definitions and byte packers",
-        "Worker/lifetime/cleanup evidence",
-        "Fast FFI eligibility model",
-        "arbitrary-pfn gap finding"
-      ],
-      "prior_status_for_context": "ready_but_blocked_on_official_Node_26_7_environment"
+        "generated dependency-free synthetic ABI fixture and direct C oracle",
+        "independent passing Windows x64 and native Linux x86-64 evidence",
+        "59 correctness cases, 6 unit tests, lifecycle, permission, responsiveness, cleanup, and benchmark capsules per profile"
+      ]
     },
     {
       "id": "CJS-F1B",
-      "status": "future_not_authorized_documentation_only",
+      "status": "complete_accepted_schema_abi",
       "outputs": [
-        "Tier-0 CUDA Runtime IR",
-        "pinned header importer",
-        "semantic overlay",
-        "CUDA packers",
-        "native CUDA ABI probes"
-      ],
-      "prior_status_for_context": "blocked_on_F1A"
+        "hash-pinned CUDA 13.3.29 official inputs and deterministic Clang importer",
+        "12 reviewed private Tier-0 functions and 9 type/layout facts",
+        "471 unselected Driver declarations cataloged unavailable",
+        "native Linux x86-64 probes plus hash-identical-header MSVC Win64 compatibility probe"
+      ]
     },
     {
-      "id": "CJS-F2",
-      "status": "future_not_authorized_documentation_only",
+      "id": "CJS-F2W",
+      "status": "complete_accepted_windows_x64",
       "outputs": [
-        "Node 26 FFI/CUDA preflight",
-        "Driver pathfinder",
-        "named-symbol smoke",
-        "cuGetProcAddress verification",
-        "hot/cold qualification evidence"
-      ],
-      "prior_status_for_context": "blocked_on_F1A_F1B_and_native_environment"
+        "canonical Windows Driver discovery and exact Node/permission preflight",
+        "all 12 generated Tier-0 named exports and cuGetProcAddress queries",
+        "Driver/device/attribute/error/context smoke with exact independent MSVC C-oracle parity",
+        "negative library/symbol/version/permission controls and terminal context/library/Worker cleanup"
+      ]
     },
     {
-      "id": "CJS-F3",
-      "status": "future_not_authorized_documentation_only",
+      "id": "CJS-F2L",
+      "status": "gpu_free_preparation_complete_hardware_qualification_deferred",
       "outputs": [
-        "DriverActor private context",
-        "opaque resource registry",
-        "error/health model",
-        "deterministic teardown",
-        "lifecycle mock"
-      ],
-      "prior_status_for_context": "blocked_on_F2"
+        "executable EXP-001 native Linux build, ABI, readiness, and real-Driver smoke capsules",
+        "hash-pinned official Linux inputs and independently compiled C oracle",
+        "human engineer runbook with evidence, troubleshooting, safety, and contribution requirements",
+        "public GitHub qualification request https://github.com/iteathen/CUDA-JS/issues/4"
+      ]
+    },
+    {
+      "id": "CJS-F3W",
+      "status": "ready_not_started",
+      "outputs": [
+        "Windows DriverActor private context owner",
+        "opaque production resource registry",
+        "error/health model and deterministic teardown"
+      ]
     }
   ],
   "authority": [
@@ -76,58 +72,63 @@
     "docs/decisions/ADR-0001-repository-boundary.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md",
-    "docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md",
+    "docs/specs/SPEC-0000-runtime-contract-map.md",
+    "docs/specs/SPEC-0001-cuda-schema-compiler.md",
+    "docs/specs/SPEC-0002-windows-driver-bootstrap.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
     "experiments/EXPERIMENT_MATRIX.md",
-    "docs/research/source-register.yaml"
+    "experiments/EXP-001-node-ffi-cuda-smoke.md",
+    "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
   ],
   "preconditions": [
-    "No competing accepted native-bootstrap/AsmJit authority remains active.",
-    "No handwritten or ahead-of-time per-CUDA production wrapper family is introduced.",
-    "The selected v0 baseline has no CUDA-JS addon; a generic native/JIT gap backend requires EXP-011 and a separate accepted ADR.",
-    "Exact Node/CUDA/header/schema/platform identity is retained.",
-    "Node FFI/raw pointers/libraries remain private behind opaque capabilities.",
-    "Strict JIT is not claimed before EXP-004 direct qualification.",
-    "Context-dependent Driver work stays on one owning Worker.",
-    "Every experiment has an independent oracle, falsifier, cleanup, and claim limit."
+    "Windows-only successors consume CJS-F2W and cannot imply Linux support.",
+    "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
+    "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
+    "Unknown or contradictory public semantics fail closed.",
+    "No CUDA-JS project-specific compiled addon or handwritten per-function wrapper family enters the baseline.",
+    "All raw Driver resources stay on their owning Worker and no pointer enters a public result.",
+    "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Maintain the foundation index, ownership registry, authority links, current status, and next-step state as one coherent documentation set.",
-    "Use exact-head documentation review and remote read-back for every foundational change.",
-    "Keep architecture, specifications, research, plans, and future experiment protocols internally consistent without converting proposals into implementation authorization.",
-    "Keep UMCGS interoperability public-contract-only; synchronize only public repository/foundation state and never private CUDA-JS implementation mechanisms.",
-    "Do not execute EXP-000 or any later experiment and do not add runtime implementation until explicit project-owner authorization advances the phase."
+    "Maintain the published CJS-F1A/F1B/F2W branch and public repository state.",
+    "Keep Linux CJS-F2L issue 4 aligned with the retained environment and acceptance requirements.",
+    "Draft the detailed CJS-F3W actor/resource/lifecycle specification from CJS-F2W evidence.",
+    "Implement only the Windows DriverActor/context/resource vertical slice after that specification is accepted.",
+    "Keep memory, module, launch, completion, compiler, cache, package, and consumer code gated on their Windows predecessors.",
+    "Re-run Linux F1A/F1B static/native evidence when those owners change; do not represent it as Driver support."
   ],
   "acceptance_criteria": [
-    "Root AGENTS.md, project charter, ownership registry, foundation index, accepted ADRs, specification map, architecture, support matrix, research/source register, plan, experiment protocols, status, and next step are present and mutually discoverable.",
-    "Private iteathen/CUDA-JS remote state is read back and no document falsely says that the repository does not exist.",
-    "All active documents agree that the current phase is documentation only.",
-    "No C, C++, JavaScript, TypeScript, Rust, native library, generated binding, runtime implementation, experiment harness, benchmark implementation, or production package is present.",
-    "Documentation validation and git diff checks pass on the exact review head.",
-    "UMCGS records only the public repository/foundation state and does not govern CUDA-JS internals."
+    "The exact remote branch/tree is readable publicly and matches the claimed commit.",
+    "The Linux issue retains native Linux x86-64 Driver/GPU, C-oracle, version/status, context, permission, and cleanup requirements.",
+    "CJS-F3W begins only from an accepted actor/resource/lifecycle specification.",
+    "Windows and Linux compatibility/evidence remain separately keyed and reported.",
+    "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
   ],
   "do_not": [
-    "execute EXP-000 or any later experiment",
-    "add native fixtures, schema importers, generated bindings, Node FFI code, CUDA Driver code, actors, resource implementations, benchmarks, or packages",
-    "start broad production CUDA implementation",
-    "add handwritten or ahead-of-time per-CUDA-function wrappers",
-    "add a project native/JIT backend without future explicit authorization, EXP-011 evidence, and a separate accepted ADR",
-    "claim strict Fast JIT or any native/platform/performance result",
-    "expose raw pointers or arbitrary schemas",
-    "add UMCGS/search semantics"
+    "remove or claim completion of the deferred Linux path",
+    "use Windows or WSL evidence as native Linux support",
+    "make Linux a hidden runtime prerequisite for the active Windows path",
+    "start memory, module, launch, completion, compiler, cache, package, or UMCGS code before its Windows predecessor passes",
+    "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
+    "claim Fast FFI dispatch from timing or static eligibility"
   ],
   "operational_blockers": [
-    "Project owner has not authorized experiment execution or implementation; documentation only is the active phase.",
-    "Future EXP-000 requires an exact qualified Node 26.7.0 profile and C compiler after explicit authorization.",
-    "Future CUDA-native experiments require a qualified NVIDIA Driver/CUDA/GPU environment and exact official inputs after explicit authorization."
+    "Native Linux CUDA Driver support remains incomplete because the available Hyper-V guest has no supported NVIDIA GPU/Driver exposure.",
+    "The current client-Windows GTX 1660 Ti host cannot provide a supported Hyper-V GPU-P/DDA Linux qualification path.",
+    "Linux completion now depends on future qualified hardware or an external contributor; it no longer blocks Windows work."
   ],
   "completion_evidence": [
-    "Private iteathen/CUDA-JS main contains the complete foundational-document set and ownership registry.",
-    "Documentation, active-link, structured-data, authority-marker, shell-syntax, diff, and source-boundary checks pass on the exact integrated tree.",
-    "Only the documentation validation workflow is present; bootstrap-transfer chunks and premature implementation workflows are absent.",
-    "No C, C++, JavaScript, TypeScript, Rust, native library, generated binding, experiment harness, benchmark implementation, or production package is present.",
-    "Remote main, open pull-request state, and non-main branch disposition are read back after integration."
+    "F1A passes independently on Windows x64 and native Linux x86-64.",
+    "F1B deterministically generates 12 function facts, 9 type/layout facts, and fail-closed coverage for 471 unselected declarations.",
+    "The Windows CUDA 13.3 cuda.h hash exactly matches the accepted F1B header hash.",
+    "The MSVC Windows native probe matches every selected size, alignment, field offset, and function-pointer width.",
+    "F2W binds all 12 generated exports and verifies all 12 public-name cuGetProcAddress queries.",
+    "Node and the independent MSVC oracle agree exactly on Driver 13030, device zero, compute capability 7.5, selected attributes, error text, and context lifecycle.",
+    "F2W permission, missing library, missing symbol, insufficient version, versioned query-name, library invalidation, context teardown, and Worker exit controls pass.",
+    "No pointer value crosses the F2W Worker boundary.",
+    "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
+    "iteathen/CUDA-JS is public, codex/windows-f2 is published through draft pull request 5, and Linux qualification is tracked publicly in issue 4."
   ]
 }

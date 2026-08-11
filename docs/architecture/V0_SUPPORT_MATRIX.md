@@ -21,8 +21,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Linux glibc | x86-64 SysV | primary | loader/FFI/ABI/actor/Driver/memory/launch/completion/error/teardown |
-| Windows 11 | x86-64 Win64 | second | DLL/path/FFI/ABI/WDDM/TCC/watchdog/teardown |
+| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap accepted; actor/Driver/memory/launch/completion/error/teardown remain staged |
+| Linux glibc | x86-64 SysV | GPU-free preparation complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then later stages |
 | Linux glibc | ARM64 AAPCS64/SBSA | third | loader/FFI/layout/cache/context/Driver capsules |
 | WSL2 | x86-64 | compatibility | Linux semantics plus environment diagnostics |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -127,6 +127,6 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 ## Release maturity
 
 - **Foundation accepted:** architecture, schemas, experiments, and support matrix coherent; no native claim.
-- **Alpha:** Linux x86-64 exact Node/Driver vertical slice; explicit unsupported profiles.
-- **Beta:** Windows x86-64 and Linux ARM64 required capsules; package/update/teardown/security evidence; JIT claims limited to proven profiles.
+- **Alpha:** Windows x86-64 exact Node/Driver vertical slice; explicit incomplete Linux profile.
+- **Beta:** Windows x86-64 production capsules plus any independently completed Linux/ARM64 profiles; package/update/teardown/security evidence; JIT claims limited to proven profiles.
 - **Public release:** Node FFI maturity/support policy accepted, previous-major CUDA compatibility proven, second unrelated consumer passes, no material debt.

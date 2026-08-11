@@ -39,9 +39,9 @@ platform truth and accepted authority
 
 ## Current workstream
 
-The active workstream is documentation-only. Maintain the charter, decisions, specification map, architecture, support matrix, research provenance, experiment protocols, registry, status, and next-step state. Improve precision and internal agreement without creating executable experiment or runtime artifacts.
+`CJS-F1A / EXP-000` is promoted after independent Windows x64 and native Linux x86-64 qualification. Preserve its exact-profile evidence and generated-product regression checks.
 
-`EXP-000` through `EXP-003` remain documented future gates. Do not add generated C or JavaScript fixtures, schema importers, FFI definitions, packers, native probes, Driver smoke code, actors, or resource implementations until explicit project-owner authorization advances the phase.
+`CJS-F1B` and Windows-only `CJS-F2W / EXP-012` are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, platform compatibility, and independent native C ABI/Driver oracles as distinct owners. Windows F3 contract work may proceed; production DriverActor/resource code still requires an accepted detailed specification. Linux `CJS-F2L / EXP-001` remains deferred and incomplete until a qualified native Driver/GPU environment passes its documented gate.
 
 ## Testing and repair
 

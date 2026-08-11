@@ -1,0 +1,2390 @@
+{
+  "catalog": {
+    "driverFunctions": [
+      "cuArray3DCreate_v2",
+      "cuArray3DGetDescriptor_v2",
+      "cuArrayCreate_v2",
+      "cuArrayDestroy",
+      "cuArrayGetDescriptor_v2",
+      "cuArrayGetMemoryRequirements",
+      "cuArrayGetPlane",
+      "cuArrayGetSparseProperties",
+      "cuCheckpointProcessCheckpoint",
+      "cuCheckpointProcessGetRestoreThreadId",
+      "cuCheckpointProcessGetState",
+      "cuCheckpointProcessLock",
+      "cuCheckpointProcessRestore",
+      "cuCheckpointProcessUnlock",
+      "cuCoredumpDeregisterCompleteCallback",
+      "cuCoredumpDeregisterStartCallback",
+      "cuCoredumpGetAttribute",
+      "cuCoredumpGetAttributeGlobal",
+      "cuCoredumpRegisterCompleteCallback",
+      "cuCoredumpRegisterStartCallback",
+      "cuCoredumpSetAttribute",
+      "cuCoredumpSetAttributeGlobal",
+      "cuCtxAttach",
+      "cuCtxCreate_v4",
+      "cuCtxDestroy_v2",
+      "cuCtxDetach",
+      "cuCtxDisablePeerAccess",
+      "cuCtxEnablePeerAccess",
+      "cuCtxFromGreenCtx",
+      "cuCtxGetApiVersion",
+      "cuCtxGetCacheConfig",
+      "cuCtxGetCurrent",
+      "cuCtxGetDevResource",
+      "cuCtxGetDevice",
+      "cuCtxGetDevice_v2",
+      "cuCtxGetExecAffinity",
+      "cuCtxGetFlags",
+      "cuCtxGetId",
+      "cuCtxGetLimit",
+      "cuCtxGetSharedMemConfig",
+      "cuCtxGetStreamPriorityRange",
+      "cuCtxPopCurrent_v2",
+      "cuCtxPushCurrent_v2",
+      "cuCtxRecordEvent",
+      "cuCtxResetPersistingL2Cache",
+      "cuCtxSetCacheConfig",
+      "cuCtxSetCurrent",
+      "cuCtxSetFlags",
+      "cuCtxSetLimit",
+      "cuCtxSetSharedMemConfig",
+      "cuCtxSynchronize",
+      "cuCtxSynchronize_v2",
+      "cuCtxWaitEvent",
+      "cuDestroyExternalMemory",
+      "cuDestroyExternalSemaphore",
+      "cuDevResourceGenerateDesc",
+      "cuDevSmResourceSplit",
+      "cuDevSmResourceSplitByCount",
+      "cuDeviceCanAccessPeer",
+      "cuDeviceComputeCapability",
+      "cuDeviceGet",
+      "cuDeviceGetAttribute",
+      "cuDeviceGetByPCIBusId",
+      "cuDeviceGetCount",
+      "cuDeviceGetDefaultMemPool",
+      "cuDeviceGetDevResource",
+      "cuDeviceGetExecAffinitySupport",
+      "cuDeviceGetGraphMemAttribute",
+      "cuDeviceGetHostAtomicCapabilities",
+      "cuDeviceGetLuid",
+      "cuDeviceGetMemPool",
+      "cuDeviceGetName",
+      "cuDeviceGetNvSciSyncAttributes",
+      "cuDeviceGetP2PAtomicCapabilities",
+      "cuDeviceGetP2PAttribute",
+      "cuDeviceGetPCIBusId",
+      "cuDeviceGetProperties",
+      "cuDeviceGetTexture1DLinearMaxWidth",
+      "cuDeviceGetUuid_v2",
+      "cuDeviceGraphMemTrim",
+      "cuDevicePrimaryCtxGetState",
+      "cuDevicePrimaryCtxRelease_v2",
+      "cuDevicePrimaryCtxReset_v2",
+      "cuDevicePrimaryCtxRetain",
+      "cuDevicePrimaryCtxSetFlags_v2",
+      "cuDeviceRegisterAsyncNotification",
+      "cuDeviceSetGraphMemAttribute",
+      "cuDeviceSetMemPool",
+      "cuDeviceTotalMem_v2",
+      "cuDeviceUnregisterAsyncNotification",
+      "cuDriverGetVersion",
+      "cuEventCreate",
+      "cuEventDestroy_v2",
+      "cuEventElapsedTime_v2",
+      "cuEventQuery",
+      "cuEventRecord",
+      "cuEventRecordWithFlags",
+      "cuEventSynchronize",
+      "cuExternalMemoryGetMappedBuffer",
+      "cuExternalMemoryGetMappedMipmappedArray",
+      "cuFlushGPUDirectRDMAWrites",
+      "cuFuncGetAttribute",
+      "cuFuncGetModule",
+      "cuFuncGetName",
+      "cuFuncGetParamCount",
+      "cuFuncGetParamInfo",
+      "cuFuncIsLoaded",
+      "cuFuncLoad",
+      "cuFuncSetAttribute",
+      "cuFuncSetBlockShape",
+      "cuFuncSetCacheConfig",
+      "cuFuncSetSharedMemConfig",
+      "cuFuncSetSharedSize",
+      "cuGetErrorName",
+      "cuGetErrorString",
+      "cuGetExportTable",
+      "cuGetProcAddress_v2",
+      "cuGraphAddBatchMemOpNode",
+      "cuGraphAddChildGraphNode",
+      "cuGraphAddDependencies_v2",
+      "cuGraphAddEmptyNode",
+      "cuGraphAddEventRecordNode",
+      "cuGraphAddEventWaitNode",
+      "cuGraphAddExternalSemaphoresSignalNode",
+      "cuGraphAddExternalSemaphoresWaitNode",
+      "cuGraphAddHostNode",
+      "cuGraphAddKernelNode_v2",
+      "cuGraphAddMemAllocNode",
+      "cuGraphAddMemFreeNode",
+      "cuGraphAddMemcpyNode",
+      "cuGraphAddMemsetNode",
+      "cuGraphAddNode_v2",
+      "cuGraphBatchMemOpNodeGetParams",
+      "cuGraphBatchMemOpNodeSetParams",
+      "cuGraphChildGraphNodeGetGraph",
+      "cuGraphClone",
+      "cuGraphConditionalHandleCreate",
+      "cuGraphCreate",
+      "cuGraphDebugDotPrint",
+      "cuGraphDestroy",
+      "cuGraphDestroyNode",
+      "cuGraphEventRecordNodeGetEvent",
+      "cuGraphEventRecordNodeSetEvent",
+      "cuGraphEventWaitNodeGetEvent",
+      "cuGraphEventWaitNodeSetEvent",
+      "cuGraphExecBatchMemOpNodeSetParams",
+      "cuGraphExecChildGraphNodeSetParams",
+      "cuGraphExecDestroy",
+      "cuGraphExecEventRecordNodeSetEvent",
+      "cuGraphExecEventWaitNodeSetEvent",
+      "cuGraphExecExternalSemaphoresSignalNodeSetParams",
+      "cuGraphExecExternalSemaphoresWaitNodeSetParams",
+      "cuGraphExecGetFlags",
+      "cuGraphExecGetId",
+      "cuGraphExecHostNodeSetParams",
+      "cuGraphExecKernelNodeSetParams_v2",
+      "cuGraphExecMemcpyNodeSetParams",
+      "cuGraphExecMemsetNodeSetParams",
+      "cuGraphExecNodeSetParams",
+      "cuGraphExecUpdate_v2",
+      "cuGraphExternalSemaphoresSignalNodeGetParams",
+      "cuGraphExternalSemaphoresSignalNodeSetParams",
+      "cuGraphExternalSemaphoresWaitNodeGetParams",
+      "cuGraphExternalSemaphoresWaitNodeSetParams",
+      "cuGraphGetEdges_v2",
+      "cuGraphGetId",
+      "cuGraphGetNodes",
+      "cuGraphGetRootNodes",
+      "cuGraphHostNodeGetParams",
+      "cuGraphHostNodeSetParams",
+      "cuGraphInstantiateWithFlags",
+      "cuGraphInstantiateWithParams",
+      "cuGraphKernelNodeCopyAttributes",
+      "cuGraphKernelNodeGetAttribute",
+      "cuGraphKernelNodeGetParams_v2",
+      "cuGraphKernelNodeSetAttribute",
+      "cuGraphKernelNodeSetParams_v2",
+      "cuGraphLaunch",
+      "cuGraphMemAllocNodeGetParams",
+      "cuGraphMemFreeNodeGetParams",
+      "cuGraphMemcpyNodeGetParams",
+      "cuGraphMemcpyNodeSetParams",
+      "cuGraphMemsetNodeGetParams",
+      "cuGraphMemsetNodeSetParams",
+      "cuGraphNodeFindInClone",
+      "cuGraphNodeGetContainingGraph",
+      "cuGraphNodeGetDependencies_v2",
+      "cuGraphNodeGetDependentNodes_v2",
+      "cuGraphNodeGetEnabled",
+      "cuGraphNodeGetLocalId",
+      "cuGraphNodeGetParams",
+      "cuGraphNodeGetToolsId",
+      "cuGraphNodeGetType",
+      "cuGraphNodeSetEnabled",
+      "cuGraphNodeSetParams",
+      "cuGraphReleaseUserObject",
+      "cuGraphRemoveDependencies_v2",
+      "cuGraphRetainUserObject",
+      "cuGraphUpload",
+      "cuGraphicsMapResources",
+      "cuGraphicsResourceGetMappedMipmappedArray",
+      "cuGraphicsResourceGetMappedPointer_v2",
+      "cuGraphicsResourceSetMapFlags_v2",
+      "cuGraphicsSubResourceGetMappedArray",
+      "cuGraphicsUnmapResources",
+      "cuGraphicsUnregisterResource",
+      "cuGreenCtxCreate",
+      "cuGreenCtxDestroy",
+      "cuGreenCtxGetDevResource",
+      "cuGreenCtxGetId",
+      "cuGreenCtxRecordEvent",
+      "cuGreenCtxStreamCreate",
+      "cuGreenCtxWaitEvent",
+      "cuImportExternalMemory",
+      "cuImportExternalSemaphore",
+      "cuInit",
+      "cuIpcCloseMemHandle",
+      "cuIpcGetEventHandle",
+      "cuIpcGetMemHandle",
+      "cuIpcOpenEventHandle",
+      "cuIpcOpenMemHandle_v2",
+      "cuKernelGetAttribute",
+      "cuKernelGetFunction",
+      "cuKernelGetLibrary",
+      "cuKernelGetName",
+      "cuKernelGetParamCount",
+      "cuKernelGetParamInfo",
+      "cuKernelSetAttribute",
+      "cuKernelSetCacheConfig",
+      "cuLaunch",
+      "cuLaunchCooperativeKernel",
+      "cuLaunchCooperativeKernelMultiDevice",
+      "cuLaunchGrid",
+      "cuLaunchGridAsync",
+      "cuLaunchHostFunc",
+      "cuLaunchHostFunc_v2",
+      "cuLaunchKernel",
+      "cuLaunchKernelEx",
+      "cuLibraryEnumerateKernels",
+      "cuLibraryGetGlobal",
+      "cuLibraryGetKernel",
+      "cuLibraryGetKernelCount",
+      "cuLibraryGetManaged",
+      "cuLibraryGetModule",
+      "cuLibraryGetUnifiedFunction",
+      "cuLibraryLoadData",
+      "cuLibraryLoadFromFile",
+      "cuLibraryUnload",
+      "cuLinkAddData_v2",
+      "cuLinkAddFile_v2",
+      "cuLinkComplete",
+      "cuLinkCreate_v2",
+      "cuLinkDestroy",
+      "cuLogicalEndpointAddDevice",
+      "cuLogicalEndpointBindAddr",
+      "cuLogicalEndpointBindMem",
+      "cuLogicalEndpointCreate",
+      "cuLogicalEndpointDestroy",
+      "cuLogicalEndpointExport",
+      "cuLogicalEndpointGetLimits",
+      "cuLogicalEndpointIdRelease",
+      "cuLogicalEndpointIdReserve",
+      "cuLogicalEndpointImport",
+      "cuLogicalEndpointQuery",
+      "cuLogicalEndpointUnbind",
+      "cuLogsCurrent",
+      "cuLogsDumpToFile",
+      "cuLogsDumpToMemory",
+      "cuLogsRegisterCallback",
+      "cuLogsUnregisterCallback",
+      "cuMemAddressFree",
+      "cuMemAddressReserve",
+      "cuMemAdvise_v2",
+      "cuMemAllocAsync",
+      "cuMemAllocFromPoolAsync",
+      "cuMemAllocHost_v2",
+      "cuMemAllocManaged",
+      "cuMemAllocPitch_v2",
+      "cuMemAlloc_v2",
+      "cuMemBatchDecompressAsync",
+      "cuMemCreate",
+      "cuMemDiscardAndPrefetchBatchAsync",
+      "cuMemDiscardBatchAsync",
+      "cuMemExportToShareableHandle",
+      "cuMemFreeAsync",
+      "cuMemFreeHost",
+      "cuMemFree_v2",
+      "cuMemGetAccess",
+      "cuMemGetAddressRange_v2",
+      "cuMemGetAllocationGranularity",
+      "cuMemGetAllocationPropertiesFromHandle",
+      "cuMemGetDefaultMemPool",
+      "cuMemGetHandleForAddressRange",
+      "cuMemGetInfo_v2",
+      "cuMemGetMemPool",
+      "cuMemHostAlloc",
+      "cuMemHostGetDevicePointer_v2",
+      "cuMemHostGetFlags",
+      "cuMemHostRegister_v2",
+      "cuMemHostUnregister",
+      "cuMemImportFromShareableHandle",
+      "cuMemMap",
+      "cuMemMapArrayAsync",
+      "cuMemPoolCreate",
+      "cuMemPoolDestroy",
+      "cuMemPoolExportPointer",
+      "cuMemPoolExportToShareableHandle",
+      "cuMemPoolGetAccess",
+      "cuMemPoolGetAttribute",
+      "cuMemPoolImportFromShareableHandle",
+      "cuMemPoolImportPointer",
+      "cuMemPoolSetAccess",
+      "cuMemPoolSetAttribute",
+      "cuMemPoolTrimTo",
+      "cuMemPrefetchAsync_v2",
+      "cuMemPrefetchBatchAsync",
+      "cuMemRangeGetAttribute",
+      "cuMemRangeGetAttributes",
+      "cuMemRelease",
+      "cuMemRetainAllocationHandle",
+      "cuMemSetAccess",
+      "cuMemSetMemPool",
+      "cuMemUnmap",
+      "cuMemcpy",
+      "cuMemcpy2DAsync_v2",
+      "cuMemcpy2DUnaligned_v2",
+      "cuMemcpy2D_v2",
+      "cuMemcpy3DAsync_v2",
+      "cuMemcpy3DBatchAsync_v2",
+      "cuMemcpy3DPeer",
+      "cuMemcpy3DPeerAsync",
+      "cuMemcpy3DWithAttributesAsync",
+      "cuMemcpy3D_v2",
+      "cuMemcpyAsync",
+      "cuMemcpyAtoA_v2",
+      "cuMemcpyAtoD_v2",
+      "cuMemcpyAtoHAsync_v2",
+      "cuMemcpyAtoH_v2",
+      "cuMemcpyBatchAsync_v2",
+      "cuMemcpyDtoA_v2",
+      "cuMemcpyDtoDAsync_v2",
+      "cuMemcpyDtoD_v2",
+      "cuMemcpyDtoHAsync_v2",
+      "cuMemcpyDtoH_v2",
+      "cuMemcpyHtoAAsync_v2",
+      "cuMemcpyHtoA_v2",
+      "cuMemcpyHtoDAsync_v2",
+      "cuMemcpyHtoD_v2",
+      "cuMemcpyPeer",
+      "cuMemcpyPeerAsync",
+      "cuMemcpyWithAttributesAsync",
+      "cuMemsetD16Async",
+      "cuMemsetD16_v2",
+      "cuMemsetD2D16Async",
+      "cuMemsetD2D16_v2",
+      "cuMemsetD2D32Async",
+      "cuMemsetD2D32_v2",
+      "cuMemsetD2D8Async",
+      "cuMemsetD2D8_v2",
+      "cuMemsetD32Async",
+      "cuMemsetD32_v2",
+      "cuMemsetD8Async",
+      "cuMemsetD8_v2",
+      "cuMipmappedArrayCreate",
+      "cuMipmappedArrayDestroy",
+      "cuMipmappedArrayGetLevel",
+      "cuMipmappedArrayGetMemoryRequirements",
+      "cuMipmappedArrayGetSparseProperties",
+      "cuModuleEnumerateFunctions",
+      "cuModuleGetFunction",
+      "cuModuleGetFunctionCount",
+      "cuModuleGetGlobal_v2",
+      "cuModuleGetLoadingMode",
+      "cuModuleGetSurfRef",
+      "cuModuleGetTexRef",
+      "cuModuleLoad",
+      "cuModuleLoadData",
+      "cuModuleLoadDataEx",
+      "cuModuleLoadFatBinary",
+      "cuModuleUnload",
+      "cuMulticastAddDevice",
+      "cuMulticastBindAddr",
+      "cuMulticastBindAddr_v2",
+      "cuMulticastBindMem",
+      "cuMulticastBindMem_v2",
+      "cuMulticastCreate",
+      "cuMulticastGetGranularity",
+      "cuMulticastUnbind",
+      "cuOccupancyAvailableDynamicSMemPerBlock",
+      "cuOccupancyMaxActiveBlocksPerMultiprocessor",
+      "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags",
+      "cuOccupancyMaxActiveClusters",
+      "cuOccupancyMaxPotentialBlockSize",
+      "cuOccupancyMaxPotentialBlockSizeWithFlags",
+      "cuOccupancyMaxPotentialClusterSize",
+      "cuParamSetSize",
+      "cuParamSetTexRef",
+      "cuParamSetf",
+      "cuParamSeti",
+      "cuParamSetv",
+      "cuPointerGetAttribute",
+      "cuPointerGetAttributes",
+      "cuPointerSetAttribute",
+      "cuSignalExternalSemaphoresAsync",
+      "cuStreamAddCallback",
+      "cuStreamAttachMemAsync",
+      "cuStreamBatchMemOp_v2",
+      "cuStreamBeginCaptureToCig",
+      "cuStreamBeginCaptureToGraph",
+      "cuStreamBeginCapture_v2",
+      "cuStreamBeginRecaptureToGraph",
+      "cuStreamCopyAttributes",
+      "cuStreamCreate",
+      "cuStreamCreateWithPriority",
+      "cuStreamDestroy_v2",
+      "cuStreamEndCapture",
+      "cuStreamEndCaptureToCig",
+      "cuStreamGetAttribute",
+      "cuStreamGetCaptureInfo_v3",
+      "cuStreamGetCtx",
+      "cuStreamGetCtx_v2",
+      "cuStreamGetDevResource",
+      "cuStreamGetDevice",
+      "cuStreamGetFlags",
+      "cuStreamGetGreenCtx",
+      "cuStreamGetId",
+      "cuStreamGetPriority",
+      "cuStreamIsCapturing",
+      "cuStreamQuery",
+      "cuStreamSetAttribute",
+      "cuStreamSynchronize",
+      "cuStreamUpdateCaptureDependencies_v2",
+      "cuStreamWaitEvent",
+      "cuStreamWaitValue32_v2",
+      "cuStreamWaitValue64_v2",
+      "cuStreamWriteValue32_v2",
+      "cuStreamWriteValue64_v2",
+      "cuSurfObjectCreate",
+      "cuSurfObjectDestroy",
+      "cuSurfObjectGetResourceDesc",
+      "cuSurfRefGetArray",
+      "cuSurfRefSetArray",
+      "cuTensorMapEncodeIm2col",
+      "cuTensorMapEncodeIm2colWide",
+      "cuTensorMapEncodeTiled",
+      "cuTensorMapReplaceAddress",
+      "cuTexObjectCreate",
+      "cuTexObjectDestroy",
+      "cuTexObjectGetResourceDesc",
+      "cuTexObjectGetResourceViewDesc",
+      "cuTexObjectGetTextureDesc",
+      "cuTexRefCreate",
+      "cuTexRefDestroy",
+      "cuTexRefGetAddressMode",
+      "cuTexRefGetAddress_v2",
+      "cuTexRefGetArray",
+      "cuTexRefGetBorderColor",
+      "cuTexRefGetFilterMode",
+      "cuTexRefGetFlags",
+      "cuTexRefGetFormat",
+      "cuTexRefGetMaxAnisotropy",
+      "cuTexRefGetMipmapFilterMode",
+      "cuTexRefGetMipmapLevelBias",
+      "cuTexRefGetMipmapLevelClamp",
+      "cuTexRefGetMipmappedArray",
+      "cuTexRefSetAddress2D_v3",
+      "cuTexRefSetAddressMode",
+      "cuTexRefSetAddress_v2",
+      "cuTexRefSetArray",
+      "cuTexRefSetBorderColor",
+      "cuTexRefSetFilterMode",
+      "cuTexRefSetFlags",
+      "cuTexRefSetFormat",
+      "cuTexRefSetMaxAnisotropy",
+      "cuTexRefSetMipmapFilterMode",
+      "cuTexRefSetMipmapLevelBias",
+      "cuTexRefSetMipmapLevelClamp",
+      "cuTexRefSetMipmappedArray",
+      "cuThreadExchangeStreamCaptureMode",
+      "cuUserObjectCreate",
+      "cuUserObjectRelease",
+      "cuUserObjectRetain",
+      "cuWaitExternalSemaphoresAsync"
+    ],
+    "selectedNativeSymbols": [
+      "cuCtxCreate_v4",
+      "cuCtxDestroy_v2",
+      "cuCtxGetCurrent",
+      "cuCtxSetCurrent",
+      "cuDeviceGet",
+      "cuDeviceGetAttribute",
+      "cuDeviceGetCount",
+      "cuDriverGetVersion",
+      "cuGetErrorName",
+      "cuGetErrorString",
+      "cuGetProcAddress_v2",
+      "cuInit"
+    ],
+    "unselectedHeaderFunctions": [
+      "cuArray3DCreate_v2",
+      "cuArray3DGetDescriptor_v2",
+      "cuArrayCreate_v2",
+      "cuArrayDestroy",
+      "cuArrayGetDescriptor_v2",
+      "cuArrayGetMemoryRequirements",
+      "cuArrayGetPlane",
+      "cuArrayGetSparseProperties",
+      "cuCheckpointProcessCheckpoint",
+      "cuCheckpointProcessGetRestoreThreadId",
+      "cuCheckpointProcessGetState",
+      "cuCheckpointProcessLock",
+      "cuCheckpointProcessRestore",
+      "cuCheckpointProcessUnlock",
+      "cuCoredumpDeregisterCompleteCallback",
+      "cuCoredumpDeregisterStartCallback",
+      "cuCoredumpGetAttribute",
+      "cuCoredumpGetAttributeGlobal",
+      "cuCoredumpRegisterCompleteCallback",
+      "cuCoredumpRegisterStartCallback",
+      "cuCoredumpSetAttribute",
+      "cuCoredumpSetAttributeGlobal",
+      "cuCtxAttach",
+      "cuCtxDetach",
+      "cuCtxDisablePeerAccess",
+      "cuCtxEnablePeerAccess",
+      "cuCtxFromGreenCtx",
+      "cuCtxGetApiVersion",
+      "cuCtxGetCacheConfig",
+      "cuCtxGetDevResource",
+      "cuCtxGetDevice",
+      "cuCtxGetDevice_v2",
+      "cuCtxGetExecAffinity",
+      "cuCtxGetFlags",
+      "cuCtxGetId",
+      "cuCtxGetLimit",
+      "cuCtxGetSharedMemConfig",
+      "cuCtxGetStreamPriorityRange",
+      "cuCtxPopCurrent_v2",
+      "cuCtxPushCurrent_v2",
+      "cuCtxRecordEvent",
+      "cuCtxResetPersistingL2Cache",
+      "cuCtxSetCacheConfig",
+      "cuCtxSetFlags",
+      "cuCtxSetLimit",
+      "cuCtxSetSharedMemConfig",
+      "cuCtxSynchronize",
+      "cuCtxSynchronize_v2",
+      "cuCtxWaitEvent",
+      "cuDestroyExternalMemory",
+      "cuDestroyExternalSemaphore",
+      "cuDevResourceGenerateDesc",
+      "cuDevSmResourceSplit",
+      "cuDevSmResourceSplitByCount",
+      "cuDeviceCanAccessPeer",
+      "cuDeviceComputeCapability",
+      "cuDeviceGetByPCIBusId",
+      "cuDeviceGetDefaultMemPool",
+      "cuDeviceGetDevResource",
+      "cuDeviceGetExecAffinitySupport",
+      "cuDeviceGetGraphMemAttribute",
+      "cuDeviceGetHostAtomicCapabilities",
+      "cuDeviceGetLuid",
+      "cuDeviceGetMemPool",
+      "cuDeviceGetName",
+      "cuDeviceGetNvSciSyncAttributes",
+      "cuDeviceGetP2PAtomicCapabilities",
+      "cuDeviceGetP2PAttribute",
+      "cuDeviceGetPCIBusId",
+      "cuDeviceGetProperties",
+      "cuDeviceGetTexture1DLinearMaxWidth",
+      "cuDeviceGetUuid_v2",
+      "cuDeviceGraphMemTrim",
+      "cuDevicePrimaryCtxGetState",
+      "cuDevicePrimaryCtxRelease_v2",
+      "cuDevicePrimaryCtxReset_v2",
+      "cuDevicePrimaryCtxRetain",
+      "cuDevicePrimaryCtxSetFlags_v2",
+      "cuDeviceRegisterAsyncNotification",
+      "cuDeviceSetGraphMemAttribute",
+      "cuDeviceSetMemPool",
+      "cuDeviceTotalMem_v2",
+      "cuDeviceUnregisterAsyncNotification",
+      "cuEventCreate",
+      "cuEventDestroy_v2",
+      "cuEventElapsedTime_v2",
+      "cuEventQuery",
+      "cuEventRecord",
+      "cuEventRecordWithFlags",
+      "cuEventSynchronize",
+      "cuExternalMemoryGetMappedBuffer",
+      "cuExternalMemoryGetMappedMipmappedArray",
+      "cuFlushGPUDirectRDMAWrites",
+      "cuFuncGetAttribute",
+      "cuFuncGetModule",
+      "cuFuncGetName",
+      "cuFuncGetParamCount",
+      "cuFuncGetParamInfo",
+      "cuFuncIsLoaded",
+      "cuFuncLoad",
+      "cuFuncSetAttribute",
+      "cuFuncSetBlockShape",
+      "cuFuncSetCacheConfig",
+      "cuFuncSetSharedMemConfig",
+      "cuFuncSetSharedSize",
+      "cuGetExportTable",
+      "cuGraphAddBatchMemOpNode",
+      "cuGraphAddChildGraphNode",
+      "cuGraphAddDependencies_v2",
+      "cuGraphAddEmptyNode",
+      "cuGraphAddEventRecordNode",
+      "cuGraphAddEventWaitNode",
+      "cuGraphAddExternalSemaphoresSignalNode",
+      "cuGraphAddExternalSemaphoresWaitNode",
+      "cuGraphAddHostNode",
+      "cuGraphAddKernelNode_v2",
+      "cuGraphAddMemAllocNode",
+      "cuGraphAddMemFreeNode",
+      "cuGraphAddMemcpyNode",
+      "cuGraphAddMemsetNode",
+      "cuGraphAddNode_v2",
+      "cuGraphBatchMemOpNodeGetParams",
+      "cuGraphBatchMemOpNodeSetParams",
+      "cuGraphChildGraphNodeGetGraph",
+      "cuGraphClone",
+      "cuGraphConditionalHandleCreate",
+      "cuGraphCreate",
+      "cuGraphDebugDotPrint",
+      "cuGraphDestroy",
+      "cuGraphDestroyNode",
+      "cuGraphEventRecordNodeGetEvent",
+      "cuGraphEventRecordNodeSetEvent",
+      "cuGraphEventWaitNodeGetEvent",
+      "cuGraphEventWaitNodeSetEvent",
+      "cuGraphExecBatchMemOpNodeSetParams",
+      "cuGraphExecChildGraphNodeSetParams",
+      "cuGraphExecDestroy",
+      "cuGraphExecEventRecordNodeSetEvent",
+      "cuGraphExecEventWaitNodeSetEvent",
+      "cuGraphExecExternalSemaphoresSignalNodeSetParams",
+      "cuGraphExecExternalSemaphoresWaitNodeSetParams",
+      "cuGraphExecGetFlags",
+      "cuGraphExecGetId",
+      "cuGraphExecHostNodeSetParams",
+      "cuGraphExecKernelNodeSetParams_v2",
+      "cuGraphExecMemcpyNodeSetParams",
+      "cuGraphExecMemsetNodeSetParams",
+      "cuGraphExecNodeSetParams",
+      "cuGraphExecUpdate_v2",
+      "cuGraphExternalSemaphoresSignalNodeGetParams",
+      "cuGraphExternalSemaphoresSignalNodeSetParams",
+      "cuGraphExternalSemaphoresWaitNodeGetParams",
+      "cuGraphExternalSemaphoresWaitNodeSetParams",
+      "cuGraphGetEdges_v2",
+      "cuGraphGetId",
+      "cuGraphGetNodes",
+      "cuGraphGetRootNodes",
+      "cuGraphHostNodeGetParams",
+      "cuGraphHostNodeSetParams",
+      "cuGraphInstantiateWithFlags",
+      "cuGraphInstantiateWithParams",
+      "cuGraphKernelNodeCopyAttributes",
+      "cuGraphKernelNodeGetAttribute",
+      "cuGraphKernelNodeGetParams_v2",
+      "cuGraphKernelNodeSetAttribute",
+      "cuGraphKernelNodeSetParams_v2",
+      "cuGraphLaunch",
+      "cuGraphMemAllocNodeGetParams",
+      "cuGraphMemFreeNodeGetParams",
+      "cuGraphMemcpyNodeGetParams",
+      "cuGraphMemcpyNodeSetParams",
+      "cuGraphMemsetNodeGetParams",
+      "cuGraphMemsetNodeSetParams",
+      "cuGraphNodeFindInClone",
+      "cuGraphNodeGetContainingGraph",
+      "cuGraphNodeGetDependencies_v2",
+      "cuGraphNodeGetDependentNodes_v2",
+      "cuGraphNodeGetEnabled",
+      "cuGraphNodeGetLocalId",
+      "cuGraphNodeGetParams",
+      "cuGraphNodeGetToolsId",
+      "cuGraphNodeGetType",
+      "cuGraphNodeSetEnabled",
+      "cuGraphNodeSetParams",
+      "cuGraphReleaseUserObject",
+      "cuGraphRemoveDependencies_v2",
+      "cuGraphRetainUserObject",
+      "cuGraphUpload",
+      "cuGraphicsMapResources",
+      "cuGraphicsResourceGetMappedMipmappedArray",
+      "cuGraphicsResourceGetMappedPointer_v2",
+      "cuGraphicsResourceSetMapFlags_v2",
+      "cuGraphicsSubResourceGetMappedArray",
+      "cuGraphicsUnmapResources",
+      "cuGraphicsUnregisterResource",
+      "cuGreenCtxCreate",
+      "cuGreenCtxDestroy",
+      "cuGreenCtxGetDevResource",
+      "cuGreenCtxGetId",
+      "cuGreenCtxRecordEvent",
+      "cuGreenCtxStreamCreate",
+      "cuGreenCtxWaitEvent",
+      "cuImportExternalMemory",
+      "cuImportExternalSemaphore",
+      "cuIpcCloseMemHandle",
+      "cuIpcGetEventHandle",
+      "cuIpcGetMemHandle",
+      "cuIpcOpenEventHandle",
+      "cuIpcOpenMemHandle_v2",
+      "cuKernelGetAttribute",
+      "cuKernelGetFunction",
+      "cuKernelGetLibrary",
+      "cuKernelGetName",
+      "cuKernelGetParamCount",
+      "cuKernelGetParamInfo",
+      "cuKernelSetAttribute",
+      "cuKernelSetCacheConfig",
+      "cuLaunch",
+      "cuLaunchCooperativeKernel",
+      "cuLaunchCooperativeKernelMultiDevice",
+      "cuLaunchGrid",
+      "cuLaunchGridAsync",
+      "cuLaunchHostFunc",
+      "cuLaunchHostFunc_v2",
+      "cuLaunchKernel",
+      "cuLaunchKernelEx",
+      "cuLibraryEnumerateKernels",
+      "cuLibraryGetGlobal",
+      "cuLibraryGetKernel",
+      "cuLibraryGetKernelCount",
+      "cuLibraryGetManaged",
+      "cuLibraryGetModule",
+      "cuLibraryGetUnifiedFunction",
+      "cuLibraryLoadData",
+      "cuLibraryLoadFromFile",
+      "cuLibraryUnload",
+      "cuLinkAddData_v2",
+      "cuLinkAddFile_v2",
+      "cuLinkComplete",
+      "cuLinkCreate_v2",
+      "cuLinkDestroy",
+      "cuLogicalEndpointAddDevice",
+      "cuLogicalEndpointBindAddr",
+      "cuLogicalEndpointBindMem",
+      "cuLogicalEndpointCreate",
+      "cuLogicalEndpointDestroy",
+      "cuLogicalEndpointExport",
+      "cuLogicalEndpointGetLimits",
+      "cuLogicalEndpointIdRelease",
+      "cuLogicalEndpointIdReserve",
+      "cuLogicalEndpointImport",
+      "cuLogicalEndpointQuery",
+      "cuLogicalEndpointUnbind",
+      "cuLogsCurrent",
+      "cuLogsDumpToFile",
+      "cuLogsDumpToMemory",
+      "cuLogsRegisterCallback",
+      "cuLogsUnregisterCallback",
+      "cuMemAddressFree",
+      "cuMemAddressReserve",
+      "cuMemAdvise_v2",
+      "cuMemAllocAsync",
+      "cuMemAllocFromPoolAsync",
+      "cuMemAllocHost_v2",
+      "cuMemAllocManaged",
+      "cuMemAllocPitch_v2",
+      "cuMemAlloc_v2",
+      "cuMemBatchDecompressAsync",
+      "cuMemCreate",
+      "cuMemDiscardAndPrefetchBatchAsync",
+      "cuMemDiscardBatchAsync",
+      "cuMemExportToShareableHandle",
+      "cuMemFreeAsync",
+      "cuMemFreeHost",
+      "cuMemFree_v2",
+      "cuMemGetAccess",
+      "cuMemGetAddressRange_v2",
+      "cuMemGetAllocationGranularity",
+      "cuMemGetAllocationPropertiesFromHandle",
+      "cuMemGetDefaultMemPool",
+      "cuMemGetHandleForAddressRange",
+      "cuMemGetInfo_v2",
+      "cuMemGetMemPool",
+      "cuMemHostAlloc",
+      "cuMemHostGetDevicePointer_v2",
+      "cuMemHostGetFlags",
+      "cuMemHostRegister_v2",
+      "cuMemHostUnregister",
+      "cuMemImportFromShareableHandle",
+      "cuMemMap",
+      "cuMemMapArrayAsync",
+      "cuMemPoolCreate",
+      "cuMemPoolDestroy",
+      "cuMemPoolExportPointer",
+      "cuMemPoolExportToShareableHandle",
+      "cuMemPoolGetAccess",
+      "cuMemPoolGetAttribute",
+      "cuMemPoolImportFromShareableHandle",
+      "cuMemPoolImportPointer",
+      "cuMemPoolSetAccess",
+      "cuMemPoolSetAttribute",
+      "cuMemPoolTrimTo",
+      "cuMemPrefetchAsync_v2",
+      "cuMemPrefetchBatchAsync",
+      "cuMemRangeGetAttribute",
+      "cuMemRangeGetAttributes",
+      "cuMemRelease",
+      "cuMemRetainAllocationHandle",
+      "cuMemSetAccess",
+      "cuMemSetMemPool",
+      "cuMemUnmap",
+      "cuMemcpy",
+      "cuMemcpy2DAsync_v2",
+      "cuMemcpy2DUnaligned_v2",
+      "cuMemcpy2D_v2",
+      "cuMemcpy3DAsync_v2",
+      "cuMemcpy3DBatchAsync_v2",
+      "cuMemcpy3DPeer",
+      "cuMemcpy3DPeerAsync",
+      "cuMemcpy3DWithAttributesAsync",
+      "cuMemcpy3D_v2",
+      "cuMemcpyAsync",
+      "cuMemcpyAtoA_v2",
+      "cuMemcpyAtoD_v2",
+      "cuMemcpyAtoHAsync_v2",
+      "cuMemcpyAtoH_v2",
+      "cuMemcpyBatchAsync_v2",
+      "cuMemcpyDtoA_v2",
+      "cuMemcpyDtoDAsync_v2",
+      "cuMemcpyDtoD_v2",
+      "cuMemcpyDtoHAsync_v2",
+      "cuMemcpyDtoH_v2",
+      "cuMemcpyHtoAAsync_v2",
+      "cuMemcpyHtoA_v2",
+      "cuMemcpyHtoDAsync_v2",
+      "cuMemcpyHtoD_v2",
+      "cuMemcpyPeer",
+      "cuMemcpyPeerAsync",
+      "cuMemcpyWithAttributesAsync",
+      "cuMemsetD16Async",
+      "cuMemsetD16_v2",
+      "cuMemsetD2D16Async",
+      "cuMemsetD2D16_v2",
+      "cuMemsetD2D32Async",
+      "cuMemsetD2D32_v2",
+      "cuMemsetD2D8Async",
+      "cuMemsetD2D8_v2",
+      "cuMemsetD32Async",
+      "cuMemsetD32_v2",
+      "cuMemsetD8Async",
+      "cuMemsetD8_v2",
+      "cuMipmappedArrayCreate",
+      "cuMipmappedArrayDestroy",
+      "cuMipmappedArrayGetLevel",
+      "cuMipmappedArrayGetMemoryRequirements",
+      "cuMipmappedArrayGetSparseProperties",
+      "cuModuleEnumerateFunctions",
+      "cuModuleGetFunction",
+      "cuModuleGetFunctionCount",
+      "cuModuleGetGlobal_v2",
+      "cuModuleGetLoadingMode",
+      "cuModuleGetSurfRef",
+      "cuModuleGetTexRef",
+      "cuModuleLoad",
+      "cuModuleLoadData",
+      "cuModuleLoadDataEx",
+      "cuModuleLoadFatBinary",
+      "cuModuleUnload",
+      "cuMulticastAddDevice",
+      "cuMulticastBindAddr",
+      "cuMulticastBindAddr_v2",
+      "cuMulticastBindMem",
+      "cuMulticastBindMem_v2",
+      "cuMulticastCreate",
+      "cuMulticastGetGranularity",
+      "cuMulticastUnbind",
+      "cuOccupancyAvailableDynamicSMemPerBlock",
+      "cuOccupancyMaxActiveBlocksPerMultiprocessor",
+      "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags",
+      "cuOccupancyMaxActiveClusters",
+      "cuOccupancyMaxPotentialBlockSize",
+      "cuOccupancyMaxPotentialBlockSizeWithFlags",
+      "cuOccupancyMaxPotentialClusterSize",
+      "cuParamSetSize",
+      "cuParamSetTexRef",
+      "cuParamSetf",
+      "cuParamSeti",
+      "cuParamSetv",
+      "cuPointerGetAttribute",
+      "cuPointerGetAttributes",
+      "cuPointerSetAttribute",
+      "cuSignalExternalSemaphoresAsync",
+      "cuStreamAddCallback",
+      "cuStreamAttachMemAsync",
+      "cuStreamBatchMemOp_v2",
+      "cuStreamBeginCaptureToCig",
+      "cuStreamBeginCaptureToGraph",
+      "cuStreamBeginCapture_v2",
+      "cuStreamBeginRecaptureToGraph",
+      "cuStreamCopyAttributes",
+      "cuStreamCreate",
+      "cuStreamCreateWithPriority",
+      "cuStreamDestroy_v2",
+      "cuStreamEndCapture",
+      "cuStreamEndCaptureToCig",
+      "cuStreamGetAttribute",
+      "cuStreamGetCaptureInfo_v3",
+      "cuStreamGetCtx",
+      "cuStreamGetCtx_v2",
+      "cuStreamGetDevResource",
+      "cuStreamGetDevice",
+      "cuStreamGetFlags",
+      "cuStreamGetGreenCtx",
+      "cuStreamGetId",
+      "cuStreamGetPriority",
+      "cuStreamIsCapturing",
+      "cuStreamQuery",
+      "cuStreamSetAttribute",
+      "cuStreamSynchronize",
+      "cuStreamUpdateCaptureDependencies_v2",
+      "cuStreamWaitEvent",
+      "cuStreamWaitValue32_v2",
+      "cuStreamWaitValue64_v2",
+      "cuStreamWriteValue32_v2",
+      "cuStreamWriteValue64_v2",
+      "cuSurfObjectCreate",
+      "cuSurfObjectDestroy",
+      "cuSurfObjectGetResourceDesc",
+      "cuSurfRefGetArray",
+      "cuSurfRefSetArray",
+      "cuTensorMapEncodeIm2col",
+      "cuTensorMapEncodeIm2colWide",
+      "cuTensorMapEncodeTiled",
+      "cuTensorMapReplaceAddress",
+      "cuTexObjectCreate",
+      "cuTexObjectDestroy",
+      "cuTexObjectGetResourceDesc",
+      "cuTexObjectGetResourceViewDesc",
+      "cuTexObjectGetTextureDesc",
+      "cuTexRefCreate",
+      "cuTexRefDestroy",
+      "cuTexRefGetAddressMode",
+      "cuTexRefGetAddress_v2",
+      "cuTexRefGetArray",
+      "cuTexRefGetBorderColor",
+      "cuTexRefGetFilterMode",
+      "cuTexRefGetFlags",
+      "cuTexRefGetFormat",
+      "cuTexRefGetMaxAnisotropy",
+      "cuTexRefGetMipmapFilterMode",
+      "cuTexRefGetMipmapLevelBias",
+      "cuTexRefGetMipmapLevelClamp",
+      "cuTexRefGetMipmappedArray",
+      "cuTexRefSetAddress2D_v3",
+      "cuTexRefSetAddressMode",
+      "cuTexRefSetAddress_v2",
+      "cuTexRefSetArray",
+      "cuTexRefSetBorderColor",
+      "cuTexRefSetFilterMode",
+      "cuTexRefSetFlags",
+      "cuTexRefSetFormat",
+      "cuTexRefSetMaxAnisotropy",
+      "cuTexRefSetMipmapFilterMode",
+      "cuTexRefSetMipmapLevelBias",
+      "cuTexRefSetMipmapLevelClamp",
+      "cuTexRefSetMipmappedArray",
+      "cuThreadExchangeStreamCaptureMode",
+      "cuUserObjectCreate",
+      "cuUserObjectRelease",
+      "cuUserObjectRetain",
+      "cuWaitExternalSemaphoresAsync"
+    ]
+  },
+  "functions": {
+    "cuCtxCreate": {
+      "nativeSymbol": "cuCtxCreate_v4",
+      "parameters": [
+        {
+          "name": "pctx",
+          "sourceType": "CUcontext *"
+        },
+        {
+          "name": "ctxCreateParams",
+          "sourceType": "CUctxCreateParams *"
+        },
+        {
+          "name": "flags",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "dev",
+          "sourceType": "CUdevice"
+        }
+      ],
+      "publicName": "cuCtxCreate",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "bd54893f446e918e3f60b6efa78520f79adfe56c088906fd17647edc2cbc5725",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuCtxCreate"
+    },
+    "cuCtxDestroy": {
+      "nativeSymbol": "cuCtxDestroy_v2",
+      "parameters": [
+        {
+          "name": "ctx",
+          "sourceType": "CUcontext"
+        }
+      ],
+      "publicName": "cuCtxDestroy",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "c4946e2c43301173f368e11d17e33bdbd9f259bdc829e931fd20e04436b4a708",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuCtxDestroy"
+    },
+    "cuCtxGetCurrent": {
+      "nativeSymbol": "cuCtxGetCurrent",
+      "parameters": [
+        {
+          "name": "pctx",
+          "sourceType": "CUcontext *"
+        }
+      ],
+      "publicName": "cuCtxGetCurrent",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "7c08ed728ecfd6de090dc246a80cd9742e50096732dad8e31e491cd0d5a24d70",
+      "sourceLine": 6653,
+      "stableId": "cuda.driver.function.cuCtxGetCurrent"
+    },
+    "cuCtxSetCurrent": {
+      "nativeSymbol": "cuCtxSetCurrent",
+      "parameters": [
+        {
+          "name": "ctx",
+          "sourceType": "CUcontext"
+        }
+      ],
+      "publicName": "cuCtxSetCurrent",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "c4946e2c43301173f368e11d17e33bdbd9f259bdc829e931fd20e04436b4a708",
+      "sourceLine": 6630,
+      "stableId": "cuda.driver.function.cuCtxSetCurrent"
+    },
+    "cuDeviceGet": {
+      "nativeSymbol": "cuDeviceGet",
+      "parameters": [
+        {
+          "name": "device",
+          "sourceType": "CUdevice *"
+        },
+        {
+          "name": "ordinal",
+          "sourceType": "int"
+        }
+      ],
+      "publicName": "cuDeviceGet",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "4d806396fb967d4d29678aaa865740e72c981500eebd315c756e561a4bc48c7d",
+      "sourceLine": 5488,
+      "stableId": "cuda.driver.function.cuDeviceGet"
+    },
+    "cuDeviceGetAttribute": {
+      "nativeSymbol": "cuDeviceGetAttribute",
+      "parameters": [
+        {
+          "name": "pi",
+          "sourceType": "int *"
+        },
+        {
+          "name": "attrib",
+          "sourceType": "CUdevice_attribute"
+        },
+        {
+          "name": "dev",
+          "sourceType": "CUdevice"
+        }
+      ],
+      "publicName": "cuDeviceGetAttribute",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "9dc05a41210c2267b35bbd27358845fd247723c4b558fbe94f7fd6cdd665478c",
+      "sourceLine": 5699,
+      "stableId": "cuda.driver.function.cuDeviceGetAttribute"
+    },
+    "cuDeviceGetCount": {
+      "nativeSymbol": "cuDeviceGetCount",
+      "parameters": [
+        {
+          "name": "count",
+          "sourceType": "int *"
+        }
+      ],
+      "publicName": "cuDeviceGetCount",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "1cd75a4606a452c2fca06e3c73658686a64cbbbc5e248ad4e181e6f29746d54a",
+      "sourceLine": 5517,
+      "stableId": "cuda.driver.function.cuDeviceGetCount"
+    },
+    "cuDriverGetVersion": {
+      "nativeSymbol": "cuDriverGetVersion",
+      "parameters": [
+        {
+          "name": "driverVersion",
+          "sourceType": "int *"
+        }
+      ],
+      "publicName": "cuDriverGetVersion",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "773af520aef551e58fab479d0c4b7fd570d1578f8aba89b509934895708ba51c",
+      "sourceLine": 5445,
+      "stableId": "cuda.driver.function.cuDriverGetVersion"
+    },
+    "cuGetErrorName": {
+      "nativeSymbol": "cuGetErrorName",
+      "parameters": [
+        {
+          "name": "error",
+          "sourceType": "CUresult"
+        },
+        {
+          "name": "pStr",
+          "sourceType": "const char **"
+        }
+      ],
+      "publicName": "cuGetErrorName",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "4619db6136567d5ecfa44fdf39cc32b4b48f2eb90bef6f500f295d15b882cc99",
+      "sourceLine": 5370,
+      "stableId": "cuda.driver.function.cuGetErrorName"
+    },
+    "cuGetErrorString": {
+      "nativeSymbol": "cuGetErrorString",
+      "parameters": [
+        {
+          "name": "error",
+          "sourceType": "CUresult"
+        },
+        {
+          "name": "pStr",
+          "sourceType": "const char **"
+        }
+      ],
+      "publicName": "cuGetErrorString",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "4619db6136567d5ecfa44fdf39cc32b4b48f2eb90bef6f500f295d15b882cc99",
+      "sourceLine": 5349,
+      "stableId": "cuda.driver.function.cuGetErrorString"
+    },
+    "cuGetProcAddress": {
+      "nativeSymbol": "cuGetProcAddress_v2",
+      "parameters": [
+        {
+          "name": "symbol",
+          "sourceType": "const char *"
+        },
+        {
+          "name": "pfn",
+          "sourceType": "void **"
+        },
+        {
+          "name": "cudaVersion",
+          "sourceType": "int"
+        },
+        {
+          "name": "flags",
+          "sourceType": "cuuint64_t"
+        },
+        {
+          "name": "symbolStatus",
+          "sourceType": "CUdriverProcAddressQueryResult *"
+        }
+      ],
+      "publicName": "cuGetProcAddress",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "975da1bd07094c63f734d226c964938091e291258a09bd751e66bf994158af8b",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuGetProcAddress"
+    },
+    "cuInit": {
+      "nativeSymbol": "cuInit",
+      "parameters": [
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuInit",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "109b0f772173bf1de04adb472bf014e26eaaae600d02d44bdd4cd76bc3013842",
+      "sourceLine": 5407,
+      "stableId": "cuda.driver.function.cuInit"
+    }
+  },
+  "id": "cuda-13.3.29-driver-tier-0-linux-x64-header-facts",
+  "schemaVersion": 1,
+  "source": {
+    "clangTarget": "x86_64-unknown-linux-gnu",
+    "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+    "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
+    "packageVersion": "13.3.29-1",
+    "toolkitRelease": "13.3",
+    "typedefHeaderSha256": "30d517cfa051f7a498e432eb1a1964abb11c1cd32098125bba3dfef0b059381f"
+  },
+  "targetProfile": {
+    "abi": "sysv",
+    "architecture": "x86_64",
+    "byteOrder": "little-endian",
+    "id": "linux-x64-sysv",
+    "os": "linux",
+    "pointerBits": 64,
+    "sizeBits": 64
+  },
+  "types": {
+    "CUcontext": {
+      "canonicalType": "struct CUctx_st *",
+      "kind": "handle",
+      "name": "CUcontext",
+      "sourceType": "struct CUctx_st *",
+      "stableId": "cuda.driver.type.CUcontext"
+    },
+    "CUctxCigParam": {
+      "canonicalType": "struct CUctxCigParam_st",
+      "fields": [
+        {
+          "name": "sharedDataType",
+          "sourceType": "CUcigDataType"
+        },
+        {
+          "name": "sharedData",
+          "sourceType": "void *"
+        }
+      ],
+      "kind": "record",
+      "name": "CUctxCigParam",
+      "sourceType": "struct CUctxCigParam_st",
+      "stableId": "cuda.driver.type.CUctxCigParam",
+      "tagName": "CUctxCigParam_st"
+    },
+    "CUctxCreateParams": {
+      "canonicalType": "struct CUctxCreateParams_st",
+      "fields": [
+        {
+          "name": "execAffinityParams",
+          "sourceType": "CUexecAffinityParam *"
+        },
+        {
+          "name": "numExecAffinityParams",
+          "sourceType": "int"
+        },
+        {
+          "name": "cigParams",
+          "sourceType": "CUctxCigParam *"
+        }
+      ],
+      "kind": "record",
+      "name": "CUctxCreateParams",
+      "sourceType": "struct CUctxCreateParams_st",
+      "stableId": "cuda.driver.type.CUctxCreateParams",
+      "tagName": "CUctxCreateParams_st"
+    },
+    "CUdevice": {
+      "canonicalType": "int",
+      "kind": "scalar",
+      "name": "CUdevice",
+      "sourceType": "CUdevice_v1",
+      "stableId": "cuda.driver.type.CUdevice"
+    },
+    "CUdevice_attribute": {
+      "canonicalType": "enum CUdevice_attribute_enum",
+      "kind": "enum",
+      "name": "CUdevice_attribute",
+      "sourceType": "enum CUdevice_attribute_enum",
+      "stableId": "cuda.driver.type.CUdevice_attribute",
+      "values": [
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_ASYNC_ENGINE_COUNT",
+          "value": "40"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_ATOMIC_REDUCTION_SUPPORTED",
+          "value": "148"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_FLUSH_REMOTE_WRITES",
+          "value": "98"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY",
+          "value": "19"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_TEX2D_GATHER",
+          "value": "44"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_64_BIT_STREAM_MEM_OPS",
+          "value": "122"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_64_BIT_STREAM_MEM_OPS_V1",
+          "value": "93"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_HOST_POINTER_FOR_REGISTERED_MEM",
+          "value": "91"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_STREAM_MEM_OPS_V1",
+          "value": "92"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_STREAM_WAIT_VALUE_NOR",
+          "value": "123"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CAN_USE_STREAM_WAIT_VALUE_NOR_V1",
+          "value": "94"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CLOCK_RATE",
+          "value": "13"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CLUSTER_LAUNCH",
+          "value": "120"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR",
+          "value": "75"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR",
+          "value": "76"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COMPUTE_MODE",
+          "value": "20"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COMPUTE_PREEMPTION_SUPPORTED",
+          "value": "90"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CONCURRENT_KERNELS",
+          "value": "31"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS",
+          "value": "89"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COOPERATIVE_LAUNCH",
+          "value": "95"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_COOPERATIVE_MULTI_DEVICE_LAUNCH",
+          "value": "96"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_D3D12_CIG_STREAMS_SUPPORTED",
+          "value": "151"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_D3D12_CIG_SUPPORTED",
+          "value": "135"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_DEFERRED_MAPPING_CUDA_ARRAY_SUPPORTED",
+          "value": "121"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_DIRECT_MANAGED_MEM_ACCESS_FROM_HOST",
+          "value": "101"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_DMA_BUF_MMAP_SUPPORTED",
+          "value": "152"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_DMA_BUF_SUPPORTED",
+          "value": "124"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_ECC_ENABLED",
+          "value": "32"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GENERIC_COMPRESSION_SUPPORTED",
+          "value": "107"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GLOBAL_L1_CACHE_SUPPORTED",
+          "value": "79"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH",
+          "value": "37"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_DIRECT_RDMA_FLUSH_WRITES_OPTIONS",
+          "value": "117"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_DIRECT_RDMA_SUPPORTED",
+          "value": "116"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_DIRECT_RDMA_WITH_CUDA_VMM_SUPPORTED",
+          "value": "110"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_DIRECT_RDMA_WRITES_ORDERING",
+          "value": "118"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_OVERLAP",
+          "value": "15"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_PCI_DEVICE_ID",
+          "value": "139"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_GPU_PCI_SUBSYSTEM_ID",
+          "value": "140"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HANDLE_TYPE_FABRIC_SUPPORTED",
+          "value": "128"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR_SUPPORTED",
+          "value": "103"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HANDLE_TYPE_WIN32_HANDLE_SUPPORTED",
+          "value": "104"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HANDLE_TYPE_WIN32_KMT_HANDLE_SUPPORTED",
+          "value": "105"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_ALLOC_DMA_BUF_SUPPORTED",
+          "value": "146"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_MEMORY_POOLS_SUPPORTED",
+          "value": "144"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_NATIVE_ATOMIC_SUPPORTED",
+          "value": "86"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_NUMA_ID",
+          "value": "134"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_NUMA_MEMORY_POOLS_SUPPORTED",
+          "value": "142"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_NUMA_MULTINODE_IPC_SUPPORTED",
+          "value": "143"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_NUMA_VIRTUAL_MEMORY_MANAGEMENT_SUPPORTED",
+          "value": "141"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_REGISTER_SUPPORTED",
+          "value": "99"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_HOST_VIRTUAL_MEMORY_MANAGEMENT_SUPPORTED",
+          "value": "145"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_INTEGRATED",
+          "value": "18"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_IPC_EVENT_SUPPORTED",
+          "value": "125"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_KERNEL_EXEC_TIMEOUT",
+          "value": "17"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE",
+          "value": "38"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_LOCAL_L1_CACHE_SUPPORTED",
+          "value": "80"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_LOGICAL_ENDPOINT_COUNTED_OPS_SUPPORTED",
+          "value": "155"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_LOGICAL_ENDPOINT_MULTICAST_SUPPORTED",
+          "value": "154"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_LOGICAL_ENDPOINT_UNICAST_ACCESS_ON_OWNER_DEVICE_SUPPORTED",
+          "value": "156"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_LOGICAL_ENDPOINT_UNICAST_SUPPORTED",
+          "value": "153"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MANAGED_MEMORY",
+          "value": "83"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX",
+          "value": "157"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_ACCESS_POLICY_WINDOW_SIZE",
+          "value": "109"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X",
+          "value": "2"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y",
+          "value": "3"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z",
+          "value": "4"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_BLOCKS_PER_MULTIPROCESSOR",
+          "value": "106"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X",
+          "value": "5"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y",
+          "value": "6"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z",
+          "value": "7"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_PERSISTING_L2_CACHE_SIZE",
+          "value": "108"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_PITCH",
+          "value": "11"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK",
+          "value": "12"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR",
+          "value": "82"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK",
+          "value": "8"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK_OPTIN",
+          "value": "97"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR",
+          "value": "81"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK",
+          "value": "1"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_MULTIPROCESSOR",
+          "value": "39"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_LAYERED_LAYERS",
+          "value": "62"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_LAYERED_WIDTH",
+          "value": "61"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_WIDTH",
+          "value": "55"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_HEIGHT",
+          "value": "57"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_HEIGHT",
+          "value": "64"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_LAYERS",
+          "value": "65"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_WIDTH",
+          "value": "63"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_WIDTH",
+          "value": "56"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_DEPTH",
+          "value": "60"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_HEIGHT",
+          "value": "59"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_WIDTH",
+          "value": "58"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_LAYERED_LAYERS",
+          "value": "68"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_LAYERED_WIDTH",
+          "value": "67"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_WIDTH",
+          "value": "66"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_LAYERS",
+          "value": "43"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_WIDTH",
+          "value": "42"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LINEAR_WIDTH",
+          "value": "69"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_MIPMAPPED_WIDTH",
+          "value": "77"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_WIDTH",
+          "value": "21"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_HEIGHT",
+          "value": "28"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_NUMSLICES",
+          "value": "29"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_WIDTH",
+          "value": "27"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_GATHER_HEIGHT",
+          "value": "46"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_GATHER_WIDTH",
+          "value": "45"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_HEIGHT",
+          "value": "23"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_HEIGHT",
+          "value": "28"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_LAYERS",
+          "value": "29"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_WIDTH",
+          "value": "27"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_HEIGHT",
+          "value": "71"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_PITCH",
+          "value": "72"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_WIDTH",
+          "value": "70"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_MIPMAPPED_HEIGHT",
+          "value": "74"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_MIPMAPPED_WIDTH",
+          "value": "73"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_WIDTH",
+          "value": "22"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH",
+          "value": "26"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH_ALTERNATE",
+          "value": "49"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT",
+          "value": "25"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT_ALTERNATE",
+          "value": "48"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH",
+          "value": "24"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH_ALTERNATE",
+          "value": "47"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_LAYERED_LAYERS",
+          "value": "54"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_LAYERED_WIDTH",
+          "value": "53"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_WIDTH",
+          "value": "52"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEM_DECOMPRESS_ALGORITHM_MASK",
+          "value": "136"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEM_DECOMPRESS_MAXIMUM_LENGTH",
+          "value": "137"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEM_SYNC_DOMAIN_COUNT",
+          "value": "126"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE",
+          "value": "36"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEMORY_POOLS_SUPPORTED",
+          "value": "115"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MEMPOOL_SUPPORTED_HANDLE_TYPES",
+          "value": "119"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MPS_ENABLED",
+          "value": "133"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MULTI_GPU_BOARD",
+          "value": "84"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MULTI_GPU_BOARD_GROUP_ID",
+          "value": "85"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MULTICAST_SUPPORTED",
+          "value": "132"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT",
+          "value": "16"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_NUMA_CONFIG",
+          "value": "130"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_NUMA_ID",
+          "value": "131"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_ONLY_PARTIAL_HOST_NATIVE_ATOMIC_SUPPORTED",
+          "value": "147"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_PAGEABLE_MEMORY_ACCESS",
+          "value": "88"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_PAGEABLE_MEMORY_ACCESS_USES_HOST_PAGE_TABLES",
+          "value": "100"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_PCI_BUS_ID",
+          "value": "33"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_PCI_DEVICE_ID",
+          "value": "34"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID",
+          "value": "50"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_READ_ONLY_HOST_REGISTER_SUPPORTED",
+          "value": "113"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_REGISTERS_PER_BLOCK",
+          "value": "12"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_RESERVED_SHARED_MEMORY_PER_BLOCK",
+          "value": "111"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_SHARED_MEMORY_PER_BLOCK",
+          "value": "8"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO",
+          "value": "87"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_SPARSE_CUDA_ARRAY_SUPPORTED",
+          "value": "112"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_STREAM_PRIORITIES_SUPPORTED",
+          "value": "78"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_SURFACE_ALIGNMENT",
+          "value": "30"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TCC_DRIVER",
+          "value": "35"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TENSOR_MAP_ACCESS_SUPPORTED",
+          "value": "127"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TEXTURE_ALIGNMENT",
+          "value": "14"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TEXTURE_PITCH_ALIGNMENT",
+          "value": "51"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TIMELINE_SEMAPHORE_INTEROP_SUPPORTED",
+          "value": "114"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_TOTAL_CONSTANT_MEMORY",
+          "value": "9"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING",
+          "value": "41"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_UNIFIED_FUNCTION_POINTERS",
+          "value": "129"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_VIRTUAL_ADDRESS_MANAGEMENT_SUPPORTED",
+          "value": "102"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_VIRTUAL_MEMORY_MANAGEMENT_SUPPORTED",
+          "value": "102"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_VULKAN_CIG_SUPPORTED",
+          "value": "138"
+        },
+        {
+          "name": "CU_DEVICE_ATTRIBUTE_WARP_SIZE",
+          "value": "10"
+        }
+      ]
+    },
+    "CUdriverProcAddressQueryResult": {
+      "canonicalType": "enum CUdriverProcAddressQueryResult_enum",
+      "kind": "enum",
+      "name": "CUdriverProcAddressQueryResult",
+      "sourceType": "enum CUdriverProcAddressQueryResult_enum",
+      "stableId": "cuda.driver.type.CUdriverProcAddressQueryResult",
+      "values": [
+        {
+          "name": "CU_GET_PROC_ADDRESS_SUCCESS",
+          "value": "0"
+        },
+        {
+          "name": "CU_GET_PROC_ADDRESS_SYMBOL_NOT_FOUND",
+          "value": "1"
+        },
+        {
+          "name": "CU_GET_PROC_ADDRESS_VERSION_NOT_SUFFICIENT",
+          "value": "2"
+        }
+      ]
+    },
+    "CUexecAffinityParam": {
+      "canonicalType": "struct CUexecAffinityParam_st",
+      "fields": [
+        {
+          "name": "type",
+          "sourceType": "CUexecAffinityType"
+        },
+        {
+          "name": "param",
+          "sourceType": "union (unnamed union at cuda.h:2596:5)"
+        }
+      ],
+      "kind": "record",
+      "name": "CUexecAffinityParam",
+      "sourceType": "CUexecAffinityParam_v1",
+      "stableId": "cuda.driver.type.CUexecAffinityParam",
+      "tagName": "CUexecAffinityParam_st"
+    },
+    "CUresult": {
+      "canonicalType": "enum cudaError_enum",
+      "kind": "enum",
+      "name": "CUresult",
+      "sourceType": "enum cudaError_enum",
+      "stableId": "cuda.driver.type.CUresult",
+      "values": [
+        {
+          "name": "CUDA_ERROR_ALREADY_ACQUIRED",
+          "value": "210"
+        },
+        {
+          "name": "CUDA_ERROR_ALREADY_MAPPED",
+          "value": "208"
+        },
+        {
+          "name": "CUDA_ERROR_ARRAY_IS_MAPPED",
+          "value": "207"
+        },
+        {
+          "name": "CUDA_ERROR_ASSERT",
+          "value": "710"
+        },
+        {
+          "name": "CUDA_ERROR_CALL_REQUIRES_NEWER_DRIVER",
+          "value": "36"
+        },
+        {
+          "name": "CUDA_ERROR_CAPTURED_EVENT",
+          "value": "907"
+        },
+        {
+          "name": "CUDA_ERROR_CDP_NOT_SUPPORTED",
+          "value": "811"
+        },
+        {
+          "name": "CUDA_ERROR_CDP_VERSION_MISMATCH",
+          "value": "812"
+        },
+        {
+          "name": "CUDA_ERROR_COMPAT_NOT_SUPPORTED_ON_DEVICE",
+          "value": "804"
+        },
+        {
+          "name": "CUDA_ERROR_CONTAINED",
+          "value": "226"
+        },
+        {
+          "name": "CUDA_ERROR_CONTEXT_ALREADY_CURRENT",
+          "value": "202"
+        },
+        {
+          "name": "CUDA_ERROR_CONTEXT_ALREADY_IN_USE",
+          "value": "216"
+        },
+        {
+          "name": "CUDA_ERROR_CONTEXT_IS_DESTROYED",
+          "value": "709"
+        },
+        {
+          "name": "CUDA_ERROR_COOPERATIVE_LAUNCH_TOO_LARGE",
+          "value": "720"
+        },
+        {
+          "name": "CUDA_ERROR_DEINITIALIZED",
+          "value": "4"
+        },
+        {
+          "name": "CUDA_ERROR_DEVICE_NOT_LICENSED",
+          "value": "102"
+        },
+        {
+          "name": "CUDA_ERROR_DEVICE_UNAVAILABLE",
+          "value": "46"
+        },
+        {
+          "name": "CUDA_ERROR_ECC_UNCORRECTABLE",
+          "value": "214"
+        },
+        {
+          "name": "CUDA_ERROR_EXTERNAL_DEVICE",
+          "value": "911"
+        },
+        {
+          "name": "CUDA_ERROR_FILE_NOT_FOUND",
+          "value": "301"
+        },
+        {
+          "name": "CUDA_ERROR_FUNCTION_NOT_LOADED",
+          "value": "913"
+        },
+        {
+          "name": "CUDA_ERROR_GRAPH_EXEC_UPDATE_FAILURE",
+          "value": "910"
+        },
+        {
+          "name": "CUDA_ERROR_GRAPH_RECAPTURE_FAILURE",
+          "value": "918"
+        },
+        {
+          "name": "CUDA_ERROR_HARDWARE_STACK_ERROR",
+          "value": "714"
+        },
+        {
+          "name": "CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED",
+          "value": "712"
+        },
+        {
+          "name": "CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED",
+          "value": "713"
+        },
+        {
+          "name": "CUDA_ERROR_ILLEGAL_ADDRESS",
+          "value": "700"
+        },
+        {
+          "name": "CUDA_ERROR_ILLEGAL_INSTRUCTION",
+          "value": "715"
+        },
+        {
+          "name": "CUDA_ERROR_ILLEGAL_STATE",
+          "value": "401"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_ADDRESS_SPACE",
+          "value": "717"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_CLUSTER_SIZE",
+          "value": "912"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_CONTEXT",
+          "value": "201"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_DEVICE",
+          "value": "101"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_GRAPHICS_CONTEXT",
+          "value": "219"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_HANDLE",
+          "value": "400"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_IMAGE",
+          "value": "200"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_PC",
+          "value": "718"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_PTX",
+          "value": "218"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_RESOURCE_CONFIGURATION",
+          "value": "915"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_RESOURCE_TYPE",
+          "value": "914"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_SOURCE",
+          "value": "300"
+        },
+        {
+          "name": "CUDA_ERROR_INVALID_VALUE",
+          "value": "1"
+        },
+        {
+          "name": "CUDA_ERROR_JIT_COMPILATION_DISABLED",
+          "value": "223"
+        },
+        {
+          "name": "CUDA_ERROR_JIT_COMPILER_NOT_FOUND",
+          "value": "221"
+        },
+        {
+          "name": "CUDA_ERROR_KEY_ROTATION",
+          "value": "916"
+        },
+        {
+          "name": "CUDA_ERROR_LAUNCH_FAILED",
+          "value": "719"
+        },
+        {
+          "name": "CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING",
+          "value": "703"
+        },
+        {
+          "name": "CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES",
+          "value": "701"
+        },
+        {
+          "name": "CUDA_ERROR_LAUNCH_TIMEOUT",
+          "value": "702"
+        },
+        {
+          "name": "CUDA_ERROR_LOSSY_QUERY",
+          "value": "402"
+        },
+        {
+          "name": "CUDA_ERROR_MAP_FAILED",
+          "value": "205"
+        },
+        {
+          "name": "CUDA_ERROR_MISALIGNED_ADDRESS",
+          "value": "716"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_CLIENT_TERMINATED",
+          "value": "810"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_CONNECTION_FAILED",
+          "value": "805"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_MAX_CLIENTS_REACHED",
+          "value": "808"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_MAX_CONNECTIONS_REACHED",
+          "value": "809"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_RPC_FAILURE",
+          "value": "806"
+        },
+        {
+          "name": "CUDA_ERROR_MPS_SERVER_NOT_READY",
+          "value": "807"
+        },
+        {
+          "name": "CUDA_ERROR_NO_BINARY_FOR_GPU",
+          "value": "209"
+        },
+        {
+          "name": "CUDA_ERROR_NO_DEVICE",
+          "value": "100"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_FOUND",
+          "value": "500"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_INITIALIZED",
+          "value": "3"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_MAPPED",
+          "value": "211"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_MAPPED_AS_ARRAY",
+          "value": "212"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_MAPPED_AS_POINTER",
+          "value": "213"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_PERMITTED",
+          "value": "800"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_READY",
+          "value": "600"
+        },
+        {
+          "name": "CUDA_ERROR_NOT_SUPPORTED",
+          "value": "801"
+        },
+        {
+          "name": "CUDA_ERROR_NVLINK_UNCORRECTABLE",
+          "value": "220"
+        },
+        {
+          "name": "CUDA_ERROR_OPERATING_SYSTEM",
+          "value": "304"
+        },
+        {
+          "name": "CUDA_ERROR_OUT_OF_MEMORY",
+          "value": "2"
+        },
+        {
+          "name": "CUDA_ERROR_PEER_ACCESS_ALREADY_ENABLED",
+          "value": "704"
+        },
+        {
+          "name": "CUDA_ERROR_PEER_ACCESS_NOT_ENABLED",
+          "value": "705"
+        },
+        {
+          "name": "CUDA_ERROR_PEER_ACCESS_UNSUPPORTED",
+          "value": "217"
+        },
+        {
+          "name": "CUDA_ERROR_PRIMARY_CONTEXT_ACTIVE",
+          "value": "708"
+        },
+        {
+          "name": "CUDA_ERROR_PROFILER_ALREADY_STARTED",
+          "value": "7"
+        },
+        {
+          "name": "CUDA_ERROR_PROFILER_ALREADY_STOPPED",
+          "value": "8"
+        },
+        {
+          "name": "CUDA_ERROR_PROFILER_DISABLED",
+          "value": "5"
+        },
+        {
+          "name": "CUDA_ERROR_PROFILER_NOT_INITIALIZED",
+          "value": "6"
+        },
+        {
+          "name": "CUDA_ERROR_SHARED_OBJECT_INIT_FAILED",
+          "value": "303"
+        },
+        {
+          "name": "CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND",
+          "value": "302"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_IMPLICIT",
+          "value": "906"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_INVALIDATED",
+          "value": "901"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_ISOLATION",
+          "value": "905"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_MERGE",
+          "value": "902"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_UNJOINED",
+          "value": "904"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_UNMATCHED",
+          "value": "903"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_UNSUPPORTED",
+          "value": "900"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_CAPTURE_WRONG_THREAD",
+          "value": "908"
+        },
+        {
+          "name": "CUDA_ERROR_STREAM_DETACHED",
+          "value": "917"
+        },
+        {
+          "name": "CUDA_ERROR_STUB_LIBRARY",
+          "value": "34"
+        },
+        {
+          "name": "CUDA_ERROR_SYSTEM_DRIVER_MISMATCH",
+          "value": "803"
+        },
+        {
+          "name": "CUDA_ERROR_SYSTEM_NOT_READY",
+          "value": "802"
+        },
+        {
+          "name": "CUDA_ERROR_TENSOR_MEMORY_LEAK",
+          "value": "721"
+        },
+        {
+          "name": "CUDA_ERROR_TIMEOUT",
+          "value": "909"
+        },
+        {
+          "name": "CUDA_ERROR_TOO_MANY_PEERS",
+          "value": "711"
+        },
+        {
+          "name": "CUDA_ERROR_UNKNOWN",
+          "value": "999"
+        },
+        {
+          "name": "CUDA_ERROR_UNMAP_FAILED",
+          "value": "206"
+        },
+        {
+          "name": "CUDA_ERROR_UNSUPPORTED_DEVSIDE_SYNC",
+          "value": "225"
+        },
+        {
+          "name": "CUDA_ERROR_UNSUPPORTED_EXEC_AFFINITY",
+          "value": "224"
+        },
+        {
+          "name": "CUDA_ERROR_UNSUPPORTED_LIMIT",
+          "value": "215"
+        },
+        {
+          "name": "CUDA_ERROR_UNSUPPORTED_PTX_VERSION",
+          "value": "222"
+        },
+        {
+          "name": "CUDA_SUCCESS",
+          "value": "0"
+        }
+      ]
+    },
+    "cuuint64_t": {
+      "canonicalType": "unsigned long",
+      "kind": "scalar",
+      "name": "cuuint64_t",
+      "sourceType": "uint64_t",
+      "stableId": "cuda.driver.type.cuuint64_t"
+    }
+  }
+}

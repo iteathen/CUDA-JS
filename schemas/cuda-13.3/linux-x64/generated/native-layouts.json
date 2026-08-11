@@ -1,0 +1,153 @@
+{
+  "functions": {
+    "cuCtxCreate": {
+      "nativeSymbol": "cuCtxCreate_v4",
+      "pointerSize": 8
+    },
+    "cuCtxDestroy": {
+      "nativeSymbol": "cuCtxDestroy_v2",
+      "pointerSize": 8
+    },
+    "cuCtxGetCurrent": {
+      "nativeSymbol": "cuCtxGetCurrent",
+      "pointerSize": 8
+    },
+    "cuCtxSetCurrent": {
+      "nativeSymbol": "cuCtxSetCurrent",
+      "pointerSize": 8
+    },
+    "cuDeviceGet": {
+      "nativeSymbol": "cuDeviceGet",
+      "pointerSize": 8
+    },
+    "cuDeviceGetAttribute": {
+      "nativeSymbol": "cuDeviceGetAttribute",
+      "pointerSize": 8
+    },
+    "cuDeviceGetCount": {
+      "nativeSymbol": "cuDeviceGetCount",
+      "pointerSize": 8
+    },
+    "cuDriverGetVersion": {
+      "nativeSymbol": "cuDriverGetVersion",
+      "pointerSize": 8
+    },
+    "cuGetErrorName": {
+      "nativeSymbol": "cuGetErrorName",
+      "pointerSize": 8
+    },
+    "cuGetErrorString": {
+      "nativeSymbol": "cuGetErrorString",
+      "pointerSize": 8
+    },
+    "cuGetProcAddress": {
+      "nativeSymbol": "cuGetProcAddress_v2",
+      "pointerSize": 8
+    },
+    "cuInit": {
+      "nativeSymbol": "cuInit",
+      "pointerSize": 8
+    }
+  },
+  "id": "cuda-13.3.29-driver-tier-0-linux-x64-native-layouts",
+  "profile": {
+    "byteOrder": "little-endian",
+    "pointerSize": 8,
+    "sizeSize": 8
+  },
+  "schemaVersion": 1,
+  "targetProfile": {
+    "abi": "sysv",
+    "architecture": "x86_64",
+    "byteOrder": "little-endian",
+    "id": "linux-x64-sysv",
+    "os": "linux",
+    "pointerBits": 64,
+    "sizeBits": 64
+  },
+  "types": {
+    "CUcontext": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
+    "CUctxCigParam": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "sharedDataType",
+          "offset": 0,
+          "sourceType": "CUcigDataType"
+        },
+        {
+          "name": "sharedData",
+          "offset": 8,
+          "sourceType": "void *"
+        }
+      ],
+      "size": 16
+    },
+    "CUctxCreateParams": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "execAffinityParams",
+          "offset": 0,
+          "sourceType": "CUexecAffinityParam *"
+        },
+        {
+          "name": "numExecAffinityParams",
+          "offset": 8,
+          "sourceType": "int"
+        },
+        {
+          "name": "cigParams",
+          "offset": 16,
+          "sourceType": "CUctxCigParam *"
+        }
+      ],
+      "size": 24
+    },
+    "CUdevice": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUdevice_attribute": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUdriverProcAddressQueryResult": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUexecAffinityParam": {
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "type",
+          "offset": 0,
+          "sourceType": "CUexecAffinityType"
+        },
+        {
+          "name": "param",
+          "offset": 4,
+          "sourceType": "union (unnamed union at cuda.h:2596:5)"
+        }
+      ],
+      "size": 8
+    },
+    "CUresult": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "cuuint64_t": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    }
+  }
+}

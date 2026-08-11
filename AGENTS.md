@@ -18,7 +18,7 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 
 ## Mandatory startup
 
-1. Read this file, `agent_files/AI_RULES.md`, `agent_files/AGENTS.md`, `agent_files/general_foundation/NO_PYTHON_POLICY.md`, `STATUS.md`, and `next_step.yaml`.
+1. Read this file, `agent_files/AI_RULES.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`.
 2. Identify the exact work package, experiment, contract, target paths, and claim.
 3. Read the owning accepted ADR/specification and only objectively triggered supporting doctrine under `agent_files/general_foundation/`.
 4. Inspect exact Git state, generated artifacts, environment capabilities, and unrelated work.
@@ -28,7 +28,6 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 ## Non-negotiable boundaries
 
 - CUDA-JS is a generic Node/CUDA runtime. It contains no MCGS, minimax, graph-search, game, tensor, model, or evaluator semantics.
-- Python is prohibited throughout CUDA-JS and the wider UMCGS ecosystem, including source, dependencies, tooling, schema import, generators, tests, benchmarks, documentation automation, CI, packaging, installers, release work, experiments, and temporary scripts.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon.
 - Custom AsmJit/register stubs are a deferred measured-gap option, not the baseline.
@@ -47,11 +46,11 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 
 ## Current phase gate
 
-The repository is in a **documentation-only foundation phase**. Research, assessment, charter, ADRs, architecture, support bounds, specification maps, plans, and experiment protocols may be created or corrected. No production implementation or experiment execution is authorized merely because a future code boundary is documented as dependency-ready.
+The repository is in an **active implementation phase** with `CJS-F1A`, `CJS-F1B`, and the Windows-only `CJS-F2W / EXP-012` bootstrap accepted. Windows `CJS-F3W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` now reaches the real-Driver/GPU boundary with executable preparation, readiness, and smoke tooling; final native qualification remains deferred and independently gated. EXP-000 remains the mandatory exact Node 26.7.0 Windows x64/native Linux x86-64 regression capsule.
 
-`EXP-000`, `EXP-001`, schema importers, ABI probes, Node FFI bindings, DriverActor/resource code, native fixtures, generated bindings, benchmarks, and runtime packages remain future work until the project owner explicitly advances the phase. At that point, agents must re-read current authority and verify predecessor gates before mutation.
+F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. SPEC-0002 authorizes only the accepted bounded Windows Driver bootstrap. Linux GPU-free preparation may follow `experiments/exp-001/README.md`; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. Production DriverActor/resource code requires a new accepted F3W specification; memory, module/launch/completion, compiler/cache, packaging, and consumer interop remain blocked on their documented Windows predecessors.
 
-Do not create implementation scaffolding “for later,” executable placeholders, premature workflows, generated artifacts, or Python-based support tooling during this phase.
+Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready Windows boundary.
 
 ## Reasoning and experiment gate
 
@@ -84,14 +83,17 @@ No production source belongs in the repository root. Do not create unowned catch
 
 ## Validation
 
-For the current planning phase:
+For the current phase:
 
 ```bash
 ./scripts/verify-docs.sh
+npm run exp:000:build
+npm run verify
+npm run exp:012
 ```
 
-Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, compliance with the no-Python policy, and honest claim limits.
+Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
 
 ## Publication state
 
-The private `iteathen/CUDA-JS` repository exists. Publication claims require remote read-back of the exact branch and tree being claimed. The verified documentation foundation was imported from local foundation artifact `CJS-FND-77090a9` and is maintained on GitHub through reviewed documentation-only changes.
+The private `iteathen/CUDA-JS` repository exists. Publication claims require remote read-back of the exact branch and tree being claimed. Local EXP-000 evidence is not a publication claim until the exact remote branch/tree and its native CI result are read back.

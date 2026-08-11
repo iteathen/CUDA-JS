@@ -70,11 +70,13 @@ Cold setup/diagnostic/compiler/teardown calls may use Node's generic FFI fallbac
 
 ## Current state
 
-The private GitHub repository now contains the reviewed **documentation foundation**: agent entry rules, ownership registry, charter, accepted ADRs, architecture, support bounds, specification map, research/source register, non-authoritative plan, experiment protocols, status, and current next-step contract.
+`CJS-F1A / EXP-000` is promoted after its dependency-free C ABI library, direct oracle, minimal Runtime IR, private Node FFI Worker, packers, resource generations, and deterministic cleanup passed independently on Windows x64 and native Linux x86-64 with exact Node 26.7.0.
 
-The current phase is documentation only. No production runtime, native fixture, schema importer, generated binding, experiment harness, benchmark implementation, or package has been accepted or authorized. `EXP-000` and later gates remain future protocols, not executed work.
+`CJS-F1B` is also accepted: the pinned CUDA 13.3.29 package regenerates 12 reviewed Tier-0 function facts, 9 type/layout facts, private FFI definitions/packers/types/conformance products, and a fail-closed catalog of 471 unselected Driver declarations. Independent Linux x86-64 C probes and six mutation classes pass byte-for-byte check-only regeneration. The installed Windows CUDA 13.3 header is hash-identical, and MSVC independently confirms the selected Win64 layouts.
 
-Native and performance claims remain blocked until the project owner explicitly advances the phase and the exact required Node/CUDA/Driver/toolkit/GPU environment is available.
+Windows-only `CJS-F2W / EXP-012` is accepted. Official Node 26.7.0 and an independent MSVC oracle agree on the CUDA 13.3 Driver, GTX 1660 Ti device/attributes, all 12 Tier-0 exports and procedure queries, error text, permission behavior, and private context lifecycle/cleanup. Linux `CJS-F2L / EXP-001` has executable source/ABI/oracle preparation, environment diagnostics, and a final smoke runner, but remains incomplete because the available native Linux guest has no supported GPU exposure. [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) is open for contributors; Windows evidence does not imply Linux support.
+
+Run `npm run exp:000` for the complete F1A regression capsule, `npm run f1b:check` for cross-platform F1B integrity, `npm run f1b:verify-native` on the pinned Linux/Clang profile for native deterministic regeneration, `npm run exp:001:prepare` for Linux preparation/readiness, or `npm run exp:012` on the exact Windows Driver/GPU profile. The final Linux hardware procedure is in [`experiments/exp-001/README.md`](experiments/exp-001/README.md). Native evidence is written only to ignored `build/` storage.
 
 ## Start here
 
@@ -84,6 +86,7 @@ Native and performance claims remain blocked until the project owner explicitly 
 - [`agent_files/SYSTEM_REGISTRY.md`](agent_files/SYSTEM_REGISTRY.md)
 - [`docs/decisions/README.md`](docs/decisions/README.md)
 - [`docs/decisions/ADR-0002-node-ffi-first-host-binding.md`](docs/decisions/ADR-0002-node-ffi-first-host-binding.md)
+- [`docs/specs/SPEC-0002-windows-driver-bootstrap.md`](docs/specs/SPEC-0002-windows-driver-bootstrap.md)
 - [`docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md)
 - [`docs/architecture/TARGET_ARCHITECTURE.md`](docs/architecture/TARGET_ARCHITECTURE.md)
 - [`docs/architecture/V0_SUPPORT_MATRIX.md`](docs/architecture/V0_SUPPORT_MATRIX.md)

@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "cuda-13.3.29-driver-tier-0-semantics-v1",
+  "reviewStatus": "accepted-f1b-private-experimental",
+  "requiredFunctionFields": [
+    "stableId",
+    "exposure",
+    "releaseTier",
+    "requestedApiVersion",
+    "optional",
+    "parameters",
+    "return",
+    "contextRequirement",
+    "hostBlocking",
+    "asynchronousBehavior",
+    "deferredErrors",
+    "healthEffect",
+    "callbackPolicy",
+    "securityCapability",
+    "cleanup",
+    "conformanceCases"
+  ],
+  "requiredParameterFields": [
+    "name",
+    "direction",
+    "nullable",
+    "representation",
+    "ownership",
+    "length",
+    "bounds",
+    "capability"
+  ],
+  "types": {
+    "CUresult": { "representation": "signed-32-bit-result-code", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
+    "CUdevice": { "representation": "signed-32-bit-device-ordinal", "exposure": "private", "ownership": "value", "resourceKind": "device-identity", "packerPolicy": "generated-scalar" },
+    "CUdevice_attribute": { "representation": "signed-32-bit-closed-enum", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
+    "CUcontext": { "representation": "opaque-private-native-handle", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "context", "packerPolicy": "private-pointer-only" },
+    "CUctxCreateParams": { "representation": "generated-byte-storage", "exposure": "private", "ownership": "call-frame", "resourceKind": null, "packerPolicy": "default-null-fields-only" },
+    "CUexecAffinityParam": { "representation": "generated-byte-storage", "exposure": "denied-tier-0", "ownership": "call-frame", "resourceKind": null, "packerPolicy": "unavailable" },
+    "CUctxCigParam": { "representation": "generated-byte-storage", "exposure": "denied-tier-0", "ownership": "call-frame", "resourceKind": null, "packerPolicy": "unavailable" },
+    "CUdriverProcAddressQueryResult": { "representation": "signed-32-bit-query-status", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
+    "cuuint64_t": { "representation": "unsigned-64-bit-flags", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" }
+  },
+  "functions": {
+    "cuInit": {
+      "stableId": "cuda.driver.function.cuInit", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "Flags", "direction": "in", "nullable": false, "representation": "u32", "ownership": "value", "length": null, "bounds": { "constant": 0 }, "capability": "driver.initialize" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "none", "hostBlocking": "may-load-process-libraries", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "initializes-process-driver-state", "callbackPolicy": "none", "securityCapability": "driver.initialize", "cleanup": "process-owned-no-explicit-release", "conformanceCases": ["tier0.init.flags-zero", "tier0.init.invalid-flags"]
+    },
+    "cuDriverGetVersion": {
+      "stableId": "cuda.driver.function.cuDriverGetVersion", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "driverVersion", "direction": "out", "nullable": false, "representation": "i32-out", "ownership": "call-frame", "length": null, "bounds": { "minimum": 0 }, "capability": "driver.query" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-initialized", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "driver.query", "cleanup": "call-frame-only", "conformanceCases": ["tier0.driver-version.out"]
+    },
+    "cuDeviceGetCount": {
+      "stableId": "cuda.driver.function.cuDeviceGetCount", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "count", "direction": "out", "nullable": false, "representation": "i32-out", "ownership": "call-frame", "length": null, "bounds": { "minimum": 0 }, "capability": "device.enumerate" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-initialized", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "device.enumerate", "cleanup": "call-frame-only", "conformanceCases": ["tier0.device-count.out"]
+    },
+    "cuDeviceGet": {
+      "stableId": "cuda.driver.function.cuDeviceGet", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "device", "direction": "out", "nullable": false, "representation": "cu-device-out", "ownership": "call-frame", "length": null, "bounds": null, "capability": "device.enumerate" },
+        { "name": "ordinal", "direction": "in", "nullable": false, "representation": "i32", "ownership": "value", "length": null, "bounds": { "minimum": 0, "lessThan": "device-count" }, "capability": "device.enumerate" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-initialized", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "device.enumerate", "cleanup": "call-frame-only", "conformanceCases": ["tier0.device-get.ordinal"]
+    },
+    "cuDeviceGetAttribute": {
+      "stableId": "cuda.driver.function.cuDeviceGetAttribute", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "pi", "direction": "out", "nullable": false, "representation": "i32-out", "ownership": "call-frame", "length": null, "bounds": null, "capability": "device.query" },
+        { "name": "attrib", "direction": "in", "nullable": false, "representation": "cu-device-attribute", "ownership": "value", "length": null, "bounds": { "allow": ["CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK", "CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT", "CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR", "CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR"] }, "capability": "device.query" },
+        { "name": "dev", "direction": "in", "nullable": false, "representation": "cu-device", "ownership": "value", "length": null, "bounds": null, "capability": "device.query" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-initialized", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "device.query", "cleanup": "call-frame-only", "conformanceCases": ["tier0.device-attribute.selected"]
+    },
+    "cuGetErrorName": {
+      "stableId": "cuda.driver.function.cuGetErrorName", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "error", "direction": "in", "nullable": false, "representation": "cuda-result", "ownership": "value", "length": null, "bounds": null, "capability": "error.describe" },
+        { "name": "pStr", "direction": "out", "nullable": false, "representation": "borrowed-utf8-c-string-pointer-out", "ownership": "driver-borrowed-process-lifetime", "length": "nul-terminated", "bounds": null, "capability": "error.describe" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "none", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "error.describe", "cleanup": "borrowed-string-not-released", "conformanceCases": ["tier0.error-name.borrowed-string"]
+    },
+    "cuGetErrorString": {
+      "stableId": "cuda.driver.function.cuGetErrorString", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "error", "direction": "in", "nullable": false, "representation": "cuda-result", "ownership": "value", "length": null, "bounds": null, "capability": "error.describe" },
+        { "name": "pStr", "direction": "out", "nullable": false, "representation": "borrowed-utf8-c-string-pointer-out", "ownership": "driver-borrowed-process-lifetime", "length": "nul-terminated", "bounds": null, "capability": "error.describe" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "none", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "error.describe", "cleanup": "borrowed-string-not-released", "conformanceCases": ["tier0.error-string.borrowed-string"]
+    },
+    "cuCtxCreate": {
+      "stableId": "cuda.driver.function.cuCtxCreate", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "pctx", "direction": "out", "nullable": false, "representation": "private-context-handle-out", "ownership": "driver-actor", "length": null, "bounds": null, "capability": "context.create" },
+        { "name": "ctxCreateParams", "direction": "in", "nullable": false, "representation": "generated-cu-ctx-create-params", "ownership": "call-frame", "length": null, "bounds": { "tier0": "all-pointer-fields-null-and-count-zero" }, "capability": "context.create" },
+        { "name": "flags", "direction": "in", "nullable": false, "representation": "u32-context-flags", "ownership": "value", "length": null, "bounds": { "allow": [0] }, "capability": "context.create" },
+        { "name": "dev", "direction": "in", "nullable": false, "representation": "cu-device", "ownership": "value", "length": null, "bounds": null, "capability": "context.create" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-thread-and-driver-initialized", "hostBlocking": "may-block", "asynchronousBehavior": "creates-current-context", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "creates-owned-context-or-leaves-none", "callbackPolicy": "none", "securityCapability": "context.create", "cleanup": "destroy-with-cuCtxDestroy-on-owner", "conformanceCases": ["tier0.context-create.default-params", "tier0.context-create.cleanup"]
+    },
+    "cuCtxDestroy": {
+      "stableId": "cuda.driver.function.cuCtxDestroy", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "ctx", "direction": "in", "nullable": false, "representation": "private-context-handle", "ownership": "driver-actor", "length": null, "bounds": null, "capability": "context.destroy" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread", "hostBlocking": "may-block", "asynchronousBehavior": "may-synchronize-owned-work", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "terminally-invalidates-context-and-children", "callbackPolicy": "none", "securityCapability": "context.destroy", "cleanup": "terminal-release", "conformanceCases": ["tier0.context-destroy.owner", "tier0.context-destroy.stale"]
+    },
+    "cuCtxSetCurrent": {
+      "stableId": "cuda.driver.function.cuCtxSetCurrent", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "ctx", "direction": "in", "nullable": true, "representation": "private-context-handle-or-null", "ownership": "driver-actor", "length": null, "bounds": null, "capability": "context.current" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-thread", "hostBlocking": "short-state-change", "asynchronousBehavior": "thread-local-currentness", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "changes-owner-thread-current-context", "callbackPolicy": "none", "securityCapability": "context.current", "cleanup": "no-independent-resource", "conformanceCases": ["tier0.context-set-current.owner", "tier0.context-set-current.null"]
+    },
+    "cuCtxGetCurrent": {
+      "stableId": "cuda.driver.function.cuCtxGetCurrent", "exposure": "private-experiment", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "pctx", "direction": "out", "nullable": false, "representation": "private-context-handle-out", "ownership": "borrowed-current", "length": null, "bounds": null, "capability": "context.current" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-thread", "hostBlocking": "short-query", "asynchronousBehavior": "thread-local-currentness", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "none", "callbackPolicy": "none", "securityCapability": "context.current", "cleanup": "borrowed-handle-not-independently-released", "conformanceCases": ["tier0.context-get-current.owner"]
+    },
+    "cuGetProcAddress": {
+      "stableId": "cuda.driver.function.cuGetProcAddress", "exposure": "private-verifier-only", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "symbol", "direction": "in", "nullable": false, "representation": "allowlisted-ascii-c-string", "ownership": "call-frame", "length": "nul-terminated", "bounds": { "source": "generated-tier-0-native-symbols" }, "capability": "driver.symbol.verify" },
+        { "name": "pfn", "direction": "out", "nullable": false, "representation": "private-process-function-pointer-out", "ownership": "runtime-epoch", "length": null, "bounds": null, "capability": "driver.symbol.verify" },
+        { "name": "cudaVersion", "direction": "in", "nullable": false, "representation": "i32-api-version", "ownership": "value", "length": null, "bounds": { "constant": 13030 }, "capability": "driver.symbol.verify" },
+        { "name": "flags", "direction": "in", "nullable": false, "representation": "u64-proc-address-flags", "ownership": "value", "length": null, "bounds": { "reviewed-only": true }, "capability": "driver.symbol.verify" },
+        { "name": "symbolStatus", "direction": "out", "nullable": false, "representation": "query-status-out", "ownership": "call-frame", "length": null, "bounds": null, "capability": "driver.symbol.verify" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-initialized", "hostBlocking": "short-query", "asynchronousBehavior": "none", "deferredErrors": "none", "healthEffect": "none", "callbackPolicy": "returned-pointer-never-publicly-callable", "securityCapability": "driver.symbol.verify", "cleanup": "process-pointer-invalid-after-runtime-epoch", "conformanceCases": ["tier0.proc-address.version-status", "tier0.proc-address.named-export-match"]
+    }
+  }
+}

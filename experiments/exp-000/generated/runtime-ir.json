@@ -1,0 +1,2429 @@
+{
+  "schemaVersion": 1,
+  "id": "cjs-exp-000-synthetic-abi-v1",
+  "schemaSha256": "ca1d62de244edf48c148ddf649749818d8a5f9810c3e06ea79b7475f7e7db80c",
+  "generatorSha256": "98d89cd86d6e3daaef6d31fd8a5a1728fe2c633badfff47a7ed98e974adc00b2",
+  "sourceIdentity": {
+    "nodeTag": "v26.7.0",
+    "nodeCommit": "b4f23d3619c98bed09af93a21192f6080197a8c6",
+    "nodeFfiFlag": "--experimental-ffi"
+  },
+  "generatedBy": "experiments/exp-000/src/generate.mjs",
+  "abi": {
+    "byteOrder": "little-endian",
+    "pointerBits": 64,
+    "sizeBits": 64,
+    "supportedProfiles": [
+      "win32-x64-msvc",
+      "linux-x64-sysv",
+      "linux-arm64-aapcs64"
+    ]
+  },
+  "types": {
+    "i8": {
+      "c": "int8_t",
+      "ffi": "i8"
+    },
+    "u8": {
+      "c": "uint8_t",
+      "ffi": "u8"
+    },
+    "i16": {
+      "c": "int16_t",
+      "ffi": "i16"
+    },
+    "u16": {
+      "c": "uint16_t",
+      "ffi": "u16"
+    },
+    "i32": {
+      "c": "int32_t",
+      "ffi": "i32"
+    },
+    "u32": {
+      "c": "uint32_t",
+      "ffi": "u32"
+    },
+    "i64": {
+      "c": "int64_t",
+      "ffi": "i64"
+    },
+    "u64": {
+      "c": "uint64_t",
+      "ffi": "u64"
+    },
+    "f32": {
+      "c": "float",
+      "ffi": "f32"
+    },
+    "f64": {
+      "c": "double",
+      "ffi": "f64"
+    },
+    "size": {
+      "c": "size_t",
+      "ffi": "u64"
+    },
+    "intptr": {
+      "c": "intptr_t",
+      "ffi": "i64"
+    },
+    "uintptr": {
+      "c": "uintptr_t",
+      "ffi": "u64"
+    },
+    "handle": {
+      "c": "uintptr_t",
+      "ffi": "u64"
+    },
+    "pointer": {
+      "c": "void*",
+      "ffi": "pointer"
+    },
+    "void": {
+      "c": "void",
+      "ffi": "void"
+    }
+  },
+  "layouts": {
+    "simple": {
+      "id": 1,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "a",
+          "type": "i32",
+          "offset": 0
+        },
+        {
+          "name": "b",
+          "type": "u64",
+          "offset": 8
+        },
+        {
+          "name": "c",
+          "type": "f64",
+          "offset": 16
+        }
+      ]
+    },
+    "nested": {
+      "id": 2,
+      "size": 48,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "tag",
+          "type": "u8",
+          "offset": 0
+        },
+        {
+          "name": "inner",
+          "type": "simple",
+          "offset": 8
+        },
+        {
+          "name": "values",
+          "type": "u32[3]",
+          "offset": 32
+        }
+      ]
+    },
+    "tagged": {
+      "id": 3,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "tag",
+          "type": "u32",
+          "offset": 0
+        },
+        {
+          "name": "value",
+          "type": "union16",
+          "offset": 8
+        }
+      ]
+    },
+    "pointerStruct": {
+      "id": 4,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "pointer",
+          "type": "pointer",
+          "offset": 0
+        },
+        {
+          "name": "length",
+          "type": "size",
+          "offset": 8
+        },
+        {
+          "name": "cookie",
+          "type": "u64",
+          "offset": 16
+        }
+      ]
+    },
+    "aligned16": {
+      "id": 5,
+      "size": 16,
+      "alignment": 16,
+      "fields": [
+        {
+          "name": "lo",
+          "type": "u64",
+          "offset": 0
+        },
+        {
+          "name": "hi",
+          "type": "u64",
+          "offset": 8
+        }
+      ]
+    }
+  },
+  "functions": {
+    "cjs_zero_i32": {
+      "arguments": [],
+      "return": "i32",
+      "sourceArguments": [],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "scalar.zero.i32",
+        "lifecycle.library-close"
+      ]
+    },
+    "cjs_identity_i8": {
+      "arguments": [
+        "i8"
+      ],
+      "return": "i8",
+      "sourceArguments": [
+        "i8"
+      ],
+      "sourceReturn": "i8",
+      "caseIds": [
+        "scalar.i8.identity"
+      ]
+    },
+    "cjs_identity_u8": {
+      "arguments": [
+        "u8"
+      ],
+      "return": "u8",
+      "sourceArguments": [
+        "u8"
+      ],
+      "sourceReturn": "u8",
+      "caseIds": [
+        "scalar.u8.identity"
+      ]
+    },
+    "cjs_identity_i16": {
+      "arguments": [
+        "i16"
+      ],
+      "return": "i16",
+      "sourceArguments": [
+        "i16"
+      ],
+      "sourceReturn": "i16",
+      "caseIds": [
+        "scalar.i16.identity"
+      ]
+    },
+    "cjs_identity_u16": {
+      "arguments": [
+        "u16"
+      ],
+      "return": "u16",
+      "sourceArguments": [
+        "u16"
+      ],
+      "sourceReturn": "u16",
+      "caseIds": [
+        "scalar.u16.identity"
+      ]
+    },
+    "cjs_identity_i32": {
+      "arguments": [
+        "i32"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "i32"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "scalar.i32.identity"
+      ]
+    },
+    "cjs_identity_u32": {
+      "arguments": [
+        "u32"
+      ],
+      "return": "u32",
+      "sourceArguments": [
+        "u32"
+      ],
+      "sourceReturn": "u32",
+      "caseIds": [
+        "scalar.u32.identity"
+      ]
+    },
+    "cjs_identity_i64": {
+      "arguments": [
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "scalar.i64.identity"
+      ]
+    },
+    "cjs_identity_u64": {
+      "arguments": [
+        "u64"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "u64"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": [
+        "scalar.u64.identity"
+      ]
+    },
+    "cjs_transform_f32": {
+      "arguments": [
+        "f32"
+      ],
+      "return": "f32",
+      "sourceArguments": [
+        "f32"
+      ],
+      "sourceReturn": "f32",
+      "caseIds": [
+        "scalar.f32.transform"
+      ]
+    },
+    "cjs_transform_f64": {
+      "arguments": [
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "scalar.f64.transform"
+      ]
+    },
+    "cjs_identity_size": {
+      "arguments": [
+        "u64"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "size"
+      ],
+      "sourceReturn": "size",
+      "caseIds": [
+        "scalar.size.identity"
+      ]
+    },
+    "cjs_identity_intptr": {
+      "arguments": [
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "intptr"
+      ],
+      "sourceReturn": "intptr",
+      "caseIds": [
+        "scalar.intptr.identity"
+      ]
+    },
+    "cjs_identity_uintptr": {
+      "arguments": [
+        "u64"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "uintptr"
+      ],
+      "sourceReturn": "uintptr",
+      "caseIds": [
+        "scalar.uintptr.identity"
+      ]
+    },
+    "cjs_transform_handle": {
+      "arguments": [
+        "u64"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "handle"
+      ],
+      "sourceReturn": "handle",
+      "caseIds": [
+        "scalar.opaque-handle.transform"
+      ]
+    },
+    "cjs_args_integer_1": {
+      "arguments": [
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.1"
+      ]
+    },
+    "cjs_args_integer_2": {
+      "arguments": [
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.2"
+      ]
+    },
+    "cjs_args_integer_3": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.3"
+      ]
+    },
+    "cjs_args_integer_4": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.4"
+      ]
+    },
+    "cjs_args_integer_5": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.5"
+      ]
+    },
+    "cjs_args_integer_6": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.6"
+      ]
+    },
+    "cjs_args_integer_7": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.7"
+      ]
+    },
+    "cjs_args_integer_8": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.8"
+      ]
+    },
+    "cjs_args_integer_9": {
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "args.integer.9"
+      ]
+    },
+    "cjs_args_floating_1": {
+      "arguments": [
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.1"
+      ]
+    },
+    "cjs_args_floating_2": {
+      "arguments": [
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.2"
+      ]
+    },
+    "cjs_args_floating_3": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.3"
+      ]
+    },
+    "cjs_args_floating_4": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.4"
+      ]
+    },
+    "cjs_args_floating_5": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.5"
+      ]
+    },
+    "cjs_args_floating_6": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.6"
+      ]
+    },
+    "cjs_args_floating_7": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.7"
+      ]
+    },
+    "cjs_args_floating_8": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.8"
+      ]
+    },
+    "cjs_args_floating_9": {
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.floating.9"
+      ]
+    },
+    "cjs_args_mixed_1": {
+      "arguments": [
+        "i32"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.1"
+      ]
+    },
+    "cjs_args_mixed_2": {
+      "arguments": [
+        "i32",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.2"
+      ]
+    },
+    "cjs_args_mixed_3": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.3"
+      ]
+    },
+    "cjs_args_mixed_4": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.4"
+      ]
+    },
+    "cjs_args_mixed_5": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.5"
+      ]
+    },
+    "cjs_args_mixed_6": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.6"
+      ]
+    },
+    "cjs_args_mixed_7": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.7"
+      ]
+    },
+    "cjs_args_mixed_8": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.8"
+      ]
+    },
+    "cjs_args_mixed_9": {
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "return": "f64",
+      "sourceArguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "sourceReturn": "f64",
+      "caseIds": [
+        "args.mixed.9"
+      ]
+    },
+    "cjs_read_i32": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.input.i32"
+      ]
+    },
+    "cjs_write_i64": {
+      "arguments": [
+        "pointer",
+        "i64"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "i64"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.output.i64"
+      ]
+    },
+    "cjs_nullable_i32": {
+      "arguments": [
+        "pointer",
+        "i32"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "i32"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.nullable.i32"
+      ]
+    },
+    "cjs_get_stable": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.stable.out"
+      ]
+    },
+    "cjs_checksum_stable": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": []
+    },
+    "cjs_alloc_bytes": {
+      "arguments": [
+        "u64",
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "size",
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.allocation.out",
+        "lifecycle.resource-generation",
+        "lifecycle.foreign-view-copy"
+      ]
+    },
+    "cjs_free_bytes": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": []
+    },
+    "cjs_live_allocations": {
+      "arguments": [],
+      "return": "u64",
+      "sourceArguments": [],
+      "sourceReturn": "size",
+      "caseIds": []
+    },
+    "cjs_sum_i32": {
+      "arguments": [
+        "pointer",
+        "u64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "pointer",
+        "size"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "pointer.array.count"
+      ]
+    },
+    "cjs_sum_i32_ptrs": {
+      "arguments": [
+        "pointer",
+        "u64"
+      ],
+      "return": "i64",
+      "sourceArguments": [
+        "pointer",
+        "size"
+      ],
+      "sourceReturn": "i64",
+      "caseIds": [
+        "pointer.array-of-pointers"
+      ]
+    },
+    "cjs_reverse_ptr_table": {
+      "arguments": [
+        "pointer",
+        "pointer",
+        "u64"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "pointer",
+        "size"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.void-table.inout"
+      ]
+    },
+    "cjs_xor_bytes": {
+      "arguments": [
+        "pointer",
+        "u64",
+        "u8"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer",
+        "size",
+        "u8"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": [
+        "pointer.buffer.mutate"
+      ]
+    },
+    "cjs_write_u64_at": {
+      "arguments": [
+        "pointer",
+        "u64",
+        "u64",
+        "u64"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "size",
+        "size",
+        "u64"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "pointer.offset.alignment"
+      ]
+    },
+    "cjs_transform_simple": {
+      "arguments": [
+        "pointer",
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "struct.simple.transform"
+      ]
+    },
+    "cjs_checksum_simple": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": []
+    },
+    "cjs_checksum_nested": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": [
+        "struct.nested.checksum"
+      ]
+    },
+    "cjs_checksum_tagged": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": [
+        "struct.union.discriminated"
+      ]
+    },
+    "cjs_checksum_pointer_struct": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": [
+        "struct.pointer-fields"
+      ]
+    },
+    "cjs_transform_aligned16": {
+      "arguments": [
+        "pointer",
+        "pointer"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "pointer"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "struct.aligned16.transform"
+      ]
+    },
+    "cjs_checksum_aligned16": {
+      "arguments": [
+        "pointer"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "pointer"
+      ],
+      "sourceReturn": "u64",
+      "caseIds": []
+    },
+    "cjs_layout_query": {
+      "arguments": [
+        "u32",
+        "u32"
+      ],
+      "return": "u64",
+      "sourceArguments": [
+        "u32",
+        "u32"
+      ],
+      "sourceReturn": "size",
+      "caseIds": []
+    },
+    "cjs_resolve_hidden": {
+      "arguments": [],
+      "return": "pointer",
+      "sourceArguments": [],
+      "sourceReturn": "pointer",
+      "caseIds": [
+        "lifecycle.resolver-only-pointer"
+      ]
+    },
+    "cjs_call_callback_i32": {
+      "arguments": [
+        "pointer",
+        "i32"
+      ],
+      "return": "i32",
+      "sourceArguments": [
+        "pointer",
+        "i32"
+      ],
+      "sourceReturn": "i32",
+      "caseIds": [
+        "lifecycle.callback.same-thread"
+      ]
+    },
+    "cjs_sleep_ms": {
+      "arguments": [
+        "u32"
+      ],
+      "return": "u32",
+      "sourceArguments": [
+        "u32"
+      ],
+      "sourceReturn": "u32",
+      "caseIds": [
+        "lifecycle.blocking-worker"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "scalar.zero.i32",
+      "symbol": "cjs_zero_i32",
+      "type": "i32",
+      "input": null,
+      "expected": 324508639,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [],
+      "returnType": "i32",
+      "values": []
+    },
+    {
+      "id": "scalar.i8.identity",
+      "symbol": "cjs_identity_i8",
+      "type": "i8",
+      "input": -101,
+      "expected": -101,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "i8"
+      ],
+      "returnType": "i8",
+      "values": [
+        -101
+      ]
+    },
+    {
+      "id": "scalar.u8.identity",
+      "symbol": "cjs_identity_u8",
+      "type": "u8",
+      "input": 233,
+      "expected": 233,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "u8"
+      ],
+      "returnType": "u8",
+      "values": [
+        233
+      ]
+    },
+    {
+      "id": "scalar.i16.identity",
+      "symbol": "cjs_identity_i16",
+      "type": "i16",
+      "input": -30001,
+      "expected": -30001,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "i16"
+      ],
+      "returnType": "i16",
+      "values": [
+        -30001
+      ]
+    },
+    {
+      "id": "scalar.u16.identity",
+      "symbol": "cjs_identity_u16",
+      "type": "u16",
+      "input": 60001,
+      "expected": 60001,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "u16"
+      ],
+      "returnType": "u16",
+      "values": [
+        60001
+      ]
+    },
+    {
+      "id": "scalar.i32.identity",
+      "symbol": "cjs_identity_i32",
+      "type": "i32",
+      "input": -2000000001,
+      "expected": -2000000001,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "i32"
+      ],
+      "returnType": "i32",
+      "values": [
+        -2000000001
+      ]
+    },
+    {
+      "id": "scalar.u32.identity",
+      "symbol": "cjs_identity_u32",
+      "type": "u32",
+      "input": 4000000001,
+      "expected": 4000000001,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "u32"
+      ],
+      "returnType": "u32",
+      "values": [
+        4000000001
+      ]
+    },
+    {
+      "id": "scalar.i64.identity",
+      "symbol": "cjs_identity_i64",
+      "type": "i64",
+      "input": "-9007199254740993",
+      "expected": "-9007199254740993",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "-9007199254740993"
+      ]
+    },
+    {
+      "id": "scalar.u64.identity",
+      "symbol": "cjs_identity_u64",
+      "type": "u64",
+      "input": "18446744073709551557",
+      "expected": "18446744073709551557",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "u64"
+      ],
+      "returnType": "u64",
+      "values": [
+        "18446744073709551557"
+      ]
+    },
+    {
+      "id": "scalar.f32.transform",
+      "symbol": "cjs_transform_f32",
+      "type": "f32",
+      "input": 10.5,
+      "expected": 16,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "f32"
+      ],
+      "returnType": "f32",
+      "values": [
+        10.5
+      ]
+    },
+    {
+      "id": "scalar.f64.transform",
+      "symbol": "cjs_transform_f64",
+      "type": "f64",
+      "input": -12.25,
+      "expected": -18.125,
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        -12.25
+      ]
+    },
+    {
+      "id": "scalar.size.identity",
+      "symbol": "cjs_identity_size",
+      "type": "size",
+      "input": "4294967311",
+      "expected": "4294967311",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "size"
+      ],
+      "returnType": "size",
+      "values": [
+        "4294967311"
+      ]
+    },
+    {
+      "id": "scalar.intptr.identity",
+      "symbol": "cjs_identity_intptr",
+      "type": "intptr",
+      "input": "-4294967311",
+      "expected": "-4294967311",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "intptr"
+      ],
+      "returnType": "intptr",
+      "values": [
+        "-4294967311"
+      ]
+    },
+    {
+      "id": "scalar.uintptr.identity",
+      "symbol": "cjs_identity_uintptr",
+      "type": "uintptr",
+      "input": "4294967311",
+      "expected": "4294967311",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "uintptr"
+      ],
+      "returnType": "uintptr",
+      "values": [
+        "4294967311"
+      ]
+    },
+    {
+      "id": "scalar.opaque-handle.transform",
+      "symbol": "cjs_transform_handle",
+      "type": "handle",
+      "input": "305419896",
+      "expected": "1311768467463790320",
+      "category": "scalar",
+      "runner": "direct",
+      "arguments": [
+        "handle"
+      ],
+      "returnType": "handle",
+      "values": [
+        "305419896"
+      ]
+    },
+    {
+      "id": "args.integer.1",
+      "symbol": "cjs_args_integer_1",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1"
+      ],
+      "expected": "1",
+      "weights": [
+        "1"
+      ]
+    },
+    {
+      "id": "args.integer.2",
+      "symbol": "cjs_args_integer_2",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2"
+      ],
+      "expected": "5",
+      "weights": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "id": "args.integer.3",
+      "symbol": "cjs_args_integer_3",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3"
+      ],
+      "expected": "14",
+      "weights": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "args.integer.4",
+      "symbol": "cjs_args_integer_4",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "expected": "30",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "args.integer.5",
+      "symbol": "cjs_args_integer_5",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "expected": "55",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    {
+      "id": "args.integer.6",
+      "symbol": "cjs_args_integer_6",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "expected": "91",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "id": "args.integer.7",
+      "symbol": "cjs_args_integer_7",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "expected": "140",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "id": "args.integer.8",
+      "symbol": "cjs_args_integer_8",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "expected": "204",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ]
+    },
+    {
+      "id": "args.integer.9",
+      "symbol": "cjs_args_integer_9",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64",
+        "i64"
+      ],
+      "returnType": "i64",
+      "values": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": "285",
+      "weights": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
+      "id": "args.floating.1",
+      "symbol": "cjs_args_floating_1",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25
+      ],
+      "expected": 1.25,
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "args.floating.2",
+      "symbol": "cjs_args_floating_2",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25
+      ],
+      "expected": 5.75,
+      "weights": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "args.floating.3",
+      "symbol": "cjs_args_floating_3",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25
+      ],
+      "expected": 15.5,
+      "weights": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "args.floating.4",
+      "symbol": "cjs_args_floating_4",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25
+      ],
+      "expected": 32.5,
+      "weights": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "args.floating.5",
+      "symbol": "cjs_args_floating_5",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25
+      ],
+      "expected": 58.75,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "args.floating.6",
+      "symbol": "cjs_args_floating_6",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25,
+        6.25
+      ],
+      "expected": 96.25,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "args.floating.7",
+      "symbol": "cjs_args_floating_7",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25,
+        6.25,
+        7.25
+      ],
+      "expected": 147,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "id": "args.floating.8",
+      "symbol": "cjs_args_floating_8",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25,
+        6.25,
+        7.25,
+        8.25
+      ],
+      "expected": 213,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "id": "args.floating.9",
+      "symbol": "cjs_args_floating_9",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25,
+        6.25,
+        7.25,
+        8.25,
+        9.25
+      ],
+      "expected": 296.25,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "args.mixed.1",
+      "symbol": "cjs_args_mixed_1",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32"
+      ],
+      "returnType": "f64",
+      "values": [
+        2
+      ],
+      "expected": 2,
+      "weights": [
+        1
+      ]
+    },
+    {
+      "id": "args.mixed.2",
+      "symbol": "cjs_args_mixed_2",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5
+      ],
+      "expected": 7,
+      "weights": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "args.mixed.3",
+      "symbol": "cjs_args_mixed_3",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4
+      ],
+      "expected": 19,
+      "weights": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "args.mixed.4",
+      "symbol": "cjs_args_mixed_4",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5
+      ],
+      "expected": 37,
+      "weights": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "args.mixed.5",
+      "symbol": "cjs_args_mixed_5",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5,
+        6
+      ],
+      "expected": 67,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "args.mixed.6",
+      "symbol": "cjs_args_mixed_6",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5,
+        6,
+        6.5
+      ],
+      "expected": 106,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "args.mixed.7",
+      "symbol": "cjs_args_mixed_7",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5,
+        6,
+        6.5,
+        8
+      ],
+      "expected": 162,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "id": "args.mixed.8",
+      "symbol": "cjs_args_mixed_8",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5,
+        6,
+        6.5,
+        8,
+        8.5
+      ],
+      "expected": 230,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "id": "args.mixed.9",
+      "symbol": "cjs_args_mixed_9",
+      "category": "argument-envelope",
+      "runner": "direct",
+      "arguments": [
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32",
+        "f64",
+        "i32"
+      ],
+      "returnType": "f64",
+      "values": [
+        2,
+        2.5,
+        4,
+        4.5,
+        6,
+        6.5,
+        8,
+        8.5,
+        10
+      ],
+      "expected": 320,
+      "weights": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "pointer.input.i32",
+      "symbol": "cjs_read_i32",
+      "runner": "pointer-input",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.output.i64",
+      "symbol": "cjs_write_i64",
+      "runner": "pointer-output",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.nullable.i32",
+      "symbol": "cjs_nullable_i32",
+      "runner": "nullable-pointer",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.stable.out",
+      "symbol": "cjs_get_stable",
+      "runner": "stable-pointer-output",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.allocation.out",
+      "symbol": "cjs_alloc_bytes",
+      "runner": "allocation-output",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.array.count",
+      "symbol": "cjs_sum_i32",
+      "runner": "array-count",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.array-of-pointers",
+      "symbol": "cjs_sum_i32_ptrs",
+      "runner": "array-of-pointers",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.void-table.inout",
+      "symbol": "cjs_reverse_ptr_table",
+      "runner": "void-table-inout",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.buffer.mutate",
+      "symbol": "cjs_xor_bytes",
+      "runner": "buffer-mutate",
+      "category": "pointer"
+    },
+    {
+      "id": "pointer.offset.alignment",
+      "symbol": "cjs_write_u64_at",
+      "runner": "offset-alignment",
+      "category": "pointer"
+    },
+    {
+      "id": "struct.simple.transform",
+      "symbol": "cjs_transform_simple",
+      "layout": "simple",
+      "runner": "struct-simple",
+      "category": "structure"
+    },
+    {
+      "id": "struct.nested.checksum",
+      "symbol": "cjs_checksum_nested",
+      "layout": "nested",
+      "runner": "struct-nested",
+      "category": "structure"
+    },
+    {
+      "id": "struct.union.discriminated",
+      "symbol": "cjs_checksum_tagged",
+      "layout": "tagged",
+      "runner": "struct-tagged",
+      "category": "structure"
+    },
+    {
+      "id": "struct.pointer-fields",
+      "symbol": "cjs_checksum_pointer_struct",
+      "layout": "pointerStruct",
+      "runner": "struct-pointer",
+      "category": "structure"
+    },
+    {
+      "id": "struct.aligned16.transform",
+      "symbol": "cjs_transform_aligned16",
+      "layout": "aligned16",
+      "runner": "struct-aligned16",
+      "category": "structure"
+    },
+    {
+      "id": "lifecycle.resolver-only-pointer",
+      "symbol": "cjs_resolve_hidden",
+      "runner": "resolver-only",
+      "category": "lifecycle"
+    },
+    {
+      "id": "lifecycle.callback.same-thread",
+      "symbol": "cjs_call_callback_i32",
+      "runner": "callback-same-thread",
+      "category": "lifecycle"
+    },
+    {
+      "id": "lifecycle.blocking-worker",
+      "symbol": "cjs_sleep_ms",
+      "runner": "blocking-worker",
+      "category": "lifecycle"
+    },
+    {
+      "id": "lifecycle.library-close",
+      "symbol": "cjs_zero_i32",
+      "runner": "library-close",
+      "category": "lifecycle"
+    },
+    {
+      "id": "lifecycle.resource-generation",
+      "symbol": "cjs_alloc_bytes",
+      "runner": "resource-generation",
+      "category": "lifecycle"
+    },
+    {
+      "id": "lifecycle.foreign-view-copy",
+      "symbol": "cjs_alloc_bytes",
+      "runner": "foreign-view-copy",
+      "category": "lifecycle"
+    }
+  ]
+}

@@ -1,28 +1,19 @@
 # Contributing
 
-CUDA-JS is private, pre-release, contract-first, experiment-gated, and Python-free.
+CUDA-JS is public, pre-release, contract-first, and experiment-gated.
 
 Before changing a material boundary, read:
 
 - `AGENTS.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`;
-- [`agent_files/general_foundation/NO_PYTHON_POLICY.md`](agent_files/general_foundation/NO_PYTHON_POLICY.md);
 - the owning accepted ADR and specification;
 - the relevant assessment, target architecture, support matrix, master-plan work package, experiment, and source-register entries;
 - exact Git and environment state.
 
 ## Current authorization
 
-The current phase is documentation only. Contributors may improve foundational authority, architecture, specifications, research provenance, plans, experiment protocols, organization, indexes, and validation of those documents.
+`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA header import, generated ABI facts, reviewed Tier-0 semantics, normalized Runtime IR products, and independent native C ABI probes. Windows-only `CJS-F2W / EXP-012` is accepted and may feed Windows F3 contract work. Linux `CJS-F2L / EXP-001` includes working GPU-free preparation and a real-Driver smoke runner, but remains incomplete and contribution-ready; follow [`experiments/exp-001/README.md`](experiments/exp-001/README.md), coordinate through [issue #4](https://github.com/iteathen/CUDA-JS/issues/4), and do not claim Linux Driver support without its qualified native evidence.
 
-No code-bearing experiment, native fixture, generated binding, schema importer, runtime component, benchmark implementation, production package, or implementation workflow is authorized until the project owner explicitly advances the phase. Future experiment documents describe gates; they are not permission to execute them.
-
-## No-Python rule
-
-Python is prohibited throughout CUDA-JS and every UMCGS-related project. Do not introduce Python source, notebooks, project metadata, interpreter or package-manager invocations, Python-backed ordinary-use dependencies, generated Python artifacts, or wrappers that indirectly invoke Python.
-
-This applies to production and reference code, header/schema import, generators, tests, benchmarks, documentation tooling, CI, packaging, installers, release automation, migrations, diagnostics, prototypes, experiments, and temporary or local-only scripts. Advancing the implementation phase does not change this rule.
-
-A proposal that depends on Python must be rejected or redesigned using a language and toolchain accepted by the owning boundary. Only an explicit project-owner change to the accepted ecosystem policy can alter this requirement.
+Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 
 ## Binding rules
 
@@ -59,10 +50,14 @@ Use focused capsules and mutation/negative controls. Do not repeat unchanged tes
 
 ```bash
 ./scripts/verify-docs.sh
+npm run exp:000:build
+npm run verify
+npm run exp:012  # qualified Windows x64 Driver/GPU host only
+npm run exp:001:prepare  # native Ubuntu 24.04 x86-64; GPU-free preparation plus readiness
 ```
 
-Code-bearing work adds its experiment-specific commands. Claims must state unavailable CUDA/Node/platform checks precisely and must demonstrate compliance with the no-Python policy.
+Claims must state unavailable CUDA/Node/platform checks precisely.
 
 ## Publication
 
-The repository is private at `iteathen/CUDA-JS`. Claim publication only after reading back the exact remote branch/tree. A local commit, bundle, workflow intention, or unverified push is not publication evidence.
+The repository is published at `iteathen/CUDA-JS`. Claim a specific change as published only after reading back its exact remote branch/tree. A local commit, workflow intention, or unverified push is not publication evidence.

@@ -22,7 +22,7 @@
     {
       "id": "CJS-F0",
       "type": "authority-publication",
-      "status": "active",
+      "status": "publication-in-progress",
       "owner": "integration",
       "dependencies": [],
       "outputs": [
@@ -41,7 +41,7 @@
     {
       "id": "CJS-F1A",
       "type": "synthetic-host-abi",
-      "status": "ready-after-F0",
+      "status": "complete-promoted-windows-x64-linux-x64",
       "owner": "host-binding-foundation",
       "dependencies": [
         "CJS-F0"
@@ -71,18 +71,19 @@
     {
       "id": "CJS-F1B",
       "type": "cuda-schema-abi",
-      "status": "blocked-on-F1A",
+      "status": "complete-accepted-schema-abi-with-win64-bridge",
       "owner": "schema",
       "dependencies": [
         "CJS-F1A"
       ],
       "outputs": [
-        "CUDA Runtime IR",
-        "pinned header importer",
-        "semantic overlay",
-        "Node FFI definitions",
-        "packers",
-        "native CUDA ABI probes"
+        "pinned CUDA 13.3.29 provenance and Clang importer",
+        "12-function and 9-type Runtime IR",
+        "accepted private Tier-0 semantic overlay",
+        "Node FFI definitions, packers, declarations, conformance and compatibility products",
+        "471-entry fail-closed unavailable declaration catalog",
+        "native Linux x86-64 ABI probes and six mutation controls",
+        "hash-identical-header MSVC Win64 compatibility probe"
       ],
       "experiments": [
         "EXP-001",
@@ -96,9 +97,9 @@
       ]
     },
     {
-      "id": "CJS-F2",
+      "id": "CJS-F2W",
       "type": "node-ffi-backend",
-      "status": "planned",
+      "status": "complete-accepted-windows-x64",
       "owner": "host-binding",
       "dependencies": [
         "CJS-F1A",
@@ -112,23 +113,44 @@
         "backend diagnostics"
       ],
       "experiments": [
-        "EXP-001",
-        "EXP-002",
-        "EXP-004"
+        "EXP-012"
       ],
       "acceptance": [
-        "Linux x64 Driver smoke",
+        "Windows x64 Driver/C-oracle smoke",
         "exact profile identity",
         "no unsupported capability claim"
       ]
     },
     {
+      "id": "CJS-F2L",
+      "type": "node-ffi-backend-linux",
+      "status": "deferred-incomplete-public-contribution-requested",
+      "owner": "host-binding",
+      "dependencies": [
+        "CJS-F1A",
+        "CJS-F1B"
+      ],
+      "outputs": [
+        "retained native Linux Driver protocol",
+        "future Linux Driver, procedure, context and cleanup evidence"
+      ],
+      "experiments": [
+        "EXP-001",
+        "EXP-002"
+      ],
+      "acceptance": [
+        "qualified native Linux x64 Driver/GPU smoke",
+        "independent C-oracle parity",
+        "no Windows or WSL evidence substitution"
+      ]
+    },
+    {
       "id": "CJS-F3",
       "type": "actor-resource-core",
-      "status": "planned",
+      "status": "ready-windows-contract-not-started",
       "owner": "runtime-core",
       "dependencies": [
-        "CJS-F2"
+        "CJS-F2W"
       ],
       "outputs": [
         "DriverActor",

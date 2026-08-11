@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "cuda-13.3-win-x64-msvc",
+  "status": "accepted-for-cjs-f2w",
+  "target": {
+    "os": "windows",
+    "architecture": "x64",
+    "abi": "win64",
+    "pointerSize": 8,
+    "sizeSize": 8,
+    "littleEndian": true
+  },
+  "toolkit": {
+    "rootVersion": "13.3.0",
+    "cudartVersion": "13.3.29",
+    "nvccVersion": "13.3.33",
+    "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+    "typedefHeaderSha256": "d4ab98b677cfb7ab7abdda830d8106b62f10386a11ac7efc0335e6bbd4fe74f4",
+    "importLibrarySha256": "feb684bc4d9460c0777c5eb1e7d3a04332c426f1703a2fbfdc771dea5ad81146"
+  },
+  "sharedAcceptedProducts": {
+    "headerFacts": "../linux-x64/generated/header-facts.json",
+    "runtimeIr": "../linux-x64/generated/runtime-ir.json",
+    "ffiDefinitions": "../linux-x64/generated/ffi-definitions.mjs",
+    "packers": "../linux-x64/generated/packers.mjs",
+    "basis": "The Windows CUDA 13.3 cuda.h hash is identical to the accepted F1B header; the selected Win64 layouts are independently measured below."
+  },
+  "layouts": {
+    "CUcontext": { "size": 8, "alignment": 8, "fields": {} },
+    "CUctxCigParam": { "size": 16, "alignment": 8, "fields": { "sharedDataType": 0, "sharedData": 8 } },
+    "CUctxCreateParams": { "size": 24, "alignment": 8, "fields": { "execAffinityParams": 0, "numExecAffinityParams": 8, "cigParams": 16 } },
+    "CUdevice": { "size": 4, "alignment": 4, "fields": {} },
+    "CUdevice_attribute": { "size": 4, "alignment": 4, "fields": {} },
+    "CUdriverProcAddressQueryResult": { "size": 4, "alignment": 4, "fields": {} },
+    "CUexecAffinityParam": { "size": 8, "alignment": 4, "fields": { "type": 0, "param": 4 } },
+    "CUresult": { "size": 4, "alignment": 4, "fields": {} },
+    "cuuint64_t": { "size": 8, "alignment": 8, "fields": {} }
+  },
+  "claimLimits": [
+    "Windows x64 only",
+    "exact CUDA 13.3 header and toolkit inputs only",
+    "no Linux support inference",
+    "no Driver behavior without EXP-012 evidence",
+    "no Fast FFI or performance claim"
+  ]
+}

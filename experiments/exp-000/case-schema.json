@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "id": "cjs-exp-000-synthetic-abi-v1",
+  "sourceIdentity": {
+    "nodeTag": "v26.7.0",
+    "nodeCommit": "b4f23d3619c98bed09af93a21192f6080197a8c6",
+    "nodeFfiFlag": "--experimental-ffi"
+  },
+  "scalarCases": [
+    { "id": "scalar.zero.i32", "symbol": "cjs_zero_i32", "type": "i32", "input": null, "expected": 324508639 },
+    { "id": "scalar.i8.identity", "symbol": "cjs_identity_i8", "type": "i8", "input": -101, "expected": -101 },
+    { "id": "scalar.u8.identity", "symbol": "cjs_identity_u8", "type": "u8", "input": 233, "expected": 233 },
+    { "id": "scalar.i16.identity", "symbol": "cjs_identity_i16", "type": "i16", "input": -30001, "expected": -30001 },
+    { "id": "scalar.u16.identity", "symbol": "cjs_identity_u16", "type": "u16", "input": 60001, "expected": 60001 },
+    { "id": "scalar.i32.identity", "symbol": "cjs_identity_i32", "type": "i32", "input": -2000000001, "expected": -2000000001 },
+    { "id": "scalar.u32.identity", "symbol": "cjs_identity_u32", "type": "u32", "input": 4000000001, "expected": 4000000001 },
+    { "id": "scalar.i64.identity", "symbol": "cjs_identity_i64", "type": "i64", "input": "-9007199254740993", "expected": "-9007199254740993" },
+    { "id": "scalar.u64.identity", "symbol": "cjs_identity_u64", "type": "u64", "input": "18446744073709551557", "expected": "18446744073709551557" },
+    { "id": "scalar.f32.transform", "symbol": "cjs_transform_f32", "type": "f32", "input": 10.5, "expected": 16.0 },
+    { "id": "scalar.f64.transform", "symbol": "cjs_transform_f64", "type": "f64", "input": -12.25, "expected": -18.125 },
+    { "id": "scalar.size.identity", "symbol": "cjs_identity_size", "type": "size", "input": "4294967311", "expected": "4294967311" },
+    { "id": "scalar.intptr.identity", "symbol": "cjs_identity_intptr", "type": "intptr", "input": "-4294967311", "expected": "-4294967311" },
+    { "id": "scalar.uintptr.identity", "symbol": "cjs_identity_uintptr", "type": "uintptr", "input": "4294967311", "expected": "4294967311" },
+    { "id": "scalar.opaque-handle.transform", "symbol": "cjs_transform_handle", "type": "handle", "input": "305419896", "expected": "1311768467463790320" }
+  ],
+  "argumentEnvelopes": {
+    "integerCounts": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "floatingCounts": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "mixedCounts": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  },
+  "pointerCases": [
+    { "id": "pointer.input.i32", "symbol": "cjs_read_i32", "runner": "pointer-input" },
+    { "id": "pointer.output.i64", "symbol": "cjs_write_i64", "runner": "pointer-output" },
+    { "id": "pointer.nullable.i32", "symbol": "cjs_nullable_i32", "runner": "nullable-pointer" },
+    { "id": "pointer.stable.out", "symbol": "cjs_get_stable", "runner": "stable-pointer-output" },
+    { "id": "pointer.allocation.out", "symbol": "cjs_alloc_bytes", "runner": "allocation-output" },
+    { "id": "pointer.array.count", "symbol": "cjs_sum_i32", "runner": "array-count" },
+    { "id": "pointer.array-of-pointers", "symbol": "cjs_sum_i32_ptrs", "runner": "array-of-pointers" },
+    { "id": "pointer.void-table.inout", "symbol": "cjs_reverse_ptr_table", "runner": "void-table-inout" },
+    { "id": "pointer.buffer.mutate", "symbol": "cjs_xor_bytes", "runner": "buffer-mutate" },
+    { "id": "pointer.offset.alignment", "symbol": "cjs_write_u64_at", "runner": "offset-alignment" }
+  ],
+  "structureCases": [
+    { "id": "struct.simple.transform", "symbol": "cjs_transform_simple", "layout": "simple", "runner": "struct-simple" },
+    { "id": "struct.nested.checksum", "symbol": "cjs_checksum_nested", "layout": "nested", "runner": "struct-nested" },
+    { "id": "struct.union.discriminated", "symbol": "cjs_checksum_tagged", "layout": "tagged", "runner": "struct-tagged" },
+    { "id": "struct.pointer-fields", "symbol": "cjs_checksum_pointer_struct", "layout": "pointerStruct", "runner": "struct-pointer" },
+    { "id": "struct.aligned16.transform", "symbol": "cjs_transform_aligned16", "layout": "aligned16", "runner": "struct-aligned16" }
+  ],
+  "lifecycleCases": [
+    { "id": "lifecycle.resolver-only-pointer", "symbol": "cjs_resolve_hidden", "runner": "resolver-only" },
+    { "id": "lifecycle.callback.same-thread", "symbol": "cjs_call_callback_i32", "runner": "callback-same-thread" },
+    { "id": "lifecycle.blocking-worker", "symbol": "cjs_sleep_ms", "runner": "blocking-worker" },
+    { "id": "lifecycle.library-close", "symbol": "cjs_zero_i32", "runner": "library-close" },
+    { "id": "lifecycle.resource-generation", "symbol": "cjs_alloc_bytes", "runner": "resource-generation" },
+    { "id": "lifecycle.foreign-view-copy", "symbol": "cjs_alloc_bytes", "runner": "foreign-view-copy" }
+  ],
+  "layouts": {
+    "simple": {
+      "id": 1,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        { "name": "a", "type": "i32", "offset": 0 },
+        { "name": "b", "type": "u64", "offset": 8 },
+        { "name": "c", "type": "f64", "offset": 16 }
+      ]
+    },
+    "nested": {
+      "id": 2,
+      "size": 48,
+      "alignment": 8,
+      "fields": [
+        { "name": "tag", "type": "u8", "offset": 0 },
+        { "name": "inner", "type": "simple", "offset": 8 },
+        { "name": "values", "type": "u32[3]", "offset": 32 }
+      ]
+    },
+    "tagged": {
+      "id": 3,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        { "name": "tag", "type": "u32", "offset": 0 },
+        { "name": "value", "type": "union16", "offset": 8 }
+      ]
+    },
+    "pointerStruct": {
+      "id": 4,
+      "size": 24,
+      "alignment": 8,
+      "fields": [
+        { "name": "pointer", "type": "pointer", "offset": 0 },
+        { "name": "length", "type": "size", "offset": 8 },
+        { "name": "cookie", "type": "u64", "offset": 16 }
+      ]
+    },
+    "aligned16": {
+      "id": 5,
+      "size": 16,
+      "alignment": 16,
+      "fields": [
+        { "name": "lo", "type": "u64", "offset": 0 },
+        { "name": "hi", "type": "u64", "offset": 8 }
+      ]
+    }
+  }
+}

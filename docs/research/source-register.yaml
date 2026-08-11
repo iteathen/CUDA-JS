@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "inspected": "2026-08-10",
+  "schema_version": 3,
+  "inspected": "2026-08-11",
   "sources": [
     {
       "id": "NODE-FFI-26.7.0",
@@ -56,6 +56,50 @@
       "reuse_disposition": "normative external platform source"
     },
     {
+      "id": "CUDA-HEADERS-13.3.29-UBUNTU2404",
+      "kind": "primary-build-input",
+      "project": "NVIDIA CUDA Toolkit",
+      "revision": "cuda-cudart-dev-13-3 and cuda-driver-dev-13-3 13.3.29-1 amd64",
+      "license": "NVIDIA Software License Agreement and CUDA Supplement; package notice dated 2026-01-26",
+      "locations": [
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cudart-dev-13-3_13.3.29-1_amd64.deb",
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-driver-dev-13-3_13.3.29-1_amd64.deb",
+        "schemas/cuda-13.3/provenance.json"
+      ],
+      "verified_uses": [
+        "package SHA-256 600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
+        "Driver development package SHA-256 9ff314357a66e7602d0fe9a354052f60f7571138e9d4e1e98f3dd06cd899e021",
+        "cuda.h SHA-256 31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+        "cudaTypedefs.h SHA-256 30d517cfa051f7a498e432eb1a1964abb11c1cd32098125bba3dfef0b059381f",
+        "package license SHA-256 088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
+        "F1B Clang AST import and independent native Linux x86-64 layouts",
+        "EXP-001 independent Linux Driver-oracle link against the official stub"
+      ],
+      "reuse_disposition": "ignored reacquirable official build input; no header vendoring or redistribution in this phase"
+    },
+    {
+      "id": "CUDA-WINDOWS-13.3-F2W",
+      "kind": "primary-build-and-runtime-input",
+      "project": "NVIDIA CUDA Toolkit and Driver for Windows",
+      "revision": "CUDA Toolkit 13.3.0 / cudart headers 13.3.29 / nvcc 13.3.33 / Driver 610.74",
+      "license": "NVIDIA Software License Agreement and CUDA Supplement",
+      "locations": [
+        "https://developer.nvidia.com/cuda-downloads",
+        "https://docs.nvidia.com/cuda/cuda-driver-api/",
+        "schemas/cuda-13.3/win-x64/compatibility-manifest.json",
+        "docs/specs/SPEC-0002-windows-driver-bootstrap.md"
+      ],
+      "verified_uses": [
+        "Windows cuda.h SHA-256 31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577, identical to accepted F1B header",
+        "Windows cudaTypedefs.h SHA-256 d4ab98b677cfb7ab7abdda830d8106b62f10386a11ac7efc0335e6bbd4fe74f4",
+        "Windows cuda.lib SHA-256 feb684bc4d9460c0777c5eb1e7d3a04332c426f1703a2fbfdc771dea5ad81146",
+        "MSVC Win64 layouts for all 9 selected types and pointer widths for all 12 functions",
+        "canonical system Driver discovery, generated named exports, procedure verification, device/context lifecycle, permissions, and cleanup",
+        "independent MSVC C-oracle parity for Windows EXP-012"
+      ],
+      "reuse_disposition": "installed official build/runtime prerequisite and exact-profile evidence; no NVIDIA binary or header redistribution"
+    },
+    {
       "id": "CUDA-NVRTC-13.3",
       "kind": "primary",
       "project": "NVIDIA NVRTC",
@@ -90,22 +134,6 @@
         "link options, logs, resource lifecycle, and provider identity"
       ],
       "reuse_disposition": "normative external platform source"
-    },
-    {
-      "id": "NVIDIA-CUDA-PYTHON",
-      "kind": "prior_art",
-      "project": "NVIDIA/cuda-python",
-      "revision": "757731a10a7a166ffe4e346ca246415695712402",
-      "license": "Apache-2.0",
-      "locations": [
-        "https://github.com/NVIDIA/cuda-python"
-      ],
-      "verified_uses": [
-        "bindings/pathfinder/high-level package separation",
-        "generated broad CUDA binding and update strategy",
-        "independent subpackage versioning"
-      ],
-      "reuse_disposition": "architecture reference only; implementation reuse requires separate review"
     },
     {
       "id": "SAMMWYY-CUDA-JS",
@@ -205,7 +233,7 @@
       "id": "UMCGS-RUNTIME-BOUNDARY",
       "kind": "internal_authority",
       "project": "iteathen/UMCGS",
-      "revision": "48f7b5f5fe125c16d966eaaa4968700900cd12fb",
+      "revision": "private pre-release contract snapshot inspected 2026-08-10",
       "license": "private pre-release",
       "locations": [
         "docs/decisions/ADR-0014-extract-cuda-js-runtime.md",

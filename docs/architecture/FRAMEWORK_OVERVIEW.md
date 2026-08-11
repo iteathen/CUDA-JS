@@ -68,6 +68,6 @@ Validation, immediate native failure, deferred asynchronous failure, cancellatio
 
 NVRTC/nvJitLink outputs, logs, options, providers, target architecture, headers, schema/argument layouts, Driver/toolkit versions, and source/artifact bytes form complete content-addressed identities. Host-call and device-artifact identity remain separate.
 
-## 8. First future executable boundary
+## 8. Current executable boundary
 
-Experiment execution is not currently authorized. When the project owner advances the phase, the first bounded executable work is EXP-000: a GPU-free synthetic C/Node FFI ABI, Worker, library-lifetime, and teardown capsule. Only after it passes may EXP-001 through EXP-003 add Driver loading, export/version verification, and CUDA-native ABI/layout probes. Broad runtime code waits for those gates.
+EXP-000 is promoted after its GPU-free synthetic C/Node FFI ABI, Worker, library-lifetime, and teardown capsules passed on Windows x64 and native Linux x86-64. CJS-F1B owns pinned CUDA facts, reviewed Tier-0 semantics, normalized Runtime IR products, and native ABI/layout probes. Windows CJS-F2W/EXP-012 now proves bounded Driver loading, generated exports, procedure verification, private context lifecycle, permission behavior, C-oracle parity, and cleanup. Linux CJS-F2L remains deferred/incomplete, and broad runtime code waits for each platform's accepted predecessors.
