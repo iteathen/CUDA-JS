@@ -1,0 +1,99 @@
+name: Import verified CUDA-JS foundation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/import-foundation.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-verified-foundation
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out bootstrap repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify exact bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          chunks=(.bootstrap/CJS-FND-77090a9.bundle.b64.*)
+          if (( ${#chunks[@]} == 0 )); then
+            echo 'No bootstrap chunks found.' >&2
+            exit 1
+          fi
+          printf '%s\n' "${chunks[@]}" | LC_ALL=C sort > /tmp/chunks.list
+          while IFS= read -r chunk; do cat "$chunk"; done < /tmp/chunks.list \
+            | tr -d '\r\n' \
+            | base64 --decode > /tmp/CJS-FND-77090a9.bundle
+          echo '39dc57ea37fac71522b99090945b232173f65676f3421f4e6ea4baa84ca41ad3  /tmp/CJS-FND-77090a9.bundle' \
+            | sha256sum --check --strict
+          git bundle verify /tmp/CJS-FND-77090a9.bundle
+          git clone /tmp/CJS-FND-77090a9.bundle /tmp/foundation
+          test "$(git -C /tmp/foundation rev-parse HEAD)" = '77090a981fabb547d9e1a98d76213f2048e81ef2'
+          git -C /tmp/foundation status --short --branch
+
+      - name: Merge every remote branch before foundation publication
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name 'CUDA-JS Bootstrap'
+          git config user.email 'noreply@github.com'
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          git checkout -B agent/publish-foundation "origin/${DEFAULT_BRANCH}"
+          while IFS= read -r ref; do
+            branch="${ref#origin/}"
+            case "$branch" in
+              HEAD|"${DEFAULT_BRANCH}"|agent/publish-foundation) continue ;;
+            esac
+            git merge --no-edit --no-ff "$ref"
+          done < <(git for-each-ref --format='%(refname:short)' refs/remotes/origin | LC_ALL=C sort)
+
+      - name: Merge exact foundation history and select verified tree
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git remote add foundation /tmp/CJS-FND-77090a9.bundle
+          git fetch foundation
+          git merge --allow-unrelated-histories --no-commit foundation/main || true
+          git read-tree --reset -u foundation/main
+          git commit -m 'Publish verified CUDA-JS foundation'
+          test "$(git rev-parse HEAD^{tree})" = "$(git -C /tmp/foundation rev-parse HEAD^{tree})"
+          git merge-base --is-ancestor 77090a981fabb547d9e1a98d76213f2048e81ef2 HEAD
+          git push origin HEAD:"${DEFAULT_BRANCH}"
+
+      - name: Verify integrated main and clean merged branches
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          test "$(git rev-parse "origin/${DEFAULT_BRANCH}^{tree}")" = "$(git -C /tmp/foundation rev-parse HEAD^{tree})"
+          git merge-base --is-ancestor 77090a981fabb547d9e1a98d76213f2048e81ef2 "origin/${DEFAULT_BRANCH}"
+          while IFS= read -r ref; do
+            branch="${ref#origin/}"
+            case "$branch" in HEAD|"${DEFAULT_BRANCH}") continue ;; esac
+            if git merge-base --is-ancestor "$ref" "origin/${DEFAULT_BRANCH}"; then
+              git push origin --delete "$branch" || true
+            fi
+          done < <(git for-each-ref --format='%(refname:short)' refs/remotes/origin | LC_ALL=C sort)
+          if ! git ls-remote --exit-code --tags origin refs/tags/foundation-77090a9 >/dev/null 2>&1; then
+            git tag -a foundation-77090a9 77090a981fabb547d9e1a98d76213f2048e81ef2 \
+              -m 'Verified CUDA-JS documentation foundation'
+            git push origin refs/tags/foundation-77090a9
+          fi
