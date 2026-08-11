@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "inspected": "2026-08-11",
   "sources": [
     {
@@ -134,6 +134,44 @@
         "link options, logs, resource lifecycle, and provider identity"
       ],
       "reuse_disposition": "normative external platform source"
+    },
+    {
+      "id": "CUDA-HARDWARE-CAPABILITY-CURRENT",
+      "kind": "primary",
+      "project": "NVIDIA CUDA GPU Compute Capability",
+      "revision": "current and legacy product tables inspected 2026-08-11",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://developer.nvidia.com/cuda-gpus",
+        "https://developer.nvidia.com/cuda/gpus/legacy"
+      ],
+      "verified_uses": [
+        "compute capability as the NVIDIA hardware feature and instruction-set identifier",
+        "current product-to-compute-capability candidate mapping",
+        "candidate discovery only; no CUDA-JS support inference"
+      ],
+      "reuse_disposition": "upstream candidate reference; direct CUDA-JS qualification remains mandatory"
+    },
+    {
+      "id": "CUDA-PLATFORM-13.3",
+      "kind": "primary",
+      "project": "NVIDIA CUDA Toolkit 13.3 platform and compiler documentation",
+      "revision": "CUDA Toolkit 13.3 Update 1 documentation inspected 2026-08-11",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
+        "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/",
+        "https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/",
+        "https://docs.nvidia.com/cuda/cuda-installation-guide-linux/"
+      ],
+      "verified_uses": [
+        "CUDA 13.3 x86-64 and ARM64 SBSA component/platform availability",
+        "CUDA 13.x Driver compatibility floor",
+        "CUDA 13.3 real architecture target set from sm_75 through current Blackwell targets",
+        "Windows x86-64 and Linux x86-64/ARM64 host distinctions",
+        "Jetson and ARM64 SBSA treated as separate qualification profiles"
+      ],
+      "reuse_disposition": "normative upstream candidate and environment reference; not runtime support evidence"
     },
     {
       "id": "SAMMWYY-CUDA-JS",

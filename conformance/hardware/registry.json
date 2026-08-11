@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-11",
+  "supportDocument": "docs/HARDWARE_SUPPORT.md",
+  "policy": {
+    "supportUnit": "exact-node-os-abi-driver-toolkit-provider-gpu-profile",
+    "promotionRequires": [
+      "direct CUDA hardware execution",
+      "independent native C oracle agreement",
+      "all profile-required capsules pass on one clean commit",
+      "permission denial and explicit-allow controls pass",
+      "terminal resource, context, provider, library, and Worker cleanup",
+      "sanitized evidence manifest with source and artifact digests"
+    ],
+    "inferenceProhibited": [
+      "one GPU model to another model",
+      "one compute capability to another compute capability",
+      "Windows to native Linux or WSL2",
+      "x86-64 to ARM64",
+      "portable or mock controls to native CUDA support",
+      "a passing Driver smoke to compiler, package, performance, or production support"
+    ]
+  },
+  "upstreamSources": [
+    {
+      "id": "nvidia-cuda-gpus",
+      "url": "https://developer.nvidia.com/cuda-gpus",
+      "use": "current CUDA-capable product and compute-capability reference"
+    },
+    {
+      "id": "nvidia-cuda-13.3-release-notes",
+      "url": "https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
+      "use": "CUDA 13.3 component, architecture, platform, and Driver compatibility reference"
+    },
+    {
+      "id": "nvidia-nvcc-13.3",
+      "url": "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/",
+      "use": "CUDA 13.3 real and virtual GPU architecture targets"
+    },
+    {
+      "id": "nvidia-windows-install-13.3",
+      "url": "https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/",
+      "use": "CUDA 13.3 Windows host requirements"
+    },
+    {
+      "id": "nvidia-linux-install-13.3",
+      "url": "https://docs.nvidia.com/cuda/cuda-installation-guide-linux/",
+      "use": "CUDA 13.3 Linux x86-64, ARM64 SBSA, and Jetson host distinctions"
+    }
+  ],
+  "coordinationIssues": [
+    {
+      "number": 4,
+      "scope": "native Linux x86-64 F2L through F8L"
+    },
+    {
+      "number": 12,
+      "scope": "broad Windows x64 GPU architecture and model coverage"
+    },
+    {
+      "number": 13,
+      "scope": "WSL2 x64"
+    },
+    {
+      "number": 14,
+      "scope": "native Linux ARM64 SBSA"
+    },
+    {
+      "number": 15,
+      "scope": "Jetson ARM64 profile design and qualification"
+    },
+    {
+      "number": 16,
+      "scope": "controlled or sponsored GPU test hosts"
+    },
+    {
+      "number": 17,
+      "scope": "native Linux x86-64 distribution expansion after the Ubuntu baseline"
+    }
+  ],
+  "architectureCoverage": [
+    {
+      "computeCapability": "7.5",
+      "family": "Turing",
+      "toolkit13_3Target": "sm_75",
+      "priority": "P0",
+      "status": "qualified-one-model"
+    },
+    {
+      "computeCapability": "8.0",
+      "family": "Ampere data center",
+      "toolkit13_3Target": "sm_80",
+      "priority": "P0",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "8.6",
+      "family": "Ampere workstation/consumer",
+      "toolkit13_3Target": "sm_86",
+      "priority": "P0",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "8.7",
+      "family": "Ampere embedded",
+      "toolkit13_3Target": "sm_87",
+      "priority": "P1",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "8.8",
+      "family": "Ampere variant",
+      "toolkit13_3Target": "sm_88",
+      "priority": "P2",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "8.9",
+      "family": "Ada",
+      "toolkit13_3Target": "sm_89",
+      "priority": "P0",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "9.0",
+      "family": "Hopper",
+      "toolkit13_3Target": "sm_90",
+      "priority": "P0",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "10.0",
+      "family": "Blackwell",
+      "toolkit13_3Target": "sm_100",
+      "priority": "P1",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "10.3",
+      "family": "Blackwell variant",
+      "toolkit13_3Target": "sm_103",
+      "priority": "P1",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "11.0",
+      "family": "Blackwell embedded",
+      "toolkit13_3Target": "sm_110",
+      "priority": "P2",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "12.0",
+      "family": "Blackwell workstation/consumer",
+      "toolkit13_3Target": "sm_120",
+      "priority": "P0",
+      "status": "seeking-evidence"
+    },
+    {
+      "computeCapability": "12.1",
+      "family": "Blackwell variant",
+      "toolkit13_3Target": "sm_121",
+      "priority": "P1",
+      "status": "seeking-evidence"
+    }
+  ],
+  "qualifiedProfiles": [
+    {
+      "id": "windows-native-x64-geforce-gtx-1660-ti-sm75",
+      "status": "qualified-experimental",
+      "hardware": {
+        "vendor": "NVIDIA",
+        "model": "GeForce GTX 1660 Ti",
+        "computeCapability": "7.5"
+      },
+      "host": {
+        "profile": "windows-native-x64",
+        "operatingSystem": "Windows 11 10.0.26200",
+        "architecture": "x86-64",
+        "abi": "Win64",
+        "driverModel": "WDDM",
+        "kernelTimeout": "enabled",
+        "computeMode": "default"
+      },
+      "runtime": {
+        "node": "v26.7.0",
+        "moduleAbi": "147",
+        "requiredFlags": [
+          "--experimental-ffi"
+        ]
+      },
+      "cuda": {
+        "driverPackage": "610.74",
+        "driverApi": 13030,
+        "toolkit": "13.3.0",
+        "header": "13.3.29",
+        "ptxTarget": "sm_75",
+        "compilerProviders": "NVRTC 13.3 and nvJitLink 13.3 qualified as optional providers"
+      },
+      "coverage": {
+        "CJS-F2W": "pass",
+        "CJS-F3W": "pass",
+        "CJS-F4W": "pass",
+        "CJS-F5W": "pass",
+        "CJS-F6W": "pass",
+        "CJS-F7W": "pass",
+        "CJS-F8W": "pass"
+      },
+      "evidence": {
+        "testedAt": "2026-08-11",
+        "sourceCommit": "527e92975fbc9ebbfb4e88ba415f5156ca98b2be",
+        "integratedCommit": "09e9ada6c1d032286e75b9972cd35b763b16dae1",
+        "pullRequests": [5, 6, 7, 8, 9, 10, 11],
+        "directHardware": true,
+        "independentNativeOracle": true,
+        "cleanTree": true,
+        "terminalCleanup": true
+      },
+      "claimLimits": [
+        "This qualifies only the recorded exact profile and bounded F2W through F8W capabilities.",
+        "It does not qualify another GPU model, operating system, host architecture, Driver/toolkit combination, performance level, or production stability."
+      ]
+    }
+  ]
+}

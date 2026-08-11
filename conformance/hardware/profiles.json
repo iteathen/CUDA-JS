@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-11",
+  "profiles": [
+    {
+      "id": "windows-native-x64",
+      "host": {
+        "platform": "win32",
+        "architecture": "x64",
+        "environment": "native"
+      },
+      "status": "runner-ready",
+      "promotionTarget": "qualified-experimental",
+      "requiredNode": "v26.7.0",
+      "requiredCapsules": [
+        "EXP-000 build, correctness, lifecycle, and bounded calibration",
+        "F1B deterministic schema check",
+        "EXP-012 Windows Driver and C-oracle parity",
+        "F3 native actor/context lifecycle",
+        "F4 native memory and C-oracle parity",
+        "F5 native execution and C-oracle parity",
+        "F6 native compiler/linker/cache and C-oracle parity",
+        "F7 native diagnostics/permissions/stress",
+        "F8 installed-package native consumer"
+      ],
+      "commands": [
+        ["scripts/run-exp-000.mjs", "all"],
+        ["scripts/run-f1b.mjs", "check"],
+        ["scripts/run-exp-012.mjs", "all"],
+        ["scripts/run-f3.mjs", "all"],
+        ["scripts/run-f4.mjs", "all"],
+        ["scripts/run-f5.mjs", "all"],
+        ["scripts/run-f6.mjs", "all"],
+        ["scripts/run-f7.mjs", "all"],
+        ["scripts/run-f8.mjs", "all"]
+      ],
+      "evidenceFiles": [
+        "build/exp-000/evidence/build.json",
+        "build/exp-000/evidence/correctness.json",
+        "build/exp-000/evidence/lifecycle.json",
+        "build/exp-000/evidence/benchmark.json",
+        "build/exp-012/windows-x64/evidence/build.json",
+        "build/exp-012/windows-x64/evidence/smoke.json",
+        "build/f3/win32-x64/evidence/native-windows.json",
+        "build/f4/win32-x64/evidence/native-windows.json",
+        "build/f5/win32-x64/evidence/native-windows.json",
+        "build/f6/win32-x64/evidence/native-windows.json",
+        "build/f7/win32-x64/evidence/native-windows.json",
+        "build/f8/win32-x64/evidence/native-windows-package.json"
+      ],
+      "missingCapsules": []
+    },
+    {
+      "id": "linux-native-x64",
+      "host": {
+        "platform": "linux",
+        "architecture": "x64",
+        "environment": "native"
+      },
+      "status": "adapter-incomplete",
+      "promotionTarget": "qualified-experimental",
+      "requiredNode": "v26.7.0",
+      "requiredCapsules": [
+        "EXP-001 native Driver and C-oracle parity",
+        "F3 through F8 native Linux actor, memory, execution, compiler, hardening, and installed-package capsules"
+      ],
+      "commands": [],
+      "evidenceFiles": [],
+      "missingCapsules": [
+        "canonical Linux DriverActor backend",
+        "native F3 context lifecycle runner",
+        "native F4 memory C oracle and runner",
+        "native F5 execution C oracle and runner",
+        "native F6 NVRTC/nvJitLink C oracle and runner",
+        "native F7 permission and lifecycle stress runner",
+        "native F8 installed-package consumer"
+      ]
+    },
+    {
+      "id": "wsl2-x64",
+      "host": {
+        "platform": "linux",
+        "architecture": "x64",
+        "environment": "wsl2"
+      },
+      "status": "adapter-incomplete",
+      "promotionTarget": "qualified-experimental",
+      "requiredNode": "v26.7.0",
+      "requiredCapsules": [
+        "independent WSL2 Driver bridge, provider, permission, execution, compiler, package, and cleanup chain"
+      ],
+      "commands": [],
+      "evidenceFiles": [],
+      "missingCapsules": [
+        "WSL2-specific Driver/provider adapter",
+        "WSL2 native oracle and F2 through F8 qualification chain"
+      ]
+    },
+    {
+      "id": "linux-native-arm64-sbsa",
+      "host": {
+        "platform": "linux",
+        "architecture": "arm64",
+        "environment": "native-sbsa"
+      },
+      "status": "schema-and-adapter-incomplete",
+      "promotionTarget": "qualified-experimental",
+      "requiredNode": "v26.7.0",
+      "requiredCapsules": [
+        "independent ARM64 ABI/schema generation and native F1 through F8 qualification chain"
+      ],
+      "commands": [],
+      "evidenceFiles": [],
+      "missingCapsules": [
+        "ARM64 Runtime IR and native ABI oracle",
+        "ARM64 Driver/compiler adapters",
+        "ARM64 F2 through F8 native qualification chain"
+      ]
+    },
+    {
+      "id": "linux-native-arm64-jetson",
+      "host": {
+        "platform": "linux",
+        "architecture": "arm64",
+        "environment": "native-jetson"
+      },
+      "status": "contract-required",
+      "promotionTarget": "future-profile",
+      "requiredNode": "v26.7.0",
+      "requiredCapsules": [
+        "Jetson-specific product, Driver/provider, ABI, packaging, power-mode, and cleanup contract"
+      ],
+      "commands": [],
+      "evidenceFiles": [],
+      "missingCapsules": [
+        "accepted Jetson profile contract",
+        "Jetson Node/ABI/provider qualification",
+        "Jetson F2 through F8 native qualification chain"
+      ]
+    }
+  ]
+}

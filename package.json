@@ -99,8 +99,12 @@
     "f8:linux-readiness": "node scripts/run-f8.mjs linux-readiness",
     "f8:verify": "node scripts/run-f8.mjs verify",
     "f8": "node scripts/run-f8.mjs all",
+    "hardware:check": "node --test conformance/hardware/qualification.test.mjs && node scripts/run-hardware-qualification.mjs check",
+    "hardware:render": "node scripts/run-hardware-qualification.mjs render",
+    "hardware:plan": "node scripts/run-hardware-qualification.mjs plan",
+    "hardware:qualify": "node scripts/run-hardware-qualification.mjs qualify",
     "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all",
     "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable"
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && npm run hardware:check"
   }
 }

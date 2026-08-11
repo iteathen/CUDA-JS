@@ -23,6 +23,7 @@
 
 ## Architecture and plan
 
+- [`HARDWARE_SUPPORT.md`](HARDWARE_SUPPORT.md) — generated exact-profile hardware support list and qualification entry point.
 - [`architecture/README.md`](architecture/README.md)
 - [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md)
 - [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md)
@@ -30,6 +31,7 @@
 - [`plans/README.md`](plans/README.md)
 - [`plans/2026-08-10-master-plan.md`](plans/2026-08-10-master-plan.md)
 - [`plans/2026-08-10-focus-branch-map.json`](plans/2026-08-10-focus-branch-map.json)
+- [`plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md)
 
 ## Experiments and history
 

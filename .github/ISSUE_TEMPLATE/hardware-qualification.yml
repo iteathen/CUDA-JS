@@ -1,0 +1,91 @@
+name: Hardware qualification result
+description: Submit direct CUDA-JS evidence for one exact GPU and host profile.
+title: "Hardware qualification: <GPU> / <profile>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit one exact profile per issue. A CUDA-capable label or matching compute capability is not a support claim. Review `docs/HARDWARE_SUPPORT.md` and `conformance/hardware/README.md` first.
+  - type: input
+    id: source_commit
+    attributes:
+      label: Exact CUDA-JS commit
+      description: Full 40-character commit tested from a clean worktree.
+    validations:
+      required: true
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Qualification profile
+      options:
+        - windows-native-x64
+        - linux-native-x64
+        - wsl2-x64
+        - linux-native-arm64-sbsa
+        - linux-native-arm64-jetson
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU model and compute capability
+      placeholder: NVIDIA model, compute capability X.Y
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host operating system and processor architecture
+      placeholder: Exact OS release, x86-64 or ARM64, native/WSL2/Jetson
+    validations:
+      required: true
+  - type: input
+    id: cuda
+    attributes:
+      label: Driver, Driver API, toolkit, and providers
+      placeholder: Driver version; Driver API; toolkit/header; NVRTC and nvJitLink or unavailable
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node identity
+      placeholder: Official v26.7.0, module ABI 147
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - pass
+        - fail
+        - blocked by incomplete profile runner
+        - infrastructure failure
+    validations:
+      required: true
+  - type: textarea
+    id: first_divergence
+    attributes:
+      label: First failing or blocking case
+      description: For a non-pass result, provide the first case ID and exact sanitized error. Do not weaken or edit the runner.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Attach public-summary.json and link any reviewed evidence bundle. Do not paste arbitrary raw logs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: attestation
+    attributes:
+      label: Evidence attestation
+      options:
+        - label: I tested the exact commit from a clean worktree on directly accessible CUDA hardware.
+          required: true
+        - label: I did not weaken checks or replace the independent native oracle with package self-comparison.
+          required: true
+        - label: I reviewed uploads and removed host/account/path/serial/UUID/PCI identifiers and secrets.
+          required: true
+        - label: I understand that a passing result qualifies only this exact profile after maintainer review and registry integration.
+          required: true

@@ -88,6 +88,8 @@ Windows-only `CJS-F7W` is accepted. The runtime now classifies supported and unq
 
 Windows-only `CJS-F8W` is accepted. The public `cuda-js` 0.1.0-alpha.0 package exposes a safe runtime facade, immutable compatibility metadata, and a mock-only testing entry. Clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, simultaneous runtime isolation, cross-runtime rejection, and installed-package Windows vector execution pass. Public capabilities hide actor tokens; aggregate close reports terminal ownership. [`conformance/f8/README.md`](conformance/f8/README.md) gives the native Linux adapter and qualification handoff.
 
+[`docs/HARDWARE_SUPPORT.md`](docs/HARDWARE_SUPPORT.md) publishes the evidence-backed hardware list. The accompanying [`conformance/hardware/`](conformance/hardware/README.md) kit validates the registry, reports incomplete platform runners, and produces consistent direct-test evidence without inferring support across models, compute capabilities, operating systems, or processor architectures.
+
 Run `npm run f8:portable` for package and independent-consumer controls or `npm run f8` for the complete qualified Windows package capsule. `npm run verify` includes the portable regression set; `npm run verify:windows` includes the exact native Windows chain through F8. Native evidence is written only to ignored `build/` storage.
 
 ## Start here
@@ -102,6 +104,7 @@ Run `npm run f8:portable` for package and independent-consumer controls or `npm 
 - [`docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md)
 - [`docs/architecture/TARGET_ARCHITECTURE.md`](docs/architecture/TARGET_ARCHITECTURE.md)
 - [`docs/architecture/V0_SUPPORT_MATRIX.md`](docs/architecture/V0_SUPPORT_MATRIX.md)
+- [`docs/HARDWARE_SUPPORT.md`](docs/HARDWARE_SUPPORT.md)
 - [`docs/plans/2026-08-10-master-plan.md`](docs/plans/2026-08-10-master-plan.md)
 - [`experiments/EXPERIMENT_MATRIX.md`](experiments/EXPERIMENT_MATRIX.md)
 - [`docs/research/source-register.yaml`](docs/research/source-register.yaml)
