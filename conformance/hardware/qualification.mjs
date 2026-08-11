@@ -345,17 +345,30 @@ async function runQualification(profile, registry) {
 
   const evidence = [];
   let profileSummary = null;
+  let evidenceFailure = null;
   if (allPassed) {
-    for (const relative of profile.evidenceFiles) {
-      const target = path.join(repositoryRoot, relative);
-      invariant(existsSync(target), `Required evidence is missing after the run: ${relative}`);
-      evidence.push({ path: relative, sha256: await sha256(target) });
+    try {
+      for (const relative of profile.evidenceFiles) {
+        const target = path.join(repositoryRoot, relative);
+        invariant(existsSync(target), `Required evidence is missing after the run: ${relative}`);
+        evidence.push({ path: relative, sha256: await sha256(target) });
+      }
+      profileSummary = await summarizeProfileEvidence(profile, device);
+    } catch (error) {
+      evidenceFailure = {
+        kind: 'evidence-validation',
+        message: error instanceof Error ? error.message : String(error),
+      };
+      allPassed = false;
     }
-    profileSummary = await summarizeProfileEvidence(profile, device);
   }
   git(['update-index', '--refresh']);
   const finishedCleanTree = git(['status', '--porcelain']).length === 0;
   allPassed = allPassed && finishedCleanTree;
+  const failedCommand = commandResults.find((entry) => entry.status !== 0);
+  const failure = failedCommand
+    ? { kind: 'command', caseId: failedCommand.caseId, status: failedCommand.status }
+    : evidenceFailure ?? (!finishedCleanTree ? { kind: 'worktree-changed' } : null);
 
   const result = {
     schemaVersion: 1,
@@ -363,6 +376,7 @@ async function runQualification(profile, registry) {
     profile: profile.id,
     status: allPassed ? 'pass' : 'fail',
     promotionEligible: allPassed,
+    failure,
     startedFrom: { sourceCommit, sourceTree, cleanTree: true },
     finishedCleanTree,
     environment: {
@@ -389,6 +403,10 @@ async function runQualification(profile, registry) {
     profile: result.profile,
     status: result.status,
     promotionEligible: result.promotionEligible,
+    failure: result.failure ? {
+      kind: result.failure.kind,
+      ...(result.failure.caseId ? { caseId: result.failure.caseId, status: result.failure.status } : {}),
+    } : null,
     startedFrom: result.startedFrom,
     finishedCleanTree: result.finishedCleanTree,
     environment: result.environment,

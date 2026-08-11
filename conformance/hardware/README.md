@@ -46,7 +46,7 @@ Before uploading anything, inspect every file. Do not publish host names, accoun
 6. Review and attach `public-summary.json`; retain the complete local bundle until review closes.
 7. Submit a registry PR only after maintainers accept the evidence. One entry represents one exact profile.
 
-Test failures are useful results. Report the first failing case and preserve the bundle; do not weaken assertions, substitute package self-comparison for a native oracle, or edit a result into a pass.
+Test failures are useful results. A command, evidence-validation, or final-worktree failure still produces the standardized bundle and a sanitized public failure kind. Report the first failing case and preserve the bundle; do not weaken assertions, substitute package self-comparison for a native oracle, or edit a result into a pass.
 
 ## Dedicated-host safety
 
