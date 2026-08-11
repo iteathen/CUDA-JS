@@ -1,8 +1,8 @@
 {
   "coverage": {
-    "availableFunctions": 17,
-    "selectedFunctions": 17,
-    "selectedTypes": 11,
+    "availableFunctions": 27,
+    "selectedFunctions": 27,
+    "selectedTypes": 16,
     "unresolvedSelected": [],
     "unselectedHeaderFunctions": [
       "cuArray3DCreate_v2",
@@ -88,11 +88,7 @@
       "cuDeviceSetMemPool",
       "cuDeviceTotalMem_v2",
       "cuDeviceUnregisterAsyncNotification",
-      "cuEventCreate",
-      "cuEventDestroy_v2",
       "cuEventElapsedTime_v2",
-      "cuEventQuery",
-      "cuEventRecord",
       "cuEventRecordWithFlags",
       "cuEventSynchronize",
       "cuExternalMemoryGetMappedBuffer",
@@ -230,7 +226,6 @@
       "cuLaunchHostFunc",
       "cuLaunchHostFunc_v2",
       "cuLaunchKernel",
-      "cuLaunchKernelEx",
       "cuLibraryEnumerateKernels",
       "cuLibraryGetGlobal",
       "cuLibraryGetKernel",
@@ -357,17 +352,14 @@
       "cuMipmappedArrayGetMemoryRequirements",
       "cuMipmappedArrayGetSparseProperties",
       "cuModuleEnumerateFunctions",
-      "cuModuleGetFunction",
       "cuModuleGetFunctionCount",
       "cuModuleGetGlobal_v2",
       "cuModuleGetLoadingMode",
       "cuModuleGetSurfRef",
       "cuModuleGetTexRef",
       "cuModuleLoad",
-      "cuModuleLoadData",
       "cuModuleLoadDataEx",
       "cuModuleLoadFatBinary",
-      "cuModuleUnload",
       "cuMulticastAddDevice",
       "cuMulticastBindAddr",
       "cuMulticastBindAddr_v2",
@@ -400,9 +392,7 @@
       "cuStreamBeginCapture_v2",
       "cuStreamBeginRecaptureToGraph",
       "cuStreamCopyAttributes",
-      "cuStreamCreate",
       "cuStreamCreateWithPriority",
-      "cuStreamDestroy_v2",
       "cuStreamEndCapture",
       "cuStreamEndCaptureToCig",
       "cuStreamGetAttribute",
@@ -955,6 +945,238 @@
       },
       "stableId": "cuda.driver.function.cuDriverGetVersion"
     },
+    "cuEventCreate": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuEventCreate",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "phEvent",
+          "semantics": {
+            "bounds": {
+              "nonzero-on-success": true
+            },
+            "capability": "execution.completion.private",
+            "direction": "out",
+            "length": null,
+            "name": "phEvent",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-event-handle-out"
+          },
+          "sourceType": "CUevent *"
+        },
+        {
+          "ffiType": "u32",
+          "name": "Flags",
+          "semantics": {
+            "bounds": {
+              "constant": "CU_EVENT_DISABLE_TIMING"
+            },
+            "capability": "execution.completion.private",
+            "direction": "in",
+            "length": null,
+            "name": "Flags",
+            "nullable": false,
+            "ownership": "value",
+            "representation": "u32-event-flags"
+          },
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuEventCreate",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "creates-private-completion-event",
+        "callbackPolicy": "none",
+        "cleanup": "destroy-after-terminal-query",
+        "conformanceCases": [
+          "f5.event.disable-timing",
+          "f5.event.cleanup"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "creation-failure-conservative",
+        "hostBlocking": "short-resource-create",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.completion.private"
+      },
+      "stableId": "cuda.driver.function.cuEventCreate"
+    },
+    "cuEventDestroy": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuEventDestroy_v2",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hEvent",
+          "semantics": {
+            "bounds": {
+              "source": "terminal-private-event"
+            },
+            "capability": "execution.completion.private",
+            "direction": "in",
+            "length": null,
+            "name": "hEvent",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-event-handle"
+          },
+          "sourceType": "CUevent"
+        }
+      ],
+      "publicName": "cuEventDestroy",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "terminal-event-release-on-success",
+        "callbackPolicy": "none",
+        "cleanup": "terminal-release-once",
+        "conformanceCases": [
+          "f5.event.cleanup",
+          "f5.event.stale"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "failed-destroy-keeps-cleanup-unproved",
+        "hostBlocking": "short-release",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.completion.private"
+      },
+      "stableId": "cuda.driver.function.cuEventDestroy"
+    },
+    "cuEventQuery": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuEventQuery",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hEvent",
+          "semantics": {
+            "bounds": {
+              "source": "current-operation-event"
+            },
+            "capability": "execution.completion.private",
+            "direction": "in",
+            "length": null,
+            "name": "hEvent",
+            "nullable": false,
+            "ownership": "borrowed-leased",
+            "representation": "private-event-handle"
+          },
+          "sourceType": "CUevent"
+        }
+      ],
+      "publicName": "cuEventQuery",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "polls-prior-stream-work",
+        "callbackPolicy": "none",
+        "cleanup": "destroy-event-after-terminal-result",
+        "conformanceCases": [
+          "f5.event.pending",
+          "f5.event.complete",
+          "f5.event.deferred-failure"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "non-not-ready-failure-attributed-to-sole-in-flight-operation",
+        "exposure": "private-runtime",
+        "healthEffect": "terminal-device-failure-poisons-context",
+        "hostBlocking": "short-query",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "pending": "CUDA_ERROR_NOT_READY",
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.completion.private"
+      },
+      "stableId": "cuda.driver.function.cuEventQuery"
+    },
+    "cuEventRecord": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuEventRecord",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hEvent",
+          "semantics": {
+            "bounds": {
+              "source": "current-operation-event"
+            },
+            "capability": "execution.completion.private",
+            "direction": "in",
+            "length": null,
+            "name": "hEvent",
+            "nullable": false,
+            "ownership": "borrowed-leased",
+            "representation": "private-event-handle"
+          },
+          "sourceType": "CUevent"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "hStream",
+          "semantics": {
+            "bounds": {
+              "source": "runtime-private-stream"
+            },
+            "capability": "execution.completion.private",
+            "direction": "in",
+            "length": null,
+            "name": "hStream",
+            "nullable": false,
+            "ownership": "borrowed-leased",
+            "representation": "private-stream-handle"
+          },
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuEventRecord",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "records-after-prior-stream-work",
+        "callbackPolicy": "none",
+        "cleanup": "event-retained-until-terminal-query",
+        "conformanceCases": [
+          "f5.event.record-after-launch",
+          "f5.event.record-failure"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-submitted-or-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "post-submit-failure-restart-required-when-provenance-unavailable",
+        "hostBlocking": "enqueue-only",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.completion.private"
+      },
+      "stableId": "cuda.driver.function.cuEventRecord"
+    },
     "cuGetErrorName": {
       "availability": "private-experimental",
       "nativeSymbol": "cuGetErrorName",
@@ -1238,6 +1460,112 @@
         "securityCapability": "driver.initialize"
       },
       "stableId": "cuda.driver.function.cuInit"
+    },
+    "cuLaunchKernelEx": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuLaunchKernelEx",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "config",
+          "semantics": {
+            "bounds": {
+              "source": "validated-launch-dimensions-and-private-stream"
+            },
+            "capability": "execution.launch",
+            "direction": "in",
+            "length": null,
+            "name": "config",
+            "nullable": false,
+            "ownership": "call-frame",
+            "representation": "generated-cu-launch-config-no-attributes"
+          },
+          "sourceType": "const CUlaunchConfig *"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "f",
+          "semantics": {
+            "bounds": {
+              "source": "live-function-registry-entry"
+            },
+            "capability": "execution.launch",
+            "direction": "in",
+            "length": null,
+            "name": "f",
+            "nullable": false,
+            "ownership": "borrowed-leased",
+            "representation": "private-function-handle"
+          },
+          "sourceType": "CUfunction"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "kernelParams",
+          "semantics": {
+            "bounds": {
+              "constant": null
+            },
+            "capability": "execution.launch",
+            "direction": "in",
+            "length": null,
+            "name": "kernelParams",
+            "nullable": true,
+            "ownership": "call-frame",
+            "representation": "null-for-f5-packed-buffer"
+          },
+          "sourceType": "void **"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "extra",
+          "semantics": {
+            "bounds": {
+              "contains": [
+                "CU_LAUNCH_PARAM_BUFFER_POINTER",
+                "CU_LAUNCH_PARAM_BUFFER_SIZE",
+                "CU_LAUNCH_PARAM_END"
+              ]
+            },
+            "capability": "execution.launch",
+            "direction": "in",
+            "length": "five-pointer-width-entries",
+            "name": "extra",
+            "nullable": false,
+            "ownership": "call-frame",
+            "representation": "private-sized-launch-buffer-config"
+          },
+          "sourceType": "void **"
+        }
+      ],
+      "publicName": "cuLaunchKernelEx",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "submits-kernel-to-private-stream",
+        "callbackPolicy": "none",
+        "cleanup": "call-frame-retained-with-leases-until-terminal-event",
+        "conformanceCases": [
+          "f5.launch.packed-buffer",
+          "f5.launch.bounds",
+          "f5.launch.completion",
+          "f5.launch.cleanup"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error;f5-has-no-prior-in-flight-operation",
+        "exposure": "private-runtime",
+        "healthEffect": "immediate-rejection-conservative;submitted-failure-observed-by-event-poisons",
+        "hostBlocking": "enqueue-only",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.launch"
+      },
+      "stableId": "cuda.driver.function.cuLaunchKernelEx"
     },
     "cuMemAlloc": {
       "availability": "private-experimental",
@@ -1601,20 +1929,337 @@
         "securityCapability": "memory.write.device"
       },
       "stableId": "cuda.driver.function.cuMemcpyHtoD"
+    },
+    "cuModuleGetFunction": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuModuleGetFunction",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hfunc",
+          "semantics": {
+            "bounds": {
+              "nonzero-on-success": true
+            },
+            "capability": "module.function.resolve",
+            "direction": "out",
+            "length": null,
+            "name": "hfunc",
+            "nullable": false,
+            "ownership": "module-borrowed",
+            "representation": "private-function-handle-out"
+          },
+          "sourceType": "CUfunction *"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "hmod",
+          "semantics": {
+            "bounds": {
+              "source": "live-module-registry-entry"
+            },
+            "capability": "module.function.resolve",
+            "direction": "in",
+            "length": null,
+            "name": "hmod",
+            "nullable": false,
+            "ownership": "borrowed-leased",
+            "representation": "private-module-handle"
+          },
+          "sourceType": "CUmodule"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "name",
+          "semantics": {
+            "bounds": {
+              "maximumBytes": 256
+            },
+            "capability": "module.function.resolve",
+            "direction": "in",
+            "length": "nul-terminated",
+            "name": "name",
+            "nullable": false,
+            "ownership": "call-frame",
+            "representation": "validated-ascii-c-string"
+          },
+          "sourceType": "const char *"
+        }
+      ],
+      "publicName": "cuModuleGetFunction",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "function-ready-on-success",
+        "callbackPolicy": "none",
+        "cleanup": "function-invalidated-before-module-unload",
+        "conformanceCases": [
+          "f5.function.resolve",
+          "f5.function.missing",
+          "f5.function.module-parent"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "lookup-failure-does-not-poison-when-no-prior-work",
+        "hostBlocking": "may-trigger-lazy-load",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "module.function.resolve"
+      },
+      "stableId": "cuda.driver.function.cuModuleGetFunction"
+    },
+    "cuModuleLoadData": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuModuleLoadData",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "module",
+          "semantics": {
+            "bounds": {
+              "nonzero-on-success": true
+            },
+            "capability": "module.load.ptx",
+            "direction": "out",
+            "length": null,
+            "name": "module",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-module-handle-out"
+          },
+          "sourceType": "CUmodule *"
+        },
+        {
+          "ffiType": "pointer",
+          "name": "image",
+          "semantics": {
+            "bounds": {
+              "format": "ptx",
+              "maximum": "runtime.maxModuleBytes"
+            },
+            "capability": "module.load.ptx",
+            "direction": "in",
+            "length": "runtime-validated-module-bytes-plus-nul",
+            "name": "image",
+            "nullable": false,
+            "ownership": "call-frame",
+            "representation": "private-nul-terminated-ptx-buffer"
+          },
+          "sourceType": "const void *"
+        }
+      ],
+      "publicName": "cuModuleLoadData",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "module-ready-on-success",
+        "callbackPolicy": "none",
+        "cleanup": "unload-with-cuModuleUnload-after-functions",
+        "conformanceCases": [
+          "f5.module.load.valid",
+          "f5.module.load.invalid-ptx",
+          "f5.module.load.cleanup"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "load-failure-immediate-when-no-prior-work;pressure-does-not-poison",
+        "hostBlocking": "may-jit-and-block",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "module.load.ptx"
+      },
+      "stableId": "cuda.driver.function.cuModuleLoadData"
+    },
+    "cuModuleUnload": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuModuleUnload",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hmod",
+          "semantics": {
+            "bounds": {
+              "source": "live-module-with-no-children"
+            },
+            "capability": "module.unload",
+            "direction": "in",
+            "length": null,
+            "name": "hmod",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-module-handle"
+          },
+          "sourceType": "CUmodule"
+        }
+      ],
+      "publicName": "cuModuleUnload",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "terminal-module-release-on-success",
+        "callbackPolicy": "none",
+        "cleanup": "terminal-release-once",
+        "conformanceCases": [
+          "f5.module.release",
+          "f5.module.children",
+          "f5.module.stale"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "failed-unload-keeps-cleanup-unproved",
+        "hostBlocking": "may-block",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "module.unload"
+      },
+      "stableId": "cuda.driver.function.cuModuleUnload"
+    },
+    "cuStreamCreate": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuStreamCreate",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "phStream",
+          "semantics": {
+            "bounds": {
+              "nonzero-on-success": true
+            },
+            "capability": "execution.stream.private",
+            "direction": "out",
+            "length": null,
+            "name": "phStream",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-stream-handle-out"
+          },
+          "sourceType": "CUstream *"
+        },
+        {
+          "ffiType": "u32",
+          "name": "Flags",
+          "semantics": {
+            "bounds": {
+              "constant": "CU_STREAM_NON_BLOCKING"
+            },
+            "capability": "execution.stream.private",
+            "direction": "in",
+            "length": null,
+            "name": "Flags",
+            "nullable": false,
+            "ownership": "value",
+            "representation": "u32-stream-flags"
+          },
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuStreamCreate",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "creates-private-nonblocking-stream",
+        "callbackPolicy": "none",
+        "cleanup": "destroy-with-cuStreamDestroy-after-events",
+        "conformanceCases": [
+          "f5.stream.nonblocking",
+          "f5.stream.cleanup"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "creation-failure-conservative",
+        "hostBlocking": "short-resource-create",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.stream.private"
+      },
+      "stableId": "cuda.driver.function.cuStreamCreate"
+    },
+    "cuStreamDestroy": {
+      "availability": "private-experimental",
+      "nativeSymbol": "cuStreamDestroy_v2",
+      "parameters": [
+        {
+          "ffiType": "pointer",
+          "name": "hStream",
+          "semantics": {
+            "bounds": {
+              "source": "live-private-stream-with-no-events"
+            },
+            "capability": "execution.stream.private",
+            "direction": "in",
+            "length": null,
+            "name": "hStream",
+            "nullable": false,
+            "ownership": "driver-actor",
+            "representation": "private-stream-handle"
+          },
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuStreamDestroy",
+      "returnFfiType": "i32",
+      "returnSourceType": "CUresult",
+      "semantics": {
+        "asynchronousBehavior": "terminal-stream-release-on-success",
+        "callbackPolicy": "none",
+        "cleanup": "terminal-release-once",
+        "conformanceCases": [
+          "f5.stream.cleanup",
+          "f5.stream.no-live-events"
+        ],
+        "contextRequirement": "driver-actor-owner-thread-current-context",
+        "deferredErrors": "may-report-prior-asynchronous-error",
+        "exposure": "private-runtime",
+        "healthEffect": "failed-destroy-keeps-cleanup-unproved",
+        "hostBlocking": "short-release-after-terminal-work",
+        "optional": false,
+        "releaseTier": "experimental",
+        "requestedApiVersion": 13030,
+        "return": {
+          "representation": "cuda-result",
+          "success": "CUDA_SUCCESS"
+        },
+        "securityCapability": "execution.stream.private"
+      },
+      "stableId": "cuda.driver.function.cuStreamDestroy"
     }
   },
-  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-runtime-ir-v1",
+  "id": "cuda-13.3.29-driver-tier-0-f5-linux-x64-runtime-ir-v1",
   "identity": {
     "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
-    "generatorSha256": "6e4f489d3f95a4e190fd08ec77672cc7a135f659ba942f92608580702f7f214c",
-    "headerFactsSha256": "a6cf01fc2c959aa2b6e1a64788c8822779c9ed9fe1cc601ab55eb0eca2387d37",
+    "generatorSha256": "31ab3b6ea32a95cd82e17c5f1f89e27c1a11e098f9afd6aaa2691d35a731d0f3",
+    "headerFactsSha256": "21df1680acdd43dbf9255d7bed17e9e31c895c3f510dbf2cf704f71d730b3448",
     "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
     "licenseSha256": "088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
-    "overlaySha256": "e7293c8ca62a2520a2b065c4c9e814604af0931b71ebed4b905e7118bc132402",
+    "overlaySha256": "49094f31205d59fd5f4835063fbbf4b6cf23d8367fbb48a42b7eb299a9e7f970",
     "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
     "packageVersion": "13.3.29-1",
-    "selectionSha256": "33b4cb5704496055778790db72cc1def99a0f77d3ec2987ca48faede0a8bd18d",
-    "targetLayoutsSha256": "ed2a56ea69a7d2fb4f97104dbb3adc9a73173229c744ffeb77d75110b2ee0b0c",
+    "selectionSha256": "de2af100a70cc9aab2bc7853fbaa51872c8babfee91511a9aa470e8e42e56a5f",
+    "targetLayoutsSha256": "86977c61b99cd14841429144cbcdb3a55c23523f92dab8187f04f1d3d0029237",
     "toolkitRelease": "13.3"
   },
   "schemaVersion": 1,
@@ -2448,6 +3093,25 @@
         }
       ]
     },
+    "CUevent": {
+      "canonicalType": "struct CUevent_st *",
+      "ffiType": "pointer",
+      "kind": "handle",
+      "layout": {
+        "alignment": 8,
+        "fields": [],
+        "size": 8
+      },
+      "semantics": {
+        "exposure": "denied-public",
+        "ownership": "driver-actor",
+        "packerPolicy": "private-pointer-only",
+        "representation": "opaque-private-native-handle",
+        "resourceKind": "event"
+      },
+      "sourceType": "struct CUevent_st *",
+      "stableId": "cuda.driver.type.CUevent"
+    },
     "CUexecAffinityParam": {
       "canonicalType": "struct CUexecAffinityParam_st",
       "ffiType": "pointer",
@@ -2477,6 +3141,114 @@
       },
       "sourceType": "CUexecAffinityParam_v1",
       "stableId": "cuda.driver.type.CUexecAffinityParam"
+    },
+    "CUfunction": {
+      "canonicalType": "struct CUfunc_st *",
+      "ffiType": "pointer",
+      "kind": "handle",
+      "layout": {
+        "alignment": 8,
+        "fields": [],
+        "size": 8
+      },
+      "semantics": {
+        "exposure": "denied-public",
+        "ownership": "driver-actor",
+        "packerPolicy": "private-pointer-only",
+        "representation": "opaque-private-native-handle",
+        "resourceKind": "function"
+      },
+      "sourceType": "struct CUfunc_st *",
+      "stableId": "cuda.driver.type.CUfunction"
+    },
+    "CUlaunchConfig": {
+      "canonicalType": "struct CUlaunchConfig_st",
+      "ffiType": "pointer",
+      "kind": "record",
+      "layout": {
+        "alignment": 8,
+        "fields": [
+          {
+            "name": "gridDimX",
+            "offset": 0,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "gridDimY",
+            "offset": 4,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "gridDimZ",
+            "offset": 8,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "blockDimX",
+            "offset": 12,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "blockDimY",
+            "offset": 16,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "blockDimZ",
+            "offset": 20,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "sharedMemBytes",
+            "offset": 24,
+            "sourceType": "unsigned int"
+          },
+          {
+            "name": "hStream",
+            "offset": 32,
+            "sourceType": "CUstream"
+          },
+          {
+            "name": "attrs",
+            "offset": 40,
+            "sourceType": "CUlaunchAttribute *"
+          },
+          {
+            "name": "numAttrs",
+            "offset": 48,
+            "sourceType": "unsigned int"
+          }
+        ],
+        "size": 56
+      },
+      "semantics": {
+        "exposure": "private",
+        "ownership": "call-frame",
+        "packerPolicy": "f5-default-no-attributes",
+        "representation": "generated-byte-storage",
+        "resourceKind": null
+      },
+      "sourceType": "struct CUlaunchConfig_st",
+      "stableId": "cuda.driver.type.CUlaunchConfig"
+    },
+    "CUmodule": {
+      "canonicalType": "struct CUmod_st *",
+      "ffiType": "pointer",
+      "kind": "handle",
+      "layout": {
+        "alignment": 8,
+        "fields": [],
+        "size": 8
+      },
+      "semantics": {
+        "exposure": "denied-public",
+        "ownership": "driver-actor",
+        "packerPolicy": "private-pointer-only",
+        "representation": "opaque-private-native-handle",
+        "resourceKind": "module"
+      },
+      "sourceType": "struct CUmod_st *",
+      "stableId": "cuda.driver.type.CUmodule"
     },
     "CUresult": {
       "canonicalType": "enum cudaError_enum",
@@ -2910,6 +3682,25 @@
           "value": "0"
         }
       ]
+    },
+    "CUstream": {
+      "canonicalType": "struct CUstream_st *",
+      "ffiType": "pointer",
+      "kind": "handle",
+      "layout": {
+        "alignment": 8,
+        "fields": [],
+        "size": 8
+      },
+      "semantics": {
+        "exposure": "denied-public",
+        "ownership": "driver-actor",
+        "packerPolicy": "private-pointer-only",
+        "representation": "opaque-private-native-handle",
+        "resourceKind": "stream"
+      },
+      "sourceType": "struct CUstream_st *",
+      "stableId": "cuda.driver.type.CUstream"
     },
     "cuuint64_t": {
       "canonicalType": "unsigned long",

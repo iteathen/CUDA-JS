@@ -64,6 +64,11 @@ export const cudaTier0Layouts = Object.freeze({
     "fields": [],
     "size": 4
   },
+  "CUevent": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
+  },
   "CUexecAffinityParam": {
     "alignment": 4,
     "fields": [
@@ -80,10 +85,81 @@ export const cudaTier0Layouts = Object.freeze({
     ],
     "size": 8
   },
+  "CUfunction": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
+  },
+  "CUlaunchConfig": {
+    "alignment": 8,
+    "fields": [
+      {
+        "name": "gridDimX",
+        "offset": 0,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "gridDimY",
+        "offset": 4,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "gridDimZ",
+        "offset": 8,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "blockDimX",
+        "offset": 12,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "blockDimY",
+        "offset": 16,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "blockDimZ",
+        "offset": 20,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "sharedMemBytes",
+        "offset": 24,
+        "sourceType": "unsigned int"
+      },
+      {
+        "name": "hStream",
+        "offset": 32,
+        "sourceType": "CUstream"
+      },
+      {
+        "name": "attrs",
+        "offset": 40,
+        "sourceType": "CUlaunchAttribute *"
+      },
+      {
+        "name": "numAttrs",
+        "offset": 48,
+        "sourceType": "unsigned int"
+      }
+    ],
+    "size": 56
+  },
+  "CUmodule": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
+  },
   "CUresult": {
     "alignment": 4,
     "fields": [],
     "size": 4
+  },
+  "CUstream": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
   },
   "cuuint64_t": {
     "alignment": 8,

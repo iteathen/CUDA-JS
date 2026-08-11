@@ -8,15 +8,25 @@ export const cudaTier0SymbolAliases = Object.freeze({
   "cuDeviceGetAttribute": "cuDeviceGetAttribute",
   "cuDeviceGetCount": "cuDeviceGetCount",
   "cuDriverGetVersion": "cuDriverGetVersion",
+  "cuEventCreate": "cuEventCreate",
+  "cuEventDestroy": "cuEventDestroy_v2",
+  "cuEventQuery": "cuEventQuery",
+  "cuEventRecord": "cuEventRecord",
   "cuGetErrorName": "cuGetErrorName",
   "cuGetErrorString": "cuGetErrorString",
   "cuGetProcAddress": "cuGetProcAddress_v2",
   "cuInit": "cuInit",
+  "cuLaunchKernelEx": "cuLaunchKernelEx",
   "cuMemAlloc": "cuMemAlloc_v2",
   "cuMemFree": "cuMemFree_v2",
   "cuMemGetInfo": "cuMemGetInfo_v2",
   "cuMemcpyDtoH": "cuMemcpyDtoH_v2",
-  "cuMemcpyHtoD": "cuMemcpyHtoD_v2"
+  "cuMemcpyHtoD": "cuMemcpyHtoD_v2",
+  "cuModuleGetFunction": "cuModuleGetFunction",
+  "cuModuleLoadData": "cuModuleLoadData",
+  "cuModuleUnload": "cuModuleUnload",
+  "cuStreamCreate": "cuStreamCreate",
+  "cuStreamDestroy": "cuStreamDestroy_v2"
 });
 
 export const cudaTier0FfiDefinitions = Object.freeze({
@@ -74,6 +84,32 @@ export const cudaTier0FfiDefinitions = Object.freeze({
     ],
     "return": "i32"
   },
+  "cuEventCreate": {
+    "arguments": [
+      "pointer",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuEventDestroy_v2": {
+    "arguments": [
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuEventQuery": {
+    "arguments": [
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuEventRecord": {
+    "arguments": [
+      "pointer",
+      "pointer"
+    ],
+    "return": "i32"
+  },
   "cuGetErrorName": {
     "arguments": [
       "i32",
@@ -101,6 +137,15 @@ export const cudaTier0FfiDefinitions = Object.freeze({
   "cuInit": {
     "arguments": [
       "u32"
+    ],
+    "return": "i32"
+  },
+  "cuLaunchKernelEx": {
+    "arguments": [
+      "pointer",
+      "pointer",
+      "pointer",
+      "pointer"
     ],
     "return": "i32"
   },
@@ -137,6 +182,40 @@ export const cudaTier0FfiDefinitions = Object.freeze({
       "u64",
       "pointer",
       "u64"
+    ],
+    "return": "i32"
+  },
+  "cuModuleGetFunction": {
+    "arguments": [
+      "pointer",
+      "pointer",
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuModuleLoadData": {
+    "arguments": [
+      "pointer",
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuModuleUnload": {
+    "arguments": [
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuStreamCreate": {
+    "arguments": [
+      "pointer",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuStreamDestroy_v2": {
+    "arguments": [
+      "pointer"
     ],
     "return": "i32"
   }

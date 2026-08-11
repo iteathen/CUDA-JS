@@ -494,15 +494,25 @@
       "cuDeviceGetAttribute",
       "cuDeviceGetCount",
       "cuDriverGetVersion",
+      "cuEventCreate",
+      "cuEventDestroy_v2",
+      "cuEventQuery",
+      "cuEventRecord",
       "cuGetErrorName",
       "cuGetErrorString",
       "cuGetProcAddress_v2",
       "cuInit",
+      "cuLaunchKernelEx",
       "cuMemAlloc_v2",
       "cuMemFree_v2",
       "cuMemGetInfo_v2",
       "cuMemcpyDtoH_v2",
-      "cuMemcpyHtoD_v2"
+      "cuMemcpyHtoD_v2",
+      "cuModuleGetFunction",
+      "cuModuleLoadData",
+      "cuModuleUnload",
+      "cuStreamCreate",
+      "cuStreamDestroy_v2"
     ],
     "unselectedHeaderFunctions": [
       "cuArray3DCreate_v2",
@@ -588,11 +598,7 @@
       "cuDeviceSetMemPool",
       "cuDeviceTotalMem_v2",
       "cuDeviceUnregisterAsyncNotification",
-      "cuEventCreate",
-      "cuEventDestroy_v2",
       "cuEventElapsedTime_v2",
-      "cuEventQuery",
-      "cuEventRecord",
       "cuEventRecordWithFlags",
       "cuEventSynchronize",
       "cuExternalMemoryGetMappedBuffer",
@@ -730,7 +736,6 @@
       "cuLaunchHostFunc",
       "cuLaunchHostFunc_v2",
       "cuLaunchKernel",
-      "cuLaunchKernelEx",
       "cuLibraryEnumerateKernels",
       "cuLibraryGetGlobal",
       "cuLibraryGetKernel",
@@ -857,17 +862,14 @@
       "cuMipmappedArrayGetMemoryRequirements",
       "cuMipmappedArrayGetSparseProperties",
       "cuModuleEnumerateFunctions",
-      "cuModuleGetFunction",
       "cuModuleGetFunctionCount",
       "cuModuleGetGlobal_v2",
       "cuModuleGetLoadingMode",
       "cuModuleGetSurfRef",
       "cuModuleGetTexRef",
       "cuModuleLoad",
-      "cuModuleLoadData",
       "cuModuleLoadDataEx",
       "cuModuleLoadFatBinary",
-      "cuModuleUnload",
       "cuMulticastAddDevice",
       "cuMulticastBindAddr",
       "cuMulticastBindAddr_v2",
@@ -900,9 +902,7 @@
       "cuStreamBeginCapture_v2",
       "cuStreamBeginRecaptureToGraph",
       "cuStreamCopyAttributes",
-      "cuStreamCreate",
       "cuStreamCreateWithPriority",
-      "cuStreamDestroy_v2",
       "cuStreamEndCapture",
       "cuStreamEndCaptureToCig",
       "cuStreamGetAttribute",
@@ -1110,6 +1110,70 @@
       "sourceLine": 5445,
       "stableId": "cuda.driver.function.cuDriverGetVersion"
     },
+    "cuEventCreate": {
+      "nativeSymbol": "cuEventCreate",
+      "parameters": [
+        {
+          "name": "phEvent",
+          "sourceType": "CUevent *"
+        },
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuEventCreate",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "19e5b89712292c020d7bcced9b047d6f6155a56d033d0666b93e07166133bf19",
+      "sourceLine": 17259,
+      "stableId": "cuda.driver.function.cuEventCreate"
+    },
+    "cuEventDestroy": {
+      "nativeSymbol": "cuEventDestroy_v2",
+      "parameters": [
+        {
+          "name": "hEvent",
+          "sourceType": "CUevent"
+        }
+      ],
+      "publicName": "cuEventDestroy",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "6c49cb797e5c77f30cad141ab2d60459aaf0629f63da46ba181beb72d3f7ffa6",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuEventDestroy"
+    },
+    "cuEventQuery": {
+      "nativeSymbol": "cuEventQuery",
+      "parameters": [
+        {
+          "name": "hEvent",
+          "sourceType": "CUevent"
+        }
+      ],
+      "publicName": "cuEventQuery",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "6c49cb797e5c77f30cad141ab2d60459aaf0629f63da46ba181beb72d3f7ffa6",
+      "sourceLine": 17384,
+      "stableId": "cuda.driver.function.cuEventQuery"
+    },
+    "cuEventRecord": {
+      "nativeSymbol": "cuEventRecord",
+      "parameters": [
+        {
+          "name": "hEvent",
+          "sourceType": "CUevent"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuEventRecord",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "779672f122b9bf6787aea624aff0896be648cbd7a6f0ababddc7750644dca099",
+      "sourceLine": 17302,
+      "stableId": "cuda.driver.function.cuEventRecord"
+    },
     "cuGetErrorName": {
       "nativeSymbol": "cuGetErrorName",
       "parameters": [
@@ -1189,6 +1253,32 @@
       "signatureSha256": "109b0f772173bf1de04adb472bf014e26eaaae600d02d44bdd4cd76bc3013842",
       "sourceLine": 5407,
       "stableId": "cuda.driver.function.cuInit"
+    },
+    "cuLaunchKernelEx": {
+      "nativeSymbol": "cuLaunchKernelEx",
+      "parameters": [
+        {
+          "name": "config",
+          "sourceType": "const CUlaunchConfig *"
+        },
+        {
+          "name": "f",
+          "sourceType": "CUfunction"
+        },
+        {
+          "name": "kernelParams",
+          "sourceType": "void **"
+        },
+        {
+          "name": "extra",
+          "sourceType": "void **"
+        }
+      ],
+      "publicName": "cuLaunchKernelEx",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "9f48d59adbecc02f46688faf25f8794ef480d966f2e6e0141099010dd7c25864",
+      "sourceLine": 19150,
+      "stableId": "cuda.driver.function.cuLaunchKernelEx"
     },
     "cuMemAlloc": {
       "nativeSymbol": "cuMemAlloc_v2",
@@ -1283,9 +1373,95 @@
       "signatureSha256": "57e12cbcef45239cde1f5d129d0057bf7c90a0d0d8715e31a86a737c3b81ca6a",
       "sourceLine": null,
       "stableId": "cuda.driver.function.cuMemcpyHtoD"
+    },
+    "cuModuleGetFunction": {
+      "nativeSymbol": "cuModuleGetFunction",
+      "parameters": [
+        {
+          "name": "hfunc",
+          "sourceType": "CUfunction *"
+        },
+        {
+          "name": "hmod",
+          "sourceType": "CUmodule"
+        },
+        {
+          "name": "name",
+          "sourceType": "const char *"
+        }
+      ],
+      "publicName": "cuModuleGetFunction",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "4b22b7878a802959feda44d1bad9b1ad0f37622bed020f65b1450518c069d6d4",
+      "sourceLine": 7741,
+      "stableId": "cuda.driver.function.cuModuleGetFunction"
+    },
+    "cuModuleLoadData": {
+      "nativeSymbol": "cuModuleLoadData",
+      "parameters": [
+        {
+          "name": "module",
+          "sourceType": "CUmodule *"
+        },
+        {
+          "name": "image",
+          "sourceType": "const void *"
+        }
+      ],
+      "publicName": "cuModuleLoadData",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "444ea7be0958fa35f3231073717d4ed9c2c9de3cf6555968bd7f5fece7e32b32",
+      "sourceLine": 7574,
+      "stableId": "cuda.driver.function.cuModuleLoadData"
+    },
+    "cuModuleUnload": {
+      "nativeSymbol": "cuModuleUnload",
+      "parameters": [
+        {
+          "name": "hmod",
+          "sourceType": "CUmodule"
+        }
+      ],
+      "publicName": "cuModuleUnload",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "1ada4dc418066e7f28e3f78fb4b375b4a4e929686a40c4f34208504592196a02",
+      "sourceLine": 7685,
+      "stableId": "cuda.driver.function.cuModuleUnload"
+    },
+    "cuStreamCreate": {
+      "nativeSymbol": "cuStreamCreate",
+      "parameters": [
+        {
+          "name": "phStream",
+          "sourceType": "CUstream *"
+        },
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuStreamCreate",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "125fd6973d73024248e3bab72a61d8842875a12ece9032f46f363ead9b031bad",
+      "sourceLine": 16092,
+      "stableId": "cuda.driver.function.cuStreamCreate"
+    },
+    "cuStreamDestroy": {
+      "nativeSymbol": "cuStreamDestroy_v2",
+      "parameters": [
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuStreamDestroy",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "8c7159888c05b133ca82bd7f489f8a59b0f176abc2f6f2bbe5ff023860153465",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuStreamDestroy"
     }
   },
-  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-header-facts",
+  "id": "cuda-13.3.29-driver-tier-0-f5-linux-x64-header-facts",
   "schemaVersion": 1,
   "source": {
     "clangTarget": "x86_64-unknown-linux-gnu",
@@ -2041,6 +2217,13 @@
         }
       ]
     },
+    "CUevent": {
+      "canonicalType": "struct CUevent_st *",
+      "kind": "handle",
+      "name": "CUevent",
+      "sourceType": "struct CUevent_st *",
+      "stableId": "cuda.driver.type.CUevent"
+    },
     "CUexecAffinityParam": {
       "canonicalType": "struct CUexecAffinityParam_st",
       "fields": [
@@ -2058,6 +2241,70 @@
       "sourceType": "CUexecAffinityParam_v1",
       "stableId": "cuda.driver.type.CUexecAffinityParam",
       "tagName": "CUexecAffinityParam_st"
+    },
+    "CUfunction": {
+      "canonicalType": "struct CUfunc_st *",
+      "kind": "handle",
+      "name": "CUfunction",
+      "sourceType": "struct CUfunc_st *",
+      "stableId": "cuda.driver.type.CUfunction"
+    },
+    "CUlaunchConfig": {
+      "canonicalType": "struct CUlaunchConfig_st",
+      "fields": [
+        {
+          "name": "gridDimX",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimY",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimZ",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimX",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimY",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimZ",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "sharedMemBytes",
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        },
+        {
+          "name": "attrs",
+          "sourceType": "CUlaunchAttribute *"
+        },
+        {
+          "name": "numAttrs",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "kind": "record",
+      "name": "CUlaunchConfig",
+      "sourceType": "struct CUlaunchConfig_st",
+      "stableId": "cuda.driver.type.CUlaunchConfig",
+      "tagName": "CUlaunchConfig_st"
+    },
+    "CUmodule": {
+      "canonicalType": "struct CUmod_st *",
+      "kind": "handle",
+      "name": "CUmodule",
+      "sourceType": "struct CUmod_st *",
+      "stableId": "cuda.driver.type.CUmodule"
     },
     "CUresult": {
       "canonicalType": "enum cudaError_enum",
@@ -2479,6 +2726,13 @@
           "value": "0"
         }
       ]
+    },
+    "CUstream": {
+      "canonicalType": "struct CUstream_st *",
+      "kind": "handle",
+      "name": "CUstream",
+      "sourceType": "struct CUstream_st *",
+      "stableId": "cuda.driver.type.CUstream"
     },
     "cuuint64_t": {
       "canonicalType": "unsigned long",
