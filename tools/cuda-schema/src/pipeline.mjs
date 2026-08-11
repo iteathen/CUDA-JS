@@ -6,7 +6,6 @@ import {
   openSync,
   readFileSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
@@ -48,6 +47,14 @@ function sha256Bytes(value) {
 
 function sha256File(filePath) {
   return sha256Bytes(readFileSync(filePath));
+}
+
+function canonicalTrackedText(filePath) {
+  return readFileSync(filePath, 'utf8').replaceAll('\r\n', '\n');
+}
+
+function sha256TrackedText(filePath) {
+  return sha256Bytes(canonicalTrackedText(filePath));
 }
 
 function sortedValue(value) {
@@ -577,9 +584,9 @@ function normalizedRuntimeIr(provenance, selection, overlay, headerFacts, target
     };
   }
 
-  const selectionSha256 = sha256File(selectionPath);
-  const overlaySha256 = sha256File(overlayPath);
-  const generatorSha256 = sha256File(sourceFile);
+  const selectionSha256 = sha256TrackedText(selectionPath);
+  const overlaySha256 = sha256TrackedText(overlayPath);
+  const generatorSha256 = sha256TrackedText(sourceFile);
   const headerFactsSha256 = sha256Bytes(jsonText(headerFacts));
   const targetLayoutsSha256 = sha256Bytes(jsonText(targetLayouts));
   return {
@@ -787,8 +794,9 @@ function verifyProductManifest() {
   for (const [name, identity] of Object.entries(manifest.products)) {
     const productPath = path.join(generatedRoot, name);
     assert(existsSync(productPath), `Generated product is missing: ${name}`);
-    assert(sha256File(productPath) === identity.sha256, `Generated product hash mismatch: ${name}`);
-    assert(statSync(productPath).size === identity.bytes, `Generated product size mismatch: ${name}`);
+    const canonical = canonicalTrackedText(productPath);
+    assert(sha256Bytes(canonical) === identity.sha256, `Generated product hash mismatch: ${name}`);
+    assert(Buffer.byteLength(canonical) === identity.bytes, `Generated product size mismatch: ${name}`);
   }
   const unexpected = generatedProductNames.filter((name) => !(name in manifest.products));
   assert(unexpected.length === 0, `Generated product manifest is incomplete: ${unexpected.join(', ')}`);
@@ -821,9 +829,9 @@ function staticCheck() {
   assert(runtimeIr.schemaVersion === 1 && runtimeIr.target.id === 'linux-x64-sysv', 'Runtime IR metaschema/target identity is invalid.');
   assert(runtimeIr.identity.packageSha256 === provenance.package.sha256, 'Runtime IR package identity is stale.');
   assert(runtimeIr.identity.headerSha256 === provenance.inputs.headerSha256, 'Runtime IR header identity is stale.');
-  assert(runtimeIr.identity.selectionSha256 === sha256File(selectionPath), 'Runtime IR selection identity is stale.');
-  assert(runtimeIr.identity.overlaySha256 === sha256File(overlayPath), 'Runtime IR overlay identity is stale.');
-  assert(runtimeIr.identity.generatorSha256 === sha256File(sourceFile), 'Runtime IR generator identity is stale.');
+  assert(runtimeIr.identity.selectionSha256 === sha256TrackedText(selectionPath), 'Runtime IR selection identity is stale.');
+  assert(runtimeIr.identity.overlaySha256 === sha256TrackedText(overlayPath), 'Runtime IR overlay identity is stale.');
+  assert(runtimeIr.identity.generatorSha256 === sha256TrackedText(sourceFile), 'Runtime IR generator identity is stale.');
   assert(!/ at (?:\/|[A-Za-z]:[\\/])/.test(JSON.stringify(headerFacts)), 'Generated header facts retain an absolute compiler input path.');
   validateSemanticOverlay(selection, headerFacts, overlay);
   assertRuntimeAgainstFacts(runtimeIr, headerFacts, targetLayouts);
