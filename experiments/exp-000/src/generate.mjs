@@ -9,8 +9,8 @@ const schemaPath = path.join(experimentRoot, 'case-schema.json');
 const generatedRoot = path.join(experimentRoot, 'generated');
 const checkOnly = process.argv.includes('--check');
 
-const schemaBytes = await readFile(schemaPath);
-const generatorBytes = await readFile(generatorPath);
+const schemaBytes = Buffer.from((await readFile(schemaPath, 'utf8')).replaceAll('\r\n', '\n'));
+const generatorBytes = Buffer.from((await readFile(generatorPath, 'utf8')).replaceAll('\r\n', '\n'));
 const schema = JSON.parse(schemaBytes);
 const schemaSha256 = createHash('sha256').update(schemaBytes).digest('hex');
 const generatorSha256 = createHash('sha256').update(generatorBytes).digest('hex');

@@ -109,7 +109,7 @@ const probeRun = run(nativeProbeExecutablePath, []);
 const observedAbi = parseLayoutProbe(probeRun.stdout);
 assert.deepEqual(observedAbi.target, { pointerSize: 8, sizeSize: 8, littleEndian: true });
 assert.deepEqual(observedAbi.layouts, manifest.layouts, 'Windows native ABI probe differs from the committed compatibility manifest.');
-assert.equal(Object.keys(observedAbi.functions).length, 12, 'Windows native ABI probe must cover all Tier-0 functions.');
+assert.equal(Object.keys(observedAbi.functions).length, Object.keys(runtimeIr.functions).length, 'Windows native ABI probe must cover every selected function.');
 for (const [publicName, functionFact] of Object.entries(runtimeIr.functions)) {
   assert.deepEqual(observedAbi.functions[publicName], { nativeSymbol: functionFact.nativeSymbol, pointerSize: 8 });
 }

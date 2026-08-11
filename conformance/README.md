@@ -2,7 +2,7 @@
 
 Independent generic runtime conformance capsules.
 
-[`f3/`](f3/README.md) owns the accepted DriverActor/resource lifecycle capsule. It runs platform-neutral unit and mock evidence on Windows and native Linux, plus an exact-profile native Windows DriverActor capsule.
+[`f3/`](f3/README.md) owns the accepted DriverActor/resource lifecycle capsule. [`f4/`](f4/README.md) owns bounded device-memory evidence and the retained native Linux engineering handoff. Both run portable logic on Windows and native Linux; their native CUDA claim is currently Windows-only.
 
 Initial oracle order:
 

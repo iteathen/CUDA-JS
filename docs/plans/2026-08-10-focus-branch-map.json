@@ -176,25 +176,26 @@
     {
       "id": "CJS-F4",
       "type": "memory",
-      "status": "planned",
+      "status": "complete-windows-f4w-native-linux-portable-only",
       "owner": "memory",
       "dependencies": [
         "CJS-F3"
       ],
       "outputs": [
-        "device allocations",
-        "staged copies",
+        "bounded device allocations",
+        "synchronous copied Uint8Array transfers",
         "quotas/bounds",
         "transfer leases",
-        "pinned profile"
+        "allocation-before-context teardown",
+        "native Linux engineering handoff"
       ],
       "experiments": [
         "EXP-008"
       ],
       "acceptance": [
-        "pressure and bounds",
-        "in-flight lifetime",
-        "GC/teardown safety"
+        "pressure, rollback, failed-free accounting, and bounds",
+        "lease-fenced lifetime and stale generation rejection",
+        "independent MSVC byte parity and terminal teardown safety"
       ]
     },
     {

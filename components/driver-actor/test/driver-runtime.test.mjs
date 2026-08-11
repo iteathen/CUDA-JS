@@ -112,10 +112,71 @@ test('unexpected Worker loss invalidates the epoch and reports inaccessible reso
   await assert.rejects(runtime.contextStatus(before.context), expectCode('DRIVER_RUNTIME_CLOSED'));
 });
 
+test('mock device memory provides copied full and offset transfers with bounded quota and stale rejection', async () => {
+  const { runtime } = await openMockDriverRuntime({ memory: { maxDeviceBytes: 24, maxAllocationBytes: 16, maxTransferBytes: 16 } });
+  const description = await runtime.describe();
+  assert.deepEqual(description.memory.policy, { maxDeviceBytes: 24, maxAllocationBytes: 16, maxTransferBytes: 16 });
+  assert.equal(description.memory.reservedBytes, 0);
+  await assert.rejects(runtime.allocateDevice(null), expectCode('DRIVER_MEMORY_OPTIONS'));
+  await assert.rejects(runtime.allocateDevice({ byteLength: 8, extra: true }), expectCode('DRIVER_MEMORY_OPTIONS'));
+
+  const allocation = await runtime.allocateDevice({ byteLength: 16 });
+  assert.equal(allocation.kind, 'device');
+  assert.equal(allocation.byteLength, 16);
+  assert.equal(allocation.memory.kind, 'device-memory');
+  assert.equal(allocation.usage.reservedBytes, 16);
+  await assert.rejects(runtime.allocateDevice({ byteLength: 9 }), expectCode('MEMORY_QUOTA_EXCEEDED'));
+  assert.equal(runtime.health, 'healthy');
+
+  const submitted = Uint8Array.from({ length: 16 }, (_, index) => index + 1);
+  const writing = runtime.writeDevice(allocation.memory, submitted);
+  submitted.fill(255);
+  await writing;
+  await runtime.writeDevice(allocation.memory, Uint8Array.of(90, 91, 92), { deviceOffset: 5 });
+  const read = await runtime.readDevice(allocation.memory, { byteLength: 16 });
+  assert(read.bytes instanceof Uint8Array);
+  assert.equal(Buffer.isBuffer(read.bytes), false);
+  assert.deepEqual([...read.bytes], [1, 2, 3, 4, 5, 90, 91, 92, 9, 10, 11, 12, 13, 14, 15, 16]);
+  read.bytes.fill(0);
+  assert.equal((await runtime.readDevice(allocation.memory, { deviceOffset: 5, byteLength: 1 })).bytes[0], 90);
+
+  await assert.rejects(runtime.readDevice(allocation.memory, { deviceOffset: 16, byteLength: 1 }), expectCode('MEMORY_RANGE_OUT_OF_BOUNDS'));
+  await assert.rejects(runtime.writeDevice(allocation.memory, Buffer.from([1])), expectCode('MEMORY_BYTES_INVALID'));
+  await assert.rejects(runtime.writeDevice(allocation.memory, new Uint8Array(17)), expectCode('MEMORY_TRANSFER_LIMIT'));
+  assert.equal(runtime.health, 'healthy');
+  assert.equal((await runtime.memoryStatus(allocation.memory)).byteLength, 16);
+  const released = await runtime.releaseMemory(allocation.memory);
+  assert.equal(released.disposition.freed, true);
+  assert.equal(released.usage.reservedBytes, 0);
+  await assert.rejects(runtime.memoryStatus(allocation.memory), expectCode('RESOURCE_CLOSED'));
+
+  const replacement = await runtime.allocateDevice({ byteLength: 8 });
+  assert.equal(replacement.memory.slot, allocation.memory.slot);
+  assert(replacement.memory.generation > allocation.memory.generation);
+  await assert.rejects(runtime.memoryStatus(allocation.memory), expectCode('RESOURCE_STALE'));
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, true);
+  assert.deepEqual(terminal.disposalOrder.slice(-3), ['device-memory', 'context', 'library']);
+});
+
+test('unexpected Worker loss retains allocation inventory and reserved-byte evidence', async () => {
+  const { runtime, testing } = await openMockDriverRuntime({ memory: { maxDeviceBytes: 32, maxAllocationBytes: 32, maxTransferBytes: 16 } });
+  await runtime.allocateDevice({ byteLength: 12 });
+  const before = await runtime.describe();
+  assert.equal(before.inventory.counts.live, 3);
+  const terminal = await testing.terminateActor();
+  assert.equal(terminal.inventory.counts.orphaned, 3);
+  assert.equal(terminal.memory.reservedBytes, 12);
+  assert.equal(terminal.memory.allocationCount, 1);
+  assert.equal(terminal.memory.state, 'orphaned');
+});
+
 test('protocol rejects unknown commands and public records reject native-shaped values', () => {
   assert.throws(() => validateRequest({ schemaVersion: 1, requestId: 1, operation: 'native.call', payload: {} }), expectCode('DRIVER_COMMAND_UNSUPPORTED'));
   assert.throws(() => validateRequest({ schemaVersion: 1, requestId: 1, operation: 'runtime.describe', payload: { extra: true } }), expectCode('DRIVER_COMMAND_PAYLOAD'));
   assert.throws(() => assertPublicRecord({ pointer: 1n }), expectCode('DRIVER_RESULT_NATIVE_VALUE'));
   assert.throws(() => assertPublicRecord({ bytes: Buffer.alloc(8) }), expectCode('DRIVER_RESULT_NATIVE_VALUE'));
+  assert.deepEqual(assertPublicRecord({ bytes: Uint8Array.of(1, 2) }).bytes, Uint8Array.of(1, 2));
+  assert.throws(() => assertPublicRecord({ bytes: Uint8Array.of(1, 2) }, { maxByteLength: 1 }), expectCode('DRIVER_RESULT_BOUNDS'));
   assert.deepEqual(assertPublicRecord({ safe: true, values: [1, 'two', null] }), { safe: true, values: [1, 'two', null] });
 });

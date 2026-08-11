@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cuda-13.3-win-x64-msvc",
-  "status": "accepted-for-cjs-f2w",
+  "status": "accepted-for-cjs-f4w",
   "target": {
     "os": "windows",
     "architecture": "x64",
@@ -34,13 +34,15 @@
     "CUdriverProcAddressQueryResult": { "size": 4, "alignment": 4, "fields": {} },
     "CUexecAffinityParam": { "size": 8, "alignment": 4, "fields": { "type": 0, "param": 4 } },
     "CUresult": { "size": 4, "alignment": 4, "fields": {} },
-    "cuuint64_t": { "size": 8, "alignment": 8, "fields": {} }
+    "cuuint64_t": { "size": 8, "alignment": 8, "fields": {} },
+    "CUdeviceptr": { "size": 8, "alignment": 8, "fields": {} },
+    "size_t": { "size": 8, "alignment": 8, "fields": {} }
   },
   "claimLimits": [
     "Windows x64 only",
     "exact CUDA 13.3 header and toolkit inputs only",
     "no Linux support inference",
-    "no Driver behavior without EXP-012 evidence",
+    "no Driver behavior without EXP-012 and CJS-F4W evidence",
     "no Fast FFI or performance claim"
   ]
 }

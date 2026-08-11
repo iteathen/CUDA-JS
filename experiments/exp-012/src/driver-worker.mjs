@@ -12,6 +12,13 @@ const experimentId = workerData?.experimentId ?? 'EXP-012';
 if (!parentPort) throw new Error(`${experimentId} Driver owner must run in a Worker.`);
 
 const CUDA_VERSION = 13030;
+const F2_NATIVE_SYMBOLS = Object.freeze([
+  'cuCtxCreate_v4', 'cuCtxDestroy_v2', 'cuCtxGetCurrent', 'cuCtxSetCurrent',
+  'cuDeviceGet', 'cuDeviceGetAttribute', 'cuDeviceGetCount', 'cuDriverGetVersion',
+  'cuGetErrorName', 'cuGetErrorString', 'cuGetProcAddress_v2', 'cuInit',
+]);
+const f2FfiDefinitions = Object.freeze(Object.fromEntries(F2_NATIVE_SYMBOLS.map((name) => [name, cudaTier0FfiDefinitions[name]])));
+const f2SymbolAliases = Object.freeze(Object.fromEntries(Object.entries(cudaTier0SymbolAliases).filter(([, native]) => F2_NATIVE_SYMBOLS.includes(native))));
 const attributes = Object.freeze({
   maxThreadsPerBlock: 1,
   multiprocessorCount: 16,
@@ -108,7 +115,7 @@ function executeCuda(functions, library) {
 
   cuda.errors.name = errorText(functions, 'cuGetErrorName');
   cuda.errors.description = errorText(functions, 'cuGetErrorString');
-  for (const [publicName, nativeSymbol] of Object.entries(cudaTier0SymbolAliases)) {
+  for (const [publicName, nativeSymbol] of Object.entries(f2SymbolAliases)) {
     cuda.procAddress.entries.push({
       publicName,
       nativeSymbol,
@@ -167,7 +174,7 @@ try {
   }
 
   library = new ffi.DynamicLibrary(workerData.driverPath);
-  const functions = library.getFunctions(cudaTier0FfiDefinitions);
+  const functions = library.getFunctions(f2FfiDefinitions);
   const cuda = executeCuda(functions, library);
   const staleWrapper = functions.cuInit;
   library.close();
@@ -184,7 +191,7 @@ try {
     ok: true,
     result: {
       profile: { node: process.version, platform: process.platform, architecture: process.arch },
-      boundSymbols: Object.keys(cudaTier0FfiDefinitions),
+      boundSymbols: Object.keys(f2FfiDefinitions),
       missingLibrary: { rejected: missingLibraryRejected, error: missingLibraryError },
       cuda,
       cleanup: { contextDestroyed: cuda.context.destroy.status === 0, currentNull: cuda.context.getAfterDestroy.value, libraryClosed: true, staleWrapperRejected, staleWrapperError },

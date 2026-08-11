@@ -27,4 +27,4 @@ Node 22/24, macOS, 32-bit hosts, project addons, arbitrary pfn calls, shared con
 
 ## Current authorization
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted on exact host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, and cleanup evidence. The F3 control plane also passes on native Linux x86-64 without establishing Linux Driver support. Windows F4 memory contract work is dependency-ready; Linux `CJS-F2L / EXP-001` remains present, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only `CJS-F4W` are accepted on exact host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, copied-memory, and cleanup evidence. The F3/F4 control plane also passes in native Linux CI without establishing Linux Driver support. Windows F5 contract work is dependency-ready; Linux `CJS-F2L / EXP-001` remains present, deferred, and incomplete.

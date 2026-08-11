@@ -40,4 +40,4 @@
 - [`../experiments/EXP-012-windows-node-ffi-cuda-smoke.md`](../experiments/EXP-012-windows-node-ffi-cuda-smoke.md)
 - [`archive/README.md`](archive/README.md)
 
-Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted on exact evidence. The F3 control plane passes on native Linux without establishing Linux Driver support. Windows F4 memory contract work is dependency-ready; Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
+Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only `CJS-F4W` are accepted on exact evidence. The F3/F4 control plane passes in native Linux CI without establishing Linux Driver support. Windows F5 contract work is dependency-ready; Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.

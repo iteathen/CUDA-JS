@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import ffi from 'node:ffi';
 
+import { MemoryManager } from '../../../memory/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
 import { createDefaultCuCtxCreateParams } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
@@ -15,6 +16,7 @@ const DRIVER_ACTOR_SYMBOLS = Object.freeze([
   'cuInit', 'cuDriverGetVersion', 'cuDeviceGetCount', 'cuDeviceGet', 'cuDeviceGetAttribute',
   'cuGetErrorName', 'cuGetErrorString', 'cuCtxCreate_v4', 'cuCtxDestroy_v2',
   'cuCtxSetCurrent', 'cuCtxGetCurrent',
+  'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2',
 ]);
 const DRIVER_ACTOR_FFI_DEFINITIONS = Object.freeze(Object.fromEntries(
   DRIVER_ACTOR_SYMBOLS.map((symbol) => [symbol, cudaTier0FfiDefinitions[symbol]]),
@@ -48,7 +50,7 @@ function canonicalDriverPath() {
   return resolved;
 }
 
-export async function createBackend({ runtimeId, epoch }) {
+export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const driverPath = canonicalDriverPath();
@@ -56,6 +58,7 @@ export async function createBackend({ runtimeId, epoch }) {
   let functions;
   let libraryToken;
   let contextToken;
+  let memory;
 
   function errorText(functionName, status) {
     try {
@@ -92,6 +95,14 @@ export async function createBackend({ runtimeId, epoch }) {
     const output = Buffer.alloc(4);
     requireSuccess(functionName, functions[functionName](output, ...args), operationId);
     return readI32(output);
+  }
+
+  function readSafeU64(storage, field) {
+    const value = storage.readBigUInt64LE(0);
+    if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+      throw new DriverRuntimeError('DRIVER_MEMORY_CAPACITY_UNSAFE', 'unsupported', `${field} exceeds the safe public byte-count range.`, { field });
+    }
+    return Number(value);
   }
 
   try {
@@ -153,7 +164,60 @@ export async function createBackend({ runtimeId, epoch }) {
       throw new DriverRuntimeError('DRIVER_CONTEXT_MISMATCH', 'immediate-driver', 'Created context is not current on the owning Worker.', {}, { operationId: 0, healthBefore: 'healthy', healthAfter: health.current });
     }
 
-    function description(operationSequence = 0) {
+    function requireCurrent(operationId) {
+      const output = pointerOut();
+      requireSuccess('cuCtxGetCurrent(memory)', functions.cuCtxGetCurrent(output), operationId, 'poisoned');
+      if (readPointer(output) !== context) {
+        const before = health.current;
+        health.transition('poisoned', { reason: 'memory-context-mismatch', operationId });
+        throw new DriverRuntimeError('DRIVER_CONTEXT_MISMATCH', 'immediate-driver', 'Private context is not current for a memory operation.', {}, { operationId, healthBefore: before, healthAfter: health.current });
+      }
+    }
+
+    memory = new MemoryManager({
+      registry,
+      contextToken,
+      policy: memoryPolicy,
+      operations: {
+        async query({ operationId }) {
+          requireCurrent(operationId);
+          const freeStorage = Buffer.alloc(8);
+          const totalStorage = Buffer.alloc(8);
+          requireSuccess('cuMemGetInfo_v2', functions.cuMemGetInfo_v2(freeStorage, totalStorage), operationId);
+          return { freeBytes: readSafeU64(freeStorage, 'freeBytes'), totalBytes: readSafeU64(totalStorage, 'totalBytes') };
+        },
+        async allocate({ byteLength, operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          const status = functions.cuMemAlloc_v2(output, BigInt(byteLength));
+          if (status === 2) {
+            throw new DriverRuntimeError('CUDA_OUT_OF_MEMORY', 'pressure', 'CUDA device allocation reported out of memory.', { nativeStatus: status, byteLength }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          }
+          requireSuccess('cuMemAlloc_v2', status, operationId);
+          const address = readPointer(output);
+          if (address === 0n) throw new DriverRuntimeError('DRIVER_MEMORY_NULL', 'immediate-driver', 'CUDA allocation succeeded but returned a null address.', { byteLength }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return address;
+        },
+        async free({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemFree_v2', functions.cuMemFree_v2(native), operationId);
+          return { nativeFreed: true };
+        },
+        async write({ native, deviceOffset, bytes, operationId }) {
+          requireCurrent(operationId);
+          const staging = Buffer.from(bytes);
+          requireSuccess('cuMemcpyHtoD_v2', functions.cuMemcpyHtoD_v2(native + BigInt(deviceOffset), staging, BigInt(staging.byteLength)), operationId);
+        },
+        async read({ native, deviceOffset, byteLength, operationId }) {
+          requireCurrent(operationId);
+          const staging = Buffer.alloc(byteLength);
+          requireSuccess('cuMemcpyDtoH_v2', functions.cuMemcpyDtoH_v2(staging, native + BigInt(deviceOffset), BigInt(byteLength)), operationId);
+          return Uint8Array.from(staging);
+        },
+      },
+    });
+
+    async function description(operationSequence = 0) {
       return {
         schemaVersion: 1,
         runtime: { id: runtimeId, epoch, state: 'open', backend: 'windows-native' },
@@ -161,14 +225,16 @@ export async function createBackend({ runtimeId, epoch }) {
         driver: { apiVersion: driverVersion, deviceCount },
         device: { ordinal: 0, attributes },
         context: contextToken,
+        memory: await memory.usage(operationSequence),
         health: health.snapshot(),
         inventory: registry.inventory(),
         operationSequence,
-        claim: 'exact-windows-f3w-profile',
+        claim: 'exact-windows-f4w-profile',
       };
     }
 
     return {
+      inventory() { return registry.inventory(); },
       async describe({ operationId }) {
         return description(operationId);
       },
@@ -216,6 +282,7 @@ export async function createBackend({ runtimeId, epoch }) {
           operationSequence: operationId,
         };
       },
+      memory,
     };
   } catch (error) {
     const teardown = await registry.closeAll();

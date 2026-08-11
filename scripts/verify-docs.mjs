@@ -64,10 +64,17 @@ const required = [
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
+  'components/memory/README.md', 'components/memory/component.yaml',
+  'components/memory/index.mjs', 'components/memory/src/memory-manager.mjs',
+  'components/memory/test/memory-manager.test.mjs',
   'schemas/README.md', 'conformance/README.md',
   'conformance/f3/README.md', 'conformance/f3/evidence.mjs',
   'conformance/f3/run-mock.mjs', 'conformance/f3/run-native-windows.mjs',
   'conformance/f3/verify.mjs',
+  'conformance/f4/README.md', 'conformance/f4/evidence.mjs',
+  'conformance/f4/run-mock.mjs', 'conformance/f4/build-native-windows.mjs',
+  'conformance/f4/run-native-windows.mjs', 'conformance/f4/verify.mjs',
+  'conformance/f4/native/windows-memory-oracle.c',
   'schemas/cuda-runtime-ir.schema.json', 'schemas/cuda-13.3/provenance.json',
   'schemas/cuda-13.3/tier-0/selection.json', 'schemas/cuda-13.3/tier-0/semantic-overlay.json',
   'schemas/cuda-13.3/linux-x64/generated/header-facts.json',
@@ -88,7 +95,7 @@ const required = [
   'tools/cuda-schema/src/pipeline.mjs',
   '.github/CODEOWNERS', '.github/pull_request_template.md', '.github/workflows/docs.yml',
   'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
-  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs',
+  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs',
 ];
 
 for (const relative of required) {
@@ -119,6 +126,7 @@ for (const relative of [
   'tools/cuda-schema/component.yaml',
   'components/resource-registry/component.yaml',
   'components/driver-actor/component.yaml',
+  'components/memory/component.yaml',
   'package.json',
 ]) {
   try {
@@ -215,6 +223,7 @@ for (const relative of files) {
       && !relative.startsWith('experiments/exp-000/generated/')
       && !relative.startsWith('experiments/exp-001/generated/')
       && !relative.startsWith('experiments/exp-012/generated/')
+      && !relative.startsWith('conformance/f4/native/')
       && relative !== 'schemas/cuda-13.3/linux-x64/generated/native-abi-probe.c') {
     errors.push(`C source is outside a registered generated-source boundary: ${relative}`);
   }
@@ -228,7 +237,9 @@ for (const relative of files) {
       && !relative.startsWith('experiments/exp-012/')
       && !relative.startsWith('components/resource-registry/')
       && !relative.startsWith('components/driver-actor/')
+      && !relative.startsWith('components/memory/')
       && !relative.startsWith('conformance/f3/')
+      && !relative.startsWith('conformance/f4/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
@@ -245,4 +256,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000, accepted F1B/F2W/F3W, and implemented Linux F2L/F3-control-plane preparation checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000, accepted F1B/F2W/F3W/F4W, and retained Linux native handoff checks passed');

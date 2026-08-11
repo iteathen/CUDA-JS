@@ -1,6 +1,6 @@
 # CUDA-JS Validation Policy
 
-## Accepted Windows F3W / hardware-deferred Linux Driver phase
+## Accepted Windows F4W / hardware-deferred Linux Driver phase
 
 Run:
 
@@ -10,6 +10,7 @@ npm run exp:000:build
 npm run verify
 npm run exp:012  # exact qualified Windows x64 Driver/GPU profile
 npm run f3  # exact Windows native F3 plus platform-neutral F3 capsule
+npm run f4  # exact Windows native F4 plus platform-neutral F4 capsule
 npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
@@ -29,6 +30,8 @@ F1B changes additionally require pinned official-header identity, deterministic 
 F2W changes additionally require canonical Windows Driver discovery, exact Toolkit/header/import-library identity, MSVC ABI and Driver oracles, all generated Tier-0 exports and procedure queries, permission/negative controls, private Worker ownership, terminal context/library/Worker cleanup, and no Linux inference.
 
 F3W changes additionally require accepted SPEC-0003, one Worker-owned context, a closed command protocol, bounded pending work, opaque runtime/kind/slot/generation/state validation, parent/child dependencies, in-flight leases, conservative health, responsive application-thread behavior, deterministic graceful teardown, and restart-required unexpected-loss evidence that makes no inaccessible cleanup claim. Run `npm run f3:portable` on native Linux when shared F3 control-plane owners change. That result does not replace Linux Driver/GPU qualification.
+
+F4W changes additionally require accepted SPEC-0004, exact memory-policy validation, safe range partitions, quota reservation/rollback, failed-free accounting, copied-byte snapshot isolation, transfer leases, five generated named exports, independent MSVC byte parity, allocation-before-context teardown, zero terminal resources, and a human native Linux handoff. Run `npm run f4:portable` in native Linux CI whenever shared memory or protocol owners change. That result does not replace native Linux Driver/GPU/memory qualification.
 
 F2L preparation changes additionally require the exact Ubuntu/Node profile, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support.
 

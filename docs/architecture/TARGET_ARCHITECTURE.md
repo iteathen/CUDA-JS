@@ -113,4 +113,4 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 
 ## Current phase
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, and Windows `CJS-F3W` are accepted on exact evidence. The F3 control plane also passes on native Linux without authorizing Linux Driver execution. Windows F4 memory contract work is dependency-ready; this architecture does not authorize memory or later production components without their accepted detailed specifications and qualified native evidence.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, `CJS-F3W`, and synchronous copied-device-memory `CJS-F4W` are accepted on exact evidence. The F3/F4 control plane and deterministic schema generation also pass in native Linux CI without authorizing Linux Driver execution. Windows F5 contract work is dependency-ready; this architecture does not authorize module/launch/completion or later production components without accepted detailed specifications and qualified native evidence.

@@ -59,7 +59,7 @@ These remain ownership reservations except for the explicitly authorized F1A, F1
 
 ## Current phase gate
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted on exact host, ABI, Driver, GPU, oracle, permission, actor-affinity, resource, and cleanup evidence. The platform-neutral F3 capsule also passes on native Linux x86-64 without establishing Linux Driver support. The repository remains in an **active implementation phase** with Windows F4 memory contract work dependency-ready. Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only synchronous-memory `CJS-F4W` are accepted on exact host, ABI, Driver, GPU, oracle, permission, actor-affinity, resource, byte-parity, and cleanup evidence. The platform-neutral F3/F4 capsules also pass in native Linux CI without establishing Linux Driver support. The repository remains in an **active implementation phase** with Windows F5 contract work dependency-ready. Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
 
 ## Foundation completeness test
 

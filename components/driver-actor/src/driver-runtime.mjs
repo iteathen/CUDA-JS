@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { Worker } from 'node:worker_threads';
 
+import { normalizeMemoryPolicy } from '../../memory/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { deserializeError, DriverRuntimeError, validationError } from './errors.mjs';
 import { requestRecord } from './protocol.mjs';
 
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
-const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending']);
+const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory']);
 
 function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -20,6 +21,7 @@ function exactOptionFields(options) {
 
 function freezeRecord(value) {
   if (value === null || typeof value !== 'object') return value;
+  if (value instanceof Uint8Array) return value;
   for (const item of Array.isArray(value) ? value : Object.values(value)) freezeRecord(item);
   return Object.freeze(value);
 }
@@ -39,6 +41,7 @@ class DriverRuntime {
   #backend;
   #testHooks;
   #maxPending;
+  #memoryPolicy;
   #runtimeId = randomUUID();
   #epoch = 1;
   #worker;
@@ -53,15 +56,17 @@ class DriverRuntime {
   #exitPromise;
   #exitCode = null;
   #lastInventory = null;
+  #lastMemory = null;
   #description = null;
   #closePromise = null;
   #gracefulTerminal = null;
   #terminalReport = null;
 
-  constructor({ backend, testHooks, maxPending }) {
+  constructor({ backend, testHooks, maxPending, memoryPolicy }) {
     this.#backend = backend;
     this.#testHooks = testHooks;
     this.#maxPending = maxPending;
+    this.#memoryPolicy = memoryPolicy;
     this.#readyPromise = new Promise((resolve, reject) => { this.#readyResolve = resolve; this.#readyReject = reject; });
     this.#exitPromise = new Promise((resolve) => { this.#exitResolve = resolve; });
   }
@@ -83,6 +88,38 @@ class DriverRuntime {
   async contextStatus(token = this.#description?.context) {
     if (!isResourceToken(token)) throw validationError('DRIVER_CONTEXT_TOKEN', 'contextStatus requires the exact opaque context token.');
     return this.#request('context.status', { token });
+  }
+
+  async allocateDevice(options = {}) {
+    if (!plainObject(options) || Object.keys(options).length !== 1 || !Object.hasOwn(options, 'byteLength')) {
+      throw validationError('DRIVER_MEMORY_OPTIONS', 'allocateDevice requires exactly one byteLength field.');
+    }
+    return this.#request('memory.allocate', { byteLength: options.byteLength });
+  }
+
+  async memoryStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'memoryStatus requires an exact opaque memory token.');
+    return this.#request('memory.status', { token });
+  }
+
+  async writeDevice(token, bytes, options = {}) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'writeDevice requires an exact opaque memory token.');
+    if (!(bytes instanceof Uint8Array) || Buffer.isBuffer(bytes)) throw validationError('MEMORY_BYTES_INVALID', 'writeDevice requires an ordinary Uint8Array.');
+    if (!plainObject(options) || Object.keys(options).some((key) => key !== 'deviceOffset')) throw validationError('DRIVER_MEMORY_OPTIONS', 'writeDevice options contain unknown fields.');
+    if (bytes.byteLength > this.#memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'writeDevice bytes exceed the configured transfer limit.');
+    const snapshot = Uint8Array.from(bytes);
+    return this.#request('memory.write', { token, bytes: snapshot, deviceOffset: options.deviceOffset ?? 0 });
+  }
+
+  async readDevice(token, options) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'readDevice requires an exact opaque memory token.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'byteLength'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'readDevice options are invalid.');
+    return this.#request('memory.read', { token, deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength });
+  }
+
+  async releaseMemory(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'releaseMemory requires an exact opaque memory token.');
+    return this.#request('memory.release', { token });
   }
 
   async close() {
@@ -126,7 +163,7 @@ class DriverRuntime {
   async #start() {
     const execArgv = this.#backend === 'windows-native' ? ['--experimental-ffi'] : [];
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
-      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch },
+      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy },
       execArgv,
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
@@ -167,6 +204,7 @@ class DriverRuntime {
     if (!pending) return;
     this.#pending.delete(message.requestId);
     if (message.ok === true) {
+      if (message.state) this.#updateStateFromRecord(message.state);
       const result = freezeRecord(message.result);
       this.#updateStateFromRecord(result);
       if (pending.operation === 'runtime.close') this.#gracefulTerminal = result;
@@ -206,6 +244,7 @@ class DriverRuntime {
       reason,
       health: { current: 'restart-required', history: [{ before, after: 'restart-required', reason, operationId: null }] },
       inventory: orphanInventory(this.#lastInventory),
+      memory: this.#lastMemory ? freezeRecord({ ...this.#lastMemory, state: 'orphaned', reason: 'worker-lost' }) : null,
       workerExitCode,
       workerExited: workerExitCode !== null,
     });
@@ -215,6 +254,8 @@ class DriverRuntime {
     if (record?.health?.current) this.#health = record.health.current;
     if (record?.inventory) this.#lastInventory = record.inventory;
     if (record?.teardown?.inventory) this.#lastInventory = record.teardown.inventory;
+    if (record?.memory?.policy) this.#lastMemory = record.memory;
+    if (record?.usage?.policy) this.#lastMemory = record.usage;
   }
 
   #request(operation, payload) {
@@ -246,9 +287,10 @@ function validateMaxPending(value) {
 
 export async function openDriverRuntime(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64) });
+  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}) });
 }
 
-export async function openDriverRuntimeForTesting({ maxPending = 64 } = {}) {
-  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(maxPending) });
+export async function openDriverRuntimeForTesting(options = {}) {
+  if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
+  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}) });
 }

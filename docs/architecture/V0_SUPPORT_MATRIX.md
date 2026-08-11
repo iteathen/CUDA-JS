@@ -21,8 +21,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap and F3W actor/resource lifecycle accepted; memory/launch/completion and native deferred errors remain staged |
-| Linux glibc | x86-64 SysV | GPU-free preparation and F3 control plane complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then run the native DriverActor stage |
+| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap, F3W actor/resource lifecycle, and bounded synchronous F4W device memory accepted; launch/completion and native deferred errors remain staged |
+| Linux glibc | x86-64 SysV | GPU-free schema plus F3/F4 control plane complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then complete the documented native DriverActor/memory stages |
 | Linux glibc | ARM64 AAPCS64/SBSA | third | loader/FFI/layout/cache/context/Driver capsules |
 | WSL2 | x86-64 | compatibility | Linux semantics plus environment diagnostics |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -73,7 +73,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Profile | V0 disposition |
 |---|---|
-| one private context per DriverActor Worker | accepted Windows F3W baseline; graceful close proven, unexpected Worker loss is restart-required until recovery is proven |
+| one private context per DriverActor Worker | accepted Windows F4W baseline; device children close first, graceful close is proven, unexpected Worker loss is restart-required until recovery is proven |
 | multiple independent DriverActors/contexts | after single-actor lifecycle passes |
 | primary-context interop | later compatibility profile |
 | shared context across Workers | excluded pending explicit design |
@@ -84,7 +84,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Capability | V0 disposition |
 |---|---|
-| device-local allocation and staged JS copies | required first real-GPU slice |
+| device-local allocation and synchronous copied JS bytes | accepted Windows F4W; portable policy/control plane passes Linux CI; native Linux Driver memory remains incomplete |
 | pinned host staging | after bounded lifetime/pressure experiment |
 | mapped host control windows | optional, small, explicit synchronization |
 | managed memory | opt-in experiment; no universal zero-copy claim |

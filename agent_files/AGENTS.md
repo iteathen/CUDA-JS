@@ -41,7 +41,7 @@ platform truth and accepted authority
 
 `CJS-F1A / EXP-000` is promoted after independent Windows x64 and native Linux x86-64 qualification. Preserve its exact-profile evidence and generated-product regression checks.
 
-`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, platform compatibility, and independent native C ABI/Driver oracles as distinct owners. The F3 control-plane capsule passes on native Linux, but Linux DriverActor execution remains deferred and incomplete until `CJS-F2L / EXP-001` passes on a qualified native Driver/GPU environment. Windows F4 memory contract work may proceed; implementation still requires an accepted detailed specification.
+`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only `CJS-F4W` are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, platform compatibility, and independent native C ABI/Driver/memory oracles as distinct owners. The F3/F4 control-plane capsules pass in native Linux CI, but Linux DriverActor and memory execution remain deferred and incomplete until `CJS-F2L / EXP-001` passes on a qualified native Driver/GPU environment. Windows F5 contract work may proceed; implementation still requires an accepted detailed specification.
 
 ## Testing and repair
 
