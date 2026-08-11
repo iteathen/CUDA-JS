@@ -2,12 +2,14 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.1",
+    "version": "0.1.0-alpha.2",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
     "private": false,
-    "testingPhase": true
+    "testingPhase": true,
+    "license": "AGPL-3.0-or-later",
+    "commercialLicensing": "available-separately"
   },
   "publicApi": {
     "schemaVersion": 1,
@@ -53,6 +55,10 @@
     "functionParameters": ["device-memory", "u32"],
     "launchConcurrency": 1,
     "compiler": "optional-nvrtc-13.3",
+    "compilerHeaderProfiles": {
+      "none": "default",
+      "cuda-cccl": "exact-manifest-verified-cuda-13.3-windows-x64"
+    },
     "linker": "optional-nvjitlink-13.3",
     "strictJit": "unsupported",
     "processIsolation": "not-selected",
@@ -77,6 +83,8 @@
     "Only the exact Windows x64 Node 26.7.0 evidence profile is qualified; successful operation does not promote support.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
-    "Registry publication and licensing remain separately gated."
+    "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",
+    "NVIDIA CUDA Toolkit headers and native providers are separately licensed system inputs and are not bundled in the package.",
+    "Registry publication remains gated on a separate release, provenance, and registry review."
   ]
 }

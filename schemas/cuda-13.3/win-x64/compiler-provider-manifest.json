@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "profile": "cuda-13.3-windows-x64-compiler",
   "node": "v26.7.0",
   "toolkitVersion": "13.3",
@@ -26,6 +26,16 @@
   "headers": {
     "nvrtc.h": "316a1375c18c69c5f1857dfc154c47a58a6795ffe462d2fcb50f5272ea472d21",
     "nvJitLink.h": "164d0a1109a316d07da012bd898af3c93cd896b0f3b4368844d1bcfc418c54d9"
+  },
+  "headerProfiles": {
+    "cudaCccl": {
+      "profile": "cuda-13.3-cccl-cuda-nv-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": ["cuda", "nv"],
+      "fileCount": 1166,
+      "byteLength": 8527126,
+      "sha256": "e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c"
+    }
   },
   "claim": "Exact reviewed local CUDA 13.3 Windows x64 compiler provider profile only."
 }

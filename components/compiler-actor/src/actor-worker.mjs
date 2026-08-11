@@ -8,7 +8,7 @@ import { CompilerRuntimeError, serializeError } from './errors.mjs';
 if (!parentPort) throw new Error('CompilerActor must run in a Worker.');
 
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-function publicProvider(provider) { return { profile: provider.identity.profile, nvrtc: provider.identity.nvrtc, nvrtcBuiltins: provider.identity.nvrtcBuiltins, nvJitLink: provider.identity.nvJitLink }; }
+function publicProvider(provider) { return { profile: provider.identity.profile, nvrtc: provider.identity.nvrtc, nvrtcBuiltins: provider.identity.nvrtcBuiltins, nvJitLink: provider.identity.nvJitLink, headerProfiles: provider.identity.headerProfiles ?? null }; }
 
 async function loadBackend() {
   if (workerData.backend === 'windows-native') return (await import('./backends/windows-native.mjs')).createBackend();
@@ -61,6 +61,7 @@ try {
         else if (request.operation === 'compiler.compile') {
           const normalized = normalizeCompileRequest(request.payload, backend.provider.platform);
           const identity = compileIdentity(normalized, backend.provider);
+          if (backend.prepareCompile) await backend.prepareCompile(normalized);
           const cached = await cache.lookup(identity);
           let bytes = cached.artifact;
           let log = '';
@@ -77,6 +78,7 @@ try {
             log,
             cache: { key: cached.key, status: cached.status },
             provider: publicProvider(backend.provider),
+            headerProfile: normalized.options.headerProfile,
             health: { current: health },
             operationSequence,
           };

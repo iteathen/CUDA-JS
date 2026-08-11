@@ -1,0 +1,57 @@
+name: Bug report
+description: Report a reproducible CUDA-JS defect without overstating platform support.
+title: "Bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve CUDA-JS. Remove secrets, usernames, native addresses, and sensitive paths from evidence.
+  - type: input
+    id: revision
+    attributes:
+      label: CUDA-JS version or commit
+      placeholder: 0.1.0-alpha.2 or full commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Exact environment
+      description: Operating system/architecture, Node version and module ABI, CUDA Toolkit, NVIDIA Driver/API, GPU, and relevant flags.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest safe command or code and whether mock, portable, or native providers are involved.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result and first divergence
+    validations:
+      required: true
+  - type: textarea
+    id: cleanup
+    attributes:
+      label: Cleanup and resource state
+      description: State whether Workers exited and whether contexts, allocations, modules, compiler objects, caches, or processes remain.
+    validations:
+      required: true
+  - type: checkboxes
+    id: declarations
+    attributes:
+      label: Declarations
+      options:
+        - label: I removed credentials, private paths, raw pointers, and other sensitive data.
+          required: true
+        - label: I understand a passing portable/mock case does not establish native CUDA support.
+          required: true

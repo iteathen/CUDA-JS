@@ -39,7 +39,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `experiment.exp-001` | Native Linux official-input acquisition, ABI probe, C oracle, readiness diagnostics, real-Driver Node FFI smoke, and engineer handoff | [`../experiments/exp-001/`](../experiments/exp-001/README.md) | GPU-free preparation passes; Driver/GPU qualification deferred |
 | `experiment.exp-009` | NVRTC compile, nvJitLink composition, deterministic PTX/cubin parity, provider lifecycle, and direct MSVC oracle | [`../experiments/exp-009/`](../experiments/exp-009/README.md) | Promoted on exact Windows x64 CUDA 13.3 profile; native Linux providers deferred |
 | `experiment.exp-012` | Windows Driver discovery, generated bindings, procedure verification, private context lifecycle, MSVC oracle, permission/negative controls, and cleanup evidence | [`../experiments/exp-012/`](../experiments/exp-012/README.md) | Accepted on exact Windows x64 profile |
-| `project.interop` | Public boundary with UMCGS | [`../docs/INTEROP_WITH_UMCGS.md`](../docs/INTEROP_WITH_UMCGS.md) | Active |
+| `project.interop` | Public boundary with CUDA-MCGS (`iteathen/UMCGS`) | [`../docs/INTEROP_WITH_CUDA_MCGS.md`](../docs/INTEROP_WITH_CUDA_MCGS.md) | Active |
 | `project.archive` | Superseded design provenance | [`../docs/archive/`](../docs/archive/README.md) | Active, non-authoritative |
 | `project.state` | Current phase and verified repository state | [`../STATUS.md`](../STATUS.md) | Active |
 | `project.next-step` | One coherent current boundary | [`../next_step.yaml`](../next_step.yaml) | Active |
@@ -52,13 +52,14 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `conformance.f4` | Portable copied-memory/control-plane evidence, independent MSVC parity, native Windows cleanup, and Linux handoff | [`../conformance/f4/`](../conformance/f4/README.md) | Accepted Windows F4W; native Linux CUDA incomplete |
 | `runtime.execution` | Bounded PTX/cubin identity, declared functions, packed arguments, memory leases, one private stream/event poller, and terminal completion | [`../components/execution/`](../components/execution/README.md) | Accepted Windows F6W internal experimental; portable logic ready for Linux adapter |
 | `conformance.f5` | Portable launch/completion/loss evidence, independent MSVC vector parity, native Windows cleanup, and Linux handoff | [`../conformance/f5/`](../conformance/f5/README.md) | Accepted Windows F5W; native Linux CUDA incomplete |
-| `runtime.compiler-actor` | Typed NVRTC/nvJitLink Worker, canonical provider identity, copied PTX/cubin artifacts, validated cache, health, and lifecycle | [`../components/compiler-actor/`](../components/compiler-actor/README.md) | Accepted Windows F6W internal experimental; native Linux providers incomplete |
+| `runtime.compiler-actor` | Typed NVRTC/nvJitLink Worker, canonical provider identity, manifest-verified optional toolkit headers, copied PTX/cubin artifacts, validated cache, health, and lifecycle | [`../components/compiler-actor/`](../components/compiler-actor/README.md) | Accepted Windows F9 prerequisite internal experimental; native Linux providers incomplete |
 | `conformance.f6` | Portable compiler/cache/lifecycle evidence, independent MSVC artifact parity, PTX/cubin Windows execution, and Linux handoff | [`../conformance/f6/`](../conformance/f6/README.md) | Accepted Windows F6W; native Linux CUDA incomplete |
 | `runtime.platform-diagnostics` | Sanitized host classification, exact Windows CUDA device-mode/watchdog assessment, permission disposition, and fail-closed support reasons | [`../components/platform-diagnostics/`](../components/platform-diagnostics/README.md) | Accepted Windows F7W internal experimental; Linux/WSL classification only |
 | `conformance.f7` | Platform classification, sanitized boundaries, permission denial/allow, failure/property partitions, repeated lifecycle stress, Windows native diagnostics, and Linux/WSL handoff | [`../conformance/f7/`](../conformance/f7/README.md) | Accepted Windows F7W; native Linux/ARM64/WSL CUDA incomplete |
 | `runtime.facade` | Safe package API, private resource capabilities, stable errors, optional compiler ownership, known-incompatible preflight, unconfirmed testing operation, and aggregate close | [`../components/runtime-facade/`](../components/runtime-facade/README.md) | Public Windows testing alpha; exact F8W evidence retained; mock-only portable consumer entry |
 | `packaging.compatibility` | Exact package/API/Node/platform/capability/migration and evidence-invalidation identity | [`../packaging/compatibility-manifest.json`](../packaging/compatibility-manifest.json) | Accepted F8W; registry publication guarded |
 | `conformance.f8` | Tarball contents, clean install/uninstall, first-consumer deletion, independent consumers, instance isolation, installed Windows execution, and Linux readiness | [`../conformance/f8/`](../conformance/f8/README.md) | Accepted Windows F8W; native Linux/ARM64/WSL CUDA incomplete |
+| `conformance.f9` | Manifest-verified CUDA CCCL header profile, public-facade atomic publication, device-closed terminal launch, and cleanup | [`../conformance/f9/`](../conformance/f9/README.md) | Accepted exact Windows CUDA-JS prerequisite; cross-repository pair pending CUDA-MCGS |
 | `conformance.node` | Exact Node release registry, FFI/permission probes, verified no-support rows, and generated Node support list | [`../conformance/node/`](../conformance/node/README.md) and [`../docs/NODE_SUPPORT.md`](../docs/NODE_SUPPORT.md) | Active; exact Node 26.7.0 qualified, all other listed releases no-support |
 | `conformance.hardware` | Exact-profile support registry, architecture and extended-axis coverage, qualification orchestration, read-only Hyper-V readiness, evidence indexing/sanitization, and generated public hardware list | [`../conformance/hardware/`](../conformance/hardware/README.md) and [`../docs/HARDWARE_SUPPORT.md`](../docs/HARDWARE_SUPPORT.md) | Active; one accepted Windows x64 GPU profile, current Hyper-V route verified no-support, broader campaign open |
 
@@ -73,7 +74,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `benchmarks` | Future reproducible mechanism/regression evidence | [`../benchmarks/`](../benchmarks/README.md) | Reserved |
 | `packaging` | No-addon package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | F8 package/compatibility accepted; registry release guarded |
 | `tools` | Schema/code-generation and developer tools | [`../tools/`](../tools/README.md) | F1B importer/generator accepted internal tooling |
-| `tests` | Cross-component and end-to-end test ownership | [`../tests/`](../tests/README.md) | F8 package consumers active; F9 compatible pair deferred |
+| `tests` | Cross-component and end-to-end test ownership | [`../tests/`](../tests/README.md) | F9 generic prerequisite active; exact compatible pair pending CUDA-MCGS |
 | `third-party` | Donor material with exact provenance and reuse decision | [`../third_party/`](../third_party/README.md) | Reserved |
 | `scripts` | Thin validation and exact-toolchain experiment entry points | [`../scripts/`](../scripts/) | Active |
 
@@ -85,7 +86,7 @@ These IDs organize implemented and future specifications. Status in the governin
 |---|---|---|
 | `runtime.facade` | Safe asynchronous public API and capability negotiation | Accepted SPEC-0008 plus F8 package, consumer, native Windows, and portable Linux evidence |
 | `runtime.driver-actor` | Thread-affine CUDA context and raw-resource ownership | Accepted SPEC-0003 plus exact Windows native evidence; Linux native execution still requires F2L |
-| `runtime.compiler-actor` | NVRTC/nvJitLink provider isolation, validated cache, and artifact production | Accepted SPEC-0006 plus Windows EXP-009/F6W evidence; native Linux requires independent qualification |
+| `runtime.compiler-actor` | NVRTC/nvJitLink provider isolation, manifest-verified toolkit header profiles, validated cache, and artifact production | Accepted SPEC-0006/SPEC-0009 plus Windows EXP-009/F6W/F9 evidence; native Linux requires independent qualification |
 | `runtime.resource-registry` | Opaque capability identity, generation, state and parent/child leases | Accepted SPEC-0003 and F3 conformance |
 | `runtime.memory` | Bounded synchronous device allocation, copied transfers, quota, ranges, and lifetime | Accepted SPEC-0004 plus Windows F4W native conformance; later memory kinds need new contracts |
 | `runtime.execution` | PTX/cubin module/function identity, packed launch, memory leases, private stream/event completion, and terminality | Accepted SPEC-0005 plus SPEC-0006 cubin handoff and Windows F6W native conformance; concurrency needs a new contract |
@@ -95,7 +96,7 @@ These IDs organize implemented and future specifications. Status in the governin
 | `schema.header-facts` | Pinned official-header import and normalized ABI facts | Accepted schema/import specification and native layout oracle |
 | `schema.semantic-overlay` | Reviewed blocking, ownership, lifecycle, safety and version meaning | Accepted semantic-overlay specification |
 | `backend.node-ffi` | Private Node host-call substrate | Windows F2W accepted; each additional platform requires independent qualification evidence |
-| `interop.umcgs` | Public package/capability boundary consumed by UMCGS | Accepted CUDA-JS public contracts and compatible-pair specification |
+| `interop.cuda-mcgs` | Public package/capability boundary consumed by CUDA-MCGS (`iteathen/UMCGS`) | Accepted CUDA-JS public/header-profile contracts; exact compatible-pair evidence pending CUDA-MCGS integration |
 
 ## Changing the registry
 

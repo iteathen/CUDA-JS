@@ -306,7 +306,7 @@
       "reuse_disposition": "deferred EXP-011 candidate only; not a baseline dependency"
     },
     {
-      "id": "UMCGS-RUNTIME-BOUNDARY",
+      "id": "CUDA-MCGS-RUNTIME-BOUNDARY",
       "kind": "internal_authority",
       "project": "iteathen/UMCGS",
       "revision": "private pre-release contract snapshot inspected 2026-08-10",

@@ -14,7 +14,7 @@ The difficult part is not calling one exported function. The difficult part is m
 
 ## Accepted architectural direction
 
-1. **Repository separation.** CUDA-JS owns the generic Node/CUDA runtime. UMCGS owns search semantics and consumes only public versioned CUDA-JS contracts.
+1. **Repository separation.** CUDA-JS owns the generic Node/CUDA runtime. CUDA-MCGS, currently housed in `iteathen/UMCGS`, owns search semantics and consumes only public versioned CUDA-JS contracts.
 2. **Node-FFI-first host binding.** Version zero plans around the supported public Node 26 FFI substrate rather than a project-specific addon. This is an evidence-gated choice, not a permanent ban on measured alternatives.
 3. **Generated ABI facts.** Pinned official headers feed a deterministic importer and Runtime IR. Curated semantic and lifecycle overlays remain separately reviewed.
 4. **Named-export invocation.** `cuGetProcAddress` verifies requested version, status, and semantics; v0 invokes approved named exports until arbitrary returned-function-pointer construction is independently qualified.

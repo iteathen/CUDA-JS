@@ -6,7 +6,7 @@
 
 ## Current phase
 
-The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows `CJS-F3W` through `CJS-F8W` are accepted on their bounded evidence. The platform-neutral F3 through F8 control plane and package path also pass without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work.
+The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows `CJS-F3W` through `CJS-F8W`, and the CUDA-JS-owned `CJS-F9-A/B` prerequisite are accepted on their bounded evidence. The platform-neutral F3 through F8 control plane and package path also pass without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work. The exact cross-repository compatible pair remains pending independent CUDA-MCGS assessment and implementation in `iteathen/UMCGS`.
 
 ## Promoted F1A result
 
@@ -141,7 +141,7 @@ The human F7 handoff in [`conformance/f7/README.md`](conformance/f7/README.md) s
 
 ## Accepted Windows F8W result
 
-The amended F8 slice publishes the `cuda-js` 0.1.0-alpha.1 no-addon ESM testing package and `runtime.facade` under [`SPEC-0008`](docs/specs/SPEC-0008-package-public-facade.md):
+The amended F8 slice publishes the `cuda-js` 0.1.0-alpha.2 no-addon ESM testing package and `runtime.facade` under [`SPEC-0008`](docs/specs/SPEC-0008-package-public-facade.md):
 
 - exactly three package exports for the native facade, immutable compatibility metadata, and an explicitly mock-only testing facade;
 - Node 26.1.0-or-later testing admission, exact Node 26.7.0/module-ABI 147 qualification evidence, stable public errors, optional compiler ownership, and aggregate terminal close;
@@ -150,7 +150,17 @@ The amended F8 slice publishes the `cuda-js` 0.1.0-alpha.1 no-addon ESM testing 
 - an installed Windows package consumer that executes the tracked PTX vector kernel with exact checksum `15600773` and graceful Worker/resource closure;
 - portable Linux package/import/mock/readiness controls and a human native-adapter handoff without promoting Linux CUDA support.
 
-Strict JIT remains explicitly unsupported because no measured mandatory gap exists. Process isolation remains an optional future profile because accepted in-process Workers satisfy the current event-loop and lifecycle contract; Worker loss is still restart-required. The package manifest is public and unconfirmed Windows CUDA profiles may operate for testing without an opt-in. Registry publication remains pending an owner-selected license and separate release review.
+Strict JIT remains explicitly unsupported because no measured mandatory gap exists. Process isolation remains an optional future profile because accepted in-process Workers satisfy the current event-loop and lifecycle contract; Worker loss is still restart-required. The package manifest is public and unconfirmed Windows CUDA profiles may operate for testing without an opt-in. CUDA-JS is licensed under AGPL-3.0-or-later, with separately negotiated commercial licensing available; registry publication remains pending a separate release, provenance, and registry review.
+
+The repository now declares `iteathen` as its GitHub Sponsors recipient and includes copy-ready, no-reward profile text. As of 2026-08-11, <https://github.com/sponsors/iteathen> redirects to the ordinary account profile, so the account owner still needs to complete GitHub's one-time Sponsors, payout, tax, two-factor-authentication, and approval flow. Sponsors payouts do not automatically credit the GitHub subscription bill.
+
+## Accepted CUDA-JS F9 prerequisite
+
+The accepted [`SPEC-0009`](docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md) slice adds one typed, path-free `cuda-cccl` compiler header profile. Before cache lookup, the Windows CompilerActor inventories and snapshots the exact CUDA 13.3 `include/cccl/{cuda,nv}` virtual roots and verifies 1,166 files, 8,527,126 bytes, and aggregate SHA-256 `e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c`. The selected profile and manifest identity enter the SPEC-0009 compile cache/evidence key; default `none` compilation retains the SPEC-0006 identity and native option vector.
+
+On the exact Windows x64 Node 26.7.0/CUDA 13.3/Driver API 13030/compute-capability 7.5 profile, the public facade compiles a consumer-neutral `<cuda/atomic>` fixture, completes one two-thread device-scope release/acquire publication launch, and returns words `3737844653, 1, 3737844653`. The final PTX SHA-256 is `93e5162c8a16b33f8f85eb9e68bd766bd6585a01e91f8a7ca95c38ddbe9cd0fe`. The CompilerActor destroys its program, the DriverActor reports zero live/orphaned resources, and aggregate close is graceful.
+
+This result proves one generic atomic-publication capability through the public package path. It does not prove arbitrary CUDA C++ headers, CUDA-MCGS semantics, a scheduler, performance, Linux support, or an exact released compatible pair.
 
 ## Hardware qualification program
 
@@ -185,4 +195,4 @@ F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, revi
 
 ## Immediate next boundary
 
-Operate the public testing campaign on unconfirmed Windows CUDA hardware and Node 26.1.0-or-later candidates through the generated evidence lists and qualification kits while keeping [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained F2L–F8L runbooks. Extended axes #20–#29 remain independently completable without widening support claims. The next runtime boundary is a detailed F9 UMCGS compatible-pair specification consuming only the accepted package contract; registry publication and licensing remain separately gated.
+Preserve the accepted CUDA-JS F9 prerequisite while the independently assessed CUDA-MCGS work package defines its search-owned package/adapter contract and exact compatible-pair capsule. Continue public testing and retained Linux qualification independently without widening support claims. Licensing is selected; registry publication remains separately gated on release, provenance, and registry review.

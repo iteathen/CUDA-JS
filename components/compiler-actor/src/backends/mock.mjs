@@ -11,11 +11,20 @@ export async function createBackend() {
     architecture: process.arch,
     node: process.version,
     nodeAbi: process.versions.modules,
-    identity: Object.freeze({ profile: 'portable-compiler-mock-v1', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null }),
+    identity: Object.freeze({
+      profile: 'portable-compiler-mock-v1',
+      nvrtc: null,
+      nvrtcBuiltins: null,
+      nvJitLink: null,
+      headerProfiles: Object.freeze({
+        cudaCccl: Object.freeze({ profile: 'portable-mock-cuda-cccl-v1', algorithm: 'mock-only', roots: Object.freeze(['cuda', 'nv']), fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) }),
+      }),
+    }),
   });
   return {
     provider,
     resources,
+    async prepareCompile() {},
     async compile(request) {
       if (failureMode === 'compile-create') throw new CompilerRuntimeError('COMPILER_INJECTED_CREATE_FAILURE', 'provider', 'Injected compiler program creation failure.');
       resources.programsCreated += 1;

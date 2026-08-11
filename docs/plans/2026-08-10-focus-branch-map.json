@@ -14,7 +14,7 @@
     "nonblocking main event loop",
     "strict JIT claims require direct qualification evidence",
     "finite resources, health states, deterministic teardown",
-    "no UMCGS/search semantics",
+    "no CUDA-MCGS/search semantics",
     "compiler providers declare and contain process-global native side effects",
     "unexpected actor loss fails the runtime epoch and never claims inaccessible native cleanup"
   ],
@@ -30,7 +30,7 @@
         "exact commit",
         "bundle/zip/checksums",
         "remote publication handoff",
-        "UMCGS exact-reference update"
+        "CUDA-MCGS exact-reference update"
       ],
       "acceptance": [
         "no competing accepted ADR/plan",
@@ -305,14 +305,16 @@
     },
     {
       "id": "CJS-F9",
-      "type": "umcgs-interop",
-      "status": "planned",
+      "type": "cuda-mcgs-interop",
+      "status": "cuda_js_prerequisite_complete_pair_pending_cuda_mcgs",
       "owner": "public-integration",
       "dependencies": [
         "CJS-F8"
       ],
       "outputs": [
         "execution-package contract",
+        "trusted cuda-cccl header profile",
+        "generic atomic-publication capability capsule",
         "compatible-pair capsule",
         "device-closure proof"
       ],
@@ -320,7 +322,9 @@
         "one-way public dependency",
         "independent internal conformance",
         "exact released revisions"
-      ]
+      ],
+      "execution_plan": "docs/plans/2026-08-11-f9-atomic-interop.md",
+      "accepted_cuda_js_prerequisite": "SPEC-0009; manifest-verified CUDA 13.3 cuda/nv virtual headers; public-facade atomic publication words 3737844653,1,3737844653; graceful zero-live/orphan cleanup; exact compatible pair pending CUDA-MCGS"
     }
   ]
 }

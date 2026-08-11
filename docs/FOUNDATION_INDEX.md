@@ -27,7 +27,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | Concern | Authoritative document set |
 |---|---|
 | Mission and product boundary | [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md) |
-| CUDA-JS/UMCGS repository and public-contract boundary | [`INTEROP_WITH_UMCGS.md`](INTEROP_WITH_UMCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
+| CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
 | Host-binding baseline | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) |
 | Generated ABI facts versus reviewed semantics | [`decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md`](decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md) |
 | Foundation assessment | [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md) |
@@ -55,11 +55,11 @@ The reserved top-level areas each have a README defining ownership and preventin
 - [`../packaging/`](../packaging/README.md)
 - [`../third_party/`](../third_party/README.md)
 
-These remain ownership reservations except for the explicitly authorized F1A, F1B, and Windows F2W experiment/tool boundaries.
+These remain owned boundaries; implementation is limited to the accepted phase contracts and exact qualified profiles recorded in status and the support matrix.
 
 ## Current phase gate
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through CJS-F8W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; F9 consumer interop requires a new accepted contract. Linux `CJS-F2L / EXP-001` and native Linux F3L through F8L remain retained, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, atomic-publication, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; the exact compatible-pair and CUDA-MCGS-owned adapter evidence are still pending. Linux `CJS-F2L / EXP-001` and native Linux F3L through F9L remain retained, deferred, and incomplete.
 
 ## Foundation completeness test
 
@@ -69,8 +69,8 @@ The foundation is considered present only when all of the following are true:
 2. accepted documents do not compete or contradict each other materially;
 3. status and `next_step.yaml` describe the actual repository and authorization phase;
 4. promoted EXP-000 evidence is independent by exact profile and clearly separated from F1B work and production components;
-5. UMCGS-specific search semantics do not enter the generic runtime boundary;
+5. CUDA-MCGS-specific search semantics do not enter the generic runtime boundary;
 6. raw pointers, private FFI/provider mechanisms, and accidental first-consumer limits do not leak into public contracts;
 7. source provenance and superseded alternatives remain traceable;
 8. documentation/static validation passes;
-9. implementation source remains inside its authorized F1A, F1B, or Windows F2W experiment/tool boundary and no native binary is tracked.
+9. implementation source remains inside its accepted component, conformance, experiment, or tool boundary and no native binary is tracked.

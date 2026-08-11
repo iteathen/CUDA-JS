@@ -1,11 +1,11 @@
 {
-  "schema_version": 20,
+  "schema_version": 21,
   "updated": "2026-08-11",
-  "status": "public_testing_operation_enabled_exact_support_evidence_retained",
-  "objective": "Allow unconfirmed but not known-incompatible Node and Windows CUDA profiles to operate during public testing, collect exact evidence without automatic support promotion, keep incomplete platform profiles independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
+  "status": "f9_cuda_js_prerequisite_complete_compatible_pair_pending_cuda_mcgs",
+  "objective": "Preserve public testing and exact platform evidence, retain the accepted CUDA-JS trusted-header and generic atomic-publication prerequisite, and complete the exact compatible pair only after the independent CUDA-MCGS package/adapter in iteathen/UMCGS passes its own assessment and conformance.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "public testing compatibility integration workstream",
+  "current_branch": "CJS-F9 CUDA-JS prerequisite complete; CUDA-MCGS integration pending",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -159,7 +159,7 @@
       "status": "complete_accepted_windows_x64_protected_integration_authorized",
       "outputs": [
         "accepted SPEC-0008 no-addon package, public facade, compatibility, and independent-consumer contract",
-        "cuda-js 0.1.0-alpha.1 exact exports, Node 26.1.0-or-later testing admission, exact 26.7.0 evidence policy, private resource capabilities, and aggregate close",
+        "cuda-js 0.1.0-alpha.2 exact exports, Node 26.1.0-or-later testing admission, exact 26.7.0 evidence policy, private resource capabilities, and aggregate close",
         "clean tarball install/import/uninstall, first-consumer deletion, two unrelated consumers, and instance isolation",
         "installed-package Windows PTX vector execution checksum 15600773 with terminal Worker/resource cleanup"
       ]
@@ -172,6 +172,17 @@
         "stable native backend-unavailable error and unchanged safe public facade contract",
         "human canonical Driver/compiler adapter, independent oracle, permission, package, and cleanup handoff",
         "native Linux and WSL installed-package CUDA execution remains deferred to qualified hardware"
+      ]
+    },
+    {
+      "id": "CJS-F9",
+      "status": "cuda_js_prerequisite_complete_compatible_pair_pending_cuda_mcgs",
+      "outputs": [
+        "accepted SPEC-0009 typed path-free cuda-cccl header profile",
+        "exact manifest verification for 1166 CUDA 13.3 cuda/nv virtual headers and aggregate SHA-256 e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c",
+        "public-facade atomic publication result 3737844653,1,3737844653 with PTX SHA-256 93e5162c8a16b33f8f85eb9e68bd766bd6585a01e91f8a7ca95c38ddbe9cd0fe",
+        "balanced CompilerActor resources, zero live/orphaned DriverActor resources, and graceful aggregate close",
+        "cross-repository adapter/package and exact compatible-pair evidence retained as CUDA-MCGS-owned pending work in iteathen/UMCGS"
       ]
     }
   ],
@@ -190,6 +201,7 @@
     "docs/specs/SPEC-0006-compiler-linker-cache.md",
     "docs/specs/SPEC-0007-windows-platform-hardening.md",
     "docs/specs/SPEC-0008-package-public-facade.md",
+    "docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
@@ -206,15 +218,18 @@
     "All raw Driver resources stay on their owning Worker and no pointer enters a public result.",
     "No Fast FFI, process-isolation, performance, registry-release, or cross-platform claim exceeds exact evidence.",
     "Only exact Node 26.7.0 is qualified; FFI-capable Node 26.1.0-or-later releases may operate as testing-unconfirmed, while releases without the required substrate remain known incompatible.",
-    "Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit ranges, TCC/server, and independent attestation remain no-support."
+    "Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit ranges, TCC/server, and independent attestation remain no-support.",
+    "The cuda-cccl profile is exact Windows CUDA 13.3 evidence only; no other toolkit, platform, header root, or consumer semantics inherit support."
   ],
   "immediate_sequence": [
     "Operate the exact Node release matrix, allow FFI-capable candidates to run as testing-unconfirmed, and keep support promotion bound to each release's complete synthetic and native chain.",
     "Use issues 20 through 29 to complete each extended qualification axis without widening another axis by inference.",
     "Retain the current Windows 11 Pro Hyper-V route as verified no-support unless vendor-supported host and partition evidence changes.",
     "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, platform, and installed-package qualification runbooks.",
-    "Draft and accept a detailed F9 compatible-pair specification before implementing UMCGS consumer interop.",
-    "Keep registry publication gated on an owner-selected license and separate release review.",
+    "Preserve the accepted CUDA-JS F9 prerequisite while the independent CUDA-MCGS work package in iteathen/UMCGS defines and verifies its package/adapter.",
+    "Create an exact compatible-pair record only after both repositories' internal conformance passes against frozen revisions.",
+    "Keep registry publication gated on a separate release, provenance, and registry review; AGPL-3.0-or-later and the separately negotiated commercial-license path are selected.",
+    "Complete the one-time iteathen GitHub Sponsors profile, payout, tax, two-factor-authentication, and approval flow; repository funding configuration and copy-ready text are complete.",
     "Retain and re-run the platform-neutral F3 through F8 capsules whenever shared owners change; do not represent them as native Linux CUDA support."
   ],
   "acceptance_criteria": [
@@ -227,6 +242,8 @@
     "CJS-F6W PTX and cubin bytes match the independent MSVC oracle exactly and both execute with identical Driver output.",
     "CJS-F7W remains bounded by accepted SPEC-0007 and exact Windows permission, device-diagnostic, failure/property, stress, and cleanup evidence.",
     "CJS-F8W remains bounded by accepted SPEC-0008 and exact package, facade, consumer, install/uninstall, native Windows execution, and aggregate cleanup evidence.",
+    "CJS-F9 remains bounded by accepted SPEC-0009, exact manifest-owned cuda/nv virtual headers, one generic atomic-publication fixture, and terminal cleanup.",
+    "No compatible-pair or CUDA-MCGS correctness claim is made until the independently owned CUDA-MCGS adapter/package and exact pair capsule pass.",
     "Package exports hide actor tokens and native capabilities, and cross-runtime or post-close use fails before actor dispatch.",
     "Linux package/readiness controls remain separately keyed and do not promote native CUDA support.",
     "Both native actors inherit the Node permission profile, deny FFI without authority, and close terminally with explicit authority.",
@@ -240,7 +257,7 @@
     "remove or claim completion of the deferred Linux path",
     "use Windows or WSL evidence as native Linux support",
     "make Linux a hidden runtime prerequisite for the active Windows path",
-    "start F9 UMCGS compatible-pair code before its detailed contract and predecessor evidence pass",
+    "claim an exact CUDA-MCGS compatible pair before the independently owned CUDA-MCGS package/adapter and frozen revision evidence pass",
     "publish the package to a registry before licensing and release review pass",
     "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
     "claim Fast FFI dispatch from timing or static eligibility"
@@ -274,6 +291,7 @@
     "F6W passes exact NVRTC 13.3 PTX and nvJitLink 13.3 cubin C parity, clean-room determinism, cache miss/hit/corruption/invalidation, application responsiveness, PTX/cubin Driver execution checksum 15600773, and terminal CompilerActor/DriverActor cleanup.",
     "F7W passes exact WDDM-watchdog/default-compute-mode diagnostics, both actor permission denial/allow controls, 512 deterministic property cases, 48 portable actor cycles, 16 native actor cycles, sanitized failure boundaries, and terminal resource balance.",
     "F8W passes exact exports, clean package install/uninstall, hidden capabilities, stable errors, first-consumer deletion, two unrelated consumers, simultaneous-instance isolation, native Windows vector checksum 15600773, and terminal aggregate close.",
+    "The exact Windows F9 prerequisite verifies the CUDA 13.3 cuda/nv virtual-header aggregate, compiles cuda/atomic through the public facade, observes words 3737844653,1,3737844653, and closes with balanced/zero-live resources.",
     "Native CI regenerates the 27-function/16-type schema and runs F5 portable controls while the retained F5L handoff makes no native Linux CUDA claim.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
     "iteathen/CUDA-JS is public, CJS-F2W through CJS-F7W pull requests are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."

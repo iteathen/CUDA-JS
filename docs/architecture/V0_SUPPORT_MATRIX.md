@@ -89,6 +89,8 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 | device-local allocation and synchronous copied JS bytes | accepted Windows F4W; portable policy/control plane passes Linux CI; native Linux Driver memory remains incomplete |
 | bounded PTX module, declared function, one private stream, packed launch, event completion | accepted Windows F5W; portable orchestration passes Linux CI; native Linux Driver launch remains incomplete |
 | bounded cubin module handoff from CompilerActor | accepted Windows F6W; exact PTX/cubin output parity and execution pass; native Linux providers and Driver launch remain incomplete |
+| manifest-verified CUDA CCCL virtual headers | accepted exact Windows F9 prerequisite for `cuda/` and `nv/`; other toolkit versions/platforms/header roots require independent profiles |
+| device-scope release/acquire publication through public facade | accepted exact Windows F9 generic fixture; no CUDA-MCGS, arbitrary-atomic, performance, or cross-platform inference |
 | pinned host staging | after bounded lifetime/pressure experiment |
 | mapped host control windows | optional, small, explicit synchronization |
 | managed memory | opt-in experiment; no universal zero-copy claim |

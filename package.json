@@ -1,9 +1,9 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
-  "license": "UNLICENSED",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -24,6 +24,8 @@
     }
   },
   "files": [
+    "LICENSE",
+    "LICENSING.md",
     "components/compiler-actor/",
     "components/driver-actor/",
     "components/execution/",
@@ -99,6 +101,12 @@
     "f8:linux-readiness": "node scripts/run-f8.mjs linux-readiness",
     "f8:verify": "node scripts/run-f8.mjs verify",
     "f8": "node scripts/run-f8.mjs all",
+    "f9:unit": "node scripts/run-f9.mjs unit",
+    "f9:portable": "node scripts/run-f9.mjs portable",
+    "f9:linux-readiness": "node scripts/run-f9.mjs linux-readiness",
+    "f9:native": "node scripts/run-f9.mjs native",
+    "f9:verify": "node scripts/run-f9.mjs verify",
+    "f9": "node scripts/run-f9.mjs all",
     "hardware:check": "node --test conformance/hardware/qualification.test.mjs && node scripts/run-hardware-qualification.mjs check",
     "hardware:render": "node scripts/run-hardware-qualification.mjs render",
     "hardware:plan": "node scripts/run-hardware-qualification.mjs plan",
@@ -107,8 +115,8 @@
     "node:check": "node scripts/run-node-qualification.mjs check",
     "node:render": "node scripts/run-node-qualification.mjs render",
     "node:probe": "node scripts/run-node-qualification.mjs probe",
-    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all",
+    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all && node scripts/run-f9.mjs all",
     "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && npm run node:check && npm run hardware:check"
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run node:check && npm run hardware:check"
   }
 }

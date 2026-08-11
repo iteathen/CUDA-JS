@@ -13,7 +13,7 @@ function expectCode(code) {
 }
 
 test('compatibility and host inspection are immutable and do not open CUDA', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.1');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.2');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');

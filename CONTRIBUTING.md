@@ -2,6 +2,18 @@
 
 CUDA-JS is public, pre-release, contract-first, and experiment-gated.
 
+## Easy ways to help
+
+The lowest-friction contributions are:
+
+- reproducible bug reports with exact Node, operating-system, CUDA, Driver, and GPU identity;
+- native Linux qualification evidence following the retained runbooks;
+- documentation corrections and missing negative cases;
+- focused tests that expose one contract violation without widening the public API;
+- design proposals that keep CUDA-JS independent of any one consumer, including CUDA-MCGS.
+
+Use the repository issue forms before investing in a large change. Maintainers may narrow, defer, or reject work that lacks an accepted owner, contract, test oracle, cleanup plan, or supported environment. There is no response-time or merge guarantee.
+
 Before changing a material boundary, read:
 
 - `AGENTS.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`;
@@ -11,7 +23,7 @@ Before changing a material boundary, read:
 
 ## Current authorization
 
-`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA facts and independent native probes. Windows-only `CJS-F2W / EXP-012` through `CJS-F8W` are accepted on their bounded Driver, memory, execution, compiler, linker, cache, platform, permission, package, consumer, failure/stress, and cleanup evidence. Portable F3 through F8 controls pass without native Linux CUDA providers, but Linux `CJS-F2L / EXP-001` through F8L remain incomplete and contribution-ready; follow the retained conformance runbooks, coordinate through [issue #4](https://github.com/iteathen/CUDA-JS/issues/4), and do not claim Linux support without qualified native evidence.
+`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA facts and independent native probes. Windows-only `CJS-F2W / EXP-012` through `CJS-F8W` and the bounded Windows F9 prerequisite are accepted on their declared Driver, memory, execution, compiler, linker, cache, platform, permission, package, consumer, atomic-publication, failure/stress, and cleanup evidence. Portable controls pass without native Linux CUDA providers, but native Linux `CJS-F2L / EXP-001` through F9L remain incomplete and contribution-ready; follow the retained conformance runbooks, coordinate through [issue #4](https://github.com/iteathen/CUDA-JS/issues/4), and do not claim Linux support without qualified native evidence.
 
 Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 
@@ -67,6 +79,28 @@ On Windows, `npm run hardware:probe:hyperv` performs a read-only Hyper-V readine
 Node qualification submissions use the [Node qualification issue template](.github/ISSUE_TEMPLATE/node-qualification.yml). Hardware submissions use the [hardware qualification issue template](.github/ISSUE_TEMPLATE/hardware-qualification.yml). Support promotion requires an exact tested commit, sanitized evidence, the relevant public work issue, and maintainer review; passing only a portable probe never promotes native support.
 
 Claims must state unavailable CUDA/Node/platform checks precisely.
+
+## Pull-request workflow
+
+1. Open or reference an issue that identifies the owning boundary and exact problem.
+2. Branch from current `main` and keep one coherent ownership-sized change.
+3. Update the governing specification or plan when public meaning changes.
+4. Add stable positive, negative, lifecycle, and cleanup evidence proportional to the claim.
+5. Run the required portable checks and every native capsule available on the exact claimed profile.
+6. Use the pull-request template, list checks not run, and disclose any Linux/native gap explicitly.
+
+Do not include generated build output, credentials, machine-specific paths, CUDA Toolkit files, NVIDIA binaries, or third-party code without exact provenance and compatible licensing.
+
+## Contribution license grant
+
+CUDA-JS uses an AGPL open-source license plus a separately negotiated commercial-license path. To preserve both options, by submitting a contribution you represent that you have the right to submit it and agree that:
+
+1. the contribution may be distributed under `AGPL-3.0-or-later`;
+2. you grant the CUDA-JS project owner a perpetual, worldwide, non-exclusive, royalty-free, irrevocable copyright license to use, reproduce, modify, prepare derivative works of, publicly display, publicly perform, sublicense, relicense, and distribute the contribution;
+3. you grant the CUDA-JS project owner and downstream recipients a perpetual, worldwide, royalty-free patent license for patent claims you can license that are necessarily infringed by your contribution alone or in combination with CUDA-JS; and
+4. you retain ownership of your contribution and receive no payment or commercial-license revenue right unless a separate written agreement says otherwise.
+
+Mark the contribution-license checkbox in the pull-request template. The maintainer may request a separate signed contributor agreement before accepting a material contribution. If you cannot agree to these terms, do not submit code; an issue describing the problem or idea is welcome.
 
 ## Publication
 

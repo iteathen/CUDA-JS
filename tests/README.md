@@ -12,4 +12,4 @@ Initial ownership:
 - opaque resource/lifecycle/error/teardown;
 - exact evidence and environment identity.
 
-F3 through F8 capsules now cover memory, module/launch/completion, compiler/link/cache, platform, security, packaging, and independent consumers. A future accepted F9 contract owns UMCGS compatible-pair evidence.
+F3 through F9 capsules now cover memory, module/launch/completion, compiler/link/cache, platform, security, packaging, independent consumers, and the generic trusted-header/atomic-publication prerequisite. Exact CUDA-MCGS compatible-pair evidence remains a separately revision-keyed integration result.

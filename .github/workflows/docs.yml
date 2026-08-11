@@ -39,6 +39,8 @@ jobs:
       - run: node scripts/run-f7.mjs linux-readiness
       - run: npm run f8:portable
       - run: npm run f8:linux-readiness
+      - run: npm run f9:portable
+      - run: npm run f9:linux-readiness
       - run: npm run hardware:check
       - run: npm run node:check
       - uses: actions/upload-artifact@v4
@@ -58,4 +60,10 @@ jobs:
         with:
           name: f8-linux-package-readiness-${{ github.sha }}
           path: build/f8/linux-x64/evidence/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f9-linux-header-readiness-${{ github.sha }}
+          path: build/f9/linux-x64/evidence/readiness.json
           if-no-files-found: error
