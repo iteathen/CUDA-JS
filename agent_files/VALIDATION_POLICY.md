@@ -17,6 +17,16 @@ A planning claim additionally requires:
 - exact Git state and portable artifact verification;
 - honest remote/CUDA-environment limitations.
 
+## Ecosystem language validation
+
+Every plan, experiment protocol, repository change, dependency decision, package, and release claim must comply with [`general_foundation/NO_PYTHON_POLICY.md`](general_foundation/NO_PYTHON_POLICY.md).
+
+Validation must account for file names/extensions, dependency manifests, build and test commands, generators/importers, documentation tooling, workflows, containers, hooks, installers, release automation, vendored tools, submodules, generated products, and transitive ordinary-use requirements.
+
+Any Python source, notebook, project metadata, interpreter or package-manager invocation, Python-backed ordinary-use dependency, generated Python artifact, or indirect Python project workflow is a hard failure. Temporary, local-only, experimental, CI-only, bootstrap, migration, or diagnostic use is not exempt. Prose may mention Python only for policy, provenance, comparison, or removal records.
+
+A passing functional test cannot override this policy. A Python-dependent proposal must be rejected or redesigned before implementation, and a discovered violation is not grandfathered.
+
 ## Schema and ABI
 
 Require deterministic regeneration, pinned official inputs, native C layout probes, mutation sensitivity, fail-closed semantic coverage, and exact generated-product agreement.
