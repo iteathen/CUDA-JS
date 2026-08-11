@@ -2,7 +2,10 @@ import { isResourceToken } from '../../resource-registry/index.mjs';
 import { validationError } from './errors.mjs';
 
 const REQUEST_FIELDS = Object.freeze(['schemaVersion', 'requestId', 'operation', 'payload']);
-const BASE_OPERATIONS = new Set(['runtime.describe', 'context.status', 'runtime.close']);
+const BASE_OPERATIONS = new Set([
+  'runtime.describe', 'context.status', 'runtime.close',
+  'memory.allocate', 'memory.status', 'memory.write', 'memory.read', 'memory.release',
+]);
 const TEST_OPERATIONS = new Set(['testing.block', 'testing.inject-health']);
 
 function exactFields(value, fields) {
@@ -19,7 +22,23 @@ function emptyPayload(payload) {
   return plainObject(payload) && Object.keys(payload).length === 0;
 }
 
-export function validateRequest(message, { testHooks = false } = {}) {
+function memoryTokenPayload(payload) {
+  return plainObject(payload) && exactFields(payload, ['token']) && isResourceToken(payload.token);
+}
+
+function positiveSafeInteger(value) {
+  return Number.isSafeInteger(value) && value > 0;
+}
+
+function nonnegativeSafeInteger(value) {
+  return Number.isSafeInteger(value) && value >= 0;
+}
+
+function ordinaryBytes(value) {
+  return value instanceof Uint8Array && !Buffer.isBuffer(value);
+}
+
+export function validateRequest(message, { testHooks = false, memoryPolicy = { maxTransferBytes: 16 * 1_048_576 } } = {}) {
   if (!plainObject(message) || !exactFields(message, REQUEST_FIELDS)) {
     throw validationError('DRIVER_COMMAND_INVALID', 'Command envelope is invalid.');
   }
@@ -35,6 +54,26 @@ export function validateRequest(message, { testHooks = false } = {}) {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['token']) || !isResourceToken(message.payload.token)) {
       throw validationError('DRIVER_CONTEXT_TOKEN', 'Context status requires one exact resource token.', {}, message.requestId);
     }
+  } else if (message.operation === 'memory.allocate') {
+    if (!plainObject(message.payload) || !exactFields(message.payload, ['byteLength']) || !positiveSafeInteger(message.payload.byteLength)) {
+      throw validationError('MEMORY_RANGE_INVALID', 'Memory allocation requires one positive safe-integer byteLength.', {}, message.requestId);
+    }
+  } else if (message.operation === 'memory.status' || message.operation === 'memory.release') {
+    if (!memoryTokenPayload(message.payload)) throw validationError('DRIVER_MEMORY_TOKEN', 'Memory operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'memory.write') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'bytes', 'deviceOffset']) || !isResourceToken(payload.token)
+        || !ordinaryBytes(payload.bytes) || !nonnegativeSafeInteger(payload.deviceOffset) || payload.bytes.byteLength < 1) {
+      throw validationError('DRIVER_MEMORY_WRITE', 'Memory write payload is invalid.', {}, message.requestId);
+    }
+    if (payload.bytes.byteLength > memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'Memory write exceeds the configured transfer limit.', {}, message.requestId);
+  } else if (message.operation === 'memory.read') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'deviceOffset', 'byteLength']) || !isResourceToken(payload.token)
+        || !nonnegativeSafeInteger(payload.deviceOffset) || !positiveSafeInteger(payload.byteLength)) {
+      throw validationError('DRIVER_MEMORY_READ', 'Memory read payload is invalid.', {}, message.requestId);
+    }
+    if (payload.byteLength > memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'Memory read exceeds the configured transfer limit.', {}, message.requestId);
   } else if (message.operation === 'testing.block') {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['milliseconds'])
         || !Number.isSafeInteger(message.payload.milliseconds) || message.payload.milliseconds < 1 || message.payload.milliseconds > 2_000) {
@@ -54,7 +93,7 @@ export function requestRecord(requestId, operation, payload) {
   return Object.freeze({ schemaVersion: 1, requestId, operation, payload });
 }
 
-export function assertPublicRecord(value, { maxDepth = 12, maxNodes = 2_000 } = {}) {
+export function assertPublicRecord(value, { maxDepth = 12, maxNodes = 2_000, maxByteLength = 16 * 1_048_576 } = {}) {
   let nodes = 0;
   const visit = (current, depth) => {
     nodes += 1;
@@ -71,6 +110,10 @@ export function assertPublicRecord(value, { maxDepth = 12, maxNodes = 2_000 } = 
     }
     if (typeof current === 'bigint' || typeof current === 'function' || typeof current === 'symbol' || current === undefined) {
       throw validationError('DRIVER_RESULT_NATIVE_VALUE', 'Public result contains a prohibited native or executable value.');
+    }
+    if (current instanceof Uint8Array && !Buffer.isBuffer(current)) {
+      if (current.byteLength > maxByteLength) throw validationError('DRIVER_RESULT_BOUNDS', 'Public result contains an oversized byte copy.');
+      return;
     }
     if (ArrayBuffer.isView(current) || current instanceof ArrayBuffer || current instanceof SharedArrayBuffer) {
       throw validationError('DRIVER_RESULT_NATIVE_VALUE', 'Public result contains raw storage.');

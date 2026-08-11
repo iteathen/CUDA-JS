@@ -54,6 +54,11 @@ export const cudaTier0Layouts = Object.freeze({
     "fields": [],
     "size": 4
   },
+  "CUdeviceptr": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
+  },
   "CUdriverProcAddressQueryResult": {
     "alignment": 4,
     "fields": [],
@@ -81,6 +86,11 @@ export const cudaTier0Layouts = Object.freeze({
     "size": 4
   },
   "cuuint64_t": {
+    "alignment": 8,
+    "fields": [],
+    "size": 8
+  },
+  "size_t": {
     "alignment": 8,
     "fields": [],
     "size": 8

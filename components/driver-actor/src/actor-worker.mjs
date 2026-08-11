@@ -6,7 +6,7 @@ import { assertPublicRecord, validateRequest } from './protocol.mjs';
 if (!parentPort) throw new Error('DriverActor must run in a Worker.');
 
 function post(message) {
-  assertPublicRecord(message);
+  assertPublicRecord(message, { maxByteLength: workerData.memoryPolicy.maxTransferBytes });
   parentPort.postMessage(message);
 }
 
@@ -32,15 +32,23 @@ try {
     queue = queue.then(async () => {
       let request;
       try {
-        request = validateRequest(message, { testHooks: workerData.testHooks === true });
+        request = validateRequest(message, { testHooks: workerData.testHooks === true, memoryPolicy: workerData.memoryPolicy });
         let result;
         if (request.operation === 'runtime.describe') result = await backend.describe({ operationId: request.requestId });
         else if (request.operation === 'context.status') result = await backend.contextStatus({ token: request.payload.token, operationId: request.requestId });
+        else if (request.operation === 'memory.allocate') result = await backend.memory.allocate({ byteLength: request.payload.byteLength, operationId: request.requestId });
+        else if (request.operation === 'memory.status') result = await backend.memory.status(request.payload.token, request.requestId);
+        else if (request.operation === 'memory.write') result = await backend.memory.write(request.payload.token, request.payload.bytes, { deviceOffset: request.payload.deviceOffset, operationId: request.requestId });
+        else if (request.operation === 'memory.read') result = await backend.memory.read(request.payload.token, { deviceOffset: request.payload.deviceOffset, byteLength: request.payload.byteLength, operationId: request.requestId });
+        else if (request.operation === 'memory.release') result = await backend.memory.release(request.payload.token, request.requestId);
         else if (request.operation === 'runtime.close') result = await backend.close({ operationId: request.requestId });
         else if (request.operation === 'testing.block') result = await backend.testingBlock({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.inject-health') result = await backend.testingInjectHealth({ ...request.payload, operationId: request.requestId });
         else throw Object.assign(new Error('Validated command has no handler.'), { code: 'DRIVER_COMMAND_HANDLER', category: 'internal' });
-        post({ kind: 'response', requestId: request.requestId, ok: true, result });
+        const state = request.operation.startsWith('memory.')
+          ? { inventory: backend.inventory(), memory: result.usage ?? null }
+          : null;
+        post({ kind: 'response', requestId: request.requestId, ok: true, result, state });
       } catch (error) {
         const requestId = request?.requestId ?? (Number.isSafeInteger(message?.requestId) ? message.requestId : 0);
         post({ kind: 'response', requestId, ok: false, error: serializeError(error) });

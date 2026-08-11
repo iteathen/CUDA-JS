@@ -1,18 +1,18 @@
 {
   "exactIdentity": {
     "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
-    "generatorSha256": "e821f258beb57a887bd494873facf26b16bf4d9fe5e6915915a1e8fb556d533d",
-    "headerFactsSha256": "49a11081fc4348af5081ff02a7dc296527f721262840c813569334ffc5074689",
+    "generatorSha256": "6e4f489d3f95a4e190fd08ec77672cc7a135f659ba942f92608580702f7f214c",
+    "headerFactsSha256": "a6cf01fc2c959aa2b6e1a64788c8822779c9ed9fe1cc601ab55eb0eca2387d37",
     "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
     "licenseSha256": "088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
-    "overlaySha256": "bbbac619bc4dde1fc0d9a6167a50adcc8900883a3a937dd01f4e60f12c5d80a0",
+    "overlaySha256": "e7293c8ca62a2520a2b065c4c9e814604af0931b71ebed4b905e7118bc132402",
     "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
     "packageVersion": "13.3.29-1",
-    "selectionSha256": "c45a2a429d302283c781d0aa1cfb3313d6b3b6cab5eda17b0349a7746ec2eb27",
-    "targetLayoutsSha256": "62b02909efe9006b05960949a06dcb0c6dedff2a06e9b3f734eb60301732efbe",
+    "selectionSha256": "33b4cb5704496055778790db72cc1def99a0f77d3ec2987ca48faede0a8bd18d",
+    "targetLayoutsSha256": "ed2a56ea69a7d2fb4f97104dbb3adc9a73173229c744ffeb77d75110b2ee0b0c",
     "toolkitRelease": "13.3"
   },
-  "id": "cuda-13.3.29-driver-tier-0-linux-x64-compatibility",
+  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-compatibility",
   "packageVersion": "13.3.29-1",
   "requires": {
     "ffiFlag": "--experimental-ffi",

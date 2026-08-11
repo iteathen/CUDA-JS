@@ -11,7 +11,12 @@ export const cudaTier0SymbolAliases = Object.freeze({
   "cuGetErrorName": "cuGetErrorName",
   "cuGetErrorString": "cuGetErrorString",
   "cuGetProcAddress": "cuGetProcAddress_v2",
-  "cuInit": "cuInit"
+  "cuInit": "cuInit",
+  "cuMemAlloc": "cuMemAlloc_v2",
+  "cuMemFree": "cuMemFree_v2",
+  "cuMemGetInfo": "cuMemGetInfo_v2",
+  "cuMemcpyDtoH": "cuMemcpyDtoH_v2",
+  "cuMemcpyHtoD": "cuMemcpyHtoD_v2"
 });
 
 export const cudaTier0FfiDefinitions = Object.freeze({
@@ -96,6 +101,42 @@ export const cudaTier0FfiDefinitions = Object.freeze({
   "cuInit": {
     "arguments": [
       "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemAlloc_v2": {
+    "arguments": [
+      "pointer",
+      "u64"
+    ],
+    "return": "i32"
+  },
+  "cuMemFree_v2": {
+    "arguments": [
+      "u64"
+    ],
+    "return": "i32"
+  },
+  "cuMemGetInfo_v2": {
+    "arguments": [
+      "pointer",
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuMemcpyDtoH_v2": {
+    "arguments": [
+      "pointer",
+      "u64",
+      "u64"
+    ],
+    "return": "i32"
+  },
+  "cuMemcpyHtoD_v2": {
+    "arguments": [
+      "u64",
+      "pointer",
+      "u64"
     ],
     "return": "i32"
   }

@@ -1,8 +1,9 @@
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
+import { MemoryManager } from '../../../memory/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, healthForErrorCategory } from '../health.mjs';
 
-export async function createBackend({ runtimeId, epoch }) {
+export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const disposalOrder = [];
@@ -23,8 +24,38 @@ export async function createBackend({ runtimeId, epoch }) {
       return { contextDestroyed: true, currentNull: true };
     },
   });
+  const allocations = new Set();
+  let nativeReservedBytes = 0;
+  const memory = new MemoryManager({
+    registry,
+    contextToken,
+    policy: memoryPolicy,
+    operations: {
+      async query() {
+        return { freeBytes: memoryPolicy.maxDeviceBytes - nativeReservedBytes, totalBytes: memoryPolicy.maxDeviceBytes };
+      },
+      async allocate({ byteLength }) {
+        const storage = new Uint8Array(byteLength);
+        allocations.add(storage);
+        nativeReservedBytes += byteLength;
+        return storage;
+      },
+      async free({ native, byteLength }) {
+        if (!allocations.delete(native)) throw Object.assign(new Error('Mock allocation is not live.'), { code: 'MOCK_MEMORY_STALE' });
+        nativeReservedBytes -= byteLength;
+        disposalOrder.push('device-memory');
+        return { mockStorageReleased: true };
+      },
+      async write({ native, deviceOffset, bytes }) {
+        native.set(bytes, deviceOffset);
+      },
+      async read({ native, deviceOffset, byteLength }) {
+        return Uint8Array.from(native.subarray(deviceOffset, deviceOffset + byteLength));
+      },
+    },
+  });
 
-  function description(operationSequence = 0) {
+  async function description(operationSequence = 0) {
     return {
       schemaVersion: 1,
       runtime: { id: runtimeId, epoch, state: 'open', backend: 'mock' },
@@ -35,6 +66,7 @@ export async function createBackend({ runtimeId, epoch }) {
         attributes: { maxThreadsPerBlock: 1024, multiprocessorCount: 1, computeCapabilityMajor: 0, computeCapabilityMinor: 0 },
       },
       context: contextToken,
+      memory: await memory.usage(operationSequence),
       health: health.snapshot(),
       inventory: registry.inventory(),
       operationSequence,
@@ -43,6 +75,7 @@ export async function createBackend({ runtimeId, epoch }) {
   }
 
   return {
+    inventory() { return registry.inventory(); },
     async describe({ operationId }) {
       return description(operationId);
     },
@@ -63,7 +96,7 @@ export async function createBackend({ runtimeId, epoch }) {
         && teardown.inventory.counts.live === 0
         && teardown.inventory.counts.closing === 0
         && teardown.inventory.counts.orphaned === 0
-        && disposalOrder.join(',') === 'context,library';
+        && disposalOrder.slice(-2).join(',') === 'context,library';
       if (clean) health.transition('closed', { reason: 'graceful-close', operationId });
       else health.transition('suspect', { reason: 'unproved-close', operationId });
       return {
@@ -76,6 +109,7 @@ export async function createBackend({ runtimeId, epoch }) {
         operationSequence: operationId,
       };
     },
+    memory,
     async testingBlock({ milliseconds, operationId }) {
       const storage = new Int32Array(new SharedArrayBuffer(4));
       Atomics.wait(storage, 0, 0, milliseconds);

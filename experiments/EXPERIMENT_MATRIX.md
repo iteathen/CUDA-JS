@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, and Windows CJS-F3W are accepted. The F3 platform-neutral lifecycle capsule passes on native Linux. Native Linux EXP-001 and Linux DriverActor execution remain incomplete, hardware-deferred, and independently gated.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W, and Windows CJS-F4W are accepted. The F3/F4 platform-neutral capsules pass in native Linux CI. Native Linux EXP-001 and Linux DriverActor/memory execution remain incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 
@@ -95,6 +95,8 @@ Inject invalid input, launch failure, asynchronous illegal access, teardown afte
 Test device-local copies, pinned staging, mapped windows, managed memory, GC pressure, in-flight leases, zero-copy foreign views, release ordering, context teardown, quotas, and stale generations.
 
 **Promotion:** no use-after-free; every memory-kind contract states placement/visibility/coherence/synchronization/lifetime honestly.
+
+**Disposition:** the bounded synchronous device-allocation and copied-byte partition is accepted for Windows F4W with exact Node/MSVC parity, quotas, ranges, leases, stale generations, and teardown. Native Linux memory remains blocked on F2L/F3L with a retained human handoff. Pinned, mapped, managed, asynchronous, and foreign-view partitions remain unexecuted and require later contracts; F4W does not promote them.
 
 ## EXP-009 — NVRTC/nvJitLink pipeline and cache
 

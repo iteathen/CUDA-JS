@@ -47,9 +47,29 @@
     "cuInit": {
       "nativeSymbol": "cuInit",
       "pointerSize": 8
+    },
+    "cuMemAlloc": {
+      "nativeSymbol": "cuMemAlloc_v2",
+      "pointerSize": 8
+    },
+    "cuMemFree": {
+      "nativeSymbol": "cuMemFree_v2",
+      "pointerSize": 8
+    },
+    "cuMemGetInfo": {
+      "nativeSymbol": "cuMemGetInfo_v2",
+      "pointerSize": 8
+    },
+    "cuMemcpyDtoH": {
+      "nativeSymbol": "cuMemcpyDtoH_v2",
+      "pointerSize": 8
+    },
+    "cuMemcpyHtoD": {
+      "nativeSymbol": "cuMemcpyHtoD_v2",
+      "pointerSize": 8
     }
   },
-  "id": "cuda-13.3.29-driver-tier-0-linux-x64-native-layouts",
+  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-native-layouts",
   "profile": {
     "byteOrder": "little-endian",
     "pointerSize": 8,
@@ -118,6 +138,11 @@
       "fields": [],
       "size": 4
     },
+    "CUdeviceptr": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
     "CUdriverProcAddressQueryResult": {
       "alignment": 4,
       "fields": [],
@@ -145,6 +170,11 @@
       "size": 4
     },
     "cuuint64_t": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
+    "size_t": {
       "alignment": 8,
       "fields": [],
       "size": 8

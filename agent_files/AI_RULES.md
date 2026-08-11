@@ -4,7 +4,7 @@
 
 1. Read root `AGENTS.md` before changing the repository.
 2. Follow the authority order and report material contradictions rather than choosing silently.
-3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted on exact evidence; the native Linux F3 control-plane pass is not Linux Driver support, and Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
+3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only synchronous copied-memory `CJS-F4W` are accepted on exact evidence; native Linux F3/F4 control-plane passes are not Linux Driver support, and Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
 4. A plan, experiment protocol, reserved directory, or dependency-ready boundary is not implementation permission.
 5. Work by semantic ownership boundary, not arbitrary file count.
 6. For substantial or critical work, complete a proportional adversarial assessment before planning.

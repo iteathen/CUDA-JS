@@ -6,7 +6,7 @@
 
 ## Current phase
 
-The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted. The platform-neutral F3 control plane also passes on native Linux x86-64. Linux `CJS-F2L / EXP-001` and native Linux DriverActor execution remain incomplete until a qualified native Driver/GPU smoke passes; they do not block Windows work. Windows `CJS-F4W` memory contract work is dependency-ready.
+The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and `CJS-F4W` are accepted. The platform-neutral F3/F4 control plane also passes in native Linux CI. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/memory execution remain incomplete until a qualified native Driver/GPU smoke passes; they do not block Windows work. A bounded Windows F5 module/launch/completion contract is now dependency-ready, but its implementation is not authorized yet.
 
 ## Promoted F1A result
 
@@ -29,10 +29,10 @@ The accepted schema/ABI foundation contains:
 
 - hash-pinned official CUDA 13.3.29 Ubuntu 24.04 package, `cuda.h`, `cudaTypedefs.h`, package license, and Clang 18.1.3 identity;
 - a deterministic Clang AST and macro-alias importer under the accepted schema-compiler contract;
-- 12 reviewed private Tier-0 functions, including automatic `cuCtxCreate_v4`, `cuCtxDestroy_v2`, and `cuGetProcAddress_v2` alias resolution;
-- 9 target types covering scalar, enum, opaque handle, structure, and out-parameter storage;
+- 17 reviewed private Tier-0 functions, including automatic versioned aliases and the five F4 memory calls;
+- 11 target types covering scalar, enum, opaque handle, device address, structure, size, and out-parameter storage;
 - generated Runtime IR, private Node FFI definitions, packers, TypeScript metadata, conformance/diff/coverage/compatibility data, and exact product hashes;
-- 483 discovered Driver declarations, with all 471 unselected declarations cataloged unavailable;
+- 483 discovered Driver declarations, with all 466 unselected declarations cataloged unavailable;
 - independent Linux x86-64 C size/alignment/offset probes;
 - six detected mutation classes: size, alignment, field offset, parameter type, native symbol, and required semantic field;
 - a second complete native generation matching committed products byte-for-byte.
@@ -72,6 +72,23 @@ On Windows 10.0.26200 x64, official Node 26.7.0 uses the canonical system Driver
 
 The same platform-neutral resource, protocol, health, responsiveness, graceful-close, and unexpected-loss capsule passes on native Ubuntu 24.04.4 x86-64 with official Node 26.7.0. That evidence prepares the Linux control plane; it does not load a Linux NVIDIA Driver or establish Linux CUDA support.
 
+## Accepted Windows F4W result
+
+The accepted F4 slice adds the bounded `runtime.memory` owner and five generated Driver calls under [`SPEC-0004`](docs/specs/SPEC-0004-device-memory-foundation.md):
+
+- an exact configurable device quota, per-allocation cap, and copied-transfer cap;
+- safe-integer range partitions and rejection before native invocation;
+- synchronous copied `Uint8Array` write/read behavior with caller snapshot isolation;
+- opaque `device-memory` registry children, leases, stale generation rejection, and slot reuse;
+- reservation before allocation, rollback on failure, and capacity recovery only after proved free;
+- allocation-before-context teardown and retained reserved-byte/orphan evidence after unexpected Worker loss;
+- deterministic Ubuntu/Clang generation for 17 functions and 11 types, with a CI artifact and clean checked-in comparison;
+- a portable memory-manager/actor capsule suitable for Windows and native Linux CI.
+
+On the accepted Windows profile, an independent MSVC C oracle and the Node DriverActor produced byte-for-byte identical full and offset copies for the 4,096-byte fixture and checksum `3521616638`. The native capsule also proves capacity observation, configured pressure, exact-edge/out-of-bounds behavior, explicit free, stale rejection, generation advance, allocation-before-context/library cleanup, zero terminal live/closing/orphaned resources, and Worker exit zero. No native address or native storage crosses the actor boundary.
+
+The human Linux F4 handoff is retained in [`conformance/f4/README.md`](conformance/f4/README.md). It identifies the remaining canonical Driver discovery, F2L/F3L prerequisites, adapter, five-call, C-oracle, permission, evidence, and cleanup gates without claiming that CI mocks establish Linux CUDA support.
+
 ## Deferred incomplete Linux F2L
 
 The Ubuntu Hyper-V VM remains useful for native Linux CPU/ABI work but has no NVIDIA GPU/Driver exposure. The host GTX 1660 Ti and client-Windows Hyper-V configuration do not provide a supported GPU partition/pass-through path. Windows results must never be labeled as Linux support.
@@ -89,8 +106,8 @@ GPU-free preparation passes in the available native Linux guest. The only unexec
 
 ## Claim limits
 
-F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. The native Linux F3 capsule proves platform-neutral control-plane behavior only. These results do not prove Linux Driver execution, arbitrary returned-pointer invocation, Fast FFI dispatch, memory, modules, launch/completion, native deferred-error attribution, performance, packaging, recovery without process restart, or consumer semantics.
+F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. F4W proves only synchronous bounded device allocation and copied transfers on the exact Windows profile. Native Linux F3/F4 capsules prove platform-neutral control-plane behavior only. These results do not prove Linux Driver execution, arbitrary returned-pointer invocation, Fast FFI dispatch, asynchronous or specialized memory, modules, launch/completion, native deferred-error attribution, performance, packaging, recovery without process restart, or consumer semantics.
 
 ## Immediate next boundary
 
-F2W [pull request #5](https://github.com/iteathen/CUDA-JS/pull/5) and F3W [pull request #6](https://github.com/iteathen/CUDA-JS/pull/6) are merged into protected `main` in dependency order, with successful exact-head and final-main CI. Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained runbook, then draft the Windows F4 memory specification. Do not implement memory before that specification is accepted. Linux qualification can resume independently when suitable hardware becomes available.
+Publish and review the F4W change without weakening protected `main`. Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with both retained runbooks. The next implementation boundary is an accepted Windows F5 module/launch/completion specification; do not begin F5 code before that contract is reviewed and accepted. Linux qualification can resume independently when suitable hardware becomes available.

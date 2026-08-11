@@ -19,12 +19,14 @@ int main(void) {
   printf("FIELD\tCUctxCreateParams\tcigParams\t%zu\n", offsetof(CUctxCreateParams, cigParams));
   printf("TYPE\tCUdevice\t%zu\t%zu\n", sizeof(CUdevice), _Alignof(CUdevice));
   printf("TYPE\tCUdevice_attribute\t%zu\t%zu\n", sizeof(CUdevice_attribute), _Alignof(CUdevice_attribute));
+  printf("TYPE\tCUdeviceptr\t%zu\t%zu\n", sizeof(CUdeviceptr), _Alignof(CUdeviceptr));
   printf("TYPE\tCUdriverProcAddressQueryResult\t%zu\t%zu\n", sizeof(CUdriverProcAddressQueryResult), _Alignof(CUdriverProcAddressQueryResult));
   printf("TYPE\tCUexecAffinityParam\t%zu\t%zu\n", sizeof(CUexecAffinityParam), _Alignof(CUexecAffinityParam));
   printf("FIELD\tCUexecAffinityParam\ttype\t%zu\n", offsetof(CUexecAffinityParam, type));
   printf("FIELD\tCUexecAffinityParam\tparam\t%zu\n", offsetof(CUexecAffinityParam, param));
   printf("TYPE\tCUresult\t%zu\t%zu\n", sizeof(CUresult), _Alignof(CUresult));
   printf("TYPE\tcuuint64_t\t%zu\t%zu\n", sizeof(cuuint64_t), _Alignof(cuuint64_t));
+  printf("TYPE\tsize_t\t%zu\t%zu\n", sizeof(size_t), _Alignof(size_t));
   printf("FUNCTION\tcuCtxCreate\tcuCtxCreate_v4\t%zu\n", sizeof(&cuCtxCreate_v4));
   printf("FUNCTION\tcuCtxDestroy\tcuCtxDestroy_v2\t%zu\n", sizeof(&cuCtxDestroy_v2));
   printf("FUNCTION\tcuCtxGetCurrent\tcuCtxGetCurrent\t%zu\n", sizeof(&cuCtxGetCurrent));
@@ -37,5 +39,10 @@ int main(void) {
   printf("FUNCTION\tcuGetErrorString\tcuGetErrorString\t%zu\n", sizeof(&cuGetErrorString));
   printf("FUNCTION\tcuGetProcAddress\tcuGetProcAddress_v2\t%zu\n", sizeof(&cuGetProcAddress_v2));
   printf("FUNCTION\tcuInit\tcuInit\t%zu\n", sizeof(&cuInit));
+  printf("FUNCTION\tcuMemAlloc\tcuMemAlloc_v2\t%zu\n", sizeof(&cuMemAlloc_v2));
+  printf("FUNCTION\tcuMemFree\tcuMemFree_v2\t%zu\n", sizeof(&cuMemFree_v2));
+  printf("FUNCTION\tcuMemGetInfo\tcuMemGetInfo_v2\t%zu\n", sizeof(&cuMemGetInfo_v2));
+  printf("FUNCTION\tcuMemcpyDtoH\tcuMemcpyDtoH_v2\t%zu\n", sizeof(&cuMemcpyDtoH_v2));
+  printf("FUNCTION\tcuMemcpyHtoD\tcuMemcpyHtoD_v2\t%zu\n", sizeof(&cuMemcpyHtoD_v2));
   return 0;
 }
