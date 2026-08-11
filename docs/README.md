@@ -40,4 +40,4 @@
 - [`../experiments/EXP-012-windows-node-ffi-cuda-smoke.md`](../experiments/EXP-012-windows-node-ffi-cuda-smoke.md)
 - [`archive/README.md`](archive/README.md)
 
-Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, and Windows `CJS-F6W / EXP-009` are accepted on exact evidence. The F3 through F6 control plane passes without establishing native Linux CUDA support. Windows-first F7 hardening requires a new accepted contract; Linux `CJS-F2L / EXP-001` through F6L remain retained, deferred, and incomplete.
+Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, and `CJS-F7W` are accepted on exact evidence. The F3 through F7 control plane passes without establishing native Linux CUDA support. F8 packaging/public-facade work requires a new accepted contract; Linux `CJS-F2L / EXP-001` through F7L remain retained, deferred, and incomplete.

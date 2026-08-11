@@ -115,7 +115,16 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       driver: { apiVersion: 13030, deviceCount: 1 },
       device: {
         ordinal: 0,
-        attributes: { ...deviceLimits, multiprocessorCount: 1, computeCapabilityMajor: 0, computeCapabilityMinor: 0 },
+        attributes: {
+          ...deviceLimits,
+          multiprocessorCount: 1,
+          kernelExecTimeout: 0,
+          integrated: 0,
+          computeMode: 0,
+          tccDriver: 0,
+          computeCapabilityMajor: 0,
+          computeCapabilityMinor: 0,
+        },
       },
       context: contextToken,
       memory: await memory.usage(operationSequence),

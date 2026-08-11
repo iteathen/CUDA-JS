@@ -15,14 +15,16 @@ export function compilerError(code, message, details = {}) {
 }
 
 export function serializeError(error) {
+  const known = error instanceof CompilerRuntimeError;
+  const permissionDenied = error?.code === 'ERR_ACCESS_DENIED';
   return {
-    name: error?.name ?? 'Error',
-    code: error?.code ?? 'COMPILER_INTERNAL',
-    category: error?.category ?? 'internal',
-    message: error?.message ?? 'CompilerActor failed.',
-    details: error?.details ?? {},
-    healthBefore: error?.healthBefore ?? null,
-    healthAfter: error?.healthAfter ?? null,
+    name: known ? error.name : permissionDenied ? 'Error' : 'CompilerRuntimeError',
+    code: known ? error.code : permissionDenied ? 'ERR_ACCESS_DENIED' : 'COMPILER_INTERNAL',
+    category: known ? error.category : permissionDenied ? 'permission' : 'internal',
+    message: known ? error.message : permissionDenied ? 'CompilerActor lacks required Node permission.' : 'CompilerActor internal failure.',
+    details: known ? error.details : {},
+    healthBefore: known ? error.healthBefore : null,
+    healthAfter: known ? error.healthAfter : null,
   };
 }
 

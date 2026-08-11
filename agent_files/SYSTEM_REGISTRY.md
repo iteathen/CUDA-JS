@@ -44,8 +44,8 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `project.state` | Current phase and verified repository state | [`../STATUS.md`](../STATUS.md) | Active |
 | `project.next-step` | One coherent current boundary | [`../next_step.yaml`](../next_step.yaml) | Active |
 | `schema.header-facts` | Pinned official CUDA 13.3 provenance, selection, imported facts, target layouts, deterministic products, and Win64 compatibility bridge | [`../schemas/cuda-13.3/`](../schemas/cuda-13.3/) and [`../tools/cuda-schema/`](../tools/cuda-schema/README.md) | Accepted F1B/F5 internal plus Windows bridge |
-| `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted through F6W private-experimental |
-| `runtime.driver-actor` | Bounded async command protocol, one Worker-owned context, memory/execution adapters, health, and graceful/unexpected-loss lifecycle | [`../components/driver-actor/`](../components/driver-actor/README.md) | Accepted Windows F6W internal experimental; Linux native Driver blocked on F2L |
+| `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted through F7W private-experimental |
+| `runtime.driver-actor` | Bounded async command protocol, one Worker-owned context, memory/execution adapters, permission inheritance, health, and graceful/unexpected-loss lifecycle | [`../components/driver-actor/`](../components/driver-actor/README.md) | Accepted Windows F7W internal experimental; Linux native Driver blocked on F2L |
 | `runtime.resource-registry` | Opaque capability identity, generation, state, dependencies, leases, close ordering, and orphan inventory | [`../components/resource-registry/`](../components/resource-registry/README.md) | Accepted F3 internal experimental |
 | `conformance.f3` | Platform-neutral actor/resource lifecycle and exact Windows native context-affinity/cleanup evidence | [`../conformance/f3/`](../conformance/f3/README.md) | Accepted on Windows; control plane also passes native Linux x86-64 |
 | `runtime.memory` | Exact device-byte policy, quota ledger, ranges, copied transfers, opaque allocation lifecycle, and backend injection | [`../components/memory/`](../components/memory/README.md) | Accepted Windows F4W internal experimental; portable logic passes native Linux CI |
@@ -54,14 +54,16 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `conformance.f5` | Portable launch/completion/loss evidence, independent MSVC vector parity, native Windows cleanup, and Linux handoff | [`../conformance/f5/`](../conformance/f5/README.md) | Accepted Windows F5W; native Linux CUDA incomplete |
 | `runtime.compiler-actor` | Typed NVRTC/nvJitLink Worker, canonical provider identity, copied PTX/cubin artifacts, validated cache, health, and lifecycle | [`../components/compiler-actor/`](../components/compiler-actor/README.md) | Accepted Windows F6W internal experimental; native Linux providers incomplete |
 | `conformance.f6` | Portable compiler/cache/lifecycle evidence, independent MSVC artifact parity, PTX/cubin Windows execution, and Linux handoff | [`../conformance/f6/`](../conformance/f6/README.md) | Accepted Windows F6W; native Linux CUDA incomplete |
+| `runtime.platform-diagnostics` | Sanitized host classification, exact Windows CUDA device-mode/watchdog assessment, permission disposition, and fail-closed support reasons | [`../components/platform-diagnostics/`](../components/platform-diagnostics/README.md) | Accepted Windows F7W internal experimental; Linux/WSL classification only |
+| `conformance.f7` | Platform classification, sanitized boundaries, permission denial/allow, failure/property partitions, repeated lifecycle stress, Windows native diagnostics, and Linux/WSL handoff | [`../conformance/f7/`](../conformance/f7/README.md) | Accepted Windows F7W; native Linux/ARM64/WSL CUDA incomplete |
 
 ## Repository product areas
 
 | Product area | Owns | Location | Current status |
 |---|---|---|---|
-| `components` | Generic runtime components with accepted ownership contracts | [`../components/`](../components/README.md) | F6 DriverActor, CompilerActor/cache, resource registry, bounded memory, and execution accepted internal experimental |
+| `components` | Generic runtime components with accepted ownership contracts | [`../components/`](../components/README.md) | F7 DriverActor, CompilerActor/cache, platform diagnostics, resource registry, bounded memory, and execution accepted internal experimental |
 | `schemas` | Pinned CUDA facts, semantic overlays, Runtime IR and generated products | [`../schemas/`](../schemas/README.md) | F1B accepted; public production coverage not authorized |
-| `conformance` | Production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | F3 lifecycle through F6 compiler/cache capsules accepted on Windows; portable controls run in Linux CI |
+| `conformance` | Production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | F3 lifecycle through F7 platform hardening accepted on Windows; portable/readiness controls run in Linux CI |
 | `experiments` | Bounded decision experiments and their generated fixtures/harnesses | [`../experiments/`](../experiments/README.md) | EXP-000, Windows EXP-009, and Windows EXP-012 promoted; Linux EXP-001 prepared through the hardware boundary |
 | `benchmarks` | Future reproducible mechanism/regression evidence | [`../benchmarks/`](../benchmarks/README.md) | Reserved |
 | `packaging` | Future package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | Reserved |
@@ -82,6 +84,7 @@ These IDs organize implemented and future specifications. Status in the governin
 | `runtime.resource-registry` | Opaque capability identity, generation, state and parent/child leases | Accepted SPEC-0003 and F3 conformance |
 | `runtime.memory` | Bounded synchronous device allocation, copied transfers, quota, ranges, and lifetime | Accepted SPEC-0004 plus Windows F4W native conformance; later memory kinds need new contracts |
 | `runtime.execution` | PTX/cubin module/function identity, packed launch, memory leases, private stream/event completion, and terminality | Accepted SPEC-0005 plus SPEC-0006 cubin handoff and Windows F6W native conformance; concurrency needs a new contract |
+| `runtime.platform-diagnostics` | Sanitized host/device classification and fail-closed profile assessment | Accepted SPEC-0007 plus exact Windows permission/device/stress evidence; every additional native profile requires independent qualification |
 | `runtime.module-launch` | Module/function identity, argument packing and launch | Accepted ABI/launch specification plus native parity evidence |
 | `runtime.completion` | Stream/event completion, cancellation and deferred errors | Accepted completion/error-health specification plus native evidence |
 | `schema.header-facts` | Pinned official-header import and normalized ABI facts | Accepted schema/import specification and native layout oracle |

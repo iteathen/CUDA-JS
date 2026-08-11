@@ -3,14 +3,14 @@
   "component": {
     "id": "runtime.driver-actor",
     "name": "CUDA DriverActor",
-    "status": "accepted-f6w-internal-experimental",
+    "status": "accepted-f7w-internal-experimental",
     "product_area": "components",
     "path": "components/driver-actor",
     "purpose": "Provide a bounded asynchronous facade over one Worker-owned private CUDA context with opaque resources, synchronous copied device memory, PTX/cubin module launch and completion, conservative health, deterministic graceful teardown, and honest unexpected-loss reporting.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "node-ffi-26.7.0", "runtime.resource-registry", "runtime.memory", "runtime.execution", "generated-tier-0-ffi-definitions", "canonical-windows-cuda-driver"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-signature", "returned-function-pointer-invocation", "raw-public-pointer", "consumer-semantics", "compiler", "concurrent-launch"],
-    "validation": ["npm run f3:unit", "npm run f4", "npm run f5"],
+    "validation": ["npm run f3:unit", "npm run f4", "npm run f5", "npm run f7"],
     "owner": "runtime.driver-actor",
     "lifecycle": "One Worker owns one library, one selected device identity, one private context, one registry, and one runtime epoch. Graceful close is explicit; unexpected loss is restart-required and makes no cleanup claim.",
     "design": {

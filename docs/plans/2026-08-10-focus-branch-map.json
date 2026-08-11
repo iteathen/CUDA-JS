@@ -261,7 +261,7 @@
     {
       "id": "CJS-F7",
       "type": "platform-hardening",
-      "status": "planned",
+      "status": "windows_complete_accepted_linux_arm64_wsl_deferred",
       "owner": "platform",
       "dependencies": [
         "CJS-F5",

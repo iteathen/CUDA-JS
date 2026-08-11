@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { parentPort, workerData } from 'node:worker_threads';
 
 import { ArtifactCache } from './cache.mjs';
-import { compileIdentity, linkIdentity, normalizeCompileRequest, normalizeLinkRequest, plainObject } from './contract.mjs';
+import { assertCompilerPublicRecord, compileIdentity, linkIdentity, normalizeCompileRequest, normalizeLinkRequest, plainObject } from './contract.mjs';
 import { CompilerRuntimeError, serializeError } from './errors.mjs';
 
 if (!parentPort) throw new Error('CompilerActor must run in a Worker.');
@@ -21,7 +21,7 @@ function validateEnvelope(message) {
       || message.schemaVersion !== 1 || !Number.isSafeInteger(message.requestId) || message.requestId < 1 || typeof message.operation !== 'string' || !plainObject(message.payload)) {
     throw new CompilerRuntimeError('COMPILER_COMMAND_INVALID', 'validation', 'CompilerActor command envelope is invalid.');
   }
-  const allowed = new Set(['runtime.status', 'compiler.compile', 'linker.link', 'cache.invalidate', 'runtime.close', ...(workerData.testHooks ? ['testing.block'] : [])]);
+  const allowed = new Set(['runtime.status', 'compiler.compile', 'linker.link', 'cache.invalidate', 'runtime.close', ...(workerData.testHooks ? ['testing.block', 'testing.failure-mode'] : [])]);
   if (!allowed.has(message.operation)) throw new CompilerRuntimeError('COMPILER_COMMAND_UNSUPPORTED', 'validation', 'CompilerActor command is not allowlisted.', { operation: message.operation });
   return message;
 }
@@ -45,7 +45,7 @@ try {
     claim: workerData.backend === 'windows-native' ? 'exact-windows-f6w-profile' : 'platform-neutral-compiler-mock-only',
   });
 
-  parentPort.postMessage({ kind: 'ready', result: status() });
+  parentPort.postMessage({ kind: 'ready', result: assertCompilerPublicRecord(status()) });
   let queue = Promise.resolve();
   parentPort.on('message', (message) => {
     queue = queue.then(async () => {
@@ -55,6 +55,7 @@ try {
         requestId = request.requestId;
         operationSequence = requestId;
         if (closed) throw new CompilerRuntimeError('COMPILER_RUNTIME_CLOSED', 'closed-runtime', 'CompilerActor is closed.');
+        if (health === 'restart-required' && !['runtime.status', 'runtime.close'].includes(request.operation)) throw new CompilerRuntimeError('COMPILER_RESTART_REQUIRED', 'restart-required', 'CompilerActor requires replacement after unproved native cleanup.', {}, { healthBefore: health, healthAfter: health });
         let result;
         if (request.operation === 'runtime.status') result = status();
         else if (request.operation === 'compiler.compile') {
@@ -109,6 +110,11 @@ try {
           const storage = new Int32Array(new SharedArrayBuffer(4));
           Atomics.wait(storage, 0, 0, request.payload.milliseconds);
           result = { schemaVersion: 1, blockedMilliseconds: request.payload.milliseconds, health: { current: health }, operationSequence };
+        } else if (request.operation === 'testing.failure-mode') {
+          const modes = ['none', 'compile-create', 'compile-operation', 'compile-destroy', 'link-create', 'link-operation', 'link-destroy'];
+          if (Object.keys(request.payload).join('\0') !== 'mode' || !modes.includes(request.payload.mode)) throw new CompilerRuntimeError('COMPILER_TEST_FAILURE_MODE_INVALID', 'validation', 'Compiler failure mode is invalid.');
+          backend.setFailureMode(request.payload.mode);
+          result = { schemaVersion: 1, mode: request.payload.mode, health: { current: health }, operationSequence };
         } else if (request.operation === 'runtime.close') {
           if (Object.keys(request.payload).length !== 0) throw new CompilerRuntimeError('COMPILER_COMMAND_INVALID', 'validation', 'Close payload must be empty.');
           await backend.close();
@@ -117,20 +123,20 @@ try {
           const clean = backend.resources.programsCreated === backend.resources.programsDestroyed && backend.resources.linksCreated === backend.resources.linksDestroyed;
           result = { schemaVersion: 1, graceful: clean, cleanupClaim: clean ? (workerData.backend === 'windows-native' ? 'proved-native-resources-and-libraries' : 'proved-mock-lifecycle-only') : 'unproved', resources: { ...backend.resources }, health: { current: health }, operationSequence };
         }
-        parentPort.postMessage({ kind: 'response', requestId, ok: true, result });
+        parentPort.postMessage({ kind: 'response', requestId, ok: true, result: assertCompilerPublicRecord(result) });
         if (request.operation === 'runtime.close') parentPort.close();
       } catch (error) {
         if (error?.healthAfter === 'restart-required') health = 'restart-required';
-        parentPort.postMessage({ kind: 'response', requestId, ok: false, error: serializeError(error), state: status() });
+        parentPort.postMessage({ kind: 'response', requestId, ok: false, error: assertCompilerPublicRecord(serializeError(error)), state: assertCompilerPublicRecord(status()) });
         if (message?.operation === 'runtime.close') parentPort.close();
       }
     }).catch((error) => {
       health = 'restart-required';
-      parentPort.postMessage({ kind: 'fatal', error: serializeError(error) });
+      parentPort.postMessage({ kind: 'fatal', error: assertCompilerPublicRecord(serializeError(error)) });
       parentPort.close();
     });
   });
 } catch (error) {
-  parentPort.postMessage({ kind: 'startup-error', error: serializeError(error) });
+  parentPort.postMessage({ kind: 'startup-error', error: assertCompilerPublicRecord(serializeError(error)) });
   parentPort.close();
 }

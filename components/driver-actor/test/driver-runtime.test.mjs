@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DriverRuntimeError } from '../index.mjs';
+import { DriverRuntimeError, openDriverRuntime } from '../index.mjs';
 import { openMockDriverRuntime } from '../testing.mjs';
 import { assertPublicRecord, validateRequest } from '../src/protocol.mjs';
+import { serializeError } from '../src/errors.mjs';
 
 function expectCode(code) {
   return (error) => error instanceof DriverRuntimeError && error.code === code;
@@ -259,4 +260,20 @@ test('protocol rejects unknown commands and public records reject native-shaped 
   assert.deepEqual(assertPublicRecord({ bytes: Uint8Array.of(1, 2) }).bytes, Uint8Array.of(1, 2));
   assert.throws(() => assertPublicRecord({ bytes: Uint8Array.of(1, 2) }, { maxByteLength: 1 }), expectCode('DRIVER_RESULT_BOUNDS'));
   assert.deepEqual(assertPublicRecord({ safe: true, values: [1, 'two', null] }), { safe: true, values: [1, 'two', null] });
+});
+
+test('unexpected Driver errors are sanitized and permission denial stays attributable', () => {
+  const internal = serializeError(Object.assign(new Error('failed at C:\\private\\nvcuda.dll'), { code: 'ENOENT' }));
+  assert.equal(internal.code, 'DRIVER_RUNTIME_INTERNAL');
+  assert.equal(internal.message, 'DriverActor internal failure.');
+  assert.deepEqual(internal.details, {});
+  const permission = serializeError(Object.assign(new Error('denied'), { code: 'ERR_ACCESS_DENIED' }));
+  assert.equal(permission.code, 'ERR_ACCESS_DENIED');
+  assert.equal(permission.category, 'permission');
+  assert.equal(permission.message, 'DriverActor lacks required Node permission.');
+});
+
+test('native DriverActor fails before Worker creation when the process FFI flag is absent', async () => {
+  if (process.execArgv.includes('--experimental-ffi')) return;
+  await assert.rejects(openDriverRuntime(), { code: 'DRIVER_FFI_FLAG_REQUIRED' });
 });

@@ -1,11 +1,11 @@
 {
-  "schema_version": 15,
+  "schema_version": 16,
   "updated": "2026-08-11",
-  "status": "cjs_f6_windows_complete_accepted_protected_integration_authorized",
-  "objective": "Integrate the accepted Windows CJS-F6 result through protected main, keep the Linux F2L through F6L work publicly retained and independently completable, then specify a bounded Windows-first F7 security, failure-injection, leak-stress, permission, and diagnostic hardening slice before implementation.",
+  "status": "cjs_f7_windows_complete_accepted_protected_integration_authorized",
+  "objective": "Integrate the accepted Windows CJS-F7 platform-hardening result through protected main, keep native Linux x86-64, Linux ARM64 SBSA, and WSL2 work publicly retained and independently completable, then specify a bounded Windows-first F8 package, public-facade, compatibility, and second-consumer slice before implementation.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "protected main following authorized CJS-F6W pull-request integration",
+  "current_branch": "codex/windows-f7 pending authorized protected-main pull-request integration",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -134,6 +134,25 @@
         "portable request, cache, corruption, protocol, lifecycle, and unexpected-loss fixtures complete",
         "native libnvrtc and libnvJitLink discovery, compile, link, and cleanup evidence deferred to qualified Linux hardware"
       ]
+    },
+    {
+      "id": "CJS-F7W",
+      "status": "complete_accepted_windows_x64_protected_integration_authorized",
+      "outputs": [
+        "accepted SPEC-0007 sanitized host and device diagnostic contract",
+        "CUDA-reported WDDM/TCC/watchdog/integration/compute-mode assessment without device mutation",
+        "inherited Node permission enforcement with DriverActor and CompilerActor FFI denial and explicit-allow evidence",
+        "deterministic failure/property partitions, sanitized boundaries, and repeated portable/native lifecycle balance"
+      ]
+    },
+    {
+      "id": "CJS-F7L",
+      "status": "portable_classification_stress_and_human_handoff_complete_native_qualification_deferred",
+      "outputs": [
+        "native Linux x86-64, Linux ARM64 SBSA, and WSL2 classifications remain separate",
+        "portable property, failure, repeated-lifecycle, responsiveness, and broad regression controls complete",
+        "native Linux and WSL permission, Driver, compiler, execution, and cleanup evidence deferred to qualified hardware"
+      ]
     }
   ],
   "authority": [
@@ -149,6 +168,7 @@
     "docs/specs/SPEC-0004-device-memory-foundation.md",
     "docs/specs/SPEC-0005-module-launch-completion.md",
     "docs/specs/SPEC-0006-compiler-linker-cache.md",
+    "docs/specs/SPEC-0007-windows-platform-hardening.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
@@ -157,7 +177,7 @@
     "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
   ],
   "preconditions": [
-    "Windows F6 consumes accepted and integrated CJS-F5W and cannot imply Linux support.",
+    "Windows F7 consumes accepted CJS-F5W/F6W and cannot imply native Linux, ARM64, or WSL support.",
     "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
     "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
     "Unknown or contradictory public semantics fail closed.",
@@ -166,11 +186,11 @@
     "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Integrate CJS-F6W through protected main only after exact required checks pass.",
-    "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, and side-effect qualification runbooks.",
-    "Draft and accept a detailed Windows-first CJS-F7 platform-hardening specification before implementing F7.",
-    "Keep packaging and UMCGS consumer work gated on their accepted dependency chain.",
-    "Retain and re-run the platform-neutral F3 through F6 capsules whenever shared owners change; do not represent them as native Linux CUDA support."
+    "Integrate CJS-F7W through protected main only after exact required checks pass.",
+    "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, and platform qualification runbooks.",
+    "Draft and accept a detailed Windows-first CJS-F8 package/public-facade/second-consumer specification before implementing F8.",
+    "Keep UMCGS consumer work gated on an accepted public CUDA-JS package contract.",
+    "Retain and re-run the platform-neutral F3 through F7 capsules whenever shared owners change; do not represent them as native Linux CUDA support."
   ],
   "acceptance_criteria": [
     "The exact remote branch/tree is readable publicly and matches the claimed commit.",
@@ -180,6 +200,8 @@
     "CJS-F5W remains bounded by accepted SPEC-0005 and exact Windows oracle evidence.",
     "CJS-F6W remains bounded by accepted SPEC-0006 and exact Windows compiler, linker, cache, artifact, and cleanup evidence.",
     "CJS-F6W PTX and cubin bytes match the independent MSVC oracle exactly and both execute with identical Driver output.",
+    "CJS-F7W remains bounded by accepted SPEC-0007 and exact Windows permission, device-diagnostic, failure/property, stress, and cleanup evidence.",
+    "Both native actors inherit the Node permission profile, deny FFI without authority, and close terminally with explicit authority.",
     "Windows and Linux compatibility/evidence remain separately keyed and reported.",
     "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
   ],
@@ -187,7 +209,7 @@
     "remove or claim completion of the deferred Linux path",
     "use Windows or WSL evidence as native Linux support",
     "make Linux a hidden runtime prerequisite for the active Windows path",
-    "start F7, package, or UMCGS code before its Windows predecessor and detailed contract pass",
+    "start F8 package/public-facade or UMCGS code before its detailed contract and predecessor evidence pass",
     "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
     "claim Fast FFI dispatch from timing or static eligibility"
   ],
@@ -211,8 +233,9 @@
     "Native Ubuntu CI regenerates the expanded schema and runs F4 portable controls while the retained handoff makes no native Linux CUDA claim.",
     "F5W passes copied PTX identity, exact declared packing, lease-through-completion, deferred attribution, timeout owner loss, and exact Windows Node-versus-MSVC vector parity checksum 15600773.",
     "F6W passes exact NVRTC 13.3 PTX and nvJitLink 13.3 cubin C parity, clean-room determinism, cache miss/hit/corruption/invalidation, application responsiveness, PTX/cubin Driver execution checksum 15600773, and terminal CompilerActor/DriverActor cleanup.",
+    "F7W passes exact WDDM-watchdog/default-compute-mode diagnostics, both actor permission denial/allow controls, 512 deterministic property cases, 48 portable actor cycles, 16 native actor cycles, sanitized failure boundaries, and terminal resource balance.",
     "Native CI regenerates the 27-function/16-type schema and runs F5 portable controls while the retained F5L handoff makes no native Linux CUDA claim.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
-    "iteathen/CUDA-JS is public, CJS-F2W pull request 5, CJS-F3W pull request 6, CJS-F4W pull request 7, and CJS-F5W pull request 8 are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."
+    "iteathen/CUDA-JS is public, CJS-F2W through CJS-F6W pull requests are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."
   ]
 }

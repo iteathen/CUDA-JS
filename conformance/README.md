@@ -2,7 +2,7 @@
 
 Independent generic runtime conformance capsules.
 
-[`f3/`](f3/README.md) owns the accepted DriverActor/resource lifecycle capsule. [`f4/`](f4/README.md) owns bounded device-memory evidence. [`f5/`](f5/README.md) owns bounded PTX module/launch/completion evidence. [`f6/`](f6/README.md) owns compiler/linker/cache and PTX/cubin handoff evidence. All retain native Linux engineering handoffs and run portable logic without a Linux Driver; their native CUDA claims are currently Windows-only.
+[`f3/`](f3/README.md) owns the accepted DriverActor/resource lifecycle capsule. [`f4/`](f4/README.md) owns bounded device-memory evidence. [`f5/`](f5/README.md) owns bounded PTX module/launch/completion evidence. [`f6/`](f6/README.md) owns compiler/linker/cache and PTX/cubin handoff evidence. [`f7/`](f7/README.md) owns platform classification, permission, failure/property, repeated-lifecycle, and Windows device-mode/watchdog hardening evidence. All retain native Linux engineering handoffs and run portable logic without a Linux Driver; their native CUDA claims are currently Windows-only.
 
 Initial oracle order:
 
