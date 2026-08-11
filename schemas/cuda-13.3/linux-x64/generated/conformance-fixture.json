@@ -7,15 +7,15 @@
   ],
   "exactIdentity": {
     "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
-    "generatorSha256": "6e4f489d3f95a4e190fd08ec77672cc7a135f659ba942f92608580702f7f214c",
-    "headerFactsSha256": "a6cf01fc2c959aa2b6e1a64788c8822779c9ed9fe1cc601ab55eb0eca2387d37",
+    "generatorSha256": "31ab3b6ea32a95cd82e17c5f1f89e27c1a11e098f9afd6aaa2691d35a731d0f3",
+    "headerFactsSha256": "21df1680acdd43dbf9255d7bed17e9e31c895c3f510dbf2cf704f71d730b3448",
     "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
     "licenseSha256": "088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
-    "overlaySha256": "e7293c8ca62a2520a2b065c4c9e814604af0931b71ebed4b905e7118bc132402",
+    "overlaySha256": "49094f31205d59fd5f4835063fbbf4b6cf23d8367fbb48a42b7eb299a9e7f970",
     "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
     "packageVersion": "13.3.29-1",
-    "selectionSha256": "33b4cb5704496055778790db72cc1def99a0f77d3ec2987ca48faede0a8bd18d",
-    "targetLayoutsSha256": "ed2a56ea69a7d2fb4f97104dbb3adc9a73173229c744ffeb77d75110b2ee0b0c",
+    "selectionSha256": "de2af100a70cc9aab2bc7853fbaa51872c8babfee91511a9aa470e8e42e56a5f",
+    "targetLayoutsSha256": "86977c61b99cd14841429144cbcdb3a55c23523f92dab8187f04f1d3d0029237",
     "toolkitRelease": "13.3"
   },
   "expectedFunctions": [
@@ -91,6 +91,40 @@
     },
     {
       "argumentFfiTypes": [
+        "pointer",
+        "u32"
+      ],
+      "nativeSymbol": "cuEventCreate",
+      "publicName": "cuEventCreate",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuEventDestroy_v2",
+      "publicName": "cuEventDestroy",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuEventQuery",
+      "publicName": "cuEventQuery",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer"
+      ],
+      "nativeSymbol": "cuEventRecord",
+      "publicName": "cuEventRecord",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
         "i32",
         "pointer"
       ],
@@ -125,6 +159,17 @@
       ],
       "nativeSymbol": "cuInit",
       "publicName": "cuInit",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer",
+        "pointer",
+        "pointer"
+      ],
+      "nativeSymbol": "cuLaunchKernelEx",
+      "publicName": "cuLaunchKernelEx",
       "returnFfiType": "i32"
     },
     {
@@ -171,6 +216,50 @@
       ],
       "nativeSymbol": "cuMemcpyHtoD_v2",
       "publicName": "cuMemcpyHtoD",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer",
+        "pointer"
+      ],
+      "nativeSymbol": "cuModuleGetFunction",
+      "publicName": "cuModuleGetFunction",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer"
+      ],
+      "nativeSymbol": "cuModuleLoadData",
+      "publicName": "cuModuleLoadData",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuModuleUnload",
+      "publicName": "cuModuleUnload",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "u32"
+      ],
+      "nativeSymbol": "cuStreamCreate",
+      "publicName": "cuStreamCreate",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuStreamDestroy_v2",
+      "publicName": "cuStreamDestroy",
       "returnFfiType": "i32"
     }
   ],
@@ -237,6 +326,11 @@
       "fields": [],
       "size": 4
     },
+    "CUevent": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
     "CUexecAffinityParam": {
       "alignment": 4,
       "fields": [
@@ -253,10 +347,81 @@
       ],
       "size": 8
     },
+    "CUfunction": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
+    "CUlaunchConfig": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "gridDimX",
+          "offset": 0,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimY",
+          "offset": 4,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimZ",
+          "offset": 8,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimX",
+          "offset": 12,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimY",
+          "offset": 16,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimZ",
+          "offset": 20,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "sharedMemBytes",
+          "offset": 24,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "hStream",
+          "offset": 32,
+          "sourceType": "CUstream"
+        },
+        {
+          "name": "attrs",
+          "offset": 40,
+          "sourceType": "CUlaunchAttribute *"
+        },
+        {
+          "name": "numAttrs",
+          "offset": 48,
+          "sourceType": "unsigned int"
+        }
+      ],
+      "size": 56
+    },
+    "CUmodule": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
     "CUresult": {
       "alignment": 4,
       "fields": [],
       "size": 4
+    },
+    "CUstream": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
     },
     "cuuint64_t": {
       "alignment": 8,
@@ -269,7 +434,7 @@
       "size": 8
     }
   },
-  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-conformance",
+  "id": "cuda-13.3.29-driver-tier-0-f5-linux-x64-conformance",
   "mutationControls": [
     "size",
     "alignment",

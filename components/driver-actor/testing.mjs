@@ -12,6 +12,9 @@ export async function openMockDriverRuntime(options = {}) {
     terminateActor() {
       return runtime[DRIVER_RUNTIME_TEST]('terminate');
     },
+    setExecutionMode(mode) {
+      return runtime[DRIVER_RUNTIME_TEST]('testing.execution-mode', { mode });
+    },
   });
   return Object.freeze({ runtime, testing });
 }

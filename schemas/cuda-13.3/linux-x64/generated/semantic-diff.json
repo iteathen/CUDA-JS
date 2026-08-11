@@ -1,17 +1,25 @@
 {
   "added": [
-    "cuda.driver.function.cuMemAlloc",
-    "cuda.driver.function.cuMemFree",
-    "cuda.driver.function.cuMemGetInfo",
-    "cuda.driver.function.cuMemcpyDtoH",
-    "cuda.driver.function.cuMemcpyHtoD",
-    "cuda.driver.type.CUdeviceptr",
-    "cuda.driver.type.size_t"
+    "cuda.driver.function.cuEventCreate",
+    "cuda.driver.function.cuEventDestroy",
+    "cuda.driver.function.cuEventQuery",
+    "cuda.driver.function.cuEventRecord",
+    "cuda.driver.function.cuLaunchKernelEx",
+    "cuda.driver.function.cuModuleGetFunction",
+    "cuda.driver.function.cuModuleLoadData",
+    "cuda.driver.function.cuModuleUnload",
+    "cuda.driver.function.cuStreamCreate",
+    "cuda.driver.function.cuStreamDestroy",
+    "cuda.driver.type.CUevent",
+    "cuda.driver.type.CUfunction",
+    "cuda.driver.type.CUlaunchConfig",
+    "cuda.driver.type.CUmodule",
+    "cuda.driver.type.CUstream"
   ],
   "baseline": "selection.previousStableIds",
   "removed": [],
   "schemaVersion": 1,
-  "selectionId": "cuda-13.3.29-driver-tier-0-f4-linux-x64",
+  "selectionId": "cuda-13.3.29-driver-tier-0-f5-linux-x64",
   "unchanged": [
     "cuda.driver.function.cuCtxCreate",
     "cuda.driver.function.cuCtxDestroy",
@@ -25,15 +33,22 @@
     "cuda.driver.function.cuGetErrorString",
     "cuda.driver.function.cuGetProcAddress",
     "cuda.driver.function.cuInit",
+    "cuda.driver.function.cuMemAlloc",
+    "cuda.driver.function.cuMemFree",
+    "cuda.driver.function.cuMemGetInfo",
+    "cuda.driver.function.cuMemcpyDtoH",
+    "cuda.driver.function.cuMemcpyHtoD",
     "cuda.driver.type.CUcontext",
     "cuda.driver.type.CUctxCigParam",
     "cuda.driver.type.CUctxCreateParams",
     "cuda.driver.type.CUdevice",
     "cuda.driver.type.CUdevice_attribute",
+    "cuda.driver.type.CUdeviceptr",
     "cuda.driver.type.CUdriverProcAddressQueryResult",
     "cuda.driver.type.CUexecAffinityParam",
     "cuda.driver.type.CUresult",
-    "cuda.driver.type.cuuint64_t"
+    "cuda.driver.type.cuuint64_t",
+    "cuda.driver.type.size_t"
   ],
   "unresolved": []
 }

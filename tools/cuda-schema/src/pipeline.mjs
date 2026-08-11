@@ -511,7 +511,7 @@ function ffiTypeFor(sourceType, typeFacts) {
 
 function validateSemanticOverlay(selection, headerFacts, overlay) {
   assert(
-    ['accepted-f1b-private-experimental', 'accepted-f4w-private-experimental'].includes(overlay.reviewStatus),
+    ['accepted-f1b-private-experimental', 'accepted-f4w-private-experimental', 'accepted-f5w-private-experimental'].includes(overlay.reviewStatus),
     'Semantic overlay is not in an accepted private-experimental review state.',
   );
   const selectedFunctions = new Set(selection.functions);

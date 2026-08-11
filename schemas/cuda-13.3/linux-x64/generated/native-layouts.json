@@ -32,6 +32,22 @@
       "nativeSymbol": "cuDriverGetVersion",
       "pointerSize": 8
     },
+    "cuEventCreate": {
+      "nativeSymbol": "cuEventCreate",
+      "pointerSize": 8
+    },
+    "cuEventDestroy": {
+      "nativeSymbol": "cuEventDestroy_v2",
+      "pointerSize": 8
+    },
+    "cuEventQuery": {
+      "nativeSymbol": "cuEventQuery",
+      "pointerSize": 8
+    },
+    "cuEventRecord": {
+      "nativeSymbol": "cuEventRecord",
+      "pointerSize": 8
+    },
     "cuGetErrorName": {
       "nativeSymbol": "cuGetErrorName",
       "pointerSize": 8
@@ -46,6 +62,10 @@
     },
     "cuInit": {
       "nativeSymbol": "cuInit",
+      "pointerSize": 8
+    },
+    "cuLaunchKernelEx": {
+      "nativeSymbol": "cuLaunchKernelEx",
       "pointerSize": 8
     },
     "cuMemAlloc": {
@@ -67,9 +87,29 @@
     "cuMemcpyHtoD": {
       "nativeSymbol": "cuMemcpyHtoD_v2",
       "pointerSize": 8
+    },
+    "cuModuleGetFunction": {
+      "nativeSymbol": "cuModuleGetFunction",
+      "pointerSize": 8
+    },
+    "cuModuleLoadData": {
+      "nativeSymbol": "cuModuleLoadData",
+      "pointerSize": 8
+    },
+    "cuModuleUnload": {
+      "nativeSymbol": "cuModuleUnload",
+      "pointerSize": 8
+    },
+    "cuStreamCreate": {
+      "nativeSymbol": "cuStreamCreate",
+      "pointerSize": 8
+    },
+    "cuStreamDestroy": {
+      "nativeSymbol": "cuStreamDestroy_v2",
+      "pointerSize": 8
     }
   },
-  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64-native-layouts",
+  "id": "cuda-13.3.29-driver-tier-0-f5-linux-x64-native-layouts",
   "profile": {
     "byteOrder": "little-endian",
     "pointerSize": 8,
@@ -148,6 +188,11 @@
       "fields": [],
       "size": 4
     },
+    "CUevent": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
     "CUexecAffinityParam": {
       "alignment": 4,
       "fields": [
@@ -164,10 +209,81 @@
       ],
       "size": 8
     },
+    "CUfunction": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
+    "CUlaunchConfig": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "gridDimX",
+          "offset": 0,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimY",
+          "offset": 4,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "gridDimZ",
+          "offset": 8,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimX",
+          "offset": 12,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimY",
+          "offset": 16,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "blockDimZ",
+          "offset": 20,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "sharedMemBytes",
+          "offset": 24,
+          "sourceType": "unsigned int"
+        },
+        {
+          "name": "hStream",
+          "offset": 32,
+          "sourceType": "CUstream"
+        },
+        {
+          "name": "attrs",
+          "offset": 40,
+          "sourceType": "CUlaunchAttribute *"
+        },
+        {
+          "name": "numAttrs",
+          "offset": 48,
+          "sourceType": "unsigned int"
+        }
+      ],
+      "size": 56
+    },
+    "CUmodule": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
     "CUresult": {
       "alignment": 4,
       "fields": [],
       "size": 4
+    },
+    "CUstream": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
     },
     "cuuint64_t": {
       "alignment": 8,

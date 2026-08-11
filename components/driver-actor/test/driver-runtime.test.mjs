@@ -9,6 +9,14 @@ function expectCode(code) {
   return (error) => error instanceof DriverRuntimeError && error.code === code;
 }
 
+const MOCK_PTX = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
+
+async function waitForState(runtime, state) {
+  const deadline = Date.now() + 1_000;
+  while (runtime.state !== state && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.equal(runtime.state, state);
+}
+
 test('mock facade preserves context identity across turns and closes deterministically', async () => {
   const first = await openMockDriverRuntime();
   const second = await openMockDriverRuntime();
@@ -169,6 +177,78 @@ test('unexpected Worker loss retains allocation inventory and reserved-byte evid
   assert.equal(terminal.memory.reservedBytes, 12);
   assert.equal(terminal.memory.allocationCount, 1);
   assert.equal(terminal.memory.state, 'orphaned');
+});
+
+test('mock execution facade snapshots PTX and completes only after private event polling', async () => {
+  const { runtime } = await openMockDriverRuntime();
+  const bytes = Uint8Array.from(MOCK_PTX);
+  const loading = runtime.loadModule({ format: 'ptx', bytes });
+  bytes.fill(0);
+  const module = await loading;
+  assert.equal(module.format, 'ptx');
+  assert.equal(module.byteLength, MOCK_PTX.byteLength);
+  assert.match(module.sha256, /^[a-f0-9]{64}$/);
+  const fn = await runtime.getFunction(module.module, { name: 'mock_kernel', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
+  await assert.rejects(runtime.releaseModule(module.module), expectCode('RESOURCE_HAS_CHILDREN'));
+  const allocation = await runtime.allocateDevice({ byteLength: 16 });
+  let applicationTimer = false;
+  const timer = new Promise((resolve) => setTimeout(() => { applicationTimer = true; resolve(); }, 0));
+  const completion = await runtime.launch(fn.function, {
+    grid: { x: 1, y: 1, z: 1 },
+    block: { x: 16, y: 1, z: 1 },
+    arguments: [{ kind: 'device-memory', memory: allocation.memory }, { kind: 'u32', value: 4 }],
+  });
+  await timer;
+  assert.equal(applicationTimer, true);
+  assert.equal(completion.status, 'completed');
+  assert.equal(completion.pollCount, 2);
+  assert.equal((await runtime.functionStatus(fn.function)).name, 'mock_kernel');
+  await runtime.releaseFunction(fn.function);
+  await assert.rejects(runtime.functionStatus(fn.function), expectCode('RESOURCE_CLOSED'));
+  await runtime.releaseModule(module.module);
+  await runtime.releaseMemory(allocation.memory);
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, true);
+  assert.deepEqual(terminal.disposalOrder.slice(-3), ['stream', 'context', 'library']);
+});
+
+test('mock deferred launch failure is terminal, poisons health, and releases completed-use leases', async () => {
+  const { runtime, testing } = await openMockDriverRuntime();
+  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+  const fn = await runtime.getFunction(module.module, { name: 'deferred', parameters: [{ kind: 'device-memory' }] });
+  const allocation = await runtime.allocateDevice({ byteLength: 8 });
+  await testing.setExecutionMode('deferred');
+  await assert.rejects(runtime.launch(fn.function, {
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'device-memory', memory: allocation.memory }],
+  }), (error) => error.code === 'CUDA_DEFERRED_FAILURE' && error.category === 'deferred-driver' && error.healthAfter === 'poisoned');
+  assert.equal(runtime.health, 'poisoned');
+  await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), expectCode('DRIVER_RUNTIME_POISONED'));
+  const description = await runtime.describe();
+  assert.equal(description.inventory.resources.find((entry) => entry.kind === 'function').leases, 0);
+  assert.equal(description.inventory.resources.find((entry) => entry.kind === 'device-memory').leases, 0);
+  await runtime.releaseFunction(fn.function);
+  await runtime.releaseModule(module.module);
+  await runtime.releaseMemory(allocation.memory);
+  assert.equal((await runtime.close()).graceful, true);
+});
+
+test('mock completion timeout exits the owner and preserves orphaned event and argument leases', async () => {
+  const { runtime, testing } = await openMockDriverRuntime({ execution: { maxCompletionMilliseconds: 3 } });
+  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+  const fn = await runtime.getFunction(module.module, { name: 'timeout', parameters: [{ kind: 'device-memory' }] });
+  const allocation = await runtime.allocateDevice({ byteLength: 8 });
+  await testing.setExecutionMode('timeout');
+  await assert.rejects(runtime.launch(fn.function, {
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'device-memory', memory: allocation.memory }],
+  }), (error) => error.code === 'EXECUTION_COMPLETION_TIMEOUT' && error.category === 'restart-required');
+  await waitForState(runtime, 'restart-required');
+  const terminal = runtime.terminalReport;
+  assert.equal(terminal.cleanupClaim, 'unproved-worker-loss');
+  assert.equal(terminal.inventory.dead, true);
+  assert.equal(terminal.inventory.resources.find((entry) => entry.kind === 'event').state, 'orphaned');
+  assert.equal(terminal.inventory.resources.find((entry) => entry.kind === 'function').leases, 1);
+  assert.equal(terminal.inventory.resources.find((entry) => entry.kind === 'device-memory').leases, 1);
+  assert.equal(terminal.execution.inFlight, true);
 });
 
 test('protocol rejects unknown commands and public records reject native-shaped values', () => {

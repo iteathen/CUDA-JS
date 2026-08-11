@@ -1,11 +1,11 @@
 {
-  "schema_version": 13,
+  "schema_version": 14,
   "updated": "2026-08-11",
-  "status": "ready_cjs_f5_windows_contract",
-  "objective": "Review and integrate accepted Windows CJS-F4W, then specify a bounded Windows-only CJS-F5 module/launch/completion slice while retaining Linux F2L/F3L/F4L as public, deferred, incomplete native Driver work.",
+  "status": "cjs_f5_windows_complete_pending_protected_integration",
+  "objective": "Review and integrate stacked Windows CJS-F4W and CJS-F5W, then specify the bounded Windows F6 compiler/toolchain/cache slice while retaining Linux F2L through F5L as public, deferred, incomplete native Driver work.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "codex/windows-f4 draft pull request 7 from protected main",
+  "current_branch": "codex/windows-f5 draft pull request 8 stacked on protected CJS-F4W pull request 7",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -32,8 +32,8 @@
       "status": "complete_accepted_schema_abi",
       "outputs": [
         "hash-pinned CUDA 13.3.29 official inputs and deterministic Clang importer",
-        "17 reviewed private Tier-0 functions and 11 type/layout facts",
-        "466 unselected Driver declarations cataloged unavailable",
+        "27 reviewed private Tier-0 functions and 16 type/layout facts",
+        "456 unselected Driver declarations cataloged unavailable",
         "native Linux x86-64 probes plus hash-identical-header MSVC Win64 compatibility probe"
       ]
     },
@@ -96,6 +96,26 @@
         "human engineering handoff for canonical Driver, adapter, C oracle, permission, and cleanup qualification",
         "retained dependency on incomplete CJS-F2L/F3L for native Linux memory execution"
       ]
+    },
+    {
+      "id": "CJS-F5W",
+      "status": "complete_accepted_windows_x64_pending_integration",
+      "outputs": [
+        "accepted SPEC-0005 bounded PTX module, declared function, packed launch, and event completion contract",
+        "one private nonblocking stream, one in-flight launch, terminal polling, memory/function leases, and timeout owner-loss accounting",
+        "ten generated execution exports and five added types with independent native Ubuntu generation and MSVC layout parity",
+        "independent MSVC and Node vector-add byte parity checksum 15600773 with terminal native cleanup"
+      ]
+    },
+    {
+      "id": "CJS-F5L",
+      "status": "portable_control_plane_schema_ptx_and_oracle_complete_native_driver_blocked",
+      "outputs": [
+        "portable execution policy, PTX identity, packing, protocol, lease, polling, deferred-error, timeout/loss, and teardown controls",
+        "tracked PTX and independent C oracle source with exact expected offsets, size, output, checksum, and cleanup records",
+        "human engineering handoff for canonical libcuda, adapter, oracle portability, evidence, and cleanup qualification",
+        "retained dependency on incomplete CJS-F2L/F3L/F4L for native Linux launch execution"
+      ]
     }
   ],
   "authority": [
@@ -109,6 +129,7 @@
     "docs/specs/SPEC-0002-windows-driver-bootstrap.md",
     "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
     "docs/specs/SPEC-0004-device-memory-foundation.md",
+    "docs/specs/SPEC-0005-module-launch-completion.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
@@ -117,7 +138,7 @@
     "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
   ],
   "preconditions": [
-    "Windows-only F4 consumes accepted CJS-F3W and cannot imply Linux support; Windows F5 may consume only accepted and integrated CJS-F4W.",
+    "Windows-only F5 consumes accepted CJS-F3W/F4W and cannot imply Linux support; Windows F6 may consume only accepted and integrated CJS-F5W.",
     "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
     "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
     "Unknown or contradictory public semantics fail closed.",
@@ -126,18 +147,18 @@
     "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Review and integrate CJS-F4W through protected main without weakening required checks.",
-    "Keep Linux issue 4 aligned with both retained native environment and memory qualification runbooks.",
-    "Draft and accept the detailed Windows CJS-F5 module/launch/completion specification before implementing F5.",
+    "Review and integrate stacked CJS-F4W and CJS-F5W through protected main without weakening required checks.",
+    "Keep Linux issue 4 aligned with the retained native environment, memory, and execution qualification runbooks.",
+    "Draft and accept the detailed Windows CJS-F6 compiler/toolchain/cache specification before implementing F6.",
     "Keep compiler, cache, package, and consumer code gated on their Windows predecessors.",
-    "Retain the platform-neutral Linux F3/F4 capsules and re-run them whenever shared control-plane owners change; do not represent them as Driver support."
+    "Retain the platform-neutral Linux F3/F4/F5 capsules and re-run them whenever shared control-plane owners change; do not represent them as Driver support."
   ],
   "acceptance_criteria": [
     "The exact remote branch/tree is readable publicly and matches the claimed commit.",
     "The Linux issue retains native Linux x86-64 Driver/GPU, C-oracle, version/status, context, permission, and cleanup requirements.",
     "CJS-F3W remains bounded by accepted SPEC-0003 and its exact Windows evidence.",
     "CJS-F4W remains bounded by accepted SPEC-0004 and exact Windows oracle evidence.",
-    "CJS-F5W begins only from an accepted module/launch/completion specification.",
+    "CJS-F5W remains bounded by accepted SPEC-0005 and exact Windows oracle evidence.",
     "Windows and Linux compatibility/evidence remain separately keyed and reported.",
     "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
   ],
@@ -145,7 +166,7 @@
     "remove or claim completion of the deferred Linux path",
     "use Windows or WSL evidence as native Linux support",
     "make Linux a hidden runtime prerequisite for the active Windows path",
-    "start module, launch, completion, compiler, cache, package, or UMCGS code before its Windows predecessor and detailed contract pass",
+    "start compiler, cache, package, or UMCGS code before its Windows predecessor and detailed contract pass",
     "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
     "claim Fast FFI dispatch from timing or static eligibility"
   ],
@@ -156,7 +177,7 @@
   ],
   "completion_evidence": [
     "F1A passes independently on Windows x64 and native Linux x86-64.",
-    "F1B/F4 deterministically generates 17 function facts, 11 type/layout facts, and fail-closed coverage for 466 unselected declarations.",
+    "F1B/F5 deterministically generates 27 function facts, 16 type/layout facts, and fail-closed coverage for 456 unselected declarations.",
     "The Windows CUDA 13.3 cuda.h hash exactly matches the accepted F1B header hash.",
     "The MSVC Windows native probe matches every selected size, alignment, field offset, and function-pointer width.",
     "F2W binds all 12 generated exports and verifies all 12 public-name cuGetProcAddress queries.",
@@ -167,6 +188,8 @@
     "The F3 platform-neutral capsule passes on native Ubuntu x86-64 while making no Linux Driver support claim.",
     "F4W passes portable quota/range/byte/lifecycle controls and exact Windows Node-versus-MSVC 4096-byte parity, explicit free, slot reuse, allocation-before-context teardown, and Worker exit zero.",
     "Native Ubuntu CI regenerates the expanded schema and runs F4 portable controls while the retained handoff makes no native Linux CUDA claim.",
+    "F5W passes copied PTX identity, exact declared packing, lease-through-completion, deferred attribution, timeout owner loss, and exact Windows Node-versus-MSVC vector parity checksum 15600773.",
+    "Native CI regenerates the 27-function/16-type schema and runs F5 portable controls while the retained F5L handoff makes no native Linux CUDA claim.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
     "iteathen/CUDA-JS is public, CJS-F2W pull request 5 and CJS-F3W pull request 6 are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."
   ]

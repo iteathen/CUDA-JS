@@ -33,6 +33,7 @@ const required = [
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md',
   'docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md',
   'docs/specs/SPEC-0004-device-memory-foundation.md',
+  'docs/specs/SPEC-0005-module-launch-completion.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
@@ -67,6 +68,9 @@ const required = [
   'components/memory/README.md', 'components/memory/component.yaml',
   'components/memory/index.mjs', 'components/memory/src/memory-manager.mjs',
   'components/memory/test/memory-manager.test.mjs',
+  'components/execution/README.md', 'components/execution/component.yaml',
+  'components/execution/index.mjs', 'components/execution/src/execution-manager.mjs',
+  'components/execution/test/execution-manager.test.mjs',
   'schemas/README.md', 'conformance/README.md',
   'conformance/f3/README.md', 'conformance/f3/evidence.mjs',
   'conformance/f3/run-mock.mjs', 'conformance/f3/run-native-windows.mjs',
@@ -75,6 +79,11 @@ const required = [
   'conformance/f4/run-mock.mjs', 'conformance/f4/build-native-windows.mjs',
   'conformance/f4/run-native-windows.mjs', 'conformance/f4/verify.mjs',
   'conformance/f4/native/windows-memory-oracle.c',
+  'conformance/f5/README.md', 'conformance/f5/evidence.mjs',
+  'conformance/f5/run-mock.mjs', 'conformance/f5/build-native-windows.mjs',
+  'conformance/f5/run-native-windows.mjs', 'conformance/f5/verify.mjs',
+  'conformance/f5/native/windows-launch-oracle.c',
+  'conformance/f5/fixtures/vector-add.ptx.txt',
   'schemas/cuda-runtime-ir.schema.json', 'schemas/cuda-13.3/provenance.json',
   'schemas/cuda-13.3/tier-0/selection.json', 'schemas/cuda-13.3/tier-0/semantic-overlay.json',
   'schemas/cuda-13.3/linux-x64/generated/header-facts.json',
@@ -95,7 +104,7 @@ const required = [
   'tools/cuda-schema/src/pipeline.mjs',
   '.github/CODEOWNERS', '.github/pull_request_template.md', '.github/workflows/docs.yml',
   'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
-  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs',
+  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs', 'scripts/run-f5.mjs',
 ];
 
 for (const relative of required) {
@@ -127,6 +136,7 @@ for (const relative of [
   'components/resource-registry/component.yaml',
   'components/driver-actor/component.yaml',
   'components/memory/component.yaml',
+  'components/execution/component.yaml',
   'package.json',
 ]) {
   try {
@@ -206,6 +216,7 @@ const markers = {
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md': ['CJS-F2W', 'EXP-012', 'Deferred Linux path'],
   'docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md': ['CJS-F3', 'runtime.driver-actor', 'runtime.resource-registry', 'Unexpected Worker loss'],
   'docs/specs/SPEC-0004-device-memory-foundation.md': ['CJS-F4', 'runtime.memory', 'device-memory', 'Native Windows'],
+  'docs/specs/SPEC-0005-module-launch-completion.md': ['CJS-F5', 'runtime.execution', 'cuLaunchKernelEx', 'restart-required'],
   'schemas/README.md': ['cuda-runtime-ir.schema.json', 'cuda-13.3/tier-0/', 'generated/'],
 };
 for (const [relative, values] of Object.entries(markers)) {
@@ -224,6 +235,7 @@ for (const relative of files) {
       && !relative.startsWith('experiments/exp-001/generated/')
       && !relative.startsWith('experiments/exp-012/generated/')
       && !relative.startsWith('conformance/f4/native/')
+      && !relative.startsWith('conformance/f5/native/')
       && relative !== 'schemas/cuda-13.3/linux-x64/generated/native-abi-probe.c') {
     errors.push(`C source is outside a registered generated-source boundary: ${relative}`);
   }
@@ -238,8 +250,10 @@ for (const relative of files) {
       && !relative.startsWith('components/resource-registry/')
       && !relative.startsWith('components/driver-actor/')
       && !relative.startsWith('components/memory/')
+      && !relative.startsWith('components/execution/')
       && !relative.startsWith('conformance/f3/')
       && !relative.startsWith('conformance/f4/')
+      && !relative.startsWith('conformance/f5/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
@@ -256,4 +270,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000, accepted F1B/F2W/F3W/F4W, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000, accepted F1B/F2W/F3W/F4W/F5W, and retained Linux native handoff checks passed');

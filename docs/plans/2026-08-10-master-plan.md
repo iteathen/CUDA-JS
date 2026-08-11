@@ -8,7 +8,7 @@
 
 Turn the accepted repository boundary and Node-FFI-first host-binding decision into dependency-ordered, falsifiable future work without prematurely implementing broad CUDA coverage.
 
-**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, and Windows-only `CJS-F4W` are accepted after independent host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, copied-memory, and cleanup qualification. The F3/F4 control plane also passes in native Linux CI without establishing Linux Driver support. Windows `CJS-F5W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` and native Linux F3/F4 remain retained, incomplete, deferred, and independently promotable.
+**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, and `CJS-F5W` are accepted after independent host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, copied-memory, PTX-launch, event-completion, and cleanup qualification. The F3/F4/F5 control plane also passes without establishing Linux Driver support. Linux `CJS-F2L / EXP-001` and native Linux F3/F4/F5 remain retained, incomplete, deferred, and independently promotable.
 
 The first *planned* code-bearing work after that future authorization is **not** an application runtime and does not require CUDA. It is EXP-000: a generated synthetic C ABI library and direct C oracle that qualify Node FFI, schema-derived definitions/packers, Worker isolation, resource lifetime, and deterministic teardown before GPU variables enter the diagnosis.
 
@@ -88,7 +88,7 @@ The Node-FFI-first substrate passes exact native parity and cleanup on each clai
 
 **Exit**
 
-Satisfied on the pinned CUDA 13.3.29/Clang 18/Linux x86-64 profile and expanded through F4: Tier-0 CUDA schema regenerates deterministically; native probes agree on scalar/handle/struct/device-address/size layouts; six mutation classes are detected; 466 unselected declarations fail closed.
+Satisfied on the pinned CUDA 13.3.29/Clang 18/Linux x86-64 profile and expanded through F5: Tier-0 CUDA schema regenerates deterministically; native probes agree on scalar/handle/struct/device-address/size layouts; six mutation classes are detected; 456 unselected declarations fail closed.
 
 ### CJS-F2 — platform-separated Node FFI CUDA backend and preflight (P1)
 
@@ -154,6 +154,8 @@ Pressure, rollback, failed-free accounting, exact-edge/out-of-bounds, in-flight 
 ### CJS-F5 — module, function, launch, stream/event, completion (P1)
 
 **Dependencies:** F3/F4.
+
+**Accepted disposition:** Windows F5W satisfies the bounded PTX-only slice on the exact accepted Windows profile. An independent MSVC oracle and the DriverActor agree on the tracked vector output, checksum, parameter offsets/size, and terminal cleanup. Native CI regenerates the 27-function/16-type schema and runs portable policy, packing, lease, polling, deferred-error, timeout/loss, and teardown controls. Native Linux Driver execution remains blocked on F2L–F4L and the retained F5 handoff; compilation, caching, broad signatures/formats, public streams/events, and concurrency remain deferred.
 
 **Outputs**
 
@@ -257,11 +259,11 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 
 ## Next dependency sequence
 
-1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W, and Windows F4W evidence.
-2. Preserve the public contribution request and retained handoffs for Linux F2L/F3L/F4L.
-3. Review and integrate accepted Windows F4W through protected main.
-4. Draft and accept the Windows F5 module/launch/completion specification before implementing F5; do not begin NVRTC pipelines, graphs, or broad API generation until their Windows predecessors pass.
-5. Resume Linux F2L independently when a qualified native Linux NVIDIA Driver/GPU environment becomes available; rerun shared F3/F4 control-plane evidence there but never substitute it for native Driver evidence.
+1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W, Windows F4W, and Windows F5W evidence.
+2. Preserve the public contribution request and retained handoffs for Linux F2L/F3L/F4L/F5L.
+3. Review and integrate stacked Windows F4W and F5W through protected main.
+4. Draft and accept the Windows F6 compiler/toolchain/cache specification before implementation; do not begin graphs or broad API generation until their Windows predecessors pass.
+5. Resume Linux F2L independently when a qualified native Linux NVIDIA Driver/GPU environment becomes available; rerun shared F3/F4/F5 control-plane evidence there but never substitute it for native Driver evidence.
 
 ## Stop conditions
 
