@@ -111,7 +111,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     return {
       schemaVersion: 1,
       runtime: { id: runtimeId, epoch, state: 'open', backend: 'mock' },
-      profile: { node: process.version, platform: process.platform, architecture: process.arch, nativeQualified: false },
+      profile: { node: process.version, platform: process.platform, architecture: process.arch, nativeOperational: false, nativeQualified: false },
       driver: { apiVersion: 13030, deviceCount: 1 },
       device: {
         ordinal: 0,

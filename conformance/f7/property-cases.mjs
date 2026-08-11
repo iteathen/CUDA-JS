@@ -26,7 +26,7 @@ function driver(attributes) {
   return {
     schemaVersion: 1,
     runtime: { backend: 'windows-native' },
-    profile: { nativeQualified: true, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
+    profile: { nativeOperational: true, nativeQualified: false, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
     driver: { apiVersion: 13030 },
     device: { ordinal: 0, attributes },
   };
@@ -59,8 +59,8 @@ export function runPropertyPartitions(seed = 0xc0da1303, count = 256) {
     if (diagnosticKind === 3) attributes.computeMode = 9;
     if (diagnosticKind === 4) attributes.tccDriver = 7;
     const assessment = assessCudaSupport(windowsHost(), driver(attributes));
-    const diagnosticExpected = diagnosticKind === 0 ? (attributes.computeMode === 2 ? 'CUDA_COMPUTE_MODE_PROHIBITED' : 'accepted') : 'CUDA_DEVICE_ATTRIBUTES_INVALID';
-    const diagnosticActual = assessment.status === 'accepted' ? 'accepted' : assessment.reason;
+    const diagnosticExpected = diagnosticKind === 0 ? (attributes.computeMode === 2 ? 'CUDA_COMPUTE_MODE_PROHIBITED' : 'testing-unconfirmed') : 'CUDA_DEVICE_ATTRIBUTES_INVALID';
+    const diagnosticActual = assessment.status === 'testing-unconfirmed' ? 'testing-unconfirmed' : assessment.reason;
     assert.equal(diagnosticActual, diagnosticExpected, `diagnostic-${seed.toString(16)}-${index}`);
     diagnosticCases.push({ id: `diagnostic-${seed.toString(16)}-${String(index).padStart(4, '0')}`, kind: diagnosticKind, outcome: diagnosticActual });
   }

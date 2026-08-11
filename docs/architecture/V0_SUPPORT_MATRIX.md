@@ -12,18 +12,18 @@ The current evidence-backed device list is generated separately in [`../HARDWARE
 
 | Profile | Host-call substrate | V0 disposition |
 |---|---|---|
-| Node 26.7 exact | experimental `node:ffi`; Fast FFI where eligible | first qualification profile |
-| Other Node 26 minors | separate exact-profile qualification | unsupported until tested |
-| Node 22/24 | no built-in `node:ffi` baseline | excluded from no-addon v0 |
+| Node 26.7 exact | experimental `node:ffi`; Fast FFI where eligible | qualified evidence baseline |
+| Node 26.1 or later with required FFI | separate exact-profile qualification | testing-unconfirmed operation allowed |
+| Verified releases without built-in `node:ffi` | no required host-call substrate | known incompatible |
 | Electron/embedded Node | distinct build/permission/FFI profile | excluded until an owner and matrix exist |
 
-Node must be launched with `--experimental-ffi` and, when using the permission model, `--allow-ffi`. Node FFI remains experimental; CUDA-JS pins exact supported Node builds for pre-release work.
+Node must be launched with `--experimental-ffi` and, when using the permission model, `--allow-ffi`. Node FFI remains experimental. CUDA-JS allows unconfirmed operational releases for testing while pinning exact builds only for support evidence.
 
 ## Host platforms
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | accepted experimental package | F2W through F8W Driver/compiler/execution/hardening/package facade accepted; broader memory/concurrency, registry release, and production stability remain staged |
+| Windows 11 | x86-64 Win64 | public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
 | Linux glibc | x86-64 SysV | GPU-free schema plus F3–F8 portable/package path complete; native Driver/compiler qualification deferred | run retained F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |

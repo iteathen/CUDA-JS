@@ -16,7 +16,7 @@ The package is experimental and registry publication is guarded. Applications cu
 
 ## Native Linux x64 and ARM64 handoff
 
-CI already proves tarball contents, install/import/uninstall, compatibility inspection, mock-only public orchestration, independent consumers, multiple instances, and a stable qualification-required native-open error. Those controls should remain unchanged when the native adapter is completed.
+CI already proves tarball contents, install/import/uninstall, compatibility inspection, mock-only public orchestration, independent consumers, multiple instances, and a stable backend-unavailable native-open error. Those controls should remain unchanged when the native adapter is completed.
 
 A Linux engineer should:
 

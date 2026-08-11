@@ -14,7 +14,7 @@ const inspection = inspectCudaHost();
 assert(['linux-native-x64', 'linux-native-arm64'].includes(inspection.host.hostKind));
 let error;
 try { await openCudaRuntime(); } catch (caught) { error = caught; }
-assert.equal(error?.code, 'CUDA_JS_LINUX_QUALIFICATION_REQUIRED');
+assert.equal(error?.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
 assert.equal(error?.category, 'unsupported');
 
 const remainingGates = [
@@ -27,12 +27,12 @@ const target = await writeEvidence('linux-readiness.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8L',
   capsule: 'native-linux-package-readiness',
-  status: 'qualification-required',
+  status: 'backend-unavailable',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, hostKind: inspection.host.hostKind },
   sources: await sourceIdentity(['docs/specs/SPEC-0008-package-public-facade.md', 'conformance/f8/README.md', 'components/runtime-facade/src/runtime.mjs']),
   observations: { portablePackage: portable.status, nativeOpenCode: error.code, nativeOpenCategory: error.category },
   remainingGates,
-  claimLimits: ['Package installation, import, mock consumer, and fail-closed readiness only.', 'No native Linux CUDA provider, Driver, GPU, compiler, execution, or cleanup support claim.'],
+  claimLimits: ['Package installation, import, mock consumer, and explicit backend-unavailable readiness only.', 'No native Linux CUDA provider, Driver, GPU, compiler, execution, or cleanup support claim.'],
 });
 console.log(`F8 Linux readiness retained ${remainingGates.length} native qualification gates for ${inspection.host.hostKind}; evidence: ${target}`);

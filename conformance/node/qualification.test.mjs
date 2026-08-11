@@ -12,23 +12,25 @@ async function fixtures() {
   };
 }
 
-test('only exact Node 26.7.0 is qualified and the package engine agrees', async () => {
+test('only exact Node 26.7.0 is qualified while the package admits testing candidates', async () => {
   const { registry, packageJson } = await fixtures();
   assert.doesNotThrow(() => validateRegistry(registry, packageJson));
   assert.deepEqual(registry.versions.filter((entry) => entry.cudaJsStatus === 'qualified-experimental').map((entry) => entry.version), ['v26.7.0']);
-  assert.match(renderSupportDocument(registry), /v24\.19\.0.*no support/);
+  assert.equal(packageJson.engines.node, '>=26.1.0');
+  assert.match(renderSupportDocument(registry), /v24\.19\.0.*known incompatible/);
+  assert.match(renderSupportDocument(registry), /v26\.6\.0.*testing unconfirmed/);
 });
 
-test('an FFI-capable candidate cannot be promoted without changing the exact package engine', async () => {
+test('an FFI-capable candidate can operate but cannot inherit qualified evidence', async () => {
   const { registry, packageJson } = await fixtures();
   registry.versions.find((entry) => entry.version === 'v26.6.0').cudaJsStatus = 'qualified-experimental';
-  assert.throws(() => validateRegistry(registry, packageJson), /Only the exact package engine/);
+  assert.throws(() => validateRegistry(registry, packageJson), /Only the exact qualified Node baseline|Only the qualified baseline/);
 });
 
 test('a Node release without the required FFI substrate cannot be supported', async () => {
   const { registry, packageJson } = await fixtures();
   registry.versions.find((entry) => entry.version === 'v24.19.0').cudaJsStatus = 'qualified-experimental';
-  assert.throws(() => validateRegistry(registry, packageJson), /Only the exact package engine|cannot be supported/);
+  assert.throws(() => validateRegistry(registry, packageJson), /Only the exact qualified Node baseline|Only the qualified baseline|known-incompatible/);
 });
 
 test('the current exact Node substrate and permission behavior match the registry', async () => {

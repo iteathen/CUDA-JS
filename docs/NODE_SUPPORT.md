@@ -6,31 +6,31 @@
 
 This list is generated from [`conformance/node/registry.json`](../conformance/node/registry.json). CUDA-JS support is an exact Node-version and host-profile claim. Upstream LTS status, a matching module ABI, or a successful `node:ffi` import does not establish CUDA-JS support.
 
-The package currently declares exact Node 26.7.0. [Issue #23](https://github.com/iteathen/CUDA-JS/issues/23) coordinates additional qualification.
+The package admits Node >=26.1.0 for testing. Only exact v26.7.0 carries qualified evidence. [Issue #23](https://github.com/iteathen/CUDA-JS/issues/23) coordinates additional qualification.
 
 ## Exact version matrix
 
 | Node | Upstream phase | Module ABI | Required FFI probe | CUDA-JS status | Evidence disposition |
 |---|---|---:|---|---|---|
 | v26.7.0 | Current | 147 | must be available | **qualified experimental** | EXP-000 on Windows x64 and native Linux x64; Windows native F2W through F8W; exact qualified baseline |
-| v26.6.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.5.1 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.5.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.4.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.3.1 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.3.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.2.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.1.0 | Current | 147 | must be available | **no support** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
-| v26.0.0 | Current | 147 | must be unavailable | **no support** | automated exact-version negative probe; required node ffi substrate unavailable |
-| v25.9.0 | End-of-life | 141 | must be unavailable | **no support** | automated exact-version negative probe; end of life and required node ffi substrate unavailable |
-| v24.19.0 | Active LTS | 137 | must be unavailable | **no support** | automated exact-version negative probe; required node ffi substrate unavailable |
-| v22.23.2 | Maintenance LTS | 127 | must be unavailable | **no support** | automated exact-version negative probe; required node ffi substrate unavailable |
+| v26.6.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.5.1 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.5.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.4.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.3.1 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.3.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.2.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.1.0 | Current | 147 | must be available | **testing unconfirmed** | automated exact-version FFI/permission probe only; portable probe only full native chain absent |
+| v26.0.0 | Current | 147 | must be unavailable | **known incompatible** | automated exact-version negative probe; required node ffi substrate unavailable |
+| v25.9.0 | End-of-life | 141 | must be unavailable | **known incompatible** | automated exact-version negative probe; end of life and required node ffi substrate unavailable |
+| v24.19.0 | Active LTS | 137 | must be unavailable | **known incompatible** | automated exact-version negative probe; required node ffi substrate unavailable |
+| v22.23.2 | Maintenance LTS | 127 | must be unavailable | **known incompatible** | automated exact-version negative probe; required node ffi substrate unavailable |
 
 ## What the automated probe proves
 
 For every listed exact release, CI verifies the version and module ABI, attempts `node:ffi` only through its required flag, checks the expected public exports, and—where FFI exists—checks permission denial without FFI authority and progression to ordinary loader handling with explicit authority.
 
-A passing probe below Node 26.7.0 is deliberately still **no support**. Promotion additionally requires EXP-000 on each promoted host architecture and the complete native CUDA-JS hardware/profile chain on the same exact Node release.
+A passing FFI-capable release is allowed to operate as **testing unconfirmed** without an opt-in switch. That permits evidence collection but does not create a support claim. Releases without the required FFI substrate are **known incompatible**. Promotion still requires EXP-000 on each promoted host architecture and the complete native CUDA-JS hardware/profile chain on the same exact Node release.
 
 ## Promotion and invalidation
 

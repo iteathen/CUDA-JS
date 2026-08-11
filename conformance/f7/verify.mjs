@@ -19,7 +19,7 @@ if (process.platform === 'win32') {
   assert.equal(native.status, 'pass');
   assert.equal(native.observations.driverCycles.length, 8);
   assert.equal(native.observations.compilerCycles.length, 8);
-  assert.equal(native.observations.driverCycles[0].assessment.status, 'accepted');
+  assert.equal(native.observations.driverCycles[0].assessment.status, 'testing-unconfirmed');
   assert(['wddm-watchdog', 'wddm-no-watchdog', 'tcc'].includes(native.observations.driverCycles[0].assessment.cuda.driverModel));
   assert(native.observations.driverCycles.every((entry) => entry.terminal.graceful && entry.terminal.workerExitCode === 0 && entry.terminal.counts.live === 0 && entry.terminal.counts.orphaned === 0));
   assert(native.observations.compilerCycles.every((entry) => entry.terminal.graceful && entry.terminal.workerExitCode === 0 && entry.terminal.resources.programsCreated === entry.terminal.resources.programsDestroyed && entry.terminal.resources.linksCreated === entry.terminal.resources.linksDestroyed));

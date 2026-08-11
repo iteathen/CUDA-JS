@@ -15,7 +15,7 @@ Before changing a material boundary, read:
 
 Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 
-The public [Node support list](docs/NODE_SUPPORT.md) records exact releases, not inferred ranges. Only Node 26.7.0 is currently qualified for the accepted Windows profile; every other listed release is explicitly no-support until it passes the full native chain on an exact profile. The [hardware support list](docs/HARDWARE_SUPPORT.md) likewise keeps multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version matrices, Windows TCC/server, and independent attestation at no-support while their public work issues remain open.
+The public [Node support list](docs/NODE_SUPPORT.md) records exact evidence, not inferred support ranges. Only Node 26.7.0 is currently qualified for the accepted Windows profile; FFI-capable releases at or above Node 26.1.0 may operate as unconfirmed testing candidates, while verified releases without that substrate are known incompatible. The [hardware support list](docs/HARDWARE_SUPPORT.md) permits unconfirmed Windows hardware to run bounded qualification work without promoting support. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version matrices, Windows TCC/server, and independent attestation remain unavailable until their public work issues complete.
 
 ## Binding rules
 

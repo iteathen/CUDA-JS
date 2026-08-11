@@ -8,7 +8,7 @@
     "path": "components/compiler-actor",
     "purpose": "Provide bounded typed NVRTC compilation, nvJitLink composition, validated artifact caching, and copied PTX/cubin handoff from a separate Worker.",
     "public_contracts": ["index.mjs"],
-    "allowed_dependencies": ["node-standard-library", "node-ffi-26.7.0", "canonical-cuda-13.3-nvrtc", "canonical-cuda-13.3-nvjitlink"],
+    "allowed_dependencies": ["node-standard-library", "node-ffi-26.1-or-later", "canonical-cuda-13.3-nvrtc", "canonical-cuda-13.3-nvjitlink"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-option", "source-file", "raw-public-pointer", "driver-context", "consumer-semantics", "concurrent-compile"],
     "validation": ["npm run f6:unit", "npm run f6:native", "npm run f7"],
     "owner": "runtime.compiler-actor",

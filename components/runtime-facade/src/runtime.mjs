@@ -36,12 +36,12 @@ function normalizeOptions(value) {
 
 function preflight(host) {
   if (host.hostKind === 'linux-native-x64' || host.hostKind === 'linux-native-arm64') {
-    throw facadeError('CUDA_JS_LINUX_QUALIFICATION_REQUIRED', 'unsupported', 'Native Linux CUDA remains unqualified; use the retained Linux handoff before enabling this profile.', { hostKind: host.hostKind }, 'open');
+    throw facadeError('CUDA_JS_LINUX_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a native Linux CUDA backend.', { hostKind: host.hostKind }, 'open');
   }
-  if (host.hostKind.startsWith('wsl')) throw facadeError('CUDA_JS_WSL_QUALIFICATION_REQUIRED', 'unsupported', 'WSL CUDA requires a separate qualified profile.', { hostKind: host.hostKind }, 'open');
-  if (host.hostKind !== 'windows-native-x64') throw facadeError('CUDA_JS_HOST_UNSUPPORTED', 'unsupported', 'This host has no accepted CUDA-JS native profile.', { hostKind: host.hostKind }, 'open');
-  if (host.node.version !== CUDA_JS_COMPATIBILITY.node.version || host.node.abi !== CUDA_JS_COMPATIBILITY.node.moduleAbi) {
-    throw facadeError('CUDA_JS_NODE_UNSUPPORTED', 'unsupported', 'CUDA-JS requires the exact qualified Node build.', { actualVersion: host.node.version, actualAbi: host.node.abi, requiredVersion: CUDA_JS_COMPATIBILITY.node.version, requiredAbi: CUDA_JS_COMPATIBILITY.node.moduleAbi }, 'open');
+  if (host.hostKind.startsWith('wsl')) throw facadeError('CUDA_JS_WSL_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a WSL CUDA backend.', { hostKind: host.hostKind }, 'open');
+  if (host.hostKind !== 'windows-native-x64') throw facadeError('CUDA_JS_HOST_BACKEND_UNAVAILABLE', 'unsupported', 'This package has no native backend for the detected host.', { hostKind: host.hostKind }, 'open');
+  if (host.node.disposition === 'known-incompatible') {
+    throw facadeError('CUDA_JS_NODE_INCOMPATIBLE', 'unsupported', 'This Node release lacks the minimum runtime substrate required by CUDA-JS.', { actualVersion: host.node.version, minimumVersion: host.node.minimumVersion, reason: host.node.reason }, 'open');
   }
   if (!host.ffi.experimental) throw facadeError('CUDA_JS_FFI_FLAG_REQUIRED', 'unsupported', 'CUDA-JS requires Node experimental FFI.', {}, 'open');
   if (host.ffi.permission === 'ffi-denied') throw facadeError('CUDA_JS_FFI_PERMISSION_REQUIRED', 'permission', 'CUDA-JS requires FFI authority when the Node permission model is active.', {}, 'open');
@@ -313,7 +313,7 @@ async function openWithAdapters(options, adapters, supportFactory) {
     driver = await invoke('driver.open', () => adapters.openDriver(normalized.driver));
     const description = await invoke('driver.describe', () => driver.describe());
     const support = supportFactory(description);
-    if (support.status !== 'accepted' && support.status !== 'mock-only') throw facadeError('CUDA_JS_PROFILE_UNSUPPORTED', 'unsupported', 'The selected Driver profile is not accepted.', { reason: support.reason ?? 'unknown' }, 'open');
+    if (!['accepted', 'testing-unconfirmed', 'mock-only'].includes(support.status)) throw facadeError('CUDA_JS_PROFILE_INCOMPATIBLE', 'unsupported', 'The selected Driver profile is known to be incompatible with this runtime.', { reason: support.reason ?? 'unknown' }, 'open');
     if (normalized.compiler) compiler = await invoke('compiler.open', () => adapters.openCompiler(normalized.compiler));
     const runtime = new CudaRuntime();
     runtimeData.set(runtime, { driver, compiler: compiler ?? null, support, resources: new Set(), state: 'open', closePromise: null, terminalReport: null });

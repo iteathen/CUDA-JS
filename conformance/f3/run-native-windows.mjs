@@ -31,7 +31,8 @@ let validationError;
 let terminal;
 try {
   description = assertPublicRecord(await runtime.describe());
-  assert.equal(description.profile.nativeQualified, true);
+  assert.equal(description.profile.nativeOperational, true);
+  assert.equal(description.profile.nativeQualified, false);
   assert.equal(description.driver.apiVersion, f2.result.cuda.driverVersion.value);
   assert.equal(description.driver.deviceCount, f2.result.cuda.deviceCount.value);
   assert.equal(description.device.ordinal, f2.result.cuda.device.ordinal);

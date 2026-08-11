@@ -2,7 +2,8 @@
   "schemaVersion": 1,
   "updated": "2026-08-11",
   "supportDocument": "docs/NODE_SUPPORT.md",
-  "packageEngine": "26.7.0",
+  "packageEngine": ">=26.1.0",
+  "qualifiedVersion": "v26.7.0",
   "coordinationIssue": 23,
   "policy": {
     "supportUnit": "exact-node-version-os-architecture-module-abi-ffi-profile",
@@ -60,7 +61,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -70,7 +71,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -80,7 +81,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -90,7 +91,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -100,7 +101,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -110,7 +111,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -120,7 +121,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -130,7 +131,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": true,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "testing-unconfirmed",
       "reason": "portable-probe-only-full-native-chain-absent",
       "evidence": "automated exact-version FFI/permission probe only"
     },
@@ -140,7 +141,7 @@
       "upstreamPhase": "Current",
       "moduleAbi": "147",
       "ffiExpected": false,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "known-incompatible",
       "reason": "required-node-ffi-substrate-unavailable",
       "evidence": "automated exact-version negative probe"
     },
@@ -150,7 +151,7 @@
       "upstreamPhase": "End-of-life",
       "moduleAbi": "141",
       "ffiExpected": false,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "known-incompatible",
       "reason": "end-of-life-and-required-node-ffi-substrate-unavailable",
       "evidence": "automated exact-version negative probe"
     },
@@ -160,7 +161,7 @@
       "upstreamPhase": "Active LTS",
       "moduleAbi": "137",
       "ffiExpected": false,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "known-incompatible",
       "reason": "required-node-ffi-substrate-unavailable",
       "evidence": "automated exact-version negative probe"
     },
@@ -170,7 +171,7 @@
       "upstreamPhase": "Maintenance LTS",
       "moduleAbi": "127",
       "ffiExpected": false,
-      "cudaJsStatus": "no-support",
+      "cudaJsStatus": "known-incompatible",
       "reason": "required-node-ffi-substrate-unavailable",
       "evidence": "automated exact-version negative probe"
     }

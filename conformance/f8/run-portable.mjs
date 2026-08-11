@@ -31,7 +31,7 @@ const packed = JSON.parse(runNpm(['pack', '--json', '--pack-destination', packag
 assert.equal(packed.length, 1);
 const packageRecord = packed[0];
 assert.equal(packageRecord.name, 'cuda-js');
-assert.equal(packageRecord.version, '0.1.0-alpha.0');
+assert.equal(packageRecord.version, '0.1.0-alpha.1');
 const fileNames = packageRecord.files.map((entry) => entry.path).sort();
 for (const name of fileNames) {
   assert(!name.startsWith('build/'));
