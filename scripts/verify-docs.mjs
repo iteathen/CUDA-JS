@@ -36,6 +36,7 @@ const required = [
   'docs/specs/SPEC-0005-module-launch-completion.md',
   'docs/specs/SPEC-0006-compiler-linker-cache.md',
   'docs/specs/SPEC-0007-windows-platform-hardening.md',
+  'docs/specs/SPEC-0008-package-public-facade.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
@@ -88,6 +89,12 @@ const required = [
   'components/platform-diagnostics/index.mjs',
   'components/platform-diagnostics/src/platform-diagnostics.mjs',
   'components/platform-diagnostics/test/platform-diagnostics.test.mjs',
+  'components/runtime-facade/README.md', 'components/runtime-facade/component.yaml',
+  'components/runtime-facade/index.mjs', 'components/runtime-facade/index.d.ts',
+  'components/runtime-facade/compatibility.mjs', 'components/runtime-facade/compatibility.d.ts',
+  'components/runtime-facade/testing.mjs', 'components/runtime-facade/testing.d.ts',
+  'components/runtime-facade/src/errors.mjs', 'components/runtime-facade/src/runtime.mjs',
+  'components/runtime-facade/test/runtime-facade.test.mjs',
   'schemas/README.md', 'conformance/README.md',
   'conformance/f3/README.md', 'conformance/f3/evidence.mjs',
   'conformance/f3/run-mock.mjs', 'conformance/f3/run-native-windows.mjs',
@@ -109,6 +116,11 @@ const required = [
   'conformance/f7/permission-probe.mjs', 'conformance/f7/run-portable.mjs',
   'conformance/f7/run-native-windows.mjs', 'conformance/f7/run-linux-readiness.mjs',
   'conformance/f7/verify.mjs',
+  'conformance/f8/README.md', 'conformance/f8/evidence.mjs',
+  'conformance/f8/fixtures/consumer-memory.mjs', 'conformance/f8/fixtures/consumer-compiler.mjs',
+  'conformance/f8/fixtures/consumer-native-windows.mjs',
+  'conformance/f8/run-portable.mjs', 'conformance/f8/run-native-windows.mjs',
+  'conformance/f8/run-linux-readiness.mjs', 'conformance/f8/verify.mjs',
   'schemas/cuda-runtime-ir.schema.json', 'schemas/cuda-13.3/provenance.json',
   'schemas/cuda-13.3/tier-0/selection.json', 'schemas/cuda-13.3/tier-0/semantic-overlay.json',
   'schemas/cuda-13.3/linux-x64/generated/header-facts.json',
@@ -125,12 +137,13 @@ const required = [
   'schemas/cuda-13.3/linux-x64/generated/product-manifest.json',
   'schemas/cuda-13.3/win-x64/compatibility-manifest.json',
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
+  'packaging/compatibility-manifest.json',
   'tests/README.md', 'tools/README.md', 'packaging/README.md', 'third_party/README.md',
   'tools/cuda-schema/README.md', 'tools/cuda-schema/component.yaml',
   'tools/cuda-schema/src/pipeline.mjs',
   '.github/CODEOWNERS', '.github/pull_request_template.md', '.github/workflows/docs.yml',
   'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
-  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs', 'scripts/run-f5.mjs', 'scripts/run-f6.mjs', 'scripts/run-f7.mjs',
+  'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs', 'scripts/run-f5.mjs', 'scripts/run-f6.mjs', 'scripts/run-f7.mjs', 'scripts/run-f8.mjs',
 ];
 
 for (const relative of required) {
@@ -165,7 +178,9 @@ for (const relative of [
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
   'components/platform-diagnostics/component.yaml',
+  'components/runtime-facade/component.yaml',
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
+  'packaging/compatibility-manifest.json',
   'package.json',
 ]) {
   try {
@@ -248,6 +263,7 @@ const markers = {
   'docs/specs/SPEC-0005-module-launch-completion.md': ['CJS-F5', 'runtime.execution', 'cuLaunchKernelEx', 'restart-required'],
   'docs/specs/SPEC-0006-compiler-linker-cache.md': ['CJS-F6', 'runtime.compiler-actor', 'nvJitLink', '--modify-stack-limit=false'],
   'docs/specs/SPEC-0007-windows-platform-hardening.md': ['CJS-F7', 'runtime.platform-diagnostics', 'wddm-watchdog', 'Linux ARM64'],
+  'docs/specs/SPEC-0008-package-public-facade.md': ['CJS-F8', 'runtime.facade', 'first-consumer-deletion', 'EXP-010', 'EXP-011'],
   'schemas/README.md': ['cuda-runtime-ir.schema.json', 'cuda-13.3/tier-0/', 'generated/'],
 };
 for (const [relative, values] of Object.entries(markers)) {
@@ -272,7 +288,8 @@ for (const relative of files) {
     errors.push(`C source is outside a registered generated-source boundary: ${relative}`);
   }
   if (['.cc', '.cpp', '.cxx', '.hh', '.hpp', '.ts', '.tsx', '.rs'].includes(extension)
-      && relative !== 'schemas/cuda-13.3/linux-x64/generated/types.d.ts') {
+      && relative !== 'schemas/cuda-13.3/linux-x64/generated/types.d.ts'
+      && !relative.startsWith('components/runtime-facade/')) {
     errors.push(`source type is outside a currently registered implementation boundary: ${relative}`);
   }
   if (['.js', '.mjs', '.cjs'].includes(extension)
@@ -286,11 +303,13 @@ for (const relative of files) {
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
       && !relative.startsWith('components/platform-diagnostics/')
+      && !relative.startsWith('components/runtime-facade/')
       && !relative.startsWith('conformance/f3/')
       && !relative.startsWith('conformance/f4/')
       && !relative.startsWith('conformance/f5/')
       && !relative.startsWith('conformance/f6/')
       && !relative.startsWith('conformance/f7/')
+      && !relative.startsWith('conformance/f8/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
@@ -307,4 +326,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W, and retained Linux native handoff checks passed');

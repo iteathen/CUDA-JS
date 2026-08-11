@@ -1,0 +1,111 @@
+# SPEC-0008: Windows Package, Public Facade, and Independent Consumer
+
+**Status:** Accepted
+
+**Date:** 2026-08-11
+
+## Authorization and bounded outcome
+
+The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.
+
+F8 consumes the accepted F3 through F7 components without widening their native CUDA contracts. The exact native runtime remains Windows x64, Node 26.7.0, and the accepted CUDA 13.3/Driver profile. Native Linux x64, Linux ARM64 SBSA, and WSL2 remain independently qualified paths. Their absence does not block Windows packaging, and Windows evidence never promotes them.
+
+F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, concurrent launches or compilation, broader memory kinds, callbacks, cancellation, crash recovery, performance claims, UMCGS integration, or native Linux CUDA support.
+
+## Package boundary
+
+The repository root is the package root. `runtime.facade` owns the public API. Production implementation remains in registered components; the root contains metadata and scripts only. The package is ESM-only, has no runtime dependency, ships no project-specific native binary, and declares exact Node 26.7.0 compatibility.
+
+The package exposes only:
+
+- `cuda-js`: the native public facade, errors, host inspection, and compatibility record;
+- `cuda-js/compatibility`: the same frozen compatibility record without opening a native provider;
+- `cuda-js/testing`: an explicitly mock-only facade for consumer lifecycle and orchestration tests.
+
+Component internals, actor constructors, testing hooks, schemas, experiments, build output, native oracles, provider paths, and raw compatibility inputs are not package exports. Direct filesystem deep imports are unsupported.
+
+The package remains guarded against accidental registry publication until the owner selects a package license and a separately authorized release completes legal, provenance, and registry checks. A versioned tarball and installation from the public repository are the accepted F8 distribution forms.
+
+## Public facade contract
+
+`openCudaRuntime(options)` opens one public runtime. Options contain exactly:
+
+- `driver`: optional accepted DriverActor queue, memory, and execution policy;
+- `compiler`: `false` by default, `true` for a cache-disabled compiler, or accepted cache options.
+
+Opening performs host, Node, FFI, and permission preflight before native provider work. It then opens one DriverActor, assesses the copied Driver description, and optionally opens one CompilerActor. A later open failure closes every owner that was already acquired before rejecting.
+
+The runtime exposes:
+
+- frozen `state`, `health`, and `compilerEnabled` observations;
+- `describe()` with package/API identity, support assessment, copied Driver/device limits, bounded usage, and compiler status;
+- `allocateDevice()`, returning a device-memory capability object;
+- `loadModule()`, returning a PTX/cubin module capability object;
+- `compile()`, `link()`, and `invalidateCache()` only when the optional compiler is enabled;
+- idempotent `close()`, which closes compiler ownership before Driver ownership and returns an aggregate terminal report.
+
+The facade never exposes internal actor objects, runtime IDs, epochs, native/provider paths, native handles, registry tokens, context tokens, stream/event identities, private request records, or mutable native-backed views.
+
+## Resource capabilities
+
+Device memory, modules, and functions are ordinary JavaScript objects whose private state contains the accepted opaque actor token. They cannot be constructed through a package export.
+
+A device-memory capability exposes copied `write()`, copied `read()`, `status()`, and idempotent `close()`. A module exposes `getFunction()`, `status()`, and `close()`. A function exposes `launch()`, `status()`, and `close()`.
+
+Function declarations remain limited to `device-memory` and `u32` parameters. Public launch arguments are capability objects or unsigned 32-bit numbers in the declared order. The facade translates them to the private actor protocol and rejects closed, wrong-kind, or cross-runtime capabilities before sending a command.
+
+Closing a runtime marks all facade capabilities terminal. Graceful actor close marks them closed. Unexpected owner loss marks them orphaned and preserves the accepted restart-required claim. Explicit resource close remains primary; finalizers are not added.
+
+## Errors and compatibility
+
+All facade failures use `CudaJsError`. Stable fields are `code`, `category`, `operation`, `details`, `healthBefore`, and `healthAfter`. Accepted actor error codes and categories are preserved, while native causes and objects are not exposed. Unknown failures become a bounded internal error.
+
+The committed compatibility manifest identifies:
+
+- package version and public API schema;
+- exact Node version and module ABI;
+- supported, qualification-required, diagnostic-only, and unsupported hosts;
+- accepted CUDA header, Driver API, compiler/linker provider, artifact, memory, and execution profiles;
+- permission and launch requirements;
+- strict-JIT, process-isolation, native-addon, and native-Linux dispositions;
+- migration and evidence-invalidation rules.
+
+Before 1.0, a compatible patch may repair behavior without changing the API schema. Additive prerelease work increments the package prerelease/minor identity. Any incompatible public shape, ownership, lifetime, error, support, or compatibility change increments the public API schema and requires a new accepted specification plus consumer conformance.
+
+## Independent consumer and installation conformance
+
+F8 builds a tarball with the qualified Node toolchain, inspects its exact file list, installs it into clean generated consumer directories, runs consumers through package exports, uninstalls it, and proves package-owned files are removed. Build output owns generated tarballs and consumer directories.
+
+The portable unrelated consumer uses `cuda-js/testing` for copied-memory, module/function, launch, compiler, linker, resource-close, and runtime-close orchestration without consumer-specific semantics. A second simultaneous runtime proves instance isolation, cross-runtime rejection, and that closing one instance does not invalidate the other.
+
+The native Windows consumer imports only `cuda-js`, executes the tracked vector-add PTX through facade capabilities, compares exact copied output and checksum, and proves terminal package-level resource and Worker closure. Existing independent C-oracle evidence remains the native-result oracle; F8 does not replace it with package self-comparison.
+
+The first-consumer-deletion check proves that package implementation and compatibility files contain no dependency on the first consumer, its schemas, or its repository. Documentation may explain repository boundaries, but no package operation depends on them.
+
+## Linux and WSL completion path
+
+On native Linux and WSL, package installation, ESM import, compatibility inspection, stable unsupported/qualification-required errors, mock-only consumer behavior, multiple instances, tarball contents, and uninstall must pass in CI without a CUDA provider.
+
+The human handoff names the remaining native work: canonical `libcuda.so.1`, NVRTC, and nvJitLink adapters; retained F2L through F8L evidence; exact permission and provider discovery; independent C parity; package-root native consumer execution; and terminal cleanup. The Windows facade contract and consumer fixtures are reused rather than forked. Linux promotion changes the compatibility manifest only after exact native evidence passes.
+
+## EXP-010 and EXP-011 disposition
+
+EXP-010 is not triggered for F8. Accepted in-process Workers keep blocking work off the application event loop, and F7 proves bounded graceful lifecycle behavior on Windows. Process isolation remains an optional profile if a real consumer requires crash containment or a provider cannot satisfy process-global side-effect controls. Worker loss remains restart-required and is not described as process isolation.
+
+EXP-011 is not triggered for F8. Every accepted operation is callable through an approved named export, and no measured mandatory performance or callable-pointer gap remains. `fast-jit-required` is explicitly unsupported. A future strict-JIT or arbitrary-pointer requirement must trigger EXP-011 and a separate accepted decision; timing alone cannot promote it.
+
+## Acceptance
+
+CJS-F8 is complete only when:
+
+- this specification, package metadata, component ownership, registry, support matrix, status, next-step record, and validation policy agree;
+- package exports reveal only the accepted public, compatibility, and mock-testing surfaces;
+- exact Node 26.7.0 tarball, install, import, two-consumer, two-instance, first-consumer-deletion, and uninstall checks pass;
+- public resources hide actor tokens and reject cross-runtime, wrong-kind, closed, and post-runtime-close use;
+- public errors and descriptions contain no native capability or provider path;
+- the exact Windows package consumer passes native vector execution and graceful aggregate teardown;
+- Linux CI passes the portable package and readiness capsules while retaining an explicit native qualification requirement;
+- existing Windows F1 through F7 and portable Linux controls remain green;
+- protected required checks pass for the exact reviewed head before merge.
+
+Passing F8 authorizes a bounded F9 compatible-pair specification. It does not authorize UMCGS code, a registry release, public production support, or a native Linux claim by itself.

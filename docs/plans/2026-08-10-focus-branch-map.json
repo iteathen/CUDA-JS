@@ -281,7 +281,7 @@
     {
       "id": "CJS-F8",
       "type": "package-second-consumer",
-      "status": "planned",
+      "status": "complete-accepted-windows-x64-portable-linux-package-controls",
       "owner": "release",
       "dependencies": [
         "CJS-F7"
@@ -300,7 +300,8 @@
         "first-consumer deletion",
         "second-instance fit",
         "honest strict-JIT disposition"
-      ]
+      ],
+      "accepted": "SPEC-0008; guarded cuda-js 0.1.0-alpha.0 package, public facade, compatibility manifest, two clean consumers, install/uninstall, native Windows vector execution, and retained Linux qualification handoff"
     },
     {
       "id": "CJS-F9",

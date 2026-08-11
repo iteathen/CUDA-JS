@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.facade",
+    "name": "CUDA-JS Public Runtime Facade",
+    "status": "accepted-f8w-public-experimental",
+    "product_area": "components",
+    "path": "components/runtime-facade",
+    "purpose": "Expose one safe asynchronous package API over accepted DriverActor, CompilerActor, resource, execution, and diagnostic contracts without leaking private actor or native capabilities.",
+    "public_contracts": ["index.mjs", "compatibility.mjs", "testing.mjs", "index.d.ts", "testing.d.ts"],
+    "allowed_dependencies": ["node-standard-library", "runtime.driver-actor", "runtime.compiler-actor", "runtime.platform-diagnostics", "packaging.compatibility"],
+    "forbidden_dependencies": ["node-ffi", "raw-public-pointer", "actor-token", "context-token", "provider-path", "arbitrary-schema", "arbitrary-library", "consumer-semantics"],
+    "validation": ["npm run f8:unit", "npm run f8:portable", "npm run f8:native"],
+    "owner": "runtime.facade",
+    "lifecycle": "One facade owns one DriverActor and an optional CompilerActor. Explicit resource close is primary; facade close disposes compiler then Driver ownership and terminally marks every facade capability.",
+    "design": {
+      "owned_invariant": "Every public operation is bounded, asynchronous, capability-checked, and free of raw native or private actor representations.",
+      "public_ports": ["openCudaRuntime", "inspectCudaHost", "CUDA_JS_COMPATIBILITY", "CudaJsError", "openCudaRuntimeForTesting"],
+      "injected_dependencies": ["accepted actor constructors", "copied support assessment", "compatibility manifest"],
+      "adapter_boundaries": ["native Windows actors", "mock-only testing actors", "package compatibility metadata"],
+      "simplest_sufficient_total_system": "One runtime facade, three private resource capability classes, one public error class, and one immutable compatibility record."
+    }
+  }
+}

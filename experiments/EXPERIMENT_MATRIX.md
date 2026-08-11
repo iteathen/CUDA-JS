@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W through CJS-F5W, Windows EXP-009/CJS-F6W, and Windows CJS-F7W are accepted. The F3 through F7 platform-neutral capsules pass without native Linux providers. Native Linux EXP-001 and Linux DriverActor/compiler execution remain incomplete, hardware-deferred, and independently gated.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, Windows CJS-F3W through CJS-F8W, and Windows EXP-009 are accepted. The F3 through F8 platform-neutral/package capsules pass without native Linux providers. Native Linux EXP-001 and Linux DriverActor/compiler execution remain incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 
@@ -114,6 +114,8 @@ After in-process correctness, measure daemon IPC/copies/deployment/lifecycle aga
 
 **Promotion:** only if containment benefit exceeds total-system cost for a real consumer profile.
 
+**F8 disposition:** not triggered. Accepted in-process Workers satisfy the current responsiveness and lifecycle contract; no consumer has established a mandatory crash-containment gap. Worker loss remains restart-required.
+
 ## EXP-011 — arbitrary-pointer/custom-JIT gap
 
 Triggered only if a required API cannot be invoked through named exports or a hard performance/JIT target fails.
@@ -127,6 +129,8 @@ Compare:
 - unsupported capability.
 
 **Promotion:** a separately accepted decision showing decisive benefit and complete ABI/W^X/security/platform/lifetime cost. Custom AsmJit is not the default answer.
+
+**F8 disposition:** not triggered. Accepted operations use named exports, no measured mandatory gap remains, and `fast-jit-required` is explicitly unsupported.
 
 ## EXP-012 — Windows Node FFI CUDA smoke
 

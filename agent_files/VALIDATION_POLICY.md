@@ -1,6 +1,6 @@
 # CUDA-JS Validation Policy
 
-## Accepted Windows F7W / hardware-deferred Linux Driver phase
+## Accepted Windows F8W / hardware-deferred Linux Driver phase
 
 Run:
 
@@ -14,6 +14,7 @@ npm run f4  # exact Windows native F4 plus platform-neutral F4 capsule
 npm run f5  # exact Windows native F5 plus platform-neutral F5 capsule
 npm run f6  # exact Windows native F6 plus platform-neutral F6 capsule
 npm run f7  # exact Windows native F7 plus platform-neutral F7 capsule
+npm run f8  # exact package/public-facade consumers plus Windows native F8 capsule
 npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
@@ -39,6 +40,8 @@ F4W changes additionally require accepted SPEC-0004, exact memory-policy validat
 F5W and F6W changes require their accepted module/launch/completion and compiler/linker/cache contracts, exact independent Windows C parity, portable control-plane regressions, terminal native resources, and retained Linux runbooks.
 
 F7W changes additionally require accepted SPEC-0007, exact Node/permission flag inheritance, FFI denial and explicit-allow controls for both actors, sanitized errors/results, CUDA-reported WDDM/TCC/watchdog/compute-mode facts, deterministic property/failure partitions, repeated portable and native lifecycle balance, broad regression ceilings without performance claims, and separate native Linux x64, Linux ARM64 SBSA, and WSL2 handoffs. Run `npm run f7:portable` and `npm run f7:linux-readiness` in native Linux CI; neither establishes Linux CUDA support.
+
+F8W changes additionally require accepted SPEC-0008, exact package exports and Node/module-ABI compatibility, hidden actor tokens, stable public errors, cross-runtime/closed-resource rejection, aggregate terminal close, tarball inspection, clean install/import/uninstall, first-consumer deletion, two unrelated consumers, simultaneous-instance isolation, and installed-package native Windows vector parity. Run `npm run f8:portable` and `npm run f8:linux-readiness` in native Linux CI; these prove package/readiness behavior only, not Linux CUDA support. Registry publication remains separately gated on an owner-selected license and release review.
 
 F2L preparation changes additionally require the exact Ubuntu/Node profile, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support.
 
