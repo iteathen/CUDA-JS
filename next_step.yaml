@@ -5,15 +5,15 @@
   "objective": "Specify and implement the Windows-only CJS-F3 DriverActor/resource vertical slice from the accepted CJS-F2W bootstrap while retaining Linux CJS-F2L as public, deferred, incomplete work.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "codex/windows-f2 with local publication work pending",
+  "current_branch": "codex/windows-f2 published to the public iteathen/CUDA-JS repository",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
-      "status": "publication_in_progress",
+      "status": "complete_publication_verified",
       "outputs": [
-        "public GitHub repository",
-        "exact remote branch and commit read-back",
-        "public deferred Linux fix request"
+        "public https://github.com/iteathen/CUDA-JS repository",
+        "published codex/windows-f2 branch with exact remote commit read-back",
+        "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4"
       ]
     },
     {
@@ -52,7 +52,7 @@
         "executable EXP-001 native Linux build, ABI, readiness, and real-Driver smoke capsules",
         "hash-pinned official Linux inputs and independently compiled C oracle",
         "human engineer runbook with evidence, troubleshooting, safety, and contribution requirements",
-        "public GitHub fix request owned after publication"
+        "public GitHub qualification request https://github.com/iteathen/CUDA-JS/issues/4"
       ]
     },
     {
@@ -91,8 +91,8 @@
     "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Publish the exact CJS-F1A/F1B/F2W branch and make iteathen/CUDA-JS public.",
-    "Create and link a public Linux CJS-F2L contribution issue with exact environment and acceptance requirements.",
+    "Maintain the published CJS-F1A/F1B/F2W branch and public repository state.",
+    "Keep Linux CJS-F2L issue 4 aligned with the retained environment and acceptance requirements.",
     "Draft the detailed CJS-F3W actor/resource/lifecycle specification from CJS-F2W evidence.",
     "Implement only the Windows DriverActor/context/resource vertical slice after that specification is accepted.",
     "Keep memory, module, launch, completion, compiler, cache, package, and consumer code gated on their Windows predecessors.",
@@ -127,6 +127,7 @@
     "Node and the independent MSVC oracle agree exactly on Driver 13030, device zero, compute capability 7.5, selected attributes, error text, and context lifecycle.",
     "F2W permission, missing library, missing symbol, insufficient version, versioned query-name, library invalidation, context teardown, and Worker exit controls pass.",
     "No pointer value crosses the F2W Worker boundary.",
-    "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains."
+    "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
+    "iteathen/CUDA-JS is public, codex/windows-f2 is published, and Linux qualification is tracked publicly in issue 4."
   ]
 }

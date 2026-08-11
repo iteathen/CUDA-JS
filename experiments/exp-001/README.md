@@ -93,3 +93,5 @@ The final run qualifies only this exact profile. It does not establish ARM64, WS
 The smoke accepts only the profile-owned Driver path and generated signatures. Raw pointer values remain inside the Worker, returned function pointers are checked but never invoked, and the test must end with no current CUDA context and a closed library handle.
 
 The experiment contract and its promotion/falsification rules are in [`../EXP-001-node-ffi-cuda-smoke.md`](../EXP-001-node-ffi-cuda-smoke.md).
+
+Public qualification and contributor coordination are tracked in [GitHub issue #4](https://github.com/iteathen/CUDA-JS/issues/4).

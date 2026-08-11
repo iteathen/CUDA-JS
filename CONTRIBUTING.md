@@ -11,7 +11,7 @@ Before changing a material boundary, read:
 
 ## Current authorization
 
-`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA header import, generated ABI facts, reviewed Tier-0 semantics, normalized Runtime IR products, and independent native C ABI probes. Windows-only `CJS-F2W / EXP-012` is accepted and may feed Windows F3 contract work. Linux `CJS-F2L / EXP-001` includes working GPU-free preparation and a real-Driver smoke runner, but remains incomplete and contribution-ready; follow [`experiments/exp-001/README.md`](experiments/exp-001/README.md) and do not claim Linux Driver support without its qualified native evidence.
+`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA header import, generated ABI facts, reviewed Tier-0 semantics, normalized Runtime IR products, and independent native C ABI probes. Windows-only `CJS-F2W / EXP-012` is accepted and may feed Windows F3 contract work. Linux `CJS-F2L / EXP-001` includes working GPU-free preparation and a real-Driver smoke runner, but remains incomplete and contribution-ready; follow [`experiments/exp-001/README.md`](experiments/exp-001/README.md), coordinate through [issue #4](https://github.com/iteathen/CUDA-JS/issues/4), and do not claim Linux Driver support without its qualified native evidence.
 
 Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 

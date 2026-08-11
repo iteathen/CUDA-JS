@@ -8,7 +8,7 @@
 
 ## Engineer entry point
 
-The executable preparation, readiness diagnostics, final smoke runner, expected evidence, and troubleshooting guidance live in [`exp-001/README.md`](exp-001/README.md). Start there when bringing a native Linux NVIDIA host online.
+The executable preparation, readiness diagnostics, final smoke runner, expected evidence, and troubleshooting guidance live in [`exp-001/README.md`](exp-001/README.md). Start there when bringing a native Linux NVIDIA host online, and coordinate qualification evidence through [public issue #4](https://github.com/iteathen/CUDA-JS/issues/4).
 
 The ordinary Linux guest available during implementation has no NVIDIA GPU or Driver exposure. It can verify official inputs, generated ABI facts, native compilation, and the oracle link, but it cannot close this experiment. This limitation is environmental; the retained implementation is meant to make the remaining hardware-backed work narrow and reproducible.
 
