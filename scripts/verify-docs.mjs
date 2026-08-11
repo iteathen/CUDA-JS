@@ -33,6 +33,7 @@ const required = [
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md',
   'docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md',
   'docs/specs/SPEC-0004-device-memory-foundation.md',
+  'docs/specs/SPEC-0005-module-launch-completion.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
@@ -206,6 +207,7 @@ const markers = {
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md': ['CJS-F2W', 'EXP-012', 'Deferred Linux path'],
   'docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md': ['CJS-F3', 'runtime.driver-actor', 'runtime.resource-registry', 'Unexpected Worker loss'],
   'docs/specs/SPEC-0004-device-memory-foundation.md': ['CJS-F4', 'runtime.memory', 'device-memory', 'Native Windows'],
+  'docs/specs/SPEC-0005-module-launch-completion.md': ['CJS-F5', 'runtime.execution', 'cuLaunchKernelEx', 'restart-required'],
   'schemas/README.md': ['cuda-runtime-ir.schema.json', 'cuda-13.3/tier-0/', 'generated/'],
 };
 for (const [relative, values] of Object.entries(markers)) {

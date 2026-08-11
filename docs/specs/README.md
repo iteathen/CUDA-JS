@@ -7,5 +7,6 @@
 - [`SPEC-0002-windows-driver-bootstrap.md`](SPEC-0002-windows-driver-bootstrap.md) — accepted Windows-only F2W contract for canonical Driver discovery, generated bindings, procedure verification, independent MSVC parity, permissions, private context lifecycle, and cleanup.
 - [`SPEC-0003-driver-actor-resource-lifecycle.md`](SPEC-0003-driver-actor-resource-lifecycle.md) — accepted Windows-first F3 contract for the async DriverActor, opaque registry, health/error state, graceful teardown, unexpected-loss behavior, and platform-neutral lifecycle mock.
 - [`SPEC-0004-device-memory-foundation.md`](SPEC-0004-device-memory-foundation.md) — accepted Windows-first F4 contract for bounded device allocations, copied host transfers, quotas, leases, release, teardown, and portable memory lifecycle validation.
+- [`SPEC-0005-module-launch-completion.md`](SPEC-0005-module-launch-completion.md) — accepted Windows-first F5 contract for bounded PTX modules, declared functions, packed launches, one private stream, event-polled completion, deferred-error attribution, and portable execution lifecycle validation.
 
 No production implementation is authorized merely because a function appears in generated schema. Each public component requires accepted ownership, lifecycle, safety, compatibility, conformance, and experiment evidence.

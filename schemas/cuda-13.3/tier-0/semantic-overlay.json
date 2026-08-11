@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "cuda-13.3.29-driver-tier-0-semantics-f4-v2",
-  "reviewStatus": "accepted-f4w-private-experimental",
+  "id": "cuda-13.3.29-driver-tier-0-semantics-f5-v1",
+  "reviewStatus": "accepted-f5w-private-experimental",
   "requiredFunctionFields": [
     "stableId",
     "exposure",
@@ -41,7 +41,12 @@
     "CUdriverProcAddressQueryResult": { "representation": "signed-32-bit-query-status", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
     "cuuint64_t": { "representation": "unsigned-64-bit-flags", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
     "CUdeviceptr": { "representation": "opaque-private-device-address", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "device-memory", "packerPolicy": "private-u64-only" },
-    "size_t": { "representation": "unsigned-native-size", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" }
+    "size_t": { "representation": "unsigned-native-size", "exposure": "private", "ownership": "value", "resourceKind": null, "packerPolicy": "generated-scalar" },
+    "CUmodule": { "representation": "opaque-private-native-handle", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "module", "packerPolicy": "private-pointer-only" },
+    "CUfunction": { "representation": "opaque-private-native-handle", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "function", "packerPolicy": "private-pointer-only" },
+    "CUstream": { "representation": "opaque-private-native-handle", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "stream", "packerPolicy": "private-pointer-only" },
+    "CUevent": { "representation": "opaque-private-native-handle", "exposure": "denied-public", "ownership": "driver-actor", "resourceKind": "event", "packerPolicy": "private-pointer-only" },
+    "CUlaunchConfig": { "representation": "generated-byte-storage", "exposure": "private", "ownership": "call-frame", "resourceKind": null, "packerPolicy": "f5-default-no-attributes" }
   },
   "functions": {
     "cuInit": {
@@ -168,6 +173,77 @@
         { "name": "ByteCount", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 1, "maximum": "allocation-minus-offset", "unit": "bytes" }, "capability": "memory.read.device" }
       ],
       "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "synchronous-copy-may-block", "asynchronousBehavior": "copy-complete-on-return-for-f4-profile", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "conservative-on-driver-failure", "callbackPolicy": "none", "securityCapability": "memory.read.device", "cleanup": "returned-bytes-are-owned-copy;device-allocation-independent", "conformanceCases": ["f4.read.full", "f4.read.offset", "f4.read.bounds", "f4.read.owned-copy"]
+    },
+    "cuModuleLoadData": {
+      "stableId": "cuda.driver.function.cuModuleLoadData", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "module", "direction": "out", "nullable": false, "representation": "private-module-handle-out", "ownership": "driver-actor", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "module.load.ptx" },
+        { "name": "image", "direction": "in", "nullable": false, "representation": "private-nul-terminated-ptx-buffer", "ownership": "call-frame", "length": "runtime-validated-module-bytes-plus-nul", "bounds": { "maximum": "runtime.maxModuleBytes", "format": "ptx" }, "capability": "module.load.ptx" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "may-jit-and-block", "asynchronousBehavior": "module-ready-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "load-failure-immediate-when-no-prior-work;pressure-does-not-poison", "callbackPolicy": "none", "securityCapability": "module.load.ptx", "cleanup": "unload-with-cuModuleUnload-after-functions", "conformanceCases": ["f5.module.load.valid", "f5.module.load.invalid-ptx", "f5.module.load.cleanup"]
+    },
+    "cuModuleGetFunction": {
+      "stableId": "cuda.driver.function.cuModuleGetFunction", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "hfunc", "direction": "out", "nullable": false, "representation": "private-function-handle-out", "ownership": "module-borrowed", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "module.function.resolve" },
+        { "name": "hmod", "direction": "in", "nullable": false, "representation": "private-module-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-module-registry-entry" }, "capability": "module.function.resolve" },
+        { "name": "name", "direction": "in", "nullable": false, "representation": "validated-ascii-c-string", "ownership": "call-frame", "length": "nul-terminated", "bounds": { "maximumBytes": 256 }, "capability": "module.function.resolve" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "may-trigger-lazy-load", "asynchronousBehavior": "function-ready-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "lookup-failure-does-not-poison-when-no-prior-work", "callbackPolicy": "none", "securityCapability": "module.function.resolve", "cleanup": "function-invalidated-before-module-unload", "conformanceCases": ["f5.function.resolve", "f5.function.missing", "f5.function.module-parent"]
+    },
+    "cuModuleUnload": {
+      "stableId": "cuda.driver.function.cuModuleUnload", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "hmod", "direction": "in", "nullable": false, "representation": "private-module-handle", "ownership": "driver-actor", "length": null, "bounds": { "source": "live-module-with-no-children" }, "capability": "module.unload" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "may-block", "asynchronousBehavior": "terminal-module-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-unload-keeps-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "module.unload", "cleanup": "terminal-release-once", "conformanceCases": ["f5.module.release", "f5.module.children", "f5.module.stale"]
+    },
+    "cuStreamCreate": {
+      "stableId": "cuda.driver.function.cuStreamCreate", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "phStream", "direction": "out", "nullable": false, "representation": "private-stream-handle-out", "ownership": "driver-actor", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "execution.stream.private" },
+        { "name": "Flags", "direction": "in", "nullable": false, "representation": "u32-stream-flags", "ownership": "value", "length": null, "bounds": { "constant": "CU_STREAM_NON_BLOCKING" }, "capability": "execution.stream.private" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-create", "asynchronousBehavior": "creates-private-nonblocking-stream", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "creation-failure-conservative", "callbackPolicy": "none", "securityCapability": "execution.stream.private", "cleanup": "destroy-with-cuStreamDestroy-after-events", "conformanceCases": ["f5.stream.nonblocking", "f5.stream.cleanup"]
+    },
+    "cuStreamDestroy": {
+      "stableId": "cuda.driver.function.cuStreamDestroy", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "hStream", "direction": "in", "nullable": false, "representation": "private-stream-handle", "ownership": "driver-actor", "length": null, "bounds": { "source": "live-private-stream-with-no-events" }, "capability": "execution.stream.private" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-release-after-terminal-work", "asynchronousBehavior": "terminal-stream-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-destroy-keeps-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "execution.stream.private", "cleanup": "terminal-release-once", "conformanceCases": ["f5.stream.cleanup", "f5.stream.no-live-events"]
+    },
+    "cuEventCreate": {
+      "stableId": "cuda.driver.function.cuEventCreate", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "phEvent", "direction": "out", "nullable": false, "representation": "private-event-handle-out", "ownership": "driver-actor", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "execution.completion.private" },
+        { "name": "Flags", "direction": "in", "nullable": false, "representation": "u32-event-flags", "ownership": "value", "length": null, "bounds": { "constant": "CU_EVENT_DISABLE_TIMING" }, "capability": "execution.completion.private" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-create", "asynchronousBehavior": "creates-private-completion-event", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "creation-failure-conservative", "callbackPolicy": "none", "securityCapability": "execution.completion.private", "cleanup": "destroy-after-terminal-query", "conformanceCases": ["f5.event.disable-timing", "f5.event.cleanup"]
+    },
+    "cuEventRecord": {
+      "stableId": "cuda.driver.function.cuEventRecord", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "hEvent", "direction": "in", "nullable": false, "representation": "private-event-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "current-operation-event" }, "capability": "execution.completion.private" },
+        { "name": "hStream", "direction": "in", "nullable": false, "representation": "private-stream-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "runtime-private-stream" }, "capability": "execution.completion.private" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "enqueue-only", "asynchronousBehavior": "records-after-prior-stream-work", "deferredErrors": "may-report-submitted-or-prior-asynchronous-error", "healthEffect": "post-submit-failure-restart-required-when-provenance-unavailable", "callbackPolicy": "none", "securityCapability": "execution.completion.private", "cleanup": "event-retained-until-terminal-query", "conformanceCases": ["f5.event.record-after-launch", "f5.event.record-failure"]
+    },
+    "cuEventQuery": {
+      "stableId": "cuda.driver.function.cuEventQuery", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "hEvent", "direction": "in", "nullable": false, "representation": "private-event-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "current-operation-event" }, "capability": "execution.completion.private" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS", "pending": "CUDA_ERROR_NOT_READY" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-query", "asynchronousBehavior": "polls-prior-stream-work", "deferredErrors": "non-not-ready-failure-attributed-to-sole-in-flight-operation", "healthEffect": "terminal-device-failure-poisons-context", "callbackPolicy": "none", "securityCapability": "execution.completion.private", "cleanup": "destroy-event-after-terminal-result", "conformanceCases": ["f5.event.pending", "f5.event.complete", "f5.event.deferred-failure"]
+    },
+    "cuEventDestroy": {
+      "stableId": "cuda.driver.function.cuEventDestroy", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "hEvent", "direction": "in", "nullable": false, "representation": "private-event-handle", "ownership": "driver-actor", "length": null, "bounds": { "source": "terminal-private-event" }, "capability": "execution.completion.private" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-release", "asynchronousBehavior": "terminal-event-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-destroy-keeps-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "execution.completion.private", "cleanup": "terminal-release-once", "conformanceCases": ["f5.event.cleanup", "f5.event.stale"]
+    },
+    "cuLaunchKernelEx": {
+      "stableId": "cuda.driver.function.cuLaunchKernelEx", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "config", "direction": "in", "nullable": false, "representation": "generated-cu-launch-config-no-attributes", "ownership": "call-frame", "length": null, "bounds": { "source": "validated-launch-dimensions-and-private-stream" }, "capability": "execution.launch" },
+        { "name": "f", "direction": "in", "nullable": false, "representation": "private-function-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-function-registry-entry" }, "capability": "execution.launch" },
+        { "name": "kernelParams", "direction": "in", "nullable": true, "representation": "null-for-f5-packed-buffer", "ownership": "call-frame", "length": null, "bounds": { "constant": null }, "capability": "execution.launch" },
+        { "name": "extra", "direction": "in", "nullable": false, "representation": "private-sized-launch-buffer-config", "ownership": "call-frame", "length": "five-pointer-width-entries", "bounds": { "contains": ["CU_LAUNCH_PARAM_BUFFER_POINTER", "CU_LAUNCH_PARAM_BUFFER_SIZE", "CU_LAUNCH_PARAM_END"] }, "capability": "execution.launch" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "enqueue-only", "asynchronousBehavior": "submits-kernel-to-private-stream", "deferredErrors": "may-report-prior-asynchronous-error;f5-has-no-prior-in-flight-operation", "healthEffect": "immediate-rejection-conservative;submitted-failure-observed-by-event-poisons", "callbackPolicy": "none", "securityCapability": "execution.launch", "cleanup": "call-frame-retained-with-leases-until-terminal-event", "conformanceCases": ["f5.launch.packed-buffer", "f5.launch.bounds", "f5.launch.completion", "f5.launch.cleanup"]
     }
   }
 }

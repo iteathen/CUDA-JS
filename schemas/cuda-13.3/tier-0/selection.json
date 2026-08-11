@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "cuda-13.3.29-driver-tier-0-f4-linux-x64",
+  "id": "cuda-13.3.29-driver-tier-0-f5-linux-x64",
   "targetProfile": {
     "id": "linux-x64-sysv",
     "os": "linux",
@@ -27,7 +27,17 @@
     "cuMemAlloc",
     "cuMemFree",
     "cuMemcpyHtoD",
-    "cuMemcpyDtoH"
+    "cuMemcpyDtoH",
+    "cuModuleLoadData",
+    "cuModuleGetFunction",
+    "cuModuleUnload",
+    "cuStreamCreate",
+    "cuStreamDestroy",
+    "cuEventCreate",
+    "cuEventRecord",
+    "cuEventQuery",
+    "cuEventDestroy",
+    "cuLaunchKernelEx"
   ],
   "types": [
     { "name": "CUresult", "kind": "enum" },
@@ -40,7 +50,12 @@
     { "name": "CUdriverProcAddressQueryResult", "kind": "enum" },
     { "name": "cuuint64_t", "kind": "scalar" },
     { "name": "CUdeviceptr", "kind": "scalar" },
-    { "name": "size_t", "kind": "scalar" }
+    { "name": "size_t", "kind": "scalar" },
+    { "name": "CUmodule", "kind": "handle" },
+    { "name": "CUfunction", "kind": "handle" },
+    { "name": "CUstream", "kind": "handle" },
+    { "name": "CUevent", "kind": "handle" },
+    { "name": "CUlaunchConfig", "kind": "record" }
   ],
   "previousStableIds": [
     "cuda.driver.function.cuInit",
@@ -55,6 +70,11 @@
     "cuda.driver.function.cuCtxSetCurrent",
     "cuda.driver.function.cuCtxGetCurrent",
     "cuda.driver.function.cuGetProcAddress",
+    "cuda.driver.function.cuMemGetInfo",
+    "cuda.driver.function.cuMemAlloc",
+    "cuda.driver.function.cuMemFree",
+    "cuda.driver.function.cuMemcpyHtoD",
+    "cuda.driver.function.cuMemcpyDtoH",
     "cuda.driver.type.CUresult",
     "cuda.driver.type.CUdevice",
     "cuda.driver.type.CUdevice_attribute",
@@ -63,6 +83,8 @@
     "cuda.driver.type.CUexecAffinityParam",
     "cuda.driver.type.CUctxCigParam",
     "cuda.driver.type.CUdriverProcAddressQueryResult",
-    "cuda.driver.type.cuuint64_t"
+    "cuda.driver.type.cuuint64_t",
+    "cuda.driver.type.CUdeviceptr",
+    "cuda.driver.type.size_t"
   ]
 }
