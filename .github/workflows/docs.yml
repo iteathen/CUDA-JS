@@ -4,6 +4,21 @@ on:
   push:
     branches: [main]
 jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.7.0
+      - run: npm run f1b:generate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: f1b-generated-${{ github.sha }}
+          path: schemas/cuda-13.3/linux-x64/generated/
+          if-no-files-found: error
+      - run: git diff --exit-code -- schemas/cuda-13.3/linux-x64/generated/
   verify:
     runs-on: ubuntu-latest
     steps:

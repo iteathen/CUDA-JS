@@ -179,8 +179,13 @@ function uniqueNamedMap(nodes, label) {
 function parseSimpleMacros(output) {
   const macros = new Map();
   for (const line of output.split(/\r?\n/)) {
-    const match = line.match(/^#define\s+([A-Za-z_]\w*)\s+([A-Za-z_]\w*)$/);
-    if (match) macros.set(match[1], match[2]);
+    const direct = line.match(/^#define\s+([A-Za-z_]\w*)\s+([A-Za-z_]\w*)$/);
+    if (direct) {
+      macros.set(direct[1], direct[2]);
+      continue;
+    }
+    const streamSemanticAlias = line.match(/^#define\s+([A-Za-z_]\w*)\s+__CUDA_API_(?:PTDS|PTSZ)\(([A-Za-z_]\w*)\)$/);
+    if (streamSemanticAlias) macros.set(streamSemanticAlias[1], streamSemanticAlias[2]);
   }
   return macros;
 }
@@ -498,7 +503,10 @@ function ffiTypeFor(sourceType, typeFacts) {
 }
 
 function validateSemanticOverlay(selection, headerFacts, overlay) {
-  assert(overlay.reviewStatus === 'accepted-f1b-private-experimental', 'Semantic overlay is not in the accepted F1B review state.');
+  assert(
+    ['accepted-f1b-private-experimental', 'accepted-f4w-private-experimental'].includes(overlay.reviewStatus),
+    'Semantic overlay is not in an accepted private-experimental review state.',
+  );
   const selectedFunctions = new Set(selection.functions);
   const overlayFunctions = new Set(Object.keys(overlay.functions ?? {}));
   const selectedTypes = new Set(selection.types.map((entry) => entry.name));
