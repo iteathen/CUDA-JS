@@ -1,0 +1,9 @@
+build/
+dist/
+.cache/
+*.log
+*.ptx
+*.cubin
+*.fatbin
+*.ltoir
+node_modules/
