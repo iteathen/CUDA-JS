@@ -1,11 +1,11 @@
 {
-  "schema_version": 18,
+  "schema_version": 19,
   "updated": "2026-08-11",
-  "status": "cjs_f8_windows_complete_hardware_qualification_program_published",
-  "objective": "Operate an exact-evidence hardware qualification campaign without broadening current Windows claims, keep native Linux x86-64, Linux ARM64 SBSA, Jetson ARM64, and WSL2 independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
+  "status": "cjs_f8_windows_complete_node_and_extended_qualification_published",
+  "objective": "Operate exact-evidence Node, hardware, platform, topology, stability, version-matrix, and attestation campaigns without broadening current Windows claims, keep incomplete profiles independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "main after protected hardware-qualification integration",
+  "current_branch": "main after protected Node and extended-qualification integration",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -204,10 +204,14 @@
     "Unknown or contradictory public semantics fail closed.",
     "No CUDA-JS project-specific compiled addon or handwritten per-function wrapper family enters the baseline.",
     "All raw Driver resources stay on their owning Worker and no pointer enters a public result.",
-    "No Fast FFI, process-isolation, performance, registry-release, or cross-platform claim exceeds exact evidence."
+    "No Fast FFI, process-isolation, performance, registry-release, or cross-platform claim exceeds exact evidence.",
+    "Only exact Node 26.7.0 is qualified; all other listed Node releases remain no-support until their complete exact evidence chain passes.",
+    "Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit ranges, TCC/server, and independent attestation remain no-support."
   ],
   "immediate_sequence": [
-    "Integrate CJS-F8W through protected main only after exact required checks pass.",
+    "Operate the exact Node release matrix and keep every non-26.7 row no-support until its complete synthetic and native chain passes.",
+    "Use issues 20 through 29 to complete each extended qualification axis without widening another axis by inference.",
+    "Retain the current Windows 11 Pro Hyper-V route as verified no-support unless vendor-supported host and partition evidence changes.",
     "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, platform, and installed-package qualification runbooks.",
     "Draft and accept a detailed F9 compatible-pair specification before implementing UMCGS consumer interop.",
     "Keep registry publication gated on an owner-selected license and separate release review.",
@@ -227,7 +231,10 @@
     "Linux package/readiness controls remain separately keyed and do not promote native CUDA support.",
     "Both native actors inherit the Node permission profile, deny FFI without authority, and close terminally with explicit authority.",
     "Windows and Linux compatibility/evidence remain separately keyed and reported.",
-    "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
+    "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path.",
+    "The Node matrix directly verifies exact version, module ABI, FFI availability, required exports, and permission behavior for every listed release.",
+    "Every extended hardware axis is explicitly no-support and exposes no promotable command chain.",
+    "The Hyper-V probe is read-only, sanitized, and performs no VM, assignment, partition, or device mutation."
   ],
   "do_not": [
     "remove or claim completion of the deferred Linux path",
@@ -241,11 +248,16 @@
   "operational_blockers": [
     "Native Linux CUDA Driver support remains incomplete because the available Hyper-V guest has no supported NVIDIA GPU/Driver exposure.",
     "The current client-Windows GTX 1660 Ti host cannot provide a supported Hyper-V GPU-P/DDA Linux qualification path.",
-    "Linux completion now depends on future qualified hardware or an external contributor; it no longer blocks Windows work."
+    "Linux completion now depends on future qualified hardware or an external contributor; it no longer blocks Windows work.",
+    "Multi-GPU, MIG, ECC, TCC/server, supported virtualization, long soak, and independent attestation require controlled external hardware or runner infrastructure."
   ],
   "completion_evidence": [
     "The generated hardware support list records only the accepted exact GTX 1660 Ti Windows x64 profile and separates every candidate architecture/platform from support.",
     "The hardware qualification runner composes the accepted Windows native chain, requires a clean exact commit, hashes phase evidence, emits a sanitized public summary, and refuses incomplete platform promotion.",
+    "The generated Node support list qualifies only exact Node 26.7.0 and records every other tested release as no-support with a positive or negative probe expectation.",
+    "The exact-version Node CI matrix checks Node 22.23.2, 24.19.0, 25.9.0, and every Node 26 release from 26.0.0 through 26.7.0 including security patches.",
+    "The extension registry fail-closes multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit matrices, Windows TCC/server, and independent attestation.",
+    "The current Hyper-V readiness profile verifies Windows 11 Pro has zero partitionable GPUs and zero assigned partitions without changing host, VM, or GPU state.",
     "F1A passes independently on Windows x64 and native Linux x86-64.",
     "F1B/F5 deterministically generates 27 function facts, 16 type/layout facts, and fail-closed coverage for 456 unselected declarations.",
     "The Windows CUDA 13.3 cuda.h hash exactly matches the accepted F1B header hash.",

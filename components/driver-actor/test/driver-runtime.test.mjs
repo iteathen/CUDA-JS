@@ -213,6 +213,33 @@ test('mock execution facade snapshots PTX and completes only after private event
   assert.deepEqual(terminal.disposalOrder.slice(-3), ['stream', 'context', 'library']);
 });
 
+test('simultaneous public launch submissions remain ordered and serialized in the accepted profile', async () => {
+  const { runtime } = await openMockDriverRuntime();
+  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+  const fn = await runtime.getFunction(module.module, { name: 'serialized', parameters: [{ kind: 'device-memory' }] });
+  const firstMemory = await runtime.allocateDevice({ byteLength: 8 });
+  const secondMemory = await runtime.allocateDevice({ byteLength: 8 });
+  const launch = (memory) => runtime.launch(fn.function, {
+    grid: { x: 1, y: 1, z: 1 },
+    block: { x: 1, y: 1, z: 1 },
+    arguments: [{ kind: 'device-memory', memory }],
+  });
+
+  const [first, second] = await Promise.all([launch(firstMemory.memory), launch(secondMemory.memory)]);
+  assert.equal(first.status, 'completed');
+  assert.equal(second.status, 'completed');
+  assert.equal(first.pollCount, 2);
+  assert.equal(second.pollCount, 2);
+  assert(first.operationSequence < second.operationSequence, 'Worker command order must serialize simultaneous submissions.');
+  assert.equal((await runtime.describe()).execution.inFlight, false);
+
+  await runtime.releaseFunction(fn.function);
+  await runtime.releaseModule(module.module);
+  await runtime.releaseMemory(firstMemory.memory);
+  await runtime.releaseMemory(secondMemory.memory);
+  assert.equal((await runtime.close()).graceful, true);
+});
+
 test('mock deferred launch failure is terminal, poisons health, and releases completed-use leases', async () => {
   const { runtime, testing } = await openMockDriverRuntime();
   const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });

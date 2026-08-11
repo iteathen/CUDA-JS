@@ -15,6 +15,8 @@ Before changing a material boundary, read:
 
 Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 
+The public [Node support list](docs/NODE_SUPPORT.md) records exact releases, not inferred ranges. Only Node 26.7.0 is currently qualified for the accepted Windows profile; every other listed release is explicitly no-support until it passes the full native chain on an exact profile. The [hardware support list](docs/HARDWARE_SUPPORT.md) likewise keeps multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version matrices, Windows TCC/server, and independent attestation at no-support while their public work issues remain open.
+
 ## Binding rules
 
 - Do not add a CUDA-JS project-specific compiled addon to the baseline.
@@ -50,6 +52,8 @@ Use focused capsules and mutation/negative controls. Do not repeat unchanged tes
 
 ```bash
 ./scripts/verify-docs.sh
+npm run node:check
+npm run hardware:check
 npm run exp:000:build
 npm run verify
 npm run f7:portable
@@ -57,6 +61,10 @@ npm run f7  # qualified Windows x64 Driver/GPU/provider host only
 npm run exp:012  # qualified Windows x64 Driver/GPU host only
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64; GPU-free preparation plus readiness
 ```
+
+On Windows, `npm run hardware:probe:hyperv` performs a read-only Hyper-V readiness inventory. It does not create or modify VMs, partition or assign a GPU, dismount a device, or change driver state. A negative readiness result documents no-support for that exact host; it does not characterize other hosts.
+
+Node qualification submissions use the [Node qualification issue template](.github/ISSUE_TEMPLATE/node-qualification.yml). Hardware submissions use the [hardware qualification issue template](.github/ISSUE_TEMPLATE/hardware-qualification.yml). Support promotion requires an exact tested commit, sanitized evidence, the relevant public work issue, and maintainer review; passing only a portable probe never promotes native support.
 
 Claims must state unavailable CUDA/Node/platform checks precisely.
 

@@ -9,10 +9,13 @@ import { fileURLToPath } from 'node:url';
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const registryPath = path.join(repositoryRoot, 'conformance', 'hardware', 'registry.json');
 export const profilesPath = path.join(repositoryRoot, 'conformance', 'hardware', 'profiles.json');
+export const extensionsPath = path.join(repositoryRoot, 'conformance', 'hardware', 'extensions.json');
 
 const requiredCoverage = ['CJS-F2W', 'CJS-F3W', 'CJS-F4W', 'CJS-F5W', 'CJS-F6W', 'CJS-F7W', 'CJS-F8W'];
 const profileStatuses = new Set(['runner-ready', 'adapter-incomplete', 'schema-and-adapter-incomplete', 'contract-required']);
 const architectureStatuses = new Set(['qualified-one-model', 'seeking-evidence']);
+const extensionStatuses = new Set(['contract-required', 'verified-no-support-current-host', 'runtime-contract-required', 'measurement-contract-required', 'profile-required', 'infrastructure-required']);
+const requiredExtensionAxes = ['multi-gpu', 'mig', 'virtualization', 'concurrent-launch', 'performance-thermal-soak', 'ecc', 'driver-toolkit-matrix', 'windows-tcc-server', 'independent-attestation'];
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -34,7 +37,7 @@ function statusLabel(value) {
   return value.replaceAll('-', ' ');
 }
 
-export function validateRegistry(registry, profiles) {
+export function validateRegistry(registry, profiles, extensions) {
   invariant(registry.schemaVersion === 1, 'Hardware registry schemaVersion must be 1.');
   invariant(profiles.schemaVersion === 1, 'Qualification profiles schemaVersion must be 1.');
   invariant(registry.supportDocument === 'docs/HARDWARE_SUPPORT.md', 'Unexpected support-document owner.');
@@ -43,6 +46,9 @@ export function validateRegistry(registry, profiles) {
   invariant(Array.isArray(registry.architectureCoverage) && registry.architectureCoverage.length > 0, 'Architecture coverage is required.');
   invariant(Array.isArray(registry.qualifiedProfiles) && registry.qualifiedProfiles.length > 0, 'At least one directly qualified profile is required.');
   invariant(Array.isArray(profiles.profiles) && profiles.profiles.length > 0, 'Qualification profiles are required.');
+  invariant(extensions?.schemaVersion === 1, 'Hardware extension schemaVersion must be 1.');
+  invariant(Array.isArray(extensions.upstreamSources) && extensions.upstreamSources.length >= 3, 'Extended-profile upstream sources are required.');
+  invariant(Array.isArray(extensions.axes), 'Hardware extension axes are required.');
 
   unique(registry.upstreamSources.map((source) => source.id), 'Upstream source IDs');
   for (const source of registry.upstreamSources) {
@@ -105,9 +111,29 @@ export function validateRegistry(registry, profiles) {
   const sm75 = registry.architectureCoverage.find((entry) => entry.computeCapability === '7.5');
   invariant(sm75?.status === 'qualified-one-model', 'The accepted Turing evidence must remain represented without broadening it to all models.');
   invariant(registry.qualifiedProfiles.every((entry) => entry.claimLimits?.length >= 2), 'Every qualified profile needs explicit claim limits.');
+
+  unique(extensions.axes.map((entry) => entry.id), 'Hardware extension axis IDs');
+  invariant(requiredExtensionAxes.every((id) => extensions.axes.some((entry) => entry.id === id)), 'The hardware extension matrix is incomplete.');
+  for (const entry of extensions.axes) {
+    invariant(extensionStatuses.has(entry.status), `Invalid extension status for ${entry.id}.`);
+    invariant(entry.publicDisposition === 'no-support', `${entry.id} must remain no-support until direct promotion evidence exists.`);
+    invariant(Number.isSafeInteger(entry.coordinationIssue) && entry.coordinationIssue > 0, `${entry.id} needs a public coordination issue.`);
+    invariant(Array.isArray(entry.requiredEnvironment) && entry.requiredEnvironment.length > 0, `${entry.id} needs an exact environment contract.`);
+    invariant(Array.isArray(entry.requiredEvidence) && entry.requiredEvidence.length > 0, `${entry.id} needs evidence requirements.`);
+    invariant(Array.isArray(entry.safetyRules) && entry.safetyRules.length > 0, `${entry.id} needs safety rules.`);
+    invariant(Array.isArray(entry.commands) && entry.commands.length === 0, `${entry.id} must not expose a promotable command chain while no-support.`);
+  }
+  unique(extensions.upstreamSources.map((source) => source.id), 'Extended-profile upstream source IDs');
+  for (const source of extensions.upstreamSources) {
+    invariant(/^https:\/\/learn\.microsoft\.com\//.test(source.url), `Extended-profile source ${source.id} must be an official Microsoft URL.`);
+    invariant(typeof source.use === 'string' && source.use.length > 0, `Extended-profile source ${source.id} needs a use.`);
+  }
+  const hyperv = extensions.axes.find((entry) => entry.id === 'virtualization')?.verifiedNoSupportProfiles?.[0];
+  invariant(hyperv?.observed?.partitionableGpuCount === 0, 'The current Hyper-V negative profile must record zero partitionable GPUs.');
+  invariant(hyperv?.reasons?.includes('client-host-vendor-unsupported'), 'The current Hyper-V negative profile needs its vendor support reason.');
 }
 
-export function renderSupportDocument(registry, profiles) {
+export function renderSupportDocument(registry, profiles, extensions) {
   const lines = [
     '# CUDA-JS Hardware Support',
     '',
@@ -168,6 +194,24 @@ export function renderSupportDocument(registry, profiles) {
     '',
     'Windows x64 is the only native profile currently qualified. Native Linux x64, WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.',
     '',
+    '## Extended qualification axes',
+    '',
+    'Every axis below is explicitly **no support** until its own accepted contract and exact native evidence pass. Empty command chains are intentional: an incomplete axis cannot be promoted by the current runner.',
+    '',
+    '| Axis | Current state | Public disposition | Current boundary | Work issue |',
+    '|---|---|---|---|---|',
+  );
+  for (const entry of extensions.axes) {
+    lines.push(`| ${safeCell(entry.id)} | ${safeCell(statusLabel(entry.status))} | **${safeCell(statusLabel(entry.publicDisposition))}** | ${safeCell(entry.currentBoundary)} | [#${entry.coordinationIssue}](https://github.com/iteathen/CUDA-JS/issues/${entry.coordinationIssue}) |`);
+  }
+
+  const hyperv = extensions.axes.find((entry) => entry.id === 'virtualization').verifiedNoSupportProfiles[0];
+  lines.push(
+    '',
+    '### Verified negative virtualization profile',
+    '',
+    `The exact ${safeCell(hyperv.host)} / ${safeCell(hyperv.hardware)} Hyper-V profile is **no support**. The read-only probe found ${hyperv.observed.partitionableGpuCount} partitionable GPUs and ${hyperv.observed.assignedGpuPartitionAdapterCount} assigned GPU partitions; Microsoft also excludes the client-host class from the supported DDA/GPU-P deployment profile. No VM or device state was changed.`,
+    '',
     '## How hardware is added',
     '',
     '1. Start with [`conformance/hardware/README.md`](../conformance/hardware/README.md) and select an exact profile.',
@@ -182,16 +226,19 @@ export function renderSupportDocument(registry, profiles) {
   );
   for (const source of registry.upstreamSources) lines.push(`- [${safeCell(source.id)}](${source.url}) — ${safeCell(source.use)}.`);
 
+  lines.push('', '### Extended-profile references', '');
+  for (const source of extensions.upstreamSources) lines.push(`- [${safeCell(source.id)}](${source.url}) — ${safeCell(source.use)}.`);
+
   lines.push(
     '',
     '## Claim limits',
     '',
     '- Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.',
     '- A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.',
-    '- CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent-launch, and performance profiles require separate contracts and evidence.',
+    '- CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner profiles remain no-support.',
     '- Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.',
     '',
-    'The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md).',
+    'The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md). The Node matrix, verified-negative profiles, and extended qualification contracts are maintained in [`docs/plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md).',
     '',
   );
   return lines.join('\n');
@@ -427,8 +474,9 @@ async function runQualification(profile, registry) {
 export async function execute(action, args = process.argv.slice(3)) {
   const registry = await loadJson(registryPath);
   const profiles = await loadJson(profilesPath);
-  validateRegistry(registry, profiles);
-  const rendered = renderSupportDocument(registry, profiles);
+  const extensions = await loadJson(extensionsPath);
+  validateRegistry(registry, profiles, extensions);
+  const rendered = renderSupportDocument(registry, profiles, extensions);
   const requestedProfile = args.find((arg) => arg.startsWith('--profile='))?.slice('--profile='.length);
 
   if (action === 'check') {

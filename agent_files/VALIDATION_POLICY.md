@@ -17,6 +17,8 @@ npm run f7  # exact Windows native F7 plus platform-neutral F7 capsule
 npm run f8  # exact package/public-facade consumers plus Windows native F8 capsule
 npm run hardware:check  # registry invariants and generated support-list agreement
 npm run hardware:qualify  # clean exact-profile direct-hardware composition on a runner-ready host
+npm run node:check  # exact Node registry, current substrate probe, and generated support-list agreement
+npm run hardware:probe:hyperv  # read-only sanitized Windows Hyper-V readiness/negative evidence
 npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
@@ -48,6 +50,10 @@ F8W changes additionally require accepted SPEC-0008, exact package exports and N
 F2L preparation changes additionally require the exact Ubuntu/Node profile, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support.
 
 Hardware registry changes additionally require a clean exact commit, direct hardware execution, the complete profile-required native capsule chain, independent C-oracle agreement, permission controls, installed-package execution, terminal cleanup, sanitized evidence identity, generated-list agreement, and claim limits. An incomplete profile may describe missing work but must not expose a promotable command chain. Architecture-level coverage records at most that one or more exact models have passed; it does not infer family-wide support.
+
+Node registry changes additionally require exact official release identity, module ABI, FFI flag/import/export behavior, permission denial/allow behavior where FFI exists, generated-list agreement, and a no-support disposition unless the complete synthetic and native CUDA profile chain passed on that exact release. Upstream LTS status, matching ABI, or a portable probe cannot promote support.
+
+Extended hardware axes remain no-support and expose no command chain until an accepted contract and runner-ready exact profile exist. Hyper-V readiness is read-only: it records sanitized counts and vendor support disposition, never VM names or device identifiers, and never changes VM, partition, assignment, DDA, GPU, ECC, MIG, TCC, clock, power, fan, persistence, compute-mode, or reset state.
 
 ## Schema and ABI
 

@@ -1,0 +1,53 @@
+name: Node version qualification
+description: Submit exact Node substrate or full CUDA-JS qualification evidence
+title: "Node qualification: vX.Y.Z on <host profile>"
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A passing FFI probe does not establish CUDA-JS support. Promotion requires the exact synthetic and native profile chain described in `conformance/node/README.md`.
+  - type: input
+    id: source
+    attributes:
+      label: Exact CUDA-JS commit
+      description: Full 40-character commit tested from a clean worktree.
+      placeholder: 0123456789abcdef0123456789abcdef01234567
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Exact official Node identity
+      description: Version, module ABI, platform, architecture, and official archive checksum.
+      placeholder: v26.7.0, ABI 147, win32 x64, SHA-256 ...
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence
+    attributes:
+      label: Evidence level
+      options:
+        - Portable FFI/permission probe only
+        - EXP-000 correctness and lifecycle
+        - Complete native CUDA-JS profile chain
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Sanitized results
+      description: Include stable case IDs, statuses, evidence digests, and cleanup disposition. Do not include paths or machine identifiers.
+    validations:
+      required: true
+  - type: checkboxes
+    id: attest
+    attributes:
+      label: Attestation
+      options:
+        - label: The worktree was clean and the exact official Node archive was checksum-verified.
+          required: true
+        - label: Host names, accounts, paths, environment values, UUIDs, serial numbers, and bus identifiers were removed.
+          required: true
+        - label: I understand that probe or EXP-000 evidence alone does not promote native CUDA-JS support.
+          required: true

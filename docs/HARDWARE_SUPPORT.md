@@ -55,6 +55,26 @@ CUDA 13.3 compiler targets define the candidate set below. “Seeking evidence�
 
 Windows x64 is the only native profile currently qualified. Native Linux x64, WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.
 
+## Extended qualification axes
+
+Every axis below is explicitly **no support** until its own accepted contract and exact native evidence pass. Empty command chains are intentional: an incomplete axis cannot be promoted by the current runner.
+
+| Axis | Current state | Public disposition | Current boundary | Work issue |
+|---|---|---|---|---|
+| multi-gpu | contract required | **no support** | device zero, one private context, and no public device selector | [#20](https://github.com/iteathen/CUDA-JS/issues/20) |
+| mig | contract required | **no support** | MIG identity, isolation, quotas, and lifecycle are not modeled | [#27](https://github.com/iteathen/CUDA-JS/issues/27) |
+| virtualization | verified no support current host | **no support** | virtualization mechanisms require separate host/guest/provider profiles | [#21](https://github.com/iteathen/CUDA-JS/issues/21) |
+| concurrent-launch | runtime contract required | **no support** | one in-flight launch with serialized Worker command processing | [#25](https://github.com/iteathen/CUDA-JS/issues/25) |
+| performance-thermal-soak | measurement contract required | **no support** | F7 elapsed time and process memory are broad regression observations only | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
+| ecc | profile required | **no support** | ECC capability and error-health semantics are not in the runtime contract | [#24](https://github.com/iteathen/CUDA-JS/issues/24) |
+| driver-toolkit-matrix | infrastructure required | **no support** | only exact recorded Node, Driver, toolkit/header, provider, and GPU cells are supported | [#22](https://github.com/iteathen/CUDA-JS/issues/22) |
+| windows-tcc-server | profile required | **no support** | the accepted Windows profile is Windows 11 x64 WDDM with watchdog enabled | [#26](https://github.com/iteathen/CUDA-JS/issues/26) |
+| independent-attestation | infrastructure required | **no support** | contributor bundles are hashed and sanitized but are not independently tamper-proof | [#29](https://github.com/iteathen/CUDA-JS/issues/29) |
+
+### Verified negative virtualization profile
+
+The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile is **no support**. The read-only probe found 0 partitionable GPUs and 0 assigned GPU partitions; Microsoft also excludes the client-host class from the supported DDA/GPU-P deployment profile. No VM or device state was changed.
+
 ## How hardware is added
 
 1. Start with [`conformance/hardware/README.md`](../conformance/hardware/README.md) and select an exact profile.
@@ -72,11 +92,17 @@ Windows x64 is the only native profile currently qualified. Native Linux x64, WS
 - [nvidia-windows-install-13.3](https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/) — CUDA 13.3 Windows host requirements.
 - [nvidia-linux-install-13.3](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/) — CUDA 13.3 Linux x86-64, ARM64 SBSA, and Jetson host distinctions.
 
+### Extended-profile references
+
+- [microsoft-hyperv-gpu-troubleshooting](https://learn.microsoft.com/en-us/troubleshoot/windows-server/virtualization/troubleshoot-hyper-v-gpu-assignment-partitioning-passthrough-issues) — vendor support boundary for DDA and GPU-P.
+- [microsoft-get-partitionable-gpu](https://learn.microsoft.com/en-us/powershell/module/hyper-v/get-vmhostpartitionablegpu?view=windowsserver2025-ps) — read-only partitionable-GPU inventory.
+- [microsoft-hyperv-dda](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/plan/plan-for-deploying-devices-using-discrete-device-assignment) — DDA host, device, and security prerequisites.
+
 ## Claim limits
 
 - Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.
 - A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.
-- CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent-launch, and performance profiles require separate contracts and evidence.
+- CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner profiles remain no-support.
 - Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.
 
-The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md).
+The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md). The Node matrix, verified-negative profiles, and extended qualification contracts are maintained in [`docs/plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md).
