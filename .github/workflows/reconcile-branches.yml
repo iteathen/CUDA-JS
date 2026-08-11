@@ -1,0 +1,87 @@
+name: Reconcile all branches before EXP-000
+
+on:
+  push:
+    paths:
+      - .github/workflows/reconcile-branches.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reconcile-all-branches
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out complete repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge every remaining branch and remove bootstrap workflow
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name 'CUDA-JS Branch Reconciler'
+          git config user.email 'noreply@github.com'
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          git checkout -B "${DEFAULT_BRANCH}" "origin/${DEFAULT_BRANCH}"
+
+          foundation='77090a981fabb547d9e1a98d76213f2048e81ef2'
+          git cat-file -e "${foundation}^{commit}"
+          git merge-base --is-ancestor "${foundation}" HEAD
+
+          mapfile -t refs < <(
+            git for-each-ref --format='%(refname:short)' refs/remotes/origin \
+              | LC_ALL=C sort
+          )
+
+          merged=()
+          for ref in "${refs[@]}"; do
+            branch="${ref#origin/}"
+            case "$branch" in
+              HEAD|"${DEFAULT_BRANCH}") continue ;;
+            esac
+            if git merge-base --is-ancestor "$ref" HEAD; then
+              merged+=("$branch")
+              continue
+            fi
+            git merge --no-ff --no-edit "$ref"
+            merged+=("$branch")
+          done
+
+          rm -f .github/workflows/reconcile-branches.yml
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'Remove one-shot branch reconciliation workflow'
+          fi
+
+          git diff --check HEAD^..HEAD || true
+          git push origin HEAD:"${DEFAULT_BRANCH}"
+
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          for branch in "${merged[@]}"; do
+            ref="origin/${branch}"
+            if git show-ref --verify --quiet "refs/remotes/${ref}" \
+              && git merge-base --is-ancestor "$ref" "origin/${DEFAULT_BRANCH}"; then
+              git push origin --delete "$branch"
+            fi
+          done
+
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune
+          remaining="$({ git for-each-ref --format='%(refname:short)' refs/remotes/origin \
+            | sed '/\/HEAD$/d' \
+            | grep -v "^origin/${DEFAULT_BRANCH}$"; } || true)"
+          if [[ -n "$remaining" ]]; then
+            printf 'Unreconciled branches remain:\n%s\n' "$remaining" >&2
+            exit 1
+          fi
+
+          git merge-base --is-ancestor "${foundation}" "origin/${DEFAULT_BRANCH}"
+          test ! -e .github/workflows/reconcile-branches.yml
