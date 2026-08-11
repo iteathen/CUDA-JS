@@ -1,10 +1,11 @@
 # Contributing
 
-CUDA-JS is private, pre-release, contract-first, and experiment-gated.
+CUDA-JS is private, pre-release, contract-first, experiment-gated, and Python-free.
 
 Before changing a material boundary, read:
 
 - `AGENTS.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`;
+- [`agent_files/general_foundation/NO_PYTHON_POLICY.md`](agent_files/general_foundation/NO_PYTHON_POLICY.md);
 - the owning accepted ADR and specification;
 - the relevant assessment, target architecture, support matrix, master-plan work package, experiment, and source-register entries;
 - exact Git and environment state.
@@ -14,6 +15,14 @@ Before changing a material boundary, read:
 The current phase is documentation only. Contributors may improve foundational authority, architecture, specifications, research provenance, plans, experiment protocols, organization, indexes, and validation of those documents.
 
 No code-bearing experiment, native fixture, generated binding, schema importer, runtime component, benchmark implementation, production package, or implementation workflow is authorized until the project owner explicitly advances the phase. Future experiment documents describe gates; they are not permission to execute them.
+
+## No-Python rule
+
+Python is prohibited throughout CUDA-JS and every UMCGS-related project. Do not introduce Python source, notebooks, project metadata, interpreter or package-manager invocations, Python-backed ordinary-use dependencies, generated Python artifacts, or wrappers that indirectly invoke Python.
+
+This applies to production and reference code, header/schema import, generators, tests, benchmarks, documentation tooling, CI, packaging, installers, release automation, migrations, diagnostics, prototypes, experiments, and temporary or local-only scripts. Advancing the implementation phase does not change this rule.
+
+A proposal that depends on Python must be rejected or redesigned using a language and toolchain accepted by the owning boundary. Only an explicit project-owner change to the accepted ecosystem policy can alter this requirement.
 
 ## Binding rules
 
@@ -52,7 +61,7 @@ Use focused capsules and mutation/negative controls. Do not repeat unchanged tes
 ./scripts/verify-docs.sh
 ```
 
-Code-bearing work adds its experiment-specific commands. Claims must state unavailable CUDA/Node/platform checks precisely.
+Code-bearing work adds its experiment-specific commands. Claims must state unavailable CUDA/Node/platform checks precisely and must demonstrate compliance with the no-Python policy.
 
 ## Publication
 
