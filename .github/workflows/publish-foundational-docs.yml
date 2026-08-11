@@ -19,8 +19,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'agent/publish-foundational-docs'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       SOURCE_BRANCH: agent/publish-foundational-docs
@@ -31,7 +30,14 @@ jobs:
       FINAL_TREE: 032cd3f7d2501ae184ed3036eaffa060c56f52ce
       FINAL_FILE_COUNT: '85'
     steps:
-      - name: Check out the exact same-repository PR head
+      - name: Verify the authorized same-repository branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ github.event.pull_request.head.repo.full_name }}' = '${{ github.repository }}'
+          test '${{ github.event.pull_request.head.ref }}' = "${SOURCE_BRANCH}"
+
+      - name: Check out the exact PR head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
