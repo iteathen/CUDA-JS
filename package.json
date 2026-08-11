@@ -25,8 +25,14 @@
     "exp:001:readiness": "node scripts/run-exp-001.mjs readiness",
     "exp:001:smoke": "node scripts/run-exp-001.mjs smoke",
     "exp:001:prepare": "node scripts/run-exp-001.mjs prepare",
-    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify",
-    "test": "node scripts/run-exp-000.mjs test",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check"
+    "f3:unit": "node scripts/run-f3.mjs unit",
+    "f3:mock": "node scripts/run-f3.mjs mock",
+    "f3:native": "node scripts/run-f3.mjs native",
+    "f3:verify": "node scripts/run-f3.mjs verify",
+    "f3:portable": "node scripts/run-f3.mjs portable",
+    "f3": "node scripts/run-f3.mjs all",
+    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all",
+    "test": "node scripts/run-exp-000.mjs test && node scripts/run-f3.mjs unit",
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f3.mjs portable"
   }
 }

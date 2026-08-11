@@ -2,6 +2,8 @@
 
 Independent generic runtime conformance capsules.
 
+[`f3/`](f3/README.md) owns the accepted DriverActor/resource lifecycle capsule. It runs platform-neutral unit and mock evidence on Windows and native Linux, plus an exact-profile native Windows DriverActor capsule.
+
 Initial oracle order:
 
 1. native C ABI/layout probes from pinned official headers;

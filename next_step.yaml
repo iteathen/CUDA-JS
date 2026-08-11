@@ -1,11 +1,11 @@
 {
-  "schema_version": 11,
+  "schema_version": 12,
   "updated": "2026-08-11",
-  "status": "ready_cjs_f3_windows",
-  "objective": "Specify and implement the Windows-only CJS-F3 DriverActor/resource vertical slice from the accepted CJS-F2W bootstrap while retaining Linux CJS-F2L as public, deferred, incomplete work.",
+  "status": "ready_cjs_f4_windows_contract",
+  "objective": "Publish the accepted Windows CJS-F3 DriverActor/resource slice, then specify the Windows-only CJS-F4 memory foundation while retaining Linux F2L/F3L as public, deferred, incomplete native Driver work.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "codex/windows-f2 published to the public iteathen/CUDA-JS repository",
+  "current_branch": "codex/windows-f3 published as stacked draft pull request 6 above codex/windows-f2 pull request 5",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -14,7 +14,8 @@
         "public https://github.com/iteathen/CUDA-JS repository",
         "published codex/windows-f2 branch with exact remote commit read-back",
         "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4",
-        "draft integration request https://github.com/iteathen/CUDA-JS/pull/5"
+        "draft integration request https://github.com/iteathen/CUDA-JS/pull/5",
+        "stacked F3 review https://github.com/iteathen/CUDA-JS/pull/6"
       ]
     },
     {
@@ -58,11 +59,22 @@
     },
     {
       "id": "CJS-F3W",
-      "status": "ready_not_started",
+      "status": "complete_accepted_windows_x64",
       "outputs": [
-        "Windows DriverActor private context owner",
-        "opaque production resource registry",
-        "error/health model and deterministic teardown"
+        "accepted SPEC-0003 DriverActor/resource/lifecycle contract",
+        "Windows DriverActor private context owner and bounded async command protocol",
+        "opaque resource registry with generations, nonces, dependencies, leases, and orphan inventory",
+        "monotonic error/health model, responsive main loop, deterministic graceful teardown, and honest unexpected-loss state",
+        "exact Windows native context-affinity and terminal cleanup evidence"
+      ]
+    },
+    {
+      "id": "CJS-F3L",
+      "status": "portable_control_plane_complete_native_driver_blocked",
+      "outputs": [
+        "native Linux x86-64 unit and platform-neutral mock lifecycle evidence",
+        "shared resource, protocol, health, responsiveness, teardown, and unexpected-loss behavior",
+        "retained dependency on incomplete CJS-F2L for native Linux Driver/context execution"
       ]
     }
   ],
@@ -75,6 +87,7 @@
     "docs/specs/SPEC-0000-runtime-contract-map.md",
     "docs/specs/SPEC-0001-cuda-schema-compiler.md",
     "docs/specs/SPEC-0002-windows-driver-bootstrap.md",
+    "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
@@ -83,7 +96,7 @@
     "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
   ],
   "preconditions": [
-    "Windows-only successors consume CJS-F2W and cannot imply Linux support.",
+    "Windows-only F3 consumes CJS-F2W and cannot imply Linux support; Windows F4 may consume only accepted CJS-F3W.",
     "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
     "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
     "Unknown or contradictory public semantics fail closed.",
@@ -92,17 +105,17 @@
     "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Maintain the published CJS-F1A/F1B/F2W branch and public repository state.",
+    "Maintain stacked CJS-F3W draft pull request 6 above CJS-F2W draft pull request 5 and read back every published head.",
     "Keep Linux CJS-F2L issue 4 aligned with the retained environment and acceptance requirements.",
-    "Draft the detailed CJS-F3W actor/resource/lifecycle specification from CJS-F2W evidence.",
-    "Implement only the Windows DriverActor/context/resource vertical slice after that specification is accepted.",
-    "Keep memory, module, launch, completion, compiler, cache, package, and consumer code gated on their Windows predecessors.",
-    "Re-run Linux F1A/F1B static/native evidence when those owners change; do not represent it as Driver support."
+    "Draft and accept the detailed Windows CJS-F4 memory specification before implementing memory.",
+    "Keep module, launch, completion, compiler, cache, package, and consumer code gated on their Windows predecessors.",
+    "Retain the platform-neutral Linux F3 capsule and re-run it whenever shared F3 control-plane owners change; do not represent it as Driver support."
   ],
   "acceptance_criteria": [
     "The exact remote branch/tree is readable publicly and matches the claimed commit.",
     "The Linux issue retains native Linux x86-64 Driver/GPU, C-oracle, version/status, context, permission, and cleanup requirements.",
-    "CJS-F3W begins only from an accepted actor/resource/lifecycle specification.",
+    "CJS-F3W remains bounded by accepted SPEC-0003 and its exact Windows evidence.",
+    "CJS-F4W begins only from an accepted memory specification.",
     "Windows and Linux compatibility/evidence remain separately keyed and reported.",
     "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
   ],
@@ -128,7 +141,9 @@
     "Node and the independent MSVC oracle agree exactly on Driver 13030, device zero, compute capability 7.5, selected attributes, error text, and context lifecycle.",
     "F2W permission, missing library, missing symbol, insufficient version, versioned query-name, library invalidation, context teardown, and Worker exit controls pass.",
     "No pointer value crosses the F2W Worker boundary.",
+    "F3W passes opaque-resource, context-affinity, main-loop-responsiveness, bounded-command, health, graceful-teardown, and unexpected-loss capsules on the exact Windows profile.",
+    "The F3 platform-neutral capsule passes on native Ubuntu x86-64 while making no Linux Driver support claim.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
-    "iteathen/CUDA-JS is public, codex/windows-f2 is published through draft pull request 5, and Linux qualification is tracked publicly in issue 4."
+    "iteathen/CUDA-JS is public, codex/windows-f2 is published through draft pull request 5, codex/windows-f3 is published through stacked draft pull request 6, and Linux qualification is tracked publicly in issue 4."
   ]
 }

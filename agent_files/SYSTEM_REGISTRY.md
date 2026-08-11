@@ -44,14 +44,17 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `project.next-step` | One coherent current boundary | [`../next_step.yaml`](../next_step.yaml) | Active |
 | `schema.header-facts` | Pinned official CUDA 13.3 provenance, selection, imported facts, target layouts, deterministic products, and Win64 compatibility bridge | [`../schemas/cuda-13.3/`](../schemas/cuda-13.3/) and [`../tools/cuda-schema/`](../tools/cuda-schema/README.md) | Accepted F1B internal plus F2W bridge |
 | `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted F1B private-experimental |
+| `runtime.driver-actor` | Bounded async command protocol, one Worker-owned context, health, and graceful/unexpected-loss lifecycle | [`../components/driver-actor/`](../components/driver-actor/README.md) | Accepted Windows F3W internal experimental; Linux native Driver blocked on F2L |
+| `runtime.resource-registry` | Opaque capability identity, generation, state, dependencies, leases, close ordering, and orphan inventory | [`../components/resource-registry/`](../components/resource-registry/README.md) | Accepted F3 internal experimental |
+| `conformance.f3` | Platform-neutral actor/resource lifecycle and exact Windows native context-affinity/cleanup evidence | [`../conformance/f3/`](../conformance/f3/README.md) | Accepted on Windows; control plane also passes native Linux x86-64 |
 
 ## Repository product areas
 
 | Product area | Owns | Location | Current status |
 |---|---|---|---|
-| `components` | Future generic runtime components | [`../components/`](../components/README.md) | Reserved; no implementation authorized |
+| `components` | Generic runtime components with accepted ownership contracts | [`../components/`](../components/README.md) | F3 DriverActor and resource registry accepted internal experimental |
 | `schemas` | Pinned CUDA facts, semantic overlays, Runtime IR and generated products | [`../schemas/`](../schemas/README.md) | F1B accepted; public production coverage not authorized |
-| `conformance` | Future production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | Reserved; EXP-000 conformance remains experiment-owned |
+| `conformance` | Production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | F3 lifecycle capsule accepted; EXP-000 remains experiment-owned |
 | `experiments` | Bounded decision experiments and their generated fixtures/harnesses | [`../experiments/`](../experiments/README.md) | EXP-000 and Windows EXP-012 promoted; Linux EXP-001 prepared through the hardware boundary |
 | `benchmarks` | Future reproducible mechanism/regression evidence | [`../benchmarks/`](../benchmarks/README.md) | Reserved |
 | `packaging` | Future package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | Reserved |
@@ -60,16 +63,16 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `third-party` | Donor material with exact provenance and reuse decision | [`../third_party/`](../third_party/README.md) | Reserved |
 | `scripts` | Thin validation and exact-toolchain experiment entry points | [`../scripts/`](../scripts/) | Active |
 
-## Planned component anchors
+## Component anchors
 
-These IDs organize future specifications. They do not authorize implementation.
+These IDs organize implemented and future specifications. Status in the governing authority and rows above determines implementation authorization.
 
 | Planned boundary ID | Intended responsibility | Governing authority needed before code |
 |---|---|---|
 | `runtime.facade` | Safe asynchronous public API and capability negotiation | Accepted detailed public API specification |
-| `runtime.driver-actor` | Thread-affine CUDA context and raw-resource ownership | Accepted actor/resource/lifecycle specification plus native evidence |
+| `runtime.driver-actor` | Thread-affine CUDA context and raw-resource ownership | Accepted SPEC-0003 plus exact Windows native evidence; Linux native execution still requires F2L |
 | `runtime.compiler-actor` | NVRTC/nvJitLink provider isolation and artifact production | Accepted compiler/link/cache specification plus provider evidence |
-| `runtime.resource-registry` | Opaque capability identity, generation, state and parent/child leases | Accepted resource/lifecycle specification |
+| `runtime.resource-registry` | Opaque capability identity, generation, state and parent/child leases | Accepted SPEC-0003 and F3 conformance |
 | `runtime.memory` | Placement, visibility, mapping, coherence, synchronization and lifetime | Accepted memory specification plus native conformance evidence |
 | `runtime.module-launch` | Module/function identity, argument packing and launch | Accepted ABI/launch specification plus native parity evidence |
 | `runtime.completion` | Stream/event completion, cancellation and deferred errors | Accepted completion/error-health specification plus native evidence |

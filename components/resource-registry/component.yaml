@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.resource-registry",
+    "name": "Opaque resource registry",
+    "status": "accepted-f3-internal",
+    "product_area": "components",
+    "path": "components/resource-registry",
+    "purpose": "Own opaque resource identity, parent-child dependencies, in-flight leases, stale rejection, explicit disposal, teardown ordering, and dead-epoch orphan inventory without knowing CUDA or Node FFI.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library"],
+    "forbidden_dependencies": ["node-ffi", "cuda-driver", "worker-threads", "consumer-semantics", "raw-public-pointer"],
+    "validation": ["npm run f3:unit", "npm run f3:mock"],
+    "owner": "runtime.resource-registry",
+    "lifecycle": "Internal pre-release F3 component; entries are explicitly disposed or terminally marked orphaned when an owning runtime epoch dies.",
+    "design": {
+      "owned_invariant": "A token can identify only its exact live registry entry and stale generations can never acquire a replacement resource.",
+      "public_ports": ["ResourceRegistry", "ResourceError", "isResourceToken"],
+      "injected_dependencies": ["resource disposer", "runtime identity", "nonce source"],
+      "adapter_boundaries": [],
+      "simplest_sufficient_total_system": "One in-memory registry with frozen tokens, generation reuse, dependency ordering, leases, and bounded inventories."
+    }
+  }
+}

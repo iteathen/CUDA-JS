@@ -4,7 +4,7 @@
 
 ## Current phase
 
-`EXP-000` is promoted after exact Windows x64 and native Linux x86-64 profiles passed independently. F1B schema/ABI preparation is accepted. Windows `EXP-012` is accepted after exact Node/MSVC/Driver/GPU parity and cleanup; Linux `EXP-001` remains retained, incomplete, deferred, and open for contribution.
+`EXP-000` is promoted after exact Windows x64 and native Linux x86-64 profiles passed independently. F1B schema/ABI preparation is accepted. Windows `EXP-012` and its consuming F3W actor/resource slice are accepted after exact Node/MSVC/Driver/GPU/context/resource parity and cleanup. The F3 control plane also passes on native Linux; Linux `EXP-001` and native Linux DriverActor execution remain retained, incomplete, deferred, and open for contribution.
 
 The executable capsules are owned by [`exp-000/`](exp-000/README.md), the incomplete native-Linux handoff in [`exp-001/`](exp-001/README.md), and Windows-only [`exp-012/`](exp-012/README.md).
 

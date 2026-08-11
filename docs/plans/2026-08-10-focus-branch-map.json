@@ -147,7 +147,7 @@
     {
       "id": "CJS-F3",
       "type": "actor-resource-core",
-      "status": "ready-windows-contract-not-started",
+      "status": "complete-accepted-windows-x64-portable-control-plane-linux-x64",
       "owner": "runtime-core",
       "dependencies": [
         "CJS-F2W"

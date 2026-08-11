@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.driver-actor",
+    "name": "CUDA DriverActor",
+    "status": "accepted-f3w-internal-experimental",
+    "product_area": "components",
+    "path": "components/driver-actor",
+    "purpose": "Provide a bounded asynchronous facade over one Worker-owned private CUDA context with opaque resources, conservative health, deterministic graceful teardown, and honest unexpected-loss reporting.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library", "node-ffi-26.7.0", "runtime.resource-registry", "generated-tier-0-ffi-definitions", "canonical-windows-cuda-driver"],
+    "forbidden_dependencies": ["arbitrary-library", "arbitrary-signature", "returned-function-pointer-invocation", "raw-public-pointer", "consumer-semantics", "memory-module-launch-completion"],
+    "validation": ["npm run f3:unit", "npm run f3:mock", "npm run f3:native"],
+    "owner": "runtime.driver-actor",
+    "lifecycle": "One Worker owns one library, one selected device identity, one private context, one registry, and one runtime epoch. Graceful close is explicit; unexpected loss is restart-required and makes no cleanup claim.",
+    "design": {
+      "owned_invariant": "Every context-dependent native call executes on the one owning Worker and no raw native capability crosses its boundary.",
+      "public_ports": ["openDriverRuntime", "DriverRuntimeError"],
+      "injected_dependencies": ["private backend profile", "Worker constructor", "runtime identity"],
+      "adapter_boundaries": ["Windows Node FFI backend", "platform-neutral lifecycle mock"],
+      "simplest_sufficient_total_system": "One async facade, one serialized Worker protocol, one context, one registry, and one explicit close path."
+    }
+  }
+}

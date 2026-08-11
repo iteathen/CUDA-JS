@@ -46,9 +46,9 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 
 ## Current phase gate
 
-The repository is in an **active implementation phase** with `CJS-F1A`, `CJS-F1B`, and the Windows-only `CJS-F2W / EXP-012` bootstrap accepted. Windows `CJS-F3W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` now reaches the real-Driver/GPU boundary with executable preparation, readiness, and smoke tooling; final native qualification remains deferred and independently gated. EXP-000 remains the mandatory exact Node 26.7.0 Windows x64/native Linux x86-64 regression capsule.
+The repository is in an **active implementation phase** with `CJS-F1A`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` accepted. The platform-neutral F3 resource registry, Worker protocol, health model, graceful teardown, and unexpected-loss reporting also pass on native Linux x86-64, but native Linux Driver/context execution remains blocked on `CJS-F2L / EXP-001`. Windows `CJS-F4W` memory contract work is dependency-ready. EXP-000 remains the mandatory exact Node 26.7.0 Windows x64/native Linux x86-64 regression capsule.
 
-F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. SPEC-0002 authorizes only the accepted bounded Windows Driver bootstrap. Linux GPU-free preparation may follow `experiments/exp-001/README.md`; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. Production DriverActor/resource code requires a new accepted F3W specification; memory, module/launch/completion, compiler/cache, packaging, and consumer interop remain blocked on their documented Windows predecessors.
+F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. SPEC-0002 authorizes only the accepted bounded Windows Driver bootstrap. SPEC-0003 authorizes only the accepted DriverActor/resource/lifecycle slice and its exact Windows native profile. Linux GPU-free preparation may follow `experiments/exp-001/README.md`; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. Memory requires a new accepted F4W specification; module/launch/completion, compiler/cache, packaging, and consumer interop remain blocked on their documented Windows predecessors.
 
 Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready Windows boundary.
 
@@ -90,10 +90,11 @@ For the current phase:
 npm run exp:000:build
 npm run verify
 npm run exp:012
+npm run f3
 ```
 
 Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
 
 ## Publication state
 
-The private `iteathen/CUDA-JS` repository exists. Publication claims require remote read-back of the exact branch and tree being claimed. Local EXP-000 evidence is not a publication claim until the exact remote branch/tree and its native CI result are read back.
+The public `iteathen/CUDA-JS` repository exists. Publication claims require remote read-back of the exact branch and tree being claimed. Local evidence is not a publication claim until the exact remote branch/tree and its native CI result are read back.

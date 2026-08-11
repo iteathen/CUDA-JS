@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation and Windows EXP-012 are accepted. Native Linux EXP-001 implements and passes GPU-free preparation but remains incomplete, hardware-deferred, and independently gated.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, and Windows CJS-F3W are accepted. The F3 platform-neutral lifecycle capsule passes on native Linux. Native Linux EXP-001 and Linux DriverActor execution remain incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 
@@ -72,6 +72,8 @@ Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator
 
 **Falsifier:** context currentness leaks across threads or cannot be restored deterministically.
 
+**Disposition:** accepted for Windows F3W. Repeated native context turns remain current only on the owning Worker; graceful teardown is terminal. The mock capsule covers unexpected Worker loss because deliberately terminating the native in-process owner could strand Driver state until process restart.
+
 ## EXP-006 — completion strategy
 
 Compare adaptive `cuEventQuery`, `cuStreamQuery`, bounded worker blocking, and any later safe notification mechanism.
@@ -85,6 +87,8 @@ Compare adaptive `cuEventQuery`, `cuStreamQuery`, bounded worker blocking, and a
 Inject invalid input, launch failure, asynchronous illegal access, teardown after failure, and device-loss/restart boundaries where feasible.
 
 **Promotion:** correct provenance and conservative recoverable/suspect/poisoned/restart-required transitions.
+
+**Current limit:** F3 validates error-record shape, provenance retention, monotonic health, and restart-required Worker-loss behavior through the lifecycle backend. It has no native asynchronous launch/completion operation, so real deferred-error attribution remains unproven and must be supplied by later native execution work.
 
 ## EXP-008 — memory and foreign-view lifetime
 
@@ -124,7 +128,7 @@ Compare:
 
 **Cases:** hash-identical official Windows header; native Win64 ABI probe; all 12 exports and procedure queries; Driver/device/attribute/error results; permission and negative controls; context create/current/clear/restore/destroy; library invalidation and Worker exit.
 
-**Promotion:** accepted for the exact Windows x64 Node 26.7.0, CUDA 13.3, Driver 610.74, GTX 1660 Ti profile. It unblocks Windows F3 contract work only.
+**Promotion:** accepted for the exact Windows x64 Node 26.7.0, CUDA 13.3, Driver 610.74, GTX 1660 Ti profile. It supplied the native prerequisite consumed by accepted Windows F3W and does not authorize later memory or execution work by itself.
 
 **Falsifier:** any header/layout/export/result/status/permission/context/cleanup disagreement with the independent oracle, any raw pointer crossing the Worker boundary, or any Linux inference.
 

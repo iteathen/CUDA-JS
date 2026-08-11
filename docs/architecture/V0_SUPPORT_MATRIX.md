@@ -21,8 +21,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap accepted; actor/Driver/memory/launch/completion/error/teardown remain staged |
-| Linux glibc | x86-64 SysV | GPU-free preparation complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then later stages |
+| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap and F3W actor/resource lifecycle accepted; memory/launch/completion and native deferred errors remain staged |
+| Linux glibc | x86-64 SysV | GPU-free preparation and F3 control plane complete; Driver/GPU qualification deferred | run retained F2L readiness and Node/C Driver/context/permission/teardown smoke on a qualified native NVIDIA host, then run the native DriverActor stage |
 | Linux glibc | ARM64 AAPCS64/SBSA | third | loader/FFI/layout/cache/context/Driver capsules |
 | WSL2 | x86-64 | compatibility | Linux semantics plus environment diagnostics |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -73,7 +73,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Profile | V0 disposition |
 |---|---|
-| one private context per DriverActor Worker | baseline; graceful close required, unexpected Worker loss is restart-required until recovery is proven |
+| one private context per DriverActor Worker | accepted Windows F3W baseline; graceful close proven, unexpected Worker loss is restart-required until recovery is proven |
 | multiple independent DriverActors/contexts | after single-actor lifecycle passes |
 | primary-context interop | later compatibility profile |
 | shared context across Workers | excluded pending explicit design |
