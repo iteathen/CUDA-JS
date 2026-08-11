@@ -76,4 +76,4 @@ F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, revi
 
 ## Immediate next boundary
 
-The repository and exact F2W branch are published publicly. Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained runbook, then draft the detailed Windows F3 DriverActor/resource/lifecycle specification. Linux qualification can resume independently when suitable hardware becomes available.
+The repository and exact F2W branch are published publicly through [draft pull request #5](https://github.com/iteathen/CUDA-JS/pull/5). Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained runbook, then draft the detailed Windows F3 DriverActor/resource/lifecycle specification. Linux qualification can resume independently when suitable hardware becomes available.

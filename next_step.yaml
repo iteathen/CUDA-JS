@@ -13,7 +13,8 @@
       "outputs": [
         "public https://github.com/iteathen/CUDA-JS repository",
         "published codex/windows-f2 branch with exact remote commit read-back",
-        "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4"
+        "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4",
+        "draft integration request https://github.com/iteathen/CUDA-JS/pull/5"
       ]
     },
     {
@@ -128,6 +129,6 @@
     "F2W permission, missing library, missing symbol, insufficient version, versioned query-name, library invalidation, context teardown, and Worker exit controls pass.",
     "No pointer value crosses the F2W Worker boundary.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
-    "iteathen/CUDA-JS is public, codex/windows-f2 is published, and Linux qualification is tracked publicly in issue 4."
+    "iteathen/CUDA-JS is public, codex/windows-f2 is published through draft pull request 5, and Linux qualification is tracked publicly in issue 4."
   ]
 }
