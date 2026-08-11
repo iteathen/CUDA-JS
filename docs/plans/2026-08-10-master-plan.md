@@ -8,7 +8,7 @@
 
 Turn the accepted repository boundary and Node-FFI-first host-binding decision into dependency-ordered, falsifiable future work without prematurely implementing broad CUDA coverage.
 
-**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, and Windows-only `CJS-F2W / EXP-012` are accepted after independent host, ABI, Driver, GPU, permission, oracle, and cleanup qualification. Windows `CJS-F3W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` remains retained, incomplete, deferred, and independently promotable.
+**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted after independent host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, and cleanup qualification. The F3 control plane also passes on native Linux x86-64 without establishing Linux Driver support. Windows `CJS-F4W` memory contract work is dependency-ready. Linux `CJS-F2L / EXP-001` and native Linux F3 remain retained, incomplete, deferred, and independently promotable.
 
 The first *planned* code-bearing work after that future authorization is **not** an application runtime and does not require CUDA. It is EXP-000: a generated synthetic C ABI library and direct C oracle that qualify Node FFI, schema-derived definitions/packers, Worker isolation, resource lifetime, and deterministic teardown before GPU variables enter the diagnosis.
 
@@ -129,6 +129,8 @@ Satisfied on the pinned CUDA 13.3.29/Clang 18/Linux x86-64 profile: Tier-0 CUDA 
 **Exit**
 
 Context affinity and lifecycle capsules pass; stale/wrong-kind/cross-runtime/double-close operations reject; graceful shutdown disposes in dependency order; unexpected Worker loss fails closed without a false cleanup claim; main loop remains responsive.
+
+**Accepted disposition:** Windows F3W satisfies this exit on the exact accepted Windows profile. The same platform-neutral registry, protocol, health, responsiveness, graceful-teardown, and unexpected-loss capsule passes on native Linux x86-64. Linux native DriverActor execution remains blocked on F2L and is not implied by that shared control-plane evidence.
 
 ### CJS-F4 — memory foundation (P1)
 
@@ -253,13 +255,13 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 4. All 12 public-name procedure queries, negative version/symbol/library/permission controls, and the private context lifecycle pass.
 5. Sanitized Node observations agree exactly with the independent MSVC C oracle; teardown closes context, library, and Worker without exposing pointers.
 
-## Later dependency sequence
+## Next dependency sequence
 
-1. Preserve accepted F1A, F1B, and platform-separated F2W evidence.
-2. Publish the Windows path and request public contribution for retained Linux F2L.
-3. Draft and accept the Windows F3 DriverActor/resource/lifecycle specification, then implement only that vertical slice.
-4. Do not begin memory, modules, NVRTC pipelines, graphs, or broad API generation until their Windows predecessors pass.
-5. Resume Linux F2L independently when a qualified native Linux NVIDIA Driver/GPU environment becomes available; never substitute Windows or WSL results silently.
+1. Preserve accepted F1A, F1B, platform-separated F2W, and Windows F3W evidence.
+2. Publish F3W as a stacked review and retain the public contribution request for Linux F2L/F3L.
+3. Draft and accept the Windows F4 memory specification before implementing memory.
+4. Do not begin modules, NVRTC pipelines, graphs, or broad API generation until their Windows predecessors pass.
+5. Resume Linux F2L independently when a qualified native Linux NVIDIA Driver/GPU environment becomes available; rerun shared F3 control-plane evidence there but never substitute it for native Driver evidence.
 
 ## Stop conditions
 

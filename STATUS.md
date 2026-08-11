@@ -6,7 +6,7 @@
 
 ## Current phase
 
-The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, and Windows-only `CJS-F2W / EXP-012` are accepted. Windows `CJS-F3W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` now implements every available GPU-free preparation and diagnostic step, but remains incomplete until a qualified native Driver/GPU smoke passes; it no longer blocks Windows work.
+The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows-only `CJS-F3W` are accepted. The platform-neutral F3 control plane also passes on native Linux x86-64. Linux `CJS-F2L / EXP-001` and native Linux DriverActor execution remain incomplete until a qualified native Driver/GPU smoke passes; they do not block Windows work. Windows `CJS-F4W` memory contract work is dependency-ready.
 
 ## Promoted F1A result
 
@@ -53,7 +53,24 @@ The accepted result includes:
 - missing library, invalid flags, missing symbol, insufficient version, versioned query-name, permission denial/allow, stale wrapper, and cleanup controls;
 - terminal null current context, closed DynamicLibrary, rejected stale wrapper, Worker exit zero, and no pointer values crossing the Worker boundary.
 
-This result authorizes Windows F3 specification work, not production actor code by itself.
+This result supplied the accepted native prerequisite for Windows F3. It does not authorize Linux DriverActor execution or later memory and execution layers by itself.
+
+## Accepted Windows F3W result
+
+The accepted F3 slice introduces two bounded internal components under [`SPEC-0003`](docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md):
+
+- a dedicated Worker with one runtime epoch, one canonical Driver library, one selected device, and one private context;
+- an opaque registry with runtime, epoch, kind, slot, generation, nonce, and state validation;
+- parent/child dependencies, in-flight leases, slot reuse, deterministic close ordering, and explicit orphan inventory;
+- a finite async command protocol, bounded pending work, structured errors, and monotonic health states;
+- context-currentness checks performed only on the owning Worker;
+- responsive application-thread behavior while the mock backend blocks;
+- graceful context/library/Worker teardown with stale-wrapper rejection;
+- restart-required epoch invalidation after unexpected Worker loss without claiming inaccessible native cleanup.
+
+On Windows 10.0.26200 x64, official Node 26.7.0 uses the canonical system Driver and reproduces the accepted F2W Driver, device, attribute, and context profile across repeated actor turns. Terminal evidence records a destroyed context, null current context, closed library, rejected stale wrapper, and Worker exit zero.
+
+The same platform-neutral resource, protocol, health, responsiveness, graceful-close, and unexpected-loss capsule passes on native Ubuntu 24.04.4 x86-64 with official Node 26.7.0. That evidence prepares the Linux control plane; it does not load a Linux NVIDIA Driver or establish Linux CUDA support.
 
 ## Deferred incomplete Linux F2L
 
@@ -72,8 +89,8 @@ GPU-free preparation passes in the available native Linux guest. The only unexec
 
 ## Claim limits
 
-F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. It does not prove Linux, arbitrary returned-pointer invocation, Fast FFI dispatch, production DriverActor/resource behavior, memory, modules, launch/completion, performance, packaging, or consumer semantics.
+F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. The native Linux F3 capsule proves platform-neutral control-plane behavior only. These results do not prove Linux Driver execution, arbitrary returned-pointer invocation, Fast FFI dispatch, memory, modules, launch/completion, native deferred-error attribution, performance, packaging, recovery without process restart, or consumer semantics.
 
 ## Immediate next boundary
 
-The repository and exact F2W branch are published publicly through [draft pull request #5](https://github.com/iteathen/CUDA-JS/pull/5). Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained runbook, then draft the detailed Windows F3 DriverActor/resource/lifecycle specification. Linux qualification can resume independently when suitable hardware becomes available.
+Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained runbook, publish the accepted F3W slice as a stacked review, and draft the Windows F4 memory specification. Do not implement memory before that specification is accepted. Linux qualification can resume independently when suitable hardware becomes available.

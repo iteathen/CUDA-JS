@@ -113,4 +113,4 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 
 ## Current phase
 
-`CJS-F1A / EXP-000` and the `CJS-F1B` schema/ABI foundation are accepted on independent Windows/Linux host and native-layout evidence. This target architecture still does not authorize production components or CUDA Driver execution beyond accepted predecessor and qualified-environment gates.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, and Windows `CJS-F3W` are accepted on exact evidence. The F3 control plane also passes on native Linux without authorizing Linux Driver execution. Windows F4 memory contract work is dependency-ready; this architecture does not authorize memory or later production components without their accepted detailed specifications and qualified native evidence.

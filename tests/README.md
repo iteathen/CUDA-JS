@@ -1,6 +1,6 @@
 # Tests
 
-Cross-component and end-to-end runtime capsules. Owner-local tests remain with their experiment or component.
+Cross-component and end-to-end runtime capsules. Owner-local tests remain with their experiment or component. The accepted F3 component tests live under `components/`, and integrated evidence lives under `conformance/f3/`.
 
 Initial ownership:
 

@@ -15,3 +15,4 @@ jobs:
       - run: npm run exp:000:build
       - run: npm run exp:000:correctness
       - run: npm run exp:000:lifecycle
+      - run: npm run f3:portable
