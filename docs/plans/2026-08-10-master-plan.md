@@ -197,7 +197,55 @@ A deterministic real kernel capsule passes with responsive main loop, correct ar
 
 Clean-room repeat produces identical identity and equivalent artifact; warning/error logs, cancellation, cache corruption, process-global side effects, and teardown are verified. NVRTC compile-only evidence is separated from GPU-dependent module-load/launch evidence.
 
-**Accepted disposition:** Windows F6W satisfies the bounded source-to-PTX, PTX-to-cubin, validated local-cache, and copied Driver-handoff slice on the exact accepted Windows profile. Production Node FFI and an independent MSVC oracle produce byte-identical artifacts across clean runs; corruption and invalidation controls pass; both formats execute with identical GPU output; all program, link, module, Driver, library, and Worker cleanup is terminal. Portable Linux option/cache/lifecycle fixtures and a human native-provider runbook are retained without claiming Linux support. LTO, arbitrary options/providers, compilation concurrency, child-process recovery, and packaging remain deferred.
+**Accepted disposition:** Windows F6W satisfies the bounded source-to-PTX, PTX-to-cubin, validated local-cache, and copied Driver-handoff slice on the exact accepted Windows profile. Production Node FFI and an independent MSVC oracle produce byte-identical artifacts across clean runs; corruption and invalidation controls pass; both formats execute with identical GPU output; all program, link, module, Driver, library, and Worker cleanup is terminal. Portable Linux option/cache/lifecycle fixtures and a human native-provider runbook are retained without claiming Linux support. Arbitrary options/providers, compilation concurrency, child-process recovery, and packaging remain deferred. LTO remains outside accepted SPEC-0006 and is handled only by the bounded follow-up below.
+
+#### CJS-F6-LTO — bounded typed device-LTO follow-up (P2)
+
+**Status:** assessment/research complete; planning accepted only as future work. Production implementation requires a separately accepted bounded specification and EXP-009 LTO evidence.
+
+**Dependencies:** accepted Windows CJS-F6W, existing CompilerActor/cache/provider ownership, and exact CUDA toolkit/compiler/linker capability evidence. CUDA-MCGS is not a dependency.
+
+**Assessment:** [`../research/2026-08-11-lto-support-assessment.md`](../research/2026-08-11-lto-support-assessment.md).
+
+**Planned public capability**
+
+- keep PTX as the default compile output;
+- add a typed compile output `lto-ir` that internally selects NVRTC device-LTO generation and returns copied binary bytes with exact immutable identity;
+- allow `link()` to accept a bounded homogeneous set of typed CUDA-JS LTO-IR artifacts, infer LTO internally, and return the existing copied cubin result shape;
+- keep raw-byte link inputs PTX-only so LTO compatibility metadata cannot be discarded;
+- preserve existing PTX-to-cubin behavior unchanged;
+- carry sufficient producer/toolkit/target identity to reject known LTO compatibility failures before native linking when possible;
+- include artifact format, producer compatibility identity, ordered input identity, link mode, provider profile, target, and output in cache/evidence keys;
+- keep all native program/link objects, paths, handles, input-type enums, and native options private to the CompilerActor/backend.
+
+**First-slice exclusions**
+
+- mixed PTX and LTO-IR inputs;
+- linked LTO-IR or linked PTX output;
+- staged/partial-link pipelines;
+- raw LTO-IR byte inputs without typed CUDA-JS compatibility metadata;
+- arbitrary nvJitLink/NVRTC options or caller-selected native input kinds;
+- fatbin, object, library, external-file, or relocatable-device-code public inputs beyond the exact LTO-IR artifact contract;
+- cross-major LTO compatibility claims;
+- native Linux/ARM64/WSL LTO support without separate exact evidence;
+- any CUDA-MCGS/search semantic, performance, or adoption requirement;
+- DriverActor changes solely for LTO.
+
+**Experiment:** extend the existing EXP-009 ownership/capsule with an LTO follow-up rather than creating a competing experiment lineage.
+
+**Required evidence**
+
+- exact Node-versus-independent-native-oracle LTO-IR byte parity for the accepted Windows CUDA profile;
+- two independently compiled LTO units linked through device LTO to one cubin and executed through the existing DriverActor with oracle parity;
+- deterministic clean-room artifact and cache identity;
+- mixed-format/raw-LTOIR/unknown-option/wrong-architecture/corruption/oversize rejection;
+- synthetic compatibility negatives for cross-major and producer-newer-than-linker metadata when alternate native providers are unavailable;
+- compiler/linker error-log attribution, program/link destruction, actor responsiveness, graceful close, and terminal resource balance;
+- existing PTX/cubin F6 regressions unchanged.
+
+**Promotion:** a new accepted specification defines the typed LTO artifact, compatibility, cache, failure, lifecycle, and public-facade rules; EXP-009 LTO evidence passes on each claimed native profile; existing F6/F8/F9 contracts remain backward-compatible; exact remote source/evidence identity is recorded.
+
+**Falsifier / fallback:** if exact provider behavior, compatibility identity, cache safety, cleanup, or public-boundary containment cannot be made deterministic without exposing unsafe native controls, keep LTO unsupported. PTX/cubin remains the accepted baseline.
 
 ### CJS-F7 — platform expansion and hardening (P2)
 
@@ -247,7 +295,7 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 - proof that active search remains device-owned after ignition;
 - independent internal conformance retained by each repository.
 
-**Current disposition:** The CUDA-JS-owned prerequisite is complete under SPEC-0009. The exact Windows profile verifies and snapshots the CUDA 13.3 `cuda/` and `nv/` CCCL virtual roots, compiles a consumer-neutral `<cuda/atomic>` fixture through the public facade, observes the expected release/acquire publication words, and closes terminally. The CUDA-MCGS adapter/package and exact compatible-pair evidence remain pending the independent CUDA-MCGS work package in `iteathen/UMCGS`; CUDA-JS contains no consumer schema.
+**Current disposition:** The CUDA-JS-owned prerequisite is complete under SPEC-0009. The exact Windows profile verifies and snapshots the CUDA 13.3 `cuda/` and `nv/` CCCL virtual roots, compiles a consumer-neutral `<cuda/atomic>` fixture through the public facade, observes the expected release/acquire publication words, and closes terminally. The CUDA-MCGS adapter/package and exact compatible-pair evidence remain pending the independent CUDA-MCGS work package in `iteathen/UMCGS`; CUDA-JS contains no consumer schema. CJS-F6-LTO is an independent generic toolchain follow-up and is not a prerequisite for the compatible pair unless later CUDA-MCGS evidence explicitly establishes such a requirement.
 
 ## Completed sequence — CJS-F1B
 
@@ -267,11 +315,12 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 
 ## Next dependency sequence
 
-1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W through F8W, and independent C-oracle evidence.
+1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W through F9 prerequisite, and independent native-oracle evidence.
 2. Preserve the public contribution request and retained handoffs for Linux F2L through F8L.
-3. Preserve the accepted Windows F7W permission, device-diagnostic, failure/property, repeated-lifecycle, and cleanup evidence.
-4. Preserve the accepted F8 package/public-facade/second-consumer evidence and the accepted CUDA-JS F9 trusted-header/atomic-publication prerequisite while the independent CUDA-MCGS package/adapter and exact compatible-pair evidence are completed.
-5. Resume Linux F2L through F8L independently when a qualified native Linux NVIDIA environment becomes available; never substitute portable controls or Windows results for native Linux evidence.
+3. For the independent generic CJS-F6-LTO follow-up, draft a bounded specification before production implementation; do not reinterpret SPEC-0006 as LTO authorization.
+4. Extend EXP-009 with the LTO-IR-to-cubin parity/compatibility/cache/lifecycle capsule and promote the capability only if exact native evidence passes.
+5. Preserve the accepted F9 trusted-header/atomic-publication prerequisite while the independent CUDA-MCGS package/adapter and compatible-pair evidence are completed; CUDA-MCGS does not wait for LTO by default.
+6. Resume Linux F2L through F8L, and any later Linux LTO qualification, independently when a qualified native Linux NVIDIA environment becomes available; never substitute portable controls or Windows results for native Linux evidence.
 
 ## Stop conditions
 
@@ -287,4 +336,5 @@ Stop or split when:
 - deferred error provenance or health transition is ambiguous;
 - cleanup cannot prove terminal resource state;
 - a work package expands beyond its owner/evidence envelope;
-- production implementation is proposed before its predecessor gates pass.
+- production implementation is proposed before its predecessor gates pass;
+- LTO support would require a broad arbitrary native-linker escape hatch, unbounded compatibility interpretation, or consumer-specific semantics.

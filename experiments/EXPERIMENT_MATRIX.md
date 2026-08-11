@@ -104,9 +104,41 @@ Compile, log, emit, link, load, launch, cache, corrupt, invalidate, and cleanly 
 
 **Promotion:** complete deterministic key and equivalent clean-room result; no unexpected process-global mutation and no half-live compiler/link/module state.
 
-**Disposition:** promoted for the exact Windows x64 CUDA 13.3 profile. Independent MSVC and production Node FFI calls emit byte-identical PTX and cubin across clean runs; the validated cache rejects corruption; both artifacts execute through the DriverActor with identical output. Portable cache/lifecycle and Linux option fixtures are retained, while native Linux providers remain unqualified.
+**Disposition:** promoted for the exact Windows x64 CUDA 13.3 profile for source-to-PTX and PTX-to-cubin only. Independent MSVC and production Node FFI calls emit byte-identical PTX and cubin across clean runs; the validated cache rejects corruption; both artifacts execute through the DriverActor with identical output. Portable cache/lifecycle and Linux option fixtures are retained, while native Linux providers remain unqualified. LTO remains unpromoted and requires the follow-up below plus a separately accepted public contract.
 
-**Detailed protocol:** [`exp-009/README.md`](exp-009/README.md).
+### EXP-009 LTO follow-up — typed LTO-IR composition
+
+**Question:** Can the existing CompilerActor safely expose a bounded source-to-LTOIR and homogeneous LTOIR-to-cubin capability with deterministic compatibility/cache identity, independent native parity, and terminal cleanup without exposing arbitrary native linker controls?
+
+**Planned native cases on the exact first claimed profile:**
+
+- compile one tracked CUDA source unit to LTO-IR through NVRTC and compare the copied bytes/digest exactly with an independent MSVC/native CUDA oracle;
+- compile at least two separate device units to LTO-IR, link them with device LTO, obtain cubin, load through the existing DriverActor, and compare final output with the independent oracle;
+- clean-room repeat of source-to-LTOIR and LTOIR-to-cubin identities;
+- compiler and linker diagnostics on controlled invalid source/LTO input;
+- explicit program/link destruction and graceful CompilerActor/DriverActor teardown after success and controlled failure;
+- application event-loop responsiveness while native LTO compilation/linking runs.
+
+**Planned contract/cache negatives:**
+
+- mixed PTX and LTO-IR request rejected in the first slice;
+- raw LTO-IR byte input rejected unless represented by the typed CUDA-JS LTO artifact contract;
+- cross-major LTO producer/linker metadata rejected before native linking;
+- producer minor newer than the current linker rejected before native linking;
+- wrong target architecture, incompatible target ordering, corrupted digest/length, oversize input/output, unknown fields, and unknown public options rejected;
+- PTX and LTO-IR compile cache keys remain distinct for identical source;
+- ordinary PTX link and LTO link cache keys remain distinct;
+- changing producer compatibility facts invalidates the LTO link identity even when artifact bytes are otherwise unchanged.
+
+**Independent oracle:** a native C/C++ program that owns its NVRTC programs, LTO-IR buffers, nvJitLink handle/options/input kinds, linked cubin, Driver load/launch, logs, and cleanup directly. JavaScript must not reuse the oracle's packing/validation implementation.
+
+**Promotion:** exact first-profile Node/native parity; typed public artifact/compatibility contract accepted; deterministic cache identities; all negative partitions fail at the intended boundary; no new raw pointer/path/native-option escape; PTX/cubin regressions remain green; all native resources close terminally.
+
+**Falsifier:** LTO output or compatibility cannot be identified deterministically, cache identity cannot prevent incompatible reuse, the capability requires arbitrary native controls or consumer-specific semantics, native lifecycle cannot be fenced, or the existing PTX/cubin path regresses. In that case LTO remains unsupported while accepted F6 behavior is preserved.
+
+**Claim limits:** passing this follow-up would establish only the exact generic CUDA-JS LTO capability and exact native profiles tested. It would not prove performance benefit, CUDA-MCGS adoption/correctness, mixed-format linking, staged linked-LTOIR output, or native Linux support.
+
+**Detailed protocol owner:** extend [`exp-009/`](exp-009/README.md); do not create a competing experiment family unless execution evidence later proves isolation is independently necessary.
 
 ## EXP-010 — process isolation profile
 
