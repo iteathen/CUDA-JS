@@ -1,0 +1,133 @@
+name: Publish verified CUDA-JS foundational documents
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: publish-foundational-docs-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'agent/publish-foundational-docs'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_BRANCH: agent/publish-foundational-docs
+      FOUNDATION_COMMIT: 77090a981fabb547d9e1a98d76213f2048e81ef2
+      FOUNDATION_BUNDLE_SHA256: 39dc57ea37fac71522b99090945b232173f65676f3421f4e6ea4baa84ca41ad3
+      UPGRADE_XZ_SHA256: f94d474c6b840d62cd88b3aba1c30110c5397de757717c7fd15dddccb6ae8065
+      UPGRADE_PATCH_SHA256: 51c75ad64c3ad041aa7649a76ab8a299c24079d60e4a3eaee38c27a2711169ca
+      FINAL_TREE: 032cd3f7d2501ae184ed3036eaffa060c56f52ce
+      FINAL_FILE_COUNT: '85'
+    steps:
+      - name: Check out the exact same-repository PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Reconstruct and verify the reviewed documentation foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          git config user.name 'CUDA-JS Foundation Publisher'
+          git config user.email 'noreply@github.com'
+
+          bootstrap_parent="$(git rev-parse HEAD)"
+          test "${bootstrap_parent}" = '${{ github.event.pull_request.head.sha }}'
+
+          bundle_chunks=(.bootstrap/CJS-FND-77090a9.bundle.b64.*)
+          if (( ${#bundle_chunks[@]} == 0 )); then
+            echo 'Verified foundation bundle chunks are absent.' >&2
+            exit 1
+          fi
+          printf '%s\n' "${bundle_chunks[@]}" | LC_ALL=C sort > /tmp/foundation-chunks.list
+          while IFS= read -r chunk; do
+            cat "$chunk"
+          done < /tmp/foundation-chunks.list \
+            | tr -d '\r\n' \
+            | base64 --decode > /tmp/CJS-FND-77090a9.bundle
+
+          printf '%s  %s\n' \
+            "${FOUNDATION_BUNDLE_SHA256}" \
+            /tmp/CJS-FND-77090a9.bundle \
+            | sha256sum --check --strict
+          git bundle verify /tmp/CJS-FND-77090a9.bundle
+          git remote add foundation /tmp/CJS-FND-77090a9.bundle
+          git fetch foundation refs/heads/main:refs/remotes/foundation/main
+          test "$(git rev-parse refs/remotes/foundation/main)" = "${FOUNDATION_COMMIT}"
+
+          patch_chunks=(.foundation-import-xz/CJS-FND-docs-upgrade.patch.xz.b64.*)
+          if (( ${#patch_chunks[@]} != 10 )); then
+            printf 'Expected 10 upgrade chunks; found %s.\n' "${#patch_chunks[@]}" >&2
+            exit 1
+          fi
+          printf '%s\n' "${patch_chunks[@]}" | LC_ALL=C sort > /tmp/upgrade-chunks.list
+          while IFS= read -r chunk; do
+            cat "$chunk"
+          done < /tmp/upgrade-chunks.list \
+            | tr -d '\r\n' \
+            | base64 --decode > /tmp/CJS-FND-docs-upgrade.patch.xz
+
+          printf '%s  %s\n' \
+            "${UPGRADE_XZ_SHA256}" \
+            /tmp/CJS-FND-docs-upgrade.patch.xz \
+            | sha256sum --check --strict
+          xz --decompress --stdout \
+            /tmp/CJS-FND-docs-upgrade.patch.xz \
+            > /tmp/CJS-FND-docs-upgrade.patch
+          printf '%s  %s\n' \
+            "${UPGRADE_PATCH_SHA256}" \
+            /tmp/CJS-FND-docs-upgrade.patch \
+            | sha256sum --check --strict
+
+          git read-tree --reset -u "${FOUNDATION_COMMIT}"
+          git apply --index --whitespace=error-all \
+            /tmp/CJS-FND-docs-upgrade.patch
+
+          bash ./scripts/verify-docs.sh
+          git diff --check --cached
+
+          actual_tree="$(git write-tree)"
+          test "${actual_tree}" = "${FINAL_TREE}"
+          test "$(git ls-files | wc -l | tr -d ' ')" = "${FINAL_FILE_COUNT}"
+
+          test "$(git ls-files '.github/workflows/*')" = '.github/workflows/docs.yml'
+          test ! -e .bootstrap
+          test ! -e .foundation-import
+          test ! -e .foundation-import-xz
+          test ! -e .github/workflows/reconcile-branches.yml
+          test ! -e .github/workflows/publish-foundational-docs.yml
+
+          unauthorized="$(git ls-files | grep -Ei '\.(c|cc|cpp|cxx|h|hh|hpp|js|mjs|cjs|ts|tsx|rs|node|ptx|cubin|fatbin|ltoir|so|dll|dylib|a|lib|o|obj)$' | grep -v '^scripts/check-doc-links\.py$' || true)"
+          if [[ -n "${unauthorized}" ]]; then
+            printf 'Unauthorized implementation/native files:\n%s\n' "${unauthorized}" >&2
+            exit 1
+          fi
+
+          published_commit="$(printf '%s\n\n%s\n' \
+            'Publish complete CUDA-JS documentation foundation' \
+            'Documentation-only foundation; no experiment or runtime implementation is authorized.' \
+            | git commit-tree "${actual_tree}" \
+                -p "${bootstrap_parent}" \
+                -p "${FOUNDATION_COMMIT}")"
+
+          git update-ref "refs/heads/${SOURCE_BRANCH}" "${published_commit}"
+          git push --force-with-lease="refs/heads/${SOURCE_BRANCH}:${bootstrap_parent}" \
+            origin "${published_commit}:refs/heads/${SOURCE_BRANCH}"
+
+          git merge-base --is-ancestor "${FOUNDATION_COMMIT}" "${published_commit}"
+          test "$(git rev-parse "${published_commit}^{tree}")" = "${FINAL_TREE}"
