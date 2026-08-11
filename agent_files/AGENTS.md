@@ -23,7 +23,7 @@ platform truth and accepted authority
 
 ## Required adversarial questions
 
-- Does the design remain coherent without UMCGS?
+- Does the design remain coherent without CUDA-MCGS?
 - Is an accepted document being applied outside its scope?
 - Is a C prototype being mistaken for ownership, blocking, asynchronous, error, or cleanup semantics?
 - Is `node:ffi` being mistaken for a safety or lifetime model?
@@ -41,7 +41,7 @@ platform truth and accepted authority
 
 `CJS-F1A / EXP-000` is promoted after independent Windows x64 and native Linux x86-64 qualification. Preserve its exact-profile evidence and generated-product regression checks.
 
-`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, `CJS-F7W`, and `CJS-F8W` are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, package compatibility, and independent native C ABI/Driver/memory/execution/compiler oracles as distinct owners. The F3 through F8 control-plane and package capsules pass without native Linux CUDA providers, but Linux DriverActor/compiler execution remains deferred and incomplete until qualified native evidence exists. F9 UMCGS interop requires a new accepted detailed specification.
+`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, `CJS-F7W`, `CJS-F8W`, and the CUDA-JS-owned `CJS-F9-A/B` prerequisite are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, package compatibility, and independent native C ABI/Driver/memory/execution/compiler oracles as distinct owners. The F3 through F8 control-plane and package capsules pass without native Linux CUDA providers, but Linux DriverActor/compiler execution remains deferred and incomplete until qualified native evidence exists. Exact CUDA-MCGS compatible-pair completion requires the independently owned CUDA-MCGS package/adapter in `iteathen/UMCGS` and frozen-pair evidence.
 
 ## Testing and repair
 

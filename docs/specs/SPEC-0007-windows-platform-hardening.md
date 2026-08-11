@@ -113,4 +113,4 @@ CJS-F7W is complete only when:
 - existing F1 through F6 Windows and portable regressions remain green;
 - Linux/WSL preparation remains explicit, independently completable, and unpromoted.
 
-Passing F7W may unblock a bounded packaging/public-facade specification. It does not authorize package publication or UMCGS integration by itself.
+Passing F7W may unblock a bounded packaging/public-facade specification. It does not authorize package publication or CUDA-MCGS integration by itself.

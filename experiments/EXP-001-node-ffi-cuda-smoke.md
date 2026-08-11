@@ -37,7 +37,7 @@ Generate Node FFI definitions and packers for:
 - `cuGetProcAddress` version/status verification;
 - optional NVRTC version call.
 
-No memory allocation, module load, kernel launch, UMCGS behavior, public raw pointer, callback, or broad schema generation is authorized by this experiment.
+No memory allocation, module load, kernel launch, CUDA-MCGS behavior, public raw pointer, callback, or broad schema generation is authorized by this experiment.
 
 ## Independent oracles
 

@@ -19,7 +19,7 @@ Every work package preserves:
 - no CUDA-JS project-specific compiled addon in the selected baseline;
 - no hand-written or ahead-of-time per-CUDA-function wrapper family;
 - any future generic native/JIT gap backend requires EXP-011 and a separate accepted ADR;
-- no UMCGS/search semantics;
+- no CUDA-MCGS/search semantics;
 - trusted generated schema plus reviewed semantic overlay;
 - no public raw native/device pointers or arbitrary FFI;
 - exact Node/CUDA/header/schema/platform identity;
@@ -29,7 +29,7 @@ Every work package preserves:
 - explicit immediate/deferred error and context-health semantics;
 - no strict Fast-JIT claim without direct qualification evidence;
 - mock results never proving native CUDA behavior;
-- local validation, exact commit, portable bundle, and UMCGS handoff before implementation expansion.
+- local validation, exact commit, portable bundle, and CUDA-MCGS handoff before implementation expansion.
 
 ## Work packages
 
@@ -41,7 +41,7 @@ Every work package preserves:
 - portable Git bundle/zip/checksums;
 - public `iteathen/CUDA-JS` remote containing the reviewed foundation and Windows F2W evidence-bearing implementation;
 - documentation validation and remote read-back after publication;
-- UMCGS reference to the exact CUDA-JS plan without importing private source.
+- CUDA-MCGS reference to the exact CUDA-JS plan without importing private source.
 
 **Exit**
 
@@ -233,19 +233,21 @@ Support matrix claims match exact native evidence; unsupported profiles fail des
 
 First-consumer-deletion and second-instance tests pass; strict JIT claims are either proven, explicitly unsupported, or backed by a separately accepted design.
 
-**Accepted disposition, amended for public testing:** Windows F8W publishes the non-private `cuda-js` 0.1.0-alpha.1 no-addon ESM package boundary with Node 26.1.0-or-later testing admission, exact Node 26.7.0 qualification evidence, unconfirmed Windows CUDA operation without an opt-in, a safe facade over accepted actors, immutable compatibility metadata, mock-only consumer testing, clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, and installed-package native vector execution. Linux package/import/mock/readiness controls pass without a native CUDA claim and remain backend-incomplete. EXP-010 and EXP-011 are not triggered because no mandatory isolation, callable-pointer, or strict-JIT gap is measured; Worker loss remains restart-required and strict JIT remains unsupported.
+**Accepted disposition, amended for public testing:** Windows F8W publishes the non-private `cuda-js` 0.1.0-alpha.2 no-addon ESM package boundary with Node 26.1.0-or-later testing admission, exact Node 26.7.0 qualification evidence, unconfirmed Windows CUDA operation without an opt-in, a safe facade over accepted actors, immutable compatibility metadata, mock-only consumer testing, clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, and installed-package native vector execution. Linux package/import/mock/readiness controls pass without a native CUDA claim and remain backend-incomplete. EXP-010 and EXP-011 are not triggered because no mandatory isolation, callable-pointer, or strict-JIT gap is measured; Worker loss remains restart-required and strict JIT remains unsupported.
 
-### CJS-F9 — UMCGS public interop (P2/P3)
+### CJS-F9 — CUDA-MCGS public interop (P2/P3)
 
 **Dependencies:** stable public CUDA-JS package contract.
 
 **Outputs**
 
 - versioned execution-package contract;
-- UMCGS adapter and compatibility manifest;
+- CUDA-MCGS adapter and compatibility manifest;
 - one cross-repository compatible-pair capsule;
 - proof that active search remains device-owned after ignition;
 - independent internal conformance retained by each repository.
+
+**Current disposition:** The CUDA-JS-owned prerequisite is complete under SPEC-0009. The exact Windows profile verifies and snapshots the CUDA 13.3 `cuda/` and `nv/` CCCL virtual roots, compiles a consumer-neutral `<cuda/atomic>` fixture through the public facade, observes the expected release/acquire publication words, and closes terminally. The CUDA-MCGS adapter/package and exact compatible-pair evidence remain pending the independent CUDA-MCGS work package in `iteathen/UMCGS`; CUDA-JS contains no consumer schema.
 
 ## Completed sequence — CJS-F1B
 
@@ -268,7 +270,7 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W through F8W, and independent C-oracle evidence.
 2. Preserve the public contribution request and retained handoffs for Linux F2L through F8L.
 3. Preserve the accepted Windows F7W permission, device-diagnostic, failure/property, repeated-lifecycle, and cleanup evidence.
-4. Preserve the accepted F8 package/public-facade/second-consumer evidence and draft a bounded F9 compatible-pair specification before UMCGS consumer work.
+4. Preserve the accepted F8 package/public-facade/second-consumer evidence and the accepted CUDA-JS F9 trusted-header/atomic-publication prerequisite while the independent CUDA-MCGS package/adapter and exact compatible-pair evidence are completed.
 5. Resume Linux F2L through F8L independently when a qualified native Linux NVIDIA environment becomes available; never substitute portable controls or Windows results for native Linux evidence.
 
 ## Stop conditions

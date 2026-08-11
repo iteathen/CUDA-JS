@@ -1,0 +1,52 @@
+name: Feature or design proposal
+description: Propose a generic CUDA-JS capability, platform qualification, or commercial inquiry.
+title: "Proposal: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and users
+      description: Describe the need without prescribing an unsafe native mechanism.
+    validations:
+      required: true
+  - type: dropdown
+    id: boundary
+    attributes:
+      label: Likely owning boundary
+      options:
+        - Schema or ABI facts
+        - DriverActor and resources
+        - Memory
+        - Execution
+        - Compiler, linker, or cache
+        - Package or public facade
+        - Platform qualification
+        - Documentation or governance
+        - Commercial licensing
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: genericity
+    attributes:
+      label: Genericity and alternatives
+      description: Explain why the capability belongs in CUDA-JS rather than one consumer, and list the narrowest credible alternative.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Environment, evidence, and validation
+      description: Identify exact platforms, an independent oracle or falsifier, unavailable checks, and cleanup needs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope acknowledgement
+      options:
+        - label: This proposal does not assume Windows evidence proves Linux support or mock evidence proves native behavior.
+          required: true
+        - label: I have not included confidential commercial terms or sensitive security details.
+          required: true

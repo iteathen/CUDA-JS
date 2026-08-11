@@ -8,6 +8,7 @@ import ffi from 'node:ffi';
 
 import { LIMITS } from '../contract.mjs';
 import { CompilerRuntimeError } from '../errors.mjs';
+import { snapshotHeaderProfile } from '../header-profile.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 const manifestPath = path.join(root, 'schemas', 'cuda-13.3', 'win-x64', 'compiler-provider-manifest.json');
@@ -84,6 +85,7 @@ export async function createBackend() {
   if (process.platform !== 'win32' || process.arch !== 'x64') throw new CompilerRuntimeError('COMPILER_PROFILE_UNSUPPORTED', 'unsupported', 'The native compiler backend requires Windows x64.');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   const toolkitRoot = await canonicalToolkitRoot();
+  const ccclRoot = path.join(toolkitRoot, 'include', 'cccl');
   const nvrtcPath = await verifyProvider(toolkitRoot, manifest.providers.nvrtc);
   await verifyProvider(toolkitRoot, manifest.providers.nvrtcBuiltins);
   const linkPath = await verifyProvider(toolkitRoot, manifest.providers.nvJitLink);
@@ -96,6 +98,7 @@ export async function createBackend() {
   let nvrtc;
   let linker;
   let closed = false;
+  let cudaCccl = null;
   const resources = { programsCreated: 0, programsDestroyed: 0, linksCreated: 0, linksDestroyed: 0 };
 
   try {
@@ -121,6 +124,9 @@ export async function createBackend() {
         nvrtc: Object.freeze({ version: versions.nvrtc, byteLength: manifest.providers.nvrtc.byteLength, sha256: manifest.providers.nvrtc.sha256 }),
         nvrtcBuiltins: Object.freeze({ version: manifest.providers.nvrtcBuiltins.version, byteLength: manifest.providers.nvrtcBuiltins.byteLength, sha256: manifest.providers.nvrtcBuiltins.sha256 }),
         nvJitLink: Object.freeze({ version: versions.nvJitLink, byteLength: manifest.providers.nvJitLink.byteLength, sha256: manifest.providers.nvJitLink.sha256 }),
+        headerProfiles: Object.freeze({
+          cudaCccl: Object.freeze({ ...manifest.headerProfiles.cudaCccl, roots: Object.freeze([...manifest.headerProfiles.cudaCccl.roots]) }),
+        }),
       }),
     });
 
@@ -158,6 +164,11 @@ export async function createBackend() {
     return {
       provider,
       resources,
+      async prepareCompile(request) {
+        if (request.options.headerProfile === 'none') return;
+        if (request.options.headerProfile !== 'cuda-cccl') throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile is unavailable.');
+        if (!cudaCccl) cudaCccl = await snapshotHeaderProfile(ccclRoot, manifest.headerProfiles.cudaCccl);
+      },
       async compile(request) {
         const programStorage = Buffer.alloc(8);
         let created = false;
@@ -165,9 +176,11 @@ export async function createBackend() {
         try {
           const source = cString(request.source);
           const name = cString(request.name);
-          const headerSources = request.headers.map((header) => cString(header.source));
-          const headerNames = request.headers.map((header) => cString(header.name));
-          const status = nvrtc.nvrtcCreateProgram(programStorage, source, name, request.headers.length, request.headers.length ? pointerTable(headerSources) : null, request.headers.length ? pointerTable(headerNames) : null);
+          const profileHeaders = request.options.headerProfile === 'cuda-cccl' ? cudaCccl?.headers : [];
+          if (request.options.headerProfile === 'cuda-cccl' && !profileHeaders) throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile was not prepared.');
+          const headerSources = [...request.headers.map((header) => cString(header.source)), ...profileHeaders.map((header) => header.source)];
+          const headerNames = [...request.headers.map((header) => cString(header.name)), ...profileHeaders.map((header) => cString(header.name))];
+          const status = nvrtc.nvrtcCreateProgram(programStorage, source, name, headerSources.length, headerSources.length ? pointerTable(headerSources) : null, headerNames.length ? pointerTable(headerNames) : null);
           if (status !== 0) throw new CompilerRuntimeError('NVRTC_CREATE_FAILED', 'native-compiler', 'NVRTC program creation failed.', { nativeStatus: status, nativeMessage: nvrtcMessage(status) });
           created = true;
           resources.programsCreated += 1;

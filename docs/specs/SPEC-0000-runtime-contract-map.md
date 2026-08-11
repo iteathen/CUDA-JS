@@ -8,7 +8,7 @@ This is the version-zero specification map, not an implementable public API by i
 
 ## Governing decisions
 
-- ADR-0001 — independent generic runtime repository and one-way UMCGS consumption.
+- ADR-0001 — independent generic runtime repository and one-way CUDA-MCGS consumption.
 - ADR-0002 — Node-FFI-first, no project addon baseline, explicit hot/cold/JIT qualification.
 - ADR-0003 — generated ABI facts plus curated semantic overlays, compiled fail-closed into Runtime IR.
 
@@ -78,7 +78,7 @@ Node/OS/ABI/Driver/toolkit/GPU/schema/provider/artifact identities, migration, p
 
 Independent native ABI/CUDA oracles, lifecycle mock limits, consolidated capsules, discovery/skip accounting, fault/mutation tests, exact evidence keys, representative performance methodology, and claim limits.
 
-### C17 — UMCGS public interop
+### C17 — CUDA-MCGS public interop
 
 Versioned execution-package/capability manifest, artifact/ABI/resource/launch/completion/error requirements, one compatible-pair capsule, and device-owned search progress after ignition. No search semantics enter CUDA-JS.
 
@@ -105,6 +105,6 @@ Versioned execution-package/capability manifest, artifact/ABI/resource/launch/co
 4. C10–C13 module/launch/completion/error vertical slice.
 5. C09 compiler/link/cache.
 6. C14–C16 hardening, packaging, conformance, performance.
-7. C17 UMCGS interop after public CUDA-JS contracts stabilize.
+7. C17 CUDA-MCGS interop after public CUDA-JS contracts stabilize.
 
 No broad production implementation proceeds from this map alone. Each family requires an accepted detailed specification and its experiment/conformance gates.

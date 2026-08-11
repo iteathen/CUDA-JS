@@ -113,4 +113,4 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 
 ## Current phase
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, and Windows CJS-F3W through CJS-F8W are accepted on exact evidence. The F3 through F8 control/package path and deterministic schema generation also pass without authorizing native Linux CUDA execution. F9 UMCGS interop and later production components still require accepted detailed specifications and qualified evidence.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the generic Windows CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence. The F3 through F8 control/package path and deterministic schema generation also pass without authorizing native Linux CUDA execution. Exact CUDA-MCGS compatible-pair integration still requires the independently assessed CUDA-MCGS package/adapter in `iteathen/UMCGS` and revision-keyed evidence.

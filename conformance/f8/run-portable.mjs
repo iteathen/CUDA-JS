@@ -27,11 +27,13 @@ await rm(consumersRoot, { recursive: true, force: true });
 await mkdir(packageRoot, { recursive: true });
 await mkdir(consumersRoot, { recursive: true });
 
+const projectPackage = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
+assert.equal(projectPackage.license, 'AGPL-3.0-or-later');
 const packed = JSON.parse(runNpm(['pack', '--json', '--pack-destination', packageRoot], repositoryRoot));
 assert.equal(packed.length, 1);
 const packageRecord = packed[0];
 assert.equal(packageRecord.name, 'cuda-js');
-assert.equal(packageRecord.version, '0.1.0-alpha.1');
+assert.equal(packageRecord.version, '0.1.0-alpha.2');
 const fileNames = packageRecord.files.map((entry) => entry.path).sort();
 for (const name of fileNames) {
   assert(!name.startsWith('build/'));
@@ -43,6 +45,8 @@ for (const name of fileNames) {
   assert(!/\.(?:dll|exe|node|so|dylib|ptx|cubin|fatbin)$/i.test(name));
 }
 for (const required of [
+  'LICENSE',
+  'LICENSING.md',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
   'components/runtime-facade/compatibility.mjs',
@@ -52,7 +56,10 @@ for (const required of [
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
 ]) assert(fileNames.includes(required), `Package is missing ${required}`);
 
-const deletionNeedles = ['umcgs', 'graph-search', 'minimax', 'search ir'];
+const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf8');
+assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
+
+const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
 const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
@@ -88,12 +95,14 @@ const target = await writeEvidence('portable-package.json', {
   environment: { node: process.version, platform: process.platform, architecture: process.arch, profileName },
   sources: await sourceIdentity([
     'docs/specs/SPEC-0008-package-public-facade.md',
+    'LICENSE',
+    'LICENSING.md',
     'package.json',
     'packaging/compatibility-manifest.json',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/run-portable.mjs',
   ]),
-  package: { name: packageRecord.name, version: packageRecord.version, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
+  package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: ['Portable package, public facade, mock lifecycle, and install/uninstall behavior only.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
 });

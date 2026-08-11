@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-11
 
-**Amended:** 2026-08-11 — the package manifest is public and unconfirmed operational profiles are allowed during the project-wide testing phase without a compatibility opt-in.
+**Amended:** 2026-08-11 — the package manifest is public, unconfirmed operational profiles are allowed during the project-wide testing phase without a compatibility opt-in, and the project owner selected AGPL-3.0-or-later with a separately negotiated commercial-license path.
 
 ## Authorization and bounded outcome
 
@@ -12,7 +12,7 @@ The project owner authorized continued Windows-first implementation, retained Li
 
 F8 consumes the accepted F3 through F7 components without widening their native CUDA support claims. The implemented native runtime remains Windows x64. Node 26.1.0 or later and unconfirmed Windows CUDA hardware may operate for testing; only the exact Node 26.7.0 and accepted CUDA 13.3/Driver/GPU profile carry qualified evidence. Native Linux x64, Linux ARM64 SBSA, and WSL2 retain their incomplete backend paths. Their absence does not block Windows packaging, and Windows evidence never promotes them.
 
-F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, concurrent launches or compilation, broader memory kinds, callbacks, cancellation, crash recovery, performance claims, UMCGS integration, or native Linux CUDA support.
+F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, concurrent launches or compilation, broader memory kinds, callbacks, cancellation, crash recovery, performance claims, CUDA-MCGS integration, or native Linux CUDA support.
 
 ## Package boundary
 
@@ -26,7 +26,7 @@ The package exposes only:
 
 Component internals, actor constructors, testing hooks, schemas, experiments, build output, native oracles, provider paths, and raw compatibility inputs are not package exports. Direct filesystem deep imports are unsupported.
 
-The public package manifest permits deliberate distribution, while registry publication remains pending until the owner selects a package license and a separately authorized release completes legal, provenance, and registry checks. A versioned tarball and installation from the public repository are the accepted F8 distribution forms.
+The public package manifest permits deliberate distribution under AGPL-3.0-or-later. Separately negotiated commercial terms may be offered by the copyright holder but are not granted by the repository. Registry publication remains pending until a separately authorized release completes provenance and registry checks. A versioned tarball and installation from the public repository are the accepted F8 distribution forms.
 
 ## Public facade contract
 
@@ -110,4 +110,4 @@ CJS-F8 is complete only when:
 - existing Windows F1 through F7 and portable Linux controls remain green;
 - protected required checks pass for the exact reviewed head before merge.
 
-Passing F8 authorizes a bounded F9 compatible-pair specification. It does not authorize UMCGS code, a registry release, public production support, or a native Linux claim by itself.
+Passing F8 authorizes a bounded F9 compatible-pair specification. It does not authorize CUDA-MCGS code, a registry release, public production support, or a native Linux claim by itself.

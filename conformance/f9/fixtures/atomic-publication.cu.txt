@@ -1,0 +1,12 @@
+#include <cuda/atomic>
+
+extern "C" __global__ void cuda_js_atomic_publication(unsigned int* words) {
+  cuda::atomic_ref<unsigned int, cuda::thread_scope_device> flag(words[1]);
+  if (threadIdx.x == 0) {
+    words[0] = 0xdecafbadU;
+    flag.store(1U, cuda::memory_order_release);
+  } else if (threadIdx.x == 1) {
+    while (flag.load(cuda::memory_order_acquire) == 0U) {}
+    words[2] = words[0];
+  }
+}

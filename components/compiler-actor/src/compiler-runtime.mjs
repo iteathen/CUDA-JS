@@ -72,6 +72,7 @@ class CompilerRuntime {
         languageStandard: normalized.options.languageStandard,
         fmad: normalized.options.fmad,
         deviceAsDefaultExecutionSpace: normalized.options.deviceAsDefaultExecutionSpace,
+        headerProfile: normalized.options.headerProfile,
       },
     });
   }

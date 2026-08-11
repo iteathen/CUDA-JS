@@ -17,7 +17,7 @@ const PROHIBITED_PUBLIC_KEYS = new Set(['cacheDirectory', 'native', 'path', 'sou
 const ABSOLUTE_PATH = /(?:^|[\s'\"])(?:[a-zA-Z]:[\\/]|\\\\|\/[^/\s])/;
 
 const COMPILE_FIELDS = Object.freeze(['headers', 'name', 'options', 'source']);
-const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'languageStandard']);
+const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'headerProfile', 'languageStandard']);
 const LINK_FIELDS = Object.freeze(['inputs', 'options']);
 const LINK_OPTION_FIELDS = Object.freeze(['architecture']);
 const encoder = new TextEncoder();
@@ -106,6 +106,8 @@ export function normalizeCompileOptions(value = {}, platform = process.platform)
   const architecture = computeArchitecture(value.architecture);
   const languageStandard = value.languageStandard ?? 'c++17';
   if (!['c++17', 'c++20'].includes(languageStandard)) throw compilerError('COMPILER_STANDARD_INVALID', 'languageStandard must be c++17 or c++20.');
+  const headerProfile = value.headerProfile ?? 'none';
+  if (!['none', 'cuda-cccl'].includes(headerProfile)) throw compilerError('COMPILER_HEADER_PROFILE_INVALID', 'headerProfile must be none or cuda-cccl.');
   const fmad = value.fmad ?? false;
   const deviceAsDefaultExecutionSpace = value.deviceAsDefaultExecutionSpace ?? false;
   if (typeof fmad !== 'boolean' || typeof deviceAsDefaultExecutionSpace !== 'boolean') throw compilerError('COMPILER_OPTIONS_INVALID', 'Compile boolean options must be booleans.');
@@ -118,7 +120,7 @@ export function normalizeCompileOptions(value = {}, platform = process.platform)
     '--no-cache',
     ...(platform === 'linux' ? ['--modify-stack-limit=false'] : []),
   ];
-  return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, native: Object.freeze(native) });
+  return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, headerProfile, native: Object.freeze(native) });
 }
 
 export function normalizeLinkOptions(value = {}) {
@@ -189,26 +191,33 @@ export function normalizeLinkRequest(request) {
 }
 
 export function compileIdentity(request, provider) {
+  const { headerProfiles, ...baseProvider } = provider.identity;
+  const selectedHeaderProfile = request.options.headerProfile === 'cuda-cccl' ? headerProfiles?.cudaCccl : null;
+  if (request.options.headerProfile === 'cuda-cccl' && !selectedHeaderProfile) throw compilerError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'The selected compiler header profile is unavailable.');
+  const conflictingHeader = selectedHeaderProfile && request.headers.find((header) => selectedHeaderProfile.roots.some((root) => header.name === root || header.name.startsWith(`${root}/`)));
+  if (conflictingHeader) throw compilerError('COMPILER_HEADER_PROFILE_CONFLICT', 'Caller headers cannot use a logical name owned by the selected compiler header profile.', { header: conflictingHeader.name });
   return {
     schemaVersion: 1,
-    contractVersion: 'SPEC-0006-v1',
+    contractVersion: selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
     operation: 'compile',
     platform: provider.platform,
     architecture: provider.architecture,
     node: provider.node,
     nodeAbi: provider.nodeAbi,
-    provider: provider.identity,
+    provider: selectedHeaderProfile ? { ...baseProvider, headerProfile: selectedHeaderProfile } : baseProvider,
     request: {
       source: { byteLength: request.sourceByteLength, sha256: request.sourceSha256 },
       name: request.name,
       headers: request.headers.map(({ name, byteLength, sha256: digest }) => ({ name, byteLength, sha256: digest })),
       options: request.options.native,
+      ...(selectedHeaderProfile ? { headerProfile: request.options.headerProfile } : {}),
       output: 'ptx',
     },
   };
 }
 
 export function linkIdentity(request, provider) {
+  const { headerProfiles, ...baseProvider } = provider.identity;
   return {
     schemaVersion: 1,
     contractVersion: 'SPEC-0006-v1',
@@ -217,7 +226,7 @@ export function linkIdentity(request, provider) {
     architecture: provider.architecture,
     node: provider.node,
     nodeAbi: provider.nodeAbi,
-    provider: provider.identity,
+    provider: baseProvider,
     request: {
       inputs: request.inputs.map(({ byteLength, sha256: digest }) => ({ format: 'ptx', byteLength, sha256: digest })),
       options: request.options.native,

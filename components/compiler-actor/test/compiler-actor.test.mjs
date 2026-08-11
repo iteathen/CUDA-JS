@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertCompilerPublicRecord, COMPILER_RUNTIME_TEST, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting } from '../testing.mjs';
+import { assertCompilerPublicRecord, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, snapshotHeaderProfile } from '../testing.mjs';
 import { openCompilerRuntime } from '../index.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
@@ -13,12 +14,33 @@ test('typed compiler and linker contracts normalize deterministically and reject
   assert.deepEqual(normalizeCompileOptions({}, 'win32').native, [
     '--gpu-architecture=compute_75', '--std=c++17', '--fmad=false', '--frandom-seed=0', '--no-cache',
   ]);
+  assert.equal(normalizeCompileOptions({}, 'win32').headerProfile, 'none');
+  assert.equal(normalizeCompileOptions({ headerProfile: 'cuda-cccl' }, 'win32').headerProfile, 'cuda-cccl');
+  assert.throws(() => normalizeCompileOptions({ headerProfile: 'ambient-path' }, 'win32'), { code: 'COMPILER_HEADER_PROFILE_INVALID' });
   assert.deepEqual(normalizeCompileOptions({}, 'linux').native.slice(-1), ['--modify-stack-limit=false']);
   const request = normalizeCompileRequest({ source, headers: [{ name: 'z.h', source: 'z' }, { name: 'a.h', source: 'a' }] }, 'linux');
   assert.deepEqual(request.headers.map((header) => header.name), ['a.h', 'z.h']);
   assert.throws(() => normalizeCompileRequest({ source, path: 'kernel.cu' }), { code: 'COMPILER_REQUEST_INVALID' });
   assert.throws(() => normalizeCompileRequest({ source, options: { arbitrary: '--use-fast-math' } }), { code: 'COMPILER_OPTIONS_INVALID' });
   assert.throws(() => normalizeLinkRequest({ inputs: [new Uint8Array([1, 0, 2])] }), { code: 'LINKER_INPUT_INVALID' });
+
+  const provider = {
+    platform: 'win32', architecture: 'x64', node: 'v26.7.0', nodeAbi: '147',
+    identity: {
+      profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null,
+      headerProfiles: { cudaCccl: { profile: 'fixture-cccl', algorithm: 'fixture', roots: ['cuda', 'nv'], fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) } },
+    },
+  };
+  const defaultIdentity = compileIdentity(normalizeCompileRequest({ source }, 'win32'), provider);
+  assert.equal(defaultIdentity.contractVersion, 'SPEC-0006-v1');
+  assert.equal(Object.hasOwn(defaultIdentity.request, 'headerProfile'), false);
+  const profiledIdentity = compileIdentity(normalizeCompileRequest({ source, options: { headerProfile: 'cuda-cccl' } }, 'win32'), provider);
+  assert.equal(profiledIdentity.contractVersion, 'SPEC-0009-v1');
+  assert.equal(profiledIdentity.request.headerProfile, 'cuda-cccl');
+  assert.throws(() => compileIdentity(normalizeCompileRequest({ source, headers: [{ name: 'cuda', source: 'shadow' }], options: { headerProfile: 'cuda-cccl' } }, 'win32'), provider), { code: 'COMPILER_HEADER_PROFILE_CONFLICT' });
+  assert.throws(() => compileIdentity(normalizeCompileRequest({ source, headers: [{ name: 'nv', source: 'shadow' }], options: { headerProfile: 'cuda-cccl' } }, 'win32'), provider), { code: 'COMPILER_HEADER_PROFILE_CONFLICT' });
+  const linkedIdentity = linkIdentity(normalizeLinkRequest({ inputs: [new Uint8Array([1, 2, 3])] }), provider);
+  assert.equal(Object.hasOwn(linkedIdentity.provider, 'headerProfiles'), false);
 });
 
 test('CompilerActor serializes work, validates cache hits, rejects corruption, and invalidates exact keys', async () => {
@@ -31,6 +53,9 @@ test('CompilerActor serializes work, validates cache hits, rejects corruption, a
     const second = await runtime.compile({ source });
     assert.equal(second.cache.status, 'hit');
     assert.deepEqual(second.artifact.bytes, first.artifact.bytes);
+    const profiled = await runtime.compile({ source, options: { headerProfile: 'cuda-cccl' } });
+    assert.notEqual(profiled.cache.key, first.cache.key);
+    assert.equal(profiled.headerProfile, 'cuda-cccl');
 
     const linked = await runtime.link({ inputs: [first.artifact] });
     assert.equal(linked.cache.status, 'miss');
@@ -54,6 +79,94 @@ test('CompilerActor serializes work, validates cache hits, rejects corruption, a
     const terminal = await runtime.close();
     assert.equal(terminal.graceful, true);
     assert.equal(terminal.workerExitCode, 0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('trusted header profiles use deterministic nested-path identity and reject mutation', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f9-headers-'));
+  const manifest = {
+    profile: 'fixture-v1',
+    algorithm: 'sha256-path-u32le-size-u64le-content-v1',
+    roots: ['cuda', 'nv'],
+    fileCount: 2,
+    byteLength: 14,
+    sha256: '124fe56c0bfa4058cda1b117b000bdd26aef7c590851fa1a37c4bf6ebc73a489',
+  };
+  try {
+    await mkdir(path.join(directory, 'cuda'));
+    await mkdir(path.join(directory, 'nv'));
+    await writeFile(path.join(directory, 'cuda', 'atomic'), 'atomic\n');
+    await writeFile(path.join(directory, 'nv', 'target'), 'target\n');
+    const snapshot = await snapshotHeaderProfile(directory, manifest);
+    assert.deepEqual(snapshot.headers.map((header) => header.name), ['cuda/atomic', 'nv/target']);
+    assert(snapshot.headers.every((header) => header.source.at(-1) === 0));
+    assert.deepEqual((await inventoryHeaderProfile(directory, ['cuda', 'nv'])).observed, {
+      algorithm: manifest.algorithm,
+      roots: manifest.roots,
+      fileCount: manifest.fileCount,
+      byteLength: manifest.byteLength,
+      sha256: manifest.sha256,
+    });
+    await assert.rejects(snapshotHeaderProfile(directory, { ...manifest, fileCount: 3 }), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    await assert.rejects(snapshotHeaderProfile(directory, { ...manifest, byteLength: 15 }), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    await assert.rejects(snapshotHeaderProfile(directory, { ...manifest, sha256: '0'.repeat(64) }), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    await writeFile(path.join(directory, 'cuda', 'extra'), 'extra\n');
+    await assert.rejects(snapshotHeaderProfile(directory, manifest), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    await rm(path.join(directory, 'cuda', 'extra'));
+    await writeFile(path.join(directory, 'cuda', 'atomic'), 'changed\n');
+    await assert.rejects(snapshotHeaderProfile(directory, manifest), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    await writeFile(path.join(directory, 'cuda', 'atomic'), Buffer.from([0]));
+    await assert.rejects(snapshotHeaderProfile(directory, manifest), { code: 'COMPILER_HEADER_PROFILE_UNSAFE' });
+    await assert.rejects(inventoryHeaderProfile(directory, ['cuda', 'missing']), { code: 'COMPILER_HEADER_PROFILE_MISSING' });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('trusted header profiles reject symbolic links when the host permits creating the fixture', async (context) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f9-symlink-'));
+  try {
+    await mkdir(path.join(directory, 'cuda'));
+    await mkdir(path.join(directory, 'nv'));
+    await writeFile(path.join(directory, 'target'), 'target\n');
+    try {
+      await symlink(path.join(directory, 'target'), path.join(directory, 'cuda', 'atomic'), 'file');
+    } catch (error) {
+      if (error?.code === 'EPERM' || error?.code === 'EACCES') {
+        const targetDirectory = path.join(directory, 'target-directory');
+        await mkdir(targetDirectory);
+        try {
+          await symlink(targetDirectory, path.join(directory, 'cuda', 'linked-directory'), 'junction');
+        } catch (junctionError) {
+          if (junctionError?.code === 'EPERM' || junctionError?.code === 'EACCES') {
+            context.skip(`Host cannot create a symbolic-link or junction fixture: ${junctionError.code}`);
+            return;
+          }
+          throw junctionError;
+        }
+      } else {
+        throw error;
+      }
+    }
+    await writeFile(path.join(directory, 'nv', 'target'), 'target\n');
+    await assert.rejects(inventoryHeaderProfile(directory, ['cuda', 'nv']), { code: 'COMPILER_HEADER_PROFILE_UNSAFE' });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('trusted header profiles reject non-regular entries on native Linux', { skip: process.platform !== 'linux' }, async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f9-nonregular-'));
+  try {
+    await mkdir(path.join(directory, 'cuda'));
+    await mkdir(path.join(directory, 'nv'));
+    await writeFile(path.join(directory, 'nv', 'target'), 'target\n');
+    const fifo = path.join(directory, 'cuda', 'fifo');
+    const created = spawnSync('mkfifo', [fifo], { encoding: 'utf8' });
+    assert.equal(created.status, 0, created.stderr || 'mkfifo failed');
+    await assert.rejects(inventoryHeaderProfile(directory, ['cuda', 'nv']), { code: 'COMPILER_HEADER_PROFILE_UNSAFE' });
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

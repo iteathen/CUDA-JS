@@ -4,7 +4,7 @@
 
 1. Read root `AGENTS.md` before changing the repository.
 2. Follow the authority order and report material contradictions rather than choosing silently.
-3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through CJS-F8W are accepted on exact bounded evidence; native Linux portable/package controls are not Linux Driver support, and Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete.
+3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence; native Linux portable/package controls are not Linux Driver support, Linux `CJS-F2L / EXP-001` remains retained/deferred/incomplete, and no exact CUDA-MCGS pair exists before independent CUDA-MCGS evidence passes.
 4. A plan, experiment protocol, reserved directory, or dependency-ready boundary is not implementation permission.
 5. Work by semantic ownership boundary, not arbitrary file count.
 6. For substantial or critical work, complete a proportional adversarial assessment before planning.
@@ -12,7 +12,7 @@
 8. Rank values contextually after purpose, bounds, and failure tolerance are known. Correctness and safety gates cannot be traded away for speed.
 9. Apply LEGO at public/component boundaries, SOLID internally, CUPID for composability and developer clarity, and KISS only after sound fundamentals are preserved.
 10. Do not encode accidental first-consumer limits in foundational schemas, ranges, identifiers, layouts, or capability models.
-11. Keep CUDA-JS generic. Do not import UMCGS, MCGS, minimax, game, graph, evaluator, model, tensor, or search-policy semantics.
+11. Keep CUDA-JS generic. Do not import CUDA-MCGS, MCGS, minimax, game, graph, evaluator, model, tensor, or search-policy semantics.
 12. Do not expose raw pointers, arbitrary executable schemas, unchecked native capabilities, or private provider details through ordinary public contracts.
 13. Generated ABI facts and curated semantic/lifecycle overlays must have separate owners and independently reviewable diffs.
 14. Unknown or contradictory public semantics fail closed.
