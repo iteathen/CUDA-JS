@@ -4,7 +4,7 @@
 
 1. Read root `AGENTS.md` before changing the repository.
 2. Follow the authority order and report material contradictions rather than choosing silently.
-3. The current phase is documentation only; do not execute experiments or add implementation without explicit project-owner authorization.
+3. `CJS-F1A / EXP-000`, `CJS-F1B`, and Windows-only `CJS-F2W / EXP-012` are accepted on exact evidence; Linux `CJS-F2L / EXP-001` remains retained, deferred, incomplete, and cannot be inferred from Windows results.
 4. A plan, experiment protocol, reserved directory, or dependency-ready boundary is not implementation permission.
 5. Work by semantic ownership boundary, not arbitrary file count.
 6. For substantial or critical work, complete a proportional adversarial assessment before planning.

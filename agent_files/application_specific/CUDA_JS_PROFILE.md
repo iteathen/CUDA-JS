@@ -18,8 +18,8 @@ Provide a generic, no-project-addon Node runtime for CUDA host APIs using truste
 
 ## Current support sequence
 
-- Linux x86-64, exact Node 26, CUDA 13.3/current Driver profile.
-- Windows x86-64.
+- Windows x86-64, exact Node 26, CUDA 13.3/current Driver profile.
+- Linux x86-64, retained but deferred until qualified native GPU access.
 - Linux ARM64 SBSA.
 - WSL2 diagnostics.
 
@@ -27,4 +27,4 @@ Node 22/24, macOS, 32-bit hosts, project addons, arbitrary pfn calls, shared con
 
 ## Current authorization
 
-Only foundation research and experiments CJS-F0 through CJS-F3 are ready. Broader memory/module/compiler/platform/package work remains dependency-blocked.
+`CJS-F1A / EXP-000`, `CJS-F1B`, and Windows-only `CJS-F2W / EXP-012` are accepted on exact host, ABI, Driver, GPU, permission, oracle, and cleanup evidence. Windows F3 contract work is dependency-ready. Linux `CJS-F2L / EXP-001` remains present, deferred, and incomplete; broader work remains gated on each platform's documented predecessors.

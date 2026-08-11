@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "cuda-js-exp-001-native-linux-x64",
+  "nodeVersion": "v26.7.0",
+  "platform": "linux",
+  "architecture": "x64",
+  "distribution": "Ubuntu 24.04 LTS",
+  "abi": "glibc-x86_64-sysv",
+  "cudaApiVersion": 13030,
+  "wslAcceptedAsNative": false,
+  "packages": [
+    {
+      "name": "cuda-cudart-dev-13-3",
+      "version": "13.3.29-1",
+      "fileName": "cuda-cudart-dev-13-3_13.3.29-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cudart-dev-13-3_13.3.29-1_amd64.deb",
+      "sha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9"
+    },
+    {
+      "name": "cuda-driver-dev-13-3",
+      "version": "13.3.29-1",
+      "fileName": "cuda-driver-dev-13-3_13.3.29-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-driver-dev-13-3_13.3.29-1_amd64.deb",
+      "sha256": "9ff314357a66e7602d0fe9a354052f60f7571138e9d4e1e98f3dd06cd899e021"
+    }
+  ],
+  "driverCandidates": [
+    "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+    "/usr/lib64/libcuda.so.1"
+  ],
+  "requiredDeviceNodes": [
+    "/dev/nvidiactl",
+    "/dev/nvidia0"
+  ],
+  "claimLimits": [
+    "Native Linux x86-64 only",
+    "WSL is a separate compatibility profile",
+    "Build/readiness success without a Driver/GPU is not Linux CUDA support",
+    "Only a passing real-Driver smoke may promote CJS-F2L"
+  ]
+}

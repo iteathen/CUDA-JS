@@ -1,6 +1,6 @@
 # Contributing
 
-CUDA-JS is private, pre-release, contract-first, and experiment-gated.
+CUDA-JS is public, pre-release, contract-first, and experiment-gated.
 
 Before changing a material boundary, read:
 
@@ -11,9 +11,9 @@ Before changing a material boundary, read:
 
 ## Current authorization
 
-The current phase is documentation only. Contributors may improve foundational authority, architecture, specifications, research provenance, plans, experiment protocols, organization, indexes, and validation of those documents.
+`CJS-F1A / EXP-000` remains a required regression capsule. `CJS-F1B` is accepted with pinned CUDA header import, generated ABI facts, reviewed Tier-0 semantics, normalized Runtime IR products, and independent native C ABI probes. Windows-only `CJS-F2W / EXP-012` is accepted and may feed Windows F3 contract work. Linux `CJS-F2L / EXP-001` includes working GPU-free preparation and a real-Driver smoke runner, but remains incomplete and contribution-ready; follow [`experiments/exp-001/README.md`](experiments/exp-001/README.md) and do not claim Linux Driver support without its qualified native evidence.
 
-No code-bearing experiment, native fixture, generated binding, schema importer, runtime component, benchmark implementation, production package, or implementation workflow is authorized until the project owner explicitly advances the phase. Future experiment documents describe gates; they are not permission to execute them.
+Real Driver execution remains exact-profile-gated. Production runtime components, packages, and later work packages remain blocked until their platform-specific schema, native CUDA, lifecycle, and contract predecessors pass.
 
 ## Binding rules
 
@@ -50,10 +50,14 @@ Use focused capsules and mutation/negative controls. Do not repeat unchanged tes
 
 ```bash
 ./scripts/verify-docs.sh
+npm run exp:000:build
+npm run verify
+npm run exp:012  # qualified Windows x64 Driver/GPU host only
+npm run exp:001:prepare  # native Ubuntu 24.04 x86-64; GPU-free preparation plus readiness
 ```
 
-Code-bearing work adds its experiment-specific commands. Claims must state unavailable CUDA/Node/platform checks precisely.
+Claims must state unavailable CUDA/Node/platform checks precisely.
 
 ## Publication
 
-The repository is private at `iteathen/CUDA-JS`. Claim publication only after reading back the exact remote branch/tree. A local commit, bundle, workflow intention, or unverified push is not publication evidence.
+The repository is published at `iteathen/CUDA-JS`. Claim a specific change as published only after reading back its exact remote branch/tree. A local commit, workflow intention, or unverified push is not publication evidence.

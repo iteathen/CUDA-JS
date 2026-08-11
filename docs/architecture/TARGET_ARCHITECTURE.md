@@ -113,4 +113,4 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 
 ## Current phase
 
-This target architecture is normative for documentation and future design review only. The repository remains documentation-only until the project owner explicitly advances the phase. No component, experiment, fixture, generated binding, or runtime package is authorized by this document alone.
+`CJS-F1A / EXP-000` and the `CJS-F1B` schema/ABI foundation are accepted on independent Windows/Linux host and native-layout evidence. This target architecture still does not authorize production components or CUDA Driver execution beyond accepted predecessor and qualified-environment gates.

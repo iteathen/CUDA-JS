@@ -79,4 +79,4 @@ No production runtime component should be promoted until its public contract, ow
 
 ## Current disposition
 
-The foundation is documentation-complete enough to guide further assessment and protocol design. It is **not implementation-ready by default**. The current project-owner phase is documentation only. Future experiment documents remain protocols until explicit owner authorization advances the phase.
+The project owner authorized dependency-ordered implementation and a Windows-first sequence. `CJS-F1A / EXP-000` is promoted after independent Windows x64 and native Linux x86-64 qualification. `CJS-F1B` is accepted after deterministic CUDA 13.3.29 import, reviewed Tier-0 semantics, generated products, native layouts, and mutation-sensitive regeneration. Windows `CJS-F2W / EXP-012` is accepted on exact Driver/GPU/C-oracle/permission/cleanup evidence. Linux `CJS-F2L / EXP-001` remains retained, deferred, and incomplete. Windows F3 is dependency-ready; later work remains gated on its platform-specific predecessors.

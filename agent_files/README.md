@@ -4,7 +4,7 @@ The root [`AGENTS.md`](../AGENTS.md) is mandatory. This directory contains the c
 
 ## Canonical files
 
-- [`AGENTS.md`](AGENTS.md) — canonical working procedure and current documentation-only workstream.
+- [`AGENTS.md`](AGENTS.md) — canonical working procedure and current EXP-000 workstream.
 - [`AI_RULES.md`](AI_RULES.md) — concise hard rules.
 - [`DESIGN_ALIGNMENT_CARD.md`](DESIGN_ALIGNMENT_CARD.md) — compact design and integration gate.
 - [`SYSTEM_REGISTRY.md`](SYSTEM_REGISTRY.md) — ownership and source-of-truth registry.

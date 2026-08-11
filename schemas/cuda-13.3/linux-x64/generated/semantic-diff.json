@@ -1,0 +1,31 @@
+{
+  "added": [
+    "cuda.driver.function.cuCtxCreate",
+    "cuda.driver.function.cuCtxDestroy",
+    "cuda.driver.function.cuCtxGetCurrent",
+    "cuda.driver.function.cuCtxSetCurrent",
+    "cuda.driver.function.cuDeviceGet",
+    "cuda.driver.function.cuDeviceGetAttribute",
+    "cuda.driver.function.cuDeviceGetCount",
+    "cuda.driver.function.cuDriverGetVersion",
+    "cuda.driver.function.cuGetErrorName",
+    "cuda.driver.function.cuGetErrorString",
+    "cuda.driver.function.cuGetProcAddress",
+    "cuda.driver.function.cuInit",
+    "cuda.driver.type.CUcontext",
+    "cuda.driver.type.CUctxCigParam",
+    "cuda.driver.type.CUctxCreateParams",
+    "cuda.driver.type.CUdevice",
+    "cuda.driver.type.CUdevice_attribute",
+    "cuda.driver.type.CUdriverProcAddressQueryResult",
+    "cuda.driver.type.CUexecAffinityParam",
+    "cuda.driver.type.CUresult",
+    "cuda.driver.type.cuuint64_t"
+  ],
+  "baseline": null,
+  "removed": [],
+  "schemaVersion": 1,
+  "selectionId": "cuda-13.3.29-driver-tier-0-linux-x64",
+  "unchanged": [],
+  "unresolved": []
+}

@@ -8,7 +8,7 @@
 
 Turn the accepted repository boundary and Node-FFI-first host-binding decision into dependency-ordered, falsifiable future work without prematurely implementing broad CUDA coverage.
 
-**Current authorization:** documentation only. This accepted plan orders possible future work; it does not authorize experiment execution or implementation. Explicit project-owner phase advancement is required first.
+**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, and Windows-only `CJS-F2W / EXP-012` are accepted after independent host, ABI, Driver, GPU, permission, oracle, and cleanup qualification. Windows `CJS-F3W` contract work is dependency-ready. Linux `CJS-F2L / EXP-001` remains retained, incomplete, deferred, and independently promotable.
 
 The first *planned* code-bearing work after that future authorization is **not** an application runtime and does not require CUDA. It is EXP-000: a generated synthetic C ABI library and direct C oracle that qualify Node FFI, schema-derived definitions/packers, Worker isolation, resource lifetime, and deterministic teardown before GPU variables enter the diagnosis.
 
@@ -39,7 +39,7 @@ Every work package preserves:
 
 - exact local commit containing research, ADRs, architecture, support matrix, plan, experiments, and source register;
 - portable Git bundle/zip/checksums;
-- private `iteathen/CUDA-JS` remote containing the reviewed documentation foundation;
+- public `iteathen/CUDA-JS` remote containing the reviewed foundation and Windows F2W evidence-bearing implementation;
 - documentation validation and remote read-back after publication;
 - UMCGS reference to the exact CUDA-JS plan without importing private source.
 
@@ -51,7 +51,7 @@ One active authority set; no competing accepted ADR/plan; exact artifact verifie
 
 #### CJS-F1A — GPU-free Node FFI synthetic qualification
 
-**Dependencies:** F0 authority state and explicit project-owner authorization to leave the documentation-only phase.
+**Dependencies:** F0 authority state, project-owner authorization, and native Linux x86-64 promotion evidence are satisfied.
 
 **Outputs**
 
@@ -61,17 +61,17 @@ One active authority set; no competing accepted ADR/plan; exact artifact verifie
 - Worker ownership and library/resource lifetime harness;
 - exact Node 26.7 source-derived Fast FFI eligibility model;
 - arbitrary returned-function-pointer capability finding;
-- Linux x86-64 evidence first, then Windows x86-64 and Linux ARM64.
+- independent Windows x86-64 and Linux x86-64 evidence, with later profiles promoted separately.
 
 **Experiment:** EXP-000.
 
 **Exit**
 
-The Node-FFI-first substrate passes exact native parity and cleanup on Linux x86-64, or the baseline is revised before CUDA-specific implementation.
+The Node-FFI-first substrate passes exact native parity and cleanup on each claimed profile, or that profile remains unsupported.
 
 #### CJS-F1B — CUDA schema and ABI foundation
 
-**Dependencies:** F1A host-substrate qualification.
+**Dependencies:** F1A host-substrate qualification is satisfied. This branch is complete and accepted.
 
 **Outputs**
 
@@ -82,14 +82,15 @@ The Node-FFI-first substrate passes exact native parity and cleanup on Linux x86
 - deterministic diff and unresolved-coverage report;
 - generated Node FFI definitions, structure/out-parameter packers, TypeScript types, and conformance fixtures;
 - native C CUDA ABI probe generator.
+- an independently probed Win64 compatibility bridge when an official platform header is hash-identical.
 
 **Experiments:** EXP-001, EXP-002, EXP-003.
 
 **Exit**
 
-Tier-0 CUDA schema regenerates deterministically; native probes agree on scalar/handle/struct layouts; new/changed APIs fail closed.
+Satisfied on the pinned CUDA 13.3.29/Clang 18/Linux x86-64 profile: Tier-0 CUDA schema regenerates deterministically; native probes agree on scalar/handle/struct layouts; six mutation classes are detected; 471 unselected declarations fail closed.
 
-### CJS-F2 — Node FFI CUDA backend and preflight (P1)
+### CJS-F2 — platform-separated Node FFI CUDA backend and preflight (P1)
 
 **Dependencies:** F1A and F1B accepted outputs.
 
@@ -102,15 +103,15 @@ Tier-0 CUDA schema regenerates deterministically; native probes agree on scalar/
 - Node FFI backend diagnostics and explicit unsupported-symbol behavior;
 - safe internal pointer/buffer helpers with no public escape.
 
-**Experiments:** EXP-001, EXP-002, EXP-004.
+**Experiments:** Windows `EXP-012`; deferred Linux `EXP-001`; shared questions from EXP-002 and EXP-004 remain separately scoped.
 
 **Exit**
 
-Driver initialization/query/context smoke succeeds on Linux x86-64 native environment; generic versus Fast FFI claims are honest and exact-profile keyed.
+`CJS-F2W` is accepted when Driver initialization/query/context smoke, named exports, procedure verification, permissions, C-oracle parity, and cleanup pass on the exact Windows x64 profile. `CJS-F2L` remains incomplete until the retained native Linux protocol passes. One platform does not block or imply the other.
 
 ### CJS-F3 — DriverActor and resource state machine (P1)
 
-**Dependencies:** F2 bootstrap bindings.
+**Dependencies:** the bootstrap bindings for the platform being implemented. Windows F3 may consume accepted F2W; Linux F3 remains blocked on F2L.
 
 **Outputs**
 
@@ -236,20 +237,29 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 - proof that active search remains device-owned after ignition;
 - independent internal conformance retained by each repository.
 
-## Current authorized sequence — documentation only
+## Completed sequence — CJS-F1B
 
-1. Publish and verify the complete foundational documentation on private `iteathen/CUDA-JS`.
-2. Add and maintain the ownership registry and foundation completeness index.
-3. Reconcile stale local-bootstrap, publication, and implementation-ready language.
-4. Run documentation/static validation and remove temporary transfer or premature workflow residue.
-5. Keep all experiment execution and runtime implementation blocked until explicit project-owner authorization advances the phase.
+1. Independent Windows x64 and native Linux x86-64 EXP-000 evidence and regression checks are preserved.
+2. The official CUDA 13.3.29 Ubuntu 24.04 development package, headers, license, and Clang profile are hash-pinned.
+3. The deterministic importer, generated facts, separately reviewed Tier-0 overlay, Runtime IR, FFI definitions, packers, declarations, conformance, coverage, diff, compatibility, and product manifests are implemented.
+4. Independent native C ABI probes and six mutation-negative controls pass for Linux x86-64.
+5. Windows `cuda.h` identity and MSVC layout probes agree with accepted facts; Linux Driver/context execution remains separately gated on a qualified Linux CUDA/GPU environment.
 
-## Future dependency sequence — not current authorization
+## Completed sequence — Windows CJS-F2W
 
-1. After explicit authorization, run **EXP-000 Node FFI synthetic ABI qualification** on official Node 26.7.0/Linux x86-64; this requires no CUDA or GPU.
-2. Only after EXP-000 passes, build the pinned CUDA header importer/overlay and draft the Tier-0 normalized schema.
-3. In a qualified Linux x86-64 CUDA environment run EXP-001 through EXP-003.
-4. Do not begin memory, modules, NVRTC, graphs, or broad API generation until F1A/F1B/F2 gates pass.
+1. SPEC-0002 and EXP-012 bound the Windows bootstrap without changing or deleting Linux EXP-001.
+2. The official Windows CUDA 13.3 header hash matches the accepted F1B header and MSVC matches all selected layouts.
+3. Official Node 26.7.0 binds all 12 generated named exports from the canonical system Driver.
+4. All 12 public-name procedure queries, negative version/symbol/library/permission controls, and the private context lifecycle pass.
+5. Sanitized Node observations agree exactly with the independent MSVC C oracle; teardown closes context, library, and Worker without exposing pointers.
+
+## Later dependency sequence
+
+1. Preserve accepted F1A, F1B, and platform-separated F2W evidence.
+2. Publish the Windows path and request public contribution for retained Linux F2L.
+3. Draft and accept the Windows F3 DriverActor/resource/lifecycle specification, then implement only that vertical slice.
+4. Do not begin memory, modules, NVRTC pipelines, graphs, or broad API generation until their Windows predecessors pass.
+5. Resume Linux F2L independently when a qualified native Linux NVIDIA Driver/GPU environment becomes available; never substitute Windows or WSL results silently.
 
 ## Stop conditions
 

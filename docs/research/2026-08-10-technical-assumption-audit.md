@@ -82,4 +82,4 @@ ADR-0002 and ADR-0003 refine this audit:
 - `cuGetProcAddress` verifies version/status/semantics; v0 invokes exact approved exported symbols.
 - ABI facts are generated from pinned official headers; lifecycle/security/asynchrony remain a reviewed overlay.
 - One DriverActor owns one private context; a separate CompilerActor owns NVRTC/nvJitLink.
-- After explicit project-owner authorization advances the documentation-only phase, the first eligible code slice is GPU-free EXP-000 followed by CUDA-specific EXP-001 through EXP-003, not a custom AsmJit or broad CUDA implementation.
+- Project-owner authorization advanced GPU-free EXP-000, schema/ABI F1B, and the bounded Windows EXP-012 Driver bootstrap. Native Linux EXP-001 remains retained, deferred, and incomplete; production actors, a custom AsmJit, and broad CUDA implementation remain separately gated.

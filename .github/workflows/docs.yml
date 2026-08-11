@@ -1,4 +1,4 @@
-name: docs
+name: verify
 on:
   pull_request:
   push:
@@ -8,4 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.7.0
       - run: ./scripts/verify-docs.sh
+      - run: npm run exp:000:build
+      - run: npm run exp:000:correctness
+      - run: npm run exp:000:lifecycle

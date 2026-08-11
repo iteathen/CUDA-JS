@@ -1,0 +1,63 @@
+{
+  "exactIdentity": {
+    "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "generatorSha256": "e821f258beb57a887bd494873facf26b16bf4d9fe5e6915915a1e8fb556d533d",
+    "headerFactsSha256": "49a11081fc4348af5081ff02a7dc296527f721262840c813569334ffc5074689",
+    "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+    "licenseSha256": "088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
+    "overlaySha256": "bbbac619bc4dde1fc0d9a6167a50adcc8900883a3a937dd01f4e60f12c5d80a0",
+    "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
+    "packageVersion": "13.3.29-1",
+    "selectionSha256": "c45a2a429d302283c781d0aa1cfb3313d6b3b6cab5eda17b0349a7746ec2eb27",
+    "targetLayoutsSha256": "62b02909efe9006b05960949a06dcb0c6dedff2a06e9b3f734eb60301732efbe",
+    "toolkitRelease": "13.3"
+  },
+  "id": "cuda-13.3.29-driver-tier-0-linux-x64-products",
+  "products": {
+    "compatibility-manifest.json": {
+      "bytes": 1375,
+      "sha256": "80b216633c9482d335b9ca9fd666bb60c49d94c6e35589cfc80e7a32addb3af7"
+    },
+    "conformance-fixture.json": {
+      "bytes": 5285,
+      "sha256": "75f1121412099db784d22780a7e26a4e4ed22a5ff6086a78bbdb033f6faadfcc"
+    },
+    "coverage-report.json": {
+      "bytes": 14646,
+      "sha256": "ad55b812364c616c39c2694feb9c92337e93984c8082e88a167344622905cb03"
+    },
+    "ffi-definitions.mjs": {
+      "bytes": 1908,
+      "sha256": "6f525836078a5f723498d3cc8d32a359058614d62ea16f87e40b24b3965deb54"
+    },
+    "header-facts.json": {
+      "bytes": 69362,
+      "sha256": "49a11081fc4348af5081ff02a7dc296527f721262840c813569334ffc5074689"
+    },
+    "native-abi-probe.c": {
+      "bytes": 3007,
+      "sha256": "e705888c7ec1e886de2791ea4afb9ecd3da04f939894dae74c2c5aedcddae564"
+    },
+    "native-layouts.json": {
+      "bytes": 3233,
+      "sha256": "62b02909efe9006b05960949a06dcb0c6dedff2a06e9b3f734eb60301732efbe"
+    },
+    "packers.mjs": {
+      "bytes": 2341,
+      "sha256": "b065b50891f522f350344a75e243bf4460f1ec852d4a0a88dc20d16a68b567b3"
+    },
+    "runtime-ir.json": {
+      "bytes": 74809,
+      "sha256": "e72c8f07f6a8ab01e594179620289a76ee2bfc80091529e5b9d64aea8412d400"
+    },
+    "semantic-diff.json": {
+      "bytes": 1050,
+      "sha256": "8d67cfbd54e6e318fab917120c95aa0408a60029465cb8fe7e913c42e9a1f124"
+    },
+    "types.d.ts": {
+      "bytes": 878,
+      "sha256": "1635001a3dd7ad5639390f893c76f26660a0a820fb331615c2cce7f6e0774b5f"
+    }
+  },
+  "schemaVersion": 1
+}

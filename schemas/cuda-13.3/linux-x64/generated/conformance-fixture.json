@@ -1,0 +1,226 @@
+{
+  "claimLimits": [
+    "no Driver execution",
+    "no GPU support",
+    "no public native capability",
+    "no Fast FFI dispatch claim"
+  ],
+  "exactIdentity": {
+    "clangVersion": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "generatorSha256": "e821f258beb57a887bd494873facf26b16bf4d9fe5e6915915a1e8fb556d533d",
+    "headerFactsSha256": "49a11081fc4348af5081ff02a7dc296527f721262840c813569334ffc5074689",
+    "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+    "licenseSha256": "088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
+    "overlaySha256": "bbbac619bc4dde1fc0d9a6167a50adcc8900883a3a937dd01f4e60f12c5d80a0",
+    "packageSha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9",
+    "packageVersion": "13.3.29-1",
+    "selectionSha256": "c45a2a429d302283c781d0aa1cfb3313d6b3b6cab5eda17b0349a7746ec2eb27",
+    "targetLayoutsSha256": "62b02909efe9006b05960949a06dcb0c6dedff2a06e9b3f734eb60301732efbe",
+    "toolkitRelease": "13.3"
+  },
+  "expectedFunctions": [
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer",
+        "u32",
+        "i32"
+      ],
+      "nativeSymbol": "cuCtxCreate_v4",
+      "publicName": "cuCtxCreate",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuCtxDestroy_v2",
+      "publicName": "cuCtxDestroy",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuCtxGetCurrent",
+      "publicName": "cuCtxGetCurrent",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuCtxSetCurrent",
+      "publicName": "cuCtxSetCurrent",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "i32"
+      ],
+      "nativeSymbol": "cuDeviceGet",
+      "publicName": "cuDeviceGet",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "i32",
+        "i32"
+      ],
+      "nativeSymbol": "cuDeviceGetAttribute",
+      "publicName": "cuDeviceGetAttribute",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuDeviceGetCount",
+      "publicName": "cuDeviceGetCount",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer"
+      ],
+      "nativeSymbol": "cuDriverGetVersion",
+      "publicName": "cuDriverGetVersion",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "i32",
+        "pointer"
+      ],
+      "nativeSymbol": "cuGetErrorName",
+      "publicName": "cuGetErrorName",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "i32",
+        "pointer"
+      ],
+      "nativeSymbol": "cuGetErrorString",
+      "publicName": "cuGetErrorString",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "pointer",
+        "pointer",
+        "i32",
+        "u64",
+        "pointer"
+      ],
+      "nativeSymbol": "cuGetProcAddress_v2",
+      "publicName": "cuGetProcAddress",
+      "returnFfiType": "i32"
+    },
+    {
+      "argumentFfiTypes": [
+        "u32"
+      ],
+      "nativeSymbol": "cuInit",
+      "publicName": "cuInit",
+      "returnFfiType": "i32"
+    }
+  ],
+  "expectedLayouts": {
+    "CUcontext": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    },
+    "CUctxCigParam": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "sharedDataType",
+          "offset": 0,
+          "sourceType": "CUcigDataType"
+        },
+        {
+          "name": "sharedData",
+          "offset": 8,
+          "sourceType": "void *"
+        }
+      ],
+      "size": 16
+    },
+    "CUctxCreateParams": {
+      "alignment": 8,
+      "fields": [
+        {
+          "name": "execAffinityParams",
+          "offset": 0,
+          "sourceType": "CUexecAffinityParam *"
+        },
+        {
+          "name": "numExecAffinityParams",
+          "offset": 8,
+          "sourceType": "int"
+        },
+        {
+          "name": "cigParams",
+          "offset": 16,
+          "sourceType": "CUctxCigParam *"
+        }
+      ],
+      "size": 24
+    },
+    "CUdevice": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUdevice_attribute": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUdriverProcAddressQueryResult": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "CUexecAffinityParam": {
+      "alignment": 4,
+      "fields": [
+        {
+          "name": "type",
+          "offset": 0,
+          "sourceType": "CUexecAffinityType"
+        },
+        {
+          "name": "param",
+          "offset": 4,
+          "sourceType": "union (unnamed union at cuda.h:2596:5)"
+        }
+      ],
+      "size": 8
+    },
+    "CUresult": {
+      "alignment": 4,
+      "fields": [],
+      "size": 4
+    },
+    "cuuint64_t": {
+      "alignment": 8,
+      "fields": [],
+      "size": 8
+    }
+  },
+  "id": "cuda-13.3.29-driver-tier-0-linux-x64-conformance",
+  "mutationControls": [
+    "size",
+    "alignment",
+    "field-offset",
+    "parameter-type",
+    "native-symbol",
+    "required-semantic-field"
+  ],
+  "schemaVersion": 1
+}

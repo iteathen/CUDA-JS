@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "tool.cuda-schema",
+    "name": "CUDA schema compiler",
+    "status": "accepted-f1b-internal",
+    "product_area": "tools",
+    "path": "tools/cuda-schema",
+    "purpose": "Compile pinned official CUDA header facts and reviewed Tier-0 semantics into deterministic private Runtime IR products with native ABI evidence.",
+    "public_contracts": [],
+    "allowed_dependencies": ["node-standard-library", "clang-18", "dpkg-deb", "official-pinned-cuda-input"],
+    "forbidden_dependencies": ["cuda-driver-runtime", "application-schema", "consumer-semantics", "raw-public-pointer"],
+    "validation": ["npm run f1b:check", "npm run f1b:verify-native"],
+    "owner": "schema.header-facts and schema.semantic-overlay",
+    "lifecycle": "Internal pre-release F1B tooling; generated products invalidate on any input identity change.",
+    "design": {
+      "owned_invariant": "Generated facts and reviewed semantics remain separate and unresolved coverage fails closed.",
+      "public_ports": ["scripts/run-f1b.mjs"],
+      "injected_dependencies": ["verified package path", "clang command", "target profile"],
+      "adapter_boundaries": ["official package acquisition", "Clang AST", "native C compiler"],
+      "simplest_sufficient_total_system": "One dependency-free Node pipeline and one generated native probe."
+    }
+  }
+}

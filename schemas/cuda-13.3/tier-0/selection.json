@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "cuda-13.3.29-driver-tier-0-linux-x64",
+  "targetProfile": {
+    "id": "linux-x64-sysv",
+    "os": "linux",
+    "architecture": "x86_64",
+    "abi": "sysv",
+    "byteOrder": "little-endian",
+    "pointerBits": 64,
+    "sizeBits": 64
+  },
+  "functions": [
+    "cuInit",
+    "cuDriverGetVersion",
+    "cuDeviceGetCount",
+    "cuDeviceGet",
+    "cuDeviceGetAttribute",
+    "cuGetErrorName",
+    "cuGetErrorString",
+    "cuCtxCreate",
+    "cuCtxDestroy",
+    "cuCtxSetCurrent",
+    "cuCtxGetCurrent",
+    "cuGetProcAddress"
+  ],
+  "types": [
+    { "name": "CUresult", "kind": "enum" },
+    { "name": "CUdevice", "kind": "scalar" },
+    { "name": "CUdevice_attribute", "kind": "enum" },
+    { "name": "CUcontext", "kind": "handle" },
+    { "name": "CUctxCreateParams", "kind": "record" },
+    { "name": "CUexecAffinityParam", "kind": "record" },
+    { "name": "CUctxCigParam", "kind": "record" },
+    { "name": "CUdriverProcAddressQueryResult", "kind": "enum" },
+    { "name": "cuuint64_t", "kind": "scalar" }
+  ],
+  "previousStableIds": []
+}

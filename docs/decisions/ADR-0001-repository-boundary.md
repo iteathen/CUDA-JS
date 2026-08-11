@@ -12,7 +12,7 @@ Embedding those concerns in UMCGS would make the first search consumer the perma
 
 ## Decision
 
-Create CUDA-JS as a separate private repository.
+Create CUDA-JS as a separate public repository. Public visibility allows platform contributors to qualify independently gated environments while the pre-release support matrix and evidence rules prevent visibility from being confused with a production-support claim.
 
 CUDA-JS owns generic Node/CUDA runtime behavior. UMCGS owns search semantics, Search IR, search-specific specialization, generated search device programs, resource planning, conformance domains, and the adapter that consumes CUDA-JS.
 

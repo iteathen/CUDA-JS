@@ -4,7 +4,13 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** proposal only; execution remains blocked by the documentation-only phase and its native-environment prerequisites.
+**Current authorization:** Retained, implemented through GPU-free preparation, incomplete, and open for public contribution. F1A and F1B prerequisites are accepted, but final native Linux execution still requires a qualified Linux Driver/GPU profile. Windows EXP-012 does not replace this evidence.
+
+## Engineer entry point
+
+The executable preparation, readiness diagnostics, final smoke runner, expected evidence, and troubleshooting guidance live in [`exp-001/README.md`](exp-001/README.md). Start there when bringing a native Linux NVIDIA host online.
+
+The ordinary Linux guest available during implementation has no NVIDIA GPU or Driver exposure. It can verify official inputs, generated ABI facts, native compilation, and the oracle link, but it cannot close this experiment. This limitation is environmental; the retained implementation is meant to make the remaining hardware-backed work narrow and reproducible.
 
 ## Decision affected
 

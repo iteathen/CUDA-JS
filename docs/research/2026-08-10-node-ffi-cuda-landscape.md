@@ -128,19 +128,6 @@ Gaps CUDA-JS must own:
 
 Koffi demonstrates a mature cross-platform Node FFI, broad type conversion, callbacks, asynchronous invocation, and performance-oriented native calling. It does not own CUDA context affinity, Driver version families, deferred errors, GPU memory lifetimes, module/launch plans, or device toolchain/cache semantics. Node 26's built-in FFI also removes the need to adopt another general FFI as the selected baseline.
 
-### NVIDIA `cuda-python`
-
-**Disposition:** architecture and schema-generation reference; do not copy implementation without a separate reuse decision.
-
-Useful patterns:
-
-- split low-level bindings, path discovery, and idiomatic higher-level runtime;
-- broad CUDA host-API coverage;
-- independent package versioning;
-- generated bindings and systematic update burden reduction.
-
-It is Python/Cython-oriented and does not solve the Node/V8 event-loop or no-addon constraint directly.
-
 ### `sammwyy/cuda.js`
 
 **Disposition:** bounded feature and failure reference; not a foundation.

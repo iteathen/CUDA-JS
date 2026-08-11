@@ -2,6 +2,8 @@
 
 **Status:** Proposal
 
+**Execution:** Promoted 2026-08-11. Windows x64 passed on exact Node 26.7.0 and MSVC 19.50; native Linux x86-64 passed on exact Node 26.7.0 and GCC 13.3.0.
+
 **Date:** 2026-08-10
 
 ## Purpose
@@ -19,7 +21,7 @@ A failure here is a host-binding or schema/packer failure, not a CUDA failure.
 
 ## Decision role
 
-This is the first planned code-bearing experiment after authority publication **and explicit project-owner authorization to leave the documentation-only phase**. It is not currently authorized for execution.
+This is the first code-bearing experiment after authority publication. The project owner explicitly authorized execution on 2026-08-11.
 
 - It gates the Node-FFI-first baseline.
 - It gates the initial Runtime IR type system and packer design.
@@ -40,7 +42,7 @@ Then repeat on:
 - Windows x86-64, Microsoft x64 ABI;
 - Linux ARM64, AAPCS64.
 
-The current development container has Node 22.16.0 and cannot execute this experiment. That is an environment limitation, not a failed result.
+The current Windows development host uses a project-local, checksum-verified official Node 26.7.0 distribution. The system Node installation remains unchanged.
 
 ## Synthetic native library
 
@@ -220,7 +222,7 @@ Promote the Node-FFI-first host substrate when all required Linux x86-64 cases s
 - explicit generic versus candidate-fast classification;
 - the arbitrary-function-pointer gap is accurately recorded rather than hidden.
 
-Windows x86-64 and Linux ARM64 promotion occur independently and do not block Linux-first contract drafting unless the schema would become platform-incorrect.
+Windows x86-64, native Linux x86-64, and Linux ARM64 promotion occur independently. One platform does not block another platform's contract drafting unless shared schema would become platform-incorrect.
 
 ## Falsifiers and path changes
 

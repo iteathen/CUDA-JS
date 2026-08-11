@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** documentation only. This matrix orders future falsifiers and does not authorize execution.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation and Windows EXP-012 are accepted. Native Linux EXP-001 implements and passes GPU-free preparation but remains incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 
@@ -22,15 +22,17 @@ Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator
 
 **Detailed protocol:** [`EXP-000-node-ffi-synthetic-abi.md`](EXP-000-node-ffi-synthetic-abi.md).
 
-## EXP-001 — Node FFI CUDA smoke
+## EXP-001 — prepared, hardware-deferred native Linux Node FFI CUDA smoke
 
 **Question:** Can exact supported Node 26 builds load the Driver/NVRTC/nvJitLink libraries and correctly execute the Tier-0 named-symbol subset without a CUDA-JS addon?
 
-**Cases:** `cuInit`, driver/device queries, error strings, private context create/current/destroy, representative pointer/out parameters; optional NVRTC/version calls.
+**Cases:** pinned official input acquisition; native ABI comparison; independent C-oracle compilation; Node/platform/WSL/library/device/Driver readiness; `cuInit`, driver/device queries, error strings, all selected exports/procedure queries, private context create/current/destroy, permission behavior, and terminal cleanup.
 
 **Promotion:** exact native parity, precise missing-library/flag diagnostics, no leaked library/context state.
 
 **Falsifier:** required exported symbol cannot be bound, pointer/out packing differs, or lifecycle cannot be fenced.
+
+**Disposition:** The GPU-free build/ABI/oracle/readiness capsule passes on native Ubuntu 24.04 x86-64. The retained final runner and human handoff in [`exp-001/`](exp-001/README.md) await a qualified native Linux x86-64 NVIDIA Driver/GPU environment and public contribution. It does not block the accepted Windows path and cannot consume Windows or WSL results as native Linux evidence.
 
 ## EXP-002 — exported symbol versus `cuGetProcAddress`
 
@@ -115,3 +117,15 @@ Compare:
 - unsupported capability.
 
 **Promotion:** a separately accepted decision showing decisive benefit and complete ABI/W^X/security/platform/lifetime cost. Custom AsmJit is not the default answer.
+
+## EXP-012 — Windows Node FFI CUDA smoke
+
+**Question:** Can official Node 26.7.0 load the canonical Windows Driver, bind the generated Tier-0 exports, verify procedure versions/status, and maintain a private Worker-owned context with exact MSVC C-oracle parity and terminal cleanup?
+
+**Cases:** hash-identical official Windows header; native Win64 ABI probe; all 12 exports and procedure queries; Driver/device/attribute/error results; permission and negative controls; context create/current/clear/restore/destroy; library invalidation and Worker exit.
+
+**Promotion:** accepted for the exact Windows x64 Node 26.7.0, CUDA 13.3, Driver 610.74, GTX 1660 Ti profile. It unblocks Windows F3 contract work only.
+
+**Falsifier:** any header/layout/export/result/status/permission/context/cleanup disagreement with the independent oracle, any raw pointer crossing the Worker boundary, or any Linux inference.
+
+**Detailed protocol:** [`EXP-012-windows-node-ffi-cuda-smoke.md`](EXP-012-windows-node-ffi-cuda-smoke.md).

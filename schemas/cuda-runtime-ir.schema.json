@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cuda-js.invalid/schemas/cuda-runtime-ir.schema.json",
+  "title": "CUDA-JS normalized CUDA Runtime IR",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "identity",
+    "target",
+    "types",
+    "functions",
+    "coverage"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolkitRelease",
+        "packageVersion",
+        "packageSha256",
+        "headerSha256",
+        "licenseSha256",
+        "selectionSha256",
+        "overlaySha256",
+        "generatorSha256",
+        "clangVersion",
+        "headerFactsSha256",
+        "targetLayoutsSha256"
+      ],
+      "properties": {
+        "toolkitRelease": { "type": "string" },
+        "packageVersion": { "type": "string" },
+        "packageSha256": { "$ref": "#/$defs/sha256" },
+        "headerSha256": { "$ref": "#/$defs/sha256" },
+        "licenseSha256": { "$ref": "#/$defs/sha256" },
+        "selectionSha256": { "$ref": "#/$defs/sha256" },
+        "overlaySha256": { "$ref": "#/$defs/sha256" },
+        "generatorSha256": { "$ref": "#/$defs/sha256" },
+        "clangVersion": { "type": "string" },
+        "headerFactsSha256": { "$ref": "#/$defs/sha256" },
+        "targetLayoutsSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "os", "architecture", "abi", "byteOrder", "pointerBits", "sizeBits"],
+      "properties": {
+        "id": { "const": "linux-x64-sysv" },
+        "os": { "const": "linux" },
+        "architecture": { "const": "x86_64" },
+        "abi": { "const": "sysv" },
+        "byteOrder": { "const": "little-endian" },
+        "pointerBits": { "const": 64 },
+        "sizeBits": { "const": 64 }
+      }
+    },
+    "types": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/typeFact" }
+    },
+    "functions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/functionFact" }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selectedFunctions", "selectedTypes", "availableFunctions", "unresolvedSelected", "unselectedHeaderFunctions"],
+      "properties": {
+        "selectedFunctions": { "type": "integer", "minimum": 1 },
+        "selectedTypes": { "type": "integer", "minimum": 1 },
+        "availableFunctions": { "type": "integer", "minimum": 0 },
+        "unresolvedSelected": { "type": "array", "maxItems": 0 },
+        "unselectedHeaderFunctions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["size", "alignment", "fields"],
+      "properties": {
+        "size": { "type": "integer", "minimum": 1 },
+        "alignment": { "type": "integer", "minimum": 1 },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "sourceType", "offset"],
+            "properties": {
+              "name": { "type": "string" },
+              "sourceType": { "type": "string" },
+              "offset": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "typeFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableId", "kind", "sourceType", "canonicalType", "ffiType", "semantics", "layout"],
+      "properties": {
+        "stableId": { "type": "string" },
+        "kind": { "enum": ["scalar", "enum", "handle", "record", "union"] },
+        "sourceType": { "type": "string" },
+        "canonicalType": { "type": "string" },
+        "ffiType": { "enum": ["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64", "f32", "f64", "pointer", "void"] },
+        "semantics": { "type": "object" },
+        "layout": { "$ref": "#/$defs/layout" },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value"],
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "type": "string", "pattern": "^-?[0-9]+$" }
+            }
+          }
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "sourceType", "ffiType", "semantics"],
+      "properties": {
+        "name": { "type": "string" },
+        "sourceType": { "type": "string" },
+        "ffiType": { "enum": ["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64", "f32", "f64", "pointer"] },
+        "semantics": { "type": "object" }
+      }
+    },
+    "functionFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableId", "publicName", "nativeSymbol", "returnSourceType", "returnFfiType", "parameters", "semantics", "availability"],
+      "properties": {
+        "stableId": { "type": "string" },
+        "publicName": { "type": "string" },
+        "nativeSymbol": { "type": "string" },
+        "returnSourceType": { "type": "string" },
+        "returnFfiType": { "enum": ["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64", "f32", "f64", "pointer", "void"] },
+        "parameters": { "type": "array", "items": { "$ref": "#/$defs/parameter" } },
+        "semantics": { "type": "object" },
+        "availability": { "const": "private-experimental" }
+      }
+    }
+  }
+}
