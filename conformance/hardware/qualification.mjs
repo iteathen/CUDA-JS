@@ -353,6 +353,9 @@ async function runQualification(profile, registry) {
     }
     profileSummary = await summarizeProfileEvidence(profile, device);
   }
+  git(['update-index', '--refresh']);
+  const finishedCleanTree = git(['status', '--porcelain']).length === 0;
+  allPassed = allPassed && finishedCleanTree;
 
   const result = {
     schemaVersion: 1,
@@ -361,6 +364,7 @@ async function runQualification(profile, registry) {
     status: allPassed ? 'pass' : 'fail',
     promotionEligible: allPassed,
     startedFrom: { sourceCommit, sourceTree, cleanTree: true },
+    finishedCleanTree,
     environment: {
       node: process.version,
       platform: process.platform,
@@ -386,6 +390,7 @@ async function runQualification(profile, registry) {
     status: result.status,
     promotionEligible: result.promotionEligible,
     startedFrom: result.startedFrom,
+    finishedCleanTree: result.finishedCleanTree,
     environment: result.environment,
     deviceZero: result.deviceZero,
     profileSummary: result.profileSummary,

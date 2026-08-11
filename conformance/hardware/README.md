@@ -32,7 +32,7 @@ build/hardware-qualification/<profile>/<run-id>/
   logs/
 ```
 
-`qualification.json` is the local complete manifest. `public-summary.json` removes log paths while retaining command identities, exit states, durations, log digests, evidence digests, source commit/tree, device-zero model/compute capability, and exact software profile.
+`qualification.json` is the local complete manifest. `public-summary.json` removes log paths while retaining command identities, exit states, durations, log digests, evidence digests, source commit/tree, final clean-tree state, device-zero model/compute capability, and exact software profile.
 
 Before uploading anything, inspect every file. Do not publish host names, account names, filesystem paths, GPU serial numbers, UUIDs, PCI bus identifiers, credentials, environment secrets, or arbitrary raw logs. The public summary is designed for review, but human privacy inspection remains mandatory.
 
