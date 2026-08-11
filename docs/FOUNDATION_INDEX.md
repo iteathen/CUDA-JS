@@ -13,6 +13,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | Agent entry and authority order | [`../AGENTS.md`](../AGENTS.md) |
 | Concise hard rules | [`../agent_files/AI_RULES.md`](../agent_files/AI_RULES.md) |
 | Design hierarchy and alignment gate | [`../agent_files/DESIGN_ALIGNMENT_CARD.md`](../agent_files/DESIGN_ALIGNMENT_CARD.md) |
+| Ecosystem language exclusion | [`../agent_files/general_foundation/NO_PYTHON_POLICY.md`](../agent_files/general_foundation/NO_PYTHON_POLICY.md) |
 | Reusable planning/testing/cleanup/token/review doctrine | [`../agent_files/general_foundation/README.md`](../agent_files/general_foundation/README.md) and linked files |
 | Canonical repository procedure | [`../agent_files/AGENTS.md`](../agent_files/AGENTS.md) |
 | Ownership/source-of-truth registry | [`../agent_files/SYSTEM_REGISTRY.md`](../agent_files/SYSTEM_REGISTRY.md) |
@@ -59,6 +60,8 @@ These are ownership reservations, not permission to add implementation.
 
 The repository is in a **documentation-only foundation phase**. Experiment descriptions are planning artifacts. No C, C++, JavaScript, TypeScript, Rust, native library, generated binding, runtime implementation, experiment harness, benchmark implementation, or production package is authorized until the project owner explicitly advances the phase and the applicable accepted contract/evidence preconditions are satisfied.
 
+The no-Python policy is permanent across phases unless the project owner explicitly changes the accepted ecosystem policy. Advancing from documentation to experiments or implementation does not authorize Python source, tooling, dependencies, tests, CI, generators, packaging, installers, release work, or temporary scripts.
+
 ## Foundation completeness test
 
 The foundation is considered present only when all of the following are true:
@@ -71,4 +74,5 @@ The foundation is considered present only when all of the following are true:
 6. raw pointers, private FFI/provider mechanisms, and accidental first-consumer limits do not leak into public contracts;
 7. source provenance and superseded alternatives remain traceable;
 8. documentation/static validation passes;
-9. no unauthorized implementation source or generated binary is present.
+9. no unauthorized implementation source or generated binary is present;
+10. no Python source, project metadata, interpreter/package-manager invocation, ordinary-use dependency, generated product, or Python-backed project workflow is introduced.
