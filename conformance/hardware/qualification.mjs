@@ -197,6 +197,10 @@ export function renderSupportDocument(registry, profiles) {
   return lines.join('\n');
 }
 
+export function generatedDocumentMatches(current, rendered) {
+  return current.replace(/\r\n/g, '\n') === rendered;
+}
+
 async function detectEnvironment() {
   if (process.platform !== 'linux') return 'native';
   const release = os.release().toLowerCase();
@@ -429,7 +433,7 @@ export async function execute(action, args = process.argv.slice(3)) {
 
   if (action === 'check') {
     const current = await readFile(path.join(repositoryRoot, registry.supportDocument), 'utf8');
-    invariant(current === rendered, `${registry.supportDocument} is stale; run npm run hardware:render.`);
+    invariant(generatedDocumentMatches(current, rendered), `${registry.supportDocument} is stale; run npm run hardware:render.`);
     console.log('Hardware registry, qualification profiles, and generated support list passed.');
     return;
   }
