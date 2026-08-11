@@ -4,6 +4,8 @@
 
 CUDA-JS is a public, pre-release framework for compiling, loading, launching, observing, and tearing down CUDA work from Node.js through finite, versioned, capability-checked contracts. It is deliberately independent of graph search, games, tensor frameworks, neural-network semantics, and any one application.
 
+Exact compatibility is published in the [Node version support list](docs/NODE_SUPPORT.md) and [hardware support list](docs/HARDWARE_SUPPORT.md). Only Node 26.7.0 and the recorded Windows x64 GPU profile are currently qualified experimentally; every other listed Node or extended hardware profile is explicitly no-support until its own evidence chain passes.
+
 ## Selected foundation
 
 CUDA-JS version zero is **Node-FFI-first**:

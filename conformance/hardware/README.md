@@ -19,6 +19,10 @@ npm run hardware:qualify
 
 `hardware:check` validates registry invariants and rejects generated-document drift. `hardware:plan` is read-only and reports the current or explicitly requested profile. `hardware:qualify` is enabled only for a runner-ready profile and fails unless the process uses exact Node v26.7.0 from a clean Git worktree.
 
+`extensions.json` keeps multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version-matrix, Windows TCC/server, and independent-attestation work fail-closed. Every one is currently `no-support` and exposes no promotable command chain.
+
+On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A readiness result is not virtualized CUDA support.
+
 The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order. The Linux x64, WSL2, Linux ARM64 SBSA, and Jetson ARM64 entries intentionally expose no promotable command chain while their native adapters or contracts are incomplete.
 
 ## Result bundle

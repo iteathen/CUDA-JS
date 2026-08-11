@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-11",
+  "supportDocument": "docs/NODE_SUPPORT.md",
+  "packageEngine": "26.7.0",
+  "coordinationIssue": 23,
+  "policy": {
+    "supportUnit": "exact-node-version-os-architecture-module-abi-ffi-profile",
+    "supportRequires": [
+      "the exact official Node build passes the committed FFI and permission probe",
+      "EXP-000 correctness and lifecycle pass on every promoted host architecture",
+      "the complete native CUDA-JS qualification chain passes on every promoted CUDA host profile",
+      "package, compatibility manifest, generated support list, and evidence identity agree",
+      "terminal native cleanup is proved"
+    ],
+    "inferenceProhibited": [
+      "one patch release to another patch release",
+      "one major release to another major release",
+      "matching module ABI to CUDA-JS support",
+      "an FFI import pass to native CUDA support",
+      "upstream LTS or Current status to CUDA-JS support"
+    ]
+  },
+  "upstreamSources": [
+    {
+      "id": "node-distribution-index",
+      "url": "https://nodejs.org/dist/index.json",
+      "use": "official exact release dates, archive availability, module ABI, and LTS metadata"
+    },
+    {
+      "id": "node-release-schedule",
+      "url": "https://nodejs.org/en/about/previous-releases",
+      "use": "official release-line lifecycle"
+    },
+    {
+      "id": "node-26-changelog",
+      "url": "https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V26.md",
+      "use": "official record that node:ffi entered Node 26.1.0"
+    },
+    {
+      "id": "node-ffi-26.7.0",
+      "url": "https://github.com/nodejs/node/blob/v26.7.0/doc/api/ffi.md",
+      "use": "pinned experimental FFI and permission contract"
+    }
+  ],
+  "versions": [
+    {
+      "version": "v26.7.0",
+      "released": "2026-08-05",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "qualified-experimental",
+      "reason": "exact-qualified-baseline",
+      "evidence": "EXP-000 on Windows x64 and native Linux x64; Windows native F2W through F8W"
+    },
+    {
+      "version": "v26.6.0",
+      "released": "2026-08-03",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.5.1",
+      "released": "2026-07-28",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.5.0",
+      "released": "2026-07-08",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.4.0",
+      "released": "2026-06-24",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.3.1",
+      "released": "2026-06-17",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.3.0",
+      "released": "2026-06-01",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.2.0",
+      "released": "2026-05-20",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.1.0",
+      "released": "2026-05-06",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": true,
+      "cudaJsStatus": "no-support",
+      "reason": "portable-probe-only-full-native-chain-absent",
+      "evidence": "automated exact-version FFI/permission probe only"
+    },
+    {
+      "version": "v26.0.0",
+      "released": "2026-05-05",
+      "upstreamPhase": "Current",
+      "moduleAbi": "147",
+      "ffiExpected": false,
+      "cudaJsStatus": "no-support",
+      "reason": "required-node-ffi-substrate-unavailable",
+      "evidence": "automated exact-version negative probe"
+    },
+    {
+      "version": "v25.9.0",
+      "released": "2026-03-31",
+      "upstreamPhase": "End-of-life",
+      "moduleAbi": "141",
+      "ffiExpected": false,
+      "cudaJsStatus": "no-support",
+      "reason": "end-of-life-and-required-node-ffi-substrate-unavailable",
+      "evidence": "automated exact-version negative probe"
+    },
+    {
+      "version": "v24.19.0",
+      "released": "2026-08-03",
+      "upstreamPhase": "Active LTS",
+      "moduleAbi": "137",
+      "ffiExpected": false,
+      "cudaJsStatus": "no-support",
+      "reason": "required-node-ffi-substrate-unavailable",
+      "evidence": "automated exact-version negative probe"
+    },
+    {
+      "version": "v22.23.2",
+      "released": "2026-07-28",
+      "upstreamPhase": "Maintenance LTS",
+      "moduleAbi": "127",
+      "ffiExpected": false,
+      "cudaJsStatus": "no-support",
+      "reason": "required-node-ffi-substrate-unavailable",
+      "evidence": "automated exact-version negative probe"
+    }
+  ]
+}

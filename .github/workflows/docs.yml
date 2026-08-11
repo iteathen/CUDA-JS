@@ -40,6 +40,7 @@ jobs:
       - run: npm run f8:portable
       - run: npm run f8:linux-readiness
       - run: npm run hardware:check
+      - run: npm run node:check
       - uses: actions/upload-artifact@v4
         if: always()
         with:

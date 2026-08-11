@@ -21,7 +21,7 @@ const required = [
   'agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md', 'agent_files/general_foundation/SECURITY.md',
   'agent_files/application_specific/CUDA_JS_PROFILE.md',
   'docs/README.md', 'docs/FOUNDATION_INDEX.md', 'docs/PROJECT_CHARTER.md', 'docs/INTEROP_WITH_UMCGS.md',
-  'docs/HARDWARE_SUPPORT.md',
+  'docs/HARDWARE_SUPPORT.md', 'docs/NODE_SUPPORT.md',
   'docs/decisions/README.md', 'docs/decisions/ADR-0001-repository-boundary.md',
   'docs/decisions/ADR-0002-node-ffi-first-host-binding.md',
   'docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md',
@@ -30,6 +30,7 @@ const required = [
   'docs/architecture/V0_SUPPORT_MATRIX.md', 'docs/plans/README.md',
   'docs/plans/2026-08-10-master-plan.md', 'docs/plans/2026-08-10-focus-branch-map.json',
   'docs/plans/2026-08-11-hardware-qualification-program.md',
+  'docs/plans/2026-08-11-node-and-extended-qualification.md',
   'docs/specs/README.md', 'docs/specs/SPEC-0000-runtime-contract-map.md',
   'docs/specs/SPEC-0001-cuda-schema-compiler.md',
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md',
@@ -124,8 +125,11 @@ const required = [
   'conformance/f8/run-portable.mjs', 'conformance/f8/run-native-windows.mjs',
   'conformance/f8/run-linux-readiness.mjs', 'conformance/f8/verify.mjs',
   'conformance/hardware/README.md', 'conformance/hardware/registry.json',
-  'conformance/hardware/profiles.json', 'conformance/hardware/qualification.mjs',
-  'conformance/hardware/qualification.test.mjs',
+  'conformance/hardware/profiles.json', 'conformance/hardware/extensions.json',
+  'conformance/hardware/qualification.mjs', 'conformance/hardware/qualification.test.mjs',
+  'conformance/hardware/hyperv-readiness.mjs',
+  'conformance/node/README.md', 'conformance/node/registry.json',
+  'conformance/node/qualification.mjs', 'conformance/node/qualification.test.mjs',
   'schemas/cuda-runtime-ir.schema.json', 'schemas/cuda-13.3/provenance.json',
   'schemas/cuda-13.3/tier-0/selection.json', 'schemas/cuda-13.3/tier-0/semantic-overlay.json',
   'schemas/cuda-13.3/linux-x64/generated/header-facts.json',
@@ -147,9 +151,11 @@ const required = [
   'tools/cuda-schema/README.md', 'tools/cuda-schema/component.yaml',
   'tools/cuda-schema/src/pipeline.mjs',
   '.github/CODEOWNERS', '.github/pull_request_template.md', '.github/workflows/docs.yml',
+  '.github/workflows/node-compatibility.yml',
   'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
   'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs', 'scripts/run-f5.mjs', 'scripts/run-f6.mjs', 'scripts/run-f7.mjs', 'scripts/run-f8.mjs', 'scripts/run-hardware-qualification.mjs',
-  '.github/ISSUE_TEMPLATE/hardware-qualification.yml',
+  'scripts/run-hyperv-readiness.mjs', 'scripts/run-node-qualification.mjs',
+  '.github/ISSUE_TEMPLATE/hardware-qualification.yml', '.github/ISSUE_TEMPLATE/node-qualification.yml',
 ];
 
 for (const relative of required) {
@@ -189,6 +195,8 @@ for (const relative of [
   'packaging/compatibility-manifest.json',
   'conformance/hardware/registry.json',
   'conformance/hardware/profiles.json',
+  'conformance/hardware/extensions.json',
+  'conformance/node/registry.json',
   'package.json',
 ]) {
   try {
@@ -319,6 +327,7 @@ for (const relative of files) {
       && !relative.startsWith('conformance/f7/')
       && !relative.startsWith('conformance/f8/')
       && !relative.startsWith('conformance/hardware/')
+      && !relative.startsWith('conformance/node/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
@@ -327,12 +336,12 @@ for (const relative of files) {
 }
 
 const workflows = files.filter((file) => file.startsWith('.github/workflows/')).sort();
-if (JSON.stringify(workflows) !== JSON.stringify(['.github/workflows/docs.yml'])) {
-  errors.push(`unexpected workflow set in the accepted Windows F2W / deferred Linux F2L phase: ${JSON.stringify(workflows)}`);
+if (JSON.stringify(workflows) !== JSON.stringify(['.github/workflows/docs.yml', '.github/workflows/node-compatibility.yml'])) {
+  errors.push(`unexpected workflow set in the accepted Windows and exact-Node qualification phase: ${JSON.stringify(workflows)}`);
 }
 
 if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, exact Node matrix, extended no-support profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W, and retained Linux native handoff checks passed');

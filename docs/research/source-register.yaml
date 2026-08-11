@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "inspected": "2026-08-11",
   "sources": [
     {
@@ -31,6 +31,44 @@
         "source-derived generic-versus-fast signature classification inputs"
       ],
       "reuse_disposition": "runtime prerequisite and primary reference; no source copying planned"
+    },
+    {
+      "id": "NODE-EXACT-RELEASE-MATRIX-2026-08-11",
+      "kind": "primary-runtime-metadata",
+      "project": "nodejs/node",
+      "revision": "official distribution index inspected 2026-08-11",
+      "license": "MIT",
+      "locations": [
+        "https://nodejs.org/dist/index.json",
+        "https://nodejs.org/en/about/previous-releases",
+        "https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V26.md"
+      ],
+      "verified_uses": [
+        "exact Node 22.23.2, 24.19.0, 25.9.0, and 26.0.0 through 26.7.0 release identities",
+        "module ABI and upstream lifecycle metadata",
+        "Node 26.1.0 introduction of experimental node:ffi",
+        "exact-version positive and negative CI probe inputs"
+      ],
+      "reuse_disposition": "generated support-registry input; no binary redistribution"
+    },
+    {
+      "id": "MICROSOFT-HYPERV-GPU-2026-08-11",
+      "kind": "primary-platform-documentation",
+      "project": "Microsoft Hyper-V",
+      "revision": "current Microsoft Learn guidance inspected 2026-08-11",
+      "license": "Microsoft documentation terms",
+      "locations": [
+        "https://learn.microsoft.com/en-us/troubleshoot/windows-server/virtualization/troubleshoot-hyper-v-gpu-assignment-partitioning-passthrough-issues",
+        "https://learn.microsoft.com/en-us/powershell/module/hyper-v/get-vmhostpartitionablegpu?view=windowsserver2025-ps",
+        "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/plan/plan-for-deploying-devices-using-discrete-device-assignment"
+      ],
+      "verified_uses": [
+        "DDA and GPU-P vendor support boundary",
+        "read-only partitionable-GPU inventory",
+        "client-host and desktop-class no-support interpretation",
+        "DDA hardware, security, and administrator prerequisites"
+      ],
+      "reuse_disposition": "normative external platform source; no implementation reuse"
     },
     {
       "id": "CUDA-DRIVER-13.3",
