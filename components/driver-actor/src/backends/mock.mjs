@@ -1,9 +1,10 @@
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
+import { ExecutionManager } from '../../../execution/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, healthForErrorCategory } from '../health.mjs';
 
-export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
+export async function createBackend({ runtimeId, epoch, memoryPolicy, executionPolicy }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const disposalOrder = [];
@@ -25,6 +26,8 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
     },
   });
   const allocations = new Set();
+  const addresses = new WeakMap();
+  let nextAddress = 0x1000n;
   let nativeReservedBytes = 0;
   const memory = new MemoryManager({
     registry,
@@ -37,6 +40,8 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
       async allocate({ byteLength }) {
         const storage = new Uint8Array(byteLength);
         allocations.add(storage);
+        addresses.set(storage, nextAddress);
+        nextAddress += BigInt(byteLength + 256);
         nativeReservedBytes += byteLength;
         return storage;
       },
@@ -54,6 +59,53 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
       },
     },
   });
+  const deviceLimits = Object.freeze({
+    maxThreadsPerBlock: 1024,
+    maxBlockDimX: 1024,
+    maxBlockDimY: 1024,
+    maxBlockDimZ: 64,
+    maxGridDimX: 2_147_483_647,
+    maxGridDimY: 65_535,
+    maxGridDimZ: 65_535,
+    maxSharedMemoryPerBlock: 49_152,
+  });
+  let executionMode = 'complete';
+  let nextNative = 1;
+  const execution = new ExecutionManager({
+    registry,
+    contextToken,
+    memory,
+    policy: executionPolicy,
+    deviceLimits,
+    operations: {
+      async createStream() { return Object.freeze({ kind: 'stream', id: nextNative++ }); },
+      async destroyStream() { disposalOrder.push('stream'); return { mockStreamReleased: true }; },
+      async loadModule({ bytes }) { return Object.freeze({ kind: 'module', id: nextNative++, byteLength: bytes.byteLength }); },
+      async unloadModule() { disposalOrder.push('module'); return { mockModuleReleased: true }; },
+      async getFunction({ moduleNative, name }) { return Object.freeze({ kind: 'function', id: nextNative++, moduleId: moduleNative.id, name }); },
+      async createEvent() { return { kind: 'event', id: nextNative++, polls: 0 }; },
+      async destroyEvent() { disposalOrder.push('event'); return { mockEventReleased: true }; },
+      async devicePointer({ native, byteOffset }) { return addresses.get(native) + BigInt(byteOffset); },
+      async submitLaunch() {},
+      async recordEvent() {},
+      async queryEvent({ eventNative, operationId }) {
+        eventNative.polls += 1;
+        if (executionMode === 'timeout') return 'pending';
+        if (executionMode === 'deferred' && eventNative.polls > 1) {
+          const before = health.current;
+          health.transition('poisoned', { reason: 'mock-deferred-execution', operationId });
+          throw new DriverRuntimeError('CUDA_DEFERRED_FAILURE', 'deferred-driver', 'Injected deferred launch failure.', { nativeStatus: 999 }, { operationId, healthBefore: before, healthAfter: health.current });
+        }
+        return eventNative.polls === 1 ? 'pending' : 'complete';
+      },
+      health() { return health.snapshot(); },
+      restartRequired({ code, message, details, operationId }) {
+        const before = health.current;
+        health.transition('restart-required', { reason: code, operationId });
+        return new DriverRuntimeError(code, 'restart-required', message, details, { operationId, healthBefore: before, healthAfter: health.current });
+      },
+    },
+  });
 
   async function description(operationSequence = 0) {
     return {
@@ -63,10 +115,11 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
       driver: { apiVersion: 13030, deviceCount: 1 },
       device: {
         ordinal: 0,
-        attributes: { maxThreadsPerBlock: 1024, multiprocessorCount: 1, computeCapabilityMajor: 0, computeCapabilityMinor: 0 },
+        attributes: { ...deviceLimits, multiprocessorCount: 1, computeCapabilityMajor: 0, computeCapabilityMinor: 0 },
       },
       context: contextToken,
       memory: await memory.usage(operationSequence),
+      execution: execution.summary(),
       health: health.snapshot(),
       inventory: registry.inventory(),
       operationSequence,
@@ -76,6 +129,12 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
 
   return {
     inventory() { return registry.inventory(); },
+    assertAccepting(operation, operationId) {
+      const cleanupOrRead = new Set(['runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release']);
+      if (health.current === 'poisoned' && !cleanupOrRead.has(operation)) {
+        throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operationId, healthBefore: health.current, healthAfter: health.current });
+      }
+    },
     async describe({ operationId }) {
       return description(operationId);
     },
@@ -110,6 +169,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
       };
     },
     memory,
+    execution,
     async testingBlock({ milliseconds, operationId }) {
       const storage = new Int32Array(new SharedArrayBuffer(4));
       Atomics.wait(storage, 0, 0, milliseconds);
@@ -126,6 +186,10 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
         { originOperationId, observedOperationId: operationId, nativeStatus: 999 },
         { operationId, healthBefore: before, healthAfter: health.current },
       );
+    },
+    async testingSetExecutionMode({ mode, operationId }) {
+      executionMode = mode;
+      return { schemaVersion: 1, mode, operationSequence: operationId, health: health.snapshot(), inventory: registry.inventory() };
     },
   };
 }

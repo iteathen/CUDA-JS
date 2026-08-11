@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { Worker } from 'node:worker_threads';
 
+import { normalizeExecutionPolicy } from '../../execution/index.mjs';
 import { normalizeMemoryPolicy } from '../../memory/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { deserializeError, DriverRuntimeError, validationError } from './errors.mjs';
 import { requestRecord } from './protocol.mjs';
 
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
-const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory']);
+const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution']);
 
 function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -42,6 +43,7 @@ class DriverRuntime {
   #testHooks;
   #maxPending;
   #memoryPolicy;
+  #executionPolicy;
   #runtimeId = randomUUID();
   #epoch = 1;
   #worker;
@@ -57,16 +59,18 @@ class DriverRuntime {
   #exitCode = null;
   #lastInventory = null;
   #lastMemory = null;
+  #lastExecution = null;
   #description = null;
   #closePromise = null;
   #gracefulTerminal = null;
   #terminalReport = null;
 
-  constructor({ backend, testHooks, maxPending, memoryPolicy }) {
+  constructor({ backend, testHooks, maxPending, memoryPolicy, executionPolicy }) {
     this.#backend = backend;
     this.#testHooks = testHooks;
     this.#maxPending = maxPending;
     this.#memoryPolicy = memoryPolicy;
+    this.#executionPolicy = executionPolicy;
     this.#readyPromise = new Promise((resolve, reject) => { this.#readyResolve = resolve; this.#readyReject = reject; });
     this.#exitPromise = new Promise((resolve) => { this.#exitResolve = resolve; });
   }
@@ -122,6 +126,62 @@ class DriverRuntime {
     return this.#request('memory.release', { token });
   }
 
+  async loadModule(options) {
+    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || options.format !== 'ptx') {
+      throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" and bytes.');
+    }
+    if (!(options.bytes instanceof Uint8Array) || Buffer.isBuffer(options.bytes) || options.bytes.byteLength < 1 || options.bytes.byteLength > this.#executionPolicy.maxModuleBytes) {
+      throw validationError('EXECUTION_MODULE_BYTES', 'loadModule requires bounded ordinary Uint8Array bytes.');
+    }
+    return this.#request('execution.module.load', { format: 'ptx', bytes: Uint8Array.from(options.bytes) });
+  }
+
+  async moduleStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MODULE_TOKEN', 'moduleStatus requires an exact opaque module token.');
+    return this.#request('execution.module.status', { token });
+  }
+
+  async getFunction(moduleToken, options) {
+    if (!isResourceToken(moduleToken)) throw validationError('DRIVER_MODULE_TOKEN', 'getFunction requires an exact opaque module token.');
+    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['name', 'parameters'].join('\0') || !Array.isArray(options.parameters)) {
+      throw validationError('DRIVER_FUNCTION_OPTIONS', 'getFunction requires exactly name and parameters.');
+    }
+    const parameters = options.parameters.map((entry) => plainObject(entry) ? { ...entry } : entry);
+    return this.#request('execution.function.get', { moduleToken, name: options.name, parameters });
+  }
+
+  async functionStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_FUNCTION_TOKEN', 'functionStatus requires an exact opaque function token.');
+    return this.#request('execution.function.status', { token });
+  }
+
+  async launch(functionToken, options) {
+    if (!isResourceToken(functionToken)) throw validationError('DRIVER_FUNCTION_TOKEN', 'launch requires an exact opaque function token.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key))
+        || !Object.hasOwn(options, 'grid') || !Object.hasOwn(options, 'block') || !Object.hasOwn(options, 'arguments') || !Array.isArray(options.arguments)) {
+      throw validationError('DRIVER_LAUNCH_OPTIONS', 'launch options are invalid.');
+    }
+    const copyDimensions = (value) => plainObject(value) ? { ...value } : value;
+    const argumentCopies = options.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry);
+    return this.#request('execution.launch', {
+      functionToken,
+      grid: copyDimensions(options.grid),
+      block: copyDimensions(options.block),
+      sharedMemoryBytes: options.sharedMemoryBytes ?? 0,
+      arguments: argumentCopies,
+    });
+  }
+
+  async releaseFunction(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_FUNCTION_TOKEN', 'releaseFunction requires an exact opaque function token.');
+    return this.#request('execution.function.release', { token });
+  }
+
+  async releaseModule(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MODULE_TOKEN', 'releaseModule requires an exact opaque module token.');
+    return this.#request('execution.module.release', { token });
+  }
+
   async close() {
     if (this.#closePromise) return this.#closePromise;
     if (this.#state === 'restart-required') return this.#terminalReport;
@@ -163,7 +223,7 @@ class DriverRuntime {
   async #start() {
     const execArgv = this.#backend === 'windows-native' ? ['--experimental-ffi'] : [];
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
-      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy },
+      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy },
       execArgv,
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
@@ -210,6 +270,7 @@ class DriverRuntime {
       if (pending.operation === 'runtime.close') this.#gracefulTerminal = result;
       pending.resolve(result);
     } else {
+      if (message.state) this.#updateStateFromRecord(message.state);
       const error = deserializeError(message.error);
       if (error.healthAfter) this.#health = error.healthAfter;
       pending.reject(error);
@@ -245,6 +306,7 @@ class DriverRuntime {
       health: { current: 'restart-required', history: [{ before, after: 'restart-required', reason, operationId: null }] },
       inventory: orphanInventory(this.#lastInventory),
       memory: this.#lastMemory ? freezeRecord({ ...this.#lastMemory, state: 'orphaned', reason: 'worker-lost' }) : null,
+      execution: this.#lastExecution ? freezeRecord({ ...this.#lastExecution, state: 'orphaned', reason: 'worker-lost' }) : null,
       workerExitCode,
       workerExited: workerExitCode !== null,
     });
@@ -256,6 +318,7 @@ class DriverRuntime {
     if (record?.teardown?.inventory) this.#lastInventory = record.teardown.inventory;
     if (record?.memory?.policy) this.#lastMemory = record.memory;
     if (record?.usage?.policy) this.#lastMemory = record.usage;
+    if (record?.execution?.policy) this.#lastExecution = record.execution;
   }
 
   #request(operation, payload) {
@@ -287,10 +350,10 @@ function validateMaxPending(value) {
 
 export async function openDriverRuntime(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}) });
+  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}) });
 }
 
 export async function openDriverRuntimeForTesting(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}) });
+  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}) });
 }

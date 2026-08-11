@@ -32,3 +32,4 @@ jobs:
       - run: npm run exp:000:lifecycle
       - run: npm run f3:portable
       - run: npm run f4:portable
+      - run: npm run f5:portable

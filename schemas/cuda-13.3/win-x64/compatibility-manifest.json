@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cuda-13.3-win-x64-msvc",
-  "status": "accepted-for-cjs-f4w",
+  "status": "accepted-for-cjs-f5w",
   "target": {
     "os": "windows",
     "architecture": "x64",
@@ -31,18 +31,23 @@
     "CUctxCreateParams": { "size": 24, "alignment": 8, "fields": { "execAffinityParams": 0, "numExecAffinityParams": 8, "cigParams": 16 } },
     "CUdevice": { "size": 4, "alignment": 4, "fields": {} },
     "CUdevice_attribute": { "size": 4, "alignment": 4, "fields": {} },
+    "CUevent": { "size": 8, "alignment": 8, "fields": {} },
     "CUdriverProcAddressQueryResult": { "size": 4, "alignment": 4, "fields": {} },
     "CUexecAffinityParam": { "size": 8, "alignment": 4, "fields": { "type": 0, "param": 4 } },
+    "CUfunction": { "size": 8, "alignment": 8, "fields": {} },
+    "CUlaunchConfig": { "size": 56, "alignment": 8, "fields": { "gridDimX": 0, "gridDimY": 4, "gridDimZ": 8, "blockDimX": 12, "blockDimY": 16, "blockDimZ": 20, "sharedMemBytes": 24, "hStream": 32, "attrs": 40, "numAttrs": 48 } },
+    "CUmodule": { "size": 8, "alignment": 8, "fields": {} },
     "CUresult": { "size": 4, "alignment": 4, "fields": {} },
     "cuuint64_t": { "size": 8, "alignment": 8, "fields": {} },
     "CUdeviceptr": { "size": 8, "alignment": 8, "fields": {} },
+    "CUstream": { "size": 8, "alignment": 8, "fields": {} },
     "size_t": { "size": 8, "alignment": 8, "fields": {} }
   },
   "claimLimits": [
     "Windows x64 only",
     "exact CUDA 13.3 header and toolkit inputs only",
     "no Linux support inference",
-    "no Driver behavior without EXP-012 and CJS-F4W evidence",
+    "no Driver behavior without EXP-012 and CJS-F5W evidence",
     "no Fast FFI or performance claim"
   ]
 }

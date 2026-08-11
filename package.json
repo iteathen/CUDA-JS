@@ -38,8 +38,15 @@
     "f4:verify": "node scripts/run-f4.mjs verify",
     "f4:portable": "node scripts/run-f4.mjs portable",
     "f4": "node scripts/run-f4.mjs all",
-    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all",
-    "test": "node scripts/run-exp-000.mjs test && node scripts/run-f4.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f4.mjs portable"
+    "f5:unit": "node scripts/run-f5.mjs unit",
+    "f5:mock": "node scripts/run-f5.mjs mock",
+    "f5:build": "node scripts/run-f5.mjs build",
+    "f5:native": "node scripts/run-f5.mjs native",
+    "f5:verify": "node scripts/run-f5.mjs verify",
+    "f5:portable": "node scripts/run-f5.mjs portable",
+    "f5": "node scripts/run-f5.mjs all",
+    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all",
+    "test": "node scripts/run-exp-000.mjs test && node scripts/run-f5.mjs unit",
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f5.mjs portable"
   }
 }

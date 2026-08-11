@@ -3,10 +3,11 @@ import path from 'node:path';
 
 import ffi from 'node:ffi';
 
+import { ExecutionManager } from '../../../execution/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
-import { createDefaultCuCtxCreateParams } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
+import { createDefaultCuCtxCreateParams, cudaTier0Layouts } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState } from '../health.mjs';
 
@@ -17,12 +18,23 @@ const DRIVER_ACTOR_SYMBOLS = Object.freeze([
   'cuGetErrorName', 'cuGetErrorString', 'cuCtxCreate_v4', 'cuCtxDestroy_v2',
   'cuCtxSetCurrent', 'cuCtxGetCurrent',
   'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2',
+  'cuModuleLoadData', 'cuModuleGetFunction', 'cuModuleUnload',
+  'cuStreamCreate', 'cuStreamDestroy_v2',
+  'cuEventCreate', 'cuEventRecord', 'cuEventQuery', 'cuEventDestroy_v2',
+  'cuLaunchKernelEx',
 ]);
 const DRIVER_ACTOR_FFI_DEFINITIONS = Object.freeze(Object.fromEntries(
   DRIVER_ACTOR_SYMBOLS.map((symbol) => [symbol, cudaTier0FfiDefinitions[symbol]]),
 ));
 const ATTRIBUTES = Object.freeze({
   maxThreadsPerBlock: 1,
+  maxBlockDimX: 2,
+  maxBlockDimY: 3,
+  maxBlockDimZ: 4,
+  maxGridDimX: 5,
+  maxGridDimY: 6,
+  maxGridDimZ: 7,
+  maxSharedMemoryPerBlock: 8,
   multiprocessorCount: 16,
   computeCapabilityMajor: 75,
   computeCapabilityMinor: 76,
@@ -50,7 +62,7 @@ function canonicalDriverPath() {
   return resolved;
 }
 
-export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
+export async function createBackend({ runtimeId, epoch, memoryPolicy, executionPolicy }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const driverPath = canonicalDriverPath();
@@ -59,6 +71,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
   let libraryToken;
   let contextToken;
   let memory;
+  let execution;
 
   function errorText(functionName, status) {
     try {
@@ -95,6 +108,18 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
     const output = Buffer.alloc(4);
     requireSuccess(functionName, functions[functionName](output, ...args), operationId);
     return readI32(output);
+  }
+
+  function classifiedFailure(operation, status, operationId, category, requestedHealth = null) {
+    const before = health.current;
+    if (requestedHealth) health.transition(requestedHealth, { reason: operation, operationId });
+    return new DriverRuntimeError(
+      'CUDA_DRIVER_FAILURE',
+      category,
+      `${operation} failed with CUDA status ${status}.`,
+      { nativeStatus: status, nativeName: errorText('cuGetErrorName', status), nativeDescription: errorText('cuGetErrorString', status) },
+      { operationId, healthBefore: before, healthAfter: health.current },
+    );
   }
 
   function readSafeU64(storage, field) {
@@ -217,7 +242,122 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
       },
     });
 
+    const launchLayout = cudaTier0Layouts.CUlaunchConfig;
+    if (!launchLayout || launchLayout.size !== 56) throw new DriverRuntimeError('DRIVER_LAUNCH_LAYOUT_UNSUPPORTED', 'unsupported', 'Generated CUlaunchConfig layout is unavailable for the Windows F5 profile.');
+    const launchOffsets = Object.freeze(Object.fromEntries(launchLayout.fields.map((field) => [field.name, field.offset])));
+    for (const field of ['gridDimX', 'gridDimY', 'gridDimZ', 'blockDimX', 'blockDimY', 'blockDimZ', 'sharedMemBytes', 'hStream', 'attrs', 'numAttrs']) {
+      if (!Number.isSafeInteger(launchOffsets[field])) throw new DriverRuntimeError('DRIVER_LAUNCH_LAYOUT_UNSUPPORTED', 'unsupported', 'Generated CUlaunchConfig field is missing.', { field });
+    }
+
+    execution = new ExecutionManager({
+      registry,
+      contextToken,
+      memory,
+      policy: executionPolicy,
+      deviceLimits: attributes,
+      operations: {
+        async createStream({ operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          requireSuccess('cuStreamCreate', functions.cuStreamCreate(output, 1), operationId);
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_STREAM_NULL', 'immediate-driver', 'CUDA stream creation succeeded but returned null.', {}, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async destroyStream({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuStreamDestroy_v2', functions.cuStreamDestroy_v2(native), operationId, 'poisoned');
+          return { nativeDestroyed: true };
+        },
+        async loadModule({ bytes, operationId }) {
+          requireCurrent(operationId);
+          const source = Buffer.alloc(bytes.byteLength + 1);
+          Buffer.from(bytes).copy(source);
+          const output = pointerOut();
+          const status = functions.cuModuleLoadData(output, source);
+          if (status !== 0) throw classifiedFailure('cuModuleLoadData', status, operationId, [200, 209, 218, 222].includes(status) ? 'validation' : 'immediate-driver', [200, 209, 218, 222].includes(status) ? null : 'suspect');
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_MODULE_NULL', 'immediate-driver', 'CUDA module load succeeded but returned null.', {}, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async unloadModule({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuModuleUnload', functions.cuModuleUnload(native), operationId, 'poisoned');
+          return { nativeUnloaded: true };
+        },
+        async getFunction({ moduleNative, name, operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          const encodedName = Buffer.from(`${name}\0`, 'ascii');
+          const status = functions.cuModuleGetFunction(output, moduleNative, encodedName);
+          if (status !== 0) throw classifiedFailure('cuModuleGetFunction', status, operationId, status === 500 ? 'validation' : 'immediate-driver', status === 500 ? null : 'suspect');
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_FUNCTION_NULL', 'immediate-driver', 'CUDA function lookup succeeded but returned null.', {}, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async createEvent({ operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          requireSuccess('cuEventCreate', functions.cuEventCreate(output, 2), operationId);
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_EVENT_NULL', 'immediate-driver', 'CUDA event creation succeeded but returned null.', {}, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async destroyEvent({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuEventDestroy_v2', functions.cuEventDestroy_v2(native), operationId, 'poisoned');
+          return { nativeDestroyed: true };
+        },
+        async devicePointer({ native, byteOffset }) {
+          return native + BigInt(byteOffset);
+        },
+        async submitLaunch({ functionNative, streamNative, config, parameterBuffer, operationId }) {
+          requireCurrent(operationId);
+          const storage = Buffer.alloc(launchLayout.size);
+          storage.writeUInt32LE(config.grid.x, launchOffsets.gridDimX);
+          storage.writeUInt32LE(config.grid.y, launchOffsets.gridDimY);
+          storage.writeUInt32LE(config.grid.z, launchOffsets.gridDimZ);
+          storage.writeUInt32LE(config.block.x, launchOffsets.blockDimX);
+          storage.writeUInt32LE(config.block.y, launchOffsets.blockDimY);
+          storage.writeUInt32LE(config.block.z, launchOffsets.blockDimZ);
+          storage.writeUInt32LE(config.sharedMemoryBytes, launchOffsets.sharedMemBytes);
+          storage.writeBigUInt64LE(streamNative, launchOffsets.hStream);
+          storage.writeBigUInt64LE(0n, launchOffsets.attrs);
+          storage.writeUInt32LE(0, launchOffsets.numAttrs);
+
+          const sizeStorage = Buffer.alloc(8);
+          sizeStorage.writeBigUInt64LE(BigInt(parameterBuffer.byteLength));
+          const extra = Buffer.alloc(40);
+          extra.writeBigUInt64LE(1n, 0);
+          extra.writeBigUInt64LE(ffi.getRawPointer(parameterBuffer), 8);
+          extra.writeBigUInt64LE(2n, 16);
+          extra.writeBigUInt64LE(ffi.getRawPointer(sizeStorage), 24);
+          extra.writeBigUInt64LE(0n, 32);
+          const status = functions.cuLaunchKernelEx(storage, functionNative, 0n, extra);
+          if (status !== 0) throw classifiedFailure('cuLaunchKernelEx', status, operationId, 'immediate-driver', 'suspect');
+        },
+        async recordEvent({ eventNative, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuEventRecord', functions.cuEventRecord(eventNative, streamNative), operationId);
+        },
+        async queryEvent({ eventNative, operationId }) {
+          requireCurrent(operationId);
+          const status = functions.cuEventQuery(eventNative);
+          if (status === 0) return 'complete';
+          if (status === 600) return 'pending';
+          throw classifiedFailure('cuEventQuery', status, operationId, 'deferred-driver', 'poisoned');
+        },
+        health() { return health.snapshot(); },
+        restartRequired({ code, message, details, operationId }) {
+          const before = health.current;
+          health.transition('restart-required', { reason: code, operationId });
+          return new DriverRuntimeError(code, 'restart-required', message, details, { operationId, healthBefore: before, healthAfter: health.current });
+        },
+      },
+    });
+
     async function description(operationSequence = 0) {
+      const executionSummary = execution.summary();
       return {
         schemaVersion: 1,
         runtime: { id: runtimeId, epoch, state: 'open', backend: 'windows-native' },
@@ -226,15 +366,22 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
         device: { ordinal: 0, attributes },
         context: contextToken,
         memory: await memory.usage(operationSequence),
+        execution: executionSummary,
         health: health.snapshot(),
         inventory: registry.inventory(),
         operationSequence,
-        claim: 'exact-windows-f4w-profile',
+        claim: executionSummary.completionCount > 0 ? 'exact-windows-f5w-profile' : 'exact-windows-f4w-profile',
       };
     }
 
     return {
       inventory() { return registry.inventory(); },
+      assertAccepting(operation, operationId) {
+        const cleanupOrRead = new Set(['runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release']);
+        if (health.current === 'poisoned' && !cleanupOrRead.has(operation)) {
+          throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operationId, healthBefore: health.current, healthAfter: health.current });
+        }
+      },
       async describe({ operationId }) {
         return description(operationId);
       },
@@ -283,6 +430,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy }) {
         };
       },
       memory,
+      execution,
     };
   } catch (error) {
     const teardown = await registry.closeAll();

@@ -213,6 +213,24 @@ export class MemoryManager {
     });
   }
 
+  acquireForExecution(token, byteOffset = 0) {
+    byteLength(byteOffset, { field: 'byteOffset', positive: false });
+    const lease = this.#registry.acquire(token, { kind: 'device-memory' });
+    if (byteOffset >= lease.value.byteLength) {
+      lease.release();
+      fail('MEMORY_RANGE_OUT_OF_BOUNDS', 'validation', 'Execution argument offset must select a byte inside the allocation.', {
+        allocationLength: lease.value.byteLength,
+        byteOffset,
+      });
+    }
+    return Object.freeze({
+      native: lease.value.native,
+      byteLength: lease.value.byteLength,
+      byteOffset,
+      release: lease.release,
+    });
+  }
+
   async #descriptor(token, allocationLength, operationId) {
     return Object.freeze({
       schemaVersion: 1,
