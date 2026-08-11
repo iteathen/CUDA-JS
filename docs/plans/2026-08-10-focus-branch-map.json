@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 3,
   "plan": "docs/plans/2026-08-10-master-plan.md",
   "status": "accepted",
   "integration_owner": "CJS-INTEGRATION",
@@ -22,137 +22,314 @@
     {
       "id": "CJS-F0",
       "type": "authority-publication",
-      "status": "complete-publication-verified",
+      "status": "publication-in-progress",
       "owner": "integration",
       "dependencies": [],
-      "outputs": ["public repository", "exact integrated authority", "remote read-back"],
-      "acceptance": ["no competing accepted ADR/plan", "publication verified"]
+      "outputs": [
+        "coherent local authority",
+        "exact commit",
+        "bundle/zip/checksums",
+        "remote publication handoff",
+        "CUDA-MCGS exact-reference update"
+      ],
+      "acceptance": [
+        "no competing accepted ADR/plan",
+        "local docs validation",
+        "portable artifacts verified"
+      ]
     },
     {
       "id": "CJS-F1A",
       "type": "synthetic-host-abi",
       "status": "complete-promoted-windows-x64-linux-x64",
       "owner": "host-binding-foundation",
-      "dependencies": ["CJS-F0"],
-      "outputs": ["generated synthetic C library", "direct C oracle", "minimal generic Runtime IR", "Node FFI definitions", "byte packers", "Worker/lifetime harness", "Fast FFI eligibility model", "arbitrary-pfn gap finding"],
-      "experiments": ["EXP-000"],
-      "acceptance": ["exact native parity", "fail-closed unsupported shapes", "raw pointers private", "responsive main loop", "terminal cleanup"]
+      "dependencies": [
+        "CJS-F0"
+      ],
+      "outputs": [
+        "generated synthetic C library",
+        "direct C oracle",
+        "minimal generic Runtime IR",
+        "Node FFI definitions",
+        "byte packers",
+        "Worker/lifetime harness",
+        "Fast FFI eligibility model",
+        "arbitrary-pfn gap finding"
+      ],
+      "experiments": [
+        "EXP-000"
+      ],
+      "acceptance": [
+        "Linux x64 exact native parity",
+        "fail-closed unsupported shapes",
+        "raw pointers private",
+        "responsive main loop",
+        "terminal cleanup",
+        "honest generic/candidate-fast classification"
+      ]
     },
     {
       "id": "CJS-F1B",
       "type": "cuda-schema-abi",
       "status": "complete-accepted-schema-abi-with-win64-bridge",
       "owner": "schema",
-      "dependencies": ["CJS-F1A"],
-      "outputs": ["pinned CUDA 13.3.29 provenance and Clang importer", "reviewed private Tier-0 semantics", "generated Runtime IR/products", "native ABI probes"],
-      "experiments": ["EXP-001", "EXP-002", "EXP-003"],
-      "acceptance": ["deterministic generation", "native CUDA layout parity", "fail-closed public coverage"]
+      "dependencies": [
+        "CJS-F1A"
+      ],
+      "outputs": [
+        "pinned CUDA 13.3.29 provenance and Clang importer",
+        "12-function and 9-type Runtime IR",
+        "accepted private Tier-0 semantic overlay",
+        "Node FFI definitions, packers, declarations, conformance and compatibility products",
+        "471-entry fail-closed unavailable declaration catalog",
+        "native Linux x86-64 ABI probes and six mutation controls",
+        "hash-identical-header MSVC Win64 compatibility probe"
+      ],
+      "experiments": [
+        "EXP-001",
+        "EXP-002",
+        "EXP-003"
+      ],
+      "acceptance": [
+        "deterministic generation",
+        "native CUDA layout parity",
+        "fail-closed public coverage"
+      ]
     },
     {
       "id": "CJS-F2W",
       "type": "node-ffi-backend",
       "status": "complete-accepted-windows-x64",
       "owner": "host-binding",
-      "dependencies": ["CJS-F1A", "CJS-F1B"],
-      "outputs": ["Node/flag preflight", "Driver pathfinder", "named-symbol bindings", "cuGetProcAddress verification", "backend diagnostics"],
-      "experiments": ["EXP-012"],
-      "acceptance": ["Windows x64 Driver/C-oracle smoke", "exact profile identity", "no unsupported capability claim"]
+      "dependencies": [
+        "CJS-F1A",
+        "CJS-F1B"
+      ],
+      "outputs": [
+        "Node/flag preflight",
+        "Driver pathfinder",
+        "named-symbol bindings",
+        "cuGetProcAddress verification",
+        "backend diagnostics"
+      ],
+      "experiments": [
+        "EXP-012"
+      ],
+      "acceptance": [
+        "Windows x64 Driver/C-oracle smoke",
+        "exact profile identity",
+        "no unsupported capability claim"
+      ]
     },
     {
       "id": "CJS-F2L",
       "type": "node-ffi-backend-linux",
       "status": "deferred-incomplete-public-contribution-requested",
       "owner": "host-binding",
-      "dependencies": ["CJS-F1A", "CJS-F1B"],
-      "outputs": ["retained native Linux Driver protocol", "future Linux Driver, procedure, context and cleanup evidence"],
-      "experiments": ["EXP-001", "EXP-002"],
-      "acceptance": ["qualified native Linux x64 Driver/GPU smoke", "independent C-oracle parity", "no Windows or WSL evidence substitution"]
+      "dependencies": [
+        "CJS-F1A",
+        "CJS-F1B"
+      ],
+      "outputs": [
+        "retained native Linux Driver protocol",
+        "future Linux Driver, procedure, context and cleanup evidence"
+      ],
+      "experiments": [
+        "EXP-001",
+        "EXP-002"
+      ],
+      "acceptance": [
+        "qualified native Linux x64 Driver/GPU smoke",
+        "independent C-oracle parity",
+        "no Windows or WSL evidence substitution"
+      ]
     },
     {
       "id": "CJS-F3",
       "type": "actor-resource-core",
       "status": "complete-accepted-windows-x64-portable-control-plane-linux-x64",
       "owner": "runtime-core",
-      "dependencies": ["CJS-F2W"],
-      "outputs": ["DriverActor", "command protocol", "opaque registry", "health/error model", "mock lifecycle backend", "deterministic teardown", "unexpected-loss accounting"],
-      "experiments": ["EXP-005", "EXP-007"],
-      "acceptance": ["thread affinity", "stale/wrong-kind rejection", "responsive main loop", "graceful terminal cleanup", "honest unexpected-loss state"]
+      "dependencies": [
+        "CJS-F2W"
+      ],
+      "outputs": [
+        "DriverActor",
+        "command protocol",
+        "opaque registry",
+        "health/error model",
+        "mock lifecycle backend",
+        "deterministic explicit/graceful teardown",
+        "unexpected-loss epoch invalidation and orphan inventory"
+      ],
+      "experiments": [
+        "EXP-005",
+        "EXP-007"
+      ],
+      "acceptance": [
+        "thread affinity",
+        "stale/wrong-kind rejection",
+        "responsive main loop",
+        "graceful terminal cleanup",
+        "unexpected Worker loss is restart-required and makes no false cleanup claim"
+      ]
     },
     {
       "id": "CJS-F4",
       "type": "memory",
       "status": "complete-windows-f4w-native-linux-portable-only",
       "owner": "memory",
-      "dependencies": ["CJS-F3"],
-      "outputs": ["bounded device allocations", "synchronous copied Uint8Array transfers", "quotas/bounds", "transfer leases", "allocation-before-context teardown", "native Linux engineering handoff"],
-      "experiments": ["EXP-008"],
-      "acceptance": ["pressure/rollback/bounds", "lease-fenced lifetime", "independent MSVC byte parity", "terminal teardown"]
+      "dependencies": [
+        "CJS-F3"
+      ],
+      "outputs": [
+        "bounded device allocations",
+        "synchronous copied Uint8Array transfers",
+        "quotas/bounds",
+        "transfer leases",
+        "allocation-before-context teardown",
+        "native Linux engineering handoff"
+      ],
+      "experiments": [
+        "EXP-008"
+      ],
+      "acceptance": [
+        "pressure, rollback, failed-free accounting, and bounds",
+        "lease-fenced lifetime and stale generation rejection",
+        "independent MSVC byte parity and terminal teardown safety"
+      ]
     },
     {
       "id": "CJS-F5",
       "type": "module-launch-completion",
-      "status": "complete-accepted-windows-x64-portable-linux-controls",
+      "status": "planned",
       "owner": "execution",
-      "dependencies": ["CJS-F3", "CJS-F4"],
-      "outputs": ["module/function", "kernel ABI packers", "private stream/event completion", "launch plan", "adaptive completion", "native Linux handoff"],
-      "experiments": ["EXP-004", "EXP-006", "EXP-007"],
-      "acceptance": ["real kernel parity", "responsive main loop", "deferred error attribution", "clean teardown"]
+      "dependencies": [
+        "CJS-F3",
+        "CJS-F4"
+      ],
+      "outputs": [
+        "module/function",
+        "kernel ABI packers",
+        "streams/events",
+        "launch plans",
+        "adaptive completion",
+        "cancellation",
+        "CUDA Graph prepared-repeat profile after ordinary launch correctness"
+      ],
+      "experiments": [
+        "EXP-004",
+        "EXP-006",
+        "EXP-007"
+      ],
+      "acceptance": [
+        "real kernel parity",
+        "responsive main loop",
+        "deferred error attribution",
+        "clean teardown"
+      ]
     },
     {
       "id": "CJS-F6",
       "type": "compiler-link-cache",
       "status": "base-complete-accepted-windows-x64-lto-follow-up-planned",
       "owner": "device-toolchain",
-      "dependencies": ["CJS-F1B", "CJS-F5"],
-      "outputs": [
-        "accepted CompilerActor/NVRTC/nvJitLink PTX-to-cubin/cache baseline",
-        "planned typed source-to-LTOIR artifact",
-        "planned homogeneous LTOIR-to-cubin composition",
-        "planned LTO producer/linker compatibility identity",
-        "planned LTO-aware cache identity and negative compatibility controls"
+      "dependencies": [
+        "CJS-F1B",
+        "CJS-F5"
       ],
-      "experiments": ["EXP-009"],
+      "outputs": [
+        "CompilerActor",
+        "NVRTC",
+        "nvJitLink",
+        "logs/artifacts",
+        "content cache",
+        "provider process-global side-effect manifest",
+        "Linux NVRTC -modify-stack-limit=false profile",
+        "optional child-process compiler provider",
+        "planned typed LTO-IR artifact and homogeneous LTO-IR-to-cubin mode under the existing owner"
+      ],
+      "experiments": [
+        "EXP-009"
+      ],
       "assessment": "docs/research/2026-08-11-lto-support-assessment.md",
       "acceptance": [
-        "existing PTX/cubin acceptance remains unchanged",
-        "new bounded LTO specification accepted before production implementation",
-        "exact first-profile Node/native LTO artifact and execution parity",
-        "deterministic LTO compatibility/cache identity",
-        "no arbitrary native option/input-kind escape",
-        "terminal compiler/linker cleanup",
-        "no CUDA-MCGS dependency or adoption requirement"
+        "reproducible identity",
+        "corruption rejection",
+        "provider cleanup",
+        "no unexpected process-global mutation",
+        "GPU-free compile evidence separated from module-load/launch evidence",
+        "accepted PTX/cubin baseline remains unchanged",
+        "LTO production implementation waits for a bounded new specification and exact EXP-009 LTO native evidence",
+        "LTO public contract exposes no arbitrary native option/input-kind/path escape and no CUDA-MCGS semantics"
       ]
     },
     {
       "id": "CJS-F7",
       "type": "platform-hardening",
-      "status": "windows-complete-accepted-linux-arm64-wsl-deferred",
+      "status": "windows_complete_accepted_linux_arm64_wsl_deferred",
       "owner": "platform",
-      "dependencies": ["CJS-F5", "CJS-F6"],
-      "outputs": ["Windows x64", "Linux ARM64", "WSL diagnostics", "security/fuzz/leak/perf gates"],
-      "acceptance": ["support claims match native matrix", "unsupported profiles fail clearly"]
+      "dependencies": [
+        "CJS-F5",
+        "CJS-F6"
+      ],
+      "outputs": [
+        "Windows x64",
+        "Linux ARM64",
+        "WSL diagnostics",
+        "security/fuzz/leak/perf gates"
+      ],
+      "acceptance": [
+        "support claims match native matrix",
+        "unsupported profiles fail clearly"
+      ]
     },
     {
       "id": "CJS-F8",
       "type": "package-second-consumer",
       "status": "complete-accepted-windows-x64-portable-linux-package-controls",
       "owner": "release",
-      "dependencies": ["CJS-F7"],
-      "outputs": ["no-addon baseline package", "support policy", "second consumer", "optional isolation/JIT decisions"],
-      "experiments": ["EXP-010", "EXP-011"],
-      "acceptance": ["first-consumer deletion", "second-instance fit", "honest strict-JIT disposition"]
+      "dependencies": [
+        "CJS-F7"
+      ],
+      "outputs": [
+        "no-addon baseline package",
+        "support policy",
+        "second consumer",
+        "optional isolation/JIT decisions"
+      ],
+      "experiments": [
+        "EXP-010",
+        "EXP-011"
+      ],
+      "acceptance": [
+        "first-consumer deletion",
+        "second-instance fit",
+        "honest strict-JIT disposition"
+      ],
+      "accepted": "SPEC-0008 amended; public-testing cuda-js 0.1.0-alpha.1 package, unconfirmed Windows operation, exact support evidence, public facade, compatibility manifest, two clean consumers, install/uninstall, native Windows vector execution, and retained Linux backend handoff"
     },
     {
       "id": "CJS-F9",
       "type": "cuda-mcgs-interop",
-      "status": "cuda-js-prerequisite-complete-pair-pending-cuda-mcgs",
+      "status": "cuda_js_prerequisite_complete_pair_pending_cuda_mcgs",
       "owner": "public-integration",
-      "dependencies": ["CJS-F8"],
-      "outputs": ["trusted cuda-cccl header profile", "generic atomic-publication capability capsule", "compatible-pair capsule", "device-closure proof"],
-      "acceptance": ["one-way public dependency", "independent internal conformance", "exact released revisions"],
+      "dependencies": [
+        "CJS-F8"
+      ],
+      "outputs": [
+        "execution-package contract",
+        "trusted cuda-cccl header profile",
+        "generic atomic-publication capability capsule",
+        "compatible-pair capsule",
+        "device-closure proof"
+      ],
+      "acceptance": [
+        "one-way public dependency",
+        "independent internal conformance",
+        "exact released revisions"
+      ],
       "execution_plan": "docs/plans/2026-08-11-f9-atomic-interop.md",
-      "accepted_cuda_js_prerequisite": "SPEC-0009; exact trusted-header and publication evidence; exact pair pending CUDA-MCGS",
-      "lto_relationship": "CJS-F6-LTO is an independent generic toolchain follow-up and is not a prerequisite unless later consumer evidence explicitly proves otherwise"
+      "accepted_cuda_js_prerequisite": "SPEC-0009; manifest-verified CUDA 13.3 cuda/nv virtual headers; public-facade atomic publication words 3737844653,1,3737844653; graceful zero-live/orphan cleanup; exact compatible pair pending CUDA-MCGS"
     }
   ]
 }
