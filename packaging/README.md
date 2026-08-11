@@ -1,5 +1,7 @@
 # Packaging
 
-Versioned no-addon Node packages, schema/generated artifacts, capability/compatibility manifests, checksums, SBOM/provenance, cache metadata, and support matrices.
+**Status:** Accepted F8W package boundary
 
-Packaging is deferred until the Linux x86-64 Node-FFI/actor/resource/memory/launch lifecycle passes. Exact Node 26 profiles are explicit because `node:ffi` is experimental. A package must fail clearly when flags, permission, library, Driver, toolkit provider, architecture, or schema compatibility is missing.
+CUDA-JS 0.1.0-alpha.0 is a versioned no-addon ESM package with an exact Node 26.7.0 policy, three explicit exports, immutable compatibility metadata, clean tarball install/uninstall evidence, and independent synthetic consumers. Registry publication remains guarded pending an owner-selected license and separate release review.
+
+The accepted native profile is Windows x64 only. Native Linux x64 and ARM64 remain qualification-required, and WSL2 remains diagnostic-only. All can install, import, inspect compatibility, and use the mock-only testing export; none gains a native CUDA claim from those portable controls.

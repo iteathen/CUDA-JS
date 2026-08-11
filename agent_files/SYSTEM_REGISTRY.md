@@ -44,7 +44,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `project.state` | Current phase and verified repository state | [`../STATUS.md`](../STATUS.md) | Active |
 | `project.next-step` | One coherent current boundary | [`../next_step.yaml`](../next_step.yaml) | Active |
 | `schema.header-facts` | Pinned official CUDA 13.3 provenance, selection, imported facts, target layouts, deterministic products, and Win64 compatibility bridge | [`../schemas/cuda-13.3/`](../schemas/cuda-13.3/) and [`../tools/cuda-schema/`](../tools/cuda-schema/README.md) | Accepted F1B/F5 internal plus Windows bridge |
-| `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted through F7W private-experimental |
+| `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted through F8W private-experimental backend |
 | `runtime.driver-actor` | Bounded async command protocol, one Worker-owned context, memory/execution adapters, permission inheritance, health, and graceful/unexpected-loss lifecycle | [`../components/driver-actor/`](../components/driver-actor/README.md) | Accepted Windows F7W internal experimental; Linux native Driver blocked on F2L |
 | `runtime.resource-registry` | Opaque capability identity, generation, state, dependencies, leases, close ordering, and orphan inventory | [`../components/resource-registry/`](../components/resource-registry/README.md) | Accepted F3 internal experimental |
 | `conformance.f3` | Platform-neutral actor/resource lifecycle and exact Windows native context-affinity/cleanup evidence | [`../conformance/f3/`](../conformance/f3/README.md) | Accepted on Windows; control plane also passes native Linux x86-64 |
@@ -56,19 +56,22 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `conformance.f6` | Portable compiler/cache/lifecycle evidence, independent MSVC artifact parity, PTX/cubin Windows execution, and Linux handoff | [`../conformance/f6/`](../conformance/f6/README.md) | Accepted Windows F6W; native Linux CUDA incomplete |
 | `runtime.platform-diagnostics` | Sanitized host classification, exact Windows CUDA device-mode/watchdog assessment, permission disposition, and fail-closed support reasons | [`../components/platform-diagnostics/`](../components/platform-diagnostics/README.md) | Accepted Windows F7W internal experimental; Linux/WSL classification only |
 | `conformance.f7` | Platform classification, sanitized boundaries, permission denial/allow, failure/property partitions, repeated lifecycle stress, Windows native diagnostics, and Linux/WSL handoff | [`../conformance/f7/`](../conformance/f7/README.md) | Accepted Windows F7W; native Linux/ARM64/WSL CUDA incomplete |
+| `runtime.facade` | Safe package API, private resource capabilities, stable errors, optional compiler ownership, host preflight, and aggregate close | [`../components/runtime-facade/`](../components/runtime-facade/README.md) | Accepted Windows F8W public experimental; mock-only portable consumer entry |
+| `packaging.compatibility` | Exact package/API/Node/platform/capability/migration and evidence-invalidation identity | [`../packaging/compatibility-manifest.json`](../packaging/compatibility-manifest.json) | Accepted F8W; registry publication guarded |
+| `conformance.f8` | Tarball contents, clean install/uninstall, first-consumer deletion, independent consumers, instance isolation, installed Windows execution, and Linux readiness | [`../conformance/f8/`](../conformance/f8/README.md) | Accepted Windows F8W; native Linux/ARM64/WSL CUDA incomplete |
 
 ## Repository product areas
 
 | Product area | Owns | Location | Current status |
 |---|---|---|---|
-| `components` | Generic runtime components with accepted ownership contracts | [`../components/`](../components/README.md) | F7 DriverActor, CompilerActor/cache, platform diagnostics, resource registry, bounded memory, and execution accepted internal experimental |
+| `components` | Generic runtime components with accepted ownership contracts | [`../components/`](../components/README.md) | F8 public facade over accepted internal Driver, compiler, diagnostics, resource, memory, and execution owners |
 | `schemas` | Pinned CUDA facts, semantic overlays, Runtime IR and generated products | [`../schemas/`](../schemas/README.md) | F1B accepted; public production coverage not authorized |
-| `conformance` | Production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | F3 lifecycle through F7 platform hardening accepted on Windows; portable/readiness controls run in Linux CI |
+| `conformance` | Production synthetic/native/public-contract capsules | [`../conformance/`](../conformance/README.md) | F3 lifecycle through F8 package/public-facade accepted on Windows; portable/readiness controls run in Linux CI |
 | `experiments` | Bounded decision experiments and their generated fixtures/harnesses | [`../experiments/`](../experiments/README.md) | EXP-000, Windows EXP-009, and Windows EXP-012 promoted; Linux EXP-001 prepared through the hardware boundary |
 | `benchmarks` | Future reproducible mechanism/regression evidence | [`../benchmarks/`](../benchmarks/README.md) | Reserved |
-| `packaging` | Future package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | Reserved |
+| `packaging` | No-addon package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | F8 package/compatibility accepted; registry release guarded |
 | `tools` | Schema/code-generation and developer tools | [`../tools/`](../tools/README.md) | F1B importer/generator accepted internal tooling |
-| `tests` | Future cross-component and end-to-end tests | [`../tests/`](../tests/README.md) | Reserved |
+| `tests` | Cross-component and end-to-end test ownership | [`../tests/`](../tests/README.md) | F8 package consumers active; F9 compatible pair deferred |
 | `third-party` | Donor material with exact provenance and reuse decision | [`../third_party/`](../third_party/README.md) | Reserved |
 | `scripts` | Thin validation and exact-toolchain experiment entry points | [`../scripts/`](../scripts/) | Active |
 
@@ -78,7 +81,7 @@ These IDs organize implemented and future specifications. Status in the governin
 
 | Planned boundary ID | Intended responsibility | Governing authority needed before code |
 |---|---|---|
-| `runtime.facade` | Safe asynchronous public API and capability negotiation | Accepted detailed public API specification |
+| `runtime.facade` | Safe asynchronous public API and capability negotiation | Accepted SPEC-0008 plus F8 package, consumer, native Windows, and portable Linux evidence |
 | `runtime.driver-actor` | Thread-affine CUDA context and raw-resource ownership | Accepted SPEC-0003 plus exact Windows native evidence; Linux native execution still requires F2L |
 | `runtime.compiler-actor` | NVRTC/nvJitLink provider isolation, validated cache, and artifact production | Accepted SPEC-0006 plus Windows EXP-009/F6W evidence; native Linux requires independent qualification |
 | `runtime.resource-registry` | Opaque capability identity, generation, state and parent/child leases | Accepted SPEC-0003 and F3 conformance |

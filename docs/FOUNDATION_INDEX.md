@@ -59,7 +59,7 @@ These remain ownership reservations except for the explicitly authorized F1A, F1
 
 ## Current phase gate
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, and `CJS-F7W` are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, device-diagnostic, failure, stress, byte-parity, and cleanup evidence. The platform-neutral F3 through F7 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; F8 packaging/public-facade work requires a new accepted contract. Linux `CJS-F2L / EXP-001` and native Linux F3L through F7L remain retained, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through CJS-F8W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; F9 consumer interop requires a new accepted contract. Linux `CJS-F2L / EXP-001` and native Linux F3L through F8L remain retained, deferred, and incomplete.
 
 ## Foundation completeness test
 

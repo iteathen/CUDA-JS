@@ -1,11 +1,11 @@
 {
-  "schema_version": 16,
+  "schema_version": 17,
   "updated": "2026-08-11",
-  "status": "cjs_f7_windows_complete_accepted_protected_integration_authorized",
-  "objective": "Integrate the accepted Windows CJS-F7 platform-hardening result through protected main, keep native Linux x86-64, Linux ARM64 SBSA, and WSL2 work publicly retained and independently completable, then specify a bounded Windows-first F8 package, public-facade, compatibility, and second-consumer slice before implementation.",
+  "status": "cjs_f8_windows_complete_accepted_protected_integration_authorized",
+  "objective": "Integrate the accepted Windows CJS-F8 package and public-facade result through protected main, keep native Linux x86-64, Linux ARM64 SBSA, and WSL2 work publicly retained and independently completable, then specify bounded F9 compatible-pair interop before consumer implementation.",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "codex/windows-f7 pending authorized protected-main pull-request integration",
+  "current_branch": "codex/windows-f8 pending authorized protected-main pull-request integration",
   "active_focus_branches": [
     {
       "id": "CJS-F0",
@@ -153,6 +153,26 @@
         "portable property, failure, repeated-lifecycle, responsiveness, and broad regression controls complete",
         "native Linux and WSL permission, Driver, compiler, execution, and cleanup evidence deferred to qualified hardware"
       ]
+    },
+    {
+      "id": "CJS-F8W",
+      "status": "complete_accepted_windows_x64_protected_integration_authorized",
+      "outputs": [
+        "accepted SPEC-0008 no-addon package, public facade, compatibility, and independent-consumer contract",
+        "cuda-js 0.1.0-alpha.0 exact exports, Node 26.7.0 policy, private resource capabilities, and aggregate close",
+        "clean tarball install/import/uninstall, first-consumer deletion, two unrelated consumers, and instance isolation",
+        "installed-package Windows PTX vector execution checksum 15600773 with terminal Worker/resource cleanup"
+      ]
+    },
+    {
+      "id": "CJS-F8L",
+      "status": "portable_package_consumer_and_readiness_complete_native_qualification_deferred",
+      "outputs": [
+        "Linux package install/import/uninstall and mock-only public consumer path complete",
+        "stable native qualification-required error and unchanged public facade contract",
+        "human canonical Driver/compiler adapter, independent oracle, permission, package, and cleanup handoff",
+        "native Linux and WSL installed-package CUDA execution remains deferred to qualified hardware"
+      ]
     }
   ],
   "authority": [
@@ -169,6 +189,7 @@
     "docs/specs/SPEC-0005-module-launch-completion.md",
     "docs/specs/SPEC-0006-compiler-linker-cache.md",
     "docs/specs/SPEC-0007-windows-platform-hardening.md",
+    "docs/specs/SPEC-0008-package-public-facade.md",
     "docs/architecture/TARGET_ARCHITECTURE.md",
     "docs/architecture/V0_SUPPORT_MATRIX.md",
     "docs/plans/2026-08-10-master-plan.md",
@@ -177,20 +198,20 @@
     "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
   ],
   "preconditions": [
-    "Windows F7 consumes accepted CJS-F5W/F6W and cannot imply native Linux, ARM64, or WSL support.",
+    "Windows F8 consumes accepted CJS-F3W through F7W and cannot imply native Linux, ARM64, or WSL support.",
     "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
     "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
     "Unknown or contradictory public semantics fail closed.",
     "No CUDA-JS project-specific compiled addon or handwritten per-function wrapper family enters the baseline.",
     "All raw Driver resources stay on their owning Worker and no pointer enters a public result.",
-    "No Fast FFI, performance, package, or cross-platform claim exceeds exact evidence."
+    "No Fast FFI, process-isolation, performance, registry-release, or cross-platform claim exceeds exact evidence."
   ],
   "immediate_sequence": [
-    "Integrate CJS-F7W through protected main only after exact required checks pass.",
-    "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, and platform qualification runbooks.",
-    "Draft and accept a detailed Windows-first CJS-F8 package/public-facade/second-consumer specification before implementing F8.",
-    "Keep UMCGS consumer work gated on an accepted public CUDA-JS package contract.",
-    "Retain and re-run the platform-neutral F3 through F7 capsules whenever shared owners change; do not represent them as native Linux CUDA support."
+    "Integrate CJS-F8W through protected main only after exact required checks pass.",
+    "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, platform, and installed-package qualification runbooks.",
+    "Draft and accept a detailed F9 compatible-pair specification before implementing UMCGS consumer interop.",
+    "Keep registry publication gated on an owner-selected license and separate release review.",
+    "Retain and re-run the platform-neutral F3 through F8 capsules whenever shared owners change; do not represent them as native Linux CUDA support."
   ],
   "acceptance_criteria": [
     "The exact remote branch/tree is readable publicly and matches the claimed commit.",
@@ -201,6 +222,9 @@
     "CJS-F6W remains bounded by accepted SPEC-0006 and exact Windows compiler, linker, cache, artifact, and cleanup evidence.",
     "CJS-F6W PTX and cubin bytes match the independent MSVC oracle exactly and both execute with identical Driver output.",
     "CJS-F7W remains bounded by accepted SPEC-0007 and exact Windows permission, device-diagnostic, failure/property, stress, and cleanup evidence.",
+    "CJS-F8W remains bounded by accepted SPEC-0008 and exact package, facade, consumer, install/uninstall, native Windows execution, and aggregate cleanup evidence.",
+    "Package exports hide actor tokens and native capabilities, and cross-runtime or post-close use fails before actor dispatch.",
+    "Linux package/readiness controls remain separately keyed and do not promote native CUDA support.",
     "Both native actors inherit the Node permission profile, deny FFI without authority, and close terminally with explicit authority.",
     "Windows and Linux compatibility/evidence remain separately keyed and reported.",
     "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path."
@@ -209,7 +233,8 @@
     "remove or claim completion of the deferred Linux path",
     "use Windows or WSL evidence as native Linux support",
     "make Linux a hidden runtime prerequisite for the active Windows path",
-    "start F8 package/public-facade or UMCGS code before its detailed contract and predecessor evidence pass",
+    "start F9 UMCGS compatible-pair code before its detailed contract and predecessor evidence pass",
+    "publish the package to a registry before licensing and release review pass",
     "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
     "claim Fast FFI dispatch from timing or static eligibility"
   ],
@@ -234,8 +259,9 @@
     "F5W passes copied PTX identity, exact declared packing, lease-through-completion, deferred attribution, timeout owner loss, and exact Windows Node-versus-MSVC vector parity checksum 15600773.",
     "F6W passes exact NVRTC 13.3 PTX and nvJitLink 13.3 cubin C parity, clean-room determinism, cache miss/hit/corruption/invalidation, application responsiveness, PTX/cubin Driver execution checksum 15600773, and terminal CompilerActor/DriverActor cleanup.",
     "F7W passes exact WDDM-watchdog/default-compute-mode diagnostics, both actor permission denial/allow controls, 512 deterministic property cases, 48 portable actor cycles, 16 native actor cycles, sanitized failure boundaries, and terminal resource balance.",
+    "F8W passes exact exports, clean package install/uninstall, hidden capabilities, stable errors, first-consumer deletion, two unrelated consumers, simultaneous-instance isolation, native Windows vector checksum 15600773, and terminal aggregate close.",
     "Native CI regenerates the 27-function/16-type schema and runs F5 portable controls while the retained F5L handoff makes no native Linux CUDA claim.",
     "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
-    "iteathen/CUDA-JS is public, CJS-F2W through CJS-F6W pull requests are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."
+    "iteathen/CUDA-JS is public, CJS-F2W through CJS-F7W pull requests are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4."
   ]
 }

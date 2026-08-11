@@ -21,8 +21,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | active primary | F2W bootstrap through F7W compiler/execution/platform hardening accepted; packaging, broader memory/concurrency, and public stability remain staged |
-| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F7 control plane complete; native Driver/compiler qualification deferred | run retained F2L through F7L Driver/provider/context/permission/stress/teardown gates on a qualified native NVIDIA host |
+| Windows 11 | x86-64 Win64 | accepted experimental package | F2W through F8W Driver/compiler/execution/hardening/package facade accepted; broader memory/concurrency, registry release, and production stability remain staged |
+| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F8 portable/package path complete; native Driver/compiler qualification deferred | run retained F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -74,7 +74,7 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 | Profile | V0 disposition |
 |---|---|
 | one private context per DriverActor Worker | accepted Windows F7W baseline; repeated native cycles close terminally, execution/memory children close first, and unexpected Worker loss remains restart-required |
-| multiple independent DriverActors/contexts | after single-actor lifecycle passes |
+| multiple independent DriverActors/contexts | public facade instance isolation passes with portable actors; concurrent native contexts require a separately qualified profile |
 | primary-context interop | later compatibility profile |
 | shared context across Workers | excluded pending explicit design |
 | borrowed external context | excluded from safe v0 |
@@ -141,6 +141,6 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 ## Release maturity
 
 - **Foundation accepted:** architecture, schemas, experiments, and support matrix coherent; no native claim.
-- **Alpha:** Windows x86-64 exact Node/Driver vertical slice; explicit incomplete Linux profile.
-- **Beta:** Windows x86-64 production capsules plus any independently completed Linux/ARM64 profiles; package/update/teardown/security evidence; JIT claims limited to proven profiles.
+- **Alpha:** achieved for the Windows x86-64 exact Node/Driver package facade with an explicit incomplete Linux profile.
+- **Beta:** requires Windows production capsules plus any independently completed Linux/ARM64 profiles; release/update/security evidence; JIT claims limited to proven profiles.
 - **Public release:** Node FFI maturity/support policy accepted, previous-major CUDA compatibility proven, second unrelated consumer passes, no material debt.

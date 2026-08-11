@@ -6,7 +6,7 @@
 
 ## Current phase
 
-The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, and `CJS-F7W` are accepted on their bounded evidence. The platform-neutral F3 through F7 control plane also passes without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work.
+The project owner authorized dependency-ordered implementation and a Windows-first platform sequence. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows `CJS-F3W` through `CJS-F8W` are accepted on their bounded evidence. The platform-neutral F3 through F8 control plane and package path also pass without requiring Linux CUDA providers. Linux `CJS-F2L / EXP-001` and native Linux DriverActor/compiler execution remain incomplete until qualified native evidence passes; they do not block Windows work.
 
 ## Promoted F1A result
 
@@ -139,7 +139,20 @@ On the accepted Windows profile, CUDA reports Driver API 13030, WDDM with kernel
 
 The human F7 handoff in [`conformance/f7/README.md`](conformance/f7/README.md) separately specifies native Linux x86-64, Linux ARM64 SBSA, and WSL2 work. Portable classification and readiness run in Linux CI, but no Linux/ARM64/WSL CUDA support is claimed.
 
-## Deferred incomplete Linux F2L–F7L
+## Accepted Windows F8W result
+
+The accepted F8 slice adds the `cuda-js` 0.1.0-alpha.0 no-addon ESM package and `runtime.facade` under [`SPEC-0008`](docs/specs/SPEC-0008-package-public-facade.md):
+
+- exactly three package exports for the native facade, immutable compatibility metadata, and an explicitly mock-only testing facade;
+- exact Node 26.7.0/module-ABI 147 preflight, stable public errors, optional compiler ownership, and aggregate terminal close;
+- private device-memory, module, and function capability objects that hide actor tokens and reject closed, wrong-owner, and cross-runtime use;
+- package tarball inspection, clean install/import/uninstall, first-consumer-deletion, two unrelated synthetic consumers, and simultaneous-runtime isolation;
+- an installed Windows package consumer that executes the tracked PTX vector kernel with exact checksum `15600773` and graceful Worker/resource closure;
+- portable Linux package/import/mock/readiness controls and a human native-adapter handoff without promoting Linux CUDA support.
+
+Strict JIT remains explicitly unsupported because no measured mandatory gap exists. Process isolation remains an optional future profile because accepted in-process Workers satisfy the current event-loop and lifecycle contract; Worker loss is still restart-required. Registry publication remains guarded pending an owner-selected license and separate release review.
+
+## Deferred incomplete Linux F2L–F8L
 
 The Ubuntu Hyper-V VM remains useful for native Linux CPU/ABI work but has no NVIDIA GPU/Driver exposure. The host GTX 1660 Ti and client-Windows Hyper-V configuration do not provide a supported GPU partition/pass-through path. Windows results must never be labeled as Linux support.
 
@@ -156,8 +169,8 @@ GPU-free preparation passes in the available native Linux guest. The only unexec
 
 ## Claim limits
 
-F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. F3W proves only the bounded Windows DriverActor/resource/lifecycle profile in SPEC-0003. F4W proves only synchronous bounded device allocation and copied transfers on the exact Windows profile. F5W proves one tracked PTX vector kernel through one private stream and terminal event completion on that profile. F6W proves typed source-to-PTX, PTX-to-cubin, validated local caching, and copied artifact execution on the exact Windows profile. F7W proves the bounded Windows diagnostic, permission, failure/property, repeated-lifecycle, and boundary-sanitization profile. Native Linux F3 through F7 capsules prove platform-neutral control-plane/readiness behavior only. These results do not prove native Linux/ARM64/WSL Driver/compiler execution, arbitrary returned-pointer invocation, Fast FFI dispatch, asynchronous or specialized memory, broader compiler options/artifact formats, concurrent launch/compile, performance, packaging, recovery without process restart, or consumer semantics.
+F1A proves the exact synthetic host-call profiles. F1B proves pinned facts, reviewed private semantics, deterministic products, and the measured Linux/Windows layouts stated above. F2W proves only the exact Windows bootstrap, Driver/GPU/query/context/permission/cleanup profile. CJS-F3W through CJS-F7W prove only their accepted actor, memory, execution, compiler/cache, diagnostic, permission, failure, and lifecycle slices. F8W proves the exact package exports, install/uninstall behavior, safe facade, independent consumers, multi-instance isolation, and installed-package Windows vector execution. Native Linux F3 through F8 capsules prove platform-neutral control-plane/package/readiness behavior only. These results do not prove native Linux/ARM64/WSL Driver/compiler execution, arbitrary returned-pointer invocation, Fast FFI dispatch, asynchronous or specialized memory, broader compiler options/artifact formats, concurrent launch/compile, performance, process isolation, registry release, production stability, recovery without process restart, or consumer semantics.
 
 ## Immediate next boundary
 
-Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained F2L–F7L runbooks. The next boundary is a detailed Windows-first F8 package/public-facade/second-consumer specification. Packaging and UMCGS work remain gated on that accepted contract; Linux qualification can resume independently when suitable hardware becomes available.
+Keep [Linux qualification issue #4](https://github.com/iteathen/CUDA-JS/issues/4) aligned with the retained F2L–F8L runbooks. The next boundary is a detailed F9 UMCGS compatible-pair specification consuming only the accepted package contract. Linux qualification can resume independently when suitable hardware becomes available; registry publication and licensing remain separately gated.

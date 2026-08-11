@@ -12,4 +12,4 @@ Initial ownership:
 - opaque resource/lifecycle/error/teardown;
 - exact evidence and environment identity.
 
-Later capsules add memory, module/launch/completion, compiler/link/cache, platform, security, packaging, performance, and UMCGS compatible-pair evidence.
+F3 through F8 capsules now cover memory, module/launch/completion, compiler/link/cache, platform, security, packaging, and independent consumers. A future accepted F9 contract owns UMCGS compatible-pair evidence.

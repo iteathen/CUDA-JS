@@ -8,7 +8,7 @@
 
 Turn the accepted repository boundary and Node-FFI-first host-binding decision into dependency-ordered, falsifiable future work without prematurely implementing broad CUDA coverage.
 
-**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, and Windows `CJS-F7W` are accepted after independent host, ABI, Driver, compiler, linker, GPU, permission, oracle, actor-affinity, cache, resource, artifact, execution, failure, stress, diagnostic, and cleanup qualification. The F3 through F7 control plane also passes without establishing native Linux CUDA support. Linux `CJS-F2L / EXP-001` and native Linux F3L through F7L remain retained, incomplete, deferred, and independently promotable.
+**Current authorization:** dependency-ordered implementation is active by explicit project-owner instruction dated 2026-08-11. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through CJS-F8W are accepted after independent host, ABI, Driver, compiler, linker, GPU, permission, oracle, actor-affinity, cache, resource, artifact, execution, failure, stress, diagnostic, package, consumer, install, and cleanup qualification. The F3 through F8 portable control/package path also passes without establishing native Linux CUDA support. Linux `CJS-F2L / EXP-001` and native Linux F3L through F8L remain retained, incomplete, deferred, and independently promotable.
 
 The first *planned* code-bearing work after that future authorization is **not** an application runtime and does not require CUDA. It is EXP-000: a generated synthetic C ABI library and direct C oracle that qualify Node FFI, schema-derived definitions/packers, Worker isolation, resource lifetime, and deterministic teardown before GPU variables enter the diagnosis.
 
@@ -215,7 +215,7 @@ Clean-room repeat produces identical identity and equivalent artifact; warning/e
 
 Support matrix claims match exact native evidence; unsupported profiles fail descriptively.
 
-**Accepted disposition:** Windows F7W adds fail-closed host/device assessment, CUDA-reported WDDM/TCC/watchdog/compute-mode diagnostics, inherited Node permission enforcement, sanitized DriverActor/CompilerActor result and error boundaries, deterministic failure/property partitions, and repeated portable/native lifecycle stress. Linux x86-64, Linux ARM64 SBSA, and WSL2 remain separate, documented, unqualified paths. Broad duration and process-memory ceilings are regression controls only. Packaging and public-facade work remain gated on a detailed F8 contract.
+**Accepted disposition:** Windows F7W adds fail-closed host/device assessment, CUDA-reported WDDM/TCC/watchdog/compute-mode diagnostics, inherited Node permission enforcement, sanitized DriverActor/CompilerActor result and error boundaries, deterministic failure/property partitions, and repeated portable/native lifecycle stress. Linux x86-64, Linux ARM64 SBSA, and WSL2 remain separate, documented, unqualified paths. Broad duration and process-memory ceilings are regression controls only. F8 packaging and public-facade work was later authorized by accepted SPEC-0008.
 
 ### CJS-F8 — package, second consumer, and optional isolation/JIT gaps (P2/P3)
 
@@ -232,6 +232,8 @@ Support matrix claims match exact native evidence; unsupported profiles fail des
 **Exit**
 
 First-consumer-deletion and second-instance tests pass; strict JIT claims are either proven, explicitly unsupported, or backed by a separately accepted design.
+
+**Accepted disposition:** Windows F8W publishes the guarded `cuda-js` 0.1.0-alpha.0 no-addon ESM package boundary with exact Node 26.7.0 compatibility, a safe facade over accepted actors, immutable compatibility metadata, mock-only consumer testing, clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, and installed-package native vector execution. Linux package/import/mock/readiness controls pass without a native CUDA claim. EXP-010 and EXP-011 are not triggered because no mandatory isolation, callable-pointer, or strict-JIT gap is measured; Worker loss remains restart-required and strict JIT remains unsupported.
 
 ### CJS-F9 — UMCGS public interop (P2/P3)
 
@@ -263,11 +265,11 @@ First-consumer-deletion and second-instance tests pass; strict JIT claims are ei
 
 ## Next dependency sequence
 
-1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W through F7W, and independent C-oracle evidence.
-2. Preserve the public contribution request and retained handoffs for Linux F2L through F7L.
+1. Preserve accepted F1A, F1B, platform-separated F2W, Windows F3W through F8W, and independent C-oracle evidence.
+2. Preserve the public contribution request and retained handoffs for Linux F2L through F8L.
 3. Preserve the accepted Windows F7W permission, device-diagnostic, failure/property, repeated-lifecycle, and cleanup evidence.
-4. Draft and accept a bounded Windows-first F8 package/public-facade/second-consumer specification before implementation; do not begin UMCGS consumer work until its predecessors pass.
-5. Resume Linux F2L through F7L independently when a qualified native Linux NVIDIA environment becomes available; never substitute portable controls or Windows results for native Linux evidence.
+4. Preserve the accepted F8 package/public-facade/second-consumer evidence and draft a bounded F9 compatible-pair specification before UMCGS consumer work.
+5. Resume Linux F2L through F8L independently when a qualified native Linux NVIDIA environment becomes available; never substitute portable controls or Windows results for native Linux evidence.
 
 ## Stop conditions
 
