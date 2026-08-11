@@ -1,0 +1,224 @@
+{
+  "schema_version": 2,
+  "inspected": "2026-08-10",
+  "sources": [
+    {
+      "id": "NODE-FFI-26.7.0",
+      "kind": "primary",
+      "project": "nodejs/node",
+      "revision": "b4f23d3619c98bed09af93a21192f6080197a8c6",
+      "tag": "v26.7.0",
+      "license": "MIT",
+      "locations": [
+        "https://nodejs.org/en/blog/release/v26.7.0/",
+        "https://github.com/nodejs/node/blob/v26.7.0/doc/api/ffi.md",
+        "https://github.com/nodejs/node/blob/v26.7.0/lib/ffi.js",
+        "https://github.com/nodejs/node/blob/v26.7.0/src/node_ffi.cc",
+        "https://github.com/nodejs/node/blob/v26.7.0/src/ffi/types.cc",
+        "https://github.com/nodejs/node/blob/v26.7.0/src/ffi/fast.cc",
+        "https://github.com/nodejs/node/tree/v26.7.0/benchmark/ffi",
+        "https://github.com/nodejs/node/blob/v26.7.0/src/ffi/platforms/x64.cc",
+        "https://github.com/nodejs/node/blob/v26.7.0/src/ffi/platforms/arm64.cc"
+      ],
+      "verified_uses": [
+        "release/current-version identity",
+        "experimental FFI flags and permission behavior",
+        "dynamic-library named-symbol API and lack of public callable-from-arbitrary-pointer constructor",
+        "pointer, foreign-memory, close, and callback restrictions",
+        "Fast API generated-trampoline architecture and generic fallback",
+        "global and platform-specific Fast FFI argument/register limits",
+        "Linux x86-64, Windows x86-64, and ARM64 Fast FFI emitter envelopes",
+        "source-derived generic-versus-fast signature classification inputs"
+      ],
+      "reuse_disposition": "runtime prerequisite and primary reference; no source copying planned"
+    },
+    {
+      "id": "CUDA-DRIVER-13.3",
+      "kind": "primary",
+      "project": "NVIDIA CUDA Driver API",
+      "revision": "CUDA Driver API v13.3.1 documentation, last updated 2026-06-29, inspected 2026-08-10",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/cuda/cuda-driver-api/",
+        "https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__DRIVER__ENTRY__POINT.html",
+        "https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__CTX.html",
+        "https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__MEM.html"
+      ],
+      "verified_uses": [
+        "context and host-thread currentness",
+        "entry-point version and stream-semantics negotiation",
+        "memory/module/stream/event/launch contracts",
+        "asynchronous error reporting notes",
+        "resource and teardown semantics",
+        "cuLaunchKernel/cuLaunchKernelEx host shapes and deferred-error notes",
+        "cuGraphLaunch low-arity prepared-execution option and graph thread-safety rules"
+      ],
+      "reuse_disposition": "normative external platform source"
+    },
+    {
+      "id": "CUDA-NVRTC-13.3",
+      "kind": "primary",
+      "project": "NVIDIA NVRTC",
+      "revision": "CUDA Toolkit 13.3 documentation snapshot inspected 2026-08-10",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/cuda/nvrtc/"
+      ],
+      "verified_uses": [
+        "device-only runtime compilation",
+        "PTX/cubin and supported output behavior",
+        "host platform support",
+        "program/log/resource lifecycle",
+        "supported host platforms and GPU-free compilation",
+        "Linux process-wide stack-limit behavior and -modify-stack-limit=false containment option",
+        "CUDA 13.3 bundled-header provider capability"
+      ],
+      "reuse_disposition": "normative external platform source"
+    },
+    {
+      "id": "CUDA-NVJITLINK-13.3",
+      "kind": "primary",
+      "project": "NVIDIA nvJitLink",
+      "revision": "CUDA Toolkit 13.3 documentation snapshot inspected 2026-08-10",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/cuda/nvjitlink/"
+      ],
+      "verified_uses": [
+        "runtime device-code linking",
+        "cubin/LTO inputs and outputs",
+        "link options, logs, resource lifecycle, and provider identity"
+      ],
+      "reuse_disposition": "normative external platform source"
+    },
+    {
+      "id": "NVIDIA-CUDA-PYTHON",
+      "kind": "prior_art",
+      "project": "NVIDIA/cuda-python",
+      "revision": "757731a10a7a166ffe4e346ca246415695712402",
+      "license": "Apache-2.0",
+      "locations": [
+        "https://github.com/NVIDIA/cuda-python"
+      ],
+      "verified_uses": [
+        "bindings/pathfinder/high-level package separation",
+        "generated broad CUDA binding and update strategy",
+        "independent subpackage versioning"
+      ],
+      "reuse_disposition": "architecture reference only; implementation reuse requires separate review"
+    },
+    {
+      "id": "SAMMWYY-CUDA-JS",
+      "kind": "prior_art",
+      "project": "sammwyy/cuda.js",
+      "revision": "dc9933584f18220c77a529715d4dfdee509ae6de",
+      "license": "MIT",
+      "locations": [
+        "https://github.com/sammwyy/cuda.js"
+      ],
+      "verified_uses": [
+        "native-addon CUDA/NVRTC feature comparison",
+        "node-gyp/toolkit/compiler installation coupling",
+        "narrow array/kernel API and mixed Driver/Runtime evidence"
+      ],
+      "reuse_disposition": "bounded reference; do not adopt as foundation"
+    },
+    {
+      "id": "RAPIDSAI-NODE",
+      "kind": "prior_art",
+      "project": "rapidsai/node",
+      "revision": "312c46831c6839af31efb1a7d1994bfd07e1a94a",
+      "license": "Apache-2.0 repository licensing; package-specific notices still require review",
+      "locations": [
+        "https://github.com/rapidsai/node"
+      ],
+      "verified_uses": [
+        "large Node GPU addon ecosystem and packaging reference",
+        "evidence that selected RAPIDS/CUDA capabilities are exposed through native addons"
+      ],
+      "reuse_disposition": "packaging/native-integration reference only"
+    },
+    {
+      "id": "KOFFI-2026-05-20",
+      "kind": "prior_art",
+      "project": "Koromix/koffi",
+      "revision": "59865a5afe1bed8e8c8b118da2f3746bf452d677",
+      "license": "MIT",
+      "locations": [
+        "https://github.com/Koromix/koffi"
+      ],
+      "verified_uses": [
+        "mature cross-platform Node FFI reference",
+        "type/pointer/callback/asynchronous-call patterns",
+        "performance and packaging comparison"
+      ],
+      "reuse_disposition": "general FFI/conformance reference only; Node built-in FFI remains selected substrate"
+    },
+    {
+      "id": "NODE-NVRTC-2023",
+      "kind": "prior_art",
+      "project": "wurichengn/node-nvrtc",
+      "revision": "f9e3e1ffe507e1ce33aee84d0552f5af5a3afc20",
+      "license": "MIT (package metadata)",
+      "locations": [
+        "https://github.com/wurichengn/node-nvrtc"
+      ],
+      "verified_uses": [
+        "narrow NVRTC/launch native-addon prototype",
+        "toolkit-binary and node-gyp coupling",
+        "resource-release failure evidence"
+      ],
+      "reuse_disposition": "historical/bounded reference; do not adopt as foundation"
+    },
+    {
+      "id": "NODE-JS-CUDA-2019",
+      "kind": "prior_art",
+      "project": "generic-matrix/node-js-cuda",
+      "revision": "8c1392395f0aa66e185342345b0909752e9642b0",
+      "license": "MIT",
+      "locations": [
+        "https://github.com/generic-matrix/node-js-cuda"
+      ],
+      "verified_uses": [
+        "legacy native-addon CUDA binding",
+        "machine/path/toolkit coupling",
+        "historical Node ABI/build constraints"
+      ],
+      "reuse_disposition": "historical evidence only"
+    },
+    {
+      "id": "ASMJIT-2026-03-26",
+      "kind": "prior_art",
+      "project": "asmjit/asmjit",
+      "revision": "0bd5787b54b575ed94bf32ac452153b34385c514",
+      "license": "zlib",
+      "locations": [
+        "https://github.com/asmjit/asmjit"
+      ],
+      "verified_uses": [
+        "x86/x64/ARM64 machine-code emitter candidate",
+        "JIT code-lifetime and architecture support reference"
+      ],
+      "reuse_disposition": "deferred EXP-011 candidate only; not a baseline dependency"
+    },
+    {
+      "id": "UMCGS-RUNTIME-BOUNDARY",
+      "kind": "internal_authority",
+      "project": "iteathen/UMCGS",
+      "revision": "48f7b5f5fe125c16d966eaaa4968700900cd12fb",
+      "license": "private pre-release",
+      "locations": [
+        "docs/decisions/ADR-0014-extract-cuda-js-runtime.md",
+        "docs/research/2026-08-10-cuda-js-assumption-audit.md",
+        "docs/architecture/REPOSITORY_TOPOLOGY.md"
+      ],
+      "verified_uses": [
+        "independent repository ownership",
+        "one-way public artifact dependency",
+        "search/runtime separation",
+        "device-closure and interop constraints"
+      ],
+      "reuse_disposition": "accepted peer-project boundary authority"
+    }
+  ]
+}

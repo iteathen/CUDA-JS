@@ -1,0 +1,302 @@
+{
+  "schema_version": 3,
+  "plan": "docs/plans/2026-08-10-master-plan.md",
+  "status": "accepted",
+  "integration_owner": "CJS-INTEGRATION",
+  "global_gates": [
+    "no project-specific compiled addon in the selected baseline",
+    "synthetic Node FFI host ABI is qualified before CUDA-specific binding",
+    "no handwritten or ahead-of-time per-CUDA-function wrapper authority",
+    "generic native/JIT gap backend requires EXP-011 and a separate ADR",
+    "trusted schema and reviewed semantic overlay",
+    "opaque public capabilities and no raw pointers",
+    "one DriverActor Worker owns one context by default",
+    "nonblocking main event loop",
+    "strict JIT claims require direct qualification evidence",
+    "finite resources, health states, deterministic teardown",
+    "no UMCGS/search semantics",
+    "compiler providers declare and contain process-global native side effects",
+    "unexpected actor loss fails the runtime epoch and never claims inaccessible native cleanup"
+  ],
+  "branches": [
+    {
+      "id": "CJS-F0",
+      "type": "authority-publication",
+      "status": "active",
+      "owner": "integration",
+      "dependencies": [],
+      "outputs": [
+        "coherent local authority",
+        "exact commit",
+        "bundle/zip/checksums",
+        "remote publication handoff",
+        "UMCGS exact-reference update"
+      ],
+      "acceptance": [
+        "no competing accepted ADR/plan",
+        "local docs validation",
+        "portable artifacts verified"
+      ]
+    },
+    {
+      "id": "CJS-F1A",
+      "type": "synthetic-host-abi",
+      "status": "ready-after-F0",
+      "owner": "host-binding-foundation",
+      "dependencies": [
+        "CJS-F0"
+      ],
+      "outputs": [
+        "generated synthetic C library",
+        "direct C oracle",
+        "minimal generic Runtime IR",
+        "Node FFI definitions",
+        "byte packers",
+        "Worker/lifetime harness",
+        "Fast FFI eligibility model",
+        "arbitrary-pfn gap finding"
+      ],
+      "experiments": [
+        "EXP-000"
+      ],
+      "acceptance": [
+        "Linux x64 exact native parity",
+        "fail-closed unsupported shapes",
+        "raw pointers private",
+        "responsive main loop",
+        "terminal cleanup",
+        "honest generic/candidate-fast classification"
+      ]
+    },
+    {
+      "id": "CJS-F1B",
+      "type": "cuda-schema-abi",
+      "status": "blocked-on-F1A",
+      "owner": "schema",
+      "dependencies": [
+        "CJS-F1A"
+      ],
+      "outputs": [
+        "CUDA Runtime IR",
+        "pinned header importer",
+        "semantic overlay",
+        "Node FFI definitions",
+        "packers",
+        "native CUDA ABI probes"
+      ],
+      "experiments": [
+        "EXP-001",
+        "EXP-002",
+        "EXP-003"
+      ],
+      "acceptance": [
+        "deterministic generation",
+        "native CUDA layout parity",
+        "fail-closed public coverage"
+      ]
+    },
+    {
+      "id": "CJS-F2",
+      "type": "node-ffi-backend",
+      "status": "planned",
+      "owner": "host-binding",
+      "dependencies": [
+        "CJS-F1A",
+        "CJS-F1B"
+      ],
+      "outputs": [
+        "Node/flag preflight",
+        "Driver pathfinder",
+        "named-symbol bindings",
+        "cuGetProcAddress verification",
+        "backend diagnostics"
+      ],
+      "experiments": [
+        "EXP-001",
+        "EXP-002",
+        "EXP-004"
+      ],
+      "acceptance": [
+        "Linux x64 Driver smoke",
+        "exact profile identity",
+        "no unsupported capability claim"
+      ]
+    },
+    {
+      "id": "CJS-F3",
+      "type": "actor-resource-core",
+      "status": "planned",
+      "owner": "runtime-core",
+      "dependencies": [
+        "CJS-F2"
+      ],
+      "outputs": [
+        "DriverActor",
+        "command protocol",
+        "opaque registry",
+        "health/error model",
+        "mock lifecycle backend",
+        "deterministic explicit/graceful teardown",
+        "unexpected-loss epoch invalidation and orphan inventory"
+      ],
+      "experiments": [
+        "EXP-005",
+        "EXP-007"
+      ],
+      "acceptance": [
+        "thread affinity",
+        "stale/wrong-kind rejection",
+        "responsive main loop",
+        "graceful terminal cleanup",
+        "unexpected Worker loss is restart-required and makes no false cleanup claim"
+      ]
+    },
+    {
+      "id": "CJS-F4",
+      "type": "memory",
+      "status": "planned",
+      "owner": "memory",
+      "dependencies": [
+        "CJS-F3"
+      ],
+      "outputs": [
+        "device allocations",
+        "staged copies",
+        "quotas/bounds",
+        "transfer leases",
+        "pinned profile"
+      ],
+      "experiments": [
+        "EXP-008"
+      ],
+      "acceptance": [
+        "pressure and bounds",
+        "in-flight lifetime",
+        "GC/teardown safety"
+      ]
+    },
+    {
+      "id": "CJS-F5",
+      "type": "module-launch-completion",
+      "status": "planned",
+      "owner": "execution",
+      "dependencies": [
+        "CJS-F3",
+        "CJS-F4"
+      ],
+      "outputs": [
+        "module/function",
+        "kernel ABI packers",
+        "streams/events",
+        "launch plans",
+        "adaptive completion",
+        "cancellation",
+        "CUDA Graph prepared-repeat profile after ordinary launch correctness"
+      ],
+      "experiments": [
+        "EXP-004",
+        "EXP-006",
+        "EXP-007"
+      ],
+      "acceptance": [
+        "real kernel parity",
+        "responsive main loop",
+        "deferred error attribution",
+        "clean teardown"
+      ]
+    },
+    {
+      "id": "CJS-F6",
+      "type": "compiler-link-cache",
+      "status": "planned",
+      "owner": "device-toolchain",
+      "dependencies": [
+        "CJS-F1B",
+        "CJS-F5"
+      ],
+      "outputs": [
+        "CompilerActor",
+        "NVRTC",
+        "nvJitLink",
+        "logs/artifacts",
+        "content cache",
+        "provider process-global side-effect manifest",
+        "Linux NVRTC -modify-stack-limit=false profile",
+        "optional child-process compiler provider"
+      ],
+      "experiments": [
+        "EXP-009"
+      ],
+      "acceptance": [
+        "reproducible identity",
+        "corruption rejection",
+        "provider cleanup",
+        "no unexpected process-global mutation",
+        "GPU-free compile evidence separated from module-load/launch evidence"
+      ]
+    },
+    {
+      "id": "CJS-F7",
+      "type": "platform-hardening",
+      "status": "planned",
+      "owner": "platform",
+      "dependencies": [
+        "CJS-F5",
+        "CJS-F6"
+      ],
+      "outputs": [
+        "Windows x64",
+        "Linux ARM64",
+        "WSL diagnostics",
+        "security/fuzz/leak/perf gates"
+      ],
+      "acceptance": [
+        "support claims match native matrix",
+        "unsupported profiles fail clearly"
+      ]
+    },
+    {
+      "id": "CJS-F8",
+      "type": "package-second-consumer",
+      "status": "planned",
+      "owner": "release",
+      "dependencies": [
+        "CJS-F7"
+      ],
+      "outputs": [
+        "no-addon baseline package",
+        "support policy",
+        "second consumer",
+        "optional isolation/JIT decisions"
+      ],
+      "experiments": [
+        "EXP-010",
+        "EXP-011"
+      ],
+      "acceptance": [
+        "first-consumer deletion",
+        "second-instance fit",
+        "honest strict-JIT disposition"
+      ]
+    },
+    {
+      "id": "CJS-F9",
+      "type": "umcgs-interop",
+      "status": "planned",
+      "owner": "public-integration",
+      "dependencies": [
+        "CJS-F8"
+      ],
+      "outputs": [
+        "execution-package contract",
+        "compatible-pair capsule",
+        "device-closure proof"
+      ],
+      "acceptance": [
+        "one-way public dependency",
+        "independent internal conformance",
+        "exact released revisions"
+      ]
+    }
+  ]
+}
