@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { profilesPath, registryPath, renderSupportDocument, validateRegistry } from './qualification.mjs';
+import {
+  generatedDocumentMatches,
+  profilesPath,
+  registryPath,
+  renderSupportDocument,
+  validateRegistry,
+} from './qualification.mjs';
 
 async function fixtures() {
   return {
@@ -18,6 +24,12 @@ test('accepted exact hardware profile satisfies promotion invariants', async () 
   assert.match(rendered, /GeForce GTX 1660 Ti/);
   assert.match(rendered, /seeking evidence/);
   assert.match(rendered, /Linux ARM64 SBSA/);
+});
+
+test('generated support checks accept Windows checkout line endings without hiding content changes', () => {
+  const rendered = '# Hardware\n\nCurrent.\n';
+  assert.equal(generatedDocumentMatches(rendered.replaceAll('\n', '\r\n'), rendered), true);
+  assert.equal(generatedDocumentMatches('# Hardware\r\n\r\nStale.\r\n', rendered), false);
 });
 
 test('portable evidence cannot promote a hardware profile', async () => {
