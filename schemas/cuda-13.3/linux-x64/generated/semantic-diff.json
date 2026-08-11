@@ -1,5 +1,18 @@
 {
   "added": [
+    "cuda.driver.function.cuMemAlloc",
+    "cuda.driver.function.cuMemFree",
+    "cuda.driver.function.cuMemGetInfo",
+    "cuda.driver.function.cuMemcpyDtoH",
+    "cuda.driver.function.cuMemcpyHtoD",
+    "cuda.driver.type.CUdeviceptr",
+    "cuda.driver.type.size_t"
+  ],
+  "baseline": "selection.previousStableIds",
+  "removed": [],
+  "schemaVersion": 1,
+  "selectionId": "cuda-13.3.29-driver-tier-0-f4-linux-x64",
+  "unchanged": [
     "cuda.driver.function.cuCtxCreate",
     "cuda.driver.function.cuCtxDestroy",
     "cuda.driver.function.cuCtxGetCurrent",
@@ -22,10 +35,5 @@
     "cuda.driver.type.CUresult",
     "cuda.driver.type.cuuint64_t"
   ],
-  "baseline": null,
-  "removed": [],
-  "schemaVersion": 1,
-  "selectionId": "cuda-13.3.29-driver-tier-0-linux-x64",
-  "unchanged": [],
   "unresolved": []
 }
