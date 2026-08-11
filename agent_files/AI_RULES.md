@@ -42,3 +42,4 @@
 38. Record genuine blockers and the next coherent action in `next_step.yaml`.
 39. Do not claim publication until exact remote state is read back.
 40. Do not claim completion while stale authority, contradictory plan state, invalidated evidence, unsafe residue, or unresolved ownership remains.
+41. Follow [`general_foundation/NO_PYTHON_POLICY.md`](general_foundation/NO_PYTHON_POLICY.md): do not introduce or require Python source, metadata, interpreters, package managers, ordinary-use dependencies, generated products, tooling, tests, CI, packaging, experiments, or temporary scripts anywhere in the UMCGS ecosystem.
