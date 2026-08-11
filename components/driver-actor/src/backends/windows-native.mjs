@@ -11,7 +11,6 @@ import { createDefaultCuCtxCreateParams, cudaTier0Layouts } from '../../../../sc
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState } from '../health.mjs';
 
-const NODE_VERSION = 'v26.7.0';
 const CUDA_API_VERSION = 13030;
 const DRIVER_ACTOR_SYMBOLS = Object.freeze([
   'cuInit', 'cuDriverGetVersion', 'cuDeviceGetCount', 'cuDeviceGet', 'cuDeviceGetAttribute',
@@ -51,9 +50,6 @@ function pointerOut() { return Buffer.alloc(8); }
 function canonicalDriverPath() {
   if (process.platform !== 'win32' || process.arch !== 'x64') {
     throw new DriverRuntimeError('DRIVER_PROFILE_UNSUPPORTED', 'unsupported', 'The native F3 profile requires Windows x64.', { platform: process.platform, architecture: process.arch });
-  }
-  if (process.version !== NODE_VERSION) {
-    throw new DriverRuntimeError('DRIVER_NODE_UNSUPPORTED', 'unsupported', `The native F3 profile requires official Node ${NODE_VERSION}.`, { node: process.version });
   }
   const systemRoot = process.env.SystemRoot;
   if (!systemRoot) throw new DriverRuntimeError('DRIVER_SYSTEM_ROOT_MISSING', 'unsupported', 'SystemRoot is unavailable.');
@@ -365,7 +361,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       return {
         schemaVersion: 1,
         runtime: { id: runtimeId, epoch, state: 'open', backend: 'windows-native' },
-        profile: { node: process.version, platform: process.platform, architecture: process.arch, cudaApiVersion: CUDA_API_VERSION, nativeQualified: true },
+        profile: { node: process.version, platform: process.platform, architecture: process.arch, cudaApiVersion: CUDA_API_VERSION, nativeOperational: true, nativeQualified: false },
         driver: { apiVersion: driverVersion, deviceCount },
         device: { ordinal: 0, attributes },
         context: contextToken,

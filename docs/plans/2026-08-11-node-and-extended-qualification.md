@@ -17,12 +17,12 @@ Input authority is protected `main` at `0ae02ed2b9d1f23593a12e1144c8867942eb6bca
 The strongest failure is an informational probe being mistaken for support. The design therefore has three distinct dispositions:
 
 1. **Qualified experimental:** the exact Node/hardware/profile chain passed all required native evidence.
-2. **No support with candidate evidence:** a lower-level probe passed, but the full chain did not.
-3. **Verified no support:** a required capability is absent or the vendor excludes the exact host profile.
+2. **Testing unconfirmed:** a lower-level probe passed and operation is allowed, but the full chain did not establish support.
+3. **Known incompatible:** a required capability is absent or the vendor excludes the exact host profile.
 
 Matching module ABI, Node major/minor, GPU family, virtualization brand, Driver family, or successful import never promotes support. An incomplete extended axis exposes no command chain, so neither a contributor nor automation can accidentally emit a promotable result.
 
-The decisive falsifiers are a non-26.7 Node row becoming supported without full evidence, an FFI-unavailable release passing its expected-negative probe, an extension axis exposing commands while no-support, a Hyper-V result containing VM/device identifiers or performing mutation, or generated documentation disagreeing with either registry.
+The decisive falsifiers are a non-26.7 Node row inheriting support without full evidence, an FFI-capable candidate being blocked only for lacking evidence, an FFI-unavailable release passing its expected-negative probe, an extension axis exposing unsafe commands while unavailable, a Hyper-V result containing VM/device identifiers or performing mutation, or generated documentation disagreeing with either registry.
 
 ## Ownership
 
@@ -48,7 +48,7 @@ For each exact binary the probe checks:
 - denial under the permission model without FFI authority;
 - progression to ordinary loader handling with explicit FFI authority.
 
-The matrix is intentionally stricter about support than capability. Node 26.1 through 26.6 may pass the substrate probe but remain no-support. Promotion requires EXP-000 correctness/lifecycle on Windows x64 and native Linux x64, then the complete native CUDA-JS chain for each promoted CUDA profile.
+The matrix separates support from operation. Node 26.1 through 26.6 pass the substrate probe and may operate as testing-unconfirmed without an opt-in; Node 26.7 alone carries qualified evidence. Promotion requires EXP-000 correctness/lifecycle on Windows x64 and native Linux x64, then the complete native CUDA-JS chain for each promoted CUDA profile.
 
 ## Extended hardware qualification axes
 

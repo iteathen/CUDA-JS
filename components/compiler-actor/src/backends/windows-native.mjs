@@ -81,7 +81,7 @@ async function verifyProvider(rootPath, record) {
 }
 
 export async function createBackend() {
-  if (process.platform !== 'win32' || process.arch !== 'x64' || process.version !== 'v26.7.0') throw new CompilerRuntimeError('COMPILER_PROFILE_UNSUPPORTED', 'unsupported', 'F6W requires exact Node v26.7.0 on Windows x64.');
+  if (process.platform !== 'win32' || process.arch !== 'x64') throw new CompilerRuntimeError('COMPILER_PROFILE_UNSUPPORTED', 'unsupported', 'The native compiler backend requires Windows x64.');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   const toolkitRoot = await canonicalToolkitRoot();
   const nvrtcPath = await verifyProvider(toolkitRoot, manifest.providers.nvrtc);

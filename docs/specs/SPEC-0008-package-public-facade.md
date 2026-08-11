@@ -4,17 +4,19 @@
 
 **Date:** 2026-08-11
 
+**Amended:** 2026-08-11 — the package manifest is public and unconfirmed operational profiles are allowed during the project-wide testing phase without a compatibility opt-in.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.
 
-F8 consumes the accepted F3 through F7 components without widening their native CUDA contracts. The exact native runtime remains Windows x64, Node 26.7.0, and the accepted CUDA 13.3/Driver profile. Native Linux x64, Linux ARM64 SBSA, and WSL2 remain independently qualified paths. Their absence does not block Windows packaging, and Windows evidence never promotes them.
+F8 consumes the accepted F3 through F7 components without widening their native CUDA support claims. The implemented native runtime remains Windows x64. Node 26.1.0 or later and unconfirmed Windows CUDA hardware may operate for testing; only the exact Node 26.7.0 and accepted CUDA 13.3/Driver/GPU profile carry qualified evidence. Native Linux x64, Linux ARM64 SBSA, and WSL2 retain their incomplete backend paths. Their absence does not block Windows packaging, and Windows evidence never promotes them.
 
 F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, concurrent launches or compilation, broader memory kinds, callbacks, cancellation, crash recovery, performance claims, UMCGS integration, or native Linux CUDA support.
 
 ## Package boundary
 
-The repository root is the package root. `runtime.facade` owns the public API. Production implementation remains in registered components; the root contains metadata and scripts only. The package is ESM-only, has no runtime dependency, ships no project-specific native binary, and declares exact Node 26.7.0 compatibility.
+The repository root is the package root. `runtime.facade` owns the public API. Production implementation remains in registered components; the root contains metadata and scripts only. The package is ESM-only, has no runtime dependency, ships no project-specific native binary, is not marked private, and declares Node 26.1.0 as its minimum known-operational testing substrate. Exact Node 26.7.0 remains the qualified evidence baseline.
 
 The package exposes only:
 
@@ -24,7 +26,7 @@ The package exposes only:
 
 Component internals, actor constructors, testing hooks, schemas, experiments, build output, native oracles, provider paths, and raw compatibility inputs are not package exports. Direct filesystem deep imports are unsupported.
 
-The package remains guarded against accidental registry publication until the owner selects a package license and a separately authorized release completes legal, provenance, and registry checks. A versioned tarball and installation from the public repository are the accepted F8 distribution forms.
+The public package manifest permits deliberate distribution, while registry publication remains pending until the owner selects a package license and a separately authorized release completes legal, provenance, and registry checks. A versioned tarball and installation from the public repository are the accepted F8 distribution forms.
 
 ## Public facade contract
 
@@ -33,7 +35,7 @@ The package remains guarded against accidental registry publication until the ow
 - `driver`: optional accepted DriverActor queue, memory, and execution policy;
 - `compiler`: `false` by default, `true` for a cache-disabled compiler, or accepted cache options.
 
-Opening performs host, Node, FFI, and permission preflight before native provider work. It then opens one DriverActor, assesses the copied Driver description, and optionally opens one CompilerActor. A later open failure closes every owner that was already acquired before rejecting.
+Opening rejects only known-incompatible host, Node, FFI, permission, provider, or device-safety conditions before or during native provider work. It then opens one DriverActor, assesses the copied Driver description, permits `testing-unconfirmed` operation without a separate opt-in, and optionally opens one CompilerActor. A later open failure closes every owner that was already acquired before rejecting.
 
 The runtime exposes:
 
@@ -63,7 +65,7 @@ All facade failures use `CudaJsError`. Stable fields are `code`, `category`, `op
 The committed compatibility manifest identifies:
 
 - package version and public API schema;
-- exact Node version and module ABI;
+- minimum operational Node substrate, exact qualified Node version/module ABI, and unconfirmed-operation policy;
 - supported, qualification-required, diagnostic-only, and unsupported hosts;
 - accepted CUDA header, Driver API, compiler/linker provider, artifact, memory, and execution profiles;
 - permission and launch requirements;
@@ -100,7 +102,7 @@ CJS-F8 is complete only when:
 
 - this specification, package metadata, component ownership, registry, support matrix, status, next-step record, and validation policy agree;
 - package exports reveal only the accepted public, compatibility, and mock-testing surfaces;
-- exact Node 26.7.0 tarball, install, import, two-consumer, two-instance, first-consumer-deletion, and uninstall checks pass;
+- exact Node 26.7.0 tarball, install, import, two-consumer, two-instance, first-consumer-deletion, and uninstall qualification checks pass, while package metadata admits Node 26.1.0-or-later testing candidates;
 - public resources hide actor tokens and reject cross-runtime, wrong-kind, closed, and post-runtime-close use;
 - public errors and descriptions contain no native capability or provider path;
 - the exact Windows package consumer passes native vector execution and graceful aggregate teardown;

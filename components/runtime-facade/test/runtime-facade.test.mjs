@@ -13,8 +13,10 @@ function expectCode(code) {
 }
 
 test('compatibility and host inspection are immutable and do not open CUDA', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.0');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.1');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
+  assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
+  assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY), true);
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.nativeProfiles), true);
   const inspection = inspectCudaHost();
@@ -143,4 +145,19 @@ test('open failure reports restart-required when an acquired owner cannot close'
     openDriver: async () => driver,
     openCompiler: async () => { throw Object.assign(new Error('compiler open'), { code: 'COMPILER_OPEN', category: 'provider' }); },
   }, () => ({ status: 'mock-only' })), expectCode('CUDA_JS_OPEN_CLEANUP_UNPROVED'));
+});
+
+test('unconfirmed profiles operate while known-incompatible profiles close and reject', async () => {
+  const closed = [];
+  const adapter = {
+    health: 'healthy',
+    async describe() { return { claim: 'candidate' }; },
+    async close() { closed.push('driver'); return { graceful: true, workerExited: true, workerExitCode: 0 }; },
+  };
+  const candidate = await openCudaRuntimeWithAdapters({}, { openDriver: async () => adapter, openCompiler: async () => null }, () => ({ status: 'testing-unconfirmed', reason: 'PROFILE_EVIDENCE_UNCONFIRMED' }));
+  assert.equal((await candidate.describe()).support.status, 'testing-unconfirmed');
+  assert.equal((await candidate.close()).graceful, true);
+
+  await assert.rejects(openCudaRuntimeWithAdapters({}, { openDriver: async () => adapter, openCompiler: async () => null }, () => ({ status: 'incompatible', reason: 'KNOWN_INCOMPATIBLE_FIXTURE' })), expectCode('CUDA_JS_PROFILE_INCOMPATIBLE'));
+  assert.deepEqual(closed, ['driver', 'driver']);
 });

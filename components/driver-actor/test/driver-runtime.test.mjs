@@ -26,6 +26,7 @@ test('mock facade preserves context identity across turns and closes determinist
   assert.equal(Object.isFrozen(description.context), true);
   assert.equal(description.runtime.backend, 'mock');
   assert.equal(description.profile.nativeQualified, false);
+  assert.equal(description.profile.nativeOperational, false);
   assert.deepEqual(description.inventory.counts, { live: 2, closing: 0, closed: 0, orphaned: 0 });
 
   const turnOne = await first.runtime.contextStatus(description.context);

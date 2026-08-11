@@ -1,6 +1,7 @@
 import os from 'node:os';
 
-const NODE_VERSION = 'v26.7.0';
+const MINIMUM_NODE_VERSION = 'v26.1.0';
+const QUALIFIED_NODE_VERSION = 'v26.7.0';
 const HOST_FIELDS = Object.freeze(['architecture', 'nodeAbi', 'nodeVersion', 'osRelease', 'osVersion', 'platform', 'procVersion']);
 const BINARY_ATTRIBUTES = Object.freeze(['integrated', 'kernelExecTimeout', 'tccDriver']);
 
@@ -33,6 +34,21 @@ export function permissionState({ permissionEnabled, ffiAllowed }) {
   return ffiAllowed ? 'explicit-ffi' : 'ffi-denied';
 }
 
+export function classifyNodeRuntime(version) {
+  const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  if (!match) return frozen({ disposition: 'known-incompatible', reason: 'NODE_VERSION_INVALID', minimumVersion: MINIMUM_NODE_VERSION, qualifiedVersion: QUALIFIED_NODE_VERSION });
+  const actual = match.slice(1).map(Number);
+  const minimum = [26, 1, 0];
+  const comparison = actual.findIndex((value, index) => value !== minimum[index]);
+  const atLeastMinimum = comparison === -1 || actual[comparison] > minimum[comparison];
+  return frozen({
+    disposition: atLeastMinimum ? (version === QUALIFIED_NODE_VERSION ? 'qualified-experimental' : 'testing-unconfirmed') : 'known-incompatible',
+    reason: atLeastMinimum ? null : 'NODE_FFI_SUBSTRATE_UNAVAILABLE',
+    minimumVersion: MINIMUM_NODE_VERSION,
+    qualifiedVersion: QUALIFIED_NODE_VERSION,
+  });
+}
+
 export function classifyHost(input) {
   if (!exactFields(input, HOST_FIELDS)) throw Object.assign(new Error('Host profile fields are invalid.'), { code: 'PLATFORM_PROFILE_INVALID' });
   const platform = boundedString(input.platform, 'platform', 32);
@@ -59,7 +75,7 @@ export function classifyHost(input) {
       : hostKind === 'linux-native-arm64' ? 'complete-independent-sbsa-qualification'
         : hostKind.startsWith('wsl') ? 'run-separate-wsl2-qualification'
           : 'use-a-documented-host-profile';
-  return frozen({ schemaVersion: 1, node: { version: nodeVersion, abi: nodeAbi }, platform, architecture, os: { release: osRelease, version: osVersion }, hostKind, disposition, action });
+  return frozen({ schemaVersion: 1, node: { version: nodeVersion, abi: nodeAbi, ...classifyNodeRuntime(nodeVersion) }, platform, architecture, os: { release: osRelease, version: osVersion }, hostKind, disposition, action });
 }
 
 export function inspectHostProfile(overrides = {}) {
@@ -83,18 +99,19 @@ export function inspectHostProfile(overrides = {}) {
 }
 
 function fail(reason, host, details = {}) {
-  return frozen({ schemaVersion: 1, status: 'unsupported', reason, host, details });
+  return frozen({ schemaVersion: 1, status: 'incompatible', reason, host, details });
 }
 
 export function assessCudaSupport(host, driverDescription) {
   if (!plainObject(host) || host.schemaVersion !== 1 || !plainObject(host.node) || !plainObject(host.ffi)) return fail('HOST_PROFILE_INVALID', null);
   if (!['unrestricted-process', 'explicit-ffi', 'ffi-denied'].includes(host.ffi.permission) || typeof host.ffi.experimental !== 'boolean') return fail('HOST_PROFILE_INVALID', null);
-  if (host.hostKind !== 'windows-native-x64') return fail(host.hostKind?.startsWith('wsl') ? 'WSL_QUALIFICATION_REQUIRED' : host.hostKind?.startsWith('linux-native') ? 'LINUX_QUALIFICATION_REQUIRED' : 'HOST_UNSUPPORTED', host);
-  if (host.node.version !== NODE_VERSION) return fail('NODE_VERSION_UNSUPPORTED', host, { required: NODE_VERSION, actual: host.node.version });
+  if (host.hostKind !== 'windows-native-x64') return fail(host.hostKind?.startsWith('wsl') ? 'WSL_BACKEND_UNAVAILABLE' : host.hostKind?.startsWith('linux-native') ? 'LINUX_BACKEND_UNAVAILABLE' : 'HOST_BACKEND_UNAVAILABLE', host);
+  const nodeRuntime = classifyNodeRuntime(host.node.version);
+  if (nodeRuntime.disposition === 'known-incompatible') return fail('NODE_SUBSTRATE_INCOMPATIBLE', host, { minimum: nodeRuntime.minimumVersion, actual: host.node.version, reason: nodeRuntime.reason });
   if (host.ffi.experimental !== true) return fail('EXPERIMENTAL_FFI_REQUIRED', host);
   if (host.ffi.permission === 'ffi-denied') return fail('FFI_PERMISSION_REQUIRED', host);
-  if (!plainObject(driverDescription) || driverDescription.schemaVersion !== 1 || driverDescription.profile?.nativeQualified !== true || driverDescription.runtime?.backend !== 'windows-native'
-      || driverDescription.profile?.platform !== 'win32' || driverDescription.profile?.architecture !== 'x64' || driverDescription.profile?.node !== host.node.version) return fail('WINDOWS_DRIVER_QUALIFICATION_REQUIRED', host);
+  if (!plainObject(driverDescription) || driverDescription.schemaVersion !== 1 || driverDescription.profile?.nativeOperational !== true || driverDescription.runtime?.backend !== 'windows-native'
+      || driverDescription.profile?.platform !== 'win32' || driverDescription.profile?.architecture !== 'x64' || driverDescription.profile?.node !== host.node.version) return fail('WINDOWS_DRIVER_BACKEND_INCOMPATIBLE', host);
   if (!Number.isSafeInteger(driverDescription.driver?.apiVersion) || driverDescription.driver.apiVersion < 1 || driverDescription.device?.ordinal !== 0) return fail('WINDOWS_DRIVER_DESCRIPTION_INVALID', host);
   const attributes = driverDescription.device?.attributes;
   if (!plainObject(attributes)) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host);
@@ -105,8 +122,8 @@ export function assessCudaSupport(host, driverDescription) {
   if (attributes.computeMode === 2) return fail('CUDA_COMPUTE_MODE_PROHIBITED', host, { driverModel, computeMode: computeModes[attributes.computeMode] });
   return frozen({
     schemaVersion: 1,
-    status: 'accepted',
-    reason: null,
+    status: 'testing-unconfirmed',
+    reason: 'PROFILE_EVIDENCE_UNCONFIRMED',
     host,
     cuda: {
       driverApiVersion: driverDescription.driver.apiVersion,
@@ -116,6 +133,6 @@ export function assessCudaSupport(host, driverDescription) {
       integrated: attributes.integrated === 1,
       computeMode: computeModes[attributes.computeMode],
     },
-    claim: 'exact-windows-f7w-diagnostic-profile',
+    claim: 'testing-only-unconfirmed-profile',
   });
 }

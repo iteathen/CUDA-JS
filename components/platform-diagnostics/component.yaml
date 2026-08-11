@@ -14,8 +14,8 @@
     "owner": "runtime.platform-diagnostics",
     "lifecycle": "Pure frozen records only; the component owns no Worker, provider, native resource, cache, or external process.",
     "design": {
-      "owned_invariant": "No heuristic or portable record promotes native support, and every unknown or contradictory profile fails closed.",
-      "public_ports": ["classifyHost", "inspectHostProfile", "assessCudaSupport", "permissionState"],
+      "owned_invariant": "No heuristic, portable record, or successful unconfirmed operation promotes native support; only known-incompatible or contradictory safety facts block testing operation.",
+      "public_ports": ["classifyHost", "classifyNodeRuntime", "inspectHostProfile", "assessCudaSupport", "permissionState"],
       "injected_dependencies": ["bounded host facts", "sanitized DriverActor description"],
       "adapter_boundaries": ["operating-system facts", "DriverActor public description"],
       "simplest_sufficient_total_system": "One pure classifier and one fail-closed CUDA-device assessment over copied ordinary records."

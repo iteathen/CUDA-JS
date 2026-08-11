@@ -301,7 +301,7 @@
         "second-instance fit",
         "honest strict-JIT disposition"
       ],
-      "accepted": "SPEC-0008; guarded cuda-js 0.1.0-alpha.0 package, public facade, compatibility manifest, two clean consumers, install/uninstall, native Windows vector execution, and retained Linux qualification handoff"
+      "accepted": "SPEC-0008 amended; public-testing cuda-js 0.1.0-alpha.1 package, unconfirmed Windows operation, exact support evidence, public facade, compatibility manifest, two clean consumers, install/uninstall, native Windows vector execution, and retained Linux backend handoff"
     },
     {
       "id": "CJS-F9",

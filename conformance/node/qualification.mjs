@@ -22,6 +22,7 @@ export function validateRegistry(registry, packageJson) {
   invariant(registry.schemaVersion === 1, 'Node support registry schemaVersion must be 1.');
   invariant(registry.supportDocument === 'docs/NODE_SUPPORT.md', 'Unexpected Node support-document owner.');
   invariant(packageJson.engines?.node === registry.packageEngine, 'Package engine and Node support registry disagree.');
+  invariant(/^v\d+\.\d+\.\d+$/.test(registry.qualifiedVersion), 'A qualified exact Node version is required.');
   invariant(Number.isSafeInteger(registry.coordinationIssue) && registry.coordinationIssue > 0, 'Node coordination issue is required.');
   invariant(Array.isArray(registry.upstreamSources) && registry.upstreamSources.length >= 4, 'Official Node sources are required.');
   invariant(Array.isArray(registry.versions) && registry.versions.length >= 10, 'The exact Node matrix is incomplete.');
@@ -33,16 +34,17 @@ export function validateRegistry(registry, packageJson) {
 
   unique(registry.versions.map((entry) => entry.version), 'Node versions');
   const qualified = registry.versions.filter((entry) => entry.cudaJsStatus === 'qualified-experimental');
-  invariant(qualified.length === 1 && qualified[0].version === `v${registry.packageEngine}`, 'Only the exact package engine may be qualified.');
+  invariant(qualified.length === 1 && qualified[0].version === registry.qualifiedVersion, 'Only the exact qualified Node baseline may carry a support claim.');
   for (const entry of registry.versions) {
     invariant(/^v\d+\.\d+\.\d+$/.test(entry.version), `Invalid Node version ${entry.version}.`);
     invariant(/^\d+$/.test(entry.moduleAbi), `${entry.version} needs a numeric module ABI.`);
     invariant(typeof entry.ffiExpected === 'boolean', `${entry.version} needs an FFI expectation.`);
-    invariant(['qualified-experimental', 'no-support'].includes(entry.cudaJsStatus), `${entry.version} has an invalid CUDA-JS status.`);
+    invariant(['qualified-experimental', 'testing-unconfirmed', 'known-incompatible'].includes(entry.cudaJsStatus), `${entry.version} has an invalid CUDA-JS status.`);
     invariant(typeof entry.reason === 'string' && entry.reason.length > 0, `${entry.version} needs a reason.`);
     invariant(typeof entry.evidence === 'string' && entry.evidence.length > 0, `${entry.version} needs an evidence disposition.`);
-    if (entry.cudaJsStatus === 'no-support') invariant(entry.version !== `v${registry.packageEngine}`, 'The package engine cannot be no-support.');
-    if (!entry.ffiExpected) invariant(entry.cudaJsStatus === 'no-support', `${entry.version} cannot be supported without the required FFI substrate.`);
+    if (entry.cudaJsStatus === 'qualified-experimental') invariant(entry.version === registry.qualifiedVersion, 'Only the qualified baseline may carry a support claim.');
+    if (entry.cudaJsStatus === 'testing-unconfirmed') invariant(entry.ffiExpected, `${entry.version} cannot operate as a candidate without the required FFI substrate.`);
+    if (!entry.ffiExpected) invariant(entry.cudaJsStatus === 'known-incompatible', `${entry.version} must be known-incompatible without the required FFI substrate.`);
   }
 }
 
@@ -56,7 +58,7 @@ export function renderSupportDocument(registry) {
     '',
     'This list is generated from [`conformance/node/registry.json`](../conformance/node/registry.json). CUDA-JS support is an exact Node-version and host-profile claim. Upstream LTS status, a matching module ABI, or a successful `node:ffi` import does not establish CUDA-JS support.',
     '',
-    `The package currently declares exact Node ${registry.packageEngine}. [Issue #${registry.coordinationIssue}](https://github.com/iteathen/CUDA-JS/issues/${registry.coordinationIssue}) coordinates additional qualification.`,
+    `The package admits Node ${registry.packageEngine} for testing. Only exact ${registry.qualifiedVersion} carries qualified evidence. [Issue #${registry.coordinationIssue}](https://github.com/iteathen/CUDA-JS/issues/${registry.coordinationIssue}) coordinates additional qualification.`,
     '',
     '## Exact version matrix',
     '',
@@ -74,7 +76,7 @@ export function renderSupportDocument(registry) {
     '',
     'For every listed exact release, CI verifies the version and module ABI, attempts `node:ffi` only through its required flag, checks the expected public exports, and—where FFI exists—checks permission denial without FFI authority and progression to ordinary loader handling with explicit authority.',
     '',
-    'A passing probe below Node 26.7.0 is deliberately still **no support**. Promotion additionally requires EXP-000 on each promoted host architecture and the complete native CUDA-JS hardware/profile chain on the same exact Node release.',
+    'A passing FFI-capable release is allowed to operate as **testing unconfirmed** without an opt-in switch. That permits evidence collection but does not create a support claim. Releases without the required FFI substrate are **known incompatible**. Promotion still requires EXP-000 on each promoted host architecture and the complete native CUDA-JS hardware/profile chain on the same exact Node release.',
     '',
     '## Promotion and invalidation',
     '',
@@ -156,7 +158,7 @@ export function probeCurrentVersion(registry) {
     reason: expected.reason,
     claimLimits: [
       'This probe validates only the exact Node substrate and permission behavior recorded here.',
-      'Only exact Node v26.7.0 is currently qualified for CUDA-JS; a probe pass cannot promote another release.',
+      'Only exact Node v26.7.0 is currently qualified for CUDA-JS; other FFI-capable releases operate as testing-unconfirmed and a probe pass cannot promote them.',
     ],
   };
 }

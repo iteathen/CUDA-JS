@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { assessCudaSupport, classifyHost, inspectHostProfile, permissionState } from '../index.mjs';
+import { assessCudaSupport, classifyHost, classifyNodeRuntime, inspectHostProfile, permissionState } from '../index.mjs';
 
 function host(overrides = {}) {
   return inspectHostProfile({
-    nodeVersion: 'v26.7.0', nodeAbi: '141', platform: 'win32', architecture: 'x64',
+    nodeVersion: 'v26.7.0', nodeAbi: '147', platform: 'win32', architecture: 'x64',
     osRelease: '10.0.26200', osVersion: 'Windows 11', procVersion: '',
     execArgv: ['--experimental-ffi'], permissionEnabled: false, ...overrides,
   });
@@ -15,7 +15,7 @@ function driver(overrides = {}) {
   return {
     schemaVersion: 1,
     runtime: { backend: 'windows-native' },
-    profile: { nativeQualified: true, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
+    profile: { nativeOperational: true, nativeQualified: false, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
     driver: { apiVersion: 13030 },
     device: { ordinal: 0, attributes: { kernelExecTimeout: 1, integrated: 0, computeMode: 0, tccDriver: 0, ...overrides } },
   };
@@ -38,13 +38,21 @@ test('permission and launch diagnostics fail closed', () => {
   assert.equal(permissionState({ permissionEnabled: true, ffiAllowed: false }), 'ffi-denied');
   assert.equal(assessCudaSupport(host({ execArgv: [] }), driver()).reason, 'EXPERIMENTAL_FFI_REQUIRED');
   assert.equal(assessCudaSupport(host({ permissionEnabled: true, ffiAllowed: false }), driver()).reason, 'FFI_PERMISSION_REQUIRED');
-  assert.equal(assessCudaSupport(host({ nodeVersion: 'v26.7.1' }), driver()).reason, 'NODE_VERSION_UNSUPPORTED');
-  assert.equal(assessCudaSupport(host({ platform: 'linux', osVersion: 'Linux' }), driver()).reason, 'LINUX_QUALIFICATION_REQUIRED');
+  assert.equal(classifyNodeRuntime('v26.0.0').disposition, 'known-incompatible');
+  assert.equal(classifyNodeRuntime('v26.6.0').disposition, 'testing-unconfirmed');
+  assert.equal(classifyNodeRuntime('v26.7.0').disposition, 'qualified-experimental');
+  assert.equal(classifyNodeRuntime('v27.0.0').disposition, 'testing-unconfirmed');
+  assert.equal(assessCudaSupport(host({ nodeVersion: 'v26.0.0' }), driver()).reason, 'NODE_SUBSTRATE_INCOMPATIBLE');
+  const candidateDriver = driver();
+  candidateDriver.profile.node = 'v26.6.0';
+  assert.equal(assessCudaSupport(host({ nodeVersion: 'v26.6.0' }), candidateDriver).status, 'testing-unconfirmed');
+  assert.equal(assessCudaSupport(host({ platform: 'linux', osVersion: 'Linux' }), driver()).reason, 'LINUX_BACKEND_UNAVAILABLE');
 });
 
 test('Windows CUDA diagnostics distinguish WDDM watchdog and TCC without changing device state', () => {
   const wddm = assessCudaSupport(host(), driver());
-  assert.equal(wddm.status, 'accepted');
+  assert.equal(wddm.status, 'testing-unconfirmed');
+  assert.equal(wddm.claim, 'testing-only-unconfirmed-profile');
   assert.equal(wddm.cuda.driverModel, 'wddm-watchdog');
   assert.equal(wddm.cuda.watchdog, 'enabled');
   assert.equal(Object.isFrozen(wddm.cuda), true);

@@ -3,7 +3,7 @@
   "component": {
     "id": "runtime.facade",
     "name": "CUDA-JS Public Runtime Facade",
-    "status": "accepted-f8w-public-experimental",
+    "status": "public-testing-alpha-exact-f8w-evidence",
     "product_area": "components",
     "path": "components/runtime-facade",
     "purpose": "Expose one safe asynchronous package API over accepted DriverActor, CompilerActor, resource, execution, and diagnostic contracts without leaking private actor or native capabilities.",

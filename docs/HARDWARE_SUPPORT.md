@@ -6,6 +6,8 @@
 
 This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
 
+CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.
+
 ## Directly qualified hardware
 
 | GPU | Compute capability | Host profile | Node | Driver / API | Toolkit | Qualified surface | Evidence |
@@ -101,6 +103,7 @@ The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile
 ## Claim limits
 
 - Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.
+- Successful operation on unconfirmed hardware is test evidence, not a support claim.
 - A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.
 - CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner profiles remain no-support.
 - Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.

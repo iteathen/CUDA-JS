@@ -6,7 +6,7 @@ This component turns the accepted Windows bootstrap into a bounded asynchronous 
 
 The component surface is [`index.mjs`](index.mjs):
 
-- `openDriverRuntime()` opens the exact Windows x64 Node 26.7.0 profile;
+- `openDriverRuntime()` opens the Windows x64 backend on Node 26.1.0 or later; exact Node 26.7.0 remains the qualified evidence baseline while other operational releases remain testing-unconfirmed;
 - `runtime.describe()` returns bounded Driver/device metadata, health, inventory, and an opaque context token;
 - `runtime.contextStatus(token)` verifies on the owning Worker that the same private context remains current;
 - `runtime.allocateDevice`, `memoryStatus`, `writeDevice`, `readDevice`, and `releaseMemory` provide the bounded synchronous copied-byte contract from SPEC-0004;

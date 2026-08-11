@@ -233,7 +233,7 @@ Support matrix claims match exact native evidence; unsupported profiles fail des
 
 First-consumer-deletion and second-instance tests pass; strict JIT claims are either proven, explicitly unsupported, or backed by a separately accepted design.
 
-**Accepted disposition:** Windows F8W publishes the guarded `cuda-js` 0.1.0-alpha.0 no-addon ESM package boundary with exact Node 26.7.0 compatibility, a safe facade over accepted actors, immutable compatibility metadata, mock-only consumer testing, clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, and installed-package native vector execution. Linux package/import/mock/readiness controls pass without a native CUDA claim. EXP-010 and EXP-011 are not triggered because no mandatory isolation, callable-pointer, or strict-JIT gap is measured; Worker loss remains restart-required and strict JIT remains unsupported.
+**Accepted disposition, amended for public testing:** Windows F8W publishes the non-private `cuda-js` 0.1.0-alpha.1 no-addon ESM package boundary with Node 26.1.0-or-later testing admission, exact Node 26.7.0 qualification evidence, unconfirmed Windows CUDA operation without an opt-in, a safe facade over accepted actors, immutable compatibility metadata, mock-only consumer testing, clean tarball install/uninstall, first-consumer deletion, two unrelated consumers, and installed-package native vector execution. Linux package/import/mock/readiness controls pass without a native CUDA claim and remain backend-incomplete. EXP-010 and EXP-011 are not triggered because no mandatory isolation, callable-pointer, or strict-JIT gap is measured; Worker loss remains restart-required and strict JIT remains unsupported.
 
 ### CJS-F9 — UMCGS public interop (P2/P3)
 

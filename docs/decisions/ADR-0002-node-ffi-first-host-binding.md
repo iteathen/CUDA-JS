@@ -73,7 +73,7 @@ If the owner later requires guaranteed JIT dispatch for every cold and hot call,
 ## Consequences
 
 - Initial implementation burden and ABI risk fall substantially.
-- Node 26 with `--experimental-ffi` becomes a minimum experimental runtime dependency.
+- Node 26.1.0 with `--experimental-ffi` becomes the minimum known-operational testing substrate. Later unconfirmed releases may run; exact-profile evidence still controls support claims.
 - Release claims must state the exact Node version and FFI profile.
 - Fast-path qualification, conformance, and performance calibration become explicit gates; until they pass, no `fast-jit-required` support claim exists.
 - The schema must distinguish hot-call eligibility from generic-call support.

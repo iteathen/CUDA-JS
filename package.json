@@ -1,13 +1,13 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
-  "private": true,
+  "private": false,
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,
   "engines": {
-    "node": "26.7.0"
+    "node": ">=26.1.0"
   },
   "exports": {
     ".": {

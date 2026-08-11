@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.0",
+    "version": "0.1.0-alpha.1",
     "format": "esm",
     "nativeAddon": false,
-    "registryPublication": "guarded"
+    "registryPublication": "not-yet-released",
+    "private": false,
+    "testingPhase": true
   },
   "publicApi": {
     "schemaVersion": 1,
@@ -15,6 +17,8 @@
   "node": {
     "version": "v26.7.0",
     "moduleAbi": "147",
+    "minimumVersion": "v26.1.0",
+    "operationPolicy": "testing-unconfirmed-at-or-above-minimum",
     "ffi": "experimental",
     "requiredFlags": ["--experimental-ffi"],
     "permissionRequirement": "--allow-ffi when the permission model is active"
@@ -22,7 +26,8 @@
   "nativeProfiles": [
     {
       "host": "windows-native-x64",
-      "status": "accepted-experimental",
+      "status": "testing-unconfirmed-by-default",
+      "qualifiedEvidence": "exact GTX 1660 Ti / Node v26.7.0 / Driver API 13030 profile only",
       "abi": "win64",
       "cudaHeader": "13.3.29",
       "cudaHeaderSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
@@ -31,15 +36,15 @@
     },
     {
       "host": "linux-native-x64",
-      "status": "qualification-required"
+      "status": "backend-unavailable"
     },
     {
       "host": "linux-native-arm64",
-      "status": "qualification-required"
+      "status": "backend-unavailable"
     },
     {
       "host": "wsl2-x64",
-      "status": "diagnostic-only"
+      "status": "backend-unavailable"
     }
   ],
   "capabilities": {
@@ -68,7 +73,8 @@
     "resource ownership, lifetime, error, health, or cleanup behavior"
   ],
   "claimLimits": [
-    "Exact Windows x64 Node 26.7.0 native profile only.",
+    "Unconfirmed Windows x64 CUDA profiles may operate for testing without a separate opt-in.",
+    "Only the exact Windows x64 Node 26.7.0 evidence profile is qualified; successful operation does not promote support.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "Registry publication and licensing remain separately gated."

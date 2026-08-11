@@ -45,7 +45,7 @@ for (let index = 0; index < 8; index += 1) {
   const runtime = await openDriverRuntime();
   const description = await runtime.describe();
   const assessment = assessCudaSupport(host, description);
-  assert.equal(assessment.status, 'accepted');
+  assert.equal(assessment.status, 'testing-unconfirmed');
   const terminal = await runtime.close();
   assert.equal(terminal.graceful, true);
   assert.equal(terminal.workerExitCode, 0);
@@ -99,7 +99,7 @@ await writeEvidence('native-windows.json', {
     'conformance/f7/permission-probe.mjs',
   ]),
   observations: { driverCycles, compilerCycles, permissions, elapsedMilliseconds, rssBefore, rssAfter, rssGrowthBytes },
-  claimLimits: ['Exact Windows x64 Node 26.7.0 CUDA 13.3 profile only.', 'Elapsed time and process memory are broad regression observations, not performance claims.', 'No device state is changed.', 'No WSL or native Linux CUDA support claim.'],
+  claimLimits: ['Execution is a testing-phase operation and does not promote support.', 'Exact Windows x64 Node 26.7.0 CUDA 13.3 evidence identity only.', 'Elapsed time and process memory are broad regression observations, not performance claims.', 'No device state is changed.', 'No WSL or native Linux CUDA support claim.'],
 });
 
 console.log(`F7W native conformance passed: ${driverCycles[0].assessment.cuda.driverModel}, watchdog ${driverCycles[0].assessment.cuda.watchdog}, 16 graceful native actor cycles, and explicit permission denial/allow.`);
