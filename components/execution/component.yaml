@@ -18,7 +18,7 @@
       "public_ports": ["ExecutionManager", "normalizeExecutionPolicy", "parameterLayout", "packParameterValues", "ExecutionError"],
       "injected_dependencies": ["resource registry", "context token", "memory lease port", "device limits", "backend operations"],
       "adapter_boundaries": ["Windows DriverActor execution backend", "platform-neutral orchestration mock"],
-      "simplest_sufficient_total_system": "One PTX-only policy owner, one private stream, one launch at a time, one event poller, and explicit resource dependencies."
+      "simplest_sufficient_total_system": "One bounded PTX/cubin policy owner, one private stream, one launch at a time, one event poller, and explicit resource dependencies."
     }
   }
 }

@@ -1,0 +1,8 @@
+extern "C" __global__ void vector_add(
+    const unsigned int* left,
+    const unsigned int* right,
+    unsigned int* output,
+    unsigned int count) {
+  unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < count) output[index] = left[index] + right[index];
+}

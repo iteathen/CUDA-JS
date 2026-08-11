@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-10
 
-**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W, and Windows CJS-F4W are accepted. The F3/F4 platform-neutral capsules pass in native Linux CI. Native Linux EXP-001 and Linux DriverActor/memory execution remain incomplete, hardware-deferred, and independently gated.
+**Current authorization:** EXP-000 is promoted on independent Windows x64 and native Linux x86-64 evidence. F1B schema/ABI preparation, Windows EXP-012, CJS-F3W through CJS-F5W, and Windows EXP-009/CJS-F6W are accepted. The F3 through F6 platform-neutral capsules pass without native Linux providers. Native Linux EXP-001 and Linux DriverActor/compiler execution remain incomplete, hardware-deferred, and independently gated.
 
 Every result records exact Node build/flags, OS/ISA/ABI, schema/header/generator, source/artifact, configuration, fixture, command, and cleanup identity. CUDA Driver/toolkit/GPU identity is required when CUDA is involved and explicitly `not applicable` for GPU-free experiments. Performance is not correctness evidence.
 
@@ -103,6 +103,10 @@ Test device-local copies, pinned staging, mapped windows, managed memory, GC pre
 Compile, log, emit, link, load, launch, cache, corrupt, invalidate, and cleanly reproduce PTX/cubin/LTO artifacts where supported. Run a GPU-free NVRTC compile capsule separately from Driver module-load/launch. On Linux compare the accepted `-modify-stack-limit=false` profile with an instrumented process-limit observation; route any provider with unavoidable process-global effects to the child-process compiler profile.
 
 **Promotion:** complete deterministic key and equivalent clean-room result; no unexpected process-global mutation and no half-live compiler/link/module state.
+
+**Disposition:** promoted for the exact Windows x64 CUDA 13.3 profile. Independent MSVC and production Node FFI calls emit byte-identical PTX and cubin across clean runs; the validated cache rejects corruption; both artifacts execute through the DriverActor with identical output. Portable cache/lifecycle and Linux option fixtures are retained, while native Linux providers remain unqualified.
+
+**Detailed protocol:** [`exp-009/README.md`](exp-009/README.md).
 
 ## EXP-010 — process isolation profile
 

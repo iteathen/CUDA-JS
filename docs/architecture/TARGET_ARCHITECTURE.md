@@ -113,4 +113,4 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 
 ## Current phase
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, `CJS-F3W`, synchronous copied-device-memory `CJS-F4W`, and bounded PTX launch/completion `CJS-F5W` are accepted on exact evidence. The F3/F4/F5 control plane and deterministic schema generation also pass without authorizing Linux Driver execution. This architecture does not authorize compiler/cache or later production components without accepted detailed specifications and qualified native evidence.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, and Windows `CJS-F6W / EXP-009` are accepted on exact evidence. The F3 through F6 control plane and deterministic schema generation also pass without authorizing native Linux CUDA execution. This architecture does not authorize F7 hardening, packaging, or later production components without accepted detailed specifications and qualified evidence.

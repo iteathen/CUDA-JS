@@ -138,7 +138,10 @@ test('module, function, repeated memory leases, polling, and teardown preserve d
 test('module, schema, launch bounds, argument kinds, and memory offsets fail before unsafe backend work', async () => {
   const { memory, execution, operations } = fixture();
   await execution.initialize();
-  await assert.rejects(execution.loadModule({ format: 'cubin', bytes: PTX }), (error) => error.code === 'EXECUTION_MODULE_FORMAT');
+  await assert.rejects(execution.loadModule({ format: 'fatbin', bytes: PTX }), (error) => error.code === 'EXECUTION_MODULE_FORMAT');
+  const cubin = await execution.loadModule({ format: 'cubin', bytes: Uint8Array.of(0, 1, 255) });
+  assert.equal(cubin.format, 'cubin');
+  await execution.releaseModule(cubin.module);
   await assert.rejects(execution.loadModule({ format: 'ptx', bytes: Uint8Array.of(65, 0, 66) }), (error) => error.code === 'EXECUTION_MODULE_TEXT');
   const module = await execution.loadModule({ format: 'ptx', bytes: PTX });
   await assert.rejects(execution.getFunction(module.module, { name: '../bad', parameters: [{ kind: 'u32' }] }), (error) => error.code === 'EXECUTION_FUNCTION_NAME');

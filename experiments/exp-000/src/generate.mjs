@@ -628,7 +628,9 @@ for (const [name, content] of products) {
     } catch {
       // Report through the common mismatch path.
     }
-    if (existing !== content) {
+    const normalizedExisting = existing?.replaceAll('\r\n', '\n') ?? null;
+    const normalizedContent = content.replaceAll('\r\n', '\n');
+    if (normalizedExisting !== normalizedContent) {
       console.error(`Generated product is stale: ${path.relative(experimentRoot, target)}`);
       mismatches++;
     }

@@ -269,9 +269,9 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
           requireSuccess('cuStreamDestroy_v2', functions.cuStreamDestroy_v2(native), operationId, 'poisoned');
           return { nativeDestroyed: true };
         },
-        async loadModule({ bytes, operationId }) {
+        async loadModule({ format, bytes, operationId }) {
           requireCurrent(operationId);
-          const source = Buffer.alloc(bytes.byteLength + 1);
+          const source = Buffer.alloc(bytes.byteLength + (format === 'ptx' ? 1 : 0));
           Buffer.from(bytes).copy(source);
           const output = pointerOut();
           const status = functions.cuModuleLoadData(output, source);
