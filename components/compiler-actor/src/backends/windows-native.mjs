@@ -12,6 +12,8 @@ import { snapshotHeaderProfile } from '../header-profile.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 const manifestPath = path.join(root, 'schemas', 'cuda-13.3', 'win-x64', 'compiler-provider-manifest.json');
+const NVJITLINK_INPUT_PTX = 2;
+const NVJITLINK_INPUT_LTOIR = 3;
 const NVRTC_DEFINITIONS = Object.freeze({
   nvrtcGetErrorString: { arguments: ['i32'], return: 'pointer' },
   nvrtcVersion: { arguments: ['pointer', 'pointer'], return: 'i32' },
@@ -20,6 +22,8 @@ const NVRTC_DEFINITIONS = Object.freeze({
   nvrtcCompileProgram: { arguments: ['pointer', 'i32', 'pointer'], return: 'i32' },
   nvrtcGetPTXSize: { arguments: ['pointer', 'pointer'], return: 'i32' },
   nvrtcGetPTX: { arguments: ['pointer', 'pointer'], return: 'i32' },
+  nvrtcGetLTOIRSize: { arguments: ['pointer', 'pointer'], return: 'i32' },
+  nvrtcGetLTOIR: { arguments: ['pointer', 'pointer'], return: 'i32' },
   nvrtcGetProgramLogSize: { arguments: ['pointer', 'pointer'], return: 'i32' },
   nvrtcGetProgramLog: { arguments: ['pointer', 'pointer'], return: 'i32' },
 });
@@ -190,6 +194,15 @@ export async function createBackend() {
           log = compileLog(program);
           if (compileStatus !== 0) throw new CompilerRuntimeError('NVRTC_COMPILE_FAILED', 'compile', 'NVRTC compilation failed.', { nativeStatus: compileStatus, nativeMessage: nvrtcMessage(compileStatus), log });
           const sizeStorage = Buffer.alloc(8);
+          if (request.output === 'lto-ir') {
+            const sizeStatus = nvrtc.nvrtcGetLTOIRSize(program, sizeStorage);
+            if (sizeStatus !== 0) throw new CompilerRuntimeError('NVRTC_OUTPUT_FAILED', 'native-compiler', 'NVRTC LTO-IR size query failed.', { nativeStatus: sizeStatus, nativeMessage: nvrtcMessage(sizeStatus) });
+            const size = boundedSize(sizeStorage, 'NVRTC LTO-IR');
+            const output = Buffer.alloc(size);
+            const outputStatus = nvrtc.nvrtcGetLTOIR(program, output);
+            if (outputStatus !== 0) throw new CompilerRuntimeError('NVRTC_OUTPUT_FAILED', 'native-compiler', 'NVRTC LTO-IR extraction failed.', { nativeStatus: outputStatus, nativeMessage: nvrtcMessage(outputStatus) });
+            return { bytes: Uint8Array.from(output), log };
+          }
           const sizeStatus = nvrtc.nvrtcGetPTXSize(program, sizeStorage);
           if (sizeStatus !== 0) throw new CompilerRuntimeError('NVRTC_OUTPUT_FAILED', 'native-compiler', 'NVRTC PTX size query failed.', { nativeStatus: sizeStatus, nativeMessage: nvrtcMessage(sizeStatus) });
           const size = boundedSize(sizeStorage, 'NVRTC PTX');
@@ -217,10 +230,15 @@ export async function createBackend() {
           const handle = pointer(linkStorage);
           for (let index = 0; index < request.inputs.length; index += 1) {
             const input = request.inputs[index];
-            const withNul = Buffer.alloc(input.byteLength + 1);
-            withNul.set(input.bytes);
-            const status = linker.__nvJitLinkAddData_13_3(handle, 2, withNul, BigInt(withNul.byteLength), cString(`input-${index}.ptx`));
-            if (status !== 0) throw new CompilerRuntimeError('NVJITLINK_ADD_FAILED', 'link', 'nvJitLink rejected a PTX input.', { nativeStatus: status, input: index, log: linkLog(handle, 'error') });
+            const inputType = input.format === 'lto-ir' ? NVJITLINK_INPUT_LTOIR : NVJITLINK_INPUT_PTX;
+            const data = input.format === 'lto-ir' ? Buffer.from(input.bytes) : (() => {
+              const withNul = Buffer.alloc(input.byteLength + 1);
+              withNul.set(input.bytes);
+              return withNul;
+            })();
+            const suffix = input.format === 'lto-ir' ? 'ltoir' : 'ptx';
+            const status = linker.__nvJitLinkAddData_13_3(handle, inputType, data, BigInt(data.byteLength), cString(`input-${index}.${suffix}`));
+            if (status !== 0) throw new CompilerRuntimeError('NVJITLINK_ADD_FAILED', 'link', `nvJitLink rejected a ${input.format} input.`, { nativeStatus: status, input: index, log: linkLog(handle, 'error') });
           }
           const completeStatus = linker.__nvJitLinkComplete_13_3(handle);
           const infoLog = linkLog(handle, 'info');
