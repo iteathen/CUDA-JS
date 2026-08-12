@@ -90,8 +90,10 @@ export interface CompilerResult {
   readonly operationSequence: number;
 }
 
+export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32';
+
 export interface FunctionParameter {
-  readonly kind: 'device-memory' | 'u32';
+  readonly kind: FunctionParameterKind;
 }
 
 export interface LaunchDimensions {
@@ -110,13 +112,15 @@ export interface CudaDeviceMemory {
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
+export type CudaLaunchArgument = CudaDeviceMemory | number | bigint;
+
 export interface CudaFunction {
   readonly kind: 'function';
   readonly name: string;
   readonly parameters: readonly FunctionParameter[];
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
-  launch(options: { grid: LaunchDimensions; block: LaunchDimensions; sharedMemoryBytes?: number; arguments: readonly (CudaDeviceMemory | number)[] }): Promise<Readonly<Record<string, unknown>>>;
+  launch(options: { grid: LaunchDimensions; block: LaunchDimensions; sharedMemoryBytes?: number; arguments: readonly CudaLaunchArgument[] }): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
