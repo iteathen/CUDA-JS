@@ -26,6 +26,7 @@ This index defines the minimum documentation foundation that must exist and agre
 
 | Concern | Authoritative document set |
 |---|---|
+| Discoverable capability summary and current-vs-future classification | [`CAPABILITIES.md`](CAPABILITIES.md) — informational summary only; accepted ADRs/specifications remain authority |
 | Mission and product boundary | [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md) |
 | CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
 | Host-binding baseline | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) |
