@@ -1,6 +1,8 @@
 # CUDA Isolation and Restricted Device-JS Plan Amendment
 
-**Status:** Owner-directed plan amendment
+**Status:** Accepted
+
+**Plan authority:** Owner-directed amendment
 
 **Date:** 2026-08-12
 
