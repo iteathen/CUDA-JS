@@ -2,7 +2,14 @@ import { createHash } from 'node:crypto';
 
 const MIB = 1_048_576;
 const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds']);
-const PARAMETER_KINDS = new Set(['device-memory', 'u32']);
+const PARAMETER_KINDS = new Set(['device-memory', 'u32', 'u64', 'i32', 'f32']);
+const PARAMETER_WIDTH = Object.freeze({
+  'device-memory': 8,
+  u32: 4,
+  u64: 8,
+  i32: 4,
+  f32: 4,
+});
 
 export const DEFAULT_EXECUTION_POLICY = Object.freeze({
   maxModuleBytes: 4 * MIB,
@@ -80,7 +87,7 @@ export function parameterLayout(parameters) {
   const entries = parameters.map((parameter, index) => {
     const kind = parameter?.kind;
     if (!PARAMETER_KINDS.has(kind)) fail('EXECUTION_PARAMETER_INVALID', 'validation', 'Parameter kind is unsupported.', { index, kind: kind ?? null });
-    const width = kind === 'device-memory' ? 8 : 4;
+    const width = PARAMETER_WIDTH[kind];
     size = checkedAlign(size, width);
     const entry = Object.freeze({ index, kind, offset: size, byteLength: width, alignment: width });
     size += width;
@@ -103,11 +110,26 @@ export function packParameterValues(parameters, values) {
         fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'Private device-memory value is invalid.', { index: entry.index });
       }
       buffer.writeBigUInt64LE(value, entry.offset);
-    } else {
+    } else if (entry.kind === 'u64') {
+      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) {
+        fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'u64 argument is out of range or not an exact bigint.', { index: entry.index });
+      }
+      buffer.writeBigUInt64LE(value, entry.offset);
+    } else if (entry.kind === 'u32') {
       if (!Number.isInteger(value) || value < 0 || value > 0xffff_ffff) {
         fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'u32 argument is out of range.', { index: entry.index, value });
       }
       buffer.writeUInt32LE(value, entry.offset);
+    } else if (entry.kind === 'i32') {
+      if (!Number.isInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
+        fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'i32 argument is out of range.', { index: entry.index, value });
+      }
+      buffer.writeInt32LE(value, entry.offset);
+    } else if (entry.kind === 'f32') {
+      if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) {
+        fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'f32 argument must be finite and representable without binary32 overflow.', { index: entry.index });
+      }
+      buffer.writeFloatLE(value, entry.offset);
     }
   }
   return Object.freeze({ buffer, layout });
@@ -287,7 +309,7 @@ export class ExecutionManager {
           memoryLeases.push(lease);
           values.push(await this.#operations.devicePointer({ native: lease.native, byteOffset: lease.byteOffset, operationId }));
         } else {
-          if (!exactFields(argument, ['kind', 'value']) || argument.kind !== 'u32') fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Scalar argument does not match its declared kind.', { index });
+          if (!exactFields(argument, ['kind', 'value']) || argument.kind !== parameter.kind) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Scalar argument does not match its declared kind.', { index, expectedKind: parameter.kind });
           values.push(argument.value);
         }
       }
