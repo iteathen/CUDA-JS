@@ -3,6 +3,8 @@
 **Status:** Informational
 
 - [`CAPABILITIES.md`](CAPABILITIES.md) — full discoverable CUDA-JS capability map: accepted behavior, current qualification limits, planned/deferred capability families, concurrency, GPU residency, memory lifetime, runtime compilation, fault isolation, and common classification corrections.
+- [`PUBLIC_REPOSITORY.md`](PUBLIC_REPOSITORY.md) — public-repository security/CI posture, hardening assessment, security-reporting state, and remaining GitHub-settings follow-up.
+- [`../SECURITY.md`](../SECURITY.md) — canonical public security-reporting policy and native/executable trust boundaries.
 - [`SPONSORSHIP.md`](SPONSORSHIP.md) — low-maintenance GitHub Sponsors setup, funding purpose, and no-reward tier text.
 
 ## Authority
@@ -47,4 +49,4 @@
 - [`../experiments/EXP-012-windows-node-ffi-cuda-smoke.md`](../experiments/EXP-012-windows-node-ffi-cuda-smoke.md)
 - [`archive/README.md`](archive/README.md)
 
-Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CAPABILITIES.md` is a discoverability summary and does not widen support or implementation authority. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact evidence. The F3 through F8 portable control/package path passes without establishing native Linux CUDA support. The F9 exact compatible-pair and CUDA-MCGS-owned adapter evidence remain pending; Linux `CJS-F2L / EXP-001` through F9L remain retained, deferred, and incomplete.
+Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CAPABILITIES.md` and `PUBLIC_REPOSITORY.md` are discoverability/operational summaries and do not widen support or implementation authority. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact evidence. The F3 through F8 portable control/package path passes without establishing native Linux CUDA support. The F9 exact compatible-pair and CUDA-MCGS-owned adapter evidence remain pending; Linux `CJS-F2L / EXP-001` through F9L remain retained, deferred, and incomplete.
