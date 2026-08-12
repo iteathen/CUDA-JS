@@ -205,7 +205,7 @@ class CudaFunction {
     if (options.arguments.length !== entry.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Launch argument count must match the function declaration.', { expected: entry.parameters.length, actual: options.arguments.length }, 'function.launch');
     const argumentsForActor = entry.parameters.map((parameter, index) => {
       const value = options.arguments[index];
-      if (parameter.kind === 'u32') return { kind: 'u32', value };
+      if (parameter.kind !== 'device-memory') return { kind: parameter.kind, value };
       const memory = resourceFor(value, entry.runtime, 'device-memory', 'function.launch');
       return { kind: 'device-memory', memory: memory.token };
     });
