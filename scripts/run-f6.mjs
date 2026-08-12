@@ -10,6 +10,7 @@ const unitFiles = [
   'components/compiler-actor/test/compiler-actor.test.mjs',
   'components/compiler-actor/test/relocatable-device-code.test.mjs',
   'components/execution/test/execution-manager.test.mjs',
+  'components/execution/test/scalar-arguments.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
 ];
 
