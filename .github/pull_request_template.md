@@ -14,6 +14,10 @@
 
 ## Public API, unsafe boundary, CUDA-MCGS, and second-consumer effects
 
+## Security, provenance, licensing, and public-repository effects
+
+State whether the change affects credentials, workflow permissions, native/executable trust boundaries, third-party material, contribution/license terms, security reporting, or other public-repository behavior. Link `SECURITY.md`, `LICENSING.md`, or `docs/PUBLIC_REPOSITORY.md` when triggered.
+
 ## Test capsules, mutations/faults, benchmarks, and exact evidence keys
 
 ## Token/backpressure, scope changes, deferred work, and checks not run
@@ -25,4 +29,4 @@
 ## Contributor declarations
 
 - [ ] I have the right to submit this contribution and agree to the contribution license grant in `CONTRIBUTING.md`.
-- [ ] I disclosed third-party code, generated artifacts, unavailable native/Linux checks, and cleanup residue.
+- [ ] I disclosed third-party code, generated artifacts, credentials/security implications, unavailable native/Linux checks, and cleanup residue.

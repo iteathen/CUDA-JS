@@ -3,6 +3,10 @@ on:
   pull_request:
   push:
     branches: [main]
+
+permissions:
+  contents: read
+
 jobs:
   schema:
     runs-on: ubuntu-24.04
@@ -27,6 +31,7 @@ jobs:
         with:
           node-version: 26.7.0
       - run: ./scripts/verify-docs.sh
+      - run: node scripts/verify-public-repository.mjs
       - run: npm run exp:000:build
       - run: npm run exp:000:correctness
       - run: npm run exp:000:lifecycle
