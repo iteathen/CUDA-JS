@@ -13,5 +13,7 @@
 - [`SPEC-0008-package-public-facade.md`](SPEC-0008-package-public-facade.md) — accepted Windows-first F8 contract for the no-addon package, safe public facade, compatibility policy, independent consumer, install/uninstall evidence, and portable Linux handoff.
 - [`SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md`](SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md) — accepted bounded F9 contract for a manifest-verified CUDA CCCL virtual-header profile and generic atomic-publication capability, without consumer semantics.
 - [`SPEC-0010-relocatable-device-code.md`](SPEC-0010-relocatable-device-code.md) — accepted bounded CompilerActor follow-up for typed NVRTC relocatable-device-code compilation and linkable PTX metadata while preserving the existing default compile/link path.
+- [`SPEC-0011-scalar-kernel-arguments.md`](SPEC-0011-scalar-kernel-arguments.md) — accepted bounded execution follow-up adding closed `u64`, `i32`, and `f32` packed scalar argument kinds while preserving legacy launch behavior.
+- [`SPEC-0012-device-lto.md`](SPEC-0012-device-lto.md) — accepted bounded CompilerActor follow-up adding typed LTO-IR compile output and homogeneous device-LTO linking without exposing raw nvJitLink controls.
 
 No production implementation is authorized merely because a function appears in generated schema. Each public component requires accepted ownership, lifecycle, safety, compatibility, conformance, and experiment evidence.
