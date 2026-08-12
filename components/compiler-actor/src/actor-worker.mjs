@@ -71,17 +71,30 @@ try {
             log = native.log;
             await cache.publish(identity, bytes);
           }
+          const artifact = normalized.output === 'lto-ir'
+            ? {
+                format: 'lto-ir',
+                bytes: Uint8Array.from(bytes),
+                byteLength: bytes.byteLength,
+                sha256: sha256(bytes),
+                architecture: normalized.options.architecture,
+                producer: {
+                  profile: backend.provider.identity.profile,
+                  nvrtcVersion: backend.provider.identity.nvrtc?.version ?? '13.3',
+                },
+              }
+            : {
+                format: 'ptx',
+                bytes: Uint8Array.from(bytes),
+                byteLength: bytes.byteLength,
+                sha256: sha256(bytes),
+                architecture: normalized.options.architecture,
+                ...(normalized.options.relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
+              };
           result = {
             schemaVersion: 1,
             operation: 'compile',
-            artifact: {
-              format: 'ptx',
-              bytes: Uint8Array.from(bytes),
-              byteLength: bytes.byteLength,
-              sha256: sha256(bytes),
-              architecture: normalized.options.architecture,
-              ...(normalized.options.relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
-            },
+            artifact,
             log,
             cache: { key: cached.key, status: cached.status },
             provider: publicProvider(backend.provider),
