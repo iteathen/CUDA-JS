@@ -17,7 +17,7 @@ const PROHIBITED_PUBLIC_KEYS = new Set(['cacheDirectory', 'native', 'path', 'sou
 const ABSOLUTE_PATH = /(?:^|[\s'\"])(?:[a-zA-Z]:[\\/]|\\\\|\/[^/\s])/;
 
 const COMPILE_FIELDS = Object.freeze(['headers', 'name', 'options', 'source']);
-const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'headerProfile', 'languageStandard']);
+const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'headerProfile', 'languageStandard', 'relocatableDeviceCode']);
 const LINK_FIELDS = Object.freeze(['inputs', 'options']);
 const LINK_OPTION_FIELDS = Object.freeze(['architecture']);
 const encoder = new TextEncoder();
@@ -110,17 +110,19 @@ export function normalizeCompileOptions(value = {}, platform = process.platform)
   if (!['none', 'cuda-cccl'].includes(headerProfile)) throw compilerError('COMPILER_HEADER_PROFILE_INVALID', 'headerProfile must be none or cuda-cccl.');
   const fmad = value.fmad ?? false;
   const deviceAsDefaultExecutionSpace = value.deviceAsDefaultExecutionSpace ?? false;
-  if (typeof fmad !== 'boolean' || typeof deviceAsDefaultExecutionSpace !== 'boolean') throw compilerError('COMPILER_OPTIONS_INVALID', 'Compile boolean options must be booleans.');
+  const relocatableDeviceCode = value.relocatableDeviceCode ?? false;
+  if (typeof fmad !== 'boolean' || typeof deviceAsDefaultExecutionSpace !== 'boolean' || typeof relocatableDeviceCode !== 'boolean') throw compilerError('COMPILER_OPTIONS_INVALID', 'Compile boolean options must be booleans.');
   const native = [
     `--gpu-architecture=${architecture}`,
     `--std=${languageStandard}`,
     `--fmad=${fmad}`,
     ...(deviceAsDefaultExecutionSpace ? ['--device-as-default-execution-space'] : []),
+    ...(relocatableDeviceCode ? ['--relocatable-device-code=true'] : []),
     '--frandom-seed=0',
     '--no-cache',
     ...(platform === 'linux' ? ['--modify-stack-limit=false'] : []),
   ];
-  return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, headerProfile, native: Object.freeze(native) });
+  return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, headerProfile, relocatableDeviceCode, native: Object.freeze(native) });
 }
 
 export function normalizeLinkOptions(value = {}) {
@@ -162,18 +164,23 @@ function ordinaryBytes(value) { return value instanceof Uint8Array && !Buffer.is
 function normalizePtxInput(value, index) {
   let bytes;
   let architecture = null;
+  let relocatableDeviceCode = false;
   if (ordinaryBytes(value)) bytes = value;
   else if (plainObject(value) && value.format === 'ptx' && ordinaryBytes(value.bytes)) {
     const fields = Object.keys(value);
-    if (fields.some((key) => !['format', 'bytes', 'byteLength', 'sha256', 'architecture'].includes(key))) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact contains unknown fields.', { index });
+    if (fields.some((key) => !['format', 'bytes', 'byteLength', 'sha256', 'architecture', 'relocatableDeviceCode'].includes(key))) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact contains unknown fields.', { index });
     bytes = value.bytes;
     architecture = value.architecture ?? null;
+    if (Object.hasOwn(value, 'relocatableDeviceCode')) {
+      if (value.relocatableDeviceCode !== true) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX relocatableDeviceCode marker, when present, must be true.', { index });
+      relocatableDeviceCode = true;
+    }
     if (Object.hasOwn(value, 'byteLength') && value.byteLength !== bytes.byteLength) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact length does not match bytes.', { index });
     if (Object.hasOwn(value, 'sha256') && value.sha256 !== sha256(bytes)) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact digest does not match bytes.', { index });
   } else throw compilerError('LINKER_INPUT_INVALID', 'Link inputs must be ordinary PTX byte copies or typed PTX artifacts.', { index });
   if (bytes.byteLength < 1 || bytes.byteLength > LIMITS.totalInputBytes || bytes.includes(0)) throw compilerError('LINKER_INPUT_INVALID', 'PTX input is empty, oversized, or contains NUL.', { index });
   const copy = Uint8Array.from(bytes);
-  return Object.freeze({ bytes: copy, byteLength: copy.byteLength, sha256: sha256(copy), architecture });
+  return Object.freeze({ bytes: copy, byteLength: copy.byteLength, sha256: sha256(copy), architecture, relocatableDeviceCode });
 }
 
 export function normalizeLinkRequest(request) {
@@ -198,7 +205,7 @@ export function compileIdentity(request, provider) {
   if (conflictingHeader) throw compilerError('COMPILER_HEADER_PROFILE_CONFLICT', 'Caller headers cannot use a logical name owned by the selected compiler header profile.', { header: conflictingHeader.name });
   return {
     schemaVersion: 1,
-    contractVersion: selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
+    contractVersion: request.options.relocatableDeviceCode ? 'SPEC-0010-v1' : selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
     operation: 'compile',
     platform: provider.platform,
     architecture: provider.architecture,
@@ -211,6 +218,7 @@ export function compileIdentity(request, provider) {
       headers: request.headers.map(({ name, byteLength, sha256: digest }) => ({ name, byteLength, sha256: digest })),
       options: request.options.native,
       ...(selectedHeaderProfile ? { headerProfile: request.options.headerProfile } : {}),
+      ...(request.options.relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
       output: 'ptx',
     },
   };
@@ -228,7 +236,7 @@ export function linkIdentity(request, provider) {
     nodeAbi: provider.nodeAbi,
     provider: baseProvider,
     request: {
-      inputs: request.inputs.map(({ byteLength, sha256: digest }) => ({ format: 'ptx', byteLength, sha256: digest })),
+      inputs: request.inputs.map(({ byteLength, sha256: digest, relocatableDeviceCode }) => ({ format: 'ptx', byteLength, sha256: digest, ...(relocatableDeviceCode ? { relocatableDeviceCode: true } : {}) })),
       options: request.options.native,
       output: 'cubin',
     },
