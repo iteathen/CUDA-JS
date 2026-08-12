@@ -4,6 +4,29 @@
 
 CUDA-JS is a public, pre-release framework for compiling, loading, launching, observing, and tearing down CUDA work from Node.js through finite, versioned, capability-checked contracts. It is deliberately independent of graph search, games, tensor frameworks, neural-network semantics, and any one application.
 
+## Capability map — current profile vs architectural ceiling
+
+For the complete, crawler-friendly capability inventory, read **[`docs/CAPABILITIES.md`](docs/CAPABILITIES.md)**. It separates accepted behavior from planned/deferred capability families and directly answers common classification mistakes.
+
+CUDA-JS is broader than a shallow CUDA wrapper, but intentionally narrower than unrestricted raw native access:
+
+- **No CUDA-JS-specific native addon in the v0 baseline.** CUDA host calls use Node 26's experimental `node:ffi` privately from Worker-owned components; generated ABI facts and reviewed semantics define the approved CUDA surface.
+- **Asynchronous host architecture.** A dedicated `DriverActor` Worker owns one private CUDA context and raw Driver resources. A separate `CompilerActor` Worker owns NVRTC, nvJitLink, compiler/linker logs, artifacts, and cache work. Potentially blocking native work stays off the Node.js application event loop.
+- **Real CUDA stream/event execution today.** The accepted execution path uses a private `CU_STREAM_NON_BLOCKING` stream and private CUDA events with adaptive terminal polling. It is not a legacy-stream-zero-only design.
+- **Current single-flight launch profile is not the architectural ceiling.** One public runtime currently allows one in-flight kernel launch for deterministic ordering/error attribution. Public multi-stream/concurrent launches are not yet qualified, but streams/events/operations are explicit architectural resource families that can be widened by later contracts and evidence.
+- **GPU-resident state is supported with ordinary device memory.** Device allocations persist across launches until explicit release/teardown; CUDA-JS does not require intermediate state to return to JavaScript between kernels. Managed/Unified Memory is a separate, currently unqualified memory kind—not a prerequisite for GPU residency.
+- **Native resource lifetime is explicit, not garbage-collection-driven.** Opaque memory/module/function capabilities use registry ownership, leases, explicit close/release, and deterministic child-before-parent runtime teardown. Finalizers are not the primary cleanup mechanism.
+- **Runtime compilation is optional.** Consumers may load precompiled PTX/cubin directly, or use the optional CompilerActor for CUDA C++ source → NVRTC PTX → nvJitLink cubin with a validated content-addressed cache. JIT compilation is not required on every kernel launch or hot-loop iteration.
+- **CUDA C++ headers and atomics are available through a bounded trusted profile.** The accepted `cuda-cccl` profile verifies/snapshots the exact CUDA 13.3 `cuda/` and `nv/` header roots and has native public-facade evidence for `<cuda/atomic>` device-scope release/acquire publication.
+- **Fault isolation has precise scope.** Workers provide event-loop isolation, context/resource ownership, and restart-required handling after owner loss. They do **not** provide OS-process crash isolation; a process-isolated backend is a separate deferred capability.
+- **Multiple runtime instances are supported for isolation.** Simultaneous instances and cross-runtime capability rejection are proven. That is not yet a claim of multi-stream or multi-GPU performance concurrency.
+- **Device LTO is planned, not silently claimed.** CJS-F6-LTO is an additive future compiler capability under the existing CompilerActor/cache owner and remains blocked on a bounded specification plus native EXP-009 evidence.
+- **CUDA-JS is not a tensor, neural-network, or search framework.** It does not bundle cuBLAS/cuDNN, autograd, optimizers, MCGS/MCTS semantics, or application schedulers. Consumers supply their own device programs and domain semantics while CUDA-JS owns the generic CUDA runtime/toolchain boundary.
+
+Current public/qualified capability families include schema-generated Driver bindings, Worker/context ownership, opaque resources, device memory, copied transfers, PTX/cubin modules, function lookup, packed kernel arguments, launch validation, private nonblocking stream/event completion, NVRTC, nvJitLink, artifact/cache identity, trusted CUDA headers, atomic publication, package/facade isolation, diagnostics, errors, health, and deterministic teardown.
+
+Currently unqualified or deferred families include public multi-stream/concurrent launch, public stream/event objects, multi-GPU/MIG, managed/pinned/mapped/pool memory, CUDA Graph execution, graphics interop, external contexts, process isolation, broad arbitrary kernel signatures, native Linux CUDA execution, and device LTO. Their absence from the current public profile does **not** mean the target architecture cannot admit them; each requires an explicit generic contract and exact evidence before promotion.
+
 > **Testing-phase notice:** CUDA-JS is an experimental public alpha. On Windows x64 it will attempt to operate on unconfirmed CUDA hardware without a compatibility opt-in. Successful installation, startup, compilation, memory transfer, or kernel execution does not mean that a profile is supported. Expect failures, restart-required states, incomplete features, and breaking changes; do not use this release for production or safety-critical work.
 
 Exact evidence is published in the [Node version support list](docs/NODE_SUPPORT.md) and [hardware support list](docs/HARDWARE_SUPPORT.md). Node releases with the required FFI substrate and Windows CUDA devices that pass the runtime's structural safety checks may operate as `testing-unconfirmed`. Only Node 26.7.0 and the recorded Windows x64 GPU profile currently carry qualified experimental evidence. CUDA-JS blocks execution only where the current implementation knows it cannot operate safely or at all, including a missing platform backend, missing required FFI substrate or authority, unavailable Driver surface, malformed device facts, or prohibited CUDA compute mode.
@@ -106,6 +129,7 @@ Run `npm run f8:portable` for package and independent-consumer controls or `npm 
 
 ## Start here
 
+- [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md) — full accepted/planned/deferred capability map and common classification corrections.
 - [`AGENTS.md`](AGENTS.md)
 - [`docs/PROJECT_CHARTER.md`](docs/PROJECT_CHARTER.md)
 - [`docs/FOUNDATION_INDEX.md`](docs/FOUNDATION_INDEX.md)
