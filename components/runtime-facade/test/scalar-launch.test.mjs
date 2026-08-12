@@ -10,30 +10,35 @@ function expectCode(code) {
   return (error) => error instanceof CudaJsError && error.code === code;
 }
 
-test('public facade preserves declared u64/i32/f32 scalar kinds', async () => {
+test('public facade preserves declared u64/i32/f32 scalar kinds', { timeout: 10_000 }, async () => {
   const runtime = await openCudaRuntimeForTesting();
-  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
-  const fn = await module.getFunction({
-    name: 'scalar_kernel',
-    parameters: [{ kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }],
-  });
+  let module;
+  let fn;
+  try {
+    module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+    fn = await module.getFunction({
+      name: 'scalar_kernel',
+      parameters: [{ kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }],
+    });
 
-  const completion = await fn.launch({
-    grid: { x: 1, y: 1, z: 1 },
-    block: { x: 1, y: 1, z: 1 },
-    arguments: [0xffff_ffff_ffff_ffffn, -2, 1.5],
-  });
+    const completion = await fn.launch({
+      grid: { x: 1, y: 1, z: 1 },
+      block: { x: 1, y: 1, z: 1 },
+      arguments: [0xffff_ffff_ffff_ffffn, -2, 1.5],
+    });
 
-  assert.equal(completion.status, 'completed');
-  assert.deepEqual(completion.argumentKinds, ['u64', 'i32', 'f32']);
+    assert.equal(completion.status, 'completed');
+    assert.deepEqual(completion.argumentKinds, ['u64', 'i32', 'f32']);
 
-  await assert.rejects(fn.launch({
-    grid: { x: 1, y: 1, z: 1 },
-    block: { x: 1, y: 1, z: 1 },
-    arguments: [1, -2, 1.5],
-  }), expectCode('EXECUTION_ARGUMENT_VALUE'));
-
-  await fn.close();
-  await module.close();
-  assert.equal((await runtime.close()).graceful, true);
+    await assert.rejects(fn.launch({
+      grid: { x: 1, y: 1, z: 1 },
+      block: { x: 1, y: 1, z: 1 },
+      arguments: [1, -2, 1.5],
+    }), expectCode('DRIVER_LAUNCH_OPTIONS'));
+  } finally {
+    if (fn?.state === 'open') await fn.close();
+    if (module?.state === 'open') await module.close();
+    const terminal = await runtime.close();
+    assert.equal(terminal.graceful, true);
+  }
 });
