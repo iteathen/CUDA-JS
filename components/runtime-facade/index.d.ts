@@ -68,16 +68,36 @@ export interface DeviceCompileRequest {
   name?: string;
   headers?: readonly DeviceCompileHeader[];
   options?: DeviceCompileOptions;
+  output?: 'ptx' | 'lto-ir';
 }
 
-export interface CudaArtifact {
-  readonly format: 'ptx' | 'cubin';
+export interface PtxArtifact {
+  readonly format: 'ptx';
   readonly bytes: Uint8Array;
   readonly byteLength: number;
   readonly sha256: string;
   readonly architecture: string;
   readonly relocatableDeviceCode?: true;
 }
+
+export interface LtoIrArtifact {
+  readonly format: 'lto-ir';
+  readonly bytes: Uint8Array;
+  readonly byteLength: number;
+  readonly sha256: string;
+  readonly architecture: string;
+  readonly producer: Readonly<{ profile: string; nvrtcVersion: string }>;
+}
+
+export interface CubinArtifact {
+  readonly format: 'cubin';
+  readonly bytes: Uint8Array;
+  readonly byteLength: number;
+  readonly sha256: string;
+  readonly architecture: string;
+}
+
+export type CudaArtifact = PtxArtifact | LtoIrArtifact | CubinArtifact;
 
 export interface CompilerResult {
   readonly schemaVersion: 1;
@@ -90,8 +110,10 @@ export interface CompilerResult {
   readonly operationSequence: number;
 }
 
+export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32';
+
 export interface FunctionParameter {
-  readonly kind: 'device-memory' | 'u32';
+  readonly kind: FunctionParameterKind;
 }
 
 export interface LaunchDimensions {
@@ -110,13 +132,15 @@ export interface CudaDeviceMemory {
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
+export type CudaLaunchArgument = CudaDeviceMemory | number | bigint;
+
 export interface CudaFunction {
   readonly kind: 'function';
   readonly name: string;
   readonly parameters: readonly FunctionParameter[];
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
-  launch(options: { grid: LaunchDimensions; block: LaunchDimensions; sharedMemoryBytes?: number; arguments: readonly (CudaDeviceMemory | number)[] }): Promise<Readonly<Record<string, unknown>>>;
+  launch(options: { grid: LaunchDimensions; block: LaunchDimensions; sharedMemoryBytes?: number; arguments: readonly CudaLaunchArgument[] }): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
@@ -140,11 +164,48 @@ export interface CudaRuntime {
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
-  link(request: { inputs: readonly (Uint8Array | CudaArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
+  link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
   invalidateCache(key: string): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<{ schemaVersion: 1; graceful: boolean; restartRequired: boolean; state: string; compiler: unknown; driver: unknown }>>;
+}
+
+export type DeviceJsScalarType = 'bool' | 'u32' | 'i32' | 'u64' | 'f32';
+export type DeviceJsPointerType = `ptr<${DeviceJsScalarType}>`;
+export type DeviceJsType = DeviceJsScalarType | DeviceJsPointerType;
+
+export interface DeviceJsParameter {
+  name: string;
+  type: DeviceJsType;
+}
+
+export interface DeviceJsFunction {
+  name: string;
+  kind: 'kernel' | 'device';
+  parameters: readonly DeviceJsParameter[];
+  returns: DeviceJsScalarType | 'void';
+}
+
+export interface DeviceJsCompileRequest {
+  source: string;
+  functions: readonly DeviceJsFunction[];
+  compile?: DeviceCompileOptions;
+}
+
+export interface DeviceJsProgramDescriptor {
+  readonly contract: 'SPEC-0013-v1';
+  readonly sha256: string;
+  readonly parser: Readonly<{ name: 'acorn'; version: string }>;
+  readonly functions: readonly Readonly<Record<string, unknown>>[];
+  readonly kernels: readonly Readonly<{ name: string; functionName: string; parameters: readonly FunctionParameter[] }>[];
+}
+
+export interface DeviceJsCompileResult {
+  readonly schemaVersion: 1;
+  readonly deviceProgram: DeviceJsProgramDescriptor;
+  readonly compiler: CompilerResult;
 }
 
 export const CUDA_JS_COMPATIBILITY: Readonly<Record<string, unknown>>;
 export function inspectCudaHost(): Readonly<{ schemaVersion: 1; host: Readonly<Record<string, unknown>>; compatibility: typeof CUDA_JS_COMPATIBILITY }>;
 export function openCudaRuntime(options?: OpenCudaRuntimeOptions): Promise<CudaRuntime>;
+export function compileDeviceProgram(runtime: CudaRuntime, request: DeviceJsCompileRequest): Promise<DeviceJsCompileResult>;
