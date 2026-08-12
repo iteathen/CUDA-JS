@@ -33,9 +33,11 @@ Exact evidence is published in the [Node version support list](docs/NODE_SUPPORT
 
 The package manifest is public rather than npm-private. CUDA-JS is available under the [GNU Affero General Public License version 3 or later](LICENSE). Organizations that need different terms may request a separately negotiated [commercial license](LICENSING.md). A registry release still requires a separate release, provenance, and registry review.
 
-## Contributing and funding
+## Contributing, security, and funding
 
-Focused bug reports, platform qualification, documentation, tests, and contract-preserving improvements are welcome; see [`CONTRIBUTING.md`](CONTRIBUTING.md). GitHub Sponsors is the deliberately low-maintenance funding path. Sponsorships are intended to offset GitHub, CI, testing hardware, and project-maintenance costs; see the [sponsorship setup and policy](docs/SPONSORSHIP.md).
+Focused bug reports, platform qualification, documentation, tests, and contract-preserving improvements are welcome; see [`CONTRIBUTING.md`](CONTRIBUTING.md). Security-sensitive reports must follow [`SECURITY.md`](SECURITY.md): do not publish exploit details, secrets, proof-of-concept payloads, or sensitive logs in public issues. The current public-repository security/CI posture, including the fact that GitHub private vulnerability reporting is not yet enabled, is recorded in [`docs/PUBLIC_REPOSITORY.md`](docs/PUBLIC_REPOSITORY.md).
+
+GitHub Sponsors is the deliberately low-maintenance funding path. Sponsorships are intended to offset GitHub, CI, testing hardware, and project-maintenance costs; see the [sponsorship setup and policy](docs/SPONSORSHIP.md).
 
 ## Selected foundation
 
@@ -111,7 +113,7 @@ Windows-only `CJS-F2W / EXP-012` is accepted. Official Node 26.7.0 and an indepe
 
 Windows-only `CJS-F3W` is accepted. A dedicated Worker owns the Driver library, one private context, and an opaque resource registry; the bounded async facade proves context affinity, stale/wrong-kind rejection, main-loop responsiveness, conservative health, graceful teardown, and honest restart-required reporting after unexpected Worker loss. The platform-neutral F3 capsule passes on Windows and native Linux x86-64. Native Linux Driver/context execution remains incomplete and continues to depend on `CJS-F2L` qualification.
 
-Windows-only `CJS-F4W` is accepted. The runtime can allocate quota-bounded device memory, copy owned `Uint8Array` bytes synchronously through five exact generated Driver exports, reject unsafe ranges before native invocation, release opaque allocations, reuse slots without accepting stale generations, and free allocations before context teardown. An independent MSVC oracle and the Node path agree byte-for-byte. The portable F4 capsule and native Ubuntu schema generation prepare the Linux implementation, while [`conformance/f4/README.md`](conformance/f4/README.md) documents the remaining human-engineering gates without claiming Linux CUDA support.
+Windows-only `CJS-F4W` is accepted. The runtime can allocate quota-bounded device memory, copy owned `Uint8Array` bytes synchronously through five exact generated Driver exports, reject unsafe ranges before native invocation, release opaque allocations, reuse slots without accepting stale generations, and free allocations before context teardown. An independent MSVC oracle and the Node path agree byte-for-byte. The portable F4 capsule and native Ubuntu schema generation prepare the Linux implementation, while [`conformance/f4/README.md`](conformance/f4/README.md) documents the remaining human-engineering gates without claiming native Linux CUDA support.
 
 Windows-only `CJS-F5W` is accepted. The runtime copies bounded PTX, resolves exact declared function schemas, packs naturally aligned device-memory and `u32` arguments, retains all resource leases, launches one operation on a private nonblocking stream, and resolves only after a private event reports terminal completion. The independent MSVC oracle and Node path agree byte-for-byte on the tracked vector kernel and checksum `15600773`. Deferred failures poison health; completion timeouts terminate the owner with retained orphan/lease evidence. [`conformance/f5/README.md`](conformance/f5/README.md) preserves the human Linux adapter/oracle/evidence work without claiming native Linux CUDA support.
 
@@ -130,6 +132,8 @@ Run `npm run f8:portable` for package and independent-consumer controls or `npm 
 ## Start here
 
 - [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md) — full accepted/planned/deferred capability map and common classification corrections.
+- [`SECURITY.md`](SECURITY.md) — public security reporting and native/executable trust-boundary policy.
+- [`docs/PUBLIC_REPOSITORY.md`](docs/PUBLIC_REPOSITORY.md) — public-repository hardening assessment, CI trust model, and GitHub security-setting state.
 - [`AGENTS.md`](AGENTS.md)
 - [`docs/PROJECT_CHARTER.md`](docs/PROJECT_CHARTER.md)
 - [`docs/FOUNDATION_INDEX.md`](docs/FOUNDATION_INDEX.md)
