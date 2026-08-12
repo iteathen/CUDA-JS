@@ -9,6 +9,9 @@
   "engines": {
     "node": ">=26.1.0"
   },
+  "dependencies": {
+    "acorn": "8.15.0"
+  },
   "exports": {
     ".": {
       "types": "./components/runtime-facade/index.d.ts",
@@ -27,6 +30,7 @@
     "LICENSE",
     "LICENSING.md",
     "components/compiler-actor/",
+    "components/device-js/",
     "components/driver-actor/",
     "components/execution/",
     "components/memory/",
@@ -107,6 +111,7 @@
     "f9:native": "node scripts/run-f9.mjs native",
     "f9:verify": "node scripts/run-f9.mjs verify",
     "f9": "node scripts/run-f9.mjs all",
+    "device-js:unit": "node --test components/device-js/test/*.test.mjs",
     "hardware:check": "node --test conformance/hardware/qualification.test.mjs && node scripts/run-hardware-qualification.mjs check",
     "hardware:render": "node scripts/run-hardware-qualification.mjs render",
     "hardware:plan": "node scripts/run-hardware-qualification.mjs plan",
@@ -115,8 +120,8 @@
     "node:check": "node scripts/run-node-qualification.mjs check",
     "node:render": "node scripts/run-node-qualification.mjs render",
     "node:probe": "node scripts/run-node-qualification.mjs probe",
-    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all && node scripts/run-f9.mjs all",
-    "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run node:check && npm run hardware:check"
+    "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all && node scripts/run-f9.mjs all && npm run device-js:unit",
+    "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit && npm run device-js:unit",
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run device-js:unit && npm run node:check && npm run hardware:check"
   }
 }
