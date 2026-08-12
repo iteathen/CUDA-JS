@@ -14,6 +14,14 @@ The lowest-friction contributions are:
 
 Use the repository issue forms before investing in a large change. Maintainers may narrow, defer, or reject work that lacks an accepted owner, contract, test oracle, cleanup plan, or supported environment. There is no response-time or merge guarantee.
 
+## Security-sensitive reports
+
+Do **not** include exploit details, credentials, private data, arbitrary-native-execution techniques, proof-of-concept payloads, or sensitive logs in a public issue. Follow [`SECURITY.md`](SECURITY.md).
+
+GitHub private vulnerability reporting is currently not enabled for this repository. Until it is enabled, open only a minimal public issue asking the maintainer to establish a private security channel; do not include the vulnerability details themselves. Send reproduction material only after a private channel exists.
+
+The public-repository security/CI posture and the remaining GitHub-settings follow-up are documented in [`docs/PUBLIC_REPOSITORY.md`](docs/PUBLIC_REPOSITORY.md).
+
 Before changing a material boundary, read:
 
 - `AGENTS.md`, `agent_files/AGENTS.md`, `STATUS.md`, and `next_step.yaml`;
@@ -64,6 +72,7 @@ Use focused capsules and mutation/negative controls. Do not repeat unchanged tes
 
 ```bash
 ./scripts/verify-docs.sh
+node scripts/verify-public-repository.mjs
 npm run node:check
 npm run hardware:check
 npm run exp:000:build
@@ -87,7 +96,7 @@ Claims must state unavailable CUDA/Node/platform checks precisely.
 3. Update the governing specification or plan when public meaning changes.
 4. Add stable positive, negative, lifecycle, and cleanup evidence proportional to the claim.
 5. Run the required portable checks and every native capsule available on the exact claimed profile.
-6. Use the pull-request template, list checks not run, and disclose any Linux/native gap explicitly.
+6. Use the pull-request template, list checks not run, and disclose any Linux/native, security, provenance, or public-repository gap explicitly.
 
 Do not include generated build output, credentials, machine-specific paths, CUDA Toolkit files, NVIDIA binaries, or third-party code without exact provenance and compatible licensing.
 
