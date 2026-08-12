@@ -33,9 +33,10 @@ export async function createBackend() {
         throw new CompilerRuntimeError('COMPILER_INJECTED_OPERATION_FAILURE', 'provider', 'Injected compiler operation failure.');
       }
       if (failureMode === 'compile-destroy') throw new CompilerRuntimeError('COMPILER_INJECTED_DESTROY_FAILURE', 'restart-required', 'Injected compiler program destruction failure.', {}, { healthBefore: 'healthy', healthAfter: 'restart-required' });
-      const digest = createHash('sha256').update(request.source).digest('hex');
+      const digest = createHash('sha256').update(request.source).digest();
       resources.programsDestroyed += 1;
-      return { bytes: Uint8Array.from(Buffer.from(`// portable mock PTX ${digest}\n`, 'ascii')), log: '' };
+      if (request.output === 'lto-ir') return { bytes: Uint8Array.from(Buffer.concat([Buffer.from([0]), digest])), log: '' };
+      return { bytes: Uint8Array.from(Buffer.from(`// portable mock PTX ${digest.toString('hex')}\n`, 'ascii')), log: '' };
     },
     async link(request) {
       if (failureMode === 'link-create') throw new CompilerRuntimeError('LINKER_INJECTED_CREATE_FAILURE', 'provider', 'Injected linker creation failure.');
@@ -45,7 +46,7 @@ export async function createBackend() {
         throw new CompilerRuntimeError('LINKER_INJECTED_OPERATION_FAILURE', 'provider', 'Injected linker operation failure.');
       }
       if (failureMode === 'link-destroy') throw new CompilerRuntimeError('LINKER_INJECTED_DESTROY_FAILURE', 'restart-required', 'Injected linker destruction failure.', {}, { healthBefore: 'healthy', healthAfter: 'restart-required' });
-      const hash = createHash('sha256');
+      const hash = createHash('sha256').update(request.mode);
       for (const input of request.inputs) hash.update(input.bytes);
       resources.linksDestroyed += 1;
       return { bytes: Uint8Array.from(hash.digest()), log: '' };

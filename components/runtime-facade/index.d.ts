@@ -68,16 +68,36 @@ export interface DeviceCompileRequest {
   name?: string;
   headers?: readonly DeviceCompileHeader[];
   options?: DeviceCompileOptions;
+  output?: 'ptx' | 'lto-ir';
 }
 
-export interface CudaArtifact {
-  readonly format: 'ptx' | 'cubin';
+export interface PtxArtifact {
+  readonly format: 'ptx';
   readonly bytes: Uint8Array;
   readonly byteLength: number;
   readonly sha256: string;
   readonly architecture: string;
   readonly relocatableDeviceCode?: true;
 }
+
+export interface LtoIrArtifact {
+  readonly format: 'lto-ir';
+  readonly bytes: Uint8Array;
+  readonly byteLength: number;
+  readonly sha256: string;
+  readonly architecture: string;
+  readonly producer: Readonly<{ profile: string; nvrtcVersion: string }>;
+}
+
+export interface CubinArtifact {
+  readonly format: 'cubin';
+  readonly bytes: Uint8Array;
+  readonly byteLength: number;
+  readonly sha256: string;
+  readonly architecture: string;
+}
+
+export type CudaArtifact = PtxArtifact | LtoIrArtifact | CubinArtifact;
 
 export interface CompilerResult {
   readonly schemaVersion: 1;
@@ -144,7 +164,7 @@ export interface CudaRuntime {
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
-  link(request: { inputs: readonly (Uint8Array | CudaArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
+  link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
   invalidateCache(key: string): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<{ schemaVersion: 1; graceful: boolean; restartRequired: boolean; state: string; compiler: unknown; driver: unknown }>>;
 }

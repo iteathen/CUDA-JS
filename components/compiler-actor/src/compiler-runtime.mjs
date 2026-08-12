@@ -67,13 +67,14 @@ class CompilerRuntime {
       source: normalized.source,
       name: normalized.name,
       headers: normalized.headers.map(({ name, source }) => ({ name, source })),
+      output: normalized.output,
       options: {
         architecture: normalized.options.architecture,
         languageStandard: normalized.options.languageStandard,
         fmad: normalized.options.fmad,
         deviceAsDefaultExecutionSpace: normalized.options.deviceAsDefaultExecutionSpace,
         headerProfile: normalized.options.headerProfile,
-        relocatableDeviceCode: normalized.options.relocatableDeviceCode,
+        ...(normalized.output === 'ptx' ? { relocatableDeviceCode: normalized.options.relocatableDeviceCode } : {}),
       },
     });
   }
@@ -81,12 +82,21 @@ class CompilerRuntime {
   async link(request) {
     const normalized = normalizeLinkRequest(request);
     return this.#request('linker.link', {
-      inputs: normalized.inputs.map(({ bytes, architecture, relocatableDeviceCode }) => ({
-        format: 'ptx',
-        bytes: Uint8Array.from(bytes),
-        ...(architecture ? { architecture } : {}),
-        ...(relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
-      })),
+      inputs: normalized.inputs.map((input) => input.format === 'lto-ir'
+        ? {
+            format: 'lto-ir',
+            bytes: Uint8Array.from(input.bytes),
+            byteLength: input.byteLength,
+            sha256: input.sha256,
+            architecture: input.architecture,
+            producer: { profile: input.producer.profile, nvrtcVersion: input.producer.nvrtcVersion },
+          }
+        : {
+            format: 'ptx',
+            bytes: Uint8Array.from(input.bytes),
+            ...(input.architecture ? { architecture: input.architecture } : {}),
+            ...(input.relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
+          }),
       options: { architecture: normalized.options.architecture },
     });
   }
