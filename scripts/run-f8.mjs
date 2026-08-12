@@ -41,7 +41,7 @@ if (!npmCli || !existsSync(npmCli)) {
   process.exit(2);
 }
 
-const unit = { args: ['--test', 'components/runtime-facade/test/runtime-facade.test.mjs'] };
+const unit = { args: ['--test', 'components/runtime-facade/test/runtime-facade.test.mjs', 'components/runtime-facade/test/scalar-launch.test.mjs', 'components/runtime-facade/test/device-js.test.mjs'] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
 const native = { windowsOnly: true, args: ['conformance/f8/run-native-windows.mjs'] };
 const linux = { linuxOnly: true, args: ['conformance/f8/run-linux-readiness.mjs'] };
