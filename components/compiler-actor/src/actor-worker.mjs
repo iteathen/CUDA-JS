@@ -74,7 +74,14 @@ try {
           result = {
             schemaVersion: 1,
             operation: 'compile',
-            artifact: { format: 'ptx', bytes: Uint8Array.from(bytes), byteLength: bytes.byteLength, sha256: sha256(bytes), architecture: normalized.options.architecture },
+            artifact: {
+              format: 'ptx',
+              bytes: Uint8Array.from(bytes),
+              byteLength: bytes.byteLength,
+              sha256: sha256(bytes),
+              architecture: normalized.options.architecture,
+              ...(normalized.options.relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
+            },
             log,
             cache: { key: cached.key, status: cached.status },
             provider: publicProvider(backend.provider),

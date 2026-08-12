@@ -73,6 +73,7 @@ class CompilerRuntime {
         fmad: normalized.options.fmad,
         deviceAsDefaultExecutionSpace: normalized.options.deviceAsDefaultExecutionSpace,
         headerProfile: normalized.options.headerProfile,
+        relocatableDeviceCode: normalized.options.relocatableDeviceCode,
       },
     });
   }
@@ -80,7 +81,12 @@ class CompilerRuntime {
   async link(request) {
     const normalized = normalizeLinkRequest(request);
     return this.#request('linker.link', {
-      inputs: normalized.inputs.map(({ bytes }) => Uint8Array.from(bytes)),
+      inputs: normalized.inputs.map(({ bytes, architecture, relocatableDeviceCode }) => ({
+        format: 'ptx',
+        bytes: Uint8Array.from(bytes),
+        ...(architecture ? { architecture } : {}),
+        ...(relocatableDeviceCode ? { relocatableDeviceCode: true } : {}),
+      })),
       options: { architecture: normalized.options.architecture },
     });
   }

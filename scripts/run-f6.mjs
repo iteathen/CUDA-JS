@@ -8,6 +8,7 @@ const requestedVersion = 'v26.7.0';
 const action = process.argv[2] ?? 'all';
 const unitFiles = [
   'components/compiler-actor/test/compiler-actor.test.mjs',
+  'components/compiler-actor/test/relocatable-device-code.test.mjs',
   'components/execution/test/execution-manager.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
 ];

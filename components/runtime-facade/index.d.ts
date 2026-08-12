@@ -49,12 +49,34 @@ export interface OpenCudaRuntimeOptions {
   compiler?: boolean | CompilerOptions;
 }
 
+export interface DeviceCompileOptions {
+  architecture?: string;
+  languageStandard?: 'c++17' | 'c++20';
+  fmad?: boolean;
+  deviceAsDefaultExecutionSpace?: boolean;
+  headerProfile?: 'none' | 'cuda-cccl';
+  relocatableDeviceCode?: boolean;
+}
+
+export interface DeviceCompileHeader {
+  name: string;
+  source: string;
+}
+
+export interface DeviceCompileRequest {
+  source: string;
+  name?: string;
+  headers?: readonly DeviceCompileHeader[];
+  options?: DeviceCompileOptions;
+}
+
 export interface CudaArtifact {
   readonly format: 'ptx' | 'cubin';
   readonly bytes: Uint8Array;
   readonly byteLength: number;
   readonly sha256: string;
   readonly architecture: string;
+  readonly relocatableDeviceCode?: true;
 }
 
 export interface CompilerResult {
@@ -117,7 +139,7 @@ export interface CudaRuntime {
   describe(): Promise<Readonly<Record<string, unknown>>>;
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
-  compile(request: Readonly<Record<string, unknown>>): Promise<CompilerResult>;
+  compile(request: DeviceCompileRequest): Promise<CompilerResult>;
   link(request: { inputs: readonly (Uint8Array | CudaArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
   invalidateCache(key: string): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<{ schemaVersion: 1; graceful: boolean; restartRequired: boolean; state: string; compiler: unknown; driver: unknown }>>;
