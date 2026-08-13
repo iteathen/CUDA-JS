@@ -10,6 +10,7 @@ const unitFiles = [
   'components/resource-registry/test/resource-registry.test.mjs',
   'components/memory/test/memory-manager.test.mjs',
   'components/execution/test/execution-manager.test.mjs',
+  'components/execution/test/operation-lifecycle.test.mjs',
   'components/execution/test/scalar-arguments.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
