@@ -117,9 +117,9 @@ Preserve all of the following:
 - [x] Integrate the three bounded work surfaces without conflicting edits.
 - [x] Run focused syntax, generated-document, documentation, public-repository, package, and hardware checks.
 - [x] Publish the reviewable content commit and record its exact remote commit/tree plus the draft PR in the metadata follow-up.
-- [ ] Commit the intentional content checkpoint and its handoff-metadata follow-up, then publish the exact branch.
+- [x] Commit the intentional content checkpoint and its handoff-metadata follow-up, then publish the exact branch.
 - [x] Open draft PR [#101](https://github.com/iteathen/CUDA-JS/pull/101) using `Tracks #67`; do not auto-close the issue.
-- [ ] Read back the exact remote head/tree and PR body.
+- [x] Read back the exact remote head/tree and PR body.
 
 ### Local checkpoint evidence
 
