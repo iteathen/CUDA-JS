@@ -5,7 +5,7 @@
   "objective": "Complete the remaining Device-JS native proof and CUDA-MCGS external deletion/compatible-pair path while keeping independent native/platform qualification and future execution-capability lanes separately governed.",
   "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. It does not own CUDA-MCGS/search/domain/product semantics. Each future execution expansion must consume existing owners rather than redefine them.",
   "exact_input_revisions": {
-    "current_main": "83f44a21f6bf556f3ff6d58acaee644659777383",
+    "plan_reconciliation_baseline": "83f44a21f6bf556f3ff6d58acaee644659777383",
     "implementation_baseline": "fe9ed78939d3876790291421cec367fde58a8310",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
