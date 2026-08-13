@@ -5,6 +5,10 @@
   "objective": "Correct capability-status wording so qualification, implementation, architectural disposition, and priority cannot drift into one another; then restart the execution development cycle with submission/completion separation before bounded multi-stream scheduling.",
   "exact_main_input": "0f622a667145c810bcc9afdc2630753dfa06a20f",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
+  "legacy_phase_discovery": {
+    "CJS-F0": "publication/foundation history remains in the owning master plan and Git history",
+    "CJS-F1A": "EXP-000 promoted synthetic ABI foundation remains accepted and regression-required"
+  },
   "authority": [
     "AGENTS.md",
     "agent_files/AI_RULES.md",
