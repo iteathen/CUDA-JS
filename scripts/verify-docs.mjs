@@ -94,6 +94,8 @@ const required = [
   'components/compiler-actor/src/backends/mock.mjs',
   'components/compiler-actor/src/backends/windows-native.mjs',
   'components/compiler-actor/test/compiler-actor.test.mjs',
+  'components/cuda-target/README.md', 'components/cuda-target/component.yaml',
+  'components/cuda-target/index.mjs', 'components/cuda-target/test/cuda-target.test.mjs',
   'components/device-js/README.md', 'components/device-js/component.yaml',
   'components/device-js/index.mjs', 'components/device-js/testing.mjs',
   'components/device-js/src/errors.mjs', 'components/device-js/src/translator.mjs',
@@ -205,6 +207,7 @@ for (const relative of [
   'components/memory/component.yaml',
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
+  'components/cuda-target/component.yaml',
   'components/device-js/component.yaml',
   'components/platform-diagnostics/component.yaml',
   'components/runtime-facade/component.yaml',
@@ -350,6 +353,7 @@ for (const relative of files) {
       && !relative.startsWith('components/memory/')
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
+      && !relative.startsWith('components/cuda-target/')
       && !relative.startsWith('components/device-js/')
       && !relative.startsWith('components/platform-diagnostics/')
       && !relative.startsWith('components/runtime-facade/')

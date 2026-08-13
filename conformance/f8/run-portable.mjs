@@ -30,6 +30,7 @@ await mkdir(consumersRoot, { recursive: true });
 const projectPackage = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
 assert.equal(projectPackage.license, 'AGPL-3.0-or-later');
 assert.equal(projectPackage.dependencies.acorn, '8.15.0');
+assert.equal(Object.hasOwn(projectPackage.exports, './cuda-target'), false);
 const packed = JSON.parse(runNpm(['pack', '--json', '--pack-destination', packageRoot], repositoryRoot));
 assert.equal(packed.length, 1);
 const packageRecord = packed[0];
@@ -50,6 +51,8 @@ for (const required of [
   'LICENSING.md',
   'components/device-js/index.mjs',
   'components/device-js/src/strict-translator.mjs',
+  'components/cuda-target/index.mjs',
+  'components/cuda-target/component.yaml',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
   'components/runtime-facade/compatibility.mjs',

@@ -1,6 +1,14 @@
 import { createHash } from 'node:crypto';
 
+import { CUDA_TARGET_BASES } from '../../../cuda-target/index.mjs';
+import { providerTargetProfile } from '../contract.mjs';
 import { CompilerRuntimeError } from '../errors.mjs';
+
+const TARGET_CAPABILITIES = providerTargetProfile({
+  revision: 'portable-compiler-mock-targets-v1',
+  compile: CUDA_TARGET_BASES.map((base) => `compute_${base}`),
+  link: CUDA_TARGET_BASES.map((base) => `sm_${base}`),
+});
 
 export async function createBackend() {
   let closed = false;
@@ -16,6 +24,7 @@ export async function createBackend() {
       nvrtc: null,
       nvrtcBuiltins: null,
       nvJitLink: null,
+      targetCapabilities: TARGET_CAPABILITIES,
       headerProfiles: Object.freeze({
         cudaCccl: Object.freeze({ profile: 'portable-mock-cuda-cccl-v1', algorithm: 'mock-only', roots: Object.freeze(['cuda', 'nv']), fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) }),
       }),

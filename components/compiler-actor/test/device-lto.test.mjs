@@ -15,6 +15,11 @@ import {
 } from '../testing.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
+const targetCapabilities = {
+  revision: 'fixture-targets-v1',
+  compile: ['compute_75'],
+  link: ['sm_75'],
+};
 
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
@@ -29,6 +34,7 @@ function provider(linkVersion = '13.3') {
       nvrtc: { version: '13.3', byteLength: 1, sha256: '1'.repeat(64) },
       nvrtcBuiltins: { version: '13.3', byteLength: 1, sha256: '2'.repeat(64) },
       nvJitLink: { version: linkVersion, byteLength: 1, sha256: '3'.repeat(64) },
+      targetCapabilities,
       headerProfiles: {
         cudaCccl: { profile: 'fixture-cccl', algorithm: 'fixture', roots: ['cuda', 'nv'], fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) },
       },

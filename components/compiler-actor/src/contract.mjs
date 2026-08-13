@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
-import { compilerError } from './errors.mjs';
+import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget, pairedCudaTarget, parseCudaTarget } from '../../cuda-target/index.mjs';
+import { CompilerRuntimeError, compilerError } from './errors.mjs';
 
 export const LIMITS = Object.freeze({
   sourceBytes: 1_048_576,
@@ -20,6 +21,7 @@ const COMPILE_FIELDS = Object.freeze(['headers', 'name', 'options', 'output', 's
 const COMPILE_OPTION_FIELDS = Object.freeze(['architecture', 'deviceAsDefaultExecutionSpace', 'fmad', 'headerProfile', 'languageStandard', 'relocatableDeviceCode']);
 const LINK_FIELDS = Object.freeze(['inputs', 'options']);
 const LINK_OPTION_FIELDS = Object.freeze(['architecture']);
+const PROVIDER_TARGET_FIELDS = Object.freeze(['compile', 'link', 'revision']);
 const encoder = new TextEncoder();
 
 export function plainObject(value) {
@@ -95,14 +97,16 @@ function sourceText(value, maximum, code, label) {
 
 function computeArchitecture(value) {
   const architecture = value ?? 'compute_75';
-  if (!/^compute_[5-9][0-9]$/.test(architecture)) throw compilerError('COMPILER_ARCHITECTURE_INVALID', 'Compile architecture must use canonical compute_NN syntax from compute_50 through compute_99.');
-  return architecture;
+  const target = inspectCudaTarget(architecture, { expectedPrefix: 'compute' });
+  if (!target.ok) throw compilerError('COMPILER_ARCHITECTURE_INVALID', 'Compile architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
+  return target.target.name;
 }
 
 function smArchitecture(value) {
   const architecture = value ?? 'sm_75';
-  if (!/^sm_[5-9][0-9]$/.test(architecture)) throw compilerError('LINKER_ARCHITECTURE_INVALID', 'Link architecture must use canonical sm_NN syntax from sm_50 through sm_99.');
-  return architecture;
+  const target = inspectCudaTarget(architecture, { expectedPrefix: 'sm' });
+  if (!target.ok) throw compilerError('LINKER_ARCHITECTURE_INVALID', 'Link architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
+  return target.target.name;
 }
 
 function compileOutput(value) {
@@ -185,7 +189,7 @@ function normalizePtxInput(value, index) {
     const fields = Object.keys(value);
     if (fields.some((key) => !['format', 'bytes', 'byteLength', 'sha256', 'architecture', 'relocatableDeviceCode'].includes(key))) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact contains unknown fields.', { index });
     bytes = value.bytes;
-    architecture = value.architecture ?? null;
+    architecture = value.architecture == null ? null : computeArchitecture(value.architecture);
     if (Object.hasOwn(value, 'relocatableDeviceCode')) {
       if (value.relocatableDeviceCode !== true) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX relocatableDeviceCode marker, when present, must be true.', { index });
       relocatableDeviceCode = true;
@@ -239,7 +243,7 @@ export function normalizeLinkRequest(request) {
   const totalInputBytes = inputs.reduce((sum, input) => sum + input.byteLength, 0);
   if (totalInputBytes > LIMITS.totalInputBytes) throw compilerError('LINKER_INPUT_LIMIT', 'Total link input bytes exceed the limit.', { totalInputBytes });
   for (const input of inputs) {
-    if (input.architecture && input.architecture.replace('compute_', 'sm_') !== options.architecture) throw compilerError('LINKER_ARCHITECTURE_MISMATCH', `Typed ${input.format} architecture does not match link architecture.`);
+    if (input.architecture && pairedCudaTarget(input.architecture, 'sm') !== options.architecture) throw compilerError('LINKER_ARCHITECTURE_MISMATCH', `Typed ${input.format} architecture does not match link architecture.`);
   }
   if (mode === 'lto') {
     const majors = new Set(inputs.map((input) => input.producer.major));
@@ -262,8 +266,44 @@ export function validateLtoCompatibility(request, provider) {
   }
 }
 
-export function compileIdentity(request, provider) {
+export function providerTargetProfile(value) {
+  if (!exactFields(value, PROVIDER_TARGET_FIELDS) || typeof value.revision !== 'string' || value.revision.length < 1 || value.revision.length > 128 || !/^[\x20-\x7e]+$/.test(value.revision)) {
+    throw new CompilerRuntimeError('COMPILER_PROVIDER_TARGET_PROFILE_INVALID', 'unsupported', 'Compiler provider target capability metadata is invalid.');
+  }
+  const normalize = (targets, prefix) => {
+    if (!Array.isArray(targets) || targets.length < 1 || targets.length > 256) throw new CompilerRuntimeError('COMPILER_PROVIDER_TARGET_PROFILE_INVALID', 'unsupported', 'Compiler provider target capability metadata is invalid.');
+    const names = new Set();
+    for (const name of targets) {
+      const target = parseCudaTarget(name);
+      if (!target || target.prefix !== prefix || names.has(target.name)) throw new CompilerRuntimeError('COMPILER_PROVIDER_TARGET_PROFILE_INVALID', 'unsupported', 'Compiler provider target capability metadata is invalid.');
+      names.add(target.name);
+    }
+    return Object.freeze([...names].sort());
+  };
+  return Object.freeze({
+    revision: value.revision,
+    compile: normalize(value.compile, 'compute'),
+    link: normalize(value.link, 'sm'),
+  });
+}
+
+function providerIdentityForTarget(provider, operation, architecture) {
+  const targets = providerTargetProfile(provider?.identity?.targetCapabilities);
+  const supported = operation === 'compile' ? targets.compile : targets.link;
+  if (!supported.includes(architecture)) {
+    throw new CompilerRuntimeError(
+      operation === 'compile' ? 'COMPILER_ARCHITECTURE_UNSUPPORTED' : 'LINKER_ARCHITECTURE_UNSUPPORTED',
+      'unsupported',
+      operation === 'compile' ? 'The active compiler provider does not support the requested target.' : 'The active linker provider does not support the requested target.',
+      { architecture, providerProfile: provider?.identity?.profile ?? null },
+    );
+  }
   const { headerProfiles, ...baseProvider } = provider.identity;
+  return { headerProfiles, baseProvider: { ...baseProvider, targetCapabilities: targets } };
+}
+
+export function compileIdentity(request, provider) {
+  const { headerProfiles, baseProvider } = providerIdentityForTarget(provider, 'compile', request.options.architecture);
   const selectedHeaderProfile = request.options.headerProfile === 'cuda-cccl' ? headerProfiles?.cudaCccl : null;
   if (request.options.headerProfile === 'cuda-cccl' && !selectedHeaderProfile) throw compilerError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'The selected compiler header profile is unavailable.');
   const conflictingHeader = selectedHeaderProfile && request.headers.find((header) => selectedHeaderProfile.roots.some((root) => header.name === root || header.name.startsWith(`${root}/`)));
@@ -272,6 +312,7 @@ export function compileIdentity(request, provider) {
     schemaVersion: 1,
     contractVersion: request.output === 'lto-ir' ? 'SPEC-0012-v1' : request.options.relocatableDeviceCode ? 'SPEC-0010-v1' : selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
     operation: 'compile',
+    targetPolicy: CUDA_TARGET_POLICY_IDENTITY,
     platform: provider.platform,
     architecture: provider.architecture,
     node: provider.node,
@@ -291,11 +332,12 @@ export function compileIdentity(request, provider) {
 
 export function linkIdentity(request, provider) {
   validateLtoCompatibility(request, provider);
-  const { headerProfiles, ...baseProvider } = provider.identity;
+  const { baseProvider } = providerIdentityForTarget(provider, 'link', request.options.architecture);
   return {
     schemaVersion: 1,
     contractVersion: request.mode === 'lto' ? 'SPEC-0012-v1' : 'SPEC-0006-v1',
     operation: 'link',
+    targetPolicy: CUDA_TARGET_POLICY_IDENTITY,
     platform: provider.platform,
     architecture: provider.architecture,
     node: provider.node,

@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inspectCudaTarget } from '../../components/cuda-target/index.mjs';
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const registryPath = path.join(repositoryRoot, 'conformance', 'hardware', 'registry.json');
@@ -66,7 +67,9 @@ export function validateRegistry(registry, profiles, extensions) {
   const capabilities = new Set(registry.architectureCoverage.map((entry) => entry.computeCapability));
   for (const entry of registry.architectureCoverage) {
     invariant(/^\d+\.\d+$/.test(entry.computeCapability), `Invalid compute capability ${entry.computeCapability}.`);
-    invariant(/^sm_\d+$/.test(entry.toolkit13_3Target), `Invalid CUDA target ${entry.toolkit13_3Target}.`);
+    const target = inspectCudaTarget(entry.toolkit13_3Target, { expectedPrefix: 'sm' });
+    invariant(target.ok, `Invalid or unadmitted CUDA target ${entry.toolkit13_3Target}.`);
+    invariant(target.policy.computeCapability === entry.computeCapability, `CUDA target ${entry.toolkit13_3Target} policy metadata does not match compute capability ${entry.computeCapability}.`);
     invariant(/^P[0-2]$/.test(entry.priority), `Invalid priority for ${entry.computeCapability}.`);
     invariant(architectureStatuses.has(entry.status), `Invalid architecture status for ${entry.computeCapability}.`);
   }

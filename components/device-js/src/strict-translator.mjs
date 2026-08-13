@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { parse, version as acornVersion } from 'acorn';
+import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 
 import { deviceJsError } from './errors.mjs';
 import { translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
@@ -42,6 +43,7 @@ function programIdentity(source, functions, compile) {
   const hash = createHash('sha256');
   hashField(hash, 'contract', encoder.encode(CONTRACT));
   hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
+  hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
   hashField(hash, 'source', encoder.encode(source));
   hashField(hash, 'functions', encoder.encode(canonicalJson(canonicalMetadata(functions))));
   hashField(hash, 'compile', encoder.encode(canonicalJson(compile)));

@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const requestedVersion = 'v26.7.0';
 const action = process.argv[2] ?? 'all';
 const unitFiles = [
+  'components/cuda-target/test/cuda-target.test.mjs',
   'components/compiler-actor/test/compiler-actor.test.mjs',
   'components/compiler-actor/test/relocatable-device-code.test.mjs',
   'components/compiler-actor/test/device-lto.test.mjs',

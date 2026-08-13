@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.cuda-target",
+    "name": "Canonical CUDA target policy",
+    "status": "accepted-spec0006-target-v1-internal",
+    "product_area": "components",
+    "path": "components/cuda-target",
+    "purpose": "Own canonical CUDA target syntax, reviewed repository admission metadata, pairing, and stable policy identity without claiming provider, device, or native qualification.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library"],
+    "forbidden_dependencies": ["cuda-provider", "cuda-driver", "node-ffi", "device-selection", "native-qualification", "consumer-semantics"],
+    "validation": ["npm run f6:unit", "npm run f8:unit", "npm run hardware:check"],
+    "owner": "runtime.cuda-target",
+    "lifecycle": "Pure immutable JavaScript policy data and parsing; owns no native resource.",
+    "design": {
+      "owned_invariant": "Syntax, repository admission, explicit semantic metadata, pairing, and policy identity have one fail-closed owner while provider/device/qualification states remain independent.",
+      "public_ports": ["parseCudaTarget", "inspectCudaTarget", "normalizeCudaTarget", "pairedCudaTarget", "cudaTargetPolicySnapshot"],
+      "injected_dependencies": ["accepted reviewed target policy"],
+      "adapter_boundaries": ["CompilerActor", "Device-JS", "hardware qualification registry"],
+      "simplest_sufficient_total_system": "One structural parser, one explicit immutable policy table, one stable identity, and bounded inspection/pairing helpers."
+    }
+  }
+}

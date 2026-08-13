@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 
 import { normalizeCompileRequest } from '../../components/compiler-actor/testing.mjs';
+import { CUDA_TARGET_BASES } from '../../components/cuda-target/index.mjs';
 import { assessCudaSupport, inspectHostProfile } from '../../components/platform-diagnostics/index.mjs';
 
 function generator(initial) {
@@ -46,7 +47,7 @@ export function runPropertyPartitions(seed = 0xc0da1303, count = 256) {
     else if (kind === 2) { request = { source: 'x', name: `folder/k${index}.cu` }; expected = 'COMPILER_NAME_INVALID'; }
     else if (kind === 3) { request = { source: 'x', options: { architecture: `compute_${next() % 50}` } }; expected = 'COMPILER_ARCHITECTURE_INVALID'; }
     else if (kind === 4) { request = { source: 'x', headers: [{ name: 'same.h', source: 'a' }, { name: 'same.h', source: 'b' }] }; expected = 'COMPILER_HEADER_DUPLICATE'; }
-    else { request = { source: 'x', options: { architecture: `compute_${50 + (next() % 50)}`, languageStandard: next() % 2 ? 'c++17' : 'c++20', fmad: Boolean(next() % 2) } }; expected = 'accepted'; }
+    else { request = { source: 'x', options: { architecture: `compute_${CUDA_TARGET_BASES[next() % CUDA_TARGET_BASES.length]}`, languageStandard: next() % 2 ? 'c++17' : 'c++20', fmad: Boolean(next() % 2) } }; expected = 'accepted'; }
     let actual = 'accepted';
     try { normalizeCompileRequest(request, 'win32'); } catch (error) { actual = error.code; }
     assert.equal(actual, expected, id);

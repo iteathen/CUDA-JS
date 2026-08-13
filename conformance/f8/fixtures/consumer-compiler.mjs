@@ -20,6 +20,7 @@ const ltoLinked = await runtime.link({ inputs: [ltoFirst.artifact, ltoSecond.art
 const deviceJs = await compileDeviceProgram(runtime, {
   source: 'function portableKernel() { gpu.barrier.block(); }',
   functions: [{ name: 'portableKernel', kind: 'kernel', parameters: [], returns: 'void' }],
+  compile: { architecture: 'compute_120' },
 });
 
 assert.equal(compiled.artifact.format, 'ptx');
@@ -33,6 +34,7 @@ assert.equal(deviceJs.deviceProgram.parser.name, 'acorn');
 assert.equal(deviceJs.deviceProgram.parser.version, '8.15.0');
 assert.equal(deviceJs.deviceProgram.kernels[0].name, 'portableKernel');
 assert.equal(deviceJs.compiler.artifact.format, 'ptx');
+assert.equal(deviceJs.compiler.artifact.architecture, 'compute_120');
 for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact]) {
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/);
 }

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import ffi from 'node:ffi';
 
-import { LIMITS } from '../contract.mjs';
+import { LIMITS, providerTargetProfile } from '../contract.mjs';
 import { CompilerRuntimeError } from '../errors.mjs';
 import { snapshotHeaderProfile } from '../header-profile.mjs';
 
@@ -88,6 +88,7 @@ async function verifyProvider(rootPath, record) {
 export async function createBackend() {
   if (process.platform !== 'win32' || process.arch !== 'x64') throw new CompilerRuntimeError('COMPILER_PROFILE_UNSUPPORTED', 'unsupported', 'The native compiler backend requires Windows x64.');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  const targetCapabilities = providerTargetProfile(manifest.targetCapabilities);
   const toolkitRoot = await canonicalToolkitRoot();
   const ccclRoot = path.join(toolkitRoot, 'include', 'cccl');
   const nvrtcPath = await verifyProvider(toolkitRoot, manifest.providers.nvrtc);
@@ -128,6 +129,7 @@ export async function createBackend() {
         nvrtc: Object.freeze({ version: versions.nvrtc, byteLength: manifest.providers.nvrtc.byteLength, sha256: manifest.providers.nvrtc.sha256 }),
         nvrtcBuiltins: Object.freeze({ version: manifest.providers.nvrtcBuiltins.version, byteLength: manifest.providers.nvrtcBuiltins.byteLength, sha256: manifest.providers.nvrtcBuiltins.sha256 }),
         nvJitLink: Object.freeze({ version: versions.nvJitLink, byteLength: manifest.providers.nvJitLink.byteLength, sha256: manifest.providers.nvJitLink.sha256 }),
+        targetCapabilities,
         headerProfiles: Object.freeze({
           cudaCccl: Object.freeze({ ...manifest.headerProfiles.cudaCccl, roots: Object.freeze([...manifest.headerProfiles.cudaCccl.roots]) }),
         }),
