@@ -20,6 +20,8 @@ That revision includes the accepted Windows F1–F9 baseline plus integrated por
 
 Those three follow-ups retain their separately stated exact native promotion gates. Portable/software integration is not a native support claim.
 
+For discovery continuity, the accepted foundation still includes `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W` and later accepted Windows slices, exact qualified Node 26.7.0 evidence, and the retained independent Linux x86-64 qualification path. Linux x86-64 portable/ABI evidence is not native Linux CUDA support.
+
 The older detailed status narrative is preserved at exact revision `0f622a667145c810bcc9afdc2630753dfa06a20f` and indexed by [`docs/archive/2026-08-12-status-before-status-semantics-reset.md`](docs/archive/2026-08-12-status-before-status-semantics-reset.md).
 
 ## Status-language correction
