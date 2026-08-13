@@ -42,3 +42,6 @@
 38. Record genuine blockers and the next coherent action in `next_step.yaml`.
 39. Do not claim publication until exact remote state is read back.
 40. Do not claim completion while stale authority, contradictory plan state, invalidated evidence, unsafe residue, or unresolved ownership remains.
+41. Treat architectural disposition, implementation status, qualification/support status, and priority as independent dimensions. Never infer one from another; follow `general_foundation/STATUS_SEMANTICS.md`.
+42. `unsupported`, `not-qualified`, and legacy `no-support` are qualification/public-support statements unless accepted authority explicitly records an architectural rejection. `does not authorize`, `out of scope`, and slice exclusions remain local to their named contract/work package.
+43. When legacy or generated wording collapses status dimensions, report and correct the authoritative source before using that wording to plan, close/reopen issues, or alter implementation scope.
