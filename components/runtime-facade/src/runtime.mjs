@@ -15,9 +15,7 @@ function plainObject(value) {
   return prototype === Object.prototype || prototype === null;
 }
 
-function exactFields(value, allowed) {
-  return plainObject(value) && Object.keys(value).every((key) => allowed.includes(key));
-}
+function exactFields(value, allowed) { return plainObject(value) && Object.keys(value).every((key) => allowed.includes(key)); }
 
 function compilerOptions(value) {
   if (value === false || value === undefined) return null;
@@ -35,14 +33,10 @@ function normalizeOptions(value) {
 }
 
 function preflight(host) {
-  if (host.hostKind === 'linux-native-x64' || host.hostKind === 'linux-native-arm64') {
-    throw facadeError('CUDA_JS_LINUX_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a native Linux CUDA backend.', { hostKind: host.hostKind }, 'open');
-  }
+  if (host.hostKind === 'linux-native-x64' || host.hostKind === 'linux-native-arm64') throw facadeError('CUDA_JS_LINUX_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a native Linux CUDA backend.', { hostKind: host.hostKind }, 'open');
   if (host.hostKind.startsWith('wsl')) throw facadeError('CUDA_JS_WSL_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a WSL CUDA backend.', { hostKind: host.hostKind }, 'open');
   if (host.hostKind !== 'windows-native-x64') throw facadeError('CUDA_JS_HOST_BACKEND_UNAVAILABLE', 'unsupported', 'This package has no native backend for the detected host.', { hostKind: host.hostKind }, 'open');
-  if (host.node.disposition === 'known-incompatible') {
-    throw facadeError('CUDA_JS_NODE_INCOMPATIBLE', 'unsupported', 'This Node release lacks the minimum runtime substrate required by CUDA-JS.', { actualVersion: host.node.version, minimumVersion: host.node.minimumVersion, reason: host.node.reason }, 'open');
-  }
+  if (host.node.disposition === 'known-incompatible') throw facadeError('CUDA_JS_NODE_INCOMPATIBLE', 'unsupported', 'This Node release lacks the minimum runtime substrate required by CUDA-JS.', { actualVersion: host.node.version, minimumVersion: host.node.minimumVersion, reason: host.node.reason }, 'open');
   if (!host.ffi.experimental) throw facadeError('CUDA_JS_FFI_FLAG_REQUIRED', 'unsupported', 'CUDA-JS requires Node experimental FFI.', {}, 'open');
   if (host.ffi.permission === 'ffi-denied') throw facadeError('CUDA_JS_FFI_PERMISSION_REQUIRED', 'permission', 'CUDA-JS requires FFI authority when the Node permission model is active.', {}, 'open');
 }
@@ -54,27 +48,12 @@ function publicCompilerStatus(status) {
 
 function publicDriverTerminal(report) {
   if (!report) return null;
-  return freezePublic({
-    graceful: report.graceful === true,
-    restartRequired: report.restartRequired === true,
-    cleanupClaim: report.cleanupClaim ?? null,
-    workerExited: report.workerExited === true,
-    workerExitCode: report.workerExitCode ?? null,
-    health: report.health?.current ?? null,
-    resourceCounts: report.teardown?.inventory?.counts ?? report.inventory?.counts ?? null,
-  });
+  return freezePublic({ graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, health: report.health?.current ?? null, resourceCounts: report.teardown?.inventory?.counts ?? report.inventory?.counts ?? null });
 }
 
 function publicCompilerTerminal(report) {
   if (!report) return null;
-  return freezePublic({
-    graceful: report.graceful === true,
-    restartRequired: report.restartRequired === true,
-    cleanupClaim: report.cleanupClaim ?? null,
-    workerExited: report.workerExited === true,
-    workerExitCode: report.workerExitCode ?? null,
-    resources: report.resources ?? null,
-  });
+  return freezePublic({ graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, resources: report.resources ?? null });
 }
 
 function publicCloseFailure(error, operation) {
@@ -100,11 +79,8 @@ function resourceFor(resource, runtime, kind, operation) {
 }
 
 async function invoke(operation, callback) {
-  try {
-    return await callback();
-  } catch (error) {
-    throw publicError(error, operation);
-  }
+  try { return await callback(); }
+  catch (error) { throw publicError(error, operation); }
 }
 
 function registerResource(runtime, kind, token, publicFields, ResourceClass) {
@@ -127,40 +103,43 @@ async function closeResource(resource, operation, release) {
     runtimeData.get(entry.runtime)?.resources.delete(resource);
     return freezePublic({ schemaVersion: 1, kind: entry.kind, state: 'closed', disposition: result.disposition ?? null });
   });
-  try {
-    return await entry.closePromise;
-  } catch (error) {
-    entry.closePromise = null;
-    throw error;
-  }
+  try { return await entry.closePromise; }
+  catch (error) { entry.closePromise = null; throw error; }
+}
+
+function translateLaunch(entry, options, operation) {
+  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key)) || !Array.isArray(options.arguments)) throw facadeError('CUDA_JS_LAUNCH_OPTIONS_INVALID', 'validation', 'Launch requires grid, block, and an arguments array.', {}, operation);
+  if (options.arguments.length !== entry.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Launch argument count must match the function declaration.', { expected: entry.parameters.length, actual: options.arguments.length }, operation);
+  const argumentsForActor = entry.parameters.map((parameter, index) => {
+    const value = options.arguments[index];
+    if (parameter.kind !== 'device-memory') return { kind: parameter.kind, value };
+    const memory = resourceFor(value, entry.runtime, 'device-memory', operation);
+    return { kind: 'device-memory', memory: memory.token };
+  });
+  return { grid: options.grid, block: options.block, sharedMemoryBytes: options.sharedMemoryBytes ?? 0, arguments: argumentsForActor };
+}
+
+function publicOperationStatus(result) {
+  const output = { schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health };
+  if (result.failure) output.failure = result.failure;
+  if (result.orphanReason) output.orphanReason = result.orphanReason;
+  return freezePublic(output);
+}
+
+function updateOperation(entry, result) {
+  entry.gpuState = result.status;
+  entry.lastStatus = publicOperationStatus(result);
+  return entry.lastStatus;
 }
 
 class CudaDeviceMemory {
   get kind() { return 'device-memory'; }
   get byteLength() { return resourceData.get(this)?.byteLength ?? null; }
   get state() { return resourceData.get(this)?.state ?? 'invalid'; }
-
-  async status() {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.status');
-    const result = await invoke('memory.status', () => runtimeData.get(entry.runtime).driver.memoryStatus(entry.token));
-    return freezePublic({ schemaVersion: 1, kind: 'device-memory', state: entry.state, byteLength: result.byteLength, usage: result.usage });
-  }
-
-  async write(bytes, options = {}) {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.write');
-    const result = await invoke('memory.write', () => runtimeData.get(entry.runtime).driver.writeDevice(entry.token, bytes, options));
-    return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, usage: result.usage });
-  }
-
-  async read(options) {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.read');
-    const result = await invoke('memory.read', () => runtimeData.get(entry.runtime).driver.readDevice(entry.token, options));
-    return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, bytes: result.bytes, usage: result.usage });
-  }
-
-  async close() {
-    return closeResource(this, 'memory.close', (entry) => runtimeData.get(entry.runtime).driver.releaseMemory(entry.token));
-  }
+  async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.status'); const result = await invoke('memory.status', () => runtimeData.get(entry.runtime).driver.memoryStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'device-memory', state: entry.state, byteLength: result.byteLength, usage: result.usage }); }
+  async write(bytes, options = {}) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.write'); const result = await invoke('memory.write', () => runtimeData.get(entry.runtime).driver.writeDevice(entry.token, bytes, options)); return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, usage: result.usage }); }
+  async read(options) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.read'); const result = await invoke('memory.read', () => runtimeData.get(entry.runtime).driver.readDevice(entry.token, options)); return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, bytes: result.bytes, usage: result.usage }); }
+  async close() { return closeResource(this, 'memory.close', (entry) => runtimeData.get(entry.runtime).driver.releaseMemory(entry.token)); }
 }
 
 class CudaModule {
@@ -169,22 +148,21 @@ class CudaModule {
   get byteLength() { return resourceData.get(this)?.byteLength ?? null; }
   get sha256() { return resourceData.get(this)?.sha256 ?? null; }
   get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'module.status'); const result = await invoke('module.status', () => runtimeData.get(entry.runtime).driver.moduleStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'module', state: entry.state, format: result.format, byteLength: result.byteLength, sha256: result.sha256 }); }
+  async getFunction(options) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'function.get'); const result = await invoke('function.get', () => runtimeData.get(entry.runtime).driver.getFunction(entry.token, options)); return registerResource(entry.runtime, 'function', result.function, { module: this, name: result.name, parameters: result.parameters }, CudaFunction); }
+  async close() { return closeResource(this, 'module.close', (entry) => runtimeData.get(entry.runtime).driver.releaseModule(entry.token)); }
+}
 
-  async status() {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'module.status');
-    const result = await invoke('module.status', () => runtimeData.get(entry.runtime).driver.moduleStatus(entry.token));
-    return freezePublic({ schemaVersion: 1, kind: 'module', state: entry.state, format: result.format, byteLength: result.byteLength, sha256: result.sha256 });
+class CudaOperation {
+  get kind() { return 'operation'; }
+  get state() {
+    const entry = resourceData.get(this);
+    if (!entry) return 'invalid';
+    return entry.state === 'open' ? entry.gpuState : entry.state;
   }
-
-  async getFunction(options) {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'function.get');
-    const result = await invoke('function.get', () => runtimeData.get(entry.runtime).driver.getFunction(entry.token, options));
-    return registerResource(entry.runtime, 'function', result.function, { module: this, name: result.name, parameters: result.parameters }, CudaFunction);
-  }
-
-  async close() {
-    return closeResource(this, 'module.close', (entry) => runtimeData.get(entry.runtime).driver.releaseModule(entry.token));
-  }
+  async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'operation', 'operation.status'); const result = await invoke('operation.status', () => runtimeData.get(entry.runtime).driver.operationStatus(entry.token)); return updateOperation(entry, result); }
+  async wait() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'operation', 'operation.wait'); const result = await invoke('operation.wait', () => runtimeData.get(entry.runtime).driver.waitOperation(entry.token)); return updateOperation(entry, result); }
+  async close() { return closeResource(this, 'operation.close', (entry) => runtimeData.get(entry.runtime).driver.releaseOperation(entry.token)); }
 }
 
 class CudaFunction {
@@ -192,31 +170,20 @@ class CudaFunction {
   get name() { return resourceData.get(this)?.name ?? null; }
   get parameters() { return resourceData.get(this)?.parameters ?? null; }
   get state() { return resourceData.get(this)?.state ?? 'invalid'; }
-
-  async status() {
-    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'function', 'function.status');
-    const result = await invoke('function.status', () => runtimeData.get(entry.runtime).driver.functionStatus(entry.token));
-    return freezePublic({ schemaVersion: 1, kind: 'function', state: entry.state, name: result.name, parameters: result.parameters });
+  async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'function', 'function.status'); const result = await invoke('function.status', () => runtimeData.get(entry.runtime).driver.functionStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'function', state: entry.state, name: result.name, parameters: result.parameters }); }
+  async submit(options) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'function', 'function.submit');
+    const request = translateLaunch(entry, options, 'function.submit');
+    const result = await invoke('function.submit', () => runtimeData.get(entry.runtime).driver.submit(entry.token, request));
+    return registerResource(entry.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
   }
-
   async launch(options) {
     const entry = resourceFor(this, resourceData.get(this)?.runtime, 'function', 'function.launch');
-    if (!plainObject(options) || !Array.isArray(options.arguments)) throw facadeError('CUDA_JS_LAUNCH_OPTIONS_INVALID', 'validation', 'Launch requires an arguments array.', {}, 'function.launch');
-    if (options.arguments.length !== entry.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Launch argument count must match the function declaration.', { expected: entry.parameters.length, actual: options.arguments.length }, 'function.launch');
-    const argumentsForActor = entry.parameters.map((parameter, index) => {
-      const value = options.arguments[index];
-      if (parameter.kind !== 'device-memory') return { kind: parameter.kind, value };
-      const memory = resourceFor(value, entry.runtime, 'device-memory', 'function.launch');
-      return { kind: 'device-memory', memory: memory.token };
-    });
-    const request = { ...options, arguments: argumentsForActor };
+    const request = translateLaunch(entry, options, 'function.launch');
     const result = await invoke('function.launch', () => runtimeData.get(entry.runtime).driver.launch(entry.token, request));
     return freezePublic({ schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health });
   }
-
-  async close() {
-    return closeResource(this, 'function.close', (entry) => runtimeData.get(entry.runtime).driver.releaseFunction(entry.token));
-  }
+  async close() { return closeResource(this, 'function.close', (entry) => runtimeData.get(entry.runtime).driver.releaseFunction(entry.token)); }
 }
 
 class CudaRuntime {
@@ -229,56 +196,12 @@ class CudaRuntime {
   }
   get compilerEnabled() { return runtimeData.get(this)?.compiler !== null; }
   get terminalReport() { return runtimeData.get(this)?.terminalReport ?? null; }
-
-  async describe() {
-    const data = dataFor(this, 'runtime.describe');
-    const driver = await invoke('runtime.describe', () => data.driver.describe());
-    const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null;
-    return freezePublic({
-      schemaVersion: 1,
-      package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion },
-      state: data.state,
-      health: this.health,
-      support: data.support,
-      profile: driver.profile,
-      driver: driver.driver,
-      device: driver.device,
-      memory: driver.memory,
-      execution: driver.execution,
-      compiler: publicCompilerStatus(compiler),
-    });
-  }
-
-  async allocateDevice(options) {
-    const data = dataFor(this, 'memory.allocate');
-    const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options));
-    return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory);
-  }
-
-  async loadModule(options) {
-    const data = dataFor(this, 'module.load');
-    const result = await invoke('module.load', () => data.driver.loadModule(options));
-    return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule);
-  }
-
-  async compile(request) {
-    const data = dataFor(this, 'compiler.compile');
-    if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile');
-    return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(request)));
-  }
-
-  async link(request) {
-    const data = dataFor(this, 'compiler.link');
-    if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link');
-    return freezePublic(await invoke('compiler.link', () => data.compiler.link(request)));
-  }
-
-  async invalidateCache(key) {
-    const data = dataFor(this, 'compiler.cache.invalidate');
-    if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.cache.invalidate');
-    return freezePublic(await invoke('compiler.cache.invalidate', () => data.compiler.invalidate(key)));
-  }
-
+  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
+  async allocateDevice(options) { const data = dataFor(this, 'memory.allocate'); const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options)); return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory); }
+  async loadModule(options) { const data = dataFor(this, 'module.load'); const result = await invoke('module.load', () => data.driver.loadModule(options)); return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule); }
+  async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(request))); }
+  async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(request))); }
+  async invalidateCache(key) { const data = dataFor(this, 'compiler.cache.invalidate'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.cache.invalidate'); return freezePublic(await invoke('compiler.cache.invalidate', () => data.compiler.invalidate(key))); }
   async close() {
     const data = dataFor(this, 'runtime.close', true);
     if (data.closePromise) return data.closePromise;
@@ -287,16 +210,11 @@ class CudaRuntime {
     data.closePromise = (async () => {
       let compiler = null;
       let driver = null;
-      if (data.compiler) {
-        try { compiler = await data.compiler.close(); } catch (error) { compiler = publicCloseFailure(error, 'compiler.close'); }
-      }
+      if (data.compiler) { try { compiler = await data.compiler.close(); } catch (error) { compiler = publicCloseFailure(error, 'compiler.close'); } }
       try { driver = await data.driver.close(); } catch (error) { driver = publicCloseFailure(error, 'driver.close'); }
       const graceful = driver?.graceful === true && (!compiler || compiler.graceful === true);
       data.state = graceful ? 'closed' : 'restart-required';
-      for (const resource of data.resources) {
-        const entry = resourceData.get(resource);
-        if (entry) entry.state = graceful ? 'closed' : 'orphaned';
-      }
+      for (const resource of data.resources) { const entry = resourceData.get(resource); if (entry) entry.state = graceful ? 'closed' : 'orphaned'; }
       data.resources.clear();
       data.terminalReport = freezePublic({ schemaVersion: 1, graceful, restartRequired: !graceful, state: data.state, compiler: compiler?.error ? compiler : publicCompilerTerminal(compiler), driver: driver?.error ? driver : publicDriverTerminal(driver) });
       return data.terminalReport;
@@ -320,29 +238,14 @@ async function openWithAdapters(options, adapters, supportFactory) {
     return Object.freeze(runtime);
   } catch (error) {
     let cleanupUnproved = false;
-    if (compiler) {
-      try {
-        const compilerTerminal = await compiler.close();
-        if (compilerTerminal?.graceful !== true) cleanupUnproved = true;
-      } catch { cleanupUnproved = true; }
-    }
-    if (driver) {
-      try {
-        const driverTerminal = await driver.close();
-        if (driverTerminal?.graceful !== true) cleanupUnproved = true;
-      } catch { cleanupUnproved = true; }
-    }
-    if (cleanupUnproved) {
-      const cause = publicError(error, 'open');
-      throw facadeError('CUDA_JS_OPEN_CLEANUP_UNPROVED', 'restart-required', 'Runtime opening failed and acquired native ownership did not close terminally; restart the process.', { causeCode: cause.code }, 'open');
-    }
+    if (compiler) { try { const compilerTerminal = await compiler.close(); if (compilerTerminal?.graceful !== true) cleanupUnproved = true; } catch { cleanupUnproved = true; } }
+    if (driver) { try { const driverTerminal = await driver.close(); if (driverTerminal?.graceful !== true) cleanupUnproved = true; } catch { cleanupUnproved = true; } }
+    if (cleanupUnproved) { const cause = publicError(error, 'open'); throw facadeError('CUDA_JS_OPEN_CLEANUP_UNPROVED', 'restart-required', 'Runtime opening failed and acquired native ownership did not close terminally; restart the process.', { causeCode: cause.code }, 'open'); }
     throw publicError(error, 'open');
   }
 }
 
-export function inspectCudaHost() {
-  return freezePublic({ schemaVersion: 1, host: inspectHostProfile(), compatibility: CUDA_JS_COMPATIBILITY });
-}
+export function inspectCudaHost() { return freezePublic({ schemaVersion: 1, host: inspectHostProfile(), compatibility: CUDA_JS_COMPATIBILITY }); }
 
 export async function openCudaRuntime(options = {}) {
   const host = inspectHostProfile();
@@ -350,6 +253,4 @@ export async function openCudaRuntime(options = {}) {
   return openWithAdapters(options, { openDriver: openDriverRuntime, openCompiler: openCompilerRuntime }, (description) => assessCudaSupport(host, description));
 }
 
-export async function openCudaRuntimeWithAdapters(options, adapters, supportFactory) {
-  return openWithAdapters(options, adapters, supportFactory);
-}
+export async function openCudaRuntimeWithAdapters(options, adapters, supportFactory) { return openWithAdapters(options, adapters, supportFactory); }

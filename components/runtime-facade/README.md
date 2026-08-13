@@ -4,6 +4,8 @@
 
 The native entry requires Node 26.1.0 or later on Windows x64 and Node's experimental FFI flag. Unconfirmed Node and CUDA hardware profiles operate automatically as `testing-unconfirmed`; only the published exact evidence profile is qualified. The optional compiler is disabled by default so Driver-only use does not require CUDA Toolkit providers. Pass `compiler: true` for a cache-disabled compiler or provide accepted cache options.
 
+Function capabilities expose both terminal `launch()` compatibility and the SPEC-0016 `submit()` path. `submit()` returns an opaque `CudaOperation` with `status()`, `wait()`, and `close()`. `wait()` polls through short serialized DriverActor turns and does not itself impose the legacy launch deadline; closing a pending operation reports busy rather than pretending cancellation. One pending operation remains the first-slice limit.
+
 ```js
 import { openCudaRuntime } from 'cuda-js';
 
@@ -20,4 +22,4 @@ try {
 }
 ```
 
-`cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux and WSL imports fail with stable backend-unavailable errors while their retained runbooks remain independently completable.
+`cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native SPEC-0016 support, native Linux, and WSL remain independently gated by their exact evidence requirements.

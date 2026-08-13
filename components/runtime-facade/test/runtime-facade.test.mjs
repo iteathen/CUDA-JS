@@ -13,11 +13,12 @@ function expectCode(code) {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.3');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.4');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32']);
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
@@ -30,15 +31,11 @@ test('compatibility and host inspection are immutable and reconcile the current 
 });
 
 test('native entry fails before provider work when its launch profile is absent', async () => {
-  if (process.platform === 'win32' && !process.execArgv.includes('--experimental-ffi')) {
-    await assert.rejects(openCudaRuntime(), expectCode('CUDA_JS_FFI_FLAG_REQUIRED'));
-  }
+  if (process.platform === 'win32' && !process.execArgv.includes('--experimental-ffi')) await assert.rejects(openCudaRuntime(), expectCode('CUDA_JS_FFI_FLAG_REQUIRED'));
 });
 
 test('facade owns copied memory and hides private actor capabilities', async () => {
-  const runtime = await openCudaRuntimeForTesting({
-    driver: { memory: { maxDeviceBytes: 32, maxAllocationBytes: 16, maxTransferBytes: 16 } },
-  });
+  const runtime = await openCudaRuntimeForTesting({ driver: { memory: { maxDeviceBytes: 32, maxAllocationBytes: 16, maxTransferBytes: 16 } } });
   const memory = await runtime.allocateDevice({ byteLength: 16 });
   assert.deepEqual(Object.keys(runtime), []);
   assert.deepEqual(Object.keys(memory), []);
@@ -62,11 +59,7 @@ test('module and function capabilities translate declared public launch argument
   const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
   const fn = await module.getFunction({ name: 'unrelated_kernel', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
   const memory = await runtime.allocateDevice({ byteLength: 8 });
-  const completion = await fn.launch({
-    grid: { x: 1, y: 1, z: 1 },
-    block: { x: 1, y: 1, z: 1 },
-    arguments: [memory, 2],
-  });
+  const completion = await fn.launch({ grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [memory, 2] });
   assert.equal(completion.status, 'completed');
   assert.deepEqual(completion.argumentKinds, ['device-memory', 'u32']);
   assert.equal(JSON.stringify(fn), '{}');
@@ -83,7 +76,6 @@ test('optional compiler is explicit and returns copied PTX and cubin artifacts',
   const disabled = await openCudaRuntimeForTesting();
   await assert.rejects(disabled.compile({ source: SOURCE }), expectCode('CUDA_JS_COMPILER_DISABLED'));
   await disabled.close();
-
   const runtime = await openCudaRuntimeForTesting({ compiler: true });
   const compiled = await runtime.compile({ source: SOURCE });
   const linked = await runtime.link({ inputs: [compiled.artifact] });
@@ -104,9 +96,7 @@ test('two runtimes isolate resources and first close leaves the second usable', 
   const firstModule = await first.loadModule({ format: 'ptx', bytes: MOCK_PTX });
   const firstFunction = await firstModule.getFunction({ name: 'first', parameters: [{ kind: 'device-memory' }] });
   const secondMemory = await second.allocateDevice({ byteLength: 8 });
-  await assert.rejects(firstFunction.launch({
-    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [secondMemory],
-  }), expectCode('CUDA_JS_RESOURCE_OWNER'));
+  await assert.rejects(firstFunction.launch({ grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [secondMemory] }), expectCode('CUDA_JS_RESOURCE_OWNER'));
   assert.equal((await first.close()).graceful, true);
   await secondMemory.write(Uint8Array.of(7));
   assert.deepEqual([...(await secondMemory.read({ byteLength: 1 })).bytes], [7]);
@@ -121,15 +111,8 @@ test('public compiler cache never defaults to package-owned writable storage', a
 
 test('aggregate close attempts both owners and reports unproved cleanup without throwing', async () => {
   const closed = [];
-  const driver = {
-    health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
-    async close() { closed.push('driver'); throw Object.assign(new Error('driver close'), { code: 'DRIVER_CLOSE', category: 'restart-required' }); },
-  };
-  const compiler = {
-    health: 'healthy',
-    async close() { closed.push('compiler'); throw Object.assign(new Error('compiler close'), { code: 'COMPILER_CLOSE', category: 'restart-required' }); },
-  };
+  const driver = { health: 'healthy', async describe() { return { claim: 'stub' }; }, async close() { closed.push('driver'); throw Object.assign(new Error('driver close'), { code: 'DRIVER_CLOSE', category: 'restart-required' }); } };
+  const compiler = { health: 'healthy', async close() { closed.push('compiler'); throw Object.assign(new Error('compiler close'), { code: 'COMPILER_CLOSE', category: 'restart-required' }); } };
   const runtime = await openCudaRuntimeWithAdapters({ compiler: true }, { openDriver: async () => driver, openCompiler: async () => compiler }, () => ({ status: 'mock-only' }));
   const terminal = await runtime.close();
   assert.deepEqual(closed, ['compiler', 'driver']);
@@ -140,11 +123,7 @@ test('aggregate close attempts both owners and reports unproved cleanup without 
 });
 
 test('open failure reports restart-required when an acquired owner cannot close', async () => {
-  const driver = {
-    health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
-    async close() { return { graceful: false }; },
-  };
+  const driver = { health: 'healthy', async describe() { return { claim: 'stub' }; }, async close() { return { graceful: false }; } };
   await assert.rejects(openCudaRuntimeWithAdapters({ compiler: true }, {
     openDriver: async () => driver,
     openCompiler: async () => { throw Object.assign(new Error('compiler open'), { code: 'COMPILER_OPEN', category: 'provider' }); },
@@ -153,15 +132,10 @@ test('open failure reports restart-required when an acquired owner cannot close'
 
 test('unconfirmed profiles operate while known-incompatible profiles close and reject', async () => {
   const closed = [];
-  const adapter = {
-    health: 'healthy',
-    async describe() { return { claim: 'candidate' }; },
-    async close() { closed.push('driver'); return { graceful: true, workerExited: true, workerExitCode: 0 }; },
-  };
+  const adapter = { health: 'healthy', async describe() { return { claim: 'candidate' }; }, async close() { closed.push('driver'); return { graceful: true, workerExited: true, workerExitCode: 0 }; } };
   const candidate = await openCudaRuntimeWithAdapters({}, { openDriver: async () => adapter, openCompiler: async () => null }, () => ({ status: 'testing-unconfirmed', reason: 'PROFILE_EVIDENCE_UNCONFIRMED' }));
   assert.equal((await candidate.describe()).support.status, 'testing-unconfirmed');
   assert.equal((await candidate.close()).graceful, true);
-
   await assert.rejects(openCudaRuntimeWithAdapters({}, { openDriver: async () => adapter, openCompiler: async () => null }, () => ({ status: 'incompatible', reason: 'KNOWN_INCOMPATIBLE_FIXTURE' })), expectCode('CUDA_JS_PROFILE_INCOMPATIBLE'));
   assert.deepEqual(closed, ['driver', 'driver']);
 });

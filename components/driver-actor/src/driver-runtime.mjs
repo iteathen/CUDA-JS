@@ -10,6 +10,8 @@ import { requestRecord } from './protocol.mjs';
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
 const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution']);
 
+function delay(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
+
 function workerExecArgv() {
   return process.execArgv.filter((argument) => argument === '--experimental-ffi'
     || argument === '--permission'
@@ -26,9 +28,7 @@ function plainObject(value) {
   return prototype === Object.prototype || prototype === null;
 }
 
-function exactOptionFields(options) {
-  return Object.keys(options).every((key) => PUBLIC_OPTION_FIELDS.includes(key));
-}
+function exactOptionFields(options) { return Object.keys(options).every((key) => PUBLIC_OPTION_FIELDS.includes(key)); }
 
 function freezeRecord(value) {
   if (value === null || typeof value !== 'object') return value;
@@ -39,13 +39,58 @@ function freezeRecord(value) {
 
 function orphanInventory(lastInventory) {
   if (!lastInventory) return null;
-  const resources = lastInventory.resources.map((resource) => ({
-    ...resource,
-    state: ['live', 'closing'].includes(resource.state) ? 'orphaned' : resource.state,
-  }));
+  const resources = lastInventory.resources.map((resource) => ({ ...resource, state: ['live', 'closing'].includes(resource.state) ? 'orphaned' : resource.state }));
   const counts = { live: 0, closing: 0, closed: 0, orphaned: 0 };
   for (const resource of resources) counts[resource.state] += 1;
   return freezeRecord({ ...lastInventory, dead: true, counts, resources, reason: 'worker-lost' });
+}
+
+function launchPayload(functionToken, options, operationName) {
+  if (!isResourceToken(functionToken)) throw validationError('DRIVER_FUNCTION_TOKEN', `${operationName} requires an exact opaque function token.`);
+  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key))
+      || !Object.hasOwn(options, 'grid') || !Object.hasOwn(options, 'block') || !Object.hasOwn(options, 'arguments') || !Array.isArray(options.arguments)) {
+    throw validationError('DRIVER_LAUNCH_OPTIONS', `${operationName} options are invalid.`);
+  }
+  const copyDimensions = (value) => plainObject(value) ? { ...value } : value;
+  const argumentCopies = options.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry);
+  return {
+    functionToken,
+    grid: copyDimensions(options.grid),
+    block: copyDimensions(options.block),
+    sharedMemoryBytes: options.sharedMemoryBytes ?? 0,
+    arguments: argumentCopies,
+  };
+}
+
+function operationFailure(status) {
+  if (status?.status === 'orphaned') {
+    return new DriverRuntimeError('EXECUTION_OPERATION_ORPHANED', 'restart-required', 'GPU operation terminality is unproved; process restart is required.', { orphanReason: status.orphanReason ?? null }, { healthBefore: status.health?.current ?? null, healthAfter: 'restart-required' });
+  }
+  const failure = status?.failure ?? {};
+  return new DriverRuntimeError(
+    typeof failure.code === 'string' ? failure.code : 'EXECUTION_ASYNC_FAILURE',
+    typeof failure.category === 'string' ? failure.category : 'deferred-driver',
+    typeof failure.message === 'string' ? failure.message : 'GPU operation failed asynchronously.',
+    {},
+    { healthBefore: failure.healthBefore ?? null, healthAfter: failure.healthAfter ?? status?.health?.current ?? null },
+  );
+}
+
+function legacyCompletion(status) {
+  return freezeRecord({
+    schemaVersion: 1,
+    status: 'completed',
+    module: status.module,
+    function: status.function,
+    grid: status.grid,
+    block: status.block,
+    sharedMemoryBytes: status.sharedMemoryBytes,
+    argumentKinds: status.argumentKinds,
+    pollCount: status.pollCount,
+    elapsedMilliseconds: status.elapsedMilliseconds,
+    operationSequence: status.operationSequence,
+    health: status.health,
+  });
 }
 
 class DriverRuntime {
@@ -85,19 +130,13 @@ class DriverRuntime {
     this.#exitPromise = new Promise((resolve) => { this.#exitResolve = resolve; });
   }
 
-  static async open(options) {
-    const runtime = new DriverRuntime(options);
-    await runtime.#start();
-    return runtime;
-  }
+  static async open(options) { const runtime = new DriverRuntime(options); await runtime.#start(); return runtime; }
 
   get state() { return this.#state; }
   get health() { return this.#health; }
   get terminalReport() { return this.#terminalReport; }
 
-  async describe() {
-    return this.#request('runtime.describe', {});
-  }
+  async describe() { return this.#request('runtime.describe', {}); }
 
   async contextStatus(token = this.#description?.context) {
     if (!isResourceToken(token)) throw validationError('DRIVER_CONTEXT_TOKEN', 'contextStatus requires the exact opaque context token.');
@@ -105,9 +144,7 @@ class DriverRuntime {
   }
 
   async allocateDevice(options = {}) {
-    if (!plainObject(options) || Object.keys(options).length !== 1 || !Object.hasOwn(options, 'byteLength')) {
-      throw validationError('DRIVER_MEMORY_OPTIONS', 'allocateDevice requires exactly one byteLength field.');
-    }
+    if (!plainObject(options) || Object.keys(options).length !== 1 || !Object.hasOwn(options, 'byteLength')) throw validationError('DRIVER_MEMORY_OPTIONS', 'allocateDevice requires exactly one byteLength field.');
     return this.#request('memory.allocate', { byteLength: options.byteLength });
   }
 
@@ -121,8 +158,7 @@ class DriverRuntime {
     if (!(bytes instanceof Uint8Array) || Buffer.isBuffer(bytes)) throw validationError('MEMORY_BYTES_INVALID', 'writeDevice requires an ordinary Uint8Array.');
     if (!plainObject(options) || Object.keys(options).some((key) => key !== 'deviceOffset')) throw validationError('DRIVER_MEMORY_OPTIONS', 'writeDevice options contain unknown fields.');
     if (bytes.byteLength > this.#memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'writeDevice bytes exceed the configured transfer limit.');
-    const snapshot = Uint8Array.from(bytes);
-    return this.#request('memory.write', { token, bytes: snapshot, deviceOffset: options.deviceOffset ?? 0 });
+    return this.#request('memory.write', { token, bytes: Uint8Array.from(bytes), deviceOffset: options.deviceOffset ?? 0 });
   }
 
   async readDevice(token, options) {
@@ -137,12 +173,8 @@ class DriverRuntime {
   }
 
   async loadModule(options) {
-    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || !['ptx', 'cubin'].includes(options.format)) {
-      throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" or "cubin" and bytes.');
-    }
-    if (!(options.bytes instanceof Uint8Array) || Buffer.isBuffer(options.bytes) || options.bytes.byteLength < 1 || options.bytes.byteLength > this.#executionPolicy.maxModuleBytes) {
-      throw validationError('EXECUTION_MODULE_BYTES', 'loadModule requires bounded ordinary Uint8Array bytes.');
-    }
+    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || !['ptx', 'cubin'].includes(options.format)) throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" or "cubin" and bytes.');
+    if (!(options.bytes instanceof Uint8Array) || Buffer.isBuffer(options.bytes) || options.bytes.byteLength < 1 || options.bytes.byteLength > this.#executionPolicy.maxModuleBytes) throw validationError('EXECUTION_MODULE_BYTES', 'loadModule requires bounded ordinary Uint8Array bytes.');
     return this.#request('execution.module.load', { format: options.format, bytes: Uint8Array.from(options.bytes) });
   }
 
@@ -153,11 +185,8 @@ class DriverRuntime {
 
   async getFunction(moduleToken, options) {
     if (!isResourceToken(moduleToken)) throw validationError('DRIVER_MODULE_TOKEN', 'getFunction requires an exact opaque module token.');
-    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['name', 'parameters'].join('\0') || !Array.isArray(options.parameters)) {
-      throw validationError('DRIVER_FUNCTION_OPTIONS', 'getFunction requires exactly name and parameters.');
-    }
-    const parameters = options.parameters.map((entry) => plainObject(entry) ? { ...entry } : entry);
-    return this.#request('execution.function.get', { moduleToken, name: options.name, parameters });
+    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['name', 'parameters'].join('\0') || !Array.isArray(options.parameters)) throw validationError('DRIVER_FUNCTION_OPTIONS', 'getFunction requires exactly name and parameters.');
+    return this.#request('execution.function.get', { moduleToken, name: options.name, parameters: options.parameters.map((entry) => plainObject(entry) ? { ...entry } : entry) });
   }
 
   async functionStatus(token) {
@@ -165,21 +194,57 @@ class DriverRuntime {
     return this.#request('execution.function.status', { token });
   }
 
-  async launch(functionToken, options) {
-    if (!isResourceToken(functionToken)) throw validationError('DRIVER_FUNCTION_TOKEN', 'launch requires an exact opaque function token.');
-    if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key))
-        || !Object.hasOwn(options, 'grid') || !Object.hasOwn(options, 'block') || !Object.hasOwn(options, 'arguments') || !Array.isArray(options.arguments)) {
-      throw validationError('DRIVER_LAUNCH_OPTIONS', 'launch options are invalid.');
+  async submit(functionToken, options) {
+    return this.#request('execution.submit', launchPayload(functionToken, options, 'submit'));
+  }
+
+  async operationStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_OPERATION_TOKEN', 'operationStatus requires an exact opaque operation token.');
+    return this.#request('execution.operation.status', { token });
+  }
+
+  async releaseOperation(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_OPERATION_TOKEN', 'releaseOperation requires an exact opaque operation token.');
+    return this.#request('execution.operation.release', { token });
+  }
+
+  async waitOperation(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_OPERATION_TOKEN', 'waitOperation requires an exact opaque operation token.');
+    let pollDelay = 1;
+    for (;;) {
+      const status = await this.operationStatus(token);
+      if (status.status === 'completed') return status;
+      if (status.status === 'failed' || status.status === 'orphaned') throw operationFailure(status);
+      if (status.status !== 'pending') throw new DriverRuntimeError('EXECUTION_OPERATION_STATE', 'internal', 'DriverActor returned an invalid operation state.', { status: status.status });
+      await delay(pollDelay);
+      pollDelay = Math.min(pollDelay * 2, 16);
     }
-    const copyDimensions = (value) => plainObject(value) ? { ...value } : value;
-    const argumentCopies = options.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry);
-    return this.#request('execution.launch', {
-      functionToken,
-      grid: copyDimensions(options.grid),
-      block: copyDimensions(options.block),
-      sharedMemoryBytes: options.sharedMemoryBytes ?? 0,
-      arguments: argumentCopies,
-    });
+  }
+
+  async launch(functionToken, options) {
+    const operation = await this.submit(functionToken, options);
+    const started = Date.now();
+    let pollDelay = 1;
+    for (;;) {
+      const status = await this.operationStatus(operation.operation);
+      if (status.status === 'completed') {
+        await this.releaseOperation(operation.operation);
+        return legacyCompletion(status);
+      }
+      if (status.status === 'failed') {
+        await this.releaseOperation(operation.operation);
+        throw operationFailure(status);
+      }
+      if (status.status === 'orphaned') throw operationFailure(status);
+      if (status.status !== 'pending') throw new DriverRuntimeError('EXECUTION_OPERATION_STATE', 'internal', 'DriverActor returned an invalid operation state.', { status: status.status });
+      const elapsed = Math.max(0, Date.now() - started);
+      if (elapsed >= this.#executionPolicy.maxCompletionMilliseconds) {
+        await this.#request('execution.operation.timeout', { token: operation.operation });
+        throw new DriverRuntimeError('EXECUTION_COMPLETION_TIMEOUT', 'restart-required', 'Launch completion deadline expired; runtime restart is required.');
+      }
+      await delay(Math.min(pollDelay, this.#executionPolicy.maxCompletionMilliseconds - elapsed));
+      pollDelay = Math.min(pollDelay * 2, 16);
+    }
   }
 
   async releaseFunction(token) {
@@ -194,8 +259,7 @@ class DriverRuntime {
 
   async close() {
     if (this.#closePromise) return this.#closePromise;
-    if (this.#state === 'restart-required') return this.#terminalReport;
-    if (this.#state === 'closed') return this.#terminalReport;
+    if (this.#state === 'restart-required' || this.#state === 'closed') return this.#terminalReport;
     this.#state = 'closing';
     this.#closePromise = (async () => {
       try {
@@ -206,9 +270,7 @@ class DriverRuntime {
           this.#state = 'closed';
           this.#health = 'closed';
           this.#terminalReport = freezeRecord({ ...terminal, workerExitCode: this.#exitCode, workerExited: true });
-        } else {
-          this.#setRestartRequired(this.#exitCode, 'graceful-close-unproved');
-        }
+        } else this.#setRestartRequired(this.#exitCode, 'graceful-close-unproved');
         return this.#terminalReport;
       } catch (error) {
         await this.#exitPromise;
@@ -231,20 +293,14 @@ class DriverRuntime {
   }
 
   async #start() {
-    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) {
-      throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
-    }
-    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) {
-      throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
-    }
+    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
+    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
       workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy },
       execArgv: workerExecArgv(),
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
-    this.#worker.on('error', (error) => {
-      if (this.#state === 'opening') this.#readyReject(error);
-    });
+    this.#worker.on('error', (error) => { if (this.#state === 'opening') this.#readyReject(error); });
     this.#worker.on('exit', (code) => this.#onExit(code));
     await this.#readyPromise;
   }
@@ -263,11 +319,7 @@ class DriverRuntime {
       this.#readyResolve(this);
       return;
     }
-    if (message.kind === 'startup-error') {
-      const error = deserializeError(message.error);
-      this.#readyReject(error);
-      return;
-    }
+    if (message.kind === 'startup-error') { this.#readyReject(deserializeError(message.error)); return; }
     if (message.kind === 'fatal') {
       const error = deserializeError(message.error);
       for (const pending of this.#pending.values()) pending.reject(error);
@@ -295,9 +347,7 @@ class DriverRuntime {
   #onExit(code) {
     this.#exitCode = code;
     this.#exitResolve(code);
-    if (this.#state === 'opening') {
-      this.#readyReject(new DriverRuntimeError('DRIVER_WORKER_STARTUP_EXIT', 'restart-required', 'DriverActor exited before startup completed.', { workerExitCode: code }));
-    }
+    if (this.#state === 'opening') this.#readyReject(new DriverRuntimeError('DRIVER_WORKER_STARTUP_EXIT', 'restart-required', 'DriverActor exited before startup completed.', { workerExitCode: code }));
     const graceful = this.#gracefulTerminal?.graceful === true && code === 0;
     if (!graceful && this.#state !== 'closed') this.#setRestartRequired(code, 'unexpected-worker-exit');
     if (!graceful) {
@@ -336,17 +386,11 @@ class DriverRuntime {
     if (record?.execution?.policy) this.#lastExecution = record.execution;
   }
 
-  #request(operation, payload) {
-    return this.#requestInternal(operation, payload, { allowClosing: false });
-  }
+  #request(operation, payload) { return this.#requestInternal(operation, payload, { allowClosing: false }); }
 
   #requestInternal(operation, payload, { allowClosing }) {
-    if (this.#state !== 'open' && !(allowClosing && this.#state === 'closing')) {
-      return Promise.reject(new DriverRuntimeError('DRIVER_RUNTIME_CLOSED', this.#state === 'restart-required' ? 'restart-required' : 'closed-runtime', 'Runtime is not accepting commands.', { state: this.#state }));
-    }
-    if (!allowClosing && this.#pending.size >= this.#maxPending) {
-      return Promise.reject(new DriverRuntimeError('DRIVER_BACKPRESSURE', 'backpressure', 'DriverActor command queue is full.', { maxPending: this.#maxPending }));
-    }
+    if (this.#state !== 'open' && !(allowClosing && this.#state === 'closing')) return Promise.reject(new DriverRuntimeError('DRIVER_RUNTIME_CLOSED', this.#state === 'restart-required' ? 'restart-required' : 'closed-runtime', 'Runtime is not accepting commands.', { state: this.#state }));
+    if (!allowClosing && this.#pending.size >= this.#maxPending) return Promise.reject(new DriverRuntimeError('DRIVER_BACKPRESSURE', 'backpressure', 'DriverActor command queue is full.', { maxPending: this.#maxPending }));
     const requestId = this.#nextRequestId++;
     const request = requestRecord(requestId, operation, payload);
     return new Promise((resolve, reject) => {
@@ -357,9 +401,7 @@ class DriverRuntime {
 }
 
 function validateMaxPending(value) {
-  if (!Number.isSafeInteger(value) || value < 1 || value > 1_024) {
-    throw validationError('DRIVER_MAX_PENDING', 'maxPending must be an integer from 1 through 1024.', { maxPending: value });
-  }
+  if (!Number.isSafeInteger(value) || value < 1 || value > 1_024) throw validationError('DRIVER_MAX_PENDING', 'maxPending must be an integer from 1 through 1024.', { maxPending: value });
   return value;
 }
 

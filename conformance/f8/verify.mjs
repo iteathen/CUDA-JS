@@ -8,7 +8,7 @@ import { evidenceRoot } from './evidence.mjs';
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.3');
+assert.equal(packageJson.version, '0.1.0-alpha.4');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
 assert.equal(packageJson.license, 'AGPL-3.0-or-later');
@@ -17,6 +17,7 @@ assert.equal(compatibility.package.commercialLicensing, 'available-separately');
 assert.equal(compatibility.node.minimumVersion, 'v26.1.0');
 assert.equal(compatibility.node.version, 'v26.7.0');
 assert.deepEqual(compatibility.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32']);
+assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
@@ -31,6 +32,7 @@ const memoryConsumer = portable.observations.consumers.find((entry) => entry.con
 assert(memoryConsumer);
 assert.equal(memoryConsumer.packageVersion, packageJson.version);
 assert.deepEqual(memoryConsumer.scalarKinds, ['u64', 'i32', 'f32']);
+assert.equal(memoryConsumer.operationLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
@@ -46,4 +48,4 @@ if (process.platform === 'linux') {
   assert.equal(readiness.status, 'backend-unavailable');
   assert.equal(readiness.observations.nativeOpenCode, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
 }
-console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade execution' : 'retained native Linux qualification gates'}.`);
+console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade execution' : 'retained native Linux qualification gates'}.`);

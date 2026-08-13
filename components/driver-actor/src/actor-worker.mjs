@@ -1,9 +1,11 @@
 import { parentPort, workerData } from 'node:worker_threads';
 
-import { serializeError } from './errors.mjs';
+import { DriverRuntimeError, serializeError } from './errors.mjs';
 import { assertPublicRecord, validateRequest } from './protocol.mjs';
 
 if (!parentPort) throw new Error('DriverActor must run in a Worker.');
+
+const OPERATION_TERMINAL_COMMANDS = new Set(['execution.operation.status', 'execution.operation.release', 'runtime.close']);
 
 function post(message) {
   assertPublicRecord(message, { maxByteLength: workerData.memoryPolicy.maxTransferBytes });
@@ -11,14 +13,8 @@ function post(message) {
 }
 
 async function loadBackend() {
-  if (workerData.backend === 'windows-native') {
-    const module = await import('./backends/windows-native.mjs');
-    return module.createBackend(workerData);
-  }
-  if (workerData.backend === 'mock' && workerData.testHooks === true) {
-    const module = await import('./backends/mock.mjs');
-    return module.createBackend(workerData);
-  }
+  if (workerData.backend === 'windows-native') return (await import('./backends/windows-native.mjs')).createBackend(workerData);
+  if (workerData.backend === 'mock' && workerData.testHooks === true) return (await import('./backends/mock.mjs')).createBackend(workerData);
   throw Object.assign(new Error('DriverActor backend profile is not allowlisted.'), { code: 'DRIVER_BACKEND_UNSUPPORTED', category: 'unsupported' });
 }
 
@@ -33,7 +29,8 @@ try {
       let request;
       try {
         request = validateRequest(message, { testHooks: workerData.testHooks === true, memoryPolicy: workerData.memoryPolicy, executionPolicy: workerData.executionPolicy });
-        backend.assertAccepting?.(request.operation, request.requestId);
+        backend.execution.assertCommandAllowed(request.operation, request.requestId);
+        if (!OPERATION_TERMINAL_COMMANDS.has(request.operation)) backend.assertAccepting?.(request.operation, request.requestId);
         let result;
         if (request.operation === 'runtime.describe') result = await backend.describe({ operationId: request.requestId });
         else if (request.operation === 'context.status') result = await backend.contextStatus({ token: request.payload.token, operationId: request.requestId });
@@ -48,9 +45,17 @@ try {
         else if (request.operation === 'execution.function.get') result = await backend.execution.getFunction(request.payload.moduleToken, { name: request.payload.name, parameters: request.payload.parameters, operationId: request.requestId });
         else if (request.operation === 'execution.function.status') result = backend.execution.functionStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.function.release') result = await backend.execution.releaseFunction(request.payload.token, request.requestId);
-        else if (request.operation === 'execution.launch') result = await backend.execution.launch(request.payload.functionToken, { ...request.payload, operationId: request.requestId });
-        else if (request.operation === 'runtime.close') result = await backend.close({ operationId: request.requestId });
-        else if (request.operation === 'testing.block') result = await backend.testingBlock({ ...request.payload, operationId: request.requestId });
+        else if (request.operation === 'execution.submit') result = await backend.execution.submit(request.payload.functionToken, { ...request.payload, operationId: request.requestId });
+        else if (request.operation === 'execution.operation.status') result = await backend.execution.operationStatus(request.payload.token, request.requestId);
+        else if (request.operation === 'execution.operation.release') result = await backend.execution.releaseOperation(request.payload.token, request.requestId);
+        else if (request.operation === 'execution.operation.timeout') result = await backend.execution.legacyTimeout(request.payload.token, request.requestId);
+        else if (request.operation === 'runtime.close') {
+          const prepared = await backend.execution.prepareClose(request.requestId);
+          if (prepared.pendingOperation) {
+            throw new DriverRuntimeError('EXECUTION_CLOSE_TERMINALITY_UNPROVED', 'restart-required', 'Runtime close cannot begin dependency teardown while GPU operation terminality is unproved.', {}, { operationId: request.requestId, healthBefore: 'restart-required', healthAfter: 'restart-required' });
+          }
+          result = await backend.close({ operationId: request.requestId });
+        } else if (request.operation === 'testing.block') result = await backend.testingBlock({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.inject-health') result = await backend.testingInjectHealth({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.execution-mode') result = await backend.testingSetExecutionMode({ ...request.payload, operationId: request.requestId });
         else throw Object.assign(new Error('Validated command has no handler.'), { code: 'DRIVER_COMMAND_HANDLER', category: 'internal' });
@@ -64,7 +69,7 @@ try {
         const requestId = request?.requestId ?? (Number.isSafeInteger(message?.requestId) ? message.requestId : 0);
         const state = backend ? { inventory: backend.inventory(), execution: backend.execution.summary() } : null;
         post({ kind: 'response', requestId, ok: false, error: serializeError(error), state });
-        if (error?.healthAfter === 'restart-required') setImmediate(() => parentPort.close());
+        if (error?.healthAfter === 'restart-required' || error?.category === 'restart-required') setImmediate(() => parentPort.close());
       } finally {
         if (request?.operation === 'runtime.close') setImmediate(() => parentPort.close());
       }

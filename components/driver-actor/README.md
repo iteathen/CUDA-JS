@@ -2,7 +2,7 @@
 
 **Status:** Accepted F5W internal experimental component
 
-This component turns the accepted Windows bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical Windows CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes launches, modules, streams, and device allocations before the context and library.
+This component turns the accepted Windows bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical Windows CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library.
 
 The component surface is [`index.mjs`](index.mjs):
 
@@ -10,11 +10,15 @@ The component surface is [`index.mjs`](index.mjs):
 - `runtime.describe()` returns bounded Driver/device metadata, health, inventory, and an opaque context token;
 - `runtime.contextStatus(token)` verifies on the owning Worker that the same private context remains current;
 - `runtime.allocateDevice`, `memoryStatus`, `writeDevice`, `readDevice`, and `releaseMemory` provide the bounded synchronous copied-byte contract from SPEC-0004;
-- `runtime.loadModule`, `moduleStatus`, `getFunction`, `functionStatus`, `launch`, `releaseFunction`, and `releaseModule` provide the PTX/cubin, declared-schema, one-in-flight completion contract from SPEC-0005 plus the bounded cubin handoff in SPEC-0006;
-- `runtime.close()` performs idempotent graceful teardown and returns a terminal report.
+- `runtime.loadModule`, `moduleStatus`, `getFunction`, `functionStatus`, `releaseFunction`, and `releaseModule` provide the PTX/cubin and declared-schema contracts from SPEC-0005/0006;
+- `runtime.submit`, `operationStatus`, `waitOperation`, and `releaseOperation` implement the SPEC-0016 one-pending-operation lifecycle;
+- legacy `runtime.launch()` is host-side submit + repeated short status turns and preserves the SPEC-0005 terminal convenience shape without monopolizing the DriverActor command queue;
+- `runtime.close()` performs bounded pending-operation terminal observation before dependency teardown and refuses a graceful cleanup claim when terminality remains unproved.
 
-Callers cannot provide a library, symbol, signature, pointer, device ordinal, context flags, or operation name. Tokens contain no native address. Any unexpected Worker exit invalidates the runtime epoch, reports the last known resources as inaccessible, and requires restart without claiming cleanup.
+The Worker command protocol contains short submit/status/release/legacy-timeout turns; it does not expose a long-running `execution.launch` polling command. While one operation is pending, the execution owner admits only the exact operation-safe allowlist and runtime close. Callers cannot provide a library, symbol, signature, pointer, device ordinal, context flags, stream/event handle, or arbitrary operation name. Tokens contain no native address.
 
-[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. Mock success proves protocol/resource behavior only. Native Linux Driver support remains independently gated.
+Any unexpected Worker exit or unproved operation terminality invalidates the runtime epoch, reports retained resources as inaccessible/orphaned where applicable, and requires restart without claiming cleanup.
 
-The governing contracts are [`SPEC-0003`](../../docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md), [`SPEC-0004`](../../docs/specs/SPEC-0004-device-memory-foundation.md), and [`SPEC-0005`](../../docs/specs/SPEC-0005-module-launch-completion.md).
+[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. Mock success proves protocol/resource behavior only. Native SPEC-0016 and native Linux Driver support remain independently gated.
+
+The governing contracts are [`SPEC-0003`](../../docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md), [`SPEC-0004`](../../docs/specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0005`](../../docs/specs/SPEC-0005-module-launch-completion.md), and [`SPEC-0016`](../../docs/specs/SPEC-0016-operation-lifecycle.md).
