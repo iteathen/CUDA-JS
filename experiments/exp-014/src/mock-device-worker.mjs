@@ -8,6 +8,8 @@ const failAtTick = workerData.failAtTick;
 const intervalMilliseconds = workerData.intervalMilliseconds;
 let ticks = 0;
 
+parentPort.postMessage({ kind: 'ready' });
+
 const timer = setInterval(() => {
   ticks += 1;
   Atomics.store(words, 1, ticks);
