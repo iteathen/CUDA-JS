@@ -56,9 +56,9 @@ Issue #67 began from protected `main` after issue #66 completed its full cycle:
 protected-main input commit: 0fd146a285a19feb393d2c29b11b8c952326354c
 protected-main input tree:   7ccf037924ac5e83c220baadb7270b6b1fac178a
 focus branch:                docs/capability-reconciliation-67
-draft pull request:          assigned at checkpoint publication
-reviewable content commit:   assigned at checkpoint publication
-reviewable content tree:     assigned at checkpoint publication
+draft pull request:          https://github.com/iteathen/CUDA-JS/pull/101
+reviewable content commit:   623bbf43a89cd166276540ac53f7ec664879552f
+reviewable content tree:     1873afd18cb9cb9f0098a9fbfc031877ac090a7f
 current draft PR head:       read back from GitHub before continuing work
 ```
 
@@ -116,9 +116,9 @@ Preserve all of the following:
 
 - [x] Integrate the three bounded work surfaces without conflicting edits.
 - [x] Run focused syntax, generated-document, documentation, public-repository, package, and hardware checks.
-- [ ] Publish the reviewable content commit and record its exact remote commit/tree plus the draft PR in the metadata follow-up.
+- [x] Publish the reviewable content commit and record its exact remote commit/tree plus the draft PR in the metadata follow-up.
 - [ ] Commit the intentional content checkpoint and its handoff-metadata follow-up, then publish the exact branch.
-- [ ] Open a draft PR using `Tracks #67`; do not auto-close the issue.
+- [x] Open draft PR [#101](https://github.com/iteathen/CUDA-JS/pull/101) using `Tracks #67`; do not auto-close the issue.
 - [ ] Read back the exact remote head/tree and PR body.
 
 ### Local checkpoint evidence
