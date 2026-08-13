@@ -1,16 +1,18 @@
 {
-  "schema_version": 27,
+  "schema_version": 28,
   "updated": "2026-08-13",
-  "status": "ready_for_p0_implementation",
-  "objective": "Implement the two accepted P0 authority corrections for target parsing/policy (#65) and resource disposal failure provenance/health (#66) in separate ownership-aligned packets, while continuing independent native qualification and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
+  "status": "ready_for_p0_disposal_implementation",
+  "objective": "Complete the remaining accepted P0 resource-disposal failure provenance/health correction (#66) after protected-main read-back of the independently implemented target parsing/policy correction (#65), while continuing independent native qualification and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
   "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. The accepted P0 addenda correct existing owners; they do not authorize new consumer semantics or future capability proposals.",
   "exact_input_revisions": {
     "protected_main_capability_authority": "5233a046c57813532a71763bb36cdba5894e43e0",
     "implementation_baseline": "fe9ed78939d3876790291421cec367fde58a8310",
     "package": "cuda-js@0.1.0-alpha.5",
-    "portable_implemented": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
+    "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
+    "implemented_corrections": [
+      "SPEC-0006 target-syntax addendum (#65)"
+    ],
     "accepted_unimplemented_corrections": [
-      "SPEC-0006 target-syntax addendum (#65)",
       "SPEC-0003 disposal-failure addendum (#66)"
     ],
     "proposal_evidence_only": ["SPEC-0014 + EXP-013"],
@@ -49,14 +51,12 @@
     "docs/specs/SPEC-0016-operation-lifecycle.md"
   ],
   "current_focus": {
-    "id": "CJS-P0-CORRECTIONS-01",
+    "id": "CJS-P0-DISPOSAL-66",
     "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "After this authority-acceptance packet is integrated, create separate implementation focus branches. Packet A (#65): centralize CUDA target syntax/policy ownership and replace CompilerActor/linker/Device-JS duplicate target validation without changing qualified support rows. Packet B (#66): preserve disposal-failure category/operation/health through ResourceRegistry, DriverActor and facade; make failed close orphaned/unusable and repeated close non-disposing by default. Validate each packet independently before merge.",
-    "exit": "Both accepted P0 corrections are implemented in software/portable paths with regression coverage and truthful status updates; native/profile support dimensions change only where exact qualifying evidence exists."
+    "next_action": "After protected-main read-back confirms the independently reviewed #65 target-policy packet is integrated, create a separate #66 focus branch from that exact main. Preserve disposal-failure category/operation/health through ResourceRegistry, DriverActor and facade; make failed close orphaned/unusable and repeated close non-disposing by default; validate and integrate #66 independently.",
+    "exit": "The accepted #66 disposal-failure correction is implemented in software/portable paths with regression coverage and truthful status updates; native destructive-cleanup qualification changes only where exact qualifying evidence exists."
   },
   "deliverables": [
-    "shared target parser/policy implementation with current unsuffixed hardware-registry target admission and structural f/a parsing",
-    "compiler/linker/Device-JS/facade/hardware integration tests for target validation and identity",
     "resource disposal failure envelope preserving category/operation/health and bounded sanitized cleanup context",
     "orphaned/unusable failed-close behavior plus deterministic no-repeat disposal regression",
     "continued exact native qualification evidence for already-implemented capabilities when suitable environments exist",

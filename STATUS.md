@@ -24,6 +24,7 @@ The implementation baseline contains:
 
 - the accepted Windows F1–F9 foundation, including `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W`, exact Node 26.7.0 evidence, and retained Linux x86-64 qualification paths;
 - portable/software implementations of SPEC-0010 typed RDC, SPEC-0011 `u64`/`i32`/`f32` scalar arguments, SPEC-0012 Device LTO, SPEC-0013 restricted Device-JS, and SPEC-0016 opaque GPU operations;
+- the SPEC-0006 target-syntax correction in portable/software paths: one package-internal CUDA target syntax/admission-policy owner consumed by CompilerActor, linker, Device-JS, hardware validation, cache identity, and installed-package conformance;
 - proposed SPEC-0014 plus EXP-013 publication-mailbox evidence, without production mapped/sideband support;
 - retained EXP-014 lifecycle orchestration evidence;
 - a public facade that keeps DriverActor/CompilerActor/native capabilities private and exposes Device-JS only through the standalone `compileDeviceProgram()` helper.
@@ -51,15 +52,15 @@ Proposal presence does not authorize their production implementation. Each must 
 
 ## Accepted P0 authority corrections
 
-Two contradictions in already-accepted authority have now been resolved at the specification level:
+Two contradictions in already-accepted authority are being completed as separate implementation packets:
 
 ### SPEC-0006 target-syntax addendum — issue #65
 
 **Architectural disposition:** selected correction.  
-**Implementation status:** authorized, not yet implemented.  
+**Implementation status:** implemented in portable/software and package paths.
 **Qualification status:** existing qualified targets unchanged; newly represented targets remain not-qualified.
 
-The accepted addendum requires one shared target parser/policy owner across CompilerActor, linker, Device-JS and target validation. It can structurally represent current numeric, family-specific (`f`) and architecture-specific (`a`) CUDA target forms, but the initial repository policy admits only the reviewed unsuffixed target bases already owned by the hardware registry. Parser/policy admission, provider/toolkit acceptance, device compatibility and CUDA-JS native qualification remain separate facts.
+The implementation provides one shared target parser/policy owner across CompilerActor, linker, Device-JS and hardware target validation. It structurally represents current numeric, family-specific (`f`) and architecture-specific (`a`) CUDA target forms, while policy revision 1 admits only the reviewed unsuffixed target bases already owned by the hardware registry. Target-policy identity participates in compiler/linker cache identity and both Device-JS identity layers. The internal owner is included in the installed package without becoming a public export. Parser/policy admission, provider/toolkit acceptance, device compatibility and CUDA-JS native qualification remain separate facts.
 
 ### SPEC-0003 disposal-failure addendum — issue #66
 
@@ -69,7 +70,7 @@ The accepted addendum requires one shared target parser/policy owner across Comp
 
 The accepted addendum keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth.
 
-These two corrections are now dependency-ready implementation work. Acceptance does not itself fix the code or claim native negative-path/Blackwell support.
+The target correction is implemented in portable/software paths. The disposal-failure correction is the remaining dependency-ready P0 implementation packet. Neither specification acceptance nor portable target admission claims native negative-path or Blackwell support.
 
 ## Execution baseline
 
