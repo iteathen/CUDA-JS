@@ -17,6 +17,8 @@ As of the exact repository state inspected for this hardening pass:
 - repository metadata identifies CUDA-JS as an experimental Windows-first Node/CUDA runtime and publishes CUDA/Node/NVRTC/nvJitLink-related topics;
 - repository license detection is GNU AGPL v3, with `LICENSING.md` documenting the `AGPL-3.0-or-later` and separately negotiated commercial-license model;
 - public pull-request workflows execute portable/generated/reference checks only; native Windows qualification remains separate exact-profile evidence;
+- every remote GitHub Action is pinned to a reviewed full commit SHA with a same-line release tag, while repository-local actions remain same-commit source and remote reusable workflows follow the same immutable rule;
+- Dependabot checks the `github-actions` ecosystem weekly and opens at most three concurrent update pull requests;
 - GitHub private vulnerability reporting is currently **disabled**.
 
 The last item is an operational gap: public issue routing must never imply that a private GitHub security channel exists when the repository setting is disabled.
@@ -54,6 +56,7 @@ This hardening pass does not:
 3. **Accidental local-secret commits.** Common `.env`, private-key, credential-config, or certificate files are not ignored by default.
 4. **Unowned public-security policy.** A root security policy exists without registry/validation ownership and silently drifts.
 5. **Security policy overclaim.** Documentation implies a private reporting mechanism or native security guarantee that is not actually enabled/proven.
+6. **Mutable CI dependency.** A tag, branch, short SHA, unreviewed remote action, or stale release comment silently changes code executed by public CI.
 
 ### Selected path
 
@@ -64,6 +67,7 @@ Use the smallest source-controlled hardening set that addresses those failures:
 - explicitly set public CI workflows to read-only repository permission;
 - add defense-in-depth ignore patterns for common secret-bearing local files;
 - make the security policy a required validated repository file and register its owner;
+- pin remote Actions to reviewed full SHAs, record their release/license provenance, reject dependency drift, and let Dependabot propose bounded reviewable updates;
 - surface security/public-repository guidance from README, CONTRIBUTING, and the documentation index;
 - keep enabling GitHub private vulnerability reporting as an explicit repository-settings follow-up because no connected write action currently owns that setting.
 
@@ -81,6 +85,20 @@ permissions:
 Do not expose repository secrets to untrusted pull-request code. Do not add `pull_request_target` execution of PR-controlled code merely to obtain privileged automation.
 
 The existing `verify`, `schema`, and `node-compatibility` checks are repository-quality evidence; they do not establish native CUDA support on untested platforms.
+
+## GitHub Actions dependency policy
+
+GitHub-hosted remote actions and remote reusable workflows must use a full 40-character commit SHA. The same `uses:` line must end with the reviewed release tag so humans and Dependabot retain a readable version identity. Repository-local actions and reusable workflows may use only normalized `./...` paths because they execute from the already reviewed repository commit; Docker `uses:` references are prohibited by the current policy.
+
+The canonical machine-readable provenance owner is [`.github/actions-provenance.json`](../.github/actions-provenance.json). The current reviewed set is:
+
+| Dependency | Release | Immutable commit | Role |
+|---|---|---|---|
+| [`actions/checkout`](https://github.com/actions/checkout/releases/tag/v7.0.1) | `v7.0.1` | [`3d3c42e5aac5ba805825da76410c181273ba90b1`](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) | Fetch the exact workflow revision |
+| [`actions/setup-node`](https://github.com/actions/setup-node/releases/tag/v7.0.0) | `v7.0.0` | [`820762786026740c76f36085b0efc47a31fe5020`](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020) | Install exact Node matrix/toolchain versions |
+| [`actions/upload-artifact`](https://github.com/actions/upload-artifact/releases/tag/v4.6.2) | `v4.6.2` | [`ea165f8d65b6e75b540449e92b4886f43607fa02`](https://github.com/actions/upload-artifact/commit/ea165f8d65b6e75b540449e92b4886f43607fa02) | Retain generated/readiness artifacts |
+
+`.github/dependabot.yml` checks for Action releases weekly. A proposed update is not accepted merely because the bot changed a SHA/comment: review the upstream release and commit in the source repository, confirm role/license/permissions and workflow behavior, update the provenance entry, then require the normal protected checks. `scripts/verify-public-repository.mjs` rejects mutable, undeclared, mismatched, expression-based, and prohibited Action references plus stale workflow inventory or update configuration.
 
 ## Security-reporting posture
 

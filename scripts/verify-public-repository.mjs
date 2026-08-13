@@ -1,6 +1,8 @@
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { validateWorkflowActionPolicy } from './workflow-action-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -25,9 +27,17 @@ const publicRepository = await text('docs/PUBLIC_REPOSITORY.md');
 const contributing = await text('CONTRIBUTING.md');
 const issueConfig = await text('.github/ISSUE_TEMPLATE/config.yml');
 const pullRequestTemplate = await text('.github/pull_request_template.md');
-const verifyWorkflow = await text('.github/workflows/docs.yml');
-const nodeWorkflow = await text('.github/workflows/node-compatibility.yml');
 const gitignore = await text('.gitignore');
+const dependabot = await text('.github/dependabot.yml');
+const provenanceText = await text('.github/actions-provenance.json');
+const workflowDirectory = path.join(root, '.github/workflows');
+const workflowPaths = (await readdir(workflowDirectory))
+  .filter((name) => /\.ya?ml$/.test(name))
+  .map((name) => `.github/workflows/${name}`)
+  .sort();
+const workflows = Object.fromEntries(await Promise.all(
+  workflowPaths.map(async (relative) => [relative, await text(relative)]),
+));
 
 if (!security.includes('GitHub private vulnerability reporting') || !security.includes('currently not enabled')) {
   errors.push('SECURITY.md must state the current private-vulnerability-reporting limitation explicitly');
@@ -50,16 +60,20 @@ if (issueConfig.includes('/security/advisories/new')) {
 if (!pullRequestTemplate.includes('Security, provenance, licensing, and public-repository effects')) {
   errors.push('pull-request template must include public security/provenance disclosure');
 }
-for (const [relative, workflow] of [
-  ['.github/workflows/docs.yml', verifyWorkflow],
-  ['.github/workflows/node-compatibility.yml', nodeWorkflow],
-]) {
+for (const [relative, workflow] of Object.entries(workflows)) {
   if (!/\npermissions:\s*\n\s+contents:\s*read\s*(?:\n|$)/.test(workflow)) {
     errors.push(`${relative} must declare workflow-level contents: read permission`);
   }
   if (/pull_request_target\s*:/.test(workflow)) {
     errors.push(`${relative} must not use pull_request_target for public PR-controlled execution`);
   }
+}
+
+try {
+  const provenance = JSON.parse(provenanceText);
+  errors.push(...validateWorkflowActionPolicy({ workflows, provenance, dependabot }));
+} catch (error) {
+  errors.push(`.github/actions-provenance.json must contain valid JSON: ${error.message}`);
 }
 
 for (const pattern of ['.env', '.env.*', '*.pem', '*.key', '*.p12', '*.pfx', '.netrc', '.npmrc']) {

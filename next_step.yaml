@@ -1,12 +1,12 @@
 {
-  "schema_version": 31,
+  "schema_version": 32,
   "updated": "2026-08-13",
-  "status": "ready_for_p0_action_dependency_pinning",
-  "objective": "After protected-main read-back of the #64 EXP-013 oracle repair, pin GitHub Actions dependencies to reviewed immutable revisions (#69) while retaining #64's exact merged-head Windows F5 revalidation as an independent open evidence gate and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
+  "status": "blocked_on_external_private_vulnerability_reporting_control",
+  "objective": "After protected-main read-back of the #69 immutable GitHub Actions packet, complete the external private-vulnerability-reporting control (#68) while retaining #64's exact merged-head Windows F5 revalidation as an independent open evidence gate and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
   "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. The accepted P0 addenda correct existing owners; they do not authorize new consumer semantics or future capability proposals.",
   "exact_input_revisions": {
     "protected_main_capability_authority": "5233a046c57813532a71763bb36cdba5894e43e0",
-    "implementation_baseline": "a5b0ab92e0b3a62af8169fe3915c5cbc38956187",
+    "implementation_baseline": "ff0d497b23d7c1ff7e602e1a558ea3128b4aabfe",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
     "implemented_corrections": [
@@ -50,13 +50,13 @@
     "docs/specs/SPEC-0016-operation-lifecycle.md"
   ],
   "current_focus": {
-    "id": "CJS-P0-ACTIONS-69",
+    "id": "CJS-P0-SECURITY-68",
     "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "After protected-main read-back confirms the independently reviewed #64 oracle-repair packet is integrated, create a separate #69 focus branch from that exact main. Pin every remote GitHub Action to a reviewed full commit SHA with readable release comments, add an immutable-reference validation gate, and configure controlled Dependabot updates without widening workflow permissions or Node/toolchain policy.",
-    "exit": "Every remote action reference is immutable and provenance-recorded, mutable references fail repository validation, Dependabot proposes controlled updates, and both protected workflows pass on the exact reviewed head."
+    "next_action": "A maintainer with repository-settings access must enable GitHub private vulnerability reporting, read back enabled: true, verify the private-report entry point as an unaffiliated reporter, and verify maintainer advisory management without exposing test vulnerability details. Then reconcile the security policy and record the durable owner/periodic check.",
+    "exit": "GitHub read-back records enabled: true, unaffiliated reporter and maintainer advisory flows are privately verified, security links describe the working path exactly, and a named operational owner/check cadence prevents silent regression."
   },
   "deliverables": [
-    "immutable GitHub Actions dependency identities and update policy (#69)",
+    "external private-vulnerability-reporting enablement and end-to-end verification (#68)",
     "exact merged-head Windows F5 revalidation for the integrated EXP-013 repair (#64)",
     "continued public capability projection coverage as authoritative facts change",
     "continued exact native qualification evidence for already-implemented capabilities when suitable environments exist",
@@ -70,6 +70,7 @@
   },
   "blockers": [
     "this environment does not itself expose the exact NVIDIA Windows profile required for new native support promotion",
+    "the available GitHub connector does not expose private-vulnerability-reporting setting mutation/read-back or an unaffiliated reporter/maintainer advisory verification flow required by issue #68",
     "issue #64 cannot close until the exact merged repair head passes the focused EXP-013 and complete F5 capsule on Windows Node 26.7.0",
     "SPEC-0017 through SPEC-0026 remain proposals and cannot be implemented until separately accepted",
     "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",
