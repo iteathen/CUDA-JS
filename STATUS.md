@@ -22,6 +22,8 @@ The repository state represented by this branch contains:
 - SPEC-0015 status/scope clarification;
 - accepted SPEC-0016 and its bounded portable/software `CudaOperation` implementation.
 
+For discovery continuity, the retained foundation still includes `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W` and later accepted Windows slices, exact Node 26.7.0 evidence, and the Linux x86-64 qualification path. Linux portable/ABI evidence is not native Linux CUDA support.
+
 Native SPEC-0016 support remains **not qualified** until its exact Windows native evidence passes. Portable/mock success does not establish native CUDA ordering, cleanup, or support.
 
 ## Status semantics
