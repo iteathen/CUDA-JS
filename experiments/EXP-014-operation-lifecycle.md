@@ -1,6 +1,6 @@
 # EXP-014 — Submission/Completion Operation Lifecycle
 
-**Status:** Active bounded experiment — portable question passed
+**Status:** Retained bounded experiment — portable question passed
 
 **Date:** 2026-08-12
 
@@ -8,16 +8,22 @@
 
 Can CUDA-JS preserve one serialized Driver owner while allowing independently progressing device work to outlive the submission command, with exact operation state, resource leases, command interleaving, terminalization, legacy deadline behavior, and close truth?
 
-This experiment answers only the host/lifecycle question needed by proposed SPEC-0016. It does not load CUDA and cannot establish native asynchronous execution, Driver ordering, performance, or support.
+This experiment originally answered only the host/lifecycle question needed while SPEC-0016 was proposed. It does not load CUDA and cannot establish native asynchronous execution, Driver ordering, performance, or support.
 
-## Input authority
+## Current authority relationship
+
+SPEC-0016 is now accepted and its bounded portable/software/package implementation is integrated. It exclusively owns production submission/status/wait/close behavior, operation state and terminalization, pending-command admission, legacy `launch()` compatibility, and runtime-close semantics.
+
+EXP-014 is retained as regression evidence and an independently progressing mock-work harness. It does not authorize production behavior, create a second operation lifecycle, or override the accepted specification. Proposal-time wording below is historical provenance for the experiment's input and promotion sequence.
+
+## Historical input authority
 
 - protected `main` `d4ff83717ad53be4701898def7c9ba757a496731`;
 - SPEC-0003 resource/DriverActor lifecycle;
 - SPEC-0004 device memory;
 - SPEC-0005 accepted terminal single-flight launch;
 - SPEC-0015 scope/status clarification;
-- proposed SPEC-0016 on the experiment branch;
+- then-proposed SPEC-0016 on the experiment branch;
 - issue #51 restarted assessment/research/reassessment.
 
 ## Competing hypotheses
@@ -185,15 +191,17 @@ Do not accept/promote the production capability if later work shows any of the f
 - a timeout releases unproved leases while GPU work may still be running;
 - owner/context loss is reported as graceful.
 
-## Promotion
+## Historical promotion disposition
 
-Passing EXP-014 permits reassessment of proposed SPEC-0016. It does **not** itself accept the spec or authorize production implementation.
+Passing EXP-014 permitted reassessment of the then-proposed SPEC-0016. It did **not** itself accept the specification or authorize production implementation.
 
-After the durable experiment/proposal record is merged:
+The historical sequence after the durable experiment/proposal record merged was:
 
 1. perform exact-head review;
 2. promote SPEC-0016 to `Accepted` only through a separate reviewed authority change;
 3. then begin the bounded production integration work package.
+
+That sequence is now complete. Further production lifecycle changes must follow accepted SPEC-0016 or a separately accepted successor; this retained experiment remains evidence, not authority.
 
 ## Cleanup
 

@@ -66,7 +66,7 @@ for (const required of [
 const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf8');
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
-const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
+const deletionNeedles = ['cuda-mcgs', 'cudamcgs', 'cuda_mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
 const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();

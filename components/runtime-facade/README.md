@@ -25,3 +25,62 @@ try {
 ```
 
 `cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux and WSL imports fail with stable backend-unavailable errors while their retained runbooks remain independently completable.
+
+The current scalar and operation surface is explicit. Given copied `ptxBytes` for a matching kernel:
+
+```js
+const module = await runtime.loadModule({ format: 'ptx', bytes: ptxBytes });
+try {
+  const fn = await module.getFunction({
+    name: 'typed_kernel',
+    parameters: [{ kind: 'device-memory' }, { kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }],
+  });
+  const memory = await runtime.allocateDevice({ byteLength: 4096 });
+  try {
+    const operation = await fn.submit({
+      grid: { x: 1, y: 1, z: 1 },
+      block: { x: 64, y: 1, z: 1 },
+      arguments: [memory, 0xffff_ffff_ffff_ffffn, -2, 1.5],
+    });
+    try {
+      const result = await operation.wait();
+    } finally {
+      await operation.close();
+    }
+  } finally {
+    await memory.close();
+    await fn.close();
+  }
+} finally {
+  await module.close();
+}
+```
+
+Only one operation may be pending in a runtime in SPEC-0016 v1. `fn.launch(...)` remains the terminal compatibility convenience. The added scalar and operation contracts are implemented in portable/software/package paths and retain separate native qualification gates.
+
+Typed RDC, Device LTO, and Device-JS use the same optional CompilerActor owner:
+
+```js
+import { compileDeviceProgram, openCudaRuntime } from 'cuda-js';
+
+const runtime = await openCudaRuntime({ compiler: true });
+try {
+  const rdc = await runtime.compile({
+    source: 'extern "C" __global__ void kernel() {}',
+    options: { relocatableDeviceCode: true },
+  });
+  const lto = await runtime.compile({
+    source: 'extern "C" __global__ void kernel() {}',
+    output: 'lto-ir',
+  });
+  const program = await compileDeviceProgram(runtime, {
+    source: 'function fill(output) { const i = gpu.thread.globalX(); output[i] = gpu.u32(7); }',
+    functions: [{ name: 'fill', kind: 'kernel', parameters: [{ name: 'output', type: 'ptr<u32>' }], returns: 'void' }],
+  });
+} finally {
+  const terminal = await runtime.close();
+  if (!terminal.graceful) throw new Error('CUDA-JS cleanup is unproved; restart the process.');
+}
+```
+
+PTX remains the default compiler output. LTO linking accepts homogeneous typed LTO-IR artifacts only, and generated CUDA source remains private. Full executable installed-package examples live in [`conformance/f8/fixtures/consumer-memory.mjs`](../../conformance/f8/fixtures/consumer-memory.mjs) and [`conformance/f8/fixtures/consumer-compiler.mjs`](../../conformance/f8/fixtures/consumer-compiler.mjs).

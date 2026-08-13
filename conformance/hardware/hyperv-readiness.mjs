@@ -17,7 +17,8 @@ export function classifyHyperVReadiness(observed) {
   if (observed.partitionableGpuCount === 0) reasons.push('no-partitionable-gpu');
   if (observed.assignedGpuPartitionAdapterCount === 0) reasons.push('no-assigned-gpu-partition');
   return {
-    disposition: reasons.length === 0 ? 'qualification-required' : 'no-support',
+    qualificationStatus: reasons.includes('client-host-vendor-unsupported') ? 'known-incompatible' : 'not-qualified',
+    profileScope: 'exact-observed-host',
     reasons,
   };
 }
@@ -54,7 +55,7 @@ export async function runHyperVReadiness() {
   const observed = { platform: process.platform, architecture: process.arch, ...probePowerShell(), hostCuda: visibleCudaGpuCount() };
   const classification = classifyHyperVReadiness(observed);
   const record = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     probe: 'hyper-v-gpu-readiness',
     testedAt: new Date().toISOString(),
     source: {
@@ -70,14 +71,15 @@ export async function runHyperVReadiness() {
       omitted: ['VM names', 'host name', 'account', 'paths', 'GPU UUID', 'serial number', 'bus identifier'],
     },
     claimLimits: [
-      'This is a read-only readiness and verified-negative record for the exact observed host.',
-      'A qualification-required result still does not establish virtualized CUDA-JS support.',
+      'This is a read-only readiness and profile-specific negative record for the exact observed host.',
+      'A not-qualified result still does not establish virtualized CUDA-JS support.',
+      'A known-incompatible result applies only to the exact observed profile and is not an architectural rejection.',
     ],
   };
   const runId = record.testedAt.replace(/[-:.]/g, '').replace('Z', 'Z');
   const output = path.join(repositoryRoot, 'build', 'hardware-qualification', 'hyperv-readiness', runId, 'readiness.json');
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(record, null, 2)}\n`);
-  console.log(JSON.stringify({ output: path.relative(repositoryRoot, output), disposition: record.disposition, reasons: record.reasons }));
+  console.log(JSON.stringify({ output: path.relative(repositoryRoot, output), qualificationStatus: record.qualificationStatus, reasons: record.reasons }));
   return record;
 }

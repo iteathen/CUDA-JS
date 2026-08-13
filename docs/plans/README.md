@@ -6,6 +6,7 @@ Active plans contain **unfinished work only**. Completed or mixed historical pla
 
 ## Active forward plans
 
+- [`2026-08-13-capability-docs-67-handoff.md`](2026-08-13-capability-docs-67-handoff.md) — exact issue #67 checkpoint, authority links, claim limits, progress gates, file ownership, validation, and guarded continuation instructions.
 - [`2026-08-12-native-and-platform-qualification-continuation.md`](2026-08-12-native-and-platform-qualification-continuation.md) — exact native promotion for implemented capabilities plus independent Linux/hardware/Node profile qualification.
 - [`2026-08-12-execution-capability-continuation.md`](2026-08-12-execution-capability-continuation.md) — retained execution-continuation plan for sideband/multi-stream follow-up against the accepted SPEC-0016 baseline.
 - [`2026-08-12-compatible-pair-continuation.md`](2026-08-12-compatible-pair-continuation.md) — neutral Device-JS native proof, CUDA-MCGS external deletion, and exact F9-C compatible-pair completion.

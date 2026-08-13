@@ -56,7 +56,7 @@ Hardware registry changes additionally require a clean exact commit, direct hard
 
 Node registry changes additionally require exact official release identity, module ABI, FFI flag/import/export behavior, permission denial/allow behavior where FFI exists, generated-list agreement, and distinct `testing-unconfirmed`, `known-incompatible`, and qualified-evidence dispositions. Upstream LTS status, matching ABI, operation, or a portable probe cannot promote support.
 
-Extended hardware axes remain no-support and expose no command chain until an accepted contract and runner-ready exact profile exist. Hyper-V readiness is read-only: it records sanitized counts and vendor support disposition, never VM names or device identifiers, and never changes VM, partition, assignment, DDA, GPU, ECC, MIG, TCC, clock, power, fan, persistence, compute-mode, or reset state.
+Extended hardware axes record architectural disposition, implementation status, qualification status, and priority independently. Ordinary axes remain `not-qualified` and expose no command chain until an accepted contract and runner-ready exact profile exist. Hyper-V readiness is read-only: it records sanitized counts and a profile-specific qualification status, never VM names or device identifiers, and never changes VM, partition, assignment, DDA, GPU, ECC, MIG, TCC, clock, power, fan, persistence, compute-mode, or reset state. Only an exact negative profile may be `known-incompatible`; the virtualization axis remains `not-qualified` until its own promotion evidence passes.
 
 ## Schema and ABI
 

@@ -10,11 +10,11 @@ build\toolchains\node-v26.7.0-win-x64\node.exe experiments\exp-009\src\run-nativ
 
 All executables and artifacts remain under ignored `build/exp-009/windows-x64`. The accepted capsule proves only the exact Windows x64 provider ABI, deterministic PTX/cubin input profile, output parity, and native-handle teardown. It does not prove native Linux providers, recovery, performance, packaging, or LTO.
 
-## Planned LTO follow-up
+## Historical LTO follow-up and current authority
 
-The existing EXP-009 family will own the bounded CJS-F6-LTO decision rather than creating a competing compiler experiment.
+This section records the native evidence plan that preceded accepted SPEC-0012. SPEC-0012 now exclusively owns the production typed Device-LTO contract, and its portable/software/package implementation is integrated. EXP-009 remains the retained exact-provider/oracle evidence family; it does not define or amend the public LTO surface.
 
-The follow-up must not be implemented before a bounded public LTO artifact/compatibility specification is accepted. Its first target is deliberately narrow:
+The historical first target was deliberately narrow:
 
 ```text
 CUDA source --NVRTC device LTO--> typed LTO-IR artifact
@@ -28,7 +28,7 @@ CUDA source --NVRTC device LTO--> typed LTO-IR artifact
                           existing DriverActor
 ```
 
-Required evidence includes:
+The following exact native evidence remains required before Device LTO is qualified on a named profile:
 
 - exact LTO-IR byte/digest parity with an independent native MSVC/CUDA oracle;
 - at least two separately compiled LTO units composed into one executable cubin;
@@ -39,6 +39,6 @@ Required evidence includes:
 - compile/link error logs, program/link destruction, application-loop responsiveness, graceful actor close, and terminal native-resource balance;
 - unchanged accepted PTX/cubin regression evidence.
 
-The first LTO follow-up does **not** plan public mixed-format linking, linked LTO-IR/PTX output, staged partial linking, arbitrary object/library/fatbin inputs, raw native nvJitLink/NVRTC options, cross-major LTO support, CUDA-MCGS semantics, or a performance claim.
+SPEC-0012 does **not** authorize public mixed-format linking, linked LTO-IR/PTX output, staged partial linking, arbitrary object/library/fatbin inputs, raw native nvJitLink/NVRTC options, broad cross-major LTO support, CUDA-MCGS semantics, or a performance claim.
 
-See [`../../docs/research/2026-08-11-lto-support-assessment.md`](../../docs/research/2026-08-11-lto-support-assessment.md) and the `CJS-F6-LTO` section of the accepted master plan for the assessment and planning boundary.
+See accepted [`SPEC-0012`](../../docs/specs/SPEC-0012-device-lto.md), the active [native qualification continuation](../../docs/plans/2026-08-12-native-and-platform-qualification-continuation.md), and the retained [LTO assessment](../../docs/research/2026-08-11-lto-support-assessment.md).

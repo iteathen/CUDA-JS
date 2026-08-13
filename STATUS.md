@@ -6,10 +6,10 @@
 
 ## Current implementation state
 
-The exact protected-`main` input baseline for this implementation packet is:
+The exact protected-`main` input baseline for the issue #67 documentation-reconciliation packet is:
 
 ```text
-962b120d3056d82492f0e99f3e11d44a7afe958b
+0fd146a285a19feb393d2c29b11b8c952326354c
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -25,6 +25,7 @@ The implementation baseline contains:
 - the accepted Windows F1–F9 foundation, including `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W`, exact Node 26.7.0 evidence, and retained Linux x86-64 qualification paths;
 - portable/software implementations of SPEC-0010 typed RDC, SPEC-0011 `u64`/`i32`/`f32` scalar arguments, SPEC-0012 Device LTO, SPEC-0013 restricted Device-JS, and SPEC-0016 opaque GPU operations;
 - the SPEC-0006 target-syntax correction in portable/software paths: one package-internal CUDA target syntax/admission-policy owner consumed by CompilerActor, linker, Device-JS, hardware validation, cache identity, and installed-package conformance;
+- the SPEC-0003 disposal-failure correction in portable/software paths, including bounded provenance/health transport, deterministic orphan/no-retry state, rollback/cascade truth, and conservative admission;
 - proposed SPEC-0014 plus EXP-013 publication-mailbox evidence, without production mapped/sideband support;
 - retained EXP-014 lifecycle orchestration evidence;
 - a public facade that keeps DriverActor/CompilerActor/native capabilities private and exposes Device-JS only through the standalone `compileDeviceProgram()` helper.
@@ -72,6 +73,14 @@ The implementation keeps `RESOURCE_DISPOSE_FAILED` as registry context while pre
 
 Both accepted P0 corrections are implemented in portable/software paths. Destructive native cleanup failures were not induced in this environment and remain explicitly unqualified; this correction does not claim new native negative-path or Blackwell support.
 
+## Active public-documentation reconciliation — issue #67
+
+Issue #67 is an active documentation and semantic-validation packet rooted at the exact protected-main input above. It reconciles public package, capability, operation, Device-JS, interoperability, version, and support-status projections with already accepted authority and implementation state.
+
+The selected design uses non-shipped `docs/capability-status.json` as the machine-readable documentation/governance projection for capability status, public export inventory and CUDA-MCGS interop; the shipped `packaging/compatibility-manifest.json` remains the unchanged generic package-compatibility owner. `conformance/hardware/extensions.json` remains the separate hardware-axis owner. Public documentation must render or validate those facts so future drift fails CI. This work changes no public API and promotes no native profile. The durable continuation record is [`docs/plans/2026-08-13-capability-docs-67-handoff.md`](docs/plans/2026-08-13-capability-docs-67-handoff.md).
+
+Issue #67 remains incomplete until its exact remote head, checks, independent review, guarded merge, protected-main SHA/tree, generated documents, and post-merge workflows are read back. Issues #68/#69 remain downstream operational/supply-chain work until that boundary is satisfied.
+
 ## Execution baseline
 
 ```text
@@ -113,6 +122,7 @@ Issues #70–#84 describe an optional NN training extension, but the currently a
 
 Active plans contain unfinished work only:
 
+- [`docs/plans/2026-08-13-capability-docs-67-handoff.md`](docs/plans/2026-08-13-capability-docs-67-handoff.md);
 - [`docs/plans/2026-08-12-native-and-platform-qualification-continuation.md`](docs/plans/2026-08-12-native-and-platform-qualification-continuation.md);
 - [`docs/plans/2026-08-12-execution-capability-continuation.md`](docs/plans/2026-08-12-execution-capability-continuation.md);
 - [`docs/plans/2026-08-12-compatible-pair-continuation.md`](docs/plans/2026-08-12-compatible-pair-continuation.md);

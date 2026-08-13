@@ -2,15 +2,38 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-12
+**Updated:** 2026-08-13
 
 This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
+
+<!-- CUDA-JS:BEGIN GENERATED CAPABILITY STATUS -->
+| Capability | Architectural disposition | Implementation | Qualification / profile | Priority | Public surface | Limit | Issue |
+|---|---|---|---|---|---|---|---|
+| SPEC-0003 disposal-failure correction | planned — accepted correction | implemented — portable/software | not-qualified — destructive native cleanup failure partitions | deferred — independent native qualification | `RESOURCE_DISPOSE_FAILED` preserves the underlying category, operation and health transition; failed resource capabilities become orphaned and unusable. | Repeated close does not retry disposal by default; only bounded sanitized failure details are public. | #66 |
+| SPEC-0006 target-policy correction | planned — accepted correction | implemented — portable/software/package | not-qualified — newly represented targets; existing qualified targets unchanged | deferred — independent native qualification | No new export; compile, link and Device-JS target fields share canonical `compute_<base>` / `sm_<base>` parsing with optional structural `f` or `a` suffix recognition. | Policy revision 1 admits only unsuffixed bases 75, 80, 86, 87, 88, 89, 90, 100, 103, 110, 120 and 121; syntax/policy admission is not provider, toolkit, GPU or qualification evidence. | #65 |
+| SPEC-0010 relocatable device code | planned — accepted capability | implemented — portable/software/package | not-qualified — exact Windows public RDC compile/link/launch/oracle/lifecycle | active — native qualification | `compile({ options: { relocatableDeviceCode: boolean } })` returns typed PTX marked `relocatableDeviceCode: true` when enabled; the existing `link()` consumes it. | Default is `false`; relocatable PTX has no direct-execution promise and callers cannot provide native option text. | #35 |
+| SPEC-0011 scalar kernel arguments | planned — accepted capability | implemented — portable/software/package | not-qualified — exact Windows mixed-scalar ABI/launch/oracle/lifecycle | active — native qualification | Function parameter kinds are exactly `device-memory`, `u32`, `u64`, `i32` and `f32`; facade launch values are validated and packed by their declared kind. | No numeric coercion, raw parameter buffer, arbitrary ABI kind or non-finite `f32` value is accepted. | — |
+| SPEC-0012 Device LTO | planned — accepted capability | implemented — portable/software/package | not-qualified — exact Windows LTO-IR compile/link/launch/oracle/lifecycle | active — native qualification | `compile({ output: "lto-ir" })` returns typed LTO-IR; `link()` accepts a homogeneous typed LTO-IR set and returns cubin. | Raw LTO-IR, mixed PTX/LTO input, caller-selected native kinds/options and broad cross-target composition are rejected. | #42 |
+| SPEC-0013 restricted Device-JS | planned — accepted capability | implemented — portable/software/package | not-qualified — exact Windows generated-source/compiler/launch/oracle/lifecycle | active — native qualification | `compileDeviceProgram(runtime, request)` validates restricted Device-JS and returns a bounded device-program descriptor plus the ordinary compiler result. | Acorn 8.15.0 is syntax-only; the accepted subset is closed and generated CUDA, ASTs, native options, pointers and handles remain private. | #43 |
+| SPEC-0016 operation lifecycle | planned — accepted capability | implemented — portable/software/package | not-qualified — exact Windows submit/status/wait/close/deferred-failure/lifecycle | active — native qualification | `CudaFunction.submit()` returns an opaque `CudaOperation` with `status()`, `wait()` and `close()`; `launch()` remains the terminal convenience API. | One pending operation and one private stream; pending-command gating remains conservative and there is no public stream/event or kernel-cancellation surface. | #51 |
+<!-- CUDA-JS:END GENERATED CAPABILITY STATUS -->
+
+<!-- CUDA-JS:BEGIN GENERATED CUDA-MCGS INTEROP -->
+| Boundary | Governance projection |
+|---|---|
+| Status | compatible-pair-pending |
+| External consumer owns | semantic Device-JS program; domain oracle; finite resource plan |
+| CUDA-JS owns | Device-JS validation; CUDA C++ lowering; private generated CUDA; compilation and linking; artifact identity and cache; runtime execution and lifecycle |
+| Production authoring boundary | consumer-authored CUDA or PTX is not required |
+| Cross-repository deletion test | required |
+| Exact compatible pair | pending |
+<!-- CUDA-JS:END GENERATED CUDA-MCGS INTEROP -->
 
 CUDA-JS is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. Its current public profiles are intentionally narrower than its architectural extension surface.
 
 ## Executive summary
 
-CUDA-JS currently provides, on its qualified Windows x64 profile:
+CUDA-JS tracks architecture, implementation, native qualification, and priority independently. Its exact qualified Windows x64 baseline provides:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
@@ -24,14 +47,23 @@ CUDA-JS currently provides, on its qualified Windows x64 profile:
 - exact tested device-scope release/acquire atomic publication through generated device code;
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
-- exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and unsupported profiles.
+- exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed or known-incompatible profiles.
+
+The current `cuda-js@0.1.0-alpha.5` public implementation additionally includes, in portable/software/package paths:
+
+- typed relocatable-PTX compilation from SPEC-0010;
+- exact `u64`, `i32`, and `f32` launch scalars in addition to `device-memory` and `u32` from SPEC-0011;
+- typed LTO-IR compilation and homogeneous Device-LTO linking from SPEC-0012;
+- restricted Device-JS through standalone `compileDeviceProgram(runtime, request)` from SPEC-0013;
+- opaque `submit()` / `status()` / `wait()` / `close()` GPU operations from SPEC-0016, with one pending operation and one private stream.
+
+Those implementation facts do not promote native support. Each additive capability retains its owning specification's exact native evidence gate.
 
 Important current limits are equally explicit:
 
-- one public runtime currently permits **one in-flight kernel launch at a time**;
-- public caller-controlled streams/events and multi-stream concurrent launches are not yet accepted;
+- one public runtime currently permits **one pending GPU operation at a time** on one private stream;
+- the opaque operation lifecycle is implemented, while multiple pending operations, public caller-controlled streams/events, and multi-stream scheduling remain proposal-only and unqualified;
 - multi-GPU, MIG, managed/pinned/mapped memory, CUDA Graph execution, graphics interop, external contexts, process isolation, broad arbitrary kernel signatures, and native Linux CUDA execution are not currently qualified public capabilities;
-- device LTO is planned under the existing CJS-F6 compiler owner but is not yet an accepted production capability;
 - CUDA-JS does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
 Those limits describe the **current qualified profile**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
@@ -126,7 +158,7 @@ The current memory contract deliberately does **not** market managed, unified, p
 
 See [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md).
 
-### 4. Module, function, launch, stream, and completion
+### 4. Module, function, launch, operation, stream, and completion
 
 CUDA-JS currently supports a bounded execution slice with:
 
@@ -134,20 +166,22 @@ CUDA-JS currently supports a bounded execution slice with:
 - named function lookup;
 - declared kernel parameter schemas;
 - naturally aligned packed launch-buffer construction;
-- device-memory and `u32` parameter kinds in the current public profile;
+- the closed `device-memory`, `u32`, `u64`, `i32`, and `f32` parameter-kind set;
 - grid/block/shared-memory validation against queried device limits;
 - one private nonblocking CUDA stream;
-- one private event per in-flight launch;
+- one private event per pending operation;
 - event-based terminal completion;
 - adaptive nonblocking polling;
 - function and memory leases held through terminality;
 - immediate/deferred error attribution;
+- opaque `CudaFunction.submit()` and `CudaOperation.status()` / `wait()` / `close()` capabilities with one pending operation;
+- terminal `CudaFunction.launch()` compatibility implemented above the operation lifecycle;
 - timeout handling that fails the runtime conservatively rather than claiming inaccessible cleanup;
 - explicit function/module release and dependency-safe teardown.
 
-A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-in-flight-launch** rule describes host-side submission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially.
+A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-pending-operation** rule describes host-side admission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially. SPEC-0016 is implemented in portable/software/package paths; its exact native promotion remains separately unqualified.
 
-See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md).
+See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md), and [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md).
 
 ### 5. Concurrency: the uncompressed model
 
@@ -159,11 +193,12 @@ See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md).
 | GPU threads/warps/blocks within a kernel | Yes. Normal CUDA device parallelism. |
 | DriverActor vs CompilerActor ownership | Separate Workers and queues. No claim that every operation overlaps or improves performance. |
 | Multiple CUDA-JS runtime instances | Isolation is proven; cross-runtime resources reject. This is not a performance claim about overlapping GPU execution. |
-| Multiple kernels in flight on caller-controlled streams in one runtime | Not currently public/qualified. Current profile is single-flight. |
+| One opaque GPU operation in one runtime | Implemented in portable/software/package paths; exact native SPEC-0016 qualification remains open. |
+| Multiple kernels in flight on private streams in one runtime | Proposed under SPEC-0018; not implemented or qualified. |
 | Public stream/event capability objects | Not currently public/qualified. |
-| Multiple GPUs/MIG | Not currently supported. |
+| Multiple GPUs/MIG | Architecturally deferred, not implemented, and not qualified. |
 
-The target architecture already models memory/module/function/**stream/event/operation** resources as separate bricks. Therefore the current single-flight rule is an accepted **profile boundary**, not a claim that multi-stream support is architecturally impossible. Adding public multi-stream/concurrent launch requires new rules for ownership, ordering, event provenance, deferred errors, cancellation, resource leases, backpressure, teardown, and native evidence.
+The target architecture already models memory/module/function/**stream/event/operation** resources as separate bricks. Therefore the current one-pending-operation rule is an accepted **profile boundary**, not a claim that multi-stream support is architecturally impossible. Adding public multi-operation/multi-stream scheduling requires new rules for ownership, ordering, event provenance, deferred errors, cancellation, resource leases, backpressure, teardown, and native evidence.
 
 See the [target architecture](architecture/TARGET_ARCHITECTURE.md) and [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
@@ -188,9 +223,18 @@ Current compiler/toolchain behavior includes:
 - copied PTX/cubin handoff to the Driver runtime;
 - CompilerActor resource cleanup and conservative restart-required state after unproved native destruction.
 
+Accepted additive compiler modes are also implemented:
+
+- `relocatableDeviceCode: true` produces typed relocatable PTX through the same bounded CompilerActor owner;
+- `output: "lto-ir"` produces a typed, copied LTO-IR artifact;
+- homogeneous typed LTO-IR inputs infer private Device-LTO link mode and produce final cubin;
+- raw LTO-IR, mixed PTX/LTO input sets, and arbitrary native input/option controls remain unavailable.
+
+PTX remains the default compile/link path. RDC and Device LTO have portable/software/package implementation evidence; their native promotion remains separately gated by SPEC-0010 and SPEC-0012.
+
 **CUDA-JS does not require recompilation on every kernel launch.** Compilation can occur during setup, artifacts can be cached, and PTX/cubin can be loaded later. The compiler is a toolchain capability, not a mandatory hot-loop stage.
 
-See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md).
+See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md), [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md), and [`SPEC-0012`](specs/SPEC-0012-device-lto.md).
 
 ### 7. Trusted CUDA C++ headers and atomics
 
@@ -202,7 +246,23 @@ This proves a generic CUDA C++ atomic-publication capability through the public 
 
 See [`SPEC-0009`](specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md).
 
-### 8. Content-addressed device artifacts
+### 8. Restricted Device-JS authoring
+
+The accepted SPEC-0013 frontend lets a consumer author a closed, statically typed JavaScript subset while CUDA-JS owns validation, deterministic CUDA C++ lowering, compilation, artifact identity, and runtime handoff.
+
+The public entry is the standalone helper:
+
+```js
+compileDeviceProgram(runtime, request)
+```
+
+It is not a method added to every runtime. CUDA-JS uses pinned `acorn@8.15.0` only as a syntax parser; the accepted grammar, types, helper semantics, return rules, ordering, diagnostics, identity, and lowering remain CUDA-JS-owned. Generated CUDA source, parser ASTs, native options, providers, and pointers remain private.
+
+The portable/software/package implementation proves the closed contract and compiler bridge. Native Device-JS support remains unqualified until the exact compiler/launch/oracle/lifecycle evidence in SPEC-0013 is published and integrated. The CUDA-MCGS external deletion and exact compatible-pair proof remain pending cross-repository work.
+
+See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md) and its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md).
+
+### 9. Content-addressed device artifacts
 
 Compiler and linker outputs have deterministic, provider-aware identities. Cache records separate compile and link operations and include normalized options, provider versions/digests, source/header/input digests, artifact type, lengths, and output identity.
 
@@ -210,11 +270,11 @@ A cache hit is not trusted by filename alone. CUDA-JS revalidates the manifest, 
 
 This makes runtime compilation compatible with build-once/cache/reuse workflows rather than forcing source compilation into latency-sensitive execution loops.
 
-### 9. Public package and independent consumers
+### 10. Public package and independent consumers
 
 The public package is ESM-only and no-addon in the CUDA-JS-specific sense. Its public exports are deliberately smaller than the repository internals.
 
-The facade exposes safe capability objects for device memory, modules, functions, and optional compilation/linking. Actor tokens, provider paths, context/stream/event handles, and raw native storage are hidden.
+The facade exposes safe capability objects for device memory, modules, functions, opaque GPU operations, and optional compilation/linking. The package also exports standalone `compileDeviceProgram()`. Actor tokens, provider paths, context/stream/event handles, generated CUDA, and raw native storage are hidden.
 
 The accepted package evidence includes:
 
@@ -231,7 +291,7 @@ See [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
 ## GPU residency and device-resident workloads
 
-CUDA-JS supports the host-side mechanisms needed to keep application state resident in ordinary device memory across sequential launches:
+CUDA-JS supports the host-side mechanisms needed to keep application state resident in ordinary device memory across sequential operations:
 
 ```text
 host configuration/source
@@ -247,7 +307,7 @@ kernel A -> device state -> kernel B -> device state -> kernel C
 
 Nothing in the accepted memory/launch contract requires intermediate device state to egress to JavaScript between those kernels. Host orchestration and host data egress are separate concepts.
 
-CUDA-JS does **not**, by itself, define a universal device-resident scheduler or claim that every application's control flow continues on the GPU after one ignition call. That is consumer semantics. A consumer that requires device-owned progress must provide device programs and a compatible execution/scheduling design, and CUDA-JS must expose any generic CUDA substrate that design genuinely needs through accepted capability contracts.
+CUDA-JS does **not**, by itself, define a universal device-resident scheduler or claim that every application's control flow continues on the GPU after one ignition call. That is consumer semantics. A production CUDA-MCGS consumer owns its restricted Device-JS program and domain oracle/resource meaning; CUDA-JS owns the CUDA realization and runtime. Any missing generic primitive must enter CUDA-JS through an accepted generic contract rather than a consumer-local CUDA escape hatch.
 
 Likewise, device-resident execution does not imply one mandatory realization such as a persistent kernel. Persistent kernels, device-launched/conditional CUDA Graphs, multi-kernel device-resident workflows, cooperative execution, thread-block clusters, or hybrids are separate design choices whose support depends on the generic CUDA capabilities a consumer actually requires.
 
@@ -290,45 +350,30 @@ A consumer can compile during installation, startup, model/search-image preparat
 
 ## Device LTO status
 
-Device LTO is **planned, not currently accepted production behavior**.
+Device LTO is **accepted and implemented in portable/software/package paths, but not promoted as native support**.
 
-The current CJS-F6-LTO plan keeps PTX as the default compile path and proposes a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The plan deliberately excludes a raw nvJitLink escape hatch, raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, and cross-major compatibility claims.
+SPEC-0012 keeps PTX as the default compile path and adds typed `lto-ir` artifacts plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. Raw untyped LTO-IR, mixed PTX/LTO-IR input sets, staged partial linking, arbitrary nvJitLink controls, and broad compatibility inference remain excluded.
 
-Production LTO implementation remains blocked on a new bounded specification plus exact EXP-009 LTO evidence.
+Exact native LTO-IR/oracle parity, multi-unit linking, Driver execution, negative compatibility controls, and terminal lifecycle evidence remain required before any named native profile is promoted.
 
-See the [`CJS-F6-LTO` master-plan section](plans/2026-08-10-master-plan.md#cjs-f6-lto--bounded-typed-device-lto-follow-up-p2) and the [LTO assessment](research/2026-08-11-lto-support-assessment.md).
+See [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the active [native qualification continuation](plans/2026-08-12-native-and-platform-qualification-continuation.md).
 
-## Capability families: current, planned, and not yet qualified
+## Capability status ownership
 
-| Capability | Status | Meaning |
-|---|---|---|
-| Node FFI CUDA host binding | Accepted/qualified on exact profiles | Private generated FFI over approved named exports. |
-| DriverActor Worker/context ownership | Accepted | One private context per runtime by default. |
-| Device memory | Accepted | Bounded ordinary device allocations and copied transfers. |
-| GPU-resident state across launches | Accepted consequence of device-memory + launch contracts | No mandatory intermediate host read. |
-| PTX module execution | Accepted | Bounded copied PTX load/function/launch/completion. |
-| Cubin module execution | Accepted through F6/F8 path | Copied cubin artifact can be loaded/executed. |
-| Private nonblocking stream/event completion | Accepted | Current implementation detail of bounded execution contract. |
-| Public concurrent launches/multi-stream | Not yet accepted | Current public profile is one in-flight launch per runtime. Architecturally extensible. |
-| Public stream/event objects | Not yet accepted | Separate future resource/capability contracts. |
-| Multiple runtime instances | Accepted isolation behavior | Isolation/cross-runtime rejection, not a GPU-overlap performance claim. |
-| Multi-GPU / MIG | Not supported | Requires separate device/resource/compatibility contracts and evidence. |
-| NVRTC source compilation | Accepted | Optional CompilerActor source-to-PTX path. |
-| nvJitLink PTX-to-cubin | Accepted | Optional CompilerActor link path. |
-| Content-addressed compiler/link cache | Accepted | Validated provider/request/artifact identity. |
-| Trusted CCCL `cuda/` + `nv/` profile | Accepted on exact Windows CUDA 13.3 profile | Path-free verified virtual headers. |
-| `<cuda/atomic>` device-scope publication | Accepted bounded evidence | Generic atomic publication fixture only. |
-| Device LTO | Planned | Requires new spec + native evidence before implementation promotion. |
-| Managed/unified memory | Not yet accepted | Separate memory kind; not required for ordinary device residency. |
-| Pinned/mapped host memory | Not yet accepted | Separate placement/coherence/lifetime contracts. |
-| Memory pools/async allocation | Not yet accepted | Requires separate pressure/stream/lifetime semantics. |
-| CUDA Graphs | Not yet accepted | Candidate future execution/scheduling capability, not current public contract. |
-| Cooperative/dynamic/device-side scheduling features | Not generally qualified | Consumer/device semantics require exact generic capability contracts and evidence. |
-| Process-isolated Driver/compiler backend | Deferred option | Current Workers isolate event-loop/resource ownership, not fatal process crashes. |
-| Graphics/OpenGL interop | Not currently supported | Separate external-resource ownership/lifetime problem. |
-| cuBLAS/cuDNN/tensor framework | Not bundled | CUDA-JS is a generic runtime/toolchain; consumers may integrate separate libraries under future contracts if required. |
-| Native Linux CUDA execution | Incomplete/deferred | Portable controls pass; native Driver/compiler/GPU qualification remains separate. |
-| Linux ARM64 / WSL2 native CUDA | Not qualified | Separate platform profiles. |
+The generated capability table near the top of this document is the public status projection for accepted additive capabilities and P0 corrections. Do not maintain a second handwritten status matrix here.
+
+Other capability families remain governed by their domain owners:
+
+| Fact family | Authoritative owner |
+|---|---|
+| Exact qualified hardware and platform profiles | [`conformance/hardware/registry.json`](../conformance/hardware/registry.json), [`profiles.json`](../conformance/hardware/profiles.json), and generated [`HARDWARE_SUPPORT.md`](HARDWARE_SUPPORT.md) |
+| Deferred/planned hardware axes | [`conformance/hardware/extensions.json`](../conformance/hardware/extensions.json) |
+| Exact Node support | [`conformance/node/registry.json`](../conformance/node/registry.json) and generated [`NODE_SUPPORT.md`](NODE_SUPPORT.md) |
+| Accepted contracts | [`docs/specs/`](specs/) plus accepted addenda |
+| Proposal-only expansion | [`SPEC-0017` through `SPEC-0026`](specs/) and the [capability roadmap](plans/2026-08-13-capability-expansion-roadmap.md) |
+| Current work and blockers | [`STATUS.md`](../STATUS.md) and [`next_step.yaml`](../next_step.yaml) |
+
+Architecture, implementation, qualification/profile, and priority must be read independently from those owners. Absence of a qualification claim is not architectural rejection.
 
 ## Common classification errors
 
@@ -344,9 +389,9 @@ False. CUDA Driver ownership is in a dedicated `DriverActor` Worker; compiler/li
 
 False for the accepted execution path. CUDA-JS owns a private nonblocking stream and private completion events. What is currently missing is **public multi-stream/concurrent-launch control**, not all stream/event usage.
 
-### "One in-flight launch means CUDA-JS has no GPU concurrency."
+### "One pending operation means CUDA-JS has no GPU concurrency."
 
-False. One-in-flight is a host submission/error-attribution rule for the current runtime profile. CUDA kernels still execute with ordinary massive GPU parallelism. Multi-stream overlapping kernel submission is a distinct, currently unqualified capability.
+False. One pending operation is a host admission/error-attribution rule for the current runtime profile. CUDA kernels still execute with ordinary massive GPU parallelism. Multi-operation/private-stream scheduling is a distinct proposal and remains unimplemented/unqualified.
 
 ### "Single-flight is the permanent CUDA-JS architecture."
 
@@ -363,6 +408,14 @@ False. Ordinary device memory persists across launches and is directly consumabl
 ### "Using CUDA-JS means compiling CUDA source during every hot-loop operation."
 
 False. Runtime compilation is optional, cacheable, and separable from execution. Precompiled PTX/cubin can be loaded directly.
+
+### "Device LTO and relocatable PTX are only future ideas."
+
+False as an implementation statement. Both typed capabilities are accepted and implemented in portable/software/package paths. They remain not-qualified for native support until their exact promotion evidence is published and integrated.
+
+### "A Device-JS consumer must own generated CUDA or PTX."
+
+False for the accepted higher-level boundary. The consumer owns its semantic restricted Device-JS program; CUDA-JS owns validation, private CUDA lowering, compilation, artifacts, and runtime mechanics. Direct CUDA C++/PTX remains an available lower-level generic CUDA-JS surface, but it is not required for the CUDA-MCGS production deletion-test boundary.
 
 ### "Host orchestration means intermediate data must return to JavaScript."
 
@@ -393,7 +446,7 @@ For exact support state, read [`NODE_SUPPORT.md`](NODE_SUPPORT.md) and [`HARDWAR
 
 ## Primary capability vocabulary
 
-CUDA-JS is relevant to searches for: **Node.js CUDA**, **NVIDIA CUDA Driver API for JavaScript/TypeScript**, **Node FFI CUDA**, **GPU memory from Node.js**, **PTX launch from Node.js**, **cubin launch from Node.js**, **NVRTC Node.js**, **nvJitLink Node.js**, **runtime CUDA compilation**, **CUDA streams and events**, **asynchronous CUDA Node.js**, **GPU-resident computation**, **device memory**, **CUDA atomics**, **CUDA C++ JIT**, **content-addressed GPU artifact cache**, and **schema-generated CUDA bindings**.
+CUDA-JS is relevant to searches for: **Node.js CUDA**, **NVIDIA CUDA Driver API for JavaScript/TypeScript**, **Node FFI CUDA**, **GPU memory from Node.js**, **PTX launch from Node.js**, **cubin launch from Node.js**, **NVRTC Node.js**, **nvJitLink Node.js**, **relocatable PTX**, **CUDA Device LTO**, **restricted JavaScript GPU kernels**, **opaque GPU operations**, **runtime CUDA compilation**, **CUDA streams and events**, **asynchronous CUDA Node.js**, **GPU-resident computation**, **device memory**, **CUDA atomics**, **CUDA C++ JIT**, **content-addressed GPU artifact cache**, and **schema-generated CUDA bindings**.
 
 ## Authority links
 
@@ -405,6 +458,11 @@ For normative behavior and exact claim limits, start with:
 - [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md) — NVRTC/nvJitLink/cache;
 - [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md) — public package/facade/multiple instances;
 - [`SPEC-0009`](specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md) — trusted CUDA headers and generic atomic publication;
+- [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md) — typed relocatable PTX;
+- [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md) — typed scalar launch arguments;
+- [`SPEC-0012`](specs/SPEC-0012-device-lto.md) — typed Device LTO;
+- [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md) — restricted Device-JS;
+- [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md) — opaque operation lifecycle;
 - [`TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) — proposal-level extension shape;
 - [`V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md) — qualification boundaries;
 - [`next_step.yaml`](../next_step.yaml) — current operational plan state.

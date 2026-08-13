@@ -1,14 +1,16 @@
 # EXP-014 — Operation Lifecycle Runner
 
-**Status:** Active bounded experiment — portable question passed
+**Status:** Retained bounded experiment — portable question passed
 
 Detailed protocol: [`../EXP-014-operation-lifecycle.md`](../EXP-014-operation-lifecycle.md).
 
 ## Purpose
 
-Validate the host/lifecycle shape proposed by SPEC-0016 before production execution code changes.
+Validate the host/lifecycle shape that was proposed by SPEC-0016 before production execution code changed.
 
 The experiment uses one serialized JavaScript owner queue and an independent Node Worker as a mock device. Submission returns while the Worker is still progressing. Later status calls are separate short owner commands.
+
+SPEC-0016 is now accepted and its bounded portable/software/package implementation is integrated. It exclusively owns production submission/status/wait/close behavior, operation state, pending-command admission, legacy `launch()` compatibility, and runtime-close semantics. This retained experiment supplies regression evidence and an independently progressing mock-work harness only; it does not authorize or redefine production behavior.
 
 The capsule covers stable cases `OPL-001` through `OPL-015`:
 
@@ -70,9 +72,9 @@ node --test experiments/exp-014/test/operation-lifecycle.test.mjs
 
 ## Claim limit
 
-This passing result proves only that the proposed ownership/state/interleaving model is coherent in JavaScript. It does not prove CUDA launch asynchrony, event ordering, deferred-error behavior, native cleanup, overlap, performance, or native support.
+This passing result proves only that the ownership/state/interleaving model under consideration at the time was coherent in JavaScript. It does not prove CUDA launch asynchrony, event ordering, deferred-error behavior, native cleanup, overlap, performance, or native support.
 
-The result is evidence for reassessing SPEC-0016; it does not by itself accept that specification or authorize production implementation.
+The result was evidence used to reassess SPEC-0016; it did not by itself accept that specification or authorize production implementation. Accepted SPEC-0016, not EXP-014, is the current production authority.
 
 ## Cleanup
 

@@ -27,6 +27,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | Concern | Authoritative document set |
 |---|---|
 | Discoverable capability summary and current-vs-future classification | [`CAPABILITIES.md`](CAPABILITIES.md) — informational summary only; accepted ADRs/specifications remain authority |
+| Machine-readable documentation/governance projection | [`capability-status.json`](capability-status.json) — non-shipped owner for generated capability/interop blocks and public-export reconciliation |
 | Mission and product boundary | [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md) |
 | CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
 | Host-binding baseline | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) |
@@ -38,7 +39,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | Accepted CUDA schema compiler and Tier-0 ABI contract | [`specs/SPEC-0001-cuda-schema-compiler.md`](specs/SPEC-0001-cuda-schema-compiler.md) |
 | Accepted Windows Driver bootstrap contract | [`specs/SPEC-0002-windows-driver-bootstrap.md`](specs/SPEC-0002-windows-driver-bootstrap.md) |
 | Research and exact source provenance | [`research/README.md`](research/README.md), [`research/source-register.yaml`](research/source-register.yaml) |
-| Non-authoritative sequencing | [`plans/2026-08-10-master-plan.md`](plans/2026-08-10-master-plan.md), [`plans/2026-08-10-focus-branch-map.json`](plans/2026-08-10-focus-branch-map.json) |
+| Non-authoritative sequencing | [`plans/README.md`](plans/README.md) and its active native-qualification, execution-continuation, compatible-pair, and capability-roadmap links; completed master/focus plans remain under [`archive/plans/`](archive/plans/) |
 | Future empirical gates and claim limits | [`../experiments/EXPERIMENT_MATRIX.md`](../experiments/EXPERIMENT_MATRIX.md) and detailed experiment documents |
 | Superseded design provenance | [`archive/README.md`](archive/README.md) |
 
@@ -60,7 +61,7 @@ These remain owned boundaries; implementation is limited to the accepted phase c
 
 ## Current phase gate
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, atomic-publication, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; the exact compatible-pair and CUDA-MCGS-owned adapter evidence are still pending. Linux `CJS-F2L / EXP-001` and native Linux F3L through F9L remain retained, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, atomic-publication, and cleanup evidence. Accepted SPEC-0010/0011/0012/0013/0016 capabilities are implemented in portable/software/package paths but retain independent native promotion gates. The platform-neutral F3 through F9 capsules pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; the exact compatible-pair and CUDA-MCGS-owned adapter evidence are still pending. Linux `CJS-F2L / EXP-001` and native Linux F3L through F9L remain retained, deferred, and incomplete.
 
 ## Foundation completeness test
 

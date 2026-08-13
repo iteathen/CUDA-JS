@@ -19,9 +19,9 @@ npm run hardware:qualify
 
 `hardware:check` validates registry invariants and rejects generated-document drift. `hardware:plan` is read-only and reports the current or explicitly requested profile. `hardware:qualify` is enabled only for a runner-ready profile and fails unless the process uses exact Node v26.7.0 from a clean Git worktree.
 
-`extensions.json` keeps multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version-matrix, Windows TCC/server, and independent-attestation work fail-closed. Every one is currently `no-support` and exposes no promotable command chain.
+`extensions.json` records architectural disposition, implementation status, qualification status, and priority independently for multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version-matrix, Windows TCC/server, and independent-attestation work. Every ordinary axis remains `not-qualified` and exposes no promotable command chain. Only the recorded negative Hyper-V host/GPU profile is `known-incompatible`; that exact-profile result does not reject virtualization or characterize another host.
 
-On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A readiness result is not virtualized CUDA support.
+On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A ready-looking inventory remains `not-qualified` without native promotion evidence; a negative result is `known-incompatible` only for the exact observed profile.
 
 The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order. The Linux x64, WSL2, Linux ARM64 SBSA, and Jetson ARM64 entries intentionally expose no promotable command chain while their native adapters or contracts are incomplete.
 

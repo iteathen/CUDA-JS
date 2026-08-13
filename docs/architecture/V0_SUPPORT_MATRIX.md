@@ -23,7 +23,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
+| Windows 11 | x86-64 Win64 | public testing package; unconfirmed hardware may operate | F2W through F9W exact baseline evidence retained; additive SPEC-0010/0011/0012/0013/0016 capabilities retain independent native promotion gates |
 | Linux glibc | x86-64 SysV | GPU-free schema plus F3–F8 portable/package path complete; native Driver/compiler qualification deferred | run retained F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
@@ -88,6 +88,8 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 |---|---|
 | device-local allocation and synchronous copied JS bytes | accepted Windows F4W; portable policy/control plane passes Linux CI; native Linux Driver memory remains incomplete |
 | bounded PTX module, declared function, one private stream, packed launch, event completion | accepted Windows F5W; portable orchestration passes Linux CI; native Linux Driver launch remains incomplete |
+| typed `u64`/`i32`/`f32` launch arguments | implemented in portable/software/package paths under SPEC-0011; exact named native profiles remain independently qualified |
+| opaque submit/status/wait/close operation lifecycle | implemented in portable/software/package paths under SPEC-0016 with one pending operation and one private stream; exact native promotion remains independent |
 | bounded cubin module handoff from CompilerActor | accepted Windows F6W; exact PTX/cubin output parity and execution pass; native Linux providers and Driver launch remain incomplete |
 | manifest-verified CUDA CCCL virtual headers | accepted exact Windows F9 prerequisite for `cuda/` and `nv/`; other toolkit versions/platforms/header roots require independent profiles |
 | device-scope release/acquire publication through public facade | accepted exact Windows F9 generic fixture; no CUDA-MCGS, arbitrary-atomic, performance, or cross-platform inference |
@@ -139,7 +141,10 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 |---|---|
 | load precompiled PTX/cubin | accepted Windows F6W; fatbin remains outside the bounded module contract |
 | NVRTC source to PTX | accepted optional Windows F6W provider; other platforms require independent qualification |
-| nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; LTO remains deferred |
+| nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; typed RDC/LTO additions below retain their own native promotion gates |
+| typed relocatable PTX | implemented in portable/software/package paths under SPEC-0010; exact native compile/link/launch/oracle/lifecycle promotion remains independent |
+| typed Device LTO | implemented in portable/software/package paths under SPEC-0012; raw/mixed inputs remain unavailable and exact native promotion remains independent |
+| restricted Device-JS | implemented in portable/software/package paths under SPEC-0013 through standalone `compileDeviceProgram()`; generated CUDA stays private and exact native promotion remains independent |
 | runtime host-code compilation | out of scope; NVRTC is device-only |
 
 ## Release maturity

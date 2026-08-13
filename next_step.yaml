@@ -1,12 +1,12 @@
 {
-  "schema_version": 29,
+  "schema_version": 30,
   "updated": "2026-08-13",
-  "status": "ready_for_p0_documentation_reconciliation",
-  "objective": "After protected-main read-back of the independently implemented P0 target-policy (#65) and disposal-failure (#66) corrections, reconcile public capability/interop/version documentation (#67) while continuing independent native qualification and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
+  "status": "active_p0_documentation_reconciliation",
+  "objective": "Complete issue #67 from exact protected main by reconciling public capability/interop/version/status documentation with accepted implementation authority, making semantic drift fail CI, and preserving independent native qualification plus proposal-only SPEC-0017 through SPEC-0026.",
   "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. The accepted P0 addenda correct existing owners; they do not authorize new consumer semantics or future capability proposals.",
   "exact_input_revisions": {
     "protected_main_capability_authority": "5233a046c57813532a71763bb36cdba5894e43e0",
-    "implementation_baseline": "962b120d3056d82492f0e99f3e11d44a7afe958b",
+    "implementation_baseline": "0fd146a285a19feb393d2c29b11b8c952326354c",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
     "implemented_corrections": [
@@ -51,9 +51,9 @@
   ],
   "current_focus": {
     "id": "CJS-P0-DOCS-67",
-    "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "After protected-main read-back confirms the independently reviewed #66 disposal-failure packet is integrated, create a separate #67 focus branch from that exact main. Reconcile public capability, interop and version documentation against accepted main and extend validation so semantic drift fails CI.",
-    "exit": "Public capability, interop and version documentation agrees with accepted implementation/qualification authority and CI owns the resulting semantic invariants."
+    "plan": "docs/plans/2026-08-13-capability-docs-67-handoff.md",
+    "next_action": "Publish the bounded #67 checkpoint as a draft PR, read back its exact remote head/tree, complete exact Node 26.7.0 validation and independent exact-head review, then guarded-merge only the accepted head and verify protected main before issue closure.",
+    "exit": "Public capability, interop, version and status documentation agrees with accepted implementation/qualification authority; semantic drift fails CI; the exact protected-main result and post-merge checks are read back."
   },
   "deliverables": [
     "public documentation reconciliation and semantic-drift validation (#67)",
@@ -67,6 +67,7 @@
     "compatible_pair": "docs/plans/2026-08-12-compatible-pair-continuation.md"
   },
   "blockers": [
+    "issue #67 is not complete until its final exact remote head, protected-main integration, generated projections and push checks are independently read back",
     "this environment does not itself expose the exact NVIDIA Windows profile required for new native support promotion",
     "SPEC-0017 through SPEC-0026 remain proposals and cannot be implemented until separately accepted",
     "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",

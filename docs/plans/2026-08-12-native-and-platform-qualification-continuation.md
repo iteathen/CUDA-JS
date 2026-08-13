@@ -28,9 +28,11 @@ Remaining evidence:
 - failures preserve actor health and terminal resource balance;
 - exact Windows profile evidence is recorded before support promotion.
 
-### NQ-SCALAR — SPEC-0011 / issue #39
+### NQ-SCALAR — SPEC-0011 / no dedicated current issue
 
 Current state: `u64`, `i32`, and `f32` packed scalar arguments are implemented.
+
+Issue #39 now owns later `f64`/`f16`/`bf16` expansion under SPEC-0021, not this completed SPEC-0011 implementation slice. Do not use its current coordination state as the qualification owner for the existing scalar kinds.
 
 Remaining evidence: exact native boundary values, packing parity, launch result/oracle parity, failure cases, and terminal cleanup on each claimed profile.
 

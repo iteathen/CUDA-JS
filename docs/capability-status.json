@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "statusSemanticsOwner": "agent_files/general_foundation/STATUS_SEMANTICS.md",
+    "shippedCompatibilityOwner": "packaging/compatibility-manifest.json",
+    "capabilityProjectionFiles": ["README.md", "docs/CAPABILITIES.md"],
+    "interopProjectionFiles": ["README.md", "docs/CAPABILITIES.md", "docs/INTEROP_WITH_CUDA_MCGS.md"]
+  },
+  "publicApiExports": {
+    "cuda-js": ["CUDA_JS_COMPATIBILITY", "CudaJsError", "inspectCudaHost", "openCudaRuntime", "compileDeviceProgram"],
+    "cuda-js/compatibility": ["CUDA_JS_COMPATIBILITY"],
+    "cuda-js/testing": ["openCudaRuntimeForTesting"]
+  },
+  "statusRecords": [
+    {
+      "id": "SPEC-0003-disposal-failure",
+      "label": "SPEC-0003 disposal-failure correction",
+      "authority": [
+        "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
+        "docs/specs/SPEC-0003-disposal-failure-addendum.md"
+      ],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted correction",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "destructive native cleanup failure partitions"
+      },
+      "priority": {
+        "status": "deferred",
+        "context": "independent native qualification"
+      },
+      "publicSurface": "`RESOURCE_DISPOSE_FAILED` preserves the underlying category, operation and health transition; failed resource capabilities become orphaned and unusable.",
+      "limit": "Repeated close does not retry disposal by default; only bounded sanitized failure details are public.",
+      "issue": 66
+    },
+    {
+      "id": "SPEC-0006-target-policy",
+      "label": "SPEC-0006 target-policy correction",
+      "authority": [
+        "docs/specs/SPEC-0006-compiler-linker-cache.md",
+        "docs/specs/SPEC-0006-target-syntax-addendum.md"
+      ],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted correction",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "newly represented targets; existing qualified targets unchanged"
+      },
+      "priority": {
+        "status": "deferred",
+        "context": "independent native qualification"
+      },
+      "publicSurface": "No new export; compile, link and Device-JS target fields share canonical `compute_<base>` / `sm_<base>` parsing with optional structural `f` or `a` suffix recognition.",
+      "limit": "Policy revision 1 admits only unsuffixed bases 75, 80, 86, 87, 88, 89, 90, 100, 103, 110, 120 and 121; syntax/policy admission is not provider, toolkit, GPU or qualification evidence.",
+      "issue": 65
+    },
+    {
+      "id": "SPEC-0010-relocatable-device-code",
+      "label": "SPEC-0010 relocatable device code",
+      "authority": ["docs/specs/SPEC-0010-relocatable-device-code.md"],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted capability",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "exact Windows public RDC compile/link/launch/oracle/lifecycle"
+      },
+      "priority": {
+        "status": "active",
+        "context": "native qualification"
+      },
+      "publicSurface": "`compile({ options: { relocatableDeviceCode: boolean } })` returns typed PTX marked `relocatableDeviceCode: true` when enabled; the existing `link()` consumes it.",
+      "limit": "Default is `false`; relocatable PTX has no direct-execution promise and callers cannot provide native option text.",
+      "issue": 35
+    },
+    {
+      "id": "SPEC-0011-scalar-kernel-arguments",
+      "label": "SPEC-0011 scalar kernel arguments",
+      "authority": ["docs/specs/SPEC-0011-scalar-kernel-arguments.md"],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted capability",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "exact Windows mixed-scalar ABI/launch/oracle/lifecycle"
+      },
+      "priority": {
+        "status": "active",
+        "context": "native qualification"
+      },
+      "publicSurface": "Function parameter kinds are exactly `device-memory`, `u32`, `u64`, `i32` and `f32`; facade launch values are validated and packed by their declared kind.",
+      "limit": "No numeric coercion, raw parameter buffer, arbitrary ABI kind or non-finite `f32` value is accepted.",
+      "issue": null
+    },
+    {
+      "id": "SPEC-0012-device-lto",
+      "label": "SPEC-0012 Device LTO",
+      "authority": ["docs/specs/SPEC-0012-device-lto.md"],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted capability",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "exact Windows LTO-IR compile/link/launch/oracle/lifecycle"
+      },
+      "priority": {
+        "status": "active",
+        "context": "native qualification"
+      },
+      "publicSurface": "`compile({ output: \"lto-ir\" })` returns typed LTO-IR; `link()` accepts a homogeneous typed LTO-IR set and returns cubin.",
+      "limit": "Raw LTO-IR, mixed PTX/LTO input, caller-selected native kinds/options and broad cross-target composition are rejected.",
+      "issue": 42
+    },
+    {
+      "id": "SPEC-0013-restricted-device-js",
+      "label": "SPEC-0013 restricted Device-JS",
+      "authority": [
+        "docs/specs/SPEC-0013-restricted-device-js.md",
+        "docs/specs/SPEC-0013-public-surface-addendum.md"
+      ],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted capability",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "exact Windows generated-source/compiler/launch/oracle/lifecycle"
+      },
+      "priority": {
+        "status": "active",
+        "context": "native qualification"
+      },
+      "publicSurface": "`compileDeviceProgram(runtime, request)` validates restricted Device-JS and returns a bounded device-program descriptor plus the ordinary compiler result.",
+      "limit": "Acorn 8.15.0 is syntax-only; the accepted subset is closed and generated CUDA, ASTs, native options, pointers and handles remain private.",
+      "issue": 43
+    },
+    {
+      "id": "SPEC-0016-operation-lifecycle",
+      "label": "SPEC-0016 operation lifecycle",
+      "authority": ["docs/specs/SPEC-0016-operation-lifecycle.md"],
+      "architecturalDisposition": "planned",
+      "architectureContext": "accepted capability",
+      "implementation": {
+        "status": "implemented",
+        "profile": "portable/software/package"
+      },
+      "qualification": {
+        "status": "not-qualified",
+        "profile": "exact Windows submit/status/wait/close/deferred-failure/lifecycle"
+      },
+      "priority": {
+        "status": "active",
+        "context": "native qualification"
+      },
+      "publicSurface": "`CudaFunction.submit()` returns an opaque `CudaOperation` with `status()`, `wait()` and `close()`; `launch()` remains the terminal convenience API.",
+      "limit": "One pending operation and one private stream; pending-command gating remains conservative and there is no public stream/event or kernel-cancellation surface.",
+      "issue": 51
+    }
+  ],
+  "cudaMcgsInterop": {
+    "status": "compatible-pair-pending",
+    "externalConsumerOwns": [
+      "semantic Device-JS program",
+      "domain oracle",
+      "finite resource plan"
+    ],
+    "cudaJsOwns": [
+      "Device-JS validation",
+      "CUDA C++ lowering",
+      "private generated CUDA",
+      "compilation and linking",
+      "artifact identity and cache",
+      "runtime execution and lifecycle"
+    ],
+    "productionAuthoringBoundary": "consumer-authored CUDA or PTX is not required",
+    "deletionTest": "required",
+    "compatiblePair": "pending"
+  }
+}
