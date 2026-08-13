@@ -8,13 +8,13 @@
 
 ## Outcome
 
-Separate successful GPU submission from later GPU completion while preserving the accepted one-DriverActor/one-private-context ownership model and the existing SPEC-0005 single-stream/single-flight baseline.
+Separate successful GPU submission from later GPU completion while preserving the accepted one-DriverActor/one-private-context ownership model and the SPEC-0005 single-stream/single-flight baseline.
 
-The first slice adds one opaque logical **GPU operation** resource. A submission command returns after the launch has been accepted and a private completion event has been successfully recorded. Completion is observed later through short DriverActor commands. The DriverActor remains intentionally serialized; it is no longer retained inside one polling command for the lifetime of the GPU work.
+The first slice adds one opaque logical GPU operation. Submission returns only after the kernel has been submitted and a private completion event has been successfully recorded. Completion is observed later through short serialized DriverActor commands. The DriverActor remains one context-owning Worker; it is no longer retained inside one polling command for the lifetime of the GPU work.
 
-This specification does **not** authorize multiple GPU operations in flight or multiple execution streams. Those remain a separately planned capability under issue #40 after this lifecycle is proven.
+This specification does **not** authorize multiple GPU operations in flight or multiple execution streams. Those remain a separately planned capability under issue #40 after this lifecycle is trustworthy.
 
-Production implementation is not authorized while this document remains `Proposal`. EXP-014 must first validate the portable lifecycle/interleaving model, followed by review and explicit acceptance of this specification.
+Production implementation is not authorized while this document remains `Proposal`.
 
 ## Authority and relationship
 
@@ -26,14 +26,25 @@ This proposal is additive to:
 - SPEC-0011 typed scalar launch arguments;
 - SPEC-0015 execution-scope/status clarification.
 
-SPEC-0005 remains the accepted runtime behavior until this proposal is accepted and implemented.
+SPEC-0005 remains the accepted runtime behavior until this proposal is explicitly accepted and implemented.
 
 Issue ownership:
 
 - #51 owns this operation lifecycle;
-- #38 may later consume it for sideband/mapped-publication work;
-- #40 may later consume it for multiple-in-flight/private-stream scheduling;
+- #38 may consume it for sideband/mapped-publication work;
+- #40 may consume it for multiple-in-flight/private-stream scheduling;
 - neither successor may redefine operation lifetime, terminalization, lease, or deferred-error semantics independently.
+
+## Status dimensions
+
+```text
+architectural disposition: planned
+implementation status:       not implemented in accepted main
+qualification status:        not qualified
+priority:                    next execution-lifecycle capability
+```
+
+These dimensions are independent under `STATUS_SEMANTICS.md`.
 
 ## Design invariants
 
@@ -42,13 +53,14 @@ Issue ownership:
 - one private nonblocking execution stream remains the only execution stream in this slice;
 - at most one GPU operation may be `pending` in a runtime;
 - no raw event, stream, context, pointer, or native handle crosses the DriverActor boundary;
-- a pending GPU operation owns every resource lease needed by the submitted launch;
+- a pending GPU operation retains every function/device-memory lease needed by its launch;
 - host waiting is not GPU progression and does not imply cancellation;
+- freeing the command queue does **not** implicitly authorize arbitrary Driver interleaving;
 - qualification/support claims remain exact-profile evidence, not architectural disposition.
 
-## Why the lifecycle must change
+## Why the lifecycle changes
 
-Current `ExecutionManager.launch()` already establishes the correct submission provenance sequence:
+Current `ExecutionManager.launch()` already establishes the required submission provenance sequence:
 
 1. validate launch;
 2. acquire function and memory leases;
@@ -56,35 +68,35 @@ Current `ExecutionManager.launch()` already establishes the correct submission p
 4. submit `cuLaunchKernelEx` on the private stream;
 5. record the event on that stream.
 
-It then remains in the same Worker command while polling `cuEventQuery()` to terminality. Because DriverActor commands are serialized, the polling interval accidentally becomes a global same-actor exclusion interval.
+It then remains in the same Worker command while polling `cuEventQuery()` to terminality. Because DriverActor commands are serialized, that polling interval becomes a global same-actor exclusion interval.
 
 The new lifecycle cuts the command at the existing provenance boundary: **successful event record**.
 
-## Candidate alternatives and disposition
+## Alternatives assessed
 
-### Blocking event synchronization on the DriverActor
+### Blocking synchronization on the DriverActor
 
-Rejected. It preserves head-of-line blocking and weakens later control/observation evolution.
+Rejected. It preserves head-of-line blocking.
 
-### Native event queries from the application thread
+### Query CUDA from the application thread
 
-Rejected. Raw event/context authority would cross the DriverActor boundary.
+Rejected. Raw event/context authority would escape the DriverActor.
 
-### Second context-owning/polling Worker
+### Second polling/context Worker
 
-Rejected for the first slice. It creates cross-thread context-currentness, native-capability transfer, teardown, and error-provenance complexity without necessity.
+Rejected for the first slice. It adds cross-thread context-currentness, native-capability transfer, teardown, and failure-provenance complexity without necessity.
 
-### Native callback/host-function completion
+### Callback/host-function completion
 
-Deferred. Callback/reentrancy/Node-FFI lifetime complexity is not justified before event-query operations are proven.
+Deferred. Callback/reentrancy/Node-FFI lifetime complexity is not justified before the simpler event-query model is proven.
 
-### Serialized DriverActor with short submit/query commands
+### Selected: serialized DriverActor with short submit/query commands
 
-Selected. It preserves one owner and one context while allowing device work to outlive the submission command.
+The owning Worker remains serialized. Submission returns after event provenance exists. Later status calls are separate short commands. Facade `wait()` is repeated short status polling outside the DriverActor queue.
 
 ## Public capability direction
 
-The intended public shape is:
+Intended public shape:
 
 ```text
 CudaFunction.submit(options) -> CudaOperation
@@ -95,13 +107,13 @@ CudaOperation
   close()  -> logical operation release after terminality
 ```
 
-`CudaFunction.launch(options)` remains the terminal convenience API defined by the accepted package surface and must preserve SPEC-0005 behavior unless this specification explicitly says otherwise.
+`CudaFunction.launch(options)` remains the terminal convenience API and must preserve SPEC-0005 behavior unless this specification explicitly says otherwise.
 
-Final public names may be adjusted during acceptance if package review finds a clearer spelling, but the lifecycle semantics in this document are the authority target.
+Final naming may change during acceptance/package review; lifecycle semantics are the authority target.
 
 ## Operation states
 
-Logical operation state is exactly:
+GPU operation state is exactly:
 
 ```text
 pending
@@ -110,84 +122,69 @@ failed
 orphaned
 ```
 
-`closed` is a public capability/resource disposition rather than a GPU execution state.
+`closed` is logical capability disposition, not GPU execution state.
 
-### pending
-
-The launch was submitted, completion-event provenance was established, and referenced leases remain held.
-
-### completed
-
-The private event reported successful completion and terminalization completed successfully.
-
-### failed
-
-A terminal asynchronous failure was observed and terminalization completed sufficiently to release the execution leases. Runtime health may remain poisoned/suspect according to the underlying Driver error.
-
-### orphaned
-
-Owner/context loss or cleanup failure prevents proof of the operation's terminal native/resource disposition. The runtime requires restart and must not claim the resources were freed.
+- `pending`: launch submitted, event provenance established, execution leases retained.
+- `completed`: event reported successful completion and terminalization succeeded.
+- `failed`: terminal asynchronous failure observed and terminalization succeeded sufficiently to establish the failed record.
+- `orphaned`: owner/context/cleanup loss prevents proof of native/resource terminality; restart is required and cleanup is not claimed.
 
 ## Submission boundary
 
-`submit()` may resolve only after all of the following succeed:
+`submit()` may resolve only after:
 
-1. exact public/facade validation;
-2. function capability validation;
-3. launch geometry/shared-memory validation;
-4. argument count/kind/range validation;
-5. function lease acquisition;
-6. every device-memory execution lease acquisition, including repeated aliases;
-7. parameter-buffer packing;
-8. private event creation;
-9. kernel submission on the existing private stream;
-10. event record on that same stream;
-11. logical operation-resource registration.
+1. exact facade/function validation;
+2. launch geometry/shared-memory validation;
+3. argument count/kind/range validation;
+4. function lease acquisition;
+5. every device-memory execution lease acquisition, including repeated aliases;
+6. parameter-buffer packing;
+7. private event creation;
+8. kernel submission on the existing private stream;
+9. event record on that same stream;
+10. logical operation registration.
 
-The returned operation capability contains no native event or stream identity.
+The returned capability contains no native event/stream identity.
 
-A failure before native submission releases leases and destroys any created unused event. A successful launch followed by failure to record the completion event remains `restart-required`: GPU work may exist without trustworthy completion provenance.
+Failure before native submission releases leases and destroys an unused event. Successful launch followed by failure to establish event provenance remains restart-required because device work may exist without trustworthy completion observation.
 
 ## Private operation record
 
 The execution owner retains private state equivalent to:
 
 ```text
-operation token
-submission request/sequence identity
+operation/submission identity
 state
-function/module identity for result reporting
+function/module logical identity
 launch grid/block/shared-memory summary
 argument-kind summary
-private event resource token
+private completion-event token
 function lease release authority
-device-memory lease release authorities
-terminal result or bounded failure observation
+all memory lease release authorities
+terminal result/failure observation
 terminalization guard
 ```
 
-This record is internal implementation data. Callers receive only the opaque operation capability and bounded status/result records.
-
-The logical operation should be a context-owned resource rather than a stream child. Its private event remains a stream child. After terminal event cleanup, retaining a completed logical operation must not unnecessarily keep the stream or native event alive.
+The logical operation is not a public event wrapper. The native event remains private and must be destroyed at terminalization; retaining a completed logical operation must not keep the event or execution stream leased merely for result inspection.
 
 ## Status observation
 
-`operation.status()` is a short DriverActor request.
+`operation.status()` is one short DriverActor request.
 
-When the operation is `pending`:
+For `pending`:
 
-- query its private event once;
-- CUDA success terminalizes the operation as `completed`;
-- `CUDA_ERROR_NOT_READY` returns `pending` without mutation of leases;
-- another Driver error is recorded at the exact observation site and is processed under the deferred-error rules below.
+- query the private event once;
+- CUDA success terminalizes `completed`;
+- `CUDA_ERROR_NOT_READY` returns `pending` without releasing leases;
+- another Driver error is recorded at its exact observation site and processed under the deferred-error rules below.
 
-When already terminal, status returns the stored terminal record without another CUDA query.
+For an already terminal operation, status returns the stored terminal record without another CUDA query.
 
-Status polling does not drive GPU work and does not hold the DriverActor between calls.
+Polling does not drive GPU work and does not retain the DriverActor between calls.
 
 ## Terminalization
 
-Successful terminalization order is:
+Terminalization order:
 
 ```text
 terminal event/failure observation
@@ -199,70 +196,73 @@ terminal event/failure observation
   -> release the single-flight admission slot
 ```
 
-Terminalization is idempotent. Repeated terminal `status()` calls return the same bounded record and do not repeat native cleanup or lease release.
+Terminalization is idempotent. Repeated terminal status does not repeat native cleanup or lease release.
 
-If event destruction or another required terminal cleanup step cannot be proved, the runtime/operation becomes restart-required/orphaned rather than reporting a normal terminal cleanup claim.
+If required event/resource cleanup cannot be proved, the operation/runtime becomes orphaned/restart-required rather than reporting normal terminal cleanup.
 
-NVIDIA permits destroying an incomplete event asynchronously; CUDA-JS deliberately does **not** use that permission to implement pending-operation close, because destruction of the event does not prove that the kernel stopped using the function/memory resources.
+Destroying an incomplete CUDA event is not used as cancellation: event destruction does not prove the kernel stopped using its resources.
 
 ## First-slice admission
 
 ```text
 maxPendingGpuOperations = 1
-privateExecutionStreams = 1
+privateExecutionStreams  = 1
 ```
 
-A second submit while the existing operation is pending fails with deterministic execution backpressure.
+A second submission while one operation is pending returns deterministic execution backpressure.
 
-A terminal-but-not-yet-closed operation does not consume the GPU admission slot because its native execution/resources have already terminalized.
+A terminal-but-not-yet-logically-closed operation does not consume the GPU admission slot because its execution resources already terminalized.
 
-## Interleaving contract while an operation is pending
+## Pending-operation command gate
 
-Submission returning early does not make all Driver commands concurrency-safe.
+**EXP-014 changed the implementation direction here.** The first slice does not need ResourceRegistry lease introspection or new per-memory conflict machinery merely to make early submission safe.
+
+While one GPU operation is pending, DriverActor accepts only an explicit operation-safe command allowlist.
 
 ### Allowed in the first slice
 
 - status/terminal observation of the pending operation;
-- terminal logical operation release;
+- pending operation close request, which must report busy rather than cancellation;
 - runtime close under the close protocol below;
-- exact test/diagnostic hooks required by conformance and explicitly allowed by the owner.
+- the internal legacy-launch timeout transition;
+- exact test/diagnostic controls explicitly named by conformance.
 
-### Not implicitly allowed
+### Blocked while pending
 
-Unless a later accepted capability says otherwise, pending execution rejects commands that would create unproven synchronization, memory mutation, native-resource mutation, or ambiguous execution interaction, including:
+All other ordinary DriverActor commands fail before native work unless a later accepted capability explicitly adds them to the allowlist. This includes:
 
 - another kernel submission;
-- ordinary host-to-device or device-to-host transfer on an allocation currently execution-leased;
-- release of a leased allocation/function/module dependency;
-- arbitrary new Driver work merely because the command queue is available.
+- ordinary device-memory read/write, even for a currently unrelated allocation;
+- memory/function/module release or mutation;
+- arbitrary Driver diagnostics or operations merely because the Worker queue is available.
+
+This conservative gate restores the global exclusion that SPEC-0005 previously obtained accidentally from its long-lived launch command, while still freeing the queue for the operation lifecycle itself.
+
+Existing registry leases continue to fence actual dependency release. No ResourceRegistry or MemoryManager API widening is required for SPEC-0016 v1.
+
+Later capabilities may deliberately widen interleaving:
+
+- #38 may add specifically proven sideband/mailbox commands;
+- #40 may add multiple independent operations/private streams and the resource-conflict model they require;
+- copy/compute overlap or asynchronous transfer requires its own explicit memory/stream contract and native evidence.
 
 CompilerActor operations remain independently owned by the separate CompilerActor Worker and are not serialized behind DriverActor GPU execution.
 
-## Device-memory execution conflict
-
-The accepted ResourceRegistry lease mechanism currently prevents close/free while an allocation is leased, but it does not itself prevent `MemoryManager.read()` or `write()` from acquiring another lease and performing a transfer.
-
-The operation implementation therefore requires an internal conflict query owned by the resource/lifetime boundary. Preferred implementation is a bounded internal `leaseCount()`/equivalent registry capability used by MemoryManager before transfer acquisition.
-
-Because DriverActor commands remain serialized, checking an existing execution lease and acquiring the transfer lease occur without another command interleaving between them.
-
-In this slice, any existing lease on an allocation when an ordinary read/write begins is sufficient to reject the transfer as busy. Later concurrent-execution work may define richer range/access modes only under a separate accepted contract.
-
 ## Wait semantics
 
-`CudaOperation.wait()` is a facade-side asynchronous convenience built from repeated short `status()` calls with bounded polling cadence.
+`CudaOperation.wait()` is facade-side repeated short `status()` polling with bounded polling cadence.
 
-First-slice `wait()` has no built-in GPU cancellation or execution deadline. It resolves only when the operation becomes terminal and does not occupy the DriverActor between polls.
+The explicit operation wait has no implicit GPU cancellation/deadline in the first slice. It resolves only when the operation becomes terminal and does not occupy the DriverActor between polls.
 
-A caller may stop awaiting or compose the promise with its own JavaScript timing/abort mechanism; that changes only the caller's wait and does not alter operation ownership, state, or leases.
+A caller abandoning the promise or composing it with JavaScript timing/abort logic changes only the caller's wait. It does not alter GPU ownership, state, event, or leases.
 
-A future bounded wait option requires explicit semantics. A host wait deadline must never be presented as kernel cancellation.
+Any future host wait deadline must be described as a host wait result, never as kernel cancellation.
 
-## Existing `launch()` compatibility and completion deadline
+## Existing `launch()` compatibility
 
-The existing terminal `CudaFunction.launch()` behavior remains bounded by the accepted `execution.maxCompletionMilliseconds` policy.
+The terminal `CudaFunction.launch()` API remains bounded by the accepted `execution.maxCompletionMilliseconds` policy.
 
-The intended implementation is internally equivalent to:
+Intended internal behavior:
 
 ```text
 submit
@@ -272,128 +272,122 @@ submit
   -> return legacy terminal launch record
 ```
 
-If the existing completion deadline expires before terminality, `launch()` preserves SPEC-0005's restart-required behavior: the runtime does not release the still-unproved operation leases and does not return an unreachable hidden pending operation as if normal ownership remained available to the caller.
+If the existing completion deadline expires first, `launch()` preserves SPEC-0005 restart-required truth: it does not release unproved execution leases and does not leave an unreachable hidden pending operation pretending normal ownership remains available.
 
-An internal legacy-timeout transition may be used to mark the owning runtime/epoch restart-required. It is not a public arbitrary-kernel cancellation API.
+An internal legacy-timeout transition may mark the runtime/epoch restart-required. It is not a public arbitrary-kernel cancellation API.
 
-The new explicit `submit()` path has no such implicit completion deadline; long-lived ownership is represented by the operation capability itself.
+The new explicit `submit()` path itself has no implicit completion deadline; long-lived ownership is represented by the operation capability.
 
-## Runtime close with a pending operation
+## Runtime close with pending operation
 
-`runtime.close()` is allowed to consume the existing bounded completion policy because the runtime has entered the closing state and no new work is accepted.
+After runtime state becomes `closing`, no new ordinary commands are accepted. Close may therefore occupy the owning Worker while bounded-polling the sole pending operation under the existing completion safety policy.
 
-If one operation is pending:
-
-1. close repeatedly observes that operation on the owning Worker;
-2. if it terminalizes within the accepted close/completion deadline, close proceeds with ordinary dependency-safe teardown;
-3. if terminality cannot be proved within that bound, the runtime becomes restart-required and preserves operation/event/lease orphan evidence instead of invoking ordinary close-all and claiming cleanup.
-
-This close-only bounded polling may occupy the DriverActor because no further commands are accepted after closing begins.
+- If the operation terminalizes within the accepted close/completion bound, terminalize it first, then perform normal dependency-safe teardown.
+- If terminality cannot be proved within the bound, mark restart-required/orphaned and preserve operation/event/lease evidence. Do not run ordinary `closeAll()` through live work and claim cleanup.
 
 ## Deferred-error provenance
 
-Current CUDA documentation notes that event, stream, and launch APIs may report errors originating from previous asynchronous launches.
+CUDA event, stream, and launch APIs may report errors originating from previous asynchronous launches.
 
 CUDA-JS records separately:
 
-- `observedAt`: the exact Driver operation/request where CUDA reported the error;
-- `causalOperation`: only when the evidence/mechanism justifies attribution;
-- runtime health transition and native status/name/description under the existing sanitized error contract.
+- `observedAt`: exact Driver operation/request on which CUDA reported the failure;
+- `causalOperation`: only when mechanism/evidence justifies attribution;
+- existing sanitized native status/name/description and runtime health transition.
 
-With one pending operation, ambiguity is deliberately minimized but not erased by assertion. SPEC-0016 must not state stronger causality than the Driver evidence supports.
+One pending operation minimizes ambiguity but does not authorize stronger causal claims than the Driver evidence provides. #40 must revisit this rule with multiple operations.
 
-A later multiple-in-flight profile under #40 must revisit this rule explicitly.
+## Public result
 
-## Public operation result
+A completed operation exposes bounded data equivalent to the existing terminal launch record: schema/status, logical function/module identity, launch dimensions/shared-memory summary, argument-kind summary, operation/submission identity, bounded observation metadata, and health snapshot.
 
-A completed operation exposes bounded data equivalent to the existing terminal launch record:
-
-```text
-schemaVersion
-status: completed
-function/module logical identity
-launch grid/block/shared-memory summary
-argument-kind summary
-submission/operation sequence identity
-observed poll/status count where retained
-bounded elapsed host-observation information where meaningful
-health snapshot
-```
-
-A failed status/result contains only stable sanitized failure identity/provenance and health facts. No event/stream/native address/parameter bytes/module bytes are returned.
+Failure records expose only stable sanitized failure/provenance/health facts. No event, stream, pointer, module bytes, or parameter storage is returned.
 
 ## Operation close
 
 `operation.close()`:
 
-- rejects/busy while `pending`;
-- never claims cancellation;
-- after `completed` or `failed`, closes only the logical operation resource because the private event and execution leases already terminalized;
-- is idempotent at the public facade boundary.
+- reports busy while `pending` and never claims cancellation;
+- after `completed` or `failed`, closes only the logical operation capability because private event/execution leases already terminalized;
+- is idempotent at the public facade boundary;
+- cannot turn an orphaned operation into a cleanup claim.
 
-Unexpected DriverActor loss marks outstanding operation capabilities orphaned/restart-required through the runtime epoch rules.
+Unexpected DriverActor loss follows the existing runtime epoch/orphan rules.
 
-## EXP-014 prerequisite
+## EXP-014 result
 
-Before this specification may become `Accepted`, EXP-014 must prove the host/lifecycle model without CUDA:
+EXP-014 is the cheapest decisive portable experiment for this lifecycle shape.
 
-- independently progressing mock-device work outlives submit;
-- status requests are separate short serialized-owner commands;
-- polling is not required for device progress;
+On GitHub Actions Ubuntu 24.04 with official Node 26.7.0, protected PR #53 merge-ref run `31656331994` passed all stable experiment cases `OPL-001` through `OPL-015` represented by nine grouped tests:
+
+```text
+tests 9
+pass 9
+fail 0
+```
+
+The passing cases prove only the JavaScript orchestration model:
+
+- submit returns while independent mock work remains pending;
+- mock work progresses without status polling;
+- later status is a separate serialized-owner command;
 - second submit backpressures;
-- function/repeated-memory leases remain held;
-- host read/write conflicts reject while execution-leased;
-- pending close cannot claim cancellation;
-- successful terminal observation releases resources exactly once;
-- repeated terminal status is stable;
+- repeated function/memory leases are conserved;
+- conservative pending-command gate rejects ordinary commands;
+- pending close is not cancellation;
+- terminalization/cleanup is idempotent;
+- logical operation can outlive its mock event cleanup;
 - runtime close either proves terminality or reports restart-required/orphaned state;
-- legacy terminal-launch deadline behavior does not leak hidden ownership;
-- controlled failure/owner loss remains honest;
-- Node event loop remains responsive.
+- legacy terminal-launch success/timeout behavior retains ownership truth;
+- controlled failure and mock-owner loss remain distinguishable;
+- application event loop remains responsive.
 
-Mocks establish orchestration/lifetime semantics only.
+The first experiment run exposed a test-oracle defect: hosted Worker startup could exceed a fixed 20–30 ms assumption. The experiment was repaired by adding a test-only Worker readiness signal, then measuring independent progress during a no-host-command interval. Behavior assertions were not weakened.
 
-## Production implementation after acceptance
+EXP-014 does **not** prove CUDA launch asynchrony, event ordering, native deferred-error behavior, cleanup, overlap, or performance.
 
-The first implementation work package is bounded to:
+## Production work after acceptance
 
-- private operation-resource state in `runtime.execution`;
-- closed DriverActor commands for submit/status/release and legacy-timeout handling;
+Only after a separate authority change promotes this specification to `Accepted`, the first production work package is bounded to:
+
+- durable operation state in `runtime.execution`;
+- closed DriverActor commands for submit/status/logical release/legacy timeout;
+- a pending-operation command gate at the DriverActor/execution ownership boundary;
 - DriverRuntime operation methods;
 - public opaque `CudaOperation` facade;
-- internal resource lease/conflict inspection needed by MemoryManager;
 - compatibility implementation of terminal `launch()`;
 - pending-aware DriverActor close;
-- F3/F4/F5/F8 portable/package conformance updates;
-- no new CUDA Driver exports merely for lifecycle separation.
+- F3/F5/F8 portable/package conformance updates;
+- **no** new CUDA Driver exports merely for lifecycle separation;
+- **no** ResourceRegistry/MemoryManager API expansion solely for this slice.
 
 ## Native Windows promotion evidence
 
 Before native support is claimed for the new operation surface on the accepted Windows profile:
 
 1. an independent native oracle submits the same watchdog-safe delayed fixture and records its completion event;
-2. public `submit()` returns while the native event still reports not-ready;
+2. public `submit()` returns while the event still reports not-ready;
 3. the application event loop remains responsive;
 4. status queries occur on later DriverActor turns with the private context still current;
 5. final output is byte-identical to the independent oracle;
-6. execution-leased host transfer/release conflicts fail before unsafe native work;
+6. blocked pending commands fail before unsafe native work;
 7. controlled asynchronous failure records conservative observation/health provenance;
 8. existing terminal `launch()` output and timeout controls remain valid;
-9. normal pending close waits/terminalizes before dependency teardown;
-10. an unproved close/timeout retains restart-required/orphan evidence;
+9. normal close terminalizes pending work before dependency teardown;
+10. unproved close/timeout retains restart-required/orphan evidence;
 11. event/function/module/memory/stream/context/library ownership balances after proved terminal execution;
 12. no raw native capability crosses the public boundary.
 
 ## Falsifiers / rollback
 
-Do not promote this capability if:
+Do not promote if:
 
 - short status queries cannot preserve context/currentness or error provenance;
 - operation lifetime cannot own leases without raw-native escape;
-- pending memory conflicts cannot be enforced cleanly;
-- compatibility `launch()` cannot preserve its bounded timeout/cleanup truth;
-- graceful close can race a live operation;
-- a portable mock requires host polling to advance device work;
+- the pending command gate cannot prevent unproven interleaving cleanly;
+- legacy `launch()` cannot preserve its timeout/cleanup truth;
+- graceful close can race live work;
+- a portable mock requires host polling to advance work;
 - native qualification later shows the intended submission boundary is not asynchronous on the exact profile.
 
 Rollback is preservation of accepted SPEC-0005 terminal single-flight behavior.
@@ -402,6 +396,7 @@ Rollback is preservation of accepted SPEC-0005 terminal single-flight behavior.
 
 - multiple in-flight kernels or private stream pool (#40);
 - mapped host/publication memory (#38);
+- asynchronous copy/compute overlap;
 - raw public streams/events;
 - forced arbitrary-kernel cancellation;
 - CUDA Graphs/cooperative launch;
