@@ -66,7 +66,7 @@ Every axis below is explicitly **no support** until its own accepted contract an
 | multi-gpu | contract required | **no support** | device zero, one private context, and no public device selector | [#20](https://github.com/iteathen/CUDA-JS/issues/20) |
 | mig | contract required | **no support** | MIG identity, isolation, quotas, and lifecycle are not modeled | [#27](https://github.com/iteathen/CUDA-JS/issues/27) |
 | virtualization | verified no support current host | **no support** | virtualization mechanisms require separate host/guest/provider profiles | [#21](https://github.com/iteathen/CUDA-JS/issues/21) |
-| concurrent-launch | runtime contract required | **no support** | one in-flight launch with serialized Worker command processing | [#25](https://github.com/iteathen/CUDA-JS/issues/25) |
+| concurrent-launch | runtime contract required | **no support** | SPEC-0005 one in-flight launch with serialized Worker command processing; SPEC-0015 clarifies this is not an architectural ceiling | [#40](https://github.com/iteathen/CUDA-JS/issues/40) |
 | performance-thermal-soak | measurement contract required | **no support** | F7 elapsed time and process memory are broad regression observations only | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
 | ecc | profile required | **no support** | ECC capability and error-health semantics are not in the runtime contract | [#24](https://github.com/iteathen/CUDA-JS/issues/24) |
 | driver-toolkit-matrix | infrastructure required | **no support** | only exact recorded Node, Driver, toolkit/header, provider, and GPU cells are supported | [#22](https://github.com/iteathen/CUDA-JS/issues/22) |

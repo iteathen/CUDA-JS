@@ -18,4 +18,5 @@ Read selectively: load the instruction chain and every objectively triggered doc
 - [`CLEANUP_AND_DISPOSITION.md`](CLEANUP_AND_DISPOSITION.md)
 - [`TOKEN_DISCIPLINE.md`](TOKEN_DISCIPLINE.md)
 - [`DOCUMENTATION_GOVERNANCE.md`](DOCUMENTATION_GOVERNANCE.md)
+- [`STATUS_SEMANTICS.md`](STATUS_SEMANTICS.md)
 - [`SECURITY.md`](SECURITY.md)

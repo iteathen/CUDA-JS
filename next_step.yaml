@@ -1,354 +1,124 @@
 {
-  "schema_version": 22,
-  "updated": "2026-08-11",
-  "status": "f6_lto_plan_ready_f9_compatible_pair_pending_cuda_mcgs",
-  "objective": "Preserve public testing and exact platform evidence, retain the accepted CUDA-JS trusted-header and generic atomic-publication prerequisite, advance the existing CJS-F6 deferred LTO capability through a consumer-neutral typed LTO-IR specification and EXP-009 follow-up, and complete the exact compatible pair only after the independent CUDA-MCGS package/adapter passes its own assessment and conformance. LTO is not a CUDA-MCGS prerequisite by default.",
+  "schema_version": 23,
+  "updated": "2026-08-12",
+  "status": "status_semantics_correction_then_execution_lifecycle",
+  "objective": "Correct capability-status wording so qualification, implementation, architectural disposition, and priority cannot drift into one another; then restart the execution development cycle with submission/completion separation before bounded multi-stream scheduling.",
+  "exact_main_input": "0f622a667145c810bcc9afdc2630753dfa06a20f",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
-  "focus_branch_map": "docs/plans/2026-08-10-focus-branch-map.json",
-  "current_branch": "CJS-F6-LTO planning ready under existing F6; CJS-F9 CUDA-JS prerequisite complete; CUDA-MCGS integration independently pending",
-  "active_focus_branches": [
-    {
-      "id": "CJS-F0",
-      "status": "complete_publication_verified",
-      "outputs": [
-        "public https://github.com/iteathen/CUDA-JS repository",
-        "merged CJS-F2W pull request https://github.com/iteathen/CUDA-JS/pull/5 with exact remote commit read-back",
-        "public Linux qualification request https://github.com/iteathen/CUDA-JS/issues/4",
-        "merged CJS-F3W pull request https://github.com/iteathen/CUDA-JS/pull/6",
-        "protected main final-tree CI read-back"
-      ]
-    },
-    {
-      "id": "CJS-F1A",
-      "status": "complete_promoted_windows_x64_linux_x64",
-      "outputs": [
-        "generated dependency-free synthetic ABI fixture and direct C oracle",
-        "independent passing Windows x64 and native Linux x86-64 evidence",
-        "59 correctness cases, 6 unit tests, lifecycle, permission, responsiveness, cleanup, and benchmark capsules per profile"
-      ]
-    },
-    {
-      "id": "CJS-F1B",
-      "status": "complete_accepted_schema_abi",
-      "outputs": [
-        "hash-pinned CUDA 13.3.29 official inputs and deterministic Clang importer",
-        "27 reviewed private Tier-0 functions and 16 type/layout facts",
-        "456 unselected Driver declarations cataloged unavailable",
-        "native Linux x86-64 probes plus hash-identical-header MSVC Win64 compatibility probe"
-      ]
-    },
-    {
-      "id": "CJS-F2W",
-      "status": "complete_accepted_windows_x64",
-      "outputs": [
-        "canonical Windows Driver discovery and exact Node/permission preflight",
-        "all 12 generated Tier-0 named exports and cuGetProcAddress queries",
-        "Driver/device/attribute/error/context smoke with exact independent MSVC C-oracle parity",
-        "negative library/symbol/version/permission controls and terminal context/library/Worker cleanup"
-      ]
-    },
-    {
-      "id": "CJS-F2L",
-      "status": "gpu_free_preparation_complete_hardware_qualification_deferred",
-      "outputs": [
-        "executable EXP-001 native Linux build, ABI, readiness, and real-Driver smoke capsules",
-        "hash-pinned official Linux inputs and independently compiled C oracle",
-        "human engineer runbook with evidence, troubleshooting, safety, and contribution requirements",
-        "public GitHub qualification request https://github.com/iteathen/CUDA-JS/issues/4"
-      ]
-    },
-    {
-      "id": "CJS-F3W",
-      "status": "complete_accepted_windows_x64",
-      "outputs": [
-        "accepted SPEC-0003 DriverActor/resource/lifecycle contract",
-        "Windows DriverActor private context owner and bounded async command protocol",
-        "opaque resource registry with generations, nonces, dependencies, leases, and orphan inventory",
-        "monotonic error/health model, responsive main loop, deterministic graceful teardown, and honest unexpected-loss state",
-        "exact Windows native context-affinity and terminal cleanup evidence"
-      ]
-    },
-    {
-      "id": "CJS-F3L",
-      "status": "portable_control_plane_complete_native_driver_blocked",
-      "outputs": [
-        "native Linux x86-64 unit and platform-neutral mock lifecycle evidence",
-        "shared resource, protocol, health, responsiveness, teardown, and unexpected-loss behavior",
-        "retained dependency on incomplete CJS-F2L for native Linux Driver/context execution"
-      ]
-    },
-    {
-      "id": "CJS-F4W",
-      "status": "complete_accepted_integrated_windows_x64",
-      "outputs": [
-        "accepted SPEC-0004 bounded synchronous device-memory contract",
-        "exact memory policy, quota, safe ranges, copied Uint8Array transfers, opaque capabilities, leases, and teardown",
-        "five generated memory exports and deterministic native Ubuntu schema artifact",
-        "independent MSVC and Node byte-for-byte parity with terminal native cleanup"
-      ]
-    },
-    {
-      "id": "CJS-F4L",
-      "status": "portable_control_plane_and_schema_complete_native_driver_blocked",
-      "outputs": [
-        "native Linux CI schema generation for 17 functions and 11 types",
-        "portable memory policy, quota, copied-byte, protocol, lifecycle, and loss controls",
-        "human engineering handoff for canonical Driver, adapter, C oracle, permission, and cleanup qualification",
-        "retained dependency on incomplete CJS-F2L/F3L for native Linux memory execution"
-      ]
-    },
-    {
-      "id": "CJS-F5W",
-      "status": "complete_accepted_integrated_windows_x64",
-      "outputs": [
-        "accepted SPEC-0005 bounded PTX module, declared function, packed launch, and event completion contract",
-        "one private nonblocking stream, one in-flight launch, terminal polling, memory/function leases, and timeout owner-loss accounting",
-        "ten generated execution exports and five added types with independent native Ubuntu generation and MSVC layout parity",
-        "independent MSVC and Node vector-add byte parity checksum 15600773 with terminal native cleanup"
-      ]
-    },
-    {
-      "id": "CJS-F5L",
-      "status": "portable_control_plane_schema_ptx_and_oracle_complete_native_driver_blocked",
-      "outputs": [
-        "portable execution policy, PTX identity, packing, protocol, lease, polling, deferred-error, timeout/loss, and teardown controls",
-        "tracked PTX and independent C oracle source with exact expected offsets, size, output, checksum, and cleanup records",
-        "human engineering handoff for canonical libcuda, adapter, oracle portability, evidence, and cleanup qualification",
-        "retained dependency on incomplete CJS-F2L/F3L/F4L for native Linux launch execution"
-      ]
-    },
-    {
-      "id": "CJS-F6W",
-      "status": "complete_accepted_windows_x64_protected_integration_authorized",
-      "outputs": [
-        "accepted SPEC-0006 separate CompilerActor, typed compiler/linker options, cache, and artifact handoff contract",
-        "canonical CUDA 13.3 NVRTC and nvJitLink Windows provider profile",
-        "exact independent MSVC PTX/cubin parity, validated cache controls, Driver handoff, GPU execution, and terminal cleanup"
-      ]
-    },
-    {
-      "id": "CJS-F6L",
-      "status": "gpu_free_contract_fixtures_cache_and_runbook_complete_native_provider_qualification_deferred",
-      "outputs": [
-        "mandatory Linux stack-limit side-effect suppression policy",
-        "portable request, cache, corruption, protocol, lifecycle, and unexpected-loss fixtures complete",
-        "native libnvrtc and libnvJitLink discovery, compile, link, and cleanup evidence deferred to qualified Linux hardware"
-      ]
-    },
-    {
-      "id": "CJS-F6-LTO",
-      "status": "assessment_research_complete_plan_ready_spec_and_exp009_lto_pending",
-      "owner": "device-toolchain",
-      "exact_input_revision": "ad49a6c9b0cddb420e26e097180cf9c502060a65",
-      "assessment": "docs/research/2026-08-11-lto-support-assessment.md",
-      "outputs": [
-        "bounded future compile output selector retaining PTX default and adding typed lto-ir",
-        "bounded homogeneous typed LTO-IR-to-cubin link mode with LTO inferred internally",
-        "LTO producer/toolkit/target compatibility identity and fail-closed prevalidation",
-        "LTO-aware compile/link cache and evidence identity",
-        "EXP-009 LTO follow-up with independent native oracle and exact execution parity"
-      ],
-      "non_goals": [
-        "mixed PTX and LTO-IR link inputs in the first slice",
-        "raw untyped LTO-IR public inputs",
-        "linked LTO-IR/PTX output or staged partial linking",
-        "arbitrary NVRTC/nvJitLink options, native input kinds, paths, objects, libraries, or fatbins",
-        "cross-major LTO support",
-        "DriverActor changes solely for LTO",
-        "CUDA-MCGS semantics, correctness, performance, or adoption requirements"
-      ]
-    },
-    {
-      "id": "CJS-F7W",
-      "status": "complete_accepted_windows_x64_protected_integration_authorized",
-      "outputs": [
-        "accepted SPEC-0007 sanitized host and device diagnostic contract",
-        "CUDA-reported WDDM/TCC/watchdog/integration/compute-mode assessment without device mutation",
-        "inherited Node permission enforcement with DriverActor and CompilerActor FFI denial and explicit-allow evidence",
-        "deterministic failure/property partitions, sanitized boundaries, and repeated portable/native lifecycle balance"
-      ]
-    },
-    {
-      "id": "CJS-F7L",
-      "status": "portable_classification_stress_and_human_handoff_complete_native_qualification_deferred",
-      "outputs": [
-        "native Linux x86-64, Linux ARM64 SBSA, and WSL2 classifications remain separate",
-        "portable property, failure, repeated-lifecycle, responsiveness, and broad regression controls complete",
-        "native Linux and WSL permission, Driver, compiler, execution, and cleanup evidence deferred to qualified hardware"
-      ]
-    },
-    {
-      "id": "CJS-F8W",
-      "status": "complete_accepted_windows_x64_protected_integration_authorized",
-      "outputs": [
-        "accepted SPEC-0008 no-addon package, public facade, compatibility, and independent-consumer contract",
-        "cuda-js 0.1.0-alpha.2 exact exports, Node 26.1.0-or-later testing admission, exact 26.7.0 evidence policy, private resource capabilities, and aggregate close",
-        "clean tarball install/import/uninstall, first-consumer deletion, two unrelated consumers, and instance isolation",
-        "installed-package Windows PTX vector execution checksum 15600773 with terminal Worker/resource cleanup"
-      ]
-    },
-    {
-      "id": "CJS-F8L",
-      "status": "portable_package_consumer_and_readiness_complete_native_qualification_deferred",
-      "outputs": [
-        "Linux package install/import/uninstall and mock-only public consumer path complete",
-        "stable native backend-unavailable error and unchanged safe public facade contract",
-        "human canonical Driver/compiler adapter, independent oracle, permission, package, and cleanup handoff",
-        "native Linux and WSL installed-package CUDA execution remains deferred to qualified hardware"
-      ]
-    },
-    {
-      "id": "CJS-F9",
-      "status": "cuda_js_prerequisite_complete_compatible_pair_pending_cuda_mcgs",
-      "outputs": [
-        "accepted SPEC-0009 typed path-free cuda-cccl header profile",
-        "exact manifest verification for 1166 CUDA 13.3 cuda/nv virtual headers and aggregate SHA-256 e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c",
-        "public-facade atomic publication result 3737844653,1,3737844653 with PTX SHA-256 93e5162c8a16b33f8f85eb9e68bd766bd6585a01e91f8a7ca95c38ddbe9cd0fe",
-        "balanced CompilerActor resources, zero live/orphaned DriverActor resources, and graceful aggregate close",
-        "cross-repository adapter/package and exact compatible-pair evidence retained as CUDA-MCGS-owned pending work in iteathen/UMCGS"
-      ],
-      "lto_relationship": "CJS-F6-LTO is independent generic CUDA-JS work and is not a compatible-pair prerequisite unless future frozen consumer evidence explicitly requires it"
-    }
-  ],
+  "legacy_phase_discovery": {
+    "CJS-F0": "publication/foundation history remains in the owning master plan and Git history",
+    "CJS-F1A": "EXP-000 promoted synthetic ABI foundation remains accepted and regression-required"
+  },
   "authority": [
     "AGENTS.md",
+    "agent_files/AI_RULES.md",
+    "agent_files/AGENTS.md",
+    "agent_files/general_foundation/STATUS_SEMANTICS.md",
     "docs/PROJECT_CHARTER.md",
     "docs/decisions/ADR-0001-repository-boundary.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md",
-    "docs/specs/SPEC-0000-runtime-contract-map.md",
-    "docs/specs/SPEC-0001-cuda-schema-compiler.md",
-    "docs/specs/SPEC-0002-windows-driver-bootstrap.md",
     "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
-    "docs/specs/SPEC-0004-device-memory-foundation.md",
     "docs/specs/SPEC-0005-module-launch-completion.md",
-    "docs/specs/SPEC-0006-compiler-linker-cache.md",
-    "docs/specs/SPEC-0007-windows-platform-hardening.md",
-    "docs/specs/SPEC-0008-package-public-facade.md",
-    "docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md",
-    "docs/architecture/TARGET_ARCHITECTURE.md",
-    "docs/architecture/V0_SUPPORT_MATRIX.md",
-    "docs/plans/2026-08-10-master-plan.md",
-    "docs/research/2026-08-11-lto-support-assessment.md",
-    "experiments/EXPERIMENT_MATRIX.md",
-    "experiments/EXP-001-node-ffi-cuda-smoke.md",
-    "experiments/EXP-012-windows-node-ffi-cuda-smoke.md"
+    "docs/specs/SPEC-0015-execution-scope-status-clarification.md"
+  ],
+  "status_semantics": {
+    "rule": "Architectural disposition, implementation status, qualification/support status, and priority are independent. No value in one dimension implies a value in another.",
+    "legacy_no_support": "Deprecated shorthand. Historical occurrences are qualification/public-support statements unless an accepted architectural decision explicitly says rejected.",
+    "scope_language": "does not authorize, out of scope, and excluded from this slice are local scope statements, not project-wide architectural rejection"
+  },
+  "accepted_baseline": {
+    "driver_owner": "one DriverActor Worker owns one private context and raw Driver resources",
+    "execution": "SPEC-0005 one private nonblocking stream, one in-flight launch, private event, terminal launch() resolution",
+    "compiler": "SPEC-0006 PTX/cubin baseline plus integrated portable/software SPEC-0010 RDC and SPEC-0012 typed LTO follow-ups",
+    "launch_scalars": "integrated portable/software SPEC-0011 u32/u64/i32/f32 plus device-memory ABI",
+    "native_claim_limit": "SPEC-0010/0011/0012 retain their separate exact native qualification gates"
+  },
+  "active_repository_state": {
+    "main": "0f622a667145c810bcc9afdc2630753dfa06a20f",
+    "documentation_correction_branch": "agent/status-semantics-correction",
+    "device_js_pr": {
+      "number": 49,
+      "status": "open-unintegrated",
+      "note": "Do not describe Device-JS as merged until PR #49 is reconciled, green, merged, and main is read back."
+    },
+    "sideband_pr": {
+      "number": 50,
+      "status": "open-unintegrated",
+      "note": "Portable experiment/proposal only; reassess against the operation-lifecycle authority before integration."
+    }
+  },
+  "execution_capabilities": {
+    "single_flight_terminal_launch": {
+      "architectural_disposition": "baseline-selected",
+      "implementation_status": "implemented",
+      "qualification_status": "qualified-exact-windows-profile",
+      "priority": "baseline",
+      "authority": "SPEC-0005"
+    },
+    "submission_completion_separation": {
+      "architectural_disposition": "planned",
+      "implementation_status": "not-implemented-in-accepted-main",
+      "qualification_status": "not-qualified",
+      "priority": "next",
+      "coordination_issue": 51,
+      "gate": "new accepted operation-lifecycle specification and decisive portable experiment before production implementation"
+    },
+    "bounded_multi_stream_execution": {
+      "architectural_disposition": "planned",
+      "implementation_status": "not-implemented-in-accepted-main",
+      "qualification_status": "not-qualified",
+      "priority": "after:submission-completion-separation",
+      "coordination_issue": 40,
+      "gate": "must consume the operation lifecycle from issue #51; no duplicate stream/event/operation owner"
+    },
+    "long_lived_sideband": {
+      "architectural_disposition": "planned",
+      "implementation_status": "portable-experiment-unintegrated",
+      "qualification_status": "not-qualified",
+      "priority": "after:submission-completion-separation",
+      "coordination_issue": 38,
+      "gate": "operation lifecycle is owned by #51; #38 owns only mailbox/sideband-specific semantics and native mapping evidence"
+    }
+  },
+  "immediate_sequence": [
+    "Integrate the status-semantics correction first: agent doctrine, SPEC-0015, current STATUS/next-step records, and generated/public support terminology must agree.",
+    "Reassess issue closures made from overloaded no-support/not-planned language and reopen or supersede them according to explicit architectural disposition rather than administrative shorthand.",
+    "Restart issue #51 from assess -> current NVIDIA research -> reassess -> durable plan/spec/experiment gate. Do not implement production async-operation changes before the accepted lifecycle contract exists.",
+    "After #51 has a trustworthy operation resource/lifecycle, restart issue #40 from assess -> research -> reassess -> plan for a bounded private stream pool and multiple in-flight operations. Preserve maxInFlight=1 as the default profile unless an accepted later contract changes it.",
+    "Reassess open PR #49 against corrected authority and current main before integration; do not assume prior claims that it was merged are true.",
+    "Reassess open PR #50 after #51 ownership is established so the sideband experiment does not duplicate operation lifecycle semantics.",
+    "Keep native Linux, WSL, ARM64, additional GPU-profile, and other qualification work independently evidence-gated."
   ],
   "preconditions": [
-    "Windows F8 consumes accepted CJS-F3W through F7W and cannot imply native Linux, ARM64, or WSL support.",
-    "CJS-F2L remains present, incomplete, and independently promotable when a qualified native Linux NVIDIA Driver/GPU profile appears.",
-    "Generated CUDA header facts and curated semantic overlays remain separate authorities.",
-    "Unknown or contradictory public semantics fail closed.",
-    "No CUDA-JS project-specific compiled addon or handwritten per-function wrapper family enters the baseline.",
-    "All raw Driver resources stay on their owning Worker and no pointer enters a public result.",
-    "No Fast FFI, process-isolation, performance, registry-release, or cross-platform claim exceeds exact evidence.",
-    "Only exact Node 26.7.0 is qualified; FFI-capable Node 26.1.0-or-later releases may operate as testing-unconfirmed, while releases without the required substrate remain known incompatible.",
-    "Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit ranges, TCC/server, and independent attestation remain no-support.",
-    "The cuda-cccl profile is exact Windows CUDA 13.3 evidence only; no other toolkit, platform, header root, or consumer semantics inherit support.",
-    "Accepted CJS-F6W/SPEC-0006 remains the production PTX/cubin baseline; LTO is not retroactively authorized by this plan.",
-    "The LTO capability must remain coherent with CUDA-MCGS removed and expose no search semantics.",
-    "A bounded new specification must be accepted before production LTO implementation.",
-    "LTO-IR compatibility is treated as versioned artifact compatibility, not as an opaque byte format that can be linked under any provider."
-  ],
-  "immediate_sequence": [
-    "Operate the exact Node release matrix, allow FFI-capable candidates to run as testing-unconfirmed, and keep support promotion bound to each release's complete synthetic and native chain.",
-    "Use issues 20 through 29 to complete each extended qualification axis without widening another axis by inference.",
-    "Retain the current Windows 11 Pro Hyper-V route as verified no-support unless vendor-supported host and partition evidence changes.",
-    "Keep Linux issue 4 aligned with the retained native environment, memory, execution, compiler, linker, cache, permission, stress, platform, and installed-package qualification runbooks.",
-    "Preserve the accepted CUDA-JS F9 prerequisite while the independent CUDA-MCGS work package in iteathen/UMCGS defines and verifies its package/adapter.",
-    "Create an exact compatible-pair record only after both repositories' internal conformance passes against frozen revisions.",
-    "Keep registry publication gated on a separate release, provenance, and registry review; AGPL-3.0-or-later and the separately negotiated commercial-license path are selected.",
-    "Complete the one-time iteathen GitHub Sponsors profile, payout, tax, two-factor-authentication, and approval flow; repository funding configuration and copy-ready text are complete.",
-    "Retain and re-run the platform-neutral F3 through F8 capsules whenever shared owners change; do not represent them as native Linux CUDA support.",
-    "For CJS-F6-LTO, draft a bounded follow-up specification under the existing device-toolchain owner; do not reinterpret SPEC-0006 as authorization.",
-    "Extend EXP-009 with source-to-LTOIR and homogeneous LTOIR-to-cubin native-oracle/cache/compatibility/lifecycle cases.",
-    "Only after the specification and EXP-009 LTO evidence pass, authorize the minimum CompilerActor/provider/cache implementation and rerun affected F6/F8/F9 portable/public-facade regressions.",
-    "Keep CUDA-MCGS compatible-pair work independent; do not delay or widen it for LTO unless its own frozen evidence establishes a requirement."
-  ],
-  "acceptance_criteria": [
-    "The exact remote branch/tree is readable publicly and matches the claimed commit.",
-    "The Linux issue retains native Linux x86-64 Driver/GPU, C-oracle, version/status, context, permission, and cleanup requirements.",
-    "CJS-F3W remains bounded by accepted SPEC-0003 and its exact Windows evidence.",
-    "CJS-F4W remains bounded by accepted SPEC-0004 and exact Windows oracle evidence.",
-    "CJS-F5W remains bounded by accepted SPEC-0005 and exact Windows oracle evidence.",
-    "CJS-F6W remains bounded by accepted SPEC-0006 and exact Windows compiler, linker, cache, artifact, and cleanup evidence.",
-    "CJS-F6W PTX and cubin bytes match the independent MSVC oracle exactly and both execute with identical Driver output.",
-    "CJS-F7W remains bounded by accepted SPEC-0007 and exact Windows permission, device-diagnostic, failure/property, stress, and cleanup evidence.",
-    "CJS-F8W remains bounded by accepted SPEC-0008 and exact package, facade, consumer, install/uninstall, native Windows execution, and aggregate cleanup evidence.",
-    "CJS-F9 remains bounded by accepted SPEC-0009, exact manifest-owned cuda/nv virtual headers, one generic atomic-publication fixture, and terminal cleanup.",
-    "No compatible-pair or CUDA-MCGS correctness claim is made until the independently owned CUDA-MCGS adapter/package and exact pair capsule pass.",
-    "Package exports hide actor tokens and native capabilities, and cross-runtime or post-close use fails before actor dispatch.",
-    "Linux package/readiness controls remain separately keyed and do not promote native CUDA support.",
-    "Both native actors inherit the Node permission profile, deny FFI without authority, and close terminally with explicit authority.",
-    "Windows and Linux compatibility/evidence remain separately keyed and reported.",
-    "No raw pointer, arbitrary schema/library/signature, or consumer semantic enters the Windows path.",
-    "The Node matrix directly verifies exact version, module ABI, FFI availability, required exports, and permission behavior for every listed release.",
-    "Every extended hardware axis remains unclaimed and exposes no unsafe promotable command chain; ordinary unconfirmed Windows hardware may still run bounded testing workloads.",
-    "The Hyper-V probe is read-only, sanitized, and performs no VM, assignment, partition, or device mutation.",
-    "The LTO plan does not authorize production code until a new bounded specification is accepted.",
-    "The first LTO slice remains typed source-to-LTOIR plus homogeneous typed LTOIR-to-cubin, with existing PTX paths unchanged.",
-    "LTO artifacts carry complete digest/length/target/producer compatibility identity and known incompatible versions fail closed before native linking where possible.",
-    "LTO compile/link cache identity is distinct from PTX and covers relevant producer/provider/link-mode facts.",
-    "No raw LTOIR byte input, mixed PTX/LTOIR first-slice input, arbitrary native option/input-kind/path, or CUDA-MCGS semantic enters the public contract.",
-    "EXP-009 LTO follow-up uses an independent native oracle and proves terminal program/link/actor cleanup on each claimed profile.",
-    "No LTO performance claim is made without a separate representative benchmark."
+    "Current public support claims remain bounded to exact native evidence; a planned capability is not supported until implemented and qualified.",
+    "Current lack of support does not imply architectural rejection.",
+    "One DriverActor Worker/private context remains the default owner unless a future accepted decision explicitly changes it.",
+    "No raw pointer, stream, event, context, provider path, arbitrary native option, or consumer semantic enters the ordinary public API.",
+    "Deferred CUDA/platform profiles remain independently promotable when their exact environment and evidence become available.",
+    "Open issues and pull requests are coordination artifacts, not implementation authority."
   ],
   "do_not": [
-    "remove or claim completion of the deferred Linux path",
-    "use Windows or WSL evidence as native Linux support",
-    "make Linux a hidden runtime prerequisite for the active Windows path",
-    "claim an exact CUDA-MCGS compatible pair before the independently owned CUDA-MCGS package/adapter and frozen revision evidence pass",
-    "publish the package to a registry before licensing and release review pass",
-    "expose raw pointers, arbitrary libraries, arbitrary signatures, callbacks, or foreign views",
-    "claim Fast FFI dispatch from timing or static eligibility",
-    "claim CUDA-MCGS requires LTO without independent consumer evidence",
-    "treat this plan or research note as implementation authorization",
-    "expose raw NVRTC/nvJitLink options, input-kind enums, paths, libraries, native handles, or arbitrary executable schemas",
-    "support mixed PTX/LTOIR, linked LTOIR/PTX output, staged linking, or cross-major LTO in the first slice",
-    "allow raw LTOIR bytes to bypass typed producer compatibility identity",
-    "change DriverActor contracts solely to support LTO",
-    "claim LTO performance benefit from platform capability or functional correctness evidence"
+    "use no-support or unsupported as shorthand for rejected",
+    "infer priority from qualification state",
+    "infer architecture from GitHub issue close reason",
+    "rewrite SPEC-0005 history to pretend multi-operation execution was part of the F5 proof",
+    "implement multi-stream scheduling before the operation lifecycle owner is accepted",
+    "expose raw public CUDA streams/events merely to demonstrate concurrency",
+    "claim Device-JS or sideband work is integrated before exact main read-back",
+    "weaken existing single-flight/native evidence while adding later profiles"
   ],
   "operational_blockers": [
-    "Native Linux CUDA Driver support remains incomplete because the available Hyper-V guest has no supported NVIDIA GPU/Driver exposure.",
-    "The current client-Windows GTX 1660 Ti host cannot provide a supported Hyper-V GPU-P/DDA Linux qualification path.",
-    "Linux completion now depends on future qualified hardware or an external contributor; it no longer blocks Windows work.",
-    "Multi-GPU, MIG, ECC, TCC/server, supported virtualization, long soak, and independent attestation require controlled external hardware or runner infrastructure.",
-    "No accepted CUDA-JS LTO public artifact/compatibility specification exists yet.",
-    "No EXP-009 LTO exact native Node-versus-independent-oracle evidence exists yet."
+    "This sandbox has no NVIDIA GPU/toolkit exposure, so exact native async submission, overlap, mapped sideband, RDC, scalar-ABI, LTO, and Device-JS qualification require a qualified native host.",
+    "Native Linux CUDA remains blocked on qualified Linux NVIDIA hardware/provider exposure.",
+    "PR #49 and PR #50 are open and must be reconciled with the corrected authority before integration."
   ],
-  "completion_evidence": [
-    "The generated hardware support list records only the accepted exact GTX 1660 Ti Windows x64 profile and separates every candidate architecture/platform from support.",
-    "The hardware qualification runner composes the accepted Windows native chain, requires a clean exact commit, hashes phase evidence, emits a sanitized public summary, and refuses incomplete platform promotion.",
-    "The generated Node support list qualifies only exact Node 26.7.0, records FFI-capable releases as testing-unconfirmed, and records substrate-negative releases as known incompatible.",
-    "The exact-version Node CI matrix checks Node 22.23.2, 24.19.0, 25.9.0, and every Node 26 release from 26.0.0 through 26.7.0 including security patches.",
-    "The extension registry fail-closes multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, Driver/toolkit matrices, Windows TCC/server, and independent attestation.",
-    "The current Hyper-V readiness profile verifies Windows 11 Pro has zero partitionable GPUs and zero assigned partitions without changing host, VM, or GPU state.",
-    "F1A passes independently on Windows x64 and native Linux x86-64.",
-    "F1B/F5 deterministically generates 27 function facts, 16 type/layout facts, and fail-closed coverage for 456 unselected declarations.",
-    "The Windows CUDA 13.3 cuda.h hash exactly matches the accepted F1B header hash.",
-    "The MSVC Windows native probe matches every selected size, alignment, field offset, and function-pointer width.",
-    "F2W binds all 12 generated exports and verifies all 12 public-name cuGetProcAddress queries.",
-    "Node and the independent MSVC oracle agree exactly on Driver 13030, device zero, compute capability 7.5, selected attributes, error text, and context lifecycle.",
-    "F2W permission, missing library, missing symbol, insufficient version, versioned query-name, library invalidation, context teardown, and Worker exit controls pass.",
-    "No pointer value crosses the F2W Worker boundary.",
-    "F3W passes opaque-resource, context-affinity, main-loop-responsiveness, bounded-command, health, graceful-teardown, and unexpected-loss capsules on the exact Windows profile.",
-    "The F3 platform-neutral capsule passes on native Ubuntu x86-64 while making no Linux Driver support claim.",
-    "F4W passes portable quota/range/byte/lifecycle controls and exact Windows Node-versus-MSVC 4096-byte parity, explicit free, slot reuse, allocation-before-context teardown, and Worker exit zero.",
-    "Native Ubuntu CI regenerates the expanded schema and runs F4 portable controls while the retained handoff makes no native Linux CUDA claim.",
-    "F5W passes copied PTX identity, exact declared packing, lease-through-completion, deferred attribution, timeout owner loss, and exact Windows Node-versus-MSVC vector parity checksum 15600773.",
-    "F6W passes exact NVRTC 13.3 PTX and nvJitLink 13.3 cubin C parity, clean-room determinism, cache miss/hit/corruption/invalidation, application responsiveness, PTX/cubin Driver execution checksum 15600773, and terminal CompilerActor/DriverActor cleanup.",
-    "F7W passes exact WDDM-watchdog/default-compute-mode diagnostics, both actor permission denial/allow controls, 512 deterministic property cases, 48 portable actor cycles, 16 native actor cycles, sanitized failure boundaries, and terminal resource balance.",
-    "F8W passes exact exports, clean package install/uninstall, hidden capabilities, stable errors, first-consumer deletion, two unrelated consumers, simultaneous-instance isolation, native Windows vector checksum 15600773, and terminal aggregate close.",
-    "The exact Windows F9 prerequisite verifies the CUDA 13.3 cuda/nv virtual-header aggregate, compiles cuda/atomic through the public facade, observes words 3737844653,1,3737844653, and closes with balanced/zero-live resources.",
-    "Native CI regenerates the 27-function/16-type schema and runs F5 portable controls while the retained F5L handoff makes no native Linux CUDA claim.",
-    "EXP-001 automates all available GPU-free native Linux source, input, ABI, oracle-build, and environment-readiness work; only qualified Driver/GPU smoke evidence remains.",
-    "iteathen/CUDA-JS is public, CJS-F2W through CJS-F7W pull requests are merged into protected main with successful CI, and Linux qualification is tracked publicly in issue 4.",
-    "Owner-directed LTO assessment followed the required assess, research, reassess, targeted second research, then plan sequence at exact CUDA-JS input revision ad49a6c9b0cddb420e26e097180cf9c502060a65.",
-    "The LTO assessment is recorded in docs/research/2026-08-11-lto-support-assessment.md and reuses existing NVIDIA source-register identities rather than duplicating them.",
-    "The master plan contains CJS-F6-LTO as an additive future follow-up under the existing CompilerActor owner rather than a competing master plan.",
-    "EXP-009 remains the owning experiment family and contains the planned LTO subcapsule.",
-    "The focus-branch map and canonical next-step record agree that accepted PTX/cubin behavior remains baseline and LTO requires a new specification plus native evidence.",
-    "The LTO plan is generic CUDA-JS work and does not make CUDA-MCGS depend on LTO."
+  "acceptance_criteria": [
+    "No active authoritative/current-status record uses qualification shorthand to imply architectural rejection.",
+    "SPEC-0005 remains the accepted single-flight baseline and SPEC-0015 makes its scope interpretation explicit.",
+    "Issue #51 is the sole owner of submission/completion operation lifecycle planning.",
+    "Issue #40 is a dependent planned multi-stream capability, not implementation authority and not a rejected feature.",
+    "Issue #38 consumes the operation lifecycle and owns only sideband-specific semantics.",
+    "Current main, open PRs, issue states, and public claims are read back exactly before any completion claim."
   ]
 }
