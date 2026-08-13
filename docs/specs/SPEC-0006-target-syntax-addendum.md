@@ -8,7 +8,7 @@
 
 ## Outcome
 
-Amend only the architecture-target grammar/policy portion of accepted SPEC-0006 so CUDA-JS can represent current three-digit CUDA target spellings such as `compute_120` / `sm_120` without treating syntax acceptance as native toolkit/GPU qualification.
+Amend only the architecture-target grammar/policy portion of accepted SPEC-0006 so CUDA-JS can represent current three-digit CUDA target spellings such as `compute_120` / `sm_120` without treating syntax acceptance as native toolkit/GPU qualification or replacing the old accidental two-digit ceiling with a new accidental three-digit ceiling.
 
 All other SPEC-0006 CompilerActor, provider, option, cache, artifact, lifecycle, security and cleanup rules remain unchanged.
 
@@ -31,33 +31,34 @@ priority:                    active authority repair
 
 CUDA-JS must have one authoritative pure-JavaScript target parser/normalizer consumed by compiler, linker, Device-JS and hardware/profile validation.
 
-Accepted syntactic forms after this addendum is accepted:
+Accepted numeric syntactic forms after this addendum is accepted:
 
 ```text
 compute_<code>
 sm_<code>
 ```
 
-where `<code>` is a canonical decimal compute-capability code with:
+where `<code>` is a canonical decimal compute-capability code matching the semantic rule:
 
-- two or three digits;
-- no sign;
-- no leading zero;
-- lowercase prefix only;
-- no whitespace or alternate separators.
+```text
+[1-9][0-9]+
+```
+
+That is: at least two decimal digits, no sign, no leading zero, lowercase prefix only, and no whitespace or alternate separators. Syntax is deliberately not capped at three digits; the finite repository-owned policy allowlist below determines which concrete targets are admitted now.
 
 The parser interprets the final decimal digit as the minor capability and all preceding digits as the major capability:
 
 ```text
-75  -> 7.5
-89  -> 8.9
-100 -> 10.0
-103 -> 10.3
-120 -> 12.0
-121 -> 12.1
+75   -> 7.5
+89   -> 8.9
+100  -> 10.0
+103  -> 10.3
+120  -> 12.0
+121  -> 12.1
+1000 -> 100.0   (syntactically representable, not policy-admitted unless later reviewed)
 ```
 
-This parsing rule is syntax only.
+This parsing rule is syntax only. If NVIDIA later introduces a materially different canonical target form, such as a non-numeric suffix with distinct semantics, that is a reviewed grammar/semantic addition rather than something guessed by this parser.
 
 ## Policy allowlist
 
@@ -65,7 +66,7 @@ Syntactic validity does not automatically make a target admissible.
 
 A separate repository-owned target policy/registry selects the exact codes CUDA-JS currently admits for compile/link/profile planning. Unknown or policy-disallowed codes fail before backend/native work.
 
-The first policy update must include only codes already required by the hardware support/qualification program or another accepted capability contract. Future architecture codes are added through a reviewed policy update rather than by widening a regex again.
+The first policy update must include only codes already required by the hardware support/qualification program or another accepted capability contract. Future numeric architecture codes are added through a reviewed policy update, without changing the generic numeric parser merely because the number of digits grows.
 
 ## Compile/link relationship
 
@@ -114,8 +115,9 @@ Tests must cover:
 
 - accepted two-digit targets used by current baseline;
 - admitted three-digit targets from the hardware registry;
+- a longer syntactically valid but policy-disallowed numeric code to prove syntax is not accidentally digit-capped;
 - compile/link prefix mismatch;
-- leading zero, sign, whitespace, uppercase, decimal-point and malformed forms;
+- one-digit code, leading zero, sign, whitespace, uppercase, decimal-point and malformed forms;
 - syntactically valid but policy-disallowed codes;
 - deterministic normalization;
 - compiler/linker/Device-JS reuse of the same owner;
@@ -133,13 +135,14 @@ For each new target actually promoted:
 
 ## Falsifiers / rollback
 
-Do not accept an implementation that simply changes the duplicated regexes to `\d{2,3}` without a shared parser and policy allowlist.
+Do not accept an implementation that merely widens duplicated regexes. The implementation must centralize syntax parsing/normalization and keep the finite target policy separate.
 
 Rollback is the accepted two-digit SPEC-0006 target policy while three-digit architectures remain rejected before backend work.
 
 ## Non-goals
 
-- automatically accepting every future numeric target;
+- automatically policy-admitting every syntactically valid numeric target;
+- guessing future non-numeric CUDA target suffix semantics;
 - architecture-family support claims from syntax alone;
 - changing compiler provider discovery or native options;
 - changing Device-JS language semantics beyond target normalization;
