@@ -13,6 +13,7 @@ const unitFiles = [
   'components/execution/test/scalar-arguments.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
+  'experiments/exp-013/test/prototype.test.mjs',
 ];
 
 function resolveQualifiedNode() {
