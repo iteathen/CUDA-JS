@@ -53,21 +53,33 @@ Every dtype has exactly defined:
 
 Arbitrary C/C++ types, structs/vectors by value and caller-supplied raw parameter buffers remain unavailable.
 
+## Width and alignment
+
+The proposed new by-value ABI kinds are:
+
+```text
+f64:  8 bytes, natural alignment 8
+f16:  2 bytes, natural alignment 2
+bf16: 2 bytes, natural alignment 2
+```
+
+These are CUDA-JS ABI meanings and must be checked against the independent native parameter-layout oracle before acceptance/promotion. They do not authorize arbitrary C++ half/bfloat wrapper structs by value.
+
 ## Public scalar representation
 
 ### `f64`
 
 Public input is a JavaScript `number`.
 
-Packing uses IEEE-754 binary64 bytes in the platform-independent byte order already selected by the kernel-argument ABI. JavaScript `number` is the semantic input, but CUDA-JS explicitly owns packing and special-value policy rather than assuming host ABI layout.
+Packing emits the exact IEEE-754 binary64 bit pattern for finite values, infinities and signed zero under the existing kernel-argument byte-order contract. JavaScript `number` is the semantic input, but CUDA-JS explicitly owns packing and special-value policy rather than assuming host ABI layout or preserving an engine-specific NaN payload.
 
 ### `f16`
 
-Public input is a JavaScript `number` converted deterministically to IEEE-754 binary16 using round-to-nearest-even for finite values.
+Public input is a JavaScript `number` converted deterministically to IEEE-754 binary16 using round-to-nearest, ties-to-even for finite values.
 
 ### `bf16`
 
-Public input is a JavaScript `number` converted deterministically to bfloat16 using round-to-nearest-even for finite values.
+Public input is a JavaScript `number` converted deterministically to bfloat16 using round-to-nearest, ties-to-even for finite values.
 
 Using `number` as the public input is an ergonomics choice, not a claim that JavaScript natively executes half/bfloat arithmetic. CUDA-JS defines conversion independently and validates it against native/reference oracles.
 
@@ -76,13 +88,26 @@ Using `number` as the public input is an ergonomics choice, not a claim that Jav
 For all floating scalar kinds:
 
 - `+0` and `-0` remain distinguishable in packed bits;
-- positive/negative infinity are preserved when representable;
-- NaN input is accepted only under an explicit canonical-NaN packing rule; NaN payload preservation is not promised;
-- finite overflow converts to signed infinity for `f16`/`bf16` under the selected IEEE-style conversion policy;
-- normal/subnormal conversion follows round-to-nearest-even;
+- positive/negative infinity are preserved;
+- NaN is canonicalized by CUDA-JS rather than preserving an engine/provider payload;
+- finite overflow converts to signed infinity for `f16`/`bf16`;
+- normal/subnormal conversion follows round-to-nearest, ties-to-even;
+- underflow may produce a correctly rounded subnormal or signed zero; it is not silently flushed to zero by the host packer;
 - no implicit saturation is performed;
-- `undefined`, strings, bigint and objects reject;
+- `undefined`, strings, bigint, symbols and objects reject;
 - no fast-math/flush-to-zero device-execution promise follows from scalar packing.
+
+The proposed canonical quiet-NaN bit patterns are:
+
+```text
+f64:  0x7ff8000000000000
+f16:  0x7e00
+bf16: 0x7fc0
+```
+
+JavaScript does not provide a portable NaN payload/sign contract to preserve through this API, so every JavaScript NaN maps to the positive canonical quiet NaN above. These exact bits enter the ABI contract and mutation tests.
+
+Finite conversion must be implemented by CUDA-JS-owned deterministic bit/conversion logic or another implementation proven byte-identical to that logic. It must not depend on whatever half/bfloat conversion happens to be exposed by a particular GPU/provider.
 
 Device arithmetic behavior remains governed by the compiled device program/provider profile. Packing correctness is separate from kernel arithmetic semantics.
 
@@ -179,6 +204,7 @@ Numeric ABI identity changes when any of these change:
 ```text
 dtype definitions
 conversion/special-value policy
+canonical NaN bits
 size/alignment/packing rules
 ```
 
@@ -201,12 +227,14 @@ Artifact/provider caches that depend on these meanings include the relevant iden
 - boundary finite values;
 - signed zero;
 - infinities;
-- canonical NaN;
-- normal/subnormal/tie rounding cases;
-- overflow behavior;
+- exact canonical NaN bit patterns;
+- largest/smallest normal and subnormal boundaries;
+- halfway/tie rounding cases in both signs;
+- overflow and underflow behavior;
 - deterministic zero padding;
 - legacy signature byte identity;
-- invalid/ambiguous input rejection.
+- invalid/ambiguous input rejection;
+- mutation tests for wrong width/alignment/offset/padding/rounding/NaN policy.
 
 ### Views
 
@@ -223,7 +251,7 @@ Artifact/provider caches that depend on these meanings include the relevant iden
 
 ### Scalars
 
-An independent native C/CUDA Driver oracle must consume mixed signatures covering every new kind and position, compare exact parameter bytes/offsets where observable, launch bounded fixtures and validate output/special-value behavior under the declared profile.
+An independent native C/CUDA Driver oracle must consume mixed signatures covering every new kind and position, compare exact parameter bytes/offsets where observable, launch bounded fixtures and validate output/special-value behavior under the declared profile. The oracle vectors must include the same exact canonical NaN, signed-zero, subnormal, tie and overflow cases and must not reuse production conversion code.
 
 ### Views
 
@@ -233,7 +261,7 @@ Every profile records exact Node/ABI/Driver/toolkit/GPU/provider identity.
 
 ## Falsifiers / rollback
 
-Do not accept this contract if new scalar kinds require raw caller buffers or if view range semantics cannot be proven without exposing pointers.
+Do not accept this contract if new scalar kinds require raw caller buffers, depend on provider-specific conversion for their host ABI meaning, or if view range semantics cannot be proven without exposing pointers.
 
 Rollback is SPEC-0011 scalar ABI plus raw opaque device-allocation bytes under SPEC-0004.
 
@@ -244,6 +272,7 @@ Rollback is SPEC-0011 scalar ABI plus raw opaque device-allocation bytes under S
 - generic pointers;
 - tensor algebra/autograd/broadcasting;
 - library-specific FFT/sparse/image semantics;
+- preserving JavaScript-engine NaN payloads;
 - implying device arithmetic/fast-math behavior from host packing;
 - raw device addresses.
 
