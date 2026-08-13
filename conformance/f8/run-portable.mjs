@@ -29,6 +29,7 @@ await mkdir(consumersRoot, { recursive: true });
 
 const projectPackage = JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8'));
 assert.equal(projectPackage.license, 'AGPL-3.0-or-later');
+assert.equal(projectPackage.dependencies.acorn, '8.15.0');
 const packed = JSON.parse(runNpm(['pack', '--json', '--pack-destination', packageRoot], repositoryRoot));
 assert.equal(packed.length, 1);
 const packageRecord = packed[0];
@@ -47,9 +48,12 @@ for (const name of fileNames) {
 for (const required of [
   'LICENSE',
   'LICENSING.md',
+  'components/device-js/index.mjs',
+  'components/device-js/src/strict-translator.mjs',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
   'components/runtime-facade/compatibility.mjs',
+  'components/runtime-facade/src/device-program.mjs',
   'packaging/compatibility-manifest.json',
   'schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs',
   'schemas/cuda-13.3/linux-x64/generated/packers.mjs',
@@ -60,7 +64,7 @@ const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
 const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
-const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name === 'packaging/compatibility-manifest.json');
+const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
   for (const needle of deletionNeedles) assert(!text.includes(needle), `${relative} contains first-consumer coupling: ${needle}`);
@@ -91,7 +95,8 @@ assert(memoryObservation);
 assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32']);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
-for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
+for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
+assert.deepEqual(compilerObservation.deviceJsParser, { name: 'acorn', version: '8.15.0' });
 
 const target = await writeEvidence('portable-package.json', {
   schemaVersion: 1,
@@ -102,17 +107,21 @@ const target = await writeEvidence('portable-package.json', {
   environment: { node: process.version, platform: process.platform, architecture: process.arch, profileName },
   sources: await sourceIdentity([
     'docs/specs/SPEC-0008-package-public-facade.md',
+    'docs/specs/SPEC-0013-restricted-device-js.md',
+    'docs/specs/SPEC-0013-public-surface-addendum.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
     'packaging/compatibility-manifest.json',
+    'components/device-js/src/strict-translator.mjs',
     'components/runtime-facade/src/runtime.mjs',
+    'components/runtime-facade/src/device-program.mjs',
     'conformance/f8/fixtures/consumer-memory.mjs',
     'conformance/f8/fixtures/consumer-compiler.mjs',
     'conformance/f8/run-portable.mjs',
   ]),
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
-  claimLimits: ['Portable package, public facade, mock lifecycle, and install/uninstall behavior only.', 'RDC, extended scalar ABI, and Device LTO remain subject to their exact native promotion gates.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
+  claimLimits: ['Portable package, public facade, Device-JS translation, mock lifecycle, and install/uninstall behavior only.', 'RDC, extended scalar ABI, Device LTO, Device-JS, and SPEC-0016 operations remain subject to their exact native promotion gates.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
 });
 console.log(`F8 portable package conformance passed for ${packageRecord.name}@${packageRecord.version}; evidence: ${target}`);

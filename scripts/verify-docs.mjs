@@ -21,7 +21,7 @@ const required = [
   'agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md', 'agent_files/general_foundation/SECURITY.md',
   'agent_files/application_specific/CUDA_JS_PROFILE.md',
   'docs/README.md', 'docs/FOUNDATION_INDEX.md', 'docs/PROJECT_CHARTER.md', 'docs/INTEROP_WITH_CUDA_MCGS.md',
-  'docs/HARDWARE_SUPPORT.md', 'docs/NODE_SUPPORT.md',
+  'docs/HARDWARE_SUPPORT.md', 'docs/NODE_SUPPORT.md', 'docs/THIRD_PARTY_DEPENDENCIES.md',
   'docs/decisions/README.md', 'docs/decisions/ADR-0001-repository-boundary.md',
   'docs/decisions/ADR-0002-node-ffi-first-host-binding.md',
   'docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md',
@@ -43,6 +43,8 @@ const required = [
   'docs/specs/SPEC-0007-windows-platform-hardening.md',
   'docs/specs/SPEC-0008-package-public-facade.md',
   'docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md',
+  'docs/specs/SPEC-0013-restricted-device-js.md',
+  'docs/specs/SPEC-0013-public-surface-addendum.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
@@ -92,6 +94,11 @@ const required = [
   'components/compiler-actor/src/backends/mock.mjs',
   'components/compiler-actor/src/backends/windows-native.mjs',
   'components/compiler-actor/test/compiler-actor.test.mjs',
+  'components/device-js/README.md', 'components/device-js/component.yaml',
+  'components/device-js/index.mjs', 'components/device-js/testing.mjs',
+  'components/device-js/src/errors.mjs', 'components/device-js/src/translator.mjs',
+  'components/device-js/src/strict-translator.mjs',
+  'components/device-js/test/translator.test.mjs', 'components/device-js/test/strict-contract.test.mjs',
   'components/platform-diagnostics/README.md', 'components/platform-diagnostics/component.yaml',
   'components/platform-diagnostics/index.mjs',
   'components/platform-diagnostics/src/platform-diagnostics.mjs',
@@ -101,7 +108,8 @@ const required = [
   'components/runtime-facade/compatibility.mjs', 'components/runtime-facade/compatibility.d.ts',
   'components/runtime-facade/testing.mjs', 'components/runtime-facade/testing.d.ts',
   'components/runtime-facade/src/errors.mjs', 'components/runtime-facade/src/runtime.mjs',
-  'components/runtime-facade/test/runtime-facade.test.mjs',
+  'components/runtime-facade/src/device-program.mjs',
+  'components/runtime-facade/test/runtime-facade.test.mjs', 'components/runtime-facade/test/device-js.test.mjs',
   'schemas/README.md', 'conformance/README.md',
   'conformance/f3/README.md', 'conformance/f3/evidence.mjs',
   'conformance/f3/run-mock.mjs', 'conformance/f3/run-native-windows.mjs',
@@ -197,6 +205,7 @@ for (const relative of [
   'components/memory/component.yaml',
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
+  'components/device-js/component.yaml',
   'components/platform-diagnostics/component.yaml',
   'components/runtime-facade/component.yaml',
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
@@ -341,6 +350,7 @@ for (const relative of files) {
       && !relative.startsWith('components/memory/')
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
+      && !relative.startsWith('components/device-js/')
       && !relative.startsWith('components/platform-diagnostics/')
       && !relative.startsWith('components/runtime-facade/')
       && !relative.startsWith('conformance/f3/')
@@ -368,4 +378,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including accepted SPEC-0013 Device-JS, owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');

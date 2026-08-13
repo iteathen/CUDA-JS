@@ -191,6 +191,43 @@ export interface CudaRuntime {
   close(): Promise<Readonly<{ schemaVersion: 1; graceful: boolean; restartRequired: boolean; state: string; compiler: unknown; driver: unknown }>>;
 }
 
+export type DeviceJsScalarType = 'bool' | 'u32' | 'i32' | 'u64' | 'f32';
+export type DeviceJsPointerType = `ptr<${DeviceJsScalarType}>`;
+export type DeviceJsType = DeviceJsScalarType | DeviceJsPointerType;
+
+export interface DeviceJsParameter {
+  name: string;
+  type: DeviceJsType;
+}
+
+export interface DeviceJsFunction {
+  name: string;
+  kind: 'kernel' | 'device';
+  parameters: readonly DeviceJsParameter[];
+  returns: DeviceJsScalarType | 'void';
+}
+
+export interface DeviceJsCompileRequest {
+  source: string;
+  functions: readonly DeviceJsFunction[];
+  compile?: DeviceCompileOptions;
+}
+
+export interface DeviceJsProgramDescriptor {
+  readonly contract: 'SPEC-0013-v1';
+  readonly sha256: string;
+  readonly parser: Readonly<{ name: 'acorn'; version: string }>;
+  readonly functions: readonly Readonly<Record<string, unknown>>[];
+  readonly kernels: readonly Readonly<{ name: string; functionName: string; parameters: readonly FunctionParameter[] }>[];
+}
+
+export interface DeviceJsCompileResult {
+  readonly schemaVersion: 1;
+  readonly deviceProgram: DeviceJsProgramDescriptor;
+  readonly compiler: CompilerResult;
+}
+
 export const CUDA_JS_COMPATIBILITY: Readonly<Record<string, unknown>>;
 export function inspectCudaHost(): Readonly<{ schemaVersion: 1; host: Readonly<Record<string, unknown>>; compatibility: typeof CUDA_JS_COMPATIBILITY }>;
 export function openCudaRuntime(options?: OpenCudaRuntimeOptions): Promise<CudaRuntime>;
+export function compileDeviceProgram(runtime: CudaRuntime, request: DeviceJsCompileRequest): Promise<DeviceJsCompileResult>;
