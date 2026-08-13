@@ -23,3 +23,9 @@ No Acorn plugin, recovery mode, code generator, source transform, semantic infer
 CUDA-JS does not implement its own JavaScript lexer/parser in SPEC-0013 v1 because doing so would create a large, security-sensitive grammar-maintenance surface without increasing ownership of the CUDA semantics that matter. The parser is therefore treated as a replaceable adapter: methodology and semantic authority remain ours even though commodity syntax parsing is reused.
 
 Replace or internalize Acorn if it cannot continue to provide a deterministic syntax-only AST with acceptable provenance/license, bounded dependency surface, no required plugins/recovery, and fail-closed compatibility with the accepted Device-JS grammar. A replacement must preserve SPEC-0013 conformance; it does not authorize broader JavaScript.
+
+## CI-only GitHub Actions
+
+The repository's GitHub Actions are development/CI dependencies, not package runtime dependencies. Their reviewed releases, immutable commits, licenses, workflow inventory, and update policy are owned by [`.github/actions-provenance.json`](../.github/actions-provenance.json) and explained in [`PUBLIC_REPOSITORY.md`](PUBLIC_REPOSITORY.md).
+
+Remote Actions and remote reusable workflows must be pinned to full commit SHAs. Repository-local actions use same-commit `./...` references. Weekly Dependabot pull requests are proposals that still require upstream release/commit review, provenance reconciliation, and protected checks before merge.

@@ -9,7 +9,7 @@
 The exact protected-`main` input baseline for this implementation packet is:
 
 ```text
-a5b0ab92e0b3a62af8169fe3915c5cbc38956187
+ff0d497b23d7c1ff7e602e1a558ea3128b4aabfe
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -97,6 +97,18 @@ The public README and capability map now separate architecture, implementation, 
 **Qualification status:** focused exact-Node and F5 portable evidence passes. The exact Windows Node 26.7.0 F5 capsule must be rerun on the merged head before issue #64 closes; earlier candidate evidence is retained but does not qualify a later head automatically.
 
 The Worker readiness handshake, independently progressing mock work, mailbox directions/generation/leases, pending-close truth, failure cleanup and 10-second outer bounds are unchanged. This repair changes no production mailbox, DriverActor, runtime, CUDA, or support behavior.
+
+## Immutable GitHub Actions — issue #69
+
+**Security disposition:** source-controlled supply-chain hardening implemented in this packet.
+
+**Runtime/support effect:** none; package behavior, native qualification and exact Node/toolchain gates are unchanged.
+
+The `verify` and `node-compatibility` workflows pin `actions/checkout@v7.0.1`, `actions/setup-node@v7.0.0`, and `actions/upload-artifact@v4.6.2` to reviewed full commit SHAs with same-line release comments. `.github/actions-provenance.json` owns exact release, commit, license and workflow-usage facts. Remote reusable workflows follow the same full-SHA rule; normalized repository-local `./...` references are explicitly allowed; Docker references are prohibited.
+
+The repository validator and focused mutation tests reject tags/branches/short SHAs, expression-based or malformed references, undeclared dependencies, commit/comment/provenance mismatches, stale workflow inventories, and drift from the weekly three-PR Dependabot update path. Dependency pull requests remain proposals: an upstream release/commit and its provenance must be reviewed before the protected checks can pass.
+
+Issue #68 remains a separate external-control gate. Source files cannot prove the private vulnerability reporting setting, an unaffiliated reporter's Security-tab entry point, or maintainer advisory management.
 
 ## Execution baseline
 

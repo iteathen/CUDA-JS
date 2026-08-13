@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-13",
+  "policy": {
+    "remoteReferences": "full-length-git-commit-sha",
+    "releaseComments": "required-on-same-line",
+    "localReferences": "allowed-within-current-repository-without-a-ref",
+    "remoteReusableWorkflows": "same-policy-as-remote-actions",
+    "dockerReferences": "prohibited"
+  },
+  "dependencies": [
+    {
+      "source": "actions/checkout",
+      "repository": "actions/checkout",
+      "release": "v7.0.1",
+      "commit": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "releaseUrl": "https://github.com/actions/checkout/releases/tag/v7.0.1",
+      "commitUrl": "https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE",
+      "workflows": [
+        ".github/workflows/docs.yml",
+        ".github/workflows/node-compatibility.yml"
+      ]
+    },
+    {
+      "source": "actions/setup-node",
+      "repository": "actions/setup-node",
+      "release": "v7.0.0",
+      "commit": "820762786026740c76f36085b0efc47a31fe5020",
+      "releaseUrl": "https://github.com/actions/setup-node/releases/tag/v7.0.0",
+      "commitUrl": "https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE",
+      "workflows": [
+        ".github/workflows/docs.yml",
+        ".github/workflows/node-compatibility.yml"
+      ]
+    },
+    {
+      "source": "actions/upload-artifact",
+      "repository": "actions/upload-artifact",
+      "release": "v4.6.2",
+      "commit": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "releaseUrl": "https://github.com/actions/upload-artifact/releases/tag/v4.6.2",
+      "commitUrl": "https://github.com/actions/upload-artifact/commit/ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/LICENSE",
+      "workflows": [
+        ".github/workflows/docs.yml"
+      ]
+    }
+  ]
+}

@@ -124,7 +124,7 @@ The reconciliation packet updates public capability/interop/version documentatio
 
 ### CAP-P0-SECURITY — #68/#69
 
-Treat repository private-vulnerability reporting and immutable GitHub Action pinning as operational/supply-chain work. These do not become CUDA runtime support claims.
+Issue #69's source-controlled packet pins every remote GitHub Action to a reviewed full commit SHA, keeps the release tag readable on the same line, records immutable provenance/license facts, adds weekly bounded Dependabot proposals, and makes mutable or undeclared references fail repository validation. Issue #68 remains an external repository-control task requiring the private-reporting setting, unaffiliated-reporter entry-point proof, and maintainer advisory-management proof. Neither issue changes CUDA runtime support claims.
 
 ## P1 — finish native evidence for already implemented capabilities
 
