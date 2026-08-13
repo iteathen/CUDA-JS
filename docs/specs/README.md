@@ -16,7 +16,8 @@
 - [`SPEC-0011-scalar-kernel-arguments.md`](SPEC-0011-scalar-kernel-arguments.md) — accepted bounded execution follow-up adding closed `u64`, `i32`, and `f32` packed scalar argument kinds while preserving legacy launch behavior.
 - [`SPEC-0012-device-lto.md`](SPEC-0012-device-lto.md) — accepted bounded CompilerActor follow-up adding typed LTO-IR compile output and homogeneous device-LTO linking without exposing raw nvJitLink controls.
 - [`SPEC-0015-execution-scope-status-clarification.md`](SPEC-0015-execution-scope-status-clarification.md) — accepted clarification that SPEC-0005 single-flight exclusions are F5 scope/qualification boundaries, not architectural rejection; future submission/completion and bounded multi-stream capability families remain separately gated.
+- [`SPEC-0016-operation-lifecycle.md`](SPEC-0016-operation-lifecycle.md) — **proposal**, not implementation authority: split GPU submission from later completion through one opaque operation lifecycle while retaining one DriverActor/context, one private stream, and one pending operation for the first slice.
 
 Numbers 0013 and 0014 are intentionally reserved by active, not-yet-integrated Device-JS and long-lived-sideband work. Their absence from this `main` index is not an authorization or rejection signal.
 
-No production implementation is authorized merely because a function appears in generated schema or a capability is architecturally planned. Each public component requires accepted ownership, lifecycle, safety, compatibility, conformance, and experiment evidence.
+No production implementation is authorized merely because a function appears in generated schema, an issue is open, or a capability is architecturally planned. Each public component requires accepted ownership, lifecycle, safety, compatibility, conformance, and experiment evidence.
