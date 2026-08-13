@@ -55,7 +55,11 @@ Accepted follow-up contracts `SPEC-0010` (relocatable device code), `SPEC-0011` 
 
 `SPEC-0005` remains the legacy terminal-launch compatibility baseline. `SPEC-0015` clarifies that its one-stream/one-in-flight exclusions are F5 scope boundaries, not architectural rejection. `SPEC-0016` is accepted and its bounded portable/software submission/completion lifecycle is implemented in the current repository state: one opaque operation, one private stream, one pending operation, short DriverActor submit/status/release/timeout turns, host-side `wait()`, and legacy `launch()` implemented above the actor as submit plus repeated short status turns. It does not authorize general Driver interleaving, multiple in-flight kernels, or multi-stream scheduling. Native SPEC-0016 support remains unqualified until its exact Windows evidence passes.
 
-Bounded private multi-stream execution remains architecturally planned under issue #40 **after** the SPEC-0016 operation lifecycle is trustworthy. Issue state alone does not authorize that work.
+Bounded private multi-stream execution remains architecturally planned under issue #40 **after** the SPEC-0016 operation lifecycle is trustworthy. Proposed SPEC-0018 now describes that intended boundary, but proposal state does not authorize implementation.
+
+The 2026-08-13 capability-expansion corpus `SPEC-0017` through `SPEC-0026` and the proposed SPEC-0003/SPEC-0006 addenda are **proposal authority only**. They repair issue/ownership/dependency definition for device selection, multi-operation scheduling, host transfers, prepared/CUDA Graph execution, extended numeric/views, Device-JS parallel/service profiles, CUDA library adapters, multi-GPU, graphics interop, process isolation, target syntax, and disposal-failure provenance. Each proposal must be separately reviewed and accepted before production code enters its boundary. Do not scaffold multiple future proposals simply because they now exist.
+
+Issues #70 through #84 propose a separately layered optional NN training extension, but the currently accepted charter and this entry point still exclude tensor/model/training semantics from generic CUDA-JS core. Before any NN production implementation, explicit project-owner direction must be made durable through the charter/component/package/spec authority reconciliation required by #71. Generic capability proposals do not silently authorize tensor/autodiff/training code in DriverActor, CompilerActor, memory, execution, or Device-JS core.
 
 EXP-013 is owner-authorized as a bounded CUDA-free publication-mailbox experiment for proposed SPEC-0014. It may execute only under `experiments/exp-013/` and the named F5 regression hook. Its `DetachedMockOperation` is a test harness for independently progressing work, not production operation authority; accepted SPEC-0016 exclusively owns submission/status/wait/close, operation state, terminalization, pending-command gating, and runtime-close semantics. EXP-013 does not authorize native host registration/mapping, mapped-memory support, or production mailbox code.
 
@@ -63,7 +67,7 @@ EXP-014 remains a retained regression experiment under `experiments/exp-014/` an
 
 F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. Accepted specifications authorize only their explicitly bounded slices. Linux GPU-free preparation may follow the retained experiment and conformance runbooks; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. CUDA-MCGS consumer interop remains blocked on independent CUDA-MCGS conformance and an exact compatible-pair record.
 
-Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready Windows boundary.
+Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready boundary selected by accepted authority and `next_step.yaml`.
 
 ## Reasoning and experiment gate
 
