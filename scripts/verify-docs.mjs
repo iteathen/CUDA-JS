@@ -74,7 +74,7 @@ const required = [
   'components/driver-actor/index.mjs', 'components/driver-actor/testing.mjs',
   'components/driver-actor/src/errors.mjs', 'components/driver-actor/src/health.mjs',
   'components/driver-actor/src/protocol.mjs', 'components/driver-actor/src/driver-runtime.mjs',
-  'components/driver-actor/src/actor-worker.mjs',
+  'components/driver-actor/src/actor-worker.mjs', 'components/driver-actor/src/startup-rollback.mjs',
   'components/driver-actor/src/backends/mock.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',

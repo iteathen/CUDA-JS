@@ -19,6 +19,8 @@ The Worker command protocol contains short submit/status/release/legacy-timeout 
 
 Any unexpected Worker exit or unproved operation terminality invalidates the runtime epoch, reports retained resources as inaccessible/orphaned where applicable, and requires restart without claiming cleanup.
 
-[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. Mock success proves protocol/resource behavior only. Native SPEC-0016 and native Linux Driver support remain independently gated.
+Disposal failures retain their sanitized native observation operation, category, and health transition across the Worker boundary. The backend observes that transition before responding, immediately applies poisoned/restart admission rules, and preserves acknowledged ungraceful teardown evidence when the owner exits.
+
+[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. `setDisposalFailureMode()` selects `none`, `immediate`, `poisoned`, `restart-required`, or `unstructured` device-memory free behavior; `disposalStatus()` reports bounded call-count and inventory evidence. Mock success proves protocol/resource behavior only. Exact Windows destructive disposal injection remains independently unqualified, as do native SPEC-0016 and native Linux Driver support.
 
 The governing contracts are [`SPEC-0003`](../../docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md), [`SPEC-0004`](../../docs/specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0005`](../../docs/specs/SPEC-0005-module-launch-completion.md), and [`SPEC-0016`](../../docs/specs/SPEC-0016-operation-lifecycle.md).

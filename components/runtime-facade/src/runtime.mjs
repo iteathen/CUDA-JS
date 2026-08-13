@@ -2,12 +2,20 @@ import { openCompilerRuntime } from '../../compiler-actor/index.mjs';
 import { openDriverRuntime } from '../../driver-actor/index.mjs';
 import { assessCudaSupport, inspectHostProfile } from '../../platform-diagnostics/index.mjs';
 import { CUDA_JS_COMPATIBILITY } from '../compatibility.mjs';
-import { facadeError, freezePublic, publicError } from './errors.mjs';
+import { CudaJsError, facadeError, freezePublic, publicDetails, publicError } from './errors.mjs';
 
 const runtimeData = new WeakMap();
 const resourceData = new WeakMap();
 const OPEN_FIELDS = Object.freeze(['compiler', 'driver']);
 const COMPILER_FIELDS = Object.freeze(['cacheDirectory', 'cacheMode']);
+const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
+const POISONED_ALLOWED_OPERATIONS = new Set([
+  'runtime.describe', 'runtime.close',
+  'memory.status', 'memory.close',
+  'module.status', 'module.close',
+  'function.status', 'function.close',
+  'operation.status', 'operation.wait', 'operation.close',
+]);
 
 function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -46,25 +54,100 @@ function publicCompilerStatus(status) {
   return freezePublic({ schemaVersion: 1, provider: status.provider, cache: status.cache, resources: status.resources, health: status.health, claim: status.claim });
 }
 
+function publicFailureRecord(error, operation, fallbackMessage = 'Cleanup failure details were unavailable.') {
+  const candidate = error && typeof error === 'object' && typeof error.message !== 'string'
+    ? { ...error, message: fallbackMessage }
+    : error;
+  return failureRecord(publicError(candidate, operation));
+}
+
 function publicDriverTerminal(report) {
   if (!report) return null;
-  return freezePublic({ graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, health: report.health?.current ?? null, resourceCounts: report.teardown?.inventory?.counts ?? report.inventory?.counts ?? null });
+  const output = { graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, health: report.health?.current ?? null, resourceCounts: publicDetails(report.teardown?.inventory?.counts ?? report.inventory?.counts ?? {}) };
+  if (report.commandAcknowledged === true) output.commandAcknowledged = true;
+  if (typeof report.failedOperation === 'string') output.failedOperation = report.failedOperation;
+  if (report.error) output.error = publicFailureRecord(report.error, 'driver.close');
+  if (Array.isArray(report.teardown?.errors) && report.teardown.errors.length > 0) output.cleanupFailures = report.teardown.errors.slice(0, 64).map((error) => publicFailureRecord(error, 'driver.close'));
+  const cleanupFailureCount = Number.isSafeInteger(report.teardown?.errorCount) && report.teardown.errorCount >= 0
+    ? report.teardown.errorCount
+    : report.teardown?.errors?.length ?? 0;
+  if (cleanupFailureCount > 0) {
+    output.cleanupFailureCount = cleanupFailureCount;
+    output.cleanupFailuresTruncated = Math.max(0, cleanupFailureCount - (output.cleanupFailures?.length ?? 0));
+  }
+  const skippedResourceCount = Number.isSafeInteger(report.teardown?.skippedCount) && report.teardown.skippedCount >= 0
+    ? report.teardown.skippedCount
+    : report.teardown?.skipped?.length ?? 0;
+  if (skippedResourceCount > 0) output.skippedResourceCount = skippedResourceCount;
+  return freezePublic(output);
 }
 
 function publicCompilerTerminal(report) {
   if (!report) return null;
-  return freezePublic({ graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, resources: report.resources ?? null });
+  const output = { graceful: report.graceful === true, restartRequired: report.restartRequired === true, cleanupClaim: report.cleanupClaim ?? null, workerExited: report.workerExited === true, workerExitCode: report.workerExitCode ?? null, resources: publicDetails(report.resources ?? {}) };
+  if (report.error) output.error = publicFailureRecord(report.error, 'compiler.close');
+  if (report.materialFailure) output.materialFailure = publicFailureRecord(report.materialFailure, 'compiler.close');
+  if (report.closeFailure) output.closeFailure = publicFailureRecord(report.closeFailure, 'compiler.close');
+  if (report.primaryFailure) output.primaryFailure = publicFailureRecord(report.primaryFailure, 'compiler.close', 'The compiler operation failed before cleanup completed.');
+  if (Array.isArray(report.cleanupFailures) && report.cleanupFailures.length > 0) output.cleanupFailures = report.cleanupFailures.slice(0, 64).map((error) => publicFailureRecord(error, 'compiler.close'));
+  if (typeof report.resultingHealth === 'string' && Object.hasOwn(HEALTH_RANK, report.resultingHealth)) output.resultingHealth = report.resultingHealth;
+  if (report.terminalInventory) output.terminalInventory = publicDetails(report.terminalInventory);
+  return freezePublic(output);
 }
 
 function publicCloseFailure(error, operation) {
   const normalized = publicError(error, operation);
-  return freezePublic({ graceful: false, restartRequired: true, cleanupClaim: 'unproved-close-failure', error: { code: normalized.code, category: normalized.category, operation: normalized.operation } });
+  return freezePublic({ graceful: false, restartRequired: true, cleanupClaim: 'unproved-close-failure', error: failureRecord(normalized) });
+}
+
+function failureRecord(error) {
+  return freezePublic({
+    code: error.code,
+    category: error.category,
+    operation: error.operation,
+    message: error.message,
+    details: error.details,
+    healthBefore: error.healthBefore,
+    healthAfter: error.healthAfter,
+  });
+}
+
+function strongestHealth(...states) {
+  return states.reduce((strongest, state) => (state in HEALTH_RANK && HEALTH_RANK[state] > HEALTH_RANK[strongest] ? state : strongest), 'healthy');
+}
+
+function markRestartRequired(data) {
+  if (data.state === 'closed') return;
+  data.state = 'restart-required';
+  const ownerHealth = strongestHealth(data.driver?.health, data.compiler?.health, 'restart-required');
+  for (const resource of data.resources) {
+    const entry = resourceData.get(resource);
+    if (entry && entry.state === 'open') {
+      entry.state = 'orphaned';
+      entry.closeError ??= new CudaJsError(
+        'CUDA_JS_RESOURCE_ORPHANED',
+        'restart-required',
+        'Resource ownership is inaccessible because the runtime requires restart.',
+        { kind: entry.kind, state: 'orphaned' },
+        { operation: 'runtime.owner-loss', healthBefore: ownerHealth, healthAfter: 'restart-required' },
+      );
+    }
+  }
+}
+
+function synchronizeOwnerState(data) {
+  if (data.driver?.state === 'restart-required' || data.driver?.health === 'restart-required'
+      || data.compiler?.state === 'restart-required' || data.compiler?.health === 'restart-required') markRestartRequired(data);
 }
 
 function dataFor(runtime, operation, allowTerminal = false) {
   const data = runtimeData.get(runtime);
   if (!data) throw facadeError('CUDA_JS_RUNTIME_INVALID', 'validation', 'Runtime object is invalid.', {}, operation);
+  synchronizeOwnerState(data);
   if (!allowTerminal && data.state !== 'open') throw facadeError('CUDA_JS_RUNTIME_CLOSED', data.state === 'restart-required' ? 'restart-required' : 'closed-runtime', 'Runtime is not accepting operations.', { state: data.state }, operation);
+  if (!allowTerminal && data.driver?.health === 'poisoned' && !POISONED_ALLOWED_OPERATIONS.has(operation)) {
+    throw new CudaJsError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operation, healthBefore: 'poisoned', healthAfter: 'poisoned' });
+  }
   return data;
 }
 
@@ -73,7 +156,16 @@ function resourceFor(resource, runtime, kind, operation) {
   if (!entry) throw facadeError('CUDA_JS_RESOURCE_INVALID', 'validation', 'Resource capability is invalid.', { kind }, operation);
   if (entry.runtime !== runtime) throw facadeError('CUDA_JS_RESOURCE_OWNER', 'validation', 'Resource capability belongs to another runtime.', { expectedKind: kind, actualKind: entry.kind }, operation);
   if (entry.kind !== kind) throw facadeError('CUDA_JS_RESOURCE_KIND', 'validation', 'Resource capability kind is invalid for this operation.', { expectedKind: kind, actualKind: entry.kind }, operation);
-  if (entry.state !== 'open') throw facadeError('CUDA_JS_RESOURCE_CLOSED', entry.state === 'orphaned' ? 'restart-required' : 'stale-resource', 'Resource capability is terminal.', { kind, state: entry.state }, operation);
+  if (entry.state !== 'open') {
+    const terminalCategory = entry.state === 'orphaned'
+      ? (entry.closeError?.category ?? 'restart-required')
+      : 'stale-resource';
+    throw new CudaJsError('CUDA_JS_RESOURCE_CLOSED', terminalCategory, 'Resource capability is terminal.', { kind, state: entry.state }, {
+      operation,
+      healthBefore: entry.closeError?.healthBefore ?? null,
+      healthAfter: entry.closeError?.healthAfter ?? null,
+    });
+  }
   dataFor(runtime, operation);
   return entry;
 }
@@ -86,7 +178,7 @@ async function invoke(operation, callback) {
 function registerResource(runtime, kind, token, publicFields, ResourceClass) {
   const data = dataFor(runtime, `${kind}.create`);
   const resource = new ResourceClass();
-  resourceData.set(resource, { runtime, kind, token, state: 'open', closePromise: null, ...publicFields });
+  resourceData.set(resource, { runtime, kind, token, state: 'open', closePromise: null, closeError: null, ...publicFields });
   data.resources.add(resource);
   return Object.freeze(resource);
 }
@@ -94,6 +186,7 @@ function registerResource(runtime, kind, token, publicFields, ResourceClass) {
 async function closeResource(resource, operation, release) {
   const entry = resourceData.get(resource);
   if (!entry) throw facadeError('CUDA_JS_RESOURCE_INVALID', 'validation', 'Resource capability is invalid.', {}, operation);
+  if (entry.closeError) throw entry.closeError;
   if (entry.state === 'closed' || entry.state === 'orphaned') return freezePublic({ schemaVersion: 1, kind: entry.kind, state: entry.state, alreadyTerminal: true });
   if (entry.closePromise) return entry.closePromise;
   resourceFor(resource, entry.runtime, entry.kind, operation);
@@ -104,7 +197,16 @@ async function closeResource(resource, operation, release) {
     return freezePublic({ schemaVersion: 1, kind: entry.kind, state: 'closed', disposition: result.disposition ?? null });
   });
   try { return await entry.closePromise; }
-  catch (error) { entry.closePromise = null; throw error; }
+  catch (error) {
+    const normalized = publicError(error, operation);
+    if (normalized.code === 'RESOURCE_DISPOSE_FAILED') {
+      entry.state = 'orphaned';
+      entry.closeError = normalized;
+      const data = runtimeData.get(entry.runtime);
+      if (data && (normalized.category === 'restart-required' || normalized.healthAfter === 'restart-required')) markRestartRequired(data);
+    } else entry.closePromise = null;
+    throw normalized;
+  }
 }
 
 function translateLaunch(entry, options, operation) {
@@ -121,7 +223,7 @@ function translateLaunch(entry, options, operation) {
 
 function publicOperationStatus(result) {
   const output = { schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health };
-  if (result.failure) output.failure = result.failure;
+  if (result.failure) output.failure = publicFailureRecord(result.failure, 'operation.status', 'GPU operation failed asynchronously.');
   if (result.orphanReason) output.orphanReason = result.orphanReason;
   return freezePublic(output);
 }
@@ -187,10 +289,16 @@ class CudaFunction {
 }
 
 class CudaRuntime {
-  get state() { return runtimeData.get(this)?.state ?? 'invalid'; }
+  get state() {
+    const data = runtimeData.get(this);
+    if (!data) return 'invalid';
+    synchronizeOwnerState(data);
+    return data.state;
+  }
   get health() {
     const data = runtimeData.get(this);
     if (!data) return 'invalid';
+    synchronizeOwnerState(data);
     if (data.state !== 'open') return data.state === 'closed' ? 'closed' : 'restart-required';
     return data.driver.health === 'healthy' && (!data.compiler || data.compiler.health === 'healthy') ? 'healthy' : data.driver.health !== 'healthy' ? data.driver.health : data.compiler.health;
   }
@@ -205,18 +313,20 @@ class CudaRuntime {
   async close() {
     const data = dataFor(this, 'runtime.close', true);
     if (data.closePromise) return data.closePromise;
-    if (data.state === 'closed' || data.state === 'restart-required') return data.terminalReport;
+    if (data.state === 'closed') return data.terminalReport;
+    if (data.state === 'restart-required' && data.terminalReport) return data.terminalReport;
+    const restartAlreadyRequired = data.state === 'restart-required';
     data.state = 'closing';
     data.closePromise = (async () => {
       let compiler = null;
       let driver = null;
       if (data.compiler) { try { compiler = await data.compiler.close(); } catch (error) { compiler = publicCloseFailure(error, 'compiler.close'); } }
       try { driver = await data.driver.close(); } catch (error) { driver = publicCloseFailure(error, 'driver.close'); }
-      const graceful = driver?.graceful === true && (!compiler || compiler.graceful === true);
+      const graceful = !restartAlreadyRequired && driver?.graceful === true && (!compiler || compiler.graceful === true);
       data.state = graceful ? 'closed' : 'restart-required';
       for (const resource of data.resources) { const entry = resourceData.get(resource); if (entry) entry.state = graceful ? 'closed' : 'orphaned'; }
       data.resources.clear();
-      data.terminalReport = freezePublic({ schemaVersion: 1, graceful, restartRequired: !graceful, state: data.state, compiler: compiler?.error ? compiler : publicCompilerTerminal(compiler), driver: driver?.error ? driver : publicDriverTerminal(driver) });
+      data.terminalReport = freezePublic({ schemaVersion: 1, graceful, restartRequired: !graceful, state: data.state, compiler: publicCompilerTerminal(compiler), driver: publicDriverTerminal(driver) });
       return data.terminalReport;
     })();
     return data.closePromise;
@@ -237,11 +347,61 @@ async function openWithAdapters(options, adapters, supportFactory) {
     runtimeData.set(runtime, { driver, compiler: compiler ?? null, support, resources: new Set(), state: 'open', closePromise: null, terminalReport: null });
     return Object.freeze(runtime);
   } catch (error) {
-    let cleanupUnproved = false;
-    if (compiler) { try { const compilerTerminal = await compiler.close(); if (compilerTerminal?.graceful !== true) cleanupUnproved = true; } catch { cleanupUnproved = true; } }
-    if (driver) { try { const driverTerminal = await driver.close(); if (driverTerminal?.graceful !== true) cleanupUnproved = true; } catch { cleanupUnproved = true; } }
-    if (cleanupUnproved) { const cause = publicError(error, 'open'); throw facadeError('CUDA_JS_OPEN_CLEANUP_UNPROVED', 'restart-required', 'Runtime opening failed and acquired native ownership did not close terminally; restart the process.', { causeCode: cause.code }, 'open'); }
-    throw publicError(error, 'open');
+    const primary = publicError(error, 'open');
+    const cleanupFailures = [];
+    const terminalInventory = [];
+    const cleanupOwner = async (owner, adapter) => {
+      if (!adapter) return;
+      try {
+        const terminal = await adapter.close();
+        terminalInventory.push(freezePublic({
+          owner,
+          graceful: terminal?.graceful === true,
+          cleanupClaim: terminal?.cleanupClaim ?? null,
+          resourceCounts: terminal?.teardown?.inventory?.counts ?? terminal?.inventory?.counts ?? null,
+        }));
+        if (terminal?.graceful !== true) {
+          const nested = [];
+          if (terminal?.error) nested.push(terminal.error);
+          if (Array.isArray(terminal?.teardown?.errors)) nested.push(...terminal.teardown.errors);
+          if (Array.isArray(terminal?.cleanupFailures)) nested.push(...terminal.cleanupFailures);
+          if (nested.length === 0 && terminal?.closeFailure) nested.push(terminal.closeFailure);
+          if (nested.length === 0) {
+            cleanupFailures.push(failureRecord(new CudaJsError(
+              'CUDA_JS_OWNER_CLEANUP_UNPROVED',
+              'restart-required',
+              'An acquired runtime owner did not prove terminal cleanup.',
+              { owner, cleanupClaim: terminal?.cleanupClaim ?? null },
+              { operation: `${owner}.close`, healthBefore: terminal?.health?.current ?? null, healthAfter: 'restart-required' },
+            )));
+          } else {
+            for (const cleanupError of nested.slice(0, 64 - cleanupFailures.length)) cleanupFailures.push(publicFailureRecord(cleanupError, `${owner}.close`));
+          }
+        }
+      } catch (cleanupError) {
+        cleanupFailures.push(failureRecord(publicError(cleanupError, `${owner}.close`)));
+      }
+    };
+    await cleanupOwner('compiler', compiler);
+    await cleanupOwner('driver', driver);
+    if (cleanupFailures.length > 0) {
+      const resultingHealth = strongestHealth(primary.healthAfter, ...cleanupFailures.map((failure) => failure.healthAfter), 'restart-required');
+      throw new CudaJsError(
+        'CUDA_JS_OPEN_CLEANUP_UNPROVED',
+        'restart-required',
+        'Runtime opening failed and acquired native ownership did not close terminally; restart the process.',
+        {
+          primaryFailure: failureRecord(primary),
+          cleanupFailures: cleanupFailures.slice(0, 64),
+          cleanupFailureCount: cleanupFailures.length,
+          cleanupFailuresTruncated: cleanupFailures.length > 64,
+          resultingHealth,
+          terminalInventory,
+        },
+        { operation: 'open', healthBefore: primary.healthBefore, healthAfter: resultingHealth },
+      );
+    }
+    throw primary;
   }
 }
 

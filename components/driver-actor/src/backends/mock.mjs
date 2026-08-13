@@ -2,24 +2,34 @@ import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
-import { HealthState, healthForErrorCategory } from '../health.mjs';
+import { HealthState, healthForErrorCategory, observeErrorHealth } from '../health.mjs';
+
+const MAX_DISPOSAL_ORDER_RECORDS = 32;
 
 export async function createBackend({ runtimeId, epoch, memoryPolicy, executionPolicy }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const disposalOrder = [];
+  let disposalOrderCount = 0;
+  function recordDisposal(kind) {
+    disposalOrderCount += 1;
+    disposalOrder.push(kind);
+    if (disposalOrder.length > MAX_DISPOSAL_ORDER_RECORDS) disposalOrder.shift();
+  }
   const libraryToken = registry.allocate({
     kind: 'library', value: Object.freeze({ privateMockLibrary: true }),
-    dispose() { disposalOrder.push('library'); return { libraryClosed: true, staleWrapperRejected: true }; },
+    dispose() { recordDisposal('library'); return { libraryClosed: true, staleWrapperRejected: true }; },
   });
   const contextToken = registry.allocate({
     kind: 'context', value: Object.freeze({ privateMockContext: true }), parent: libraryToken,
-    dispose() { disposalOrder.push('context'); return { contextDestroyed: true, currentNull: true }; },
+    dispose() { recordDisposal('context'); return { contextDestroyed: true, currentNull: true }; },
   });
   const allocations = new Set();
   const addresses = new WeakMap();
   let nextAddress = 0x1000n;
   let nativeReservedBytes = 0;
+  let disposalFailureMode = 'none';
+  let disposalCallCount = 0;
   const memory = new MemoryManager({
     registry, contextToken, policy: memoryPolicy,
     operations: {
@@ -27,9 +37,26 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       async allocate({ byteLength }) {
         const storage = new Uint8Array(byteLength); allocations.add(storage); addresses.set(storage, nextAddress); nextAddress += BigInt(byteLength + 256); nativeReservedBytes += byteLength; return storage;
       },
-      async free({ native, byteLength }) {
+      async free({ native, byteLength, operationId }) {
+        disposalCallCount += 1;
+        if (disposalFailureMode === 'unstructured') {
+          const error = new Error('Injected unstructured mock disposal failure.');
+          error.details = { disposalCallCount };
+          throw error;
+        }
+        if (disposalFailureMode !== 'none') {
+          const healthAfter = disposalFailureMode === 'immediate' ? 'suspect' : disposalFailureMode;
+          const category = healthAfter === 'restart-required' ? 'restart-required' : 'immediate-driver';
+          throw new DriverRuntimeError(
+            'CUDA_MOCK_DISPOSAL_FAILURE',
+            category,
+            'Injected mock device-memory disposal failure.',
+            { nativeStatus: 999, disposalCallCount },
+            { operation: 'mock.memory.free', operationId, healthBefore: health.current, healthAfter },
+          );
+        }
         if (!allocations.delete(native)) throw Object.assign(new Error('Mock allocation is not live.'), { code: 'MOCK_MEMORY_STALE' });
-        nativeReservedBytes -= byteLength; disposalOrder.push('device-memory'); return { mockStorageReleased: true };
+        nativeReservedBytes -= byteLength; recordDisposal('device-memory'); return { mockStorageReleased: true };
       },
       async write({ native, deviceOffset, bytes }) { native.set(bytes, deviceOffset); },
       async read({ native, deviceOffset, byteLength }) { return Uint8Array.from(native.subarray(deviceOffset, deviceOffset + byteLength)); },
@@ -45,22 +72,27 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     registry, contextToken, memory, policy: executionPolicy, deviceLimits,
     operations: {
       async createStream() { return Object.freeze({ kind: 'stream', id: nextNative++ }); },
-      async destroyStream() { disposalOrder.push('stream'); return { mockStreamReleased: true }; },
+      async destroyStream() { recordDisposal('stream'); return { mockStreamReleased: true }; },
       async loadModule({ bytes }) { return Object.freeze({ kind: 'module', id: nextNative++, byteLength: bytes.byteLength }); },
-      async unloadModule() { disposalOrder.push('module'); return { mockModuleReleased: true }; },
+      async unloadModule() { recordDisposal('module'); return { mockModuleReleased: true }; },
       async getFunction({ moduleNative, name }) { return Object.freeze({ kind: 'function', id: nextNative++, moduleId: moduleNative.id, name }); },
       async createEvent() { return { kind: 'event', id: nextNative++, polls: 0 }; },
-      async destroyEvent() { disposalOrder.push('event'); return { mockEventReleased: true }; },
+      async destroyEvent() { recordDisposal('event'); return { mockEventReleased: true }; },
       async devicePointer({ native, byteOffset }) { return addresses.get(native) + BigInt(byteOffset); },
       async submitLaunch() {},
       async recordEvent() {},
       async queryEvent({ eventNative, operationId }) {
         eventNative.polls += 1;
         if (executionMode === 'timeout') return 'pending';
+        if (executionMode === 'restart-required') {
+          const before = health.current;
+          health.transition('restart-required', { reason: 'mock-event-query-restart', operationId });
+          throw new DriverRuntimeError('CUDA_EVENT_QUERY_RESTART_REQUIRED', 'restart-required', 'Injected event-query failure requires process restart.', { nativeStatus: 999 }, { operation: 'mock.event.query', operationId, healthBefore: before, healthAfter: health.current });
+        }
         if (executionMode === 'deferred' && eventNative.polls > 1) {
           const before = health.current;
           health.transition('poisoned', { reason: 'mock-deferred-execution', operationId });
-          throw new DriverRuntimeError('CUDA_DEFERRED_FAILURE', 'deferred-driver', 'Injected deferred launch failure.', { nativeStatus: 999 }, { operationId, healthBefore: before, healthAfter: health.current });
+          throw new DriverRuntimeError('CUDA_DEFERRED_FAILURE', 'deferred-driver', 'Injected deferred launch failure.', { nativeStatus: 999 }, { operation: 'execution.event.query', operationId, healthBefore: before, healthAfter: health.current });
         }
         return eventNative.polls === 1 ? 'pending' : 'complete';
       },
@@ -90,16 +122,39 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     };
   }
 
+  function observeError(error, { operationId = null, operation = null } = {}) {
+    observeErrorHealth(health, error, { operationId, reason: error?.operation ?? operation });
+    return error;
+  }
+
+  function observeTeardown(teardown, operationId) {
+    for (const error of teardown?.errors ?? []) observeError(error, { operationId, operation: 'runtime.close' });
+  }
+
+  function disposalStatus(operationId) {
+    return {
+      schemaVersion: 1,
+      mode: disposalFailureMode,
+      disposalCallCount,
+      operationSequence: operationId,
+      health: health.snapshot(),
+      inventory: registry.inventory(),
+    };
+  }
+
   return {
     inventory() { return registry.inventory(); },
+    health() { return health.snapshot(); },
+    observeError,
     assertAccepting(operation, operationId) {
-      execution.assertCommandAllowed(operation, operationId);
       const cleanupOrRead = new Set([
         'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
         'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
         'execution.operation.status', 'execution.operation.release',
+        'testing.disposal-status',
       ]);
-      if (health.current === 'poisoned' && !cleanupOrRead.has(operation)) throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operationId, healthBefore: health.current, healthAfter: health.current });
+      if (health.current === 'restart-required') throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
+      if (health.current === 'poisoned' && !cleanupOrRead.has(operation)) throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
     },
     async describe({ operationId }) { return description(operationId); },
     async contextStatus({ token, operationId }) {
@@ -114,10 +169,21 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         throw new DriverRuntimeError('EXECUTION_CLOSE_TERMINALITY_UNPROVED', 'restart-required', 'Runtime close cannot begin dependency teardown while GPU operation terminality is unproved.', {}, { operationId, healthBefore: before, healthAfter: health.current });
       }
       const teardown = await registry.closeAll();
+      observeTeardown(teardown, operationId);
       const clean = teardown.errors.length === 0 && teardown.inventory.counts.live === 0 && teardown.inventory.counts.closing === 0 && teardown.inventory.counts.orphaned === 0 && disposalOrder.slice(-2).join(',') === 'context,library';
       if (clean) health.transition('closed', { reason: 'graceful-close', operationId });
-      else health.transition('suspect', { reason: 'unproved-close', operationId });
-      return { schemaVersion: 1, graceful: clean, cleanupClaim: clean ? 'proved-mock-lifecycle-only' : 'unproved', health: health.snapshot(), teardown, disposalOrder, operationSequence: operationId };
+      else if (health.current === 'healthy') health.transition('suspect', { reason: 'unproved-close', operationId });
+      return {
+        schemaVersion: 1,
+        graceful: clean,
+        cleanupClaim: clean ? 'proved-mock-lifecycle-only' : 'unproved',
+        health: health.snapshot(),
+        teardown,
+        disposalOrder,
+        disposalOrderCount,
+        disposalOrderTruncated: disposalOrderCount - disposalOrder.length,
+        operationSequence: operationId,
+      };
     },
     memory,
     execution,
@@ -132,6 +198,13 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     async testingSetExecutionMode({ mode, operationId }) {
       executionMode = mode;
       return { schemaVersion: 1, mode, operationSequence: operationId, health: health.snapshot(), inventory: registry.inventory() };
+    },
+    async testingSetDisposalMode({ mode, operationId }) {
+      disposalFailureMode = mode;
+      return disposalStatus(operationId);
+    },
+    async testingDisposalStatus({ operationId }) {
+      return disposalStatus(operationId);
     },
   };
 }

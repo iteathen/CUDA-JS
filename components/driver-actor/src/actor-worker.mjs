@@ -5,8 +5,6 @@ import { assertPublicRecord, validateRequest } from './protocol.mjs';
 
 if (!parentPort) throw new Error('DriverActor must run in a Worker.');
 
-const OPERATION_TERMINAL_COMMANDS = new Set(['execution.operation.status', 'execution.operation.release', 'runtime.close']);
-
 function post(message) {
   assertPublicRecord(message, { maxByteLength: workerData.memoryPolicy.maxTransferBytes });
   parentPort.postMessage(message);
@@ -29,8 +27,8 @@ try {
       let request;
       try {
         request = validateRequest(message, { testHooks: workerData.testHooks === true, memoryPolicy: workerData.memoryPolicy, executionPolicy: workerData.executionPolicy });
+        backend.assertAccepting?.(request.operation, request.requestId);
         backend.execution.assertCommandAllowed(request.operation, request.requestId);
-        if (!OPERATION_TERMINAL_COMMANDS.has(request.operation)) backend.assertAccepting?.(request.operation, request.requestId);
         let result;
         if (request.operation === 'runtime.describe') result = await backend.describe({ operationId: request.requestId });
         else if (request.operation === 'context.status') result = await backend.contextStatus({ token: request.payload.token, operationId: request.requestId });
@@ -58,6 +56,8 @@ try {
         } else if (request.operation === 'testing.block') result = await backend.testingBlock({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.inject-health') result = await backend.testingInjectHealth({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.execution-mode') result = await backend.testingSetExecutionMode({ ...request.payload, operationId: request.requestId });
+        else if (request.operation === 'testing.disposal-mode') result = await backend.testingSetDisposalMode({ ...request.payload, operationId: request.requestId });
+        else if (request.operation === 'testing.disposal-status') result = await backend.testingDisposalStatus({ operationId: request.requestId });
         else throw Object.assign(new Error('Validated command has no handler.'), { code: 'DRIVER_COMMAND_HANDLER', category: 'internal' });
         const state = request.operation.startsWith('memory.')
           ? { inventory: backend.inventory(), memory: result.usage ?? null, execution: backend.execution.summary() }
@@ -67,9 +67,10 @@ try {
         post({ kind: 'response', requestId: request.requestId, ok: true, result, state });
       } catch (error) {
         const requestId = request?.requestId ?? (Number.isSafeInteger(message?.requestId) ? message.requestId : 0);
-        const state = backend ? { inventory: backend.inventory(), execution: backend.execution.summary() } : null;
-        post({ kind: 'response', requestId, ok: false, error: serializeError(error), state });
-        if (error?.healthAfter === 'restart-required' || error?.category === 'restart-required') setImmediate(() => parentPort.close());
+        const observedError = backend?.observeError?.(error, { operation: request?.operation ?? null, operationId: requestId }) ?? error;
+        const state = backend ? { health: backend.health?.() ?? null, inventory: backend.inventory(), execution: backend.execution.summary() } : null;
+        post({ kind: 'response', requestId, ok: false, error: serializeError(observedError), state });
+        if (state?.health?.current === 'restart-required' || observedError?.healthAfter === 'restart-required' || observedError?.category === 'restart-required') setImmediate(() => parentPort.close());
       } finally {
         if (request?.operation === 'runtime.close') setImmediate(() => parentPort.close());
       }

@@ -16,6 +16,12 @@ export async function openMockDriverRuntime(options = {}) {
     setExecutionMode(mode) {
       return runtime[DRIVER_RUNTIME_TEST]('testing.execution-mode', { mode });
     },
+    setDisposalFailureMode(mode) {
+      return runtime[DRIVER_RUNTIME_TEST]('testing.disposal-mode', { mode });
+    },
+    disposalStatus() {
+      return runtime[DRIVER_RUNTIME_TEST]('testing.disposal-status', {});
+    },
   });
   return Object.freeze({ runtime, testing });
 }
