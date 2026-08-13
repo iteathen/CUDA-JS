@@ -51,6 +51,7 @@
     "exp:000:benchmark": "node scripts/run-exp-000.mjs benchmark",
     "exp:000:case": "node scripts/run-exp-000.mjs case",
     "exp:000": "node scripts/run-exp-000.mjs all",
+    "exp:014": "node scripts/run-exp-014.mjs",
     "f1b:generate": "node scripts/run-f1b.mjs generate",
     "f1b:check": "node scripts/run-f1b.mjs check",
     "f1b:verify-native": "node scripts/run-f1b.mjs verify-native",
