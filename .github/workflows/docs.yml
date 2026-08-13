@@ -30,6 +30,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 26.7.0
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: ./scripts/verify-docs.sh
       - run: node scripts/verify-public-repository.mjs
       - run: npm run exp:000:build

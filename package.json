@@ -1,6 +1,6 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
   "license": "AGPL-3.0-or-later",
@@ -27,6 +27,7 @@
     "LICENSE",
     "LICENSING.md",
     "components/compiler-actor/",
+    "components/device-js/",
     "components/driver-actor/",
     "components/execution/",
     "components/memory/",
@@ -38,6 +39,9 @@
     "schemas/cuda-13.3/linux-x64/generated/packers.mjs",
     "schemas/cuda-13.3/win-x64/compiler-provider-manifest.json"
   ],
+  "dependencies": {
+    "acorn": "8.15.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/iteathen/CUDA-JS.git"

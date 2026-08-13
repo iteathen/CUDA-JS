@@ -1,10 +1,10 @@
 # CUDA-JS public runtime facade
 
-`runtime.facade` is the accepted CJS-F8 package boundary. Applications import `openCudaRuntime`, `inspectCudaHost`, `CUDA_JS_COMPATIBILITY`, and `CudaJsError` from `cuda-js`. Native actors and their tokens are not package exports.
+`runtime.facade` is the accepted CJS-F8 package boundary. Applications import `openCudaRuntime`, `compileDeviceProgram`, `inspectCudaHost`, `CUDA_JS_COMPATIBILITY`, and `CudaJsError` from `cuda-js`. Native actors and their tokens are not package exports.
 
 The native entry requires Node 26.1.0 or later on Windows x64 and Node's experimental FFI flag. Unconfirmed Node and CUDA hardware profiles operate automatically as `testing-unconfirmed`; only the published exact evidence profile is qualified. The optional compiler is disabled by default so Driver-only use does not require CUDA Toolkit providers. Pass `compiler: true` for a cache-disabled compiler or provide accepted cache options.
 
-Function capabilities expose both terminal `launch()` compatibility and the SPEC-0016 `submit()` path. `submit()` returns an opaque `CudaOperation` with `status()`, `wait()`, and `close()`. `wait()` polls through short serialized DriverActor turns and does not itself impose the legacy launch deadline; closing a pending operation reports busy rather than pretending cancellation. One pending operation remains the first-slice limit.
+`compileDeviceProgram(runtime, request)` is the optional SPEC-0013 authoring bridge. It consumes the separate `runtime.device-js` translator, passes only private generated CUDA source into the runtime's existing `compile()` port, and returns the bounded Device-JS descriptor plus the ordinary compiler result. It does not add Device-JS state to every runtime instance, expose generated CUDA/AST data, or create a second compiler/resource owner.
 
 ```js
 import { openCudaRuntime } from 'cuda-js';
@@ -22,4 +22,4 @@ try {
 }
 ```
 
-`cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native SPEC-0016 support, native Linux, and WSL remain independently gated by their exact evidence requirements.
+`cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux and WSL imports fail with stable backend-unavailable errors while their retained runbooks remain independently completable.

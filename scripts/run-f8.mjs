@@ -42,9 +42,12 @@ if (!npmCli || !existsSync(npmCli)) {
 }
 
 const unit = { args: ['--test',
+  'components/device-js/test/translator.test.mjs',
+  'components/device-js/test/strict-contract.test.mjs',
   'components/runtime-facade/test/runtime-facade.test.mjs',
   'components/runtime-facade/test/scalar-launch.test.mjs',
   'components/runtime-facade/test/operation-lifecycle.test.mjs',
+  'components/runtime-facade/test/device-js.test.mjs',
 ] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
 const native = { windowsOnly: true, args: ['conformance/f8/run-native-windows.mjs'] };

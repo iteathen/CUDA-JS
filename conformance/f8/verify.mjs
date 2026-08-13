@@ -8,7 +8,8 @@ import { evidenceRoot } from './evidence.mjs';
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.4');
+assert.equal(packageJson.version, '0.1.0-alpha.5');
+assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
 assert.equal(packageJson.license, 'AGPL-3.0-or-later');
@@ -21,6 +22,8 @@ assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-st
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
+assert.equal(compatibility.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1');
+assert.deepEqual(compatibility.capabilities.deviceJsParser, { name: 'acorn', version: '8.15.0', role: 'syntax-only-replaceable-adapter' });
 assert.deepEqual(Object.keys(packageJson.exports).sort(), ['.', './compatibility', './testing']);
 const portable = JSON.parse(await readFile(path.join(evidenceRoot, 'portable-package.json'), 'utf8'));
 assert.equal(portable.status, 'pass');
@@ -36,7 +39,10 @@ assert.equal(memoryConsumer.operationLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
-for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin']) assert.match(compilerConsumer[field], /^[a-f0-9]{64}$/);
+for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram']) {
+  assert.match(compilerConsumer[field], /^[a-f0-9]{64}$/);
+}
+assert.deepEqual(compilerConsumer.deviceJsParser, { name: 'acorn', version: '8.15.0' });
 if (process.platform === 'win32') {
   const native = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows-package.json'), 'utf8'));
   assert.equal(native.status, 'pass');
@@ -48,4 +54,4 @@ if (process.platform === 'linux') {
   assert.equal(readiness.status, 'backend-unavailable');
   assert.equal(readiness.observations.nativeOpenCode, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
 }
-console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade execution' : 'retained native Linux qualification gates'}.`);
+console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade execution' : 'retained native Linux qualification gates'}.`);
