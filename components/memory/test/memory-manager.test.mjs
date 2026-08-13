@@ -4,7 +4,14 @@ import test from 'node:test';
 import { ResourceRegistry } from '../../resource-registry/index.mjs';
 import { DEFAULT_MEMORY_POLICY, MemoryError, MemoryManager, normalizeMemoryPolicy } from '../index.mjs';
 
-function fixture({ policy = { maxDeviceBytes: 32, maxAllocationBytes: 24, maxTransferBytes: 16 }, failAllocate = false, failFree = false, delayedWrite = null } = {}) {
+function fixture({
+  policy = { maxDeviceBytes: 32, maxAllocationBytes: 24, maxTransferBytes: 16 },
+  failAllocate = false,
+  failFree = false,
+  registrationFailure = null,
+  freeFailure = null,
+  delayedWrite = null,
+} = {}) {
   const registry = new ResourceRegistry({ runtimeId: 'memory-test', epoch: 1, nonce: (() => {
     let value = 0;
     return () => (++value).toString(16).padStart(32, '0');
@@ -12,6 +19,13 @@ function fixture({ policy = { maxDeviceBytes: 32, maxAllocationBytes: 24, maxTra
   const order = [];
   const library = registry.allocate({ kind: 'library', value: {}, dispose() { order.push('library'); } });
   const context = registry.allocate({ kind: 'context', value: {}, parent: library, dispose() { order.push('context'); } });
+  if (registrationFailure !== null) {
+    const allocateResource = registry.allocate.bind(registry);
+    registry.allocate = (request) => {
+      if (request?.kind === 'device-memory') throw registrationFailure;
+      return allocateResource(request);
+    };
+  }
   const live = new Set();
   const calls = { allocate: 0, free: 0, write: 0, read: 0 };
   const manager = new MemoryManager({
@@ -29,6 +43,7 @@ function fixture({ policy = { maxDeviceBytes: 32, maxAllocationBytes: 24, maxTra
       },
       async free({ native }) {
         calls.free += 1;
+        if (freeFailure !== null) throw freeFailure;
         if (failFree) throw Object.assign(new Error('injected free failure'), { code: 'INJECT_FREE' });
         assert.equal(live.delete(native), true);
         order.push('device-memory');
@@ -112,10 +127,100 @@ test('leases fence release and graceful teardown frees memory before context and
 });
 
 test('failed free remains orphaned and quota-reserved', async () => {
-  const { manager, registry } = fixture({ failFree: true });
+  const { manager, registry, calls } = fixture({ failFree: true });
   const allocation = await manager.allocate({ byteLength: 12 });
-  await assert.rejects(manager.release(allocation.memory), (error) => error.code === 'RESOURCE_DISPOSE_FAILED');
+  let firstFailure;
+  await assert.rejects(manager.release(allocation.memory), (error) => {
+    firstFailure = error;
+    return error.code === 'RESOURCE_DISPOSE_FAILED';
+  });
+  await assert.rejects(manager.release(allocation.memory), (error) => error === firstFailure);
+  assert.equal(calls.free, 1);
   assert.equal(manager.reservedBytes, 12);
   assert.equal(manager.allocationCount, 1);
   assert.deepEqual(registry.inventory().counts, { live: 2, closing: 0, closed: 0, orphaned: 1 });
+});
+
+test('allocation registration rollback retains sanitized primary and cleanup failures with strongest health', async () => {
+  const primaryFailure = Object.assign(new Error('registration rejected'), {
+    code: 'RESOURCE_NONCE_INVALID',
+    category: 'stale-resource',
+    operation: 'resource.allocate',
+    healthBefore: 'healthy',
+    healthAfter: 'healthy',
+    details: { resourceKind: 'device-memory', providerPath: 'C:\\private\\provider.dll' },
+  });
+  const cleanupFailure = new MemoryError(
+    'CUDA_FREE_FAILED',
+    'deferred-driver',
+    'free failed',
+    {
+      nativeStatus: 719,
+      nativeName: 'CUDA_ERROR_LAUNCH_FAILED',
+      nativeDescription: 'x'.repeat(512),
+      causeNativeDescription: 'host buildbox account alice user bob email mailroom machine runner-01 contact bob@example.test',
+      causeNativeMessage: 'nonce nonceSecret123 token tokenSecret123 runtimeId runtimeSecret123',
+      causeReason: 'handle 123456 pointer barePointer9 address bareAddress9',
+      reason: '0123456789abcdef0123456789abcdef',
+      nativeHandle: '0xfeedface',
+      providerPath: 'C:\\private\\nvcuda.dll',
+    },
+    { operation: 'cuMemFree', operationId: 41, healthBefore: 'suspect', healthAfter: 'poisoned' },
+  );
+  const { manager, calls } = fixture({ registrationFailure: primaryFailure, freeFailure: cleanupFailure });
+
+  let firstFailure;
+  await assert.rejects(manager.allocate({ byteLength: 8, operationId: 41 }), (error) => {
+    firstFailure = error;
+    assert(error instanceof MemoryError);
+    assert.equal(error.code, 'MEMORY_ALLOCATION_ROLLBACK_FAILED');
+    assert.equal(error.category, 'deferred-driver');
+    assert.equal(error.operation, 'memory.allocate');
+    assert.equal(error.operationId, 41);
+    assert.equal(error.healthBefore, 'healthy');
+    assert.equal(error.healthAfter, 'poisoned');
+    assert.equal(error.details.resultingHealth, 'poisoned');
+    assert.equal(error.details.terminal, 'unproved');
+    assert.equal(error.details.primaryFailure.code, 'RESOURCE_NONCE_INVALID');
+    assert.equal(error.details.primaryFailure.operation, 'resource.allocate');
+    assert.equal(error.details.cleanupFailures.length, 1);
+    assert.equal(error.details.cleanupFailures[0].code, 'CUDA_FREE_FAILED');
+    assert.equal(error.details.cleanupFailures[0].operation, 'cuMemFree');
+    assert.equal(error.details.cleanupFailures[0].healthAfter, 'poisoned');
+    assert.equal(error.details.cleanupFailures[0].details.nativeStatus, 719);
+    assert.equal(error.details.cleanupFailures[0].details.nativeDescription.length, 160);
+    const cleanupDetails = error.details.cleanupFailures[0].details;
+    assert.match(cleanupDetails.causeNativeDescription, /\[redacted-identity\]/);
+    assert.match(cleanupDetails.causeNativeMessage, /\[redacted-capability\]/);
+    assert.match(cleanupDetails.causeReason, /\[redacted-handle\]/);
+    assert.equal(cleanupDetails.reason, '[redacted-capability]');
+    assert.deepEqual(error.details.inventory.unproved, [{ kind: 'device-memory', registered: false, disposition: 'unproved' }]);
+    const serialized = JSON.stringify(error.details);
+    assert.doesNotMatch(serialized, /feedface|private|providerPath|nativeHandle|buildbox|alice|user bob|mailroom|runner-01|bob@example\.test|nonceSecret123|tokenSecret123|runtimeSecret123|123456|barePointer9|bareAddress9|0123456789abcdef0123456789abcdef/i);
+    return true;
+  });
+  assert.equal(calls.free, 1);
+  await assert.rejects(manager.allocate({ byteLength: 4, operationId: 42 }), (error) => error === firstFailure);
+  assert.equal(manager.rollbackFailure(), firstFailure);
+  assert.equal(calls.allocate, 1);
+  assert.equal(calls.free, 1);
+  assert.equal(manager.reservedBytes, 8);
+  assert.equal(manager.allocationCount, 0);
+});
+
+test('unstructured allocation rollback cleanup is restart-required with bounded cause summary', async () => {
+  const primaryFailure = Object.assign(new Error('registration rejected'), { code: 'REGISTER_REJECTED', category: 'internal' });
+  const cleanupFailure = Object.assign(new Error(`cleanup failed at C:\\private\\${'x'.repeat(512)}`), { code: 'FREE_UNSTRUCTURED' });
+  const { manager } = fixture({ registrationFailure: primaryFailure, freeFailure: cleanupFailure });
+
+  await assert.rejects(manager.allocate({ byteLength: 4, operationId: 9 }), (error) => {
+    assert.equal(error.code, 'MEMORY_ALLOCATION_ROLLBACK_FAILED');
+    assert.equal(error.category, 'restart-required');
+    assert.equal(error.healthAfter, 'restart-required');
+    assert.equal(error.details.cleanupFailures[0].code, 'MEMORY_ALLOCATION_CLEANUP_UNPROVED');
+    assert.equal(error.details.cleanupFailures[0].details.causeCode, 'FREE_UNSTRUCTURED');
+    assert.match(error.details.cleanupFailures[0].details.causeMessage, /\[redacted-path\]/);
+    assert.doesNotMatch(JSON.stringify(error.details), /private/);
+    return true;
+  });
 });

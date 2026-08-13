@@ -6,10 +6,10 @@
 
 ## Current implementation state
 
-The latest implementation-bearing protected `main` baseline before the documentation-only capability authority work is:
+The exact protected-`main` input baseline for this implementation packet is:
 
 ```text
-fe9ed78939d3876790291421cec367fde58a8310
+962b120d3056d82492f0e99f3e11d44a7afe958b
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -52,7 +52,7 @@ Proposal presence does not authorize their production implementation. Each must 
 
 ## Accepted P0 authority corrections
 
-Two contradictions in already-accepted authority are being completed as separate implementation packets:
+Two contradictions in already-accepted authority are implemented as separate implementation packets:
 
 ### SPEC-0006 target-syntax addendum — issue #65
 
@@ -65,12 +65,12 @@ The implementation provides one shared target parser/policy owner across Compile
 ### SPEC-0003 disposal-failure addendum — issue #66
 
 **Architectural disposition:** selected correction.  
-**Implementation status:** authorized, not yet implemented.  
-**Qualification status:** portable defect reproduced; destructive native cleanup partitions remain independently qualified.
+**Implementation status:** implemented in portable/software paths.
+**Qualification status:** portable defect reproduced; destructive native cleanup partitions remain unqualified pending independent exact-profile evidence.
 
-The accepted addendum keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth.
+The implementation keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth. DriverActor transport and facade projection preserve the bounded failure envelope and apply the resulting admission state.
 
-The target correction is implemented in portable/software paths. The disposal-failure correction is the remaining dependency-ready P0 implementation packet. Neither specification acceptance nor portable target admission claims native negative-path or Blackwell support.
+Both accepted P0 corrections are implemented in portable/software paths. Destructive native cleanup failures were not induced in this environment and remain explicitly unqualified; this correction does not claim new native negative-path or Blackwell support.
 
 ## Execution baseline
 

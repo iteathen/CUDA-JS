@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import ffi from 'node:ffi';
 
 import { LIMITS, providerTargetProfile } from '../contract.mjs';
-import { CompilerRuntimeError } from '../errors.mjs';
+import { combineCompilerCleanupFailures, CompilerRuntimeError } from '../errors.mjs';
 import { snapshotHeaderProfile } from '../header-profile.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
@@ -52,6 +52,34 @@ function boundedSize(storage, label, { allowZero = false } = {}) {
   const value = storage.readBigUInt64LE(0);
   if (value > BigInt(LIMITS.artifactBytes) || (!allowZero && value === 0n)) throw new CompilerRuntimeError('COMPILER_NATIVE_SIZE_INVALID', 'native-compiler', `${label} returned an invalid size.`, { size: value.toString() });
   return Number(value);
+}
+
+function closeProviderLibraries(entries, primaryFailure, resources) {
+  const cleanupFailures = [];
+  for (const [provider, library] of entries) {
+    if (!library) continue;
+    try {
+      library.close();
+    } catch {
+      cleanupFailures.push(new CompilerRuntimeError(
+        'COMPILER_LIBRARY_CLOSE_FAILED',
+        'restart-required',
+        'Compiler provider library close failed.',
+        { provider },
+        { operation: 'compiler.library.close', healthBefore: 'healthy', healthAfter: 'restart-required' },
+      ));
+    }
+  }
+  if (cleanupFailures.length > 0) {
+    throw combineCompilerCleanupFailures(primaryFailure, cleanupFailures, {
+      code: 'COMPILER_LIBRARY_CLOSE_FAILED',
+      category: 'restart-required',
+      message: 'One or more compiler provider libraries could not be closed.',
+      operation: 'compiler.library.close',
+      primaryOperation: 'compiler.backend.open',
+      inventory: resources,
+    });
+  }
 }
 async function fileSha256(file) {
   const hash = createHash('sha256');
@@ -179,6 +207,7 @@ export async function createBackend() {
         const programStorage = Buffer.alloc(8);
         let created = false;
         let log = '';
+        let primaryFailure = null;
         try {
           const source = cString(request.source);
           const name = cString(request.name);
@@ -212,10 +241,39 @@ export async function createBackend() {
           const outputStatus = nvrtc.nvrtcGetPTX(program, output);
           if (outputStatus !== 0 || output.at(-1) !== 0) throw new CompilerRuntimeError('NVRTC_OUTPUT_FAILED', 'native-compiler', 'NVRTC PTX extraction failed.', { nativeStatus: outputStatus, nativeMessage: nvrtcMessage(outputStatus) });
           return { bytes: Uint8Array.from(output.subarray(0, -1)), log };
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
           if (created) {
-            const status = nvrtc.nvrtcDestroyProgram(programStorage);
-            if (status !== 0 || pointer(programStorage) !== 0n) throw new CompilerRuntimeError('NVRTC_DESTROY_FAILED', 'restart-required', 'NVRTC program destruction failed.', { nativeStatus: status }, { healthBefore: 'healthy', healthAfter: 'restart-required' });
+            let cleanupFailure = null;
+            try {
+              const status = nvrtc.nvrtcDestroyProgram(programStorage);
+              if (status !== 0 || pointer(programStorage) !== 0n) {
+                cleanupFailure = new CompilerRuntimeError(
+                  'NVRTC_DESTROY_FAILED',
+                  'restart-required',
+                  'NVRTC program destruction failed.',
+                  { nativeStatus: status },
+                  { operation: 'nvrtcDestroyProgram', healthBefore: 'healthy', healthAfter: 'restart-required' },
+                );
+              }
+            } catch (error) {
+              cleanupFailure = error instanceof CompilerRuntimeError ? error : new CompilerRuntimeError(
+                'NVRTC_DESTROY_FAILED',
+                'restart-required',
+                'NVRTC program destruction completion is unproved.',
+                {},
+                { operation: 'nvrtcDestroyProgram', healthBefore: 'healthy', healthAfter: 'restart-required' },
+              );
+            }
+            if (cleanupFailure) {
+              throw combineCompilerCleanupFailures(primaryFailure, [cleanupFailure], {
+                operation: 'nvrtcDestroyProgram',
+                primaryOperation: 'compiler.compile',
+                inventory: resources,
+              });
+            }
             resources.programsDestroyed += 1;
           }
         }
@@ -223,6 +281,7 @@ export async function createBackend() {
       async link(request) {
         const linkStorage = Buffer.alloc(8);
         let created = false;
+        let primaryFailure = null;
         try {
           const options = request.options.native.map(cString);
           const createStatus = linker.__nvJitLinkCreate_13_3(linkStorage, options.length, pointerTable(options));
@@ -253,23 +312,51 @@ export async function createBackend() {
           const outputStatus = linker.__nvJitLinkGetLinkedCubin_13_3(handle, output);
           if (outputStatus !== 0) throw new CompilerRuntimeError('NVJITLINK_OUTPUT_FAILED', 'native-linker', 'nvJitLink cubin extraction failed.', { nativeStatus: outputStatus });
           return { bytes: Uint8Array.from(output), log: [infoLog, errorLog].filter(Boolean).join('\n') };
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
           if (created) {
-            const status = linker.__nvJitLinkDestroy_13_3(linkStorage);
-            if (status !== 0 || pointer(linkStorage) !== 0n) throw new CompilerRuntimeError('NVJITLINK_DESTROY_FAILED', 'restart-required', 'nvJitLink handle destruction failed.', { nativeStatus: status }, { healthBefore: 'healthy', healthAfter: 'restart-required' });
+            let cleanupFailure = null;
+            try {
+              const status = linker.__nvJitLinkDestroy_13_3(linkStorage);
+              if (status !== 0 || pointer(linkStorage) !== 0n) {
+                cleanupFailure = new CompilerRuntimeError(
+                  'NVJITLINK_DESTROY_FAILED',
+                  'restart-required',
+                  'nvJitLink handle destruction failed.',
+                  { nativeStatus: status },
+                  { operation: 'nvJitLinkDestroy', healthBefore: 'healthy', healthAfter: 'restart-required' },
+                );
+              }
+            } catch (error) {
+              cleanupFailure = error instanceof CompilerRuntimeError ? error : new CompilerRuntimeError(
+                'NVJITLINK_DESTROY_FAILED',
+                'restart-required',
+                'nvJitLink handle destruction completion is unproved.',
+                {},
+                { operation: 'nvJitLinkDestroy', healthBefore: 'healthy', healthAfter: 'restart-required' },
+              );
+            }
+            if (cleanupFailure) {
+              throw combineCompilerCleanupFailures(primaryFailure, [cleanupFailure], {
+                operation: 'nvJitLinkDestroy',
+                primaryOperation: 'linker.link',
+                inventory: resources,
+              });
+            }
             resources.linksDestroyed += 1;
           }
         }
       },
       async close() {
         if (closed) return;
-        linkLibrary.close();
-        nvrtcLibrary.close();
+        closeProviderLibraries([['nvJitLink', linkLibrary], ['nvrtc', nvrtcLibrary]], null, resources);
         closed = true;
       },
     };
   } catch (error) {
-    try { linkLibrary?.close(); } finally { nvrtcLibrary?.close(); }
+    closeProviderLibraries([['nvJitLink', linkLibrary], ['nvrtc', nvrtcLibrary]], error, resources);
     throw error;
   }
 }

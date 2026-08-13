@@ -9,7 +9,8 @@ import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
 import { createDefaultCuCtxCreateParams, cudaTier0Layouts } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
-import { HealthState } from '../health.mjs';
+import { HealthState, observeErrorHealth } from '../health.mjs';
+import { startupRollbackFailure } from '../startup-rollback.mjs';
 
 const CUDA_API_VERSION = 13030;
 const DRIVER_ACTOR_SYMBOLS = Object.freeze([
@@ -68,7 +69,9 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
   const driverPath = canonicalDriverPath();
   let library;
   let functions;
+  let staleWrapper;
   let libraryToken;
+  let rawContext = null;
   let contextToken;
   let memory;
   let execution;
@@ -86,7 +89,9 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
 
   function driverFailure(operation, status, operationId, requestedHealth = 'suspect') {
     const before = health.current;
-    health.transition(requestedHealth, { reason: operation, operationId });
+    observeErrorHealth(health, {
+      code: 'CUDA_DRIVER_FAILURE', category: 'immediate-driver', operation, operationId, healthAfter: requestedHealth,
+    }, { operationId, reason: operation });
     return new DriverRuntimeError(
       'CUDA_DRIVER_FAILURE',
       'immediate-driver',
@@ -96,7 +101,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         nativeName: errorText('cuGetErrorName', status),
         nativeDescription: errorText('cuGetErrorString', status),
       },
-      { operationId, healthBefore: before, healthAfter: health.current },
+      { operation, operationId, healthBefore: before, healthAfter: health.current },
     );
   }
 
@@ -112,14 +117,70 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
 
   function classifiedFailure(operation, status, operationId, category, requestedHealth = null) {
     const before = health.current;
-    if (requestedHealth) health.transition(requestedHealth, { reason: operation, operationId });
+    observeErrorHealth(health, {
+      code: 'CUDA_DRIVER_FAILURE', category, operation, operationId, healthAfter: requestedHealth,
+    }, { operationId, reason: operation });
     return new DriverRuntimeError(
       'CUDA_DRIVER_FAILURE',
       category,
       `${operation} failed with CUDA status ${status}.`,
       { nativeStatus: status, nativeName: errorText('cuGetErrorName', status), nativeDescription: errorText('cuGetErrorString', status) },
-      { operationId, healthBefore: before, healthAfter: health.current },
+      { operation, operationId, healthBefore: before, healthAfter: health.current },
     );
+  }
+
+  function observeError(error, { operationId = null, operation = null } = {}) {
+    observeErrorHealth(health, error, { operationId, reason: error?.operation ?? operation });
+    return error;
+  }
+
+  function observeTeardown(teardown, operationId) {
+    for (const error of teardown?.errors ?? []) observeError(error, { operationId, operation: 'runtime.close' });
+  }
+
+  function closeDriverLibrary(value) {
+    value.close();
+    if (typeof staleWrapper !== 'function') {
+      return { libraryClosed: true, staleWrapperRejected: null, staleWrapperCode: null };
+    }
+    let staleWrapperRejected = false;
+    let staleWrapperCode = null;
+    try { staleWrapper(0); } catch (error) {
+      staleWrapperRejected = true;
+      staleWrapperCode = error.code ?? null;
+    }
+    if (!staleWrapperRejected) {
+      const before = health.current;
+      health.transition('restart-required', { reason: 'driver-library-wrapper-still-callable', operationId: null });
+      throw new DriverRuntimeError(
+        'DRIVER_LIBRARY_STALE_WRAPPER',
+        'restart-required',
+        'Closed Driver library left a callable wrapper.',
+        {},
+        { operation: 'driver.library.close', healthBefore: before, healthAfter: health.current },
+      );
+    }
+    return { libraryClosed: true, staleWrapperRejected, staleWrapperCode };
+  }
+
+  function contextStillCurrent(operationId) {
+    const before = health.current;
+    health.transition('restart-required', { reason: 'context-still-current-after-destroy', operationId });
+    return new DriverRuntimeError(
+      'DRIVER_CONTEXT_STILL_CURRENT',
+      'restart-required',
+      'Destroyed context remained current during teardown.',
+      {},
+      { operation: 'cuCtxGetCurrent', operationId, healthBefore: before, healthAfter: health.current },
+    );
+  }
+
+  function destroyContextForRollback(value) {
+    requireSuccess('cuCtxSetCurrent', functions.cuCtxSetCurrent(value), 0, 'poisoned');
+    requireSuccess('cuCtxDestroy_v2', functions.cuCtxDestroy_v2(value), 0, 'poisoned');
+    const currentStorage = pointerOut();
+    requireSuccess('cuCtxGetCurrent', functions.cuCtxGetCurrent(currentStorage), 0, 'poisoned');
+    if (readPointer(currentStorage) !== 0n) throw contextStillCurrent(0);
   }
 
   function readSafeU64(storage, field) {
@@ -133,21 +194,11 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
   try {
     library = new ffi.DynamicLibrary(driverPath);
     functions = library.getFunctions(DRIVER_ACTOR_FFI_DEFINITIONS);
-    const staleWrapper = functions.cuInit;
+    staleWrapper = functions.cuInit;
     libraryToken = registry.allocate({
       kind: 'library',
       value: library,
-      dispose(value) {
-        value.close();
-        let staleWrapperRejected = false;
-        let staleWrapperCode = null;
-        try { staleWrapper(0); } catch (error) {
-          staleWrapperRejected = true;
-          staleWrapperCode = error.code ?? null;
-        }
-        if (!staleWrapperRejected) throw new DriverRuntimeError('DRIVER_LIBRARY_STALE_WRAPPER', 'restart-required', 'Closed Driver library left a callable wrapper.');
-        return { libraryClosed: true, staleWrapperRejected, staleWrapperCode };
-      },
+      dispose: closeDriverLibrary,
     });
 
     requireSuccess('cuInit', functions.cuInit(0), 0);
@@ -167,23 +218,25 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       health.transition('poisoned', { reason: 'context-create-null', operationId: 0 });
       throw new DriverRuntimeError('DRIVER_CONTEXT_NULL', 'immediate-driver', 'Context creation succeeded but returned null.', {}, { operationId: 0, healthBefore: before, healthAfter: health.current });
     }
+    rawContext = context;
     contextToken = registry.allocate({
       kind: 'context',
       value: context,
       parent: libraryToken,
       dispose(value) {
-        requireSuccess('cuCtxSetCurrent(teardown)', functions.cuCtxSetCurrent(value), null, 'poisoned');
+        requireSuccess('cuCtxSetCurrent', functions.cuCtxSetCurrent(value), null, 'poisoned');
         requireSuccess('cuCtxDestroy_v2', functions.cuCtxDestroy_v2(value), null, 'poisoned');
         const currentStorage = pointerOut();
-        requireSuccess('cuCtxGetCurrent(after-destroy)', functions.cuCtxGetCurrent(currentStorage), null, 'poisoned');
+        requireSuccess('cuCtxGetCurrent', functions.cuCtxGetCurrent(currentStorage), null, 'poisoned');
         const currentNull = readPointer(currentStorage) === 0n;
-        if (!currentNull) throw new DriverRuntimeError('DRIVER_CONTEXT_STILL_CURRENT', 'restart-required', 'Destroyed context remained current during teardown.');
+        if (!currentNull) throw contextStillCurrent(null);
         return { contextDestroyed: true, currentNull };
       },
     });
+    rawContext = null;
 
     const currentStorage = pointerOut();
-    requireSuccess('cuCtxGetCurrent(startup)', functions.cuCtxGetCurrent(currentStorage), 0, 'poisoned');
+    requireSuccess('cuCtxGetCurrent', functions.cuCtxGetCurrent(currentStorage), 0, 'poisoned');
     if (readPointer(currentStorage) !== context) {
       health.transition('poisoned', { reason: 'startup-context-mismatch', operationId: 0 });
       throw new DriverRuntimeError('DRIVER_CONTEXT_MISMATCH', 'immediate-driver', 'Created context is not current on the owning Worker.', {}, { operationId: 0, healthBefore: 'healthy', healthAfter: health.current });
@@ -191,7 +244,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
 
     function requireCurrent(operationId) {
       const output = pointerOut();
-      requireSuccess('cuCtxGetCurrent(memory)', functions.cuCtxGetCurrent(output), operationId, 'poisoned');
+      requireSuccess('cuCtxGetCurrent', functions.cuCtxGetCurrent(output), operationId, 'poisoned');
       if (readPointer(output) !== context) {
         const before = health.current;
         health.transition('poisoned', { reason: 'memory-context-mismatch', operationId });
@@ -376,10 +429,19 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
 
     return {
       inventory() { return registry.inventory(); },
+      health() { return health.snapshot(); },
+      observeError,
       assertAccepting(operation, operationId) {
-        const cleanupOrRead = new Set(['runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release']);
+        const cleanupOrRead = new Set([
+          'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
+          'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
+          'execution.operation.status', 'execution.operation.release',
+        ]);
+        if (health.current === 'restart-required') {
+          throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
+        }
         if (health.current === 'poisoned' && !cleanupOrRead.has(operation)) {
-          throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          throw new DriverRuntimeError('DRIVER_RUNTIME_POISONED', 'deferred-driver', 'Runtime health is poisoned; only inspection and cleanup operations remain available.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
         }
       },
       async describe({ operationId }) {
@@ -406,6 +468,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
       async close({ operationId }) {
         const teardown = await registry.closeAll();
+        observeTeardown(teardown, operationId);
         const contextDisposition = teardown.dispositions.find((entry) => entry.resource.kind === 'context')?.disposition ?? null;
         const libraryDisposition = teardown.dispositions.find((entry) => entry.resource.kind === 'library')?.disposition ?? null;
         const clean = teardown.errors.length === 0
@@ -433,12 +496,49 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       execution,
     };
   } catch (error) {
-    const teardown = await registry.closeAll();
-    if (!libraryToken && library) {
-      try { library.close(); } catch {}
+    observeError(error, { operationId: 0, operation: 'runtime.open' });
+    const cleanupErrors = [];
+    const unprovedResources = [];
+    let dependencyCleanupBlocked = false;
+    if (rawContext !== null) {
+      try {
+        destroyContextForRollback(rawContext);
+        rawContext = null;
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+        unprovedResources.push({ kind: 'context', state: 'orphaned', disposition: 'unproved' });
+        observeError(cleanupError, { operationId: 0, operation: 'runtime.open.cleanup' });
+        dependencyCleanupBlocked = true;
+      }
     }
-    if (teardown.errors.length > 0 && error && typeof error === 'object') {
-      error.details = Object.freeze({ ...(error.details ?? {}), startupCleanupErrors: teardown.errors });
+
+    let teardown;
+    if (dependencyCleanupBlocked) {
+      teardown = { errors: [], inventory: registry.markEpochDead('startup-rollback-dependency-unproved') };
+    } else {
+      teardown = await registry.closeAll();
+      cleanupErrors.push(...teardown.errors);
+      observeTeardown(teardown, 0);
+    }
+
+    if (!libraryToken && library && !dependencyCleanupBlocked) {
+      try { closeDriverLibrary(library); } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+        unprovedResources.push({ kind: 'library', state: 'orphaned', disposition: 'unproved' });
+        observeError(cleanupError, { operationId: 0, operation: 'runtime.open.cleanup' });
+      }
+    }
+
+    if (cleanupErrors.length > 0) {
+      const rollbackError = startupRollbackFailure({
+        primaryError: error,
+        cleanupErrors,
+        inventory: teardown.inventory,
+        unprovedResources,
+        healthCurrent: health.current,
+      });
+      observeError(rollbackError, { operationId: 0, operation: 'runtime.open' });
+      throw rollbackError;
     }
     throw error;
   }

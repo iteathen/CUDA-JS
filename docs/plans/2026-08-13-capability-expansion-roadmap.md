@@ -32,7 +32,7 @@ SPEC-0016 opaque operation lifecycle
 
 SPEC-0014 remains proposal/experiment authority only.
 
-The P0 authority-correction packet accepts the SPEC-0003 disposal-failure addendum and SPEC-0006 target-syntax addendum. Their production corrections become implementation-ready only after that acceptance packet is integrated; neither acceptance changes native support by itself.
+The P0 authority-correction packet accepted the SPEC-0003 disposal-failure addendum and SPEC-0006 target-syntax addendum. Integration made their production corrections implementation-ready; acceptance alone did not change native support.
 
 ## Governing invariants
 
@@ -112,11 +112,11 @@ Repair the EXP-013 responsiveness oracle without changing mailbox semantics or p
 
 ### CAP-P0-TARGET — #65
 
-The SPEC-0006 target-syntax addendum is accepted in the current P0 authority packet. After integration, implement one shared target parser/policy owner across CompilerActor, linker, Device-JS and target validation. Structurally understand current numeric/`f`/`a` CUDA forms, policy-admit only reviewed targets, and keep provider/device/qualification state separate. Do not change support rows merely because syntax becomes representable.
+The accepted SPEC-0006 target-syntax correction is implemented in portable/software and package paths. One shared target parser/policy owner now serves CompilerActor, linker, Device-JS and target validation while provider/device/qualification state remains separate. Newly representable target syntax does not change native support rows.
 
 ### CAP-P0-DISPOSAL — #66
 
-The SPEC-0003 disposal-failure addendum is accepted in the current P0 authority packet. After integration, repair ResourceRegistry/DriverActor/facade propagation so `RESOURCE_DISPOSE_FAILED` retains the underlying semantic category, observation and health transition, failed close becomes orphaned/unusable, and repeated close does not repeat disposer/native work by default.
+The accepted SPEC-0003 disposal-failure correction is implemented in portable/software paths. ResourceRegistry, DriverActor and facade propagation preserve the bounded underlying semantic category, observation and health transition; failed close becomes orphaned/unusable; repeated close does not repeat disposer/native work by default; and rollback/cascade products retain both primary and cleanup divergence. Destructive native cleanup partitions remain independently unqualified unless exact-profile evidence is recorded.
 
 ### CAP-P0-DOCS — #67
 

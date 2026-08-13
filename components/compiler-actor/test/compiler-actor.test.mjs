@@ -6,8 +6,8 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertCompilerPublicRecord, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
-import { openCompilerRuntime } from '../index.mjs';
+import { assertCompilerPublicRecord, combineCompilerCleanupFailures, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
+import { CompilerRuntimeError, openCompilerRuntime } from '../index.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
 const POLICY_BASES = Object.freeze(['75', '80', '86', '87', '88', '89', '90', '100', '103', '110', '120', '121']);
@@ -304,6 +304,7 @@ test('CompilerActor injected creation and operation failures recover only when d
 
 test('CompilerActor injected destruction failure is restart-required and cleanup remains unproved', async () => {
   for (const mode of ['compile-destroy', 'link-destroy']) {
+    const compiler = mode.startsWith('compile');
     const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
     const compiled = mode.startsWith('link') ? await runtime.compile({ source }) : null;
     await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode });
@@ -315,7 +316,138 @@ test('CompilerActor injected destruction failure is restart-required and cleanup
     assert.equal(terminal.graceful, false);
     assert.equal(terminal.cleanupClaim, 'unproved');
     assert.equal(terminal.restartRequired, true);
+    assert.equal(terminal.materialFailure.code, compiler ? 'COMPILER_INJECTED_DESTROY_FAILURE' : 'LINKER_INJECTED_DESTROY_FAILURE');
+    assert.equal(terminal.materialFailure.operation, compiler ? 'mock.nvrtcDestroyProgram' : 'mock.nvJitLinkDestroy');
+    assert.equal(Object.hasOwn(terminal, 'primaryFailure'), false);
+    assert.equal(terminal.cleanupFailures.length, 1);
   }
+});
+
+test('CompilerActor retains primary operation failure alongside failed destruction', async () => {
+  for (const mode of ['compile-operation-destroy', 'link-operation-destroy']) {
+    const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
+    const compiled = mode.startsWith('link') ? await runtime.compile({ source }) : null;
+    await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode });
+    const operation = mode.startsWith('compile') ? runtime.compile({ source }) : runtime.link({ inputs: [compiled.artifact] });
+    await assert.rejects(operation, (error) => {
+      const compiler = mode.startsWith('compile');
+      assert.equal(error.code, compiler ? 'COMPILER_INJECTED_DESTROY_FAILURE' : 'LINKER_INJECTED_DESTROY_FAILURE');
+      assert.equal(error.category, 'restart-required');
+      assert.equal(error.operation, compiler ? 'mock.nvrtcDestroyProgram' : 'mock.nvJitLinkDestroy');
+      assert.equal(error.healthAfter, 'restart-required');
+      assert.equal(error.details.primaryFailure.code, compiler ? 'COMPILER_INJECTED_OPERATION_FAILURE' : 'LINKER_INJECTED_OPERATION_FAILURE');
+      assert.equal(error.details.primaryFailure.operation, compiler ? 'compiler.compile' : 'linker.link');
+      assert.equal(error.details.cleanupFailures.length, 1);
+      assert.equal(error.details.cleanupFailures[0].code, error.code);
+      assert.equal(error.details.resultingHealth, 'restart-required');
+      assert.equal(error.details.terminalInventory.disposition, 'unproved');
+      assert.equal(JSON.stringify(error.details).includes('source'), false);
+      return true;
+    });
+    assert.equal(runtime.health, 'restart-required');
+    const terminal = await runtime.close();
+    const compiler = mode.startsWith('compile');
+    assert.equal(terminal.graceful, false);
+    assert.equal(terminal.cleanupClaim, 'unproved');
+    assert.equal(terminal.restartRequired, true);
+    assert.equal(terminal.materialFailure.code, compiler ? 'COMPILER_INJECTED_DESTROY_FAILURE' : 'LINKER_INJECTED_DESTROY_FAILURE');
+    assert.equal(terminal.primaryFailure.code, compiler ? 'COMPILER_INJECTED_OPERATION_FAILURE' : 'LINKER_INJECTED_OPERATION_FAILURE');
+    assert.equal(terminal.cleanupFailures.length, 1);
+  }
+});
+
+test('CompilerActor close retains every bounded provider-library cleanup failure in terminal truth', async () => {
+  const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
+  await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode: 'close-libraries' });
+  const terminal = await runtime.close();
+  assert.equal(runtime.state, 'restart-required');
+  assert.equal(runtime.health, 'restart-required');
+  assert.equal(terminal.graceful, false);
+  assert.equal(terminal.cleanupClaim, 'unproved');
+  assert.equal(terminal.closeFailure.code, 'COMPILER_LIBRARY_CLOSE_FAILED');
+  assert.equal(terminal.closeFailure.category, 'restart-required');
+  assert.equal(terminal.closeFailure.operation, 'mock.library.close');
+  assert.equal(terminal.cleanupFailures.length, 2);
+  assert.deepEqual(terminal.cleanupFailures.map((failure) => failure.details.provider), ['nvJitLink', 'nvrtc']);
+  assert.equal(terminal.resultingHealth, 'restart-required');
+  assert.equal(terminal.terminalInventory.disposition, 'unproved');
+});
+
+test('CompilerActor terminal preserves the first operation divergence alongside later provider-close failures', async () => {
+  const runtime = await openCompilerRuntimeForTesting({ cacheMode: 'disabled' });
+  await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode: 'close-libraries' });
+  await runtime[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode: 'compile-operation-destroy' });
+  await assert.rejects(runtime.compile({ source }), { code: 'COMPILER_INJECTED_DESTROY_FAILURE' });
+
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, false);
+  assert.equal(terminal.materialFailure.code, 'COMPILER_INJECTED_DESTROY_FAILURE');
+  assert.equal(terminal.materialFailure.operation, 'mock.nvrtcDestroyProgram');
+  assert.equal(terminal.primaryFailure.code, 'COMPILER_INJECTED_OPERATION_FAILURE');
+  assert.equal(terminal.closeFailure.code, 'COMPILER_LIBRARY_CLOSE_FAILED');
+  assert.equal(terminal.closeFailure.operation, 'mock.library.close');
+  assert.deepEqual(terminal.cleanupFailures.map((failure) => failure.code), [
+    'COMPILER_INJECTED_DESTROY_FAILURE',
+    'COMPILER_INJECTED_LIBRARY_CLOSE_FAILURE',
+    'COMPILER_INJECTED_LIBRARY_CLOSE_FAILURE',
+  ]);
+  assert.equal(terminal.cleanupFailureCount, 3);
+  assert.equal(terminal.cleanupFailuresTruncated, 0);
+  assert.equal(terminal.resultingHealth, 'restart-required');
+  assert.equal(terminal.terminalInventory.disposition, 'unproved');
+});
+
+test('compiler cleanup products are capped and omit source, path, log, and raw error text', () => {
+  const primary = new CompilerRuntimeError(
+    'NVRTC_COMPILE_FAILED',
+    'compile',
+    'Compilation failed.',
+    { nativeStatus: 6, nativeMessage: `host secret-machine token ${'a'.repeat(32)} bare ${'b'.repeat(32)}`, log: 'secret source at C:\\private\\kernel.cu', source: 'secret' },
+    { operation: 'compiler.compile' },
+  );
+  const cleanupFailures = [
+    new CompilerRuntimeError(
+      'COMPILER_PROVIDER_CLOSE_FAILED',
+      'restart-required',
+      'cleanup failed for machine build-17',
+      { nativeMessage: 'user secret-user runtimeId runtime-secret account@example.test' },
+      { operation: 'compiler.library.close', healthBefore: 'healthy', healthAfter: 'restart-required' },
+    ),
+    ...Array.from({ length: 11 }, (_, index) => Object.assign(new Error(`private C:\\provider-${index}.dll`), { code: `ERR_CLOSE_${index}` })),
+  ];
+  const combined = combineCompilerCleanupFailures(primary, cleanupFailures, {
+    code: 'COMPILER_LIBRARY_CLOSE_FAILED',
+    category: 'restart-required',
+    message: 'Compiler provider cleanup failed.',
+    operation: 'compiler.library.close',
+    inventory: { programsCreated: 1, programsDestroyed: 0 },
+  });
+  assert.equal(combined.details.cleanupFailures.length, 8);
+  assert.equal(combined.details.cleanupFailuresOmitted, 4);
+  assert.equal(combined.details.primaryFailure.details.nativeStatus, 6);
+  assert.equal(Object.hasOwn(combined.details.primaryFailure.details, 'nativeMessage'), false);
+  assert.equal(combined.details.cleanupFailures[0].message, 'Compiler operation failed.');
+  assert.equal(Object.hasOwn(combined.details.cleanupFailures[0].details, 'nativeMessage'), false);
+  const publicFailure = {
+    code: combined.code,
+    category: combined.category,
+    operation: combined.operation,
+    details: combined.details,
+    healthBefore: combined.healthBefore,
+    healthAfter: combined.healthAfter,
+  };
+  assert.doesNotThrow(() => assertCompilerPublicRecord(publicFailure));
+  const serialized = JSON.stringify(publicFailure);
+  assert.equal(serialized.includes('private'), false);
+  assert.equal(serialized.includes('kernel.cu'), false);
+  assert.equal(serialized.includes('secret'), false);
+  assert.equal(serialized.includes('build-17'), false);
+  assert.equal(serialized.includes('runtime-secret'), false);
+  assert.equal(serialized.includes('account@example.test'), false);
+  assert.equal(serialized.includes('a'.repeat(32)), false);
+  assert.equal(serialized.includes('b'.repeat(32)), false);
+  assert.equal(serialized.includes('log'), false);
+  assert.equal(serialized.includes('source'), false);
 });
 
 test('unexpected cache filesystem failures are sanitized before crossing the Worker boundary', async () => {

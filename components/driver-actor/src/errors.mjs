@@ -1,6 +1,12 @@
 const ERROR_FIELDS = Object.freeze([
-  'name', 'code', 'category', 'message', 'details', 'operationId', 'healthBefore', 'healthAfter',
+  'name', 'code', 'category', 'message', 'details', 'operation', 'operationId', 'healthBefore', 'healthAfter',
 ]);
+
+const OPERATION_PATTERN = /^[A-Za-z][A-Za-z0-9_.:()-]{0,127}$/;
+
+function operationName(value) {
+  return typeof value === 'string' && OPERATION_PATTERN.test(value) ? value : null;
+}
 
 export class DriverRuntimeError extends Error {
   constructor(code, category, message, details = {}, state = {}) {
@@ -9,6 +15,7 @@ export class DriverRuntimeError extends Error {
     this.code = code;
     this.category = category;
     this.details = Object.freeze({ ...details });
+    this.operation = operationName(state.operation);
     this.operationId = state.operationId ?? null;
     this.healthBefore = state.healthBefore ?? null;
     this.healthAfter = state.healthAfter ?? null;
@@ -28,6 +35,7 @@ export function serializeError(error) {
     category: structured ? error.category ?? 'internal' : permissionDenied ? 'permission' : 'internal',
     message: structured ? error.message : permissionDenied ? 'DriverActor lacks required Node permission.' : 'DriverActor internal failure.',
     details: structured ? error.details ?? {} : {},
+    operation: structured ? operationName(error.operation) : null,
     operationId: structured ? error.operationId ?? null : null,
     healthBefore: structured ? error.healthBefore ?? null : null,
     healthAfter: structured ? error.healthAfter ?? null : null,

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { COMPILER_RUNTIME_TEST, openCompilerRuntimeForTesting } from '../../compiler-actor/testing.mjs';
 import { CUDA_JS_COMPATIBILITY, CudaJsError, inspectCudaHost, openCudaRuntime } from '../index.mjs';
 import { openCudaRuntimeWithAdapters } from '../src/runtime.mjs';
 import { openCudaRuntimeForTesting } from '../testing.mjs';
@@ -30,6 +31,39 @@ test('compatibility and host inspection are immutable and reconcile the current 
   assert.equal(inspection.host.node.version, process.version);
   assert.equal(inspection.compatibility, CUDA_JS_COMPATIBILITY);
   assert.equal(Object.isFrozen(inspection), true);
+});
+
+test('public error details bound hostile traversal and redact identity and capability evidence', () => {
+  let getterCalls = 0;
+  const wide = {};
+  for (let index = 0; index < 2_000; index += 1) {
+    Object.defineProperty(wide, `field${String(index).padStart(4, '0')}`, {
+      enumerable: true,
+      get() { getterCalls += 1; return index; },
+    });
+  }
+  const bounded = new CudaJsError('CUDA_JS_TEST', 'internal', 'test', wide);
+  assert.equal(Object.keys(bounded.details).length, 64);
+  assert.equal(getterCalls, 64);
+
+  const trapped = new Proxy({}, { getPrototypeOf() { throw new Error('getPrototypeOf trap leaked'); } });
+  assert.doesNotThrow(() => new CudaJsError('CUDA_JS_TEST', 'internal', 'test', trapped));
+  assert.deepEqual(new CudaJsError('CUDA_JS_TEST', 'internal', 'test', trapped).details, {});
+
+  const capability = 'b'.repeat(32);
+  const redacted = new CudaJsError('CUDA_JS_TEST', 'internal', 'test', {
+    username: 'secret-user',
+    email: 'account@example.internal',
+    machine: 'secret-host',
+    nativeAddress: 'decimal-native-address-123456789',
+    causeMessage: `cleanup on host secret-host for user secret-user nonce=${capability} token ${capability} address 123456789 email account@example.internal`,
+  });
+  const serialized = JSON.stringify(redacted.details);
+  assert.deepEqual(Object.keys(redacted.details), ['causeMessage']);
+  assert.match(redacted.details.causeMessage, /\[redacted-identity\]/);
+  assert.match(redacted.details.causeMessage, /\[redacted-capability\]/);
+  assert.match(redacted.details.causeMessage, /\[redacted-handle\]/);
+  assert.doesNotMatch(serialized, /secret|example\.internal|123456789|b{32}/);
 });
 
 test('native entry fails before provider work when its launch profile is absent', async () => {
@@ -92,6 +126,44 @@ test('optional compiler is explicit and returns copied PTX and cubin artifacts',
   assert.equal(terminal.compiler.workerExitCode, 0);
 });
 
+test('CompilerActor cleanup degradation blocks cross-owner facade admission', async () => {
+  let compiler;
+  let allocations = 0;
+  let moduleLoads = 0;
+  const driver = {
+    state: 'open',
+    health: 'healthy',
+    async describe() { return { claim: 'stub' }; },
+    async allocateDevice() { allocations += 1; throw new Error('allocation should not be admitted'); },
+    async loadModule() { moduleLoads += 1; throw new Error('module load should not be admitted'); },
+    async close() {
+      driver.state = 'closed';
+      driver.health = 'closed';
+      return { graceful: true, cleanupClaim: 'proved-stub', health: { current: 'closed' }, workerExited: true, workerExitCode: 0 };
+    },
+  };
+  const runtime = await openCudaRuntimeWithAdapters({ compiler: true }, {
+    openDriver: async () => driver,
+    openCompiler: async (options) => {
+      compiler = await openCompilerRuntimeForTesting(options);
+      return compiler;
+    },
+  }, () => ({ status: 'mock-only' }));
+
+  await compiler[COMPILER_RUNTIME_TEST]('testing.failure-mode', { mode: 'compile-operation-destroy' });
+  await assert.rejects(runtime.compile({ source: SOURCE }), (error) => error.code === 'COMPILER_INJECTED_DESTROY_FAILURE' && error.healthAfter === 'restart-required');
+  assert.equal(runtime.health, 'restart-required');
+  assert.equal(runtime.state, 'restart-required');
+  await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), (error) => error.code === 'CUDA_JS_RUNTIME_CLOSED' && error.category === 'restart-required');
+  await assert.rejects(runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX }), (error) => error.code === 'CUDA_JS_RUNTIME_CLOSED' && error.category === 'restart-required');
+  assert.equal(allocations, 0);
+  assert.equal(moduleLoads, 0);
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, false);
+  assert.equal(terminal.restartRequired, true);
+  assert.equal(terminal.compiler.materialFailure.code, 'COMPILER_INJECTED_DESTROY_FAILURE');
+});
+
 test('two runtimes isolate resources and first close leaves the second usable', async () => {
   const first = await openCudaRuntimeForTesting();
   const second = await openCudaRuntimeForTesting();
@@ -124,12 +196,174 @@ test('aggregate close attempts both owners and reports unproved cleanup without 
   assert.equal(terminal.driver.error.code, 'DRIVER_CLOSE');
 });
 
+test('public terminal retains an acknowledged material Driver disposal failure', async () => {
+  const driver = {
+    health: 'healthy',
+    async describe() { return { claim: 'stub' }; },
+    async close() {
+      return {
+        graceful: false,
+        restartRequired: true,
+        cleanupClaim: 'unproved-worker-loss',
+        commandAcknowledged: true,
+        failedOperation: 'memory.release',
+        error: {
+          code: 'RESOURCE_DISPOSE_FAILED',
+          category: 'restart-required',
+          operation: 'cuMemFree_v2',
+          message: 'Resource disposer failed; cleanup is unproved.',
+          details: { disposition: 'unproved', providerPath: 'C:\\private\\nvcuda.dll' },
+          healthBefore: 'healthy',
+          healthAfter: 'restart-required',
+        },
+        health: { current: 'restart-required' },
+        inventory: { counts: { live: 0, closing: 0, closed: 0, orphaned: 1 } },
+        workerExited: true,
+        workerExitCode: 1,
+      };
+    },
+  };
+  const runtime = await openCudaRuntimeWithAdapters({}, { openDriver: async () => driver, openCompiler: async () => null }, () => ({ status: 'mock-only' }));
+  const terminal = await runtime.close();
+  assert.equal(terminal.driver.commandAcknowledged, true);
+  assert.equal(terminal.driver.failedOperation, 'memory.release');
+  assert.equal(terminal.driver.error.code, 'RESOURCE_DISPOSE_FAILED');
+  assert.equal(terminal.driver.error.operation, 'cuMemFree_v2');
+  assert.equal(terminal.driver.error.healthAfter, 'restart-required');
+  assert.equal(Object.hasOwn(terminal.driver.error.details, 'providerPath'), false);
+  assert.deepEqual(terminal.driver.resourceCounts, { live: 0, closing: 0, closed: 0, orphaned: 1 });
+});
+
 test('open failure reports restart-required when an acquired owner cannot close', async () => {
   const driver = { health: 'healthy', async describe() { return { claim: 'stub' }; }, async close() { return { graceful: false }; } };
   await assert.rejects(openCudaRuntimeWithAdapters({ compiler: true }, {
     openDriver: async () => driver,
     openCompiler: async () => { throw Object.assign(new Error('compiler open'), { code: 'COMPILER_OPEN', category: 'provider' }); },
-  }, () => ({ status: 'mock-only' })), expectCode('CUDA_JS_OPEN_CLEANUP_UNPROVED'));
+  }, () => ({ status: 'mock-only' })), (error) => {
+    assert.equal(error.code, 'CUDA_JS_OPEN_CLEANUP_UNPROVED');
+    assert.equal(error.category, 'restart-required');
+    assert.equal(error.healthAfter, 'restart-required');
+    assert.equal(error.details.primaryFailure.code, 'COMPILER_OPEN');
+    assert.equal(error.details.cleanupFailures.length, 1);
+    assert.equal(error.details.cleanupFailures[0].code, 'CUDA_JS_OWNER_CLEANUP_UNPROVED');
+    assert.equal(error.details.resultingHealth, 'restart-required');
+    assert.deepEqual(error.details.terminalInventory[0], { owner: 'driver', graceful: false, cleanupClaim: null, resourceCounts: null });
+    return true;
+  });
+});
+
+test('open rollback retains an acquired owner material terminal failure', async () => {
+  const driver = {
+    health: 'healthy',
+    async describe() { return { claim: 'stub' }; },
+    async close() {
+      return {
+        graceful: false,
+        cleanupClaim: 'unproved-worker-loss',
+        error: {
+          code: 'RESOURCE_DISPOSE_FAILED',
+          category: 'restart-required',
+          operation: 'cuCtxDestroy_v2',
+          message: 'Context disposal failed.',
+          details: { disposition: 'unproved', causeMessage: 'failed at C:\\private\\nvcuda.dll handle=0xdecafbad' },
+          healthBefore: 'healthy',
+          healthAfter: 'restart-required',
+        },
+      };
+    },
+  };
+  await assert.rejects(openCudaRuntimeWithAdapters({ compiler: true }, {
+    openDriver: async () => driver,
+    openCompiler: async () => { throw Object.assign(new Error('compiler open'), { code: 'COMPILER_OPEN', category: 'provider' }); },
+  }, () => ({ status: 'mock-only' })), (error) => {
+    assert.equal(error.code, 'CUDA_JS_OPEN_CLEANUP_UNPROVED');
+    assert.equal(error.details.cleanupFailures.length, 1);
+    assert.equal(error.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
+    assert.equal(error.details.cleanupFailures[0].operation, 'cuCtxDestroy_v2');
+    assert.match(error.details.cleanupFailures[0].details.causeMessage, /\[redacted-path\]/);
+    assert.match(error.details.cleanupFailures[0].details.causeMessage, /\[redacted-handle\]/);
+    assert.doesNotMatch(JSON.stringify(error.details), /private|decafbad/);
+    return true;
+  });
+});
+
+test('failed disposal orphans the facade resource, preserves provenance, and never retries release', async () => {
+  let releaseCalls = 0;
+  const driver = {
+    state: 'open',
+    health: 'healthy',
+    async describe() { return { claim: 'stub' }; },
+    async allocateDevice() { return { memory: Object.freeze({ private: 'token' }), byteLength: 8 }; },
+    async releaseMemory() {
+      releaseCalls += 1;
+      driver.health = 'poisoned';
+      throw Object.assign(new Error('Resource disposer failed; cleanup is unproved.'), {
+        code: 'RESOURCE_DISPOSE_FAILED',
+        category: 'immediate-driver',
+        operation: 'cuMemFree_v2',
+        healthBefore: 'healthy',
+        healthAfter: 'poisoned',
+        details: {
+          resourceKind: 'device-memory', resourceState: 'orphaned', disposition: 'orphaned',
+          causeCode: 'CUDA_DRIVER_FAILURE', causeCategory: 'immediate-driver', causeOperation: 'cuMemFree_v2',
+          nativeStatus: 999, nativeName: 'CUDA_ERROR_UNKNOWN', nativeDescription: 'x'.repeat(2_000), disposalCallCount: 1,
+          causeMessage: 'failed at C:\\private\\nvcuda.dll host=secret-machine handle=0xdecafbad',
+          providerPath: 'C:\\private\\nvcuda.dll', nativePointer: '0x1234', stack: 'secret stack',
+        },
+      });
+    },
+    async close() { return { graceful: false, cleanupClaim: 'unproved', health: { current: 'poisoned' }, teardown: { inventory: { counts: { live: 0, closing: 0, closed: 0, orphaned: 1 } }, errors: [] }, workerExited: true, workerExitCode: 0 }; },
+  };
+  const runtime = await openCudaRuntimeWithAdapters({}, { openDriver: async () => driver, openCompiler: async () => null }, () => ({ status: 'mock-only' }));
+  const memory = await runtime.allocateDevice({ byteLength: 8 });
+  let first;
+  await assert.rejects(memory.close(), (error) => {
+    first = error;
+    assert.equal(error.code, 'RESOURCE_DISPOSE_FAILED');
+    assert.equal(error.category, 'immediate-driver');
+    assert.equal(error.operation, 'cuMemFree_v2');
+    assert.equal(error.healthBefore, 'healthy');
+    assert.equal(error.healthAfter, 'poisoned');
+    assert.equal(error.details.nativeStatus, 999);
+    assert.equal(error.details.nativeDescription.length, 1_024);
+    assert.match(error.details.causeMessage, /\[redacted-path\]/);
+    assert.match(error.details.causeMessage, /\[redacted-identity\]/);
+    assert.match(error.details.causeMessage, /\[redacted-handle\]/);
+    assert.equal(Object.hasOwn(error.details, 'providerPath'), false);
+    assert.equal(Object.hasOwn(error.details, 'nativePointer'), false);
+    assert.equal(Object.hasOwn(error.details, 'stack'), false);
+    return true;
+  });
+  assert.equal(memory.state, 'orphaned');
+  await assert.rejects(memory.close(), (error) => error === first);
+  assert.equal(releaseCalls, 1);
+  await assert.rejects(memory.read({ byteLength: 1 }), (error) => error.code === 'CUDA_JS_RESOURCE_CLOSED' && error.category === 'immediate-driver' && error.healthAfter === 'poisoned');
+  await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), (error) => error.code === 'DRIVER_RUNTIME_POISONED' && error.healthAfter === 'poisoned');
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, false);
+  assert.deepEqual(terminal.driver.resourceCounts, { live: 0, closing: 0, closed: 0, orphaned: 1 });
+});
+
+test('pre-disposer close rejection remains retryable and does not orphan the facade resource', async () => {
+  let calls = 0;
+  const driver = {
+    state: 'open', health: 'healthy',
+    async describe() { return { claim: 'stub' }; },
+    async allocateDevice() { return { memory: Object.freeze({ private: 'token' }), byteLength: 4 }; },
+    async releaseMemory() {
+      calls += 1;
+      if (calls === 1) throw Object.assign(new Error('Resource has children.'), { code: 'RESOURCE_HAS_CHILDREN', category: 'stale-resource' });
+      return { disposition: { freed: true } };
+    },
+    async close() { return { graceful: true, health: { current: 'closed' }, workerExited: true, workerExitCode: 0 }; },
+  };
+  const runtime = await openCudaRuntimeWithAdapters({}, { openDriver: async () => driver, openCompiler: async () => null }, () => ({ status: 'mock-only' }));
+  const memory = await runtime.allocateDevice({ byteLength: 4 });
+  await assert.rejects(memory.close(), (error) => error.code === 'RESOURCE_HAS_CHILDREN' && error.category === 'stale-resource');
+  assert.equal(memory.state, 'open');
+  assert.equal((await memory.close()).state, 'closed');
+  assert.equal(calls, 2);
+  assert.equal((await runtime.close()).graceful, true);
 });
 
 test('unconfirmed profiles operate while known-incompatible profiles close and reject', async () => {

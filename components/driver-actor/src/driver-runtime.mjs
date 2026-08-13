@@ -9,6 +9,7 @@ import { requestRecord } from './protocol.mjs';
 
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
 const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution']);
+const CLIENT_HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3, closed: 4 });
 
 function delay(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
 
@@ -40,9 +41,16 @@ function freezeRecord(value) {
 function orphanInventory(lastInventory) {
   if (!lastInventory) return null;
   const resources = lastInventory.resources.map((resource) => ({ ...resource, state: ['live', 'closing'].includes(resource.state) ? 'orphaned' : resource.state }));
-  const counts = { live: 0, closing: 0, closed: 0, orphaned: 0 };
-  for (const resource of resources) counts[resource.state] += 1;
-  return freezeRecord({ ...lastInventory, dead: true, counts, resources, reason: 'worker-lost' });
+  const sourceCounts = lastInventory.counts ?? {};
+  const counts = {
+    live: 0,
+    closing: 0,
+    closed: sourceCounts.closed ?? 0,
+    orphaned: (sourceCounts.orphaned ?? 0) + (sourceCounts.live ?? 0) + (sourceCounts.closing ?? 0),
+  };
+  const resourceCount = lastInventory.resourceCount ?? Object.values(counts).reduce((total, count) => total + count, 0);
+  const resourcesTruncated = lastInventory.resourcesTruncated ?? Math.max(0, resourceCount - resources.length);
+  return freezeRecord({ ...lastInventory, dead: true, counts, resourceCount, resources, resourcesTruncated, reason: 'worker-lost' });
 }
 
 function launchPayload(functionToken, options, operationName) {
@@ -71,8 +79,13 @@ function operationFailure(status) {
     typeof failure.code === 'string' ? failure.code : 'EXECUTION_ASYNC_FAILURE',
     typeof failure.category === 'string' ? failure.category : 'deferred-driver',
     typeof failure.message === 'string' ? failure.message : 'GPU operation failed asynchronously.',
-    {},
-    { healthBefore: failure.healthBefore ?? null, healthAfter: failure.healthAfter ?? status?.health?.current ?? null },
+    failure.details && typeof failure.details === 'object' && !Array.isArray(failure.details) ? failure.details : {},
+    {
+      operation: failure.operation,
+      operationId: failure.operationId,
+      healthBefore: failure.healthBefore ?? null,
+      healthAfter: failure.healthAfter ?? status?.health?.current ?? null,
+    },
   );
 }
 
@@ -118,6 +131,7 @@ class DriverRuntime {
   #description = null;
   #closePromise = null;
   #gracefulTerminal = null;
+  #acknowledgedTerminal = null;
   #terminalReport = null;
 
   constructor({ backend, testHooks, maxPending, memoryPolicy, executionPolicy }) {
@@ -259,12 +273,20 @@ class DriverRuntime {
 
   async close() {
     if (this.#closePromise) return this.#closePromise;
-    if (this.#state === 'restart-required' || this.#state === 'closed') return this.#terminalReport;
+    if (this.#state === 'closed') return this.#terminalReport;
+    if (this.#state === 'restart-required') {
+      this.#closePromise = (async () => {
+        await this.#exitPromise;
+        return this.#terminalReport;
+      })();
+      return this.#closePromise;
+    }
     this.#state = 'closing';
     this.#closePromise = (async () => {
       try {
         const terminal = await this.#requestInternal('runtime.close', {}, { allowClosing: true });
         this.#gracefulTerminal = terminal;
+        if (terminal.graceful !== true) this.#acknowledgedTerminal = terminal;
         await this.#exitPromise;
         if (terminal.graceful === true && this.#exitCode === 0) {
           this.#state = 'closed';
@@ -334,12 +356,19 @@ class DriverRuntime {
       if (message.state) this.#updateStateFromRecord(message.state);
       const result = freezeRecord(message.result);
       this.#updateStateFromRecord(result);
-      if (pending.operation === 'runtime.close') this.#gracefulTerminal = result;
+      if (pending.operation === 'runtime.close') {
+        this.#gracefulTerminal = result;
+        if (result.graceful !== true) this.#acknowledgedTerminal = result;
+      }
       pending.resolve(result);
     } else {
       if (message.state) this.#updateStateFromRecord(message.state);
       const error = deserializeError(message.error);
-      if (error.healthAfter) this.#health = error.healthAfter;
+      if (error.healthAfter) this.#observeHealth(error.healthAfter);
+      if (pending.operation === 'runtime.close' || this.#health === 'restart-required' || error.category === 'restart-required') {
+        this.#acknowledgedTerminal = this.#failureTerminal(pending.operation, message, error);
+      }
+      if (this.#health === 'restart-required' || error.category === 'restart-required') this.#setRestartRequired(null, 'acknowledged-terminal-error');
       pending.reject(error);
     }
   }
@@ -349,7 +378,7 @@ class DriverRuntime {
     this.#exitResolve(code);
     if (this.#state === 'opening') this.#readyReject(new DriverRuntimeError('DRIVER_WORKER_STARTUP_EXIT', 'restart-required', 'DriverActor exited before startup completed.', { workerExitCode: code }));
     const graceful = this.#gracefulTerminal?.graceful === true && code === 0;
-    if (!graceful && this.#state !== 'closed') this.#setRestartRequired(code, 'unexpected-worker-exit');
+    if (!graceful && this.#state !== 'closed') this.#setRestartRequired(code, this.#acknowledgedTerminal ? 'acknowledged-ungraceful-terminal' : 'unexpected-worker-exit');
     if (!graceful) {
       const error = new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'DriverActor ownership was lost; process restart is required.', { workerExitCode: code }, { healthBefore: this.#health, healthAfter: 'restart-required' });
       for (const pending of this.#pending.values()) pending.reject(error);
@@ -360,16 +389,26 @@ class DriverRuntime {
   #setRestartRequired(workerExitCode, reason) {
     if (this.#state === 'closed') return;
     const before = this.#health;
+    const acknowledged = this.#acknowledgedTerminal;
+    const acknowledgedHealth = acknowledged?.health ?? null;
+    const acknowledgedInventory = acknowledged?.teardown?.inventory ?? acknowledged?.inventory ?? null;
+    const history = Array.isArray(acknowledgedHealth?.history) ? [...acknowledgedHealth.history] : [];
+    const observedBefore = typeof acknowledgedHealth?.current === 'string' ? acknowledgedHealth.current : before;
+    if (observedBefore !== 'restart-required') history.push(Object.freeze({ before: observedBefore, after: 'restart-required', reason, operationId: null }));
     this.#state = 'restart-required';
     this.#health = 'restart-required';
     this.#terminalReport = freezeRecord({
+      ...(acknowledged ?? {}),
       schemaVersion: 1,
       graceful: false,
-      cleanupClaim: 'unproved-worker-loss',
+      cleanupClaim: acknowledged?.cleanupClaim ?? 'unproved-worker-loss',
       restartRequired: true,
       reason,
-      health: { current: 'restart-required', history: [{ before, after: 'restart-required', reason, operationId: null }] },
-      inventory: orphanInventory(this.#lastInventory),
+      commandAcknowledged: acknowledged !== null,
+      acknowledgedHealth,
+      acknowledgedInventory,
+      health: { current: 'restart-required', history },
+      inventory: orphanInventory(acknowledgedInventory ?? this.#lastInventory),
       memory: this.#lastMemory ? freezeRecord({ ...this.#lastMemory, state: 'orphaned', reason: 'worker-lost' }) : null,
       execution: this.#lastExecution ? freezeRecord({ ...this.#lastExecution, state: 'orphaned', reason: 'worker-lost' }) : null,
       workerExitCode,
@@ -378,12 +417,43 @@ class DriverRuntime {
   }
 
   #updateStateFromRecord(record) {
-    if (record?.health?.current) this.#health = record.health.current;
+    if (record?.health?.current) this.#observeHealth(record.health.current);
     if (record?.inventory) this.#lastInventory = record.inventory;
     if (record?.teardown?.inventory) this.#lastInventory = record.teardown.inventory;
     if (record?.memory?.policy) this.#lastMemory = record.memory;
     if (record?.usage?.policy) this.#lastMemory = record.usage;
     if (record?.execution?.policy) this.#lastExecution = record.execution;
+  }
+
+  #observeHealth(next) {
+    if (typeof next !== 'string' || !Object.hasOwn(CLIENT_HEALTH_RANK, next)) return;
+    if (this.#health === 'closed') return;
+    if (next === 'closed' || CLIENT_HEALTH_RANK[next] > CLIENT_HEALTH_RANK[this.#health]) this.#health = next;
+  }
+
+  #failureTerminal(operation, message, error) {
+    const state = plainObject(message.state) ? message.state : {};
+    return freezeRecord({
+      schemaVersion: 1,
+      graceful: false,
+      cleanupClaim: operation === 'runtime.close' ? 'unproved' : 'unproved-worker-loss',
+      commandAcknowledged: true,
+      failedOperation: operation,
+      error: {
+        name: error.name,
+        code: error.code,
+        category: error.category,
+        message: error.message,
+        details: error.details,
+        operation: error.operation,
+        operationId: error.operationId,
+        healthBefore: error.healthBefore,
+        healthAfter: error.healthAfter,
+      },
+      health: state.health ?? { current: this.#health, history: [] },
+      inventory: state.inventory ?? this.#lastInventory,
+      execution: state.execution ?? this.#lastExecution,
+    });
   }
 
   #request(operation, payload) { return this.#requestInternal(operation, payload, { allowClosing: false }); }

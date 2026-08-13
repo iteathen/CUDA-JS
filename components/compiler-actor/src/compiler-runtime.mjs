@@ -3,11 +3,13 @@ import { fileURLToPath } from 'node:url';
 import { Worker } from 'node:worker_threads';
 
 import { normalizeCompileRequest, normalizeLinkRequest, plainObject } from './contract.mjs';
-import { compilerError, CompilerRuntimeError, deserializeError } from './errors.mjs';
+import { compilerError, compilerFailureRecord, CompilerRuntimeError, deserializeError } from './errors.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const DEFAULT_CACHE = path.join(root, 'build', 'cache', 'compiler-v1');
 const OPTION_FIELDS = Object.freeze(['cacheDirectory', 'cacheMode']);
+const TERMINAL_CLEANUP_FAILURE_LIMIT = 8;
+const TERMINAL_HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
 export const COMPILER_RUNTIME_TEST = Symbol('cuda-js.compiler-runtime.test');
 
 function workerExecArgv() {
@@ -18,6 +20,20 @@ function workerExecArgv() {
     || argument === '--allow-worker'
     || argument.startsWith('--allow-fs-read=')
     || argument.startsWith('--allow-fs-write='));
+}
+
+function terminalHealth(...values) {
+  let strongest = 'healthy';
+  for (const value of values) {
+    if (typeof value === 'string' && Object.hasOwn(TERMINAL_HEALTH_RANK, value)
+        && TERMINAL_HEALTH_RANK[value] > TERMINAL_HEALTH_RANK[strongest]) strongest = value;
+  }
+  return strongest;
+}
+
+function terminalCleanupRecords(error, fallbackRecord) {
+  const records = Array.isArray(error?.details?.cleanupFailures) ? error.details.cleanupFailures : [];
+  return records.length > 0 ? records : fallbackRecord ? [fallbackRecord] : [];
 }
 
 class CompilerRuntime {
@@ -37,6 +53,8 @@ class CompilerRuntime {
   #exitResolve;
   #terminalReport = null;
   #gracefulTerminal = null;
+  #closeFailure = null;
+  #materialFailure = null;
   #closePromise = null;
 
   constructor(options) {
@@ -119,7 +137,8 @@ class CompilerRuntime {
           this.#health = 'closed';
           this.#terminalReport = Object.freeze({ ...result, workerExited: true, workerExitCode: 0 });
         }
-      } catch {
+      } catch (error) {
+        this.#closeFailure ??= error;
         await this.#exitPromise;
       }
       return this.#terminalReport;
@@ -182,6 +201,8 @@ class CompilerRuntime {
     } else {
       const error = deserializeError(message.error);
       if (error.healthAfter) this.#health = error.healthAfter;
+      if (error.healthAfter === 'restart-required' || Array.isArray(error.details?.cleanupFailures)) this.#materialFailure ??= error;
+      if (pending.operation === 'runtime.close') this.#closeFailure = error;
       pending.reject(error);
     }
   }
@@ -189,13 +210,42 @@ class CompilerRuntime {
   #onExit(code) {
     this.#exitResolve(code);
     const graceful = this.#state === 'closing' && this.#gracefulTerminal?.graceful === true && code === 0;
+    const firstMaterialError = this.#materialFailure;
+    const firstMaterialFailure = firstMaterialError ? compilerFailureRecord(firstMaterialError, { operation: 'compiler.cleanup' }) : null;
+    const closeFailure = this.#closeFailure ? compilerFailureRecord(this.#closeFailure, { operation: 'runtime.close' }) : null;
+    const materialError = firstMaterialError ?? this.#closeFailure;
+    const materialFailure = firstMaterialFailure ?? closeFailure;
+    const allCleanupFailures = [
+      ...terminalCleanupRecords(firstMaterialError, firstMaterialFailure),
+      ...(this.#closeFailure === firstMaterialError ? [] : terminalCleanupRecords(this.#closeFailure, closeFailure)),
+    ];
+    const cleanupFailures = Object.freeze(allCleanupFailures.slice(0, TERMINAL_CLEANUP_FAILURE_LIMIT));
+    const cleanupFailureCount = allCleanupFailures.length;
+    const resultingHealth = terminalHealth(
+      firstMaterialError?.details?.resultingHealth,
+      this.#closeFailure?.details?.resultingHealth,
+      materialFailure?.healthAfter,
+      closeFailure?.healthAfter,
+    );
     this.#terminalReport = Object.freeze({
       ...(this.#gracefulTerminal ?? this.#terminalReport ?? {}),
       graceful,
-      cleanupClaim: graceful ? this.#gracefulTerminal.cleanupClaim : this.#gracefulTerminal?.cleanupClaim ?? 'unproved-worker-loss',
+      cleanupClaim: graceful ? this.#gracefulTerminal.cleanupClaim : this.#gracefulTerminal?.cleanupClaim ?? (materialFailure ? 'unproved' : 'unproved-worker-loss'),
       workerExited: true,
       workerExitCode: code,
       restartRequired: !graceful,
+      ...(materialFailure ? {
+        materialFailure,
+        ...(closeFailure ? { closeFailure } : {}),
+        ...(materialError.details?.primaryFailure ? { primaryFailure: materialError.details.primaryFailure } : {}),
+        cleanupFailures,
+        cleanupFailureCount,
+        cleanupFailuresTruncated: Math.max(0, cleanupFailureCount - cleanupFailures.length),
+        resultingHealth,
+        terminalInventory: firstMaterialError?.details?.terminalInventory
+          ?? this.#closeFailure?.details?.terminalInventory
+          ?? Object.freeze({ disposition: 'unproved' }),
+      } : {}),
     });
     if (!graceful) {
       const before = this.#health;

@@ -9,7 +9,10 @@ const BASE_OPERATIONS = new Set([
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
 ]);
-const TEST_OPERATIONS = new Set(['testing.block', 'testing.inject-health', 'testing.execution-mode']);
+const TEST_OPERATIONS = new Set([
+  'testing.block', 'testing.inject-health', 'testing.execution-mode',
+  'testing.disposal-mode', 'testing.disposal-status',
+]);
 const EXECUTION_PARAMETER_KINDS = new Set(['device-memory', 'u32', 'u64', 'i32', 'f32']);
 
 function exactFields(value, fields) {
@@ -111,7 +114,11 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(message.payload) || !exactFields(message.payload, ['category', 'originOperationId']) || !['immediate-driver', 'deferred-driver'].includes(message.payload.category)
         || !Number.isSafeInteger(message.payload.originOperationId) || message.payload.originOperationId < 1) throw validationError('DRIVER_TEST_HEALTH', 'Mock health injection payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'testing.execution-mode') {
-    if (!plainObject(message.payload) || !exactFields(message.payload, ['mode']) || !['complete', 'deferred', 'timeout'].includes(message.payload.mode)) throw validationError('DRIVER_TEST_EXECUTION_MODE', 'Mock execution mode is invalid.', {}, message.requestId);
+    if (!plainObject(message.payload) || !exactFields(message.payload, ['mode']) || !['complete', 'deferred', 'timeout', 'restart-required'].includes(message.payload.mode)) throw validationError('DRIVER_TEST_EXECUTION_MODE', 'Mock execution mode is invalid.', {}, message.requestId);
+  } else if (message.operation === 'testing.disposal-mode') {
+    if (!plainObject(message.payload) || !exactFields(message.payload, ['mode']) || !['none', 'immediate', 'poisoned', 'restart-required', 'unstructured'].includes(message.payload.mode)) throw validationError('DRIVER_TEST_DISPOSAL_MODE', 'Mock disposal mode is invalid.', {}, message.requestId);
+  } else if (message.operation === 'testing.disposal-status') {
+    if (!emptyPayload(message.payload)) throw validationError('DRIVER_TEST_DISPOSAL_STATUS', 'Mock disposal status payload must be empty.', {}, message.requestId);
   }
   return message;
 }

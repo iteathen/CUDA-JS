@@ -133,7 +133,18 @@ try {
           Atomics.wait(storage, 0, 0, request.payload.milliseconds);
           result = { schemaVersion: 1, blockedMilliseconds: request.payload.milliseconds, health: { current: health }, operationSequence };
         } else if (request.operation === 'testing.failure-mode') {
-          const modes = ['none', 'compile-create', 'compile-operation', 'compile-destroy', 'link-create', 'link-operation', 'link-destroy'];
+          const modes = [
+            'none',
+            'compile-create',
+            'compile-operation',
+            'compile-destroy',
+            'compile-operation-destroy',
+            'link-create',
+            'link-operation',
+            'link-destroy',
+            'link-operation-destroy',
+            'close-libraries',
+          ];
           if (Object.keys(request.payload).join('\0') !== 'mode' || !modes.includes(request.payload.mode)) throw new CompilerRuntimeError('COMPILER_TEST_FAILURE_MODE_INVALID', 'validation', 'Compiler failure mode is invalid.');
           backend.setFailureMode(request.payload.mode);
           result = { schemaVersion: 1, mode: request.payload.mode, health: { current: health }, operationSequence };

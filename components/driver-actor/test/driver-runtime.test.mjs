@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { DriverRuntimeError, openDriverRuntime } from '../index.mjs';
 import { openMockDriverRuntime } from '../testing.mjs';
 import { assertPublicRecord, validateRequest } from '../src/protocol.mjs';
-import { serializeError } from '../src/errors.mjs';
+import { deserializeError, serializeError } from '../src/errors.mjs';
+import { startupRollbackFailure } from '../src/startup-rollback.mjs';
 
 function expectCode(code) {
   return (error) => error instanceof DriverRuntimeError && error.code === code;
@@ -79,6 +81,197 @@ test('mock health records distinguish immediate and deferred provenance monotoni
     { before: 'suspect', after: 'poisoned' },
   ]);
   assert.equal((await runtime.close()).health.current, 'closed');
+});
+
+test('Driver error transport preserves a bounded observation operation', () => {
+  const source = new DriverRuntimeError(
+    'CUDA_DRIVER_FAILURE',
+    'immediate-driver',
+    'Native operation failed.',
+    { nativeStatus: 999 },
+    { operation: 'cuMemFree_v2', operationId: 17, healthBefore: 'healthy', healthAfter: 'suspect' },
+  );
+  const serialized = serializeError(source);
+  assert.equal(serialized.operation, 'cuMemFree_v2');
+  const transported = deserializeError(serialized);
+  assert.equal(transported.operation, 'cuMemFree_v2');
+  assert.equal(transported.operationId, 17);
+  assert.equal(transported.healthAfter, 'suspect');
+  assert.equal(serializeError(Object.assign(new Error('unsafe'), {
+    code: 'CUDA_DRIVER_FAILURE', category: 'immediate-driver', operation: 'C:\\private\\call',
+  })).operation, null);
+});
+
+test('native startup rollback product retains bounded primary and cleanup semantics', () => {
+  const primary = new DriverRuntimeError(
+    'RESOURCE_NONCE_INVALID',
+    'internal',
+    'Context registry admission failed.',
+    { slot: 1, privatePath: 'C:\\private\\context' },
+    { operation: 'resource.allocate', operationId: 7, healthBefore: 'healthy', healthAfter: 'suspect' },
+  );
+  const cleanup = new DriverRuntimeError(
+    'CUDA_DRIVER_FAILURE',
+    'immediate-driver',
+    'cuCtxDestroy_v2 failed.',
+    {
+      nativeStatus: 999,
+      nativeName: 'CUDA_ERROR_UNKNOWN',
+      nativeDescription: `at C:\\private\\nvcuda.dll host secret-machine user secret-user handle 0xdecafbad token ${'a'.repeat(32)} runtimeId runtime-secret bare ${'b'.repeat(32)} account@example.test`,
+      privatePointer: '0x1234',
+    },
+    { operation: 'cuCtxDestroy_v2', operationId: 7, healthBefore: 'suspect', healthAfter: 'poisoned' },
+  );
+  const error = startupRollbackFailure({
+    primaryError: primary,
+    cleanupErrors: [cleanup],
+    inventory: {
+      counts: { live: 1, closing: 0, closed: 0, orphaned: 1 },
+      resources: [{ kind: 'library', state: 'live' }, { kind: 'context', state: 'orphaned' }],
+    },
+    unprovedResources: [{ kind: 'device', state: 'orphaned', disposition: 'unproved' }],
+    healthCurrent: 'poisoned',
+  });
+  assert.equal(error.code, 'DRIVER_STARTUP_ROLLBACK_FAILED');
+  assert.equal(error.category, 'immediate-driver');
+  assert.equal(error.operation, 'runtime.open');
+  assert.equal(error.healthAfter, 'poisoned');
+  assert.equal(error.details.primaryFailure.code, 'RESOURCE_NONCE_INVALID');
+  assert.equal(error.details.cleanupFailures.length, 1);
+  assert.equal(error.details.cleanupFailures[0].operation, 'cuCtxDestroy_v2');
+  assert.equal(error.details.cleanupFailures[0].details.nativeName, 'CUDA_ERROR_UNKNOWN');
+  assert.equal(error.details.cleanupFailures[0].details.nativeStatus, 999);
+  assert.match(error.details.cleanupFailures[0].details.nativeDescription, /\[redacted-path\]/);
+  assert.match(error.details.cleanupFailures[0].details.nativeDescription, /\[redacted-identity\]/);
+  assert.match(error.details.cleanupFailures[0].details.nativeDescription, /\[redacted-handle\]/);
+  assert.match(error.details.cleanupFailures[0].details.nativeDescription, /\[redacted-capability\]/);
+  assert.equal(error.details.cleanupFailureCount, 1);
+  assert.equal(error.details.cleanupFailuresTruncated, 0);
+  assert.equal(error.details.terminal, 'unproved');
+  assert.deepEqual(error.details.inventory.counts, { live: 1, closing: 0, closed: 0, orphaned: 2 });
+  assert.deepEqual(error.details.inventory.resources.at(-1), { kind: 'device', state: 'orphaned', disposition: 'unproved' });
+  assert.equal(JSON.stringify(error.details).includes('private'), false);
+  assert.equal(JSON.stringify(error.details).includes('0x1234'), false);
+  assert.doesNotMatch(JSON.stringify(error.details), /secret-machine|secret-user|runtime-secret|account@example|a{32}|b{32}/);
+});
+
+test('native backend source directly rolls back pre-registration context/library ownership and retains failures', async () => {
+  const source = await readFile(new URL('../src/backends/windows-native.mjs', import.meta.url), 'utf8');
+  assert.match(source, /rawContext = context;\s*contextToken = registry\.allocate/);
+  assert.match(source, /if \(rawContext !== null\)[\s\S]*destroyContextForRollback\(rawContext\)/);
+  assert.match(source, /if \(!libraryToken && library && !dependencyCleanupBlocked\)[\s\S]*closeDriverLibrary\(library\)/);
+  assert.match(source, /cleanupErrors\.push\(\.\.\.teardown\.errors\)/);
+  assert.match(source, /startupRollbackFailure\(\{/);
+  assert.doesNotMatch(source, /library\.close\(\);?\s*\} catch \{\}/);
+  assert.doesNotMatch(source, /requireSuccess\('[^']*\(/);
+});
+
+for (const scenario of [
+  { mode: 'immediate', category: 'immediate-driver', health: 'suspect', workerExits: false },
+  { mode: 'poisoned', category: 'immediate-driver', health: 'poisoned', workerExits: false },
+  { mode: 'restart-required', category: 'restart-required', health: 'restart-required', workerExits: true },
+  { mode: 'unstructured', category: 'restart-required', health: 'restart-required', workerExits: true },
+]) {
+  test(`mock ${scenario.mode} disposal failure preserves health, admission, and single-call evidence`, async () => {
+    const { runtime, testing } = await openMockDriverRuntime();
+    const allocation = await runtime.allocateDevice({ byteLength: 8 });
+    await testing.setDisposalFailureMode(scenario.mode);
+    let firstFailure;
+    let immediateClose;
+    await assert.rejects(runtime.releaseMemory(allocation.memory), (error) => {
+      firstFailure = error;
+      assert.equal(error.code, 'RESOURCE_DISPOSE_FAILED');
+      assert.equal(error.category, scenario.category);
+      assert.equal(error.operation, scenario.mode === 'unstructured' ? 'resource.close' : 'mock.memory.free');
+      assert.equal(error.healthAfter, scenario.health);
+      assert.equal(error.details.resourceKind, 'device-memory');
+      assert.equal(error.details.resourceState, 'orphaned');
+      assert.equal(error.details.disposition, scenario.mode === 'unstructured' ? 'unproved' : 'orphaned');
+      if (scenario.mode === 'unstructured') {
+        assert.equal(error.details.causeCode, null);
+        assert.equal(error.details.causeDisposalCallCount, 1);
+      } else {
+        assert.equal(error.details.causeCode, 'CUDA_MOCK_DISPOSAL_FAILURE');
+        assert.equal(error.details.causeOperation, 'mock.memory.free');
+        assert.equal(error.details.causeDisposalCallCount, 1);
+      }
+      if (scenario.workerExits) {
+        immediateClose = runtime.close();
+      }
+      return true;
+    });
+
+    if (scenario.workerExits) {
+      assert.equal(runtime.health, 'restart-required');
+      const terminal = await immediateClose;
+      assert.equal(terminal.workerExited, true);
+      assert.equal(terminal.workerExitCode, 0);
+      assert.equal(runtime.terminalReport, terminal);
+      assert.equal(await runtime.close(), terminal);
+      assert.equal(terminal.commandAcknowledged, true);
+      assert.equal(terminal.error.code, firstFailure.code);
+      assert.equal(terminal.error.category, scenario.category);
+      assert.equal(terminal.error.operation, firstFailure.operation);
+      assert.equal(terminal.acknowledgedHealth.current, 'restart-required');
+      assert.equal(terminal.acknowledgedInventory.resources.find((entry) => entry.kind === 'device-memory').state, 'orphaned');
+      assert.equal(terminal.inventory.dead, true);
+      return;
+    }
+
+    assert.equal(runtime.health, scenario.health);
+    const firstStatus = await testing.disposalStatus();
+    assert.equal(firstStatus.disposalCallCount, 1);
+    assert.equal(firstStatus.inventory.resources.find((entry) => entry.kind === 'device-memory').state, 'orphaned');
+    await assert.rejects(runtime.releaseMemory(allocation.memory), (error) => {
+      assert.equal(error.code, firstFailure.code);
+      assert.equal(error.category, firstFailure.category);
+      assert.equal(error.operation, firstFailure.operation);
+      return true;
+    });
+    assert.equal((await testing.disposalStatus()).disposalCallCount, 1);
+
+    if (scenario.health === 'poisoned') {
+      await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), (error) => error.code === 'DRIVER_RUNTIME_POISONED' && error.healthAfter === 'poisoned');
+    } else {
+      const admitted = await runtime.allocateDevice({ byteLength: 1 });
+      assert.equal(admitted.byteLength, 1);
+    }
+
+    const terminal = await runtime.close();
+    assert.equal(terminal.graceful, false);
+    assert.equal(terminal.commandAcknowledged, true);
+    assert.equal(terminal.acknowledgedHealth.current, scenario.health);
+    assert.equal(terminal.acknowledgedInventory.counts.orphaned > 0, true);
+    assert.equal(terminal.inventory.dead, true);
+    assert.equal(terminal.health.current, 'restart-required');
+  });
+}
+
+test('queued commands observe restart health before pending-operation backpressure', async () => {
+  const { runtime, testing } = await openMockDriverRuntime();
+  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+  const fn = await runtime.getFunction(module.module, { name: 'restart_queue', parameters: [{ kind: 'u32' }] });
+  await testing.setExecutionMode('restart-required');
+  const operation = await runtime.submit(fn.function, {
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'u32', value: 1 }],
+  });
+
+  const restart = runtime.operationStatus(operation.operation);
+  const queuedDescribe = runtime.describe();
+  const queuedAllocation = runtime.allocateDevice({ byteLength: 1 });
+
+  await assert.rejects(restart, (error) => error.code === 'CUDA_EVENT_QUERY_RESTART_REQUIRED' && error.category === 'restart-required');
+  for (const queued of [queuedDescribe, queuedAllocation]) {
+    await assert.rejects(queued, (error) => error.code === 'DRIVER_RESTART_REQUIRED'
+      && error.category === 'restart-required'
+      && error.healthBefore === 'restart-required'
+      && error.healthAfter === 'restart-required');
+  }
+
+  const terminal = await runtime.close();
+  assert.equal(terminal.workerExited, true);
+  assert.equal(runtime.terminalReport, terminal);
+  assert.equal(await runtime.close(), terminal);
 });
 
 test('bounded queue rejects overflow while a blocked actor leaves the main loop responsive', async () => {
@@ -181,6 +374,39 @@ test('unexpected Worker loss retains allocation inventory and reserved-byte evid
   assert.equal(terminal.memory.state, 'orphaned');
 });
 
+test('Worker-loss terminal preserves total counts when inventory records are truncated', async () => {
+  const { runtime, testing } = await openMockDriverRuntime();
+  for (let index = 0; index < 20; index += 1) await runtime.allocateDevice({ byteLength: 1 });
+  const before = await runtime.describe();
+  assert.equal(before.inventory.resourceCount, 22);
+  assert.equal(before.inventory.resources.length, 16);
+  assert.equal(before.inventory.resourcesTruncated, 6);
+  assert.equal(before.inventory.counts.live, 22);
+
+  const terminal = await testing.terminateActor();
+  assert.equal(terminal.inventory.resourceCount, 22);
+  assert.equal(terminal.inventory.resources.length, 16);
+  assert.equal(terminal.inventory.resourcesTruncated, 6);
+  assert.deepEqual(terminal.inventory.counts, { live: 0, closing: 0, closed: 0, orphaned: 22 });
+});
+
+test('large graceful teardown bounds mock disposal order while retaining exact totals and terminal parent proof', async () => {
+  const { runtime } = await openMockDriverRuntime({
+    memory: { maxDeviceBytes: 4_096, maxAllocationBytes: 4_096, maxTransferBytes: 4_096 },
+  });
+  for (let index = 0; index < 1_400; index += 1) await runtime.allocateDevice({ byteLength: 1 });
+
+  const terminal = await runtime.close();
+  assert.equal(terminal.graceful, true);
+  assert.equal(terminal.cleanupClaim, 'proved-mock-lifecycle-only');
+  assert.equal(terminal.disposalOrderCount, 1_402);
+  assert.equal(terminal.disposalOrder.length, 32);
+  assert.equal(terminal.disposalOrderTruncated, 1_370);
+  assert.deepEqual(terminal.disposalOrder.slice(-2), ['context', 'library']);
+  assert.equal(terminal.teardown.dispositionCount, 1_402);
+  assert.equal(terminal.teardown.dispositionsTruncated, 1_370);
+});
+
 test('mock execution facade snapshots PTX and completes only after private event polling', async () => {
   const { runtime } = await openMockDriverRuntime();
   const bytes = Uint8Array.from(MOCK_PTX);
@@ -249,7 +475,14 @@ test('mock deferred launch failure is terminal, poisons health, and releases com
   await testing.setExecutionMode('deferred');
   await assert.rejects(runtime.launch(fn.function, {
     grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'device-memory', memory: allocation.memory }],
-  }), (error) => error.code === 'CUDA_DEFERRED_FAILURE' && error.category === 'deferred-driver' && error.healthAfter === 'poisoned');
+  }), (error) => {
+    assert.equal(error.code, 'CUDA_DEFERRED_FAILURE');
+    assert.equal(error.category, 'deferred-driver');
+    assert.equal(error.operation, 'execution.event.query');
+    assert.equal(error.healthAfter, 'poisoned');
+    assert.equal(error.details.nativeStatus, 999);
+    return true;
+  });
   assert.equal(runtime.health, 'poisoned');
   await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), expectCode('DRIVER_RUNTIME_POISONED'));
   const description = await runtime.describe();

@@ -11,10 +11,17 @@ const LIMITS = Object.freeze({
   maxGridDimX: 2_147_483_647, maxGridDimY: 65_535, maxGridDimZ: 65_535, maxSharedMemoryPerBlock: 49_152,
 });
 
-function fixture({ query = () => 'pending', policy = {}, clock = () => Date.now(), sleep = async () => {} } = {}) {
+function fixture({ query = () => 'pending', policy = {}, clock = () => Date.now(), sleep = async () => {}, eventCloseFailure = null } = {}) {
   const registry = new ResourceRegistry({ runtimeId: 'operation-test', epoch: 1, nonce: (() => { let value = 0; return () => (++value).toString(16).padStart(32, '0'); })() });
   const library = registry.allocate({ kind: 'library', value: {}, dispose() {} });
   const context = registry.allocate({ kind: 'context', value: {}, parent: library, dispose() {} });
+  if (eventCloseFailure !== null) {
+    const closeResource = registry.close.bind(registry);
+    registry.close = async (token) => {
+      if (token?.kind === 'event') throw eventCloseFailure;
+      return closeResource(token);
+    };
+  }
   const allocations = new Map();
   const memory = new MemoryManager({
     registry, contextToken: context,
@@ -92,16 +99,64 @@ test('separate status turns terminalize once, release leases, and permit logical
 });
 
 test('deferred failure becomes stable terminal failure with proved cleanup', async () => {
-  const failure = new ExecutionError('CUDA_DEFERRED_FAILURE', 'deferred-driver', 'deferred failure', {}, { healthBefore: 'healthy', healthAfter: 'poisoned' });
+  const failure = new ExecutionError(
+    'CUDA_DEFERRED_FAILURE',
+    'deferred-driver',
+    'deferred failure',
+    { nativeStatus: 719, nativeName: 'CUDA_ERROR_LAUNCH_FAILED' },
+    { operation: 'cuEventQuery', operationId: 20, healthBefore: 'healthy', healthAfter: 'poisoned' },
+  );
   const { registry, execution, fn, allocation } = await prepared({ query: () => { throw failure; } });
   const operation = await execution.submit(fn.function, launchRequest(allocation));
   const status = await execution.operationStatus(operation.operation, 20);
   assert.equal(status.status, 'failed');
   assert.equal(status.failure.code, 'CUDA_DEFERRED_FAILURE');
+  assert.equal(status.failure.operation, 'cuEventQuery');
+  assert.equal(status.failure.operationId, 20);
+  assert.equal(status.failure.details.nativeStatus, 719);
+  assert.equal(status.failure.details.nativeName, 'CUDA_ERROR_LAUNCH_FAILED');
   assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'function').leases, 0);
   assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'device-memory').leases, 0);
   assert.equal(execution.summary().pendingOperation, false);
   await execution.releaseOperation(operation.operation);
+});
+
+test('completed work plus failed event disposal retains cleanup provenance before restart', async () => {
+  const cleanupFailure = new ExecutionError(
+    'RESOURCE_DISPOSE_FAILED',
+    'immediate-driver',
+    'event cleanup failed',
+    {
+      resourceKind: 'event',
+      causeCode: 'CUDA_EVENT_DESTROY_FAILED',
+      causeNativeStatus: 400,
+      causeNativeName: 'CUDA_ERROR_INVALID_HANDLE',
+      causeNativeDescription: 'event cleanup failed at C:\\private\\driver.dll',
+      providerPath: 'C:\\private\\nvcuda.dll',
+    },
+    { operation: 'cuEventDestroy_v2', operationId: 26, healthBefore: 'healthy', healthAfter: 'suspect' },
+  );
+  const { execution, fn, allocation } = await prepared({ query: () => 'complete', eventCloseFailure: cleanupFailure });
+  const operation = await execution.submit(fn.function, { ...launchRequest(allocation), operationId: 25 });
+  await assert.rejects(execution.operationStatus(operation.operation, 26), (error) => {
+    assert.equal(error.code, 'EXECUTION_EVENT_CLEANUP_UNPROVED');
+    assert.equal(error.category, 'restart-required');
+    assert.equal(error.operation, 'execution.operation.status');
+    assert.equal(error.healthAfter, 'restart-required');
+    assert.equal(Object.hasOwn(error.details, 'primaryFailure'), false);
+    assert.equal(error.details.cleanupFailures.length, 1);
+    assert.equal(error.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
+    assert.equal(error.details.cleanupFailures[0].operation, 'cuEventDestroy_v2');
+    assert.equal(error.details.cleanupFailures[0].healthAfter, 'suspect');
+    assert.equal(error.details.cleanupFailures[0].details.causeNativeStatus, 400);
+    assert.equal(error.details.cleanupFailures[0].details.causeNativeName, 'CUDA_ERROR_INVALID_HANDLE');
+    assert.match(error.details.cleanupFailures[0].details.causeNativeDescription, /\[redacted-path\]/);
+    assert.doesNotMatch(JSON.stringify(error.details), /private|providerPath/);
+    return true;
+  });
+  const orphaned = await execution.operationStatus(operation.operation, 27);
+  assert.equal(orphaned.status, 'orphaned');
+  assert.equal(orphaned.failure.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
 });
 
 test('close preparation completes proved work but preserves orphaned ownership on timeout', async () => {
@@ -124,4 +179,53 @@ test('close preparation completes proved work but preserves orphaned ownership o
   assert.equal(resources.find((entry) => entry.kind === 'device-memory').leases, 2);
   const second = await timeout.execution.prepareClose(33);
   assert.equal(second.pendingOperation, true);
+});
+
+test('terminal failure plus event cleanup failure retains both errors and restart-required orphan inventory', async () => {
+  const primaryFailure = new ExecutionError(
+    'CUDA_DEFERRED_FAILURE',
+    'deferred-driver',
+    'deferred failure',
+    { nativeStatus: 719 },
+    { operation: 'cuEventQuery', operationId: 80, healthBefore: 'healthy', healthAfter: 'poisoned' },
+  );
+  const cleanupFailure = new ExecutionError(
+    'RESOURCE_DISPOSE_FAILED',
+    'immediate-driver',
+    'event cleanup failed',
+    { resourceKind: 'event', causeCode: 'CUDA_EVENT_DESTROY_FAILED', nativeStatus: 400, providerPath: 'C:\\private\\nvcuda.dll' },
+    { operation: 'cuEventDestroy', operationId: 81, healthBefore: 'poisoned', healthAfter: 'poisoned' },
+  );
+  const { registry, execution, fn, allocation } = await prepared({
+    query: () => { throw primaryFailure; },
+    eventCloseFailure: cleanupFailure,
+  });
+  const operation = await execution.submit(fn.function, { ...launchRequest(allocation), operationId: 80 });
+
+  await assert.rejects(execution.operationStatus(operation.operation, 81), (error) => {
+    assert.equal(error.code, 'EXECUTION_EVENT_CLEANUP_UNPROVED');
+    assert.equal(error.category, 'restart-required');
+    assert.equal(error.operation, 'execution.operation.status');
+    assert.equal(error.operationId, 81);
+    assert.equal(error.healthAfter, 'restart-required');
+    assert.equal(error.details.primaryFailure.code, 'CUDA_DEFERRED_FAILURE');
+    assert.equal(error.details.primaryFailure.operation, 'cuEventQuery');
+    assert.equal(error.details.primaryFailure.healthAfter, 'poisoned');
+    assert.equal(error.details.cleanupFailures.length, 1);
+    assert.equal(error.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
+    assert.equal(error.details.cleanupFailures[0].operation, 'cuEventDestroy');
+    assert.equal(error.details.cleanupFailures[0].healthAfter, 'poisoned');
+    assert.equal(error.details.resultingHealth, 'restart-required');
+    assert.deepEqual(error.details.inventory.unproved, [{ kind: 'event', registered: true, disposition: 'unproved' }]);
+    assert.doesNotMatch(JSON.stringify(error.details), /private|providerPath/);
+    return true;
+  });
+
+  const orphaned = await execution.operationStatus(operation.operation, 82);
+  assert.equal(orphaned.status, 'orphaned');
+  assert.equal(orphaned.failure.code, 'EXECUTION_EVENT_CLEANUP_UNPROVED');
+  assert.equal(orphaned.failure.details.primaryFailure.code, 'CUDA_DEFERRED_FAILURE');
+  assert.equal(orphaned.failure.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
+  assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'event').state, 'live');
+  assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'function').leases, 1);
 });
