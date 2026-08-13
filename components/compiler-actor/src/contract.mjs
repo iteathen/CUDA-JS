@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 
+import { inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
 import { compilerError } from './errors.mjs';
 
 export const LIMITS = Object.freeze({
@@ -95,14 +96,16 @@ function sourceText(value, maximum, code, label) {
 
 function computeArchitecture(value) {
   const architecture = value ?? 'compute_75';
-  if (!/^compute_[5-9][0-9]$/.test(architecture)) throw compilerError('COMPILER_ARCHITECTURE_INVALID', 'Compile architecture must use canonical compute_NN syntax from compute_50 through compute_99.');
-  return architecture;
+  const target = inspectCudaTarget(architecture, { expectedPrefix: 'compute' });
+  if (!target.ok) throw compilerError('COMPILER_ARCHITECTURE_INVALID', 'Compile architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
+  return target.target.name;
 }
 
 function smArchitecture(value) {
   const architecture = value ?? 'sm_75';
-  if (!/^sm_[5-9][0-9]$/.test(architecture)) throw compilerError('LINKER_ARCHITECTURE_INVALID', 'Link architecture must use canonical sm_NN syntax from sm_50 through sm_99.');
-  return architecture;
+  const target = inspectCudaTarget(architecture, { expectedPrefix: 'sm' });
+  if (!target.ok) throw compilerError('LINKER_ARCHITECTURE_INVALID', 'Link architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
+  return target.target.name;
 }
 
 function compileOutput(value) {
@@ -185,7 +188,7 @@ function normalizePtxInput(value, index) {
     const fields = Object.keys(value);
     if (fields.some((key) => !['format', 'bytes', 'byteLength', 'sha256', 'architecture', 'relocatableDeviceCode'].includes(key))) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX artifact contains unknown fields.', { index });
     bytes = value.bytes;
-    architecture = value.architecture ?? null;
+    architecture = value.architecture == null ? null : computeArchitecture(value.architecture);
     if (Object.hasOwn(value, 'relocatableDeviceCode')) {
       if (value.relocatableDeviceCode !== true) throw compilerError('LINKER_INPUT_INVALID', 'Typed PTX relocatableDeviceCode marker, when present, must be true.', { index });
       relocatableDeviceCode = true;
@@ -239,7 +242,7 @@ export function normalizeLinkRequest(request) {
   const totalInputBytes = inputs.reduce((sum, input) => sum + input.byteLength, 0);
   if (totalInputBytes > LIMITS.totalInputBytes) throw compilerError('LINKER_INPUT_LIMIT', 'Total link input bytes exceed the limit.', { totalInputBytes });
   for (const input of inputs) {
-    if (input.architecture && input.architecture.replace('compute_', 'sm_') !== options.architecture) throw compilerError('LINKER_ARCHITECTURE_MISMATCH', `Typed ${input.format} architecture does not match link architecture.`);
+    if (input.architecture && pairedCudaTarget(input.architecture, 'sm') !== options.architecture) throw compilerError('LINKER_ARCHITECTURE_MISMATCH', `Typed ${input.format} architecture does not match link architecture.`);
   }
   if (mode === 'lto') {
     const majors = new Set(inputs.map((input) => input.producer.major));
