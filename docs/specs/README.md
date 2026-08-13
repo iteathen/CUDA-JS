@@ -15,9 +15,10 @@
 - [`SPEC-0010-relocatable-device-code.md`](SPEC-0010-relocatable-device-code.md) — accepted bounded CompilerActor follow-up for typed NVRTC relocatable-device-code compilation and linkable PTX metadata while preserving the existing default compile/link path.
 - [`SPEC-0011-scalar-kernel-arguments.md`](SPEC-0011-scalar-kernel-arguments.md) — accepted bounded execution follow-up adding closed `u64`, `i32`, and `f32` packed scalar argument kinds while preserving legacy launch behavior.
 - [`SPEC-0012-device-lto.md`](SPEC-0012-device-lto.md) — accepted bounded CompilerActor follow-up adding typed LTO-IR compile output and homogeneous device-LTO linking without exposing raw nvJitLink controls.
+- [`SPEC-0014-long-lived-sideband.md`](SPEC-0014-long-lived-sideband.md) — proposal for bounded publication mailboxes consumed by SPEC-0016 operations; it does not define a second operation lifecycle or native support.
 - [`SPEC-0015-execution-scope-status-clarification.md`](SPEC-0015-execution-scope-status-clarification.md) — accepted clarification that SPEC-0005 single-flight exclusions are F5 scope/qualification boundaries, not architectural rejection.
 - [`SPEC-0016-operation-lifecycle.md`](SPEC-0016-operation-lifecycle.md) — accepted submission/completion lifecycle: one opaque operation, one DriverActor/context, one private stream and one pending operation in the first slice, with strict pending-command gating and preserved terminal `launch()` compatibility.
 
-Numbers 0013 and 0014 are intentionally reserved by active, not-yet-integrated Device-JS and long-lived-sideband work. Their absence from this `main` index is not an authorization or rejection signal.
+Number 0013 remains reserved by active, not-yet-integrated Device-JS work. SPEC-0014 is integrated as a proposal/experiment boundary only; proposal presence does not grant production implementation authority.
 
 No production implementation is authorized merely because a function appears in generated schema or an issue is open. Production work must remain inside the exact bounds of an accepted specification; native/support claims additionally require their exact evidence gates.
