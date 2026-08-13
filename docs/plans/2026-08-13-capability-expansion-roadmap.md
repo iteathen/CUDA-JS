@@ -15,12 +15,12 @@ This roadmap is non-authoritative sequencing beneath accepted specifications. Ea
 ## Exact baseline
 
 ```text
-protected main at reconciliation: d5c6795b06f86b7239cc1730dd60dc09844d126b
-implementation baseline:          fe9ed78939d3876790291421cec367fde58a8310
-package:                          cuda-js@0.1.0-alpha.5
+capability-authority main:            5233a046c57813532a71763bb36cdba5894e43e0
+implementation baseline before it:    fe9ed78939d3876790291421cec367fde58a8310
+package:                              cuda-js@0.1.0-alpha.5
 ```
 
-Accepted portable/software follow-up contracts on that baseline:
+Accepted portable/software follow-up contracts on that implementation baseline:
 
 ```text
 SPEC-0010 relocatable device code
@@ -31,6 +31,8 @@ SPEC-0016 opaque operation lifecycle
 ```
 
 SPEC-0014 remains proposal/experiment authority only.
+
+The P0 authority-correction packet accepts the SPEC-0003 disposal-failure addendum and SPEC-0006 target-syntax addendum. Their production corrections become implementation-ready only after that acceptance packet is integrated; neither acceptance changes native support by itself.
 
 ## Governing invariants
 
@@ -49,7 +51,7 @@ All expansion work preserves:
 
 ## Authority repair result
 
-The 2026-08-13 issue expansion referenced `SPEC-0017` through `SPEC-0026` before those proposal files existed on protected main. This roadmap establishes the intended proposal set:
+The 2026-08-13 issue expansion referenced `SPEC-0017` through `SPEC-0026` before those proposal files existed on protected main. PR #97 established the intended proposal set:
 
 ```text
 SPEC-0017 explicit device selection and target resolution
@@ -64,7 +66,7 @@ SPEC-0025 graphics external-resource interoperability
 SPEC-0026 process-isolated execution
 ```
 
-Their status is **Proposal**. Creating them repairs coordination/ownership references; it does not authorize production code.
+Their status remains **Proposal**. Creating them repairs coordination/ownership references; it does not authorize production code.
 
 ## Parent dependency graph
 
@@ -110,11 +112,11 @@ Repair the EXP-013 responsiveness oracle without changing mailbox semantics or p
 
 ### CAP-P0-TARGET — #65
 
-Reconcile accepted SPEC-0006 target syntax with three-digit architecture spellings and use one authoritative target parser/normalizer. This requires a specification addendum/accepted amendment before code.
+The SPEC-0006 target-syntax addendum is accepted in the current P0 authority packet. After integration, implement one shared target parser/policy owner across CompilerActor, linker, Device-JS and target validation. Structurally understand current numeric/`f`/`a` CUDA forms, policy-admit only reviewed targets, and keep provider/device/qualification state separate. Do not change support rows merely because syntax becomes representable.
 
 ### CAP-P0-DISPOSAL — #66
 
-Reconcile SPEC-0003/resource-registry disposal failure semantics so structured restart-required/health transitions are not collapsed into `stale-resource`. This requires an accepted lifecycle addendum before production repair.
+The SPEC-0003 disposal-failure addendum is accepted in the current P0 authority packet. After integration, repair ResourceRegistry/DriverActor/facade propagation so `RESOURCE_DISPOSE_FAILED` retains the underlying semantic category, observation and health transition, failed close becomes orphaned/unusable, and repeated close does not repeat disposer/native work by default.
 
 ### CAP-P0-DOCS — #67
 
