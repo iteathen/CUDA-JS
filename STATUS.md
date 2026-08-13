@@ -2,11 +2,11 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-12
+**Updated:** 2026-08-13
 
 ## Current implementation state
 
-The latest implementation-bearing protected `main` baseline before this documentation-only plan reconciliation is:
+The latest implementation-bearing protected `main` baseline before the documentation-only capability authority work is:
 
 ```text
 fe9ed78939d3876790291421cec367fde58a8310
@@ -24,6 +24,30 @@ That baseline contains:
 
 Portable/software implementation and native qualification are separate. SPEC-0010/0011/0012/0013/0016 retain their exact native promotion gates.
 
+## 2026-08-13 capability authority expansion
+
+The open capability tracker had begun referring to `SPEC-0017` through `SPEC-0026` and a capability-expansion roadmap before those files existed on protected main. The documentation authority packet now defines those missing documents as **proposals only**:
+
+```text
+SPEC-0017 device selection and target resolution
+SPEC-0018 bounded multi-operation scheduling
+SPEC-0019 host memory and async transfer
+SPEC-0020 prepared batch and CUDA Graph execution
+SPEC-0021 extended numeric ABI and generic device views
+SPEC-0022 Device-JS parallel and service profiles
+SPEC-0023 context-bound CUDA library adapters
+SPEC-0024 multi-GPU orchestration
+SPEC-0025 graphics interop
+SPEC-0026 process-isolated execution
+```
+
+It also proposes targeted addenda for:
+
+- SPEC-0006 target syntax/policy (#65), so three-digit architecture spellings can be represented without broadening native support;
+- SPEC-0003 disposal-failure provenance/health (#66), so native cleanup failures cannot be recategorized as ordinary stale-resource rejection.
+
+No implementation or qualification dimension changes merely because these proposal documents exist. Every production lane still requires its governing proposal/addendum to be separately accepted.
+
 ## Execution baseline
 
 ```text
@@ -37,17 +61,19 @@ legacy terminal convenience:  CudaFunction.launch()
 
 SPEC-0016 is implemented in software/portable paths. Direct submit backpressures while another operation is pending; legacy terminal `launch()` preserves serialized compatibility above the actor. Native SPEC-0016 qualification remains open under issue #51.
 
-Bounded multi-stream execution remains architecturally planned under issue #40 and unimplemented/unqualified. It must consume SPEC-0016 rather than define another lifecycle.
+Bounded multi-stream execution remains architecturally planned under issue #40 and proposed SPEC-0018. It is not implemented or qualified and must consume SPEC-0016 rather than define another lifecycle.
 
 ## Device-JS
 
 SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is a syntax-only parser adapter; CUDA-JS owns the accepted subset, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, diagnostics, identity and compiler handoff.
 
-Native DJS-2 evidence remains open under issue #43. The CUDA-MCGS external deletion/compatible-pair proof remains cross-repository future work.
+Native DJS-2 evidence remains open under issue #43. Proposed SPEC-0022 may later widen trusted generic GPU primitives and, separately, define a service-safe profile. Neither proposal changes the current trusted-source Device-JS support state.
+
+The CUDA-MCGS external deletion/compatible-pair proof remains cross-repository future work.
 
 ## Sideband
 
-SPEC-0014 remains a proposal. EXP-013 proves bounded portable publication-mailbox mechanics only. There is no production mapped/pinned sideband or arbitrary-duration live-operation support claim. Issue #38 must be reassessed against the now-implemented SPEC-0016 lifecycle before any production contract is accepted.
+SPEC-0014 remains a proposal. EXP-013 proves bounded portable publication-mailbox mechanics only. There is no production mapped/pinned sideband or arbitrary-duration live-operation support claim. Issue #38 must consume the accepted operation lifecycle and, if selected, accepted SPEC-0019 host-registration/mapping ownership before production sideband acceptance.
 
 ## Platform qualification
 
@@ -55,13 +81,18 @@ The exact accepted Windows x64 profile remains the native evidence baseline. Nat
 
 Not-qualified is not architectural rejection.
 
+## NN extension authority gap
+
+Issues #70–#84 describe an optional NN training extension, but the currently accepted project charter still states that CUDA-JS does not own tensor/model semantics. The first NN work package must therefore reconcile durable charter/component/package/spec authority as required by #71 before NN production implementation. Generic core capability proposals do not silently authorize tensor/autodiff/training code.
+
 ## Forward plans
 
-Active plans now contain unfinished work only:
+Active plans contain unfinished work only:
 
 - [`docs/plans/2026-08-12-native-and-platform-qualification-continuation.md`](docs/plans/2026-08-12-native-and-platform-qualification-continuation.md);
 - [`docs/plans/2026-08-12-execution-capability-continuation.md`](docs/plans/2026-08-12-execution-capability-continuation.md);
-- [`docs/plans/2026-08-12-compatible-pair-continuation.md`](docs/plans/2026-08-12-compatible-pair-continuation.md).
+- [`docs/plans/2026-08-12-compatible-pair-continuation.md`](docs/plans/2026-08-12-compatible-pair-continuation.md);
+- [`docs/plans/2026-08-13-capability-expansion-roadmap.md`](docs/plans/2026-08-13-capability-expansion-roadmap.md).
 
 The former master/focus/hardware/Node/F9/Device-JS plans are preserved unchanged under [`docs/archive/plans/`](docs/archive/plans/) and remain non-authoritative provenance. Their old active paths are explicit Superseded pointers.
 
