@@ -12,9 +12,15 @@ The latest implementation-bearing protected `main` baseline before the documenta
 fe9ed78939d3876790291421cec367fde58a8310
 ```
 
+The capability-authority proposal corpus is integrated on protected `main` at:
+
+```text
+5233a046c57813532a71763bb36cdba5894e43e0
+```
+
 Package identity is `cuda-js@0.1.0-alpha.5`.
 
-That baseline contains:
+The implementation baseline contains:
 
 - the accepted Windows F1–F9 foundation, including `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W`, exact Node 26.7.0 evidence, and retained Linux x86-64 qualification paths;
 - portable/software implementations of SPEC-0010 typed RDC, SPEC-0011 `u64`/`i32`/`f32` scalar arguments, SPEC-0012 Device LTO, SPEC-0013 restricted Device-JS, and SPEC-0016 opaque GPU operations;
@@ -26,7 +32,7 @@ Portable/software implementation and native qualification are separate. SPEC-001
 
 ## 2026-08-13 capability authority expansion
 
-The open capability tracker had begun referring to `SPEC-0017` through `SPEC-0026` and a capability-expansion roadmap before those files existed on protected main. The documentation authority packet now defines those missing documents as **proposals only**:
+The open capability tracker had begun referring to `SPEC-0017` through `SPEC-0026` and a capability-expansion roadmap before those files existed on protected main. PR #97 repaired that ownership gap by adding the following **proposal-only** contracts:
 
 ```text
 SPEC-0017 device selection and target resolution
@@ -41,12 +47,29 @@ SPEC-0025 graphics interop
 SPEC-0026 process-isolated execution
 ```
 
-It also proposes targeted addenda for:
+Proposal presence does not authorize their production implementation. Each must be separately reviewed and accepted before its implementation dimension may advance.
 
-- SPEC-0006 target syntax/policy (#65), so three-digit architecture spellings can be represented without broadening native support;
-- SPEC-0003 disposal-failure provenance/health (#66), so native cleanup failures cannot be recategorized as ordinary stale-resource rejection.
+## Accepted P0 authority corrections
 
-No implementation or qualification dimension changes merely because these proposal documents exist. Every production lane still requires its governing proposal/addendum to be separately accepted.
+Two contradictions in already-accepted authority have now been resolved at the specification level:
+
+### SPEC-0006 target-syntax addendum — issue #65
+
+**Architectural disposition:** selected correction.  
+**Implementation status:** authorized, not yet implemented.  
+**Qualification status:** existing qualified targets unchanged; newly represented targets remain not-qualified.
+
+The accepted addendum requires one shared target parser/policy owner across CompilerActor, linker, Device-JS and target validation. It can structurally represent current numeric, family-specific (`f`) and architecture-specific (`a`) CUDA target forms, but the initial repository policy admits only the reviewed unsuffixed target bases already owned by the hardware registry. Parser/policy admission, provider/toolkit acceptance, device compatibility and CUDA-JS native qualification remain separate facts.
+
+### SPEC-0003 disposal-failure addendum — issue #66
+
+**Architectural disposition:** selected correction.  
+**Implementation status:** authorized, not yet implemented.  
+**Qualification status:** portable defect reproduced; destructive native cleanup partitions remain independently qualified.
+
+The accepted addendum keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth.
+
+These two corrections are now dependency-ready implementation work. Acceptance does not itself fix the code or claim native negative-path/Blackwell support.
 
 ## Execution baseline
 
