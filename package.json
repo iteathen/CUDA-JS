@@ -42,7 +42,7 @@
     "type": "git",
     "url": "git+https://github.com/iteathen/CUDA-JS.git"
   },
-  "keywords": ["cuda", "gpu", "node", "ffi", "gpgpu", "gpu-computing", "gpu-programming", "javascript", "node-cuda", "node-ffi", "nodejs", "nvidia", "nvjitlink", "nvrtc", "ptx", "typescript", "windows"],
+  "keywords": ["cuda", "gpu", "node", "ffi", "nvrtc", "nvjitlink"],
   "scripts": {
     "exp:000:generate": "node scripts/run-exp-000.mjs generate",
     "exp:000:build": "node scripts/run-exp-000.mjs build",
