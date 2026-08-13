@@ -1,0 +1,54 @@
+# EXP-013 — Shared Publication Mailbox
+
+**Status:** Active bounded experiment; no production authority
+
+## Question
+
+Can CUDA-JS model the host-visible publication-mailbox semantics proposed by SPEC-0014 before any CUDA host-registration/mapping claim exists?
+
+Specifically, can independently progressing work exchange bounded atomic publication words through a `SharedArrayBuffer`, enforce one-writer lane direction and generation safety, retain mailbox leases through terminality, and fail honestly on attempted close/reset while leased?
+
+## Relationship to SPEC-0016
+
+SPEC-0016 is now the sole accepted GPU-operation lifecycle authority. This experiment's `DetachedMockOperation` predates that acceptance and is retained only as a **test harness** that supplies independently progressing mock work. It is not a proposed production operation resource, does not authorize `launchDetached()`, and must not be used to redefine SPEC-0016 submission/status/wait/close semantics.
+
+The useful question is narrower: can a mailbox compose with a long-lived operation without host polling driving progress or mailbox lifetime escaping operation terminality?
+
+## Isolation
+
+This experiment is pure JavaScript and uses a Node Worker as the **mock device**. It does not load CUDA, register host memory, create a CUDA context, launch a GPU kernel, or establish native support/performance.
+
+The Worker exists only to prove that host publication/control can coexist with independently progressing work.
+
+## Model
+
+- publication lanes are `u32` words over one `SharedArrayBuffer`;
+- lane direction is `host-to-device` or `device-to-host`;
+- host API uses `Atomics.load/store`;
+- mock-device API in the Worker uses the same atomic cells from the opposite side;
+- mailbox generation is captured by the experiment operation lease;
+- the harness holds one mailbox lease until Worker terminality;
+- mailbox reset/close rejects while leased;
+- pending harness close reports busy rather than pretending cancellation.
+
+## Fixture
+
+The mock device increments one device-to-host observation lane independently. A host-to-device multiplier lane changes how quickly the observation grows. A host-to-device stop lane cooperatively terminates the mock device.
+
+The host test:
+
+1. starts independently progressing mock work;
+2. proves observation changes before any status/wait call;
+3. updates the multiplier while work remains active;
+4. reads observation while work is active;
+5. verifies stale-generation and lane-direction rejections;
+6. verifies pending harness/mailbox close cannot claim cancellation/cleanup;
+7. publishes cooperative stop;
+8. observes terminality;
+9. verifies lease release permits reset/close.
+
+## Promotion/disposition
+
+Success promotes only the **portable mailbox semantic shape** into further SPEC-0014/native planning. Native production remains blocked on the exact CUDA mapping/publication evidence listed in the proposal and must consume SPEC-0016 rather than create a second lifecycle.
+
+If the experiment requires host polling to progress work, permits publication direction violations, cannot conserve leases, or cannot separate pending close from cancellation, the mailbox design is falsified before native work.
