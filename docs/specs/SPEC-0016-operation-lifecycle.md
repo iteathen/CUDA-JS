@@ -1,10 +1,10 @@
 # SPEC-0016: GPU Operation Submission and Completion Lifecycle
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-12
 
-**Assessed base:** `d4ff83717ad53be4701898def7c9ba757a496731`
+**Accepted after portable evidence on:** `f49f2621ef741b54255aad0877c1baffbfc79d1d`
 
 ## Outcome
 
@@ -14,11 +14,11 @@ The first slice adds one opaque logical GPU operation. Submission returns only a
 
 This specification does **not** authorize multiple GPU operations in flight or multiple execution streams. Those remain a separately planned capability under issue #40 after this lifecycle is trustworthy.
 
-Production implementation is not authorized while this document remains `Proposal`.
+This accepted specification authorizes only the bounded production integration described below. It does not establish native support before exact Windows qualification passes.
 
 ## Authority and relationship
 
-This proposal is additive to:
+This specification is additive to:
 
 - SPEC-0003 DriverActor/resource ownership;
 - SPEC-0004 device-memory ownership;
@@ -26,7 +26,7 @@ This proposal is additive to:
 - SPEC-0011 typed scalar launch arguments;
 - SPEC-0015 execution-scope/status clarification.
 
-SPEC-0005 remains the accepted runtime behavior until this proposal is explicitly accepted and implemented.
+SPEC-0005 remains the accepted currently implemented runtime behavior until the SPEC-0016 production work package is integrated. SPEC-0016 is now the authority for that bounded widening.
 
 Issue ownership:
 
@@ -38,10 +38,10 @@ Issue ownership:
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not implemented in accepted main
+architectural disposition: selected
+implementation status:       authorized, not yet implemented in accepted main
 qualification status:        not qualified
-priority:                    next execution-lifecycle capability
+priority:                    active execution-lifecycle work
 ```
 
 These dimensions are independent under `STATUS_SEMANTICS.md`.
@@ -96,7 +96,7 @@ The owning Worker remains serialized. Submission returns after event provenance 
 
 ## Public capability direction
 
-Intended public shape:
+The accepted public shape is:
 
 ```text
 CudaFunction.submit(options) -> CudaOperation
@@ -109,7 +109,7 @@ CudaOperation
 
 `CudaFunction.launch(options)` remains the terminal convenience API and must preserve SPEC-0005 behavior unless this specification explicitly says otherwise.
 
-Final naming may change during acceptance/package review; lifecycle semantics are the authority target.
+Minor naming refinements remain subject to package review only if they preserve this lifecycle exactly; they do not authorize semantic widening.
 
 ## Operation states
 
@@ -215,7 +215,7 @@ A terminal-but-not-yet-logically-closed operation does not consume the GPU admis
 
 ## Pending-operation command gate
 
-**EXP-014 changed the implementation direction here.** The first slice does not need ResourceRegistry lease introspection or new per-memory conflict machinery merely to make early submission safe.
+**EXP-014 established the selected implementation direction.** The first slice does not need ResourceRegistry lease introspection or new per-memory conflict machinery merely to make early submission safe.
 
 While one GPU operation is pending, DriverActor accepts only an explicit operation-safe command allowlist.
 
@@ -316,9 +316,9 @@ Unexpected DriverActor loss follows the existing runtime epoch/orphan rules.
 
 ## EXP-014 result
 
-EXP-014 is the cheapest decisive portable experiment for this lifecycle shape.
+EXP-014 was the cheapest decisive portable experiment for this lifecycle shape.
 
-On GitHub Actions Ubuntu 24.04 with official Node 26.7.0, protected PR #53 merge-ref run `31656331994` passed all stable experiment cases `OPL-001` through `OPL-015` represented by nine grouped tests:
+On GitHub Actions Ubuntu 24.04 with official Node 26.7.0, protected PR #53 merge-ref run `31656331994` passed all stable experiment cases `OPL-001` through `OPL-015`, represented by nine grouped tests:
 
 ```text
 tests 9
@@ -346,9 +346,9 @@ The first experiment run exposed a test-oracle defect: hosted Worker startup cou
 
 EXP-014 does **not** prove CUDA launch asynchrony, event ordering, native deferred-error behavior, cleanup, overlap, or performance.
 
-## Production work after acceptance
+## Authorized production work package
 
-Only after a separate authority change promotes this specification to `Accepted`, the first production work package is bounded to:
+This accepted specification authorizes only:
 
 - durable operation state in `runtime.execution`;
 - closed DriverActor commands for submit/status/logical release/legacy timeout;
@@ -360,6 +360,8 @@ Only after a separate authority change promotes this specification to `Accepted`
 - F3/F5/F8 portable/package conformance updates;
 - **no** new CUDA Driver exports merely for lifecycle separation;
 - **no** ResourceRegistry/MemoryManager API expansion solely for this slice.
+
+Anything beyond this list requires a separate accepted capability contract.
 
 ## Native Windows promotion evidence
 
@@ -380,14 +382,13 @@ Before native support is claimed for the new operation surface on the accepted W
 
 ## Falsifiers / rollback
 
-Do not promote if:
+Do not claim implementation/native completion if:
 
 - short status queries cannot preserve context/currentness or error provenance;
 - operation lifetime cannot own leases without raw-native escape;
 - the pending command gate cannot prevent unproven interleaving cleanly;
 - legacy `launch()` cannot preserve its timeout/cleanup truth;
 - graceful close can race live work;
-- a portable mock requires host polling to advance work;
 - native qualification later shows the intended submission boundary is not asynchronous on the exact profile.
 
 Rollback is preservation of accepted SPEC-0005 terminal single-flight behavior.

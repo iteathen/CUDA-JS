@@ -1,9 +1,9 @@
 {
-  "schema_version": 23,
+  "schema_version": 24,
   "updated": "2026-08-12",
-  "status": "status_semantics_correction_then_execution_lifecycle",
-  "objective": "Correct capability-status wording so qualification, implementation, architectural disposition, and priority cannot drift into one another; then restart the execution development cycle with submission/completion separation before bounded multi-stream scheduling.",
-  "exact_main_input": "0f622a667145c810bcc9afdc2630753dfa06a20f",
+  "status": "spec0016_accepted_portable_implementation_next",
+  "objective": "Implement the accepted SPEC-0016 submission/completion operation lifecycle without widening the one-context/one-stream/one-pending-operation first slice; preserve SPEC-0005 terminal launch compatibility and exact support claim limits; defer bounded multi-stream scheduling until the lifecycle is trustworthy.",
+  "exact_main_input": "f49f2621ef741b54255aad0877c1baffbfc79d1d",
   "parent_plan": "docs/plans/2026-08-10-master-plan.md",
   "legacy_phase_discovery": {
     "CJS-F0": "publication/foundation history remains in the owning master plan and Git history",
@@ -20,23 +20,24 @@
     "docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md",
     "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
     "docs/specs/SPEC-0005-module-launch-completion.md",
-    "docs/specs/SPEC-0015-execution-scope-status-clarification.md"
+    "docs/specs/SPEC-0015-execution-scope-status-clarification.md",
+    "docs/specs/SPEC-0016-operation-lifecycle.md"
   ],
   "status_semantics": {
     "rule": "Architectural disposition, implementation status, qualification/support status, and priority are independent. No value in one dimension implies a value in another.",
-    "legacy_no_support": "Deprecated shorthand. Historical occurrences are qualification/public-support statements unless an accepted architectural decision explicitly says rejected.",
-    "scope_language": "does not authorize, out of scope, and excluded from this slice are local scope statements, not project-wide architectural rejection"
+    "legacy_no_support": "Deprecated shorthand. Historical occurrences are qualification/public-support statements unless accepted architecture explicitly says rejected."
   },
   "accepted_baseline": {
     "driver_owner": "one DriverActor Worker owns one private context and raw Driver resources",
-    "execution": "SPEC-0005 one private nonblocking stream, one in-flight launch, private event, terminal launch() resolution",
+    "execution_current": "SPEC-0005 terminal launch implementation remains current until SPEC-0016 code integrates",
+    "execution_next_authority": "SPEC-0016 accepted operation lifecycle",
     "compiler": "SPEC-0006 PTX/cubin baseline plus integrated portable/software SPEC-0010 RDC and SPEC-0012 typed LTO follow-ups",
     "launch_scalars": "integrated portable/software SPEC-0011 u32/u64/i32/f32 plus device-memory ABI",
-    "native_claim_limit": "SPEC-0010/0011/0012 retain their separate exact native qualification gates"
+    "native_claim_limit": "SPEC-0010/0011/0012/0016 retain separate exact native qualification gates"
   },
   "active_repository_state": {
-    "main": "0f622a667145c810bcc9afdc2630753dfa06a20f",
-    "documentation_correction_branch": "agent/status-semantics-correction",
+    "main": "f49f2621ef741b54255aad0877c1baffbfc79d1d",
+    "spec0016_experiment": "EXP-014 durable record integrated; all OPL-001 through OPL-015 portable cases passed on protected PR #53",
     "device_js_pr": {
       "number": 49,
       "status": "open-unintegrated",
@@ -45,7 +46,7 @@
     "sideband_pr": {
       "number": 50,
       "status": "open-unintegrated",
-      "note": "Portable experiment/proposal only; reassess against the operation-lifecycle authority before integration."
+      "note": "Reassess against accepted SPEC-0016 before integration; #50 must not own a competing operation lifecycle."
     }
   },
   "execution_capabilities": {
@@ -53,72 +54,99 @@
       "architectural_disposition": "baseline-selected",
       "implementation_status": "implemented",
       "qualification_status": "qualified-exact-windows-profile",
-      "priority": "baseline",
+      "priority": "preserve-compatibility",
       "authority": "SPEC-0005"
     },
     "submission_completion_separation": {
-      "architectural_disposition": "planned",
-      "implementation_status": "not-implemented-in-accepted-main",
+      "architectural_disposition": "selected",
+      "implementation_status": "accepted-authorized-not-yet-integrated",
       "qualification_status": "not-qualified",
-      "priority": "next",
+      "priority": "active",
       "coordination_issue": 51,
-      "gate": "new accepted operation-lifecycle specification and decisive portable experiment before production implementation"
+      "authority": "SPEC-0016",
+      "portable_evidence": "EXP-014 passed"
     },
     "bounded_multi_stream_execution": {
       "architectural_disposition": "planned",
-      "implementation_status": "not-implemented-in-accepted-main",
+      "implementation_status": "not-implemented",
       "qualification_status": "not-qualified",
-      "priority": "after:submission-completion-separation",
+      "priority": "after:trustworthy-spec0016-implementation",
       "coordination_issue": 40,
-      "gate": "must consume the operation lifecycle from issue #51; no duplicate stream/event/operation owner"
+      "gate": "consume SPEC-0016 lifecycle; no duplicate operation owner"
     },
     "long_lived_sideband": {
       "architectural_disposition": "planned",
       "implementation_status": "portable-experiment-unintegrated",
       "qualification_status": "not-qualified",
-      "priority": "after:submission-completion-separation",
+      "priority": "after:spec0016-lifecycle",
       "coordination_issue": 38,
-      "gate": "operation lifecycle is owned by #51; #38 owns only mailbox/sideband-specific semantics and native mapping evidence"
+      "gate": "#38 owns mailbox/sideband semantics only and must consume SPEC-0016 operation lifecycle"
     }
   },
+  "spec0016_work_package": {
+    "allowed": [
+      "durable logical operation state in runtime.execution",
+      "closed DriverActor submit/status/logical-release/legacy-timeout commands",
+      "pending-operation DriverActor command gate",
+      "DriverRuntime operation methods",
+      "opaque public CudaOperation facade",
+      "legacy terminal launch compatibility built on the operation lifecycle",
+      "pending-aware DriverActor/runtime close",
+      "F3/F5/F8 portable/package conformance updates",
+      "documentation/component manifests required by those exact changes"
+    ],
+    "forbidden": [
+      "more than one pending GPU operation",
+      "more than one private execution stream",
+      "raw public CUDA streams/events/contexts/pointers",
+      "ResourceRegistry or MemoryManager API expansion solely for this lifecycle slice",
+      "ordinary Driver/memory command interleaving while an operation is pending",
+      "mapped sideband memory",
+      "asynchronous transfer/copy-compute overlap",
+      "CUDA Graph/cooperative execution",
+      "consumer/search/model semantics"
+    ]
+  },
   "immediate_sequence": [
-    "Integrate the status-semantics correction first: agent doctrine, SPEC-0015, current STATUS/next-step records, and generated/public support terminology must agree.",
-    "Reassess issue closures made from overloaded no-support/not-planned language and reopen or supersede them according to explicit architectural disposition rather than administrative shorthand.",
-    "Restart issue #51 from assess -> current NVIDIA research -> reassess -> durable plan/spec/experiment gate. Do not implement production async-operation changes before the accepted lifecycle contract exists.",
-    "After #51 has a trustworthy operation resource/lifecycle, restart issue #40 from assess -> research -> reassess -> plan for a bounded private stream pool and multiple in-flight operations. Preserve maxInFlight=1 as the default profile unless an accepted later contract changes it.",
-    "Reassess open PR #49 against corrected authority and current main before integration; do not assume prior claims that it was merged are true.",
-    "Reassess open PR #50 after #51 ownership is established so the sideband experiment does not duplicate operation lifecycle semantics.",
-    "Keep native Linux, WSL, ARM64, additional GPU-profile, and other qualification work independently evidence-gated."
+    "Implement SPEC-0016 on one focused branch from the exact accepted main after this authority change merges.",
+    "Start with runtime.execution private operation state and portable tests; preserve existing launch() test behavior while adding submit/status/wait/close coverage.",
+    "Add the DriverActor pending-operation command gate before exposing early-return submission through the public facade.",
+    "Keep all non-allowlisted ordinary Driver commands rejected while one operation is pending.",
+    "Make runtime close terminalize the sole pending operation before dependency teardown or preserve restart-required/orphan evidence.",
+    "Run the smallest affected tests first, then F3/F5/F8 portable and the protected full verify chain once.",
+    "Merge only the exact reviewed green head; read back main and update #51 with the software/portable result.",
+    "Leave #51 open for exact native Windows qualification if no qualified GPU environment is available.",
+    "Only after SPEC-0016 implementation is trustworthy, restart #40 from assessment/research/reassessment before any multi-stream production changes."
   ],
   "preconditions": [
-    "Current public support claims remain bounded to exact native evidence; a planned capability is not supported until implemented and qualified.",
-    "Current lack of support does not imply architectural rejection.",
-    "One DriverActor Worker/private context remains the default owner unless a future accepted decision explicitly changes it.",
-    "No raw pointer, stream, event, context, provider path, arbitrary native option, or consumer semantic enters the ordinary public API.",
-    "Deferred CUDA/platform profiles remain independently promotable when their exact environment and evidence become available.",
-    "Open issues and pull requests are coordination artifacts, not implementation authority."
+    "Current lack of native qualification does not revoke accepted implementation authority, but it forbids a native support claim.",
+    "One DriverActor Worker/private context remains the owner.",
+    "SPEC-0005 terminal launch behavior and timeout truth remain compatibility requirements.",
+    "EXP-014 is portable orchestration evidence only.",
+    "Open PR #49/#50 state is independent and must not be folded into this work package."
   ],
   "do_not": [
-    "use no-support or unsupported as shorthand for rejected",
-    "infer priority from qualification state",
-    "infer architecture from GitHub issue close reason",
-    "rewrite SPEC-0005 history to pretend multi-operation execution was part of the F5 proof",
-    "implement multi-stream scheduling before the operation lifecycle owner is accepted",
-    "expose raw public CUDA streams/events merely to demonstrate concurrency",
-    "claim Device-JS or sideband work is integrated before exact main read-back",
-    "weaken existing single-flight/native evidence while adding later profiles"
+    "implement #40 multi-stream scheduling during SPEC-0016 work",
+    "treat submit return as permission for arbitrary same-context Driver operations",
+    "release leases or destroy dependency resources before terminality is proved",
+    "translate a host wait timeout into a cancellation claim",
+    "weaken SPEC-0005 timeout/restart-required behavior",
+    "claim native asynchronous support from mocks",
+    "claim PR #49 or #50 is integrated before exact main read-back"
   ],
   "operational_blockers": [
-    "This sandbox has no NVIDIA GPU/toolkit exposure, so exact native async submission, overlap, mapped sideband, RDC, scalar-ABI, LTO, and Device-JS qualification require a qualified native host.",
-    "Native Linux CUDA remains blocked on qualified Linux NVIDIA hardware/provider exposure.",
-    "PR #49 and PR #50 are open and must be reconciled with the corrected authority before integration."
+    "This sandbox has no NVIDIA GPU/toolkit exposure, so exact native SPEC-0016 qualification requires a qualified native Windows CUDA host.",
+    "Native Linux CUDA remains blocked on qualified Linux NVIDIA hardware/provider exposure."
   ],
   "acceptance_criteria": [
-    "No active authoritative/current-status record uses qualification shorthand to imply architectural rejection.",
-    "SPEC-0005 remains the accepted single-flight baseline and SPEC-0015 makes its scope interpretation explicit.",
-    "Issue #51 is the sole owner of submission/completion operation lifecycle planning.",
-    "Issue #40 is a dependent planned multi-stream capability, not implementation authority and not a rejected feature.",
-    "Issue #38 consumes the operation lifecycle and owns only sideband-specific semantics.",
-    "Current main, open PRs, issue states, and public claims are read back exactly before any completion claim."
+    "Public submit returns a bounded opaque operation through the mock/portable path without holding the DriverActor command until terminality.",
+    "Operation status/wait/close follow SPEC-0016 state and cancellation truth.",
+    "One pending operation and one private stream remain enforced.",
+    "Non-allowlisted Driver commands reject while pending before unsafe work.",
+    "Legacy launch() preserves accepted success/failure/timeout behavior.",
+    "Runtime close never claims cleanup through unproved pending work.",
+    "Existing F3/F5/F8 regressions and EXP-014 remain green.",
+    "No raw native capability or consumer semantics enter the public boundary.",
+    "Software/portable completion is reported separately from native qualification."
   ]
 }
