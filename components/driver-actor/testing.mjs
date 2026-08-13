@@ -1,7 +1,8 @@
 import { DRIVER_RUNTIME_TEST, openDriverRuntimeForTesting } from './src/driver-runtime.mjs';
+import { withLegacyLaunchSerialization } from './src/legacy-launch-adapter.mjs';
 
 export async function openMockDriverRuntime(options = {}) {
-  const runtime = await openDriverRuntimeForTesting(options);
+  const runtime = withLegacyLaunchSerialization(await openDriverRuntimeForTesting(options));
   const testing = Object.freeze({
     blockActor(milliseconds) {
       return runtime[DRIVER_RUNTIME_TEST]('testing.block', { milliseconds });
