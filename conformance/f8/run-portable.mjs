@@ -33,7 +33,7 @@ const packed = JSON.parse(runNpm(['pack', '--json', '--pack-destination', packag
 assert.equal(packed.length, 1);
 const packageRecord = packed[0];
 assert.equal(packageRecord.name, 'cuda-js');
-assert.equal(packageRecord.version, '0.1.0-alpha.2');
+assert.equal(packageRecord.version, projectPackage.version);
 const fileNames = packageRecord.files.map((entry) => entry.path).sort();
 for (const name of fileNames) {
   assert(!name.startsWith('build/'));
@@ -86,6 +86,13 @@ for (const fixture of fixtureNames) {
   assert(!existsSync(installed), `${consumerName} uninstall left package files behind`);
 }
 
+const memoryObservation = observations.find((entry) => entry.consumer === 'portable-memory');
+assert(memoryObservation);
+assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32']);
+const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
+assert(compilerObservation);
+for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
+
 const target = await writeEvidence('portable-package.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8',
@@ -100,10 +107,12 @@ const target = await writeEvidence('portable-package.json', {
     'package.json',
     'packaging/compatibility-manifest.json',
     'components/runtime-facade/src/runtime.mjs',
+    'conformance/f8/fixtures/consumer-memory.mjs',
+    'conformance/f8/fixtures/consumer-compiler.mjs',
     'conformance/f8/run-portable.mjs',
   ]),
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
-  claimLimits: ['Portable package, public facade, mock lifecycle, and install/uninstall behavior only.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
+  claimLimits: ['Portable package, public facade, mock lifecycle, and install/uninstall behavior only.', 'RDC, extended scalar ABI, and Device LTO remain subject to their exact native promotion gates.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
 });
 console.log(`F8 portable package conformance passed for ${packageRecord.name}@${packageRecord.version}; evidence: ${target}`);

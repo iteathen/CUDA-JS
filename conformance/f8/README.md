@@ -1,8 +1,8 @@
 # CJS-F8 package and public-facade conformance
 
-The F8 capsule builds the exact `cuda-js` tarball with Node 26.7.0, inspects its contents, installs it into clean unrelated consumer directories, runs only exported entry points, tests two simultaneous runtimes and cross-runtime rejection, uninstalls the package, and verifies package-owned files are removed.
+The F8 capsule builds the exact `cuda-js` tarball with Node 26.7.0, inspects its contents, installs it into clean unrelated consumer directories, runs only exported entry points, tests two simultaneous runtimes and cross-runtime rejection, uninstalls the package, and verifies package-owned files are removed. Portable installed consumers also exercise the current additive public surface: SPEC-0010 relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` launch arguments, and SPEC-0012 typed LTO-IR/Device-LTO linking. Those portable checks prove package/facade orchestration only; each capability retains its own native promotion gate.
 
-On the accepted Windows x64 profile, the installed package runs the tracked PTX vector kernel through public memory, module, function, and launch capabilities. Output must match the existing independent F5 C-oracle result and checksum `15600773`. Aggregate close must report graceful Driver Worker exit and zero live, closing, or orphaned resources.
+On the accepted Windows x64 profile, the installed package runs the tracked PTX vector kernel through public memory, module, function, and launch capabilities. Output must match the existing independent F5 C-oracle result and checksum `15600773`. Aggregate close must report graceful Driver Worker exit and zero live, closing, or orphaned resources. This legacy native F8 consumer does not by itself qualify later additive capabilities.
 
 ## Native Windows
 
