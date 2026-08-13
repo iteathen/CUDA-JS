@@ -120,7 +120,9 @@ test('later status terminalizes exactly once, releases leases, and permits logic
   const resources = registry.inventory().resources;
   assert.equal(resources.find((entry) => entry.kind === 'function').leases, 0);
   assert.equal(resources.find((entry) => entry.kind === 'device-memory').leases, 0);
-  assert.equal(resources.some((entry) => entry.kind === 'event'), false);
+  const event = resources.find((entry) => entry.kind === 'event');
+  assert.ok(event);
+  assert.equal(event.state, 'closed');
   const repeated = await execution.operationStatus(operation.operation, 13);
   assert.equal(repeated.status, 'completed');
   assert.equal(repeated.pollCount, 2);
