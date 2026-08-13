@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-12
+**Updated:** 2026-08-13
 
 This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
 
@@ -10,31 +10,33 @@ CUDA-JS is a **schema-driven, no-project-addon, asynchronous Node.js runtime and
 
 ## Executive summary
 
-CUDA-JS currently provides, on its qualified Windows x64 profile:
+CUDA-JS currently provides a public/package implementation with an exact qualified Windows x64 foundation. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
 - a dedicated `DriverActor` Worker that owns one CUDA context and all raw Driver resources for one runtime;
 - opaque public resource capabilities instead of public CUDA pointers or handles;
 - bounded device-memory allocation, copied host-to-device/device-to-host transfers, quotas, range checks, leases, stale-generation rejection, and explicit teardown;
-- PTX/cubin module loading, named function resolution, packed kernel arguments, launch validation, a private nonblocking CUDA stream, private CUDA events, adaptive completion polling, deferred-error attribution, and deterministic cleanup;
+- PTX/cubin module loading, named function resolution, typed packed kernel arguments, launch validation, a private nonblocking CUDA stream, private CUDA events, deferred-error attribution, and deterministic cleanup;
 - an optional separate `CompilerActor` Worker using NVRTC and nvJitLink;
 - runtime CUDA C++ source compilation to PTX, PTX linking to cubin, compiler/linker logs, provider identity, deterministic artifact identity, and a validated content-addressed cache;
 - a trusted, path-free CUDA CCCL header profile that can compile `<cuda/atomic>` through the public facade;
 - exact tested device-scope release/acquire atomic publication through generated device code;
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
-- exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and unsupported profiles.
+- portable/software implementations of typed relocatable PTX, `u64`/`i32`/`f32` scalar launch arguments, typed Device LTO, restricted Device-JS, and one opaque pending-operation lifecycle, each retaining its own exact native promotion gate;
+- exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and known-incompatible exact profiles.
 
 Important current limits are equally explicit:
 
-- one public runtime currently permits **one in-flight kernel launch at a time**;
-- public caller-controlled streams/events and multi-stream concurrent launches are not yet accepted;
+- one public runtime currently permits **one pending GPU operation at a time**;
+- multiple in-flight operations/private multi-stream scheduling are planned but not implemented or qualified;
+- public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed/pinned/mapped memory, CUDA Graph execution, graphics interop, external contexts, process isolation, broad arbitrary kernel signatures, and native Linux CUDA execution are not currently qualified public capabilities;
-- device LTO is planned under the existing CJS-F6 compiler owner but is not yet an accepted production capability;
+- typed Device LTO is implemented in portable/software and package paths but remains natively unqualified;
 - CUDA-JS does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
-Those limits describe the **current qualified profile**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
+Those limits describe the applicable **implementation and qualification dimensions**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
 
 ## What CUDA-JS is — and is not
 
@@ -50,7 +52,7 @@ See [`ADR-0002`](decisions/ADR-0002-node-ffi-first-host-binding.md), [`SPEC-0001
 
 Driver operations are owned by a dedicated `DriverActor` Worker with a private CUDA context. Compilation/linking is owned by a separate `CompilerActor` Worker. The application thread communicates through bounded asynchronous commands and Promises.
 
-The current execution implementation uses a **private `CU_STREAM_NON_BLOCKING` stream** and a **private CUDA event per launch**. Completion is observed with adaptive event polling. CUDA-JS does not simply hardcode all launches to legacy stream zero.
+The current execution implementation uses a **private `CU_STREAM_NON_BLOCKING` stream** and a **private CUDA event per pending operation**. Submission returns after event provenance exists; later status requests query completion in short serialized owner turns, and facade-side waits use bounded adaptive polling between those turns. CUDA-JS does not simply hardcode all launches to legacy stream zero or retain the DriverActor inside one polling command for the lifetime of the GPU work.
 
 See [`SPEC-0003`](specs/SPEC-0003-driver-actor-resource-lifecycle.md) and [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md).
 
@@ -134,20 +136,23 @@ CUDA-JS currently supports a bounded execution slice with:
 - named function lookup;
 - declared kernel parameter schemas;
 - naturally aligned packed launch-buffer construction;
-- device-memory and `u32` parameter kinds in the current public profile;
+- device-memory, `u32`, `u64`, `i32`, and `f32` parameter kinds in the current public profile;
 - grid/block/shared-memory validation against queried device limits;
 - one private nonblocking CUDA stream;
-- one private event per in-flight launch;
-- event-based terminal completion;
-- adaptive nonblocking polling;
+- one private event per pending operation;
+- event-based terminal completion observed through short serialized status turns;
+- an opaque `CudaOperation` with `status()`, host-side `wait()`, and logical `close()`;
+- legacy terminal `launch()` compatibility implemented above submit/status observation;
 - function and memory leases held through terminality;
 - immediate/deferred error attribution;
 - timeout handling that fails the runtime conservatively rather than claiming inaccessible cleanup;
 - explicit function/module release and dependency-safe teardown.
 
-A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-in-flight-launch** rule describes host-side submission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially.
+A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-pending-operation** rule describes host-side admission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially.
 
-See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md).
+The terminal F5 launch path is qualified on the recorded Windows profile. The additive SPEC-0011 scalar kinds and SPEC-0016 operation lifecycle are implemented in portable/software/package paths and retain their separate exact native promotion gates.
+
+See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md), and [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md).
 
 ### 5. Concurrency: the uncompressed model
 
@@ -159,11 +164,12 @@ See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md).
 | GPU threads/warps/blocks within a kernel | Yes. Normal CUDA device parallelism. |
 | DriverActor vs CompilerActor ownership | Separate Workers and queues. No claim that every operation overlaps or improves performance. |
 | Multiple CUDA-JS runtime instances | Isolation is proven; cross-runtime resources reject. This is not a performance claim about overlapping GPU execution. |
-| Multiple kernels in flight on caller-controlled streams in one runtime | Not currently public/qualified. Current profile is single-flight. |
+| One opaque submitted GPU operation | Implemented in portable/software/package paths; exact native SPEC-0016 qualification remains open. |
+| Multiple GPU operations/private streams in flight in one runtime | Planned under proposed SPEC-0018; not implemented or qualified. |
 | Public stream/event capability objects | Not currently public/qualified. |
-| Multiple GPUs/MIG | Not currently supported. |
+| Multiple GPUs/MIG | Architecturally planned/deferred by exact capability; not implemented or qualified. |
 
-The target architecture already models memory/module/function/**stream/event/operation** resources as separate bricks. Therefore the current single-flight rule is an accepted **profile boundary**, not a claim that multi-stream support is architecturally impossible. Adding public multi-stream/concurrent launch requires new rules for ownership, ordering, event provenance, deferred errors, cancellation, resource leases, backpressure, teardown, and native evidence.
+The target architecture already models memory/module/function/**stream/event/operation** resources as separate bricks. Therefore the current one-pending-operation rule is an accepted **profile boundary**, not a claim that multi-stream support is architecturally impossible. Adding multiple in-flight operations/private streams requires accepted scheduling rules for ownership, ordering, event provenance, deferred errors, cancellation, resource leases, backpressure, teardown, and native evidence.
 
 See the [target architecture](architecture/TARGET_ARCHITECTURE.md) and [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
@@ -179,6 +185,8 @@ Current compiler/toolchain behavior includes:
 - typed compile options rather than free-form native option escape hatches;
 - NVRTC source-to-PTX compilation;
 - nvJitLink PTX-to-cubin linking;
+- typed relocatable-device-code PTX compilation;
+- typed `lto-ir` compilation and homogeneous typed LTO-IR-to-cubin linking;
 - copied compiler/linker logs;
 - deterministic artifact metadata;
 - content-addressed compile/link cache keys covering material provider/request identity;
@@ -190,7 +198,9 @@ Current compiler/toolchain behavior includes:
 
 **CUDA-JS does not require recompilation on every kernel launch.** Compilation can occur during setup, artifacts can be cached, and PTX/cubin can be loaded later. The compiler is a toolchain capability, not a mandatory hot-loop stage.
 
-See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md).
+The base PTX/cubin F6 path is qualified on the recorded Windows profile. Typed RDC and Device LTO are implemented public/package capabilities but remain natively unqualified until their SPEC-0010/SPEC-0012 promotion evidence passes.
+
+See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md), [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md), and [`SPEC-0012`](specs/SPEC-0012-device-lto.md).
 
 ### 7. Trusted CUDA C++ headers and atomics
 
@@ -214,7 +224,7 @@ This makes runtime compilation compatible with build-once/cache/reuse workflows 
 
 The public package is ESM-only and no-addon in the CUDA-JS-specific sense. Its public exports are deliberately smaller than the repository internals.
 
-The facade exposes safe capability objects for device memory, modules, functions, and optional compilation/linking. Actor tokens, provider paths, context/stream/event handles, and raw native storage are hidden.
+The facade exposes safe capability objects for device memory, modules, functions, opaque operations, and optional compilation/linking. The standalone `compileDeviceProgram(runtime, request)` helper provides the restricted Device-JS boundary without adding a language subsystem to every runtime instance. Actor tokens, provider paths, context/stream/event handles, generated CUDA, and raw native storage are hidden.
 
 The accepted package evidence includes:
 
@@ -228,6 +238,16 @@ The accepted package evidence includes:
 - aggregate terminal close.
 
 See [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
+
+### 10. Restricted Device-JS
+
+SPEC-0013 is accepted and implemented in portable/software/package paths. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff.
+
+Pinned `acorn@8.15.0` is a syntax-only replaceable parser adapter. It does not own Device-JS semantics or code generation. Generated CUDA source, parser ASTs, native options, and provider capabilities do not enter ordinary public results.
+
+Native Device-JS support remains not-qualified until the exact generated-source → compiler → Driver launch → independent oracle → terminal cleanup evidence passes. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
+
+See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
 
 ## GPU residency and device-resident workloads
 
@@ -290,45 +310,51 @@ A consumer can compile during installation, startup, model/search-image preparat
 
 ## Device LTO status
 
-Device LTO is **planned, not currently accepted production behavior**.
+Device LTO has independent status dimensions:
 
-The current CJS-F6-LTO plan keeps PTX as the default compile path and proposes a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The plan deliberately excludes a raw nvJitLink escape hatch, raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, and cross-major compatibility claims.
+```text
+architectural disposition: planned
+implementation status:    implemented in portable/software/package paths
+qualification status:     not-qualified for native CUDA execution
+priority:                 active native-evidence lane
+```
 
-Production LTO implementation remains blocked on a new bounded specification plus exact EXP-009 LTO evidence.
+Accepted SPEC-0012 keeps PTX as the default compile path and adds a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The implementation excludes raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, arbitrary nvJitLink controls, and cross-major compatibility claims.
 
-See the [`CJS-F6-LTO` master-plan section](plans/2026-08-10-master-plan.md#cjs-f6-lto--bounded-typed-device-lto-follow-up-p2) and the [LTO assessment](research/2026-08-11-lto-support-assessment.md).
+Native promotion remains blocked on exact independent LTO artifact/oracle, link, execution, compatibility-negative, and cleanup evidence. Portable/package success alone does not establish native Device-LTO support.
 
-## Capability families: current, planned, and not yet qualified
+See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO assessment](research/2026-08-11-lto-support-assessment.md).
 
-| Capability | Status | Meaning |
-|---|---|---|
-| Node FFI CUDA host binding | Accepted/qualified on exact profiles | Private generated FFI over approved named exports. |
-| DriverActor Worker/context ownership | Accepted | One private context per runtime by default. |
-| Device memory | Accepted | Bounded ordinary device allocations and copied transfers. |
-| GPU-resident state across launches | Accepted consequence of device-memory + launch contracts | No mandatory intermediate host read. |
-| PTX module execution | Accepted | Bounded copied PTX load/function/launch/completion. |
-| Cubin module execution | Accepted through F6/F8 path | Copied cubin artifact can be loaded/executed. |
-| Private nonblocking stream/event completion | Accepted | Current implementation detail of bounded execution contract. |
-| Public concurrent launches/multi-stream | Not yet accepted | Current public profile is one in-flight launch per runtime. Architecturally extensible. |
-| Public stream/event objects | Not yet accepted | Separate future resource/capability contracts. |
-| Multiple runtime instances | Accepted isolation behavior | Isolation/cross-runtime rejection, not a GPU-overlap performance claim. |
-| Multi-GPU / MIG | Not supported | Requires separate device/resource/compatibility contracts and evidence. |
-| NVRTC source compilation | Accepted | Optional CompilerActor source-to-PTX path. |
-| nvJitLink PTX-to-cubin | Accepted | Optional CompilerActor link path. |
-| Content-addressed compiler/link cache | Accepted | Validated provider/request/artifact identity. |
-| Trusted CCCL `cuda/` + `nv/` profile | Accepted on exact Windows CUDA 13.3 profile | Path-free verified virtual headers. |
-| `<cuda/atomic>` device-scope publication | Accepted bounded evidence | Generic atomic publication fixture only. |
-| Device LTO | Planned | Requires new spec + native evidence before implementation promotion. |
-| Managed/unified memory | Not yet accepted | Separate memory kind; not required for ordinary device residency. |
-| Pinned/mapped host memory | Not yet accepted | Separate placement/coherence/lifetime contracts. |
-| Memory pools/async allocation | Not yet accepted | Requires separate pressure/stream/lifetime semantics. |
-| CUDA Graphs | Not yet accepted | Candidate future execution/scheduling capability, not current public contract. |
-| Cooperative/dynamic/device-side scheduling features | Not generally qualified | Consumer/device semantics require exact generic capability contracts and evidence. |
-| Process-isolated Driver/compiler backend | Deferred option | Current Workers isolate event-loop/resource ownership, not fatal process crashes. |
-| Graphics/OpenGL interop | Not currently supported | Separate external-resource ownership/lifetime problem. |
-| cuBLAS/cuDNN/tensor framework | Not bundled | CUDA-JS is a generic runtime/toolchain; consumers may integrate separate libraries under future contracts if required. |
-| Native Linux CUDA execution | Incomplete/deferred | Portable controls pass; native Driver/compiler/GPU qualification remains separate. |
-| Linux ARM64 / WSL2 native CUDA | Not qualified | Separate platform profiles. |
+## Capability status by independent dimension
+
+| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |
+|---|---|---|---|---|---|
+| Node FFI CUDA host binding | `planned` | `implemented` | `qualified` | `active` | Exact recorded Node/host profiles only; private generated FFI over approved named exports. |
+| DriverActor Worker/context ownership | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; one private context per runtime by default. |
+| Device memory and GPU-resident state | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded ordinary allocations and copied transfers. |
+| PTX/cubin module execution | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded copied module/function/terminal-launch path. |
+| `u64`/`i32`/`f32` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0011 gate remains open; portable/package ABI coverage exists. |
+| Opaque submit/status/wait/close operation | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0016 gate remains open; one pending operation and one private stream. |
+| Multiple in-flight operations/private streams | `planned` | `not-implemented` | `not-qualified` | `after:issue-51` | Proposed SPEC-0018 must extend, not duplicate, SPEC-0016. |
+| Public raw stream/event objects | `unselected` | `not-implemented` | `not-qualified` | `deferred` | No current contract exposes native stream/event capabilities. |
+| Multiple runtime instances | `planned` | `implemented` | `qualified` | `active` | Isolation behavior only; not a GPU-overlap performance claim. |
+| NVRTC source compilation / nvJitLink PTX linking / cache | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; optional bounded typed compiler/linker owner. |
+| Typed relocatable PTX | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0010 gate remains open. |
+| Typed Device LTO | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0012 gate remains open; typed `lto-ir` and homogeneous LTO linking only. |
+| Restricted Device-JS | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0013 gate remains open; private CUDA lowering through `compileDeviceProgram()`. |
+| Trusted CCCL `cuda/` + `nv/` profile | `planned` | `implemented` | `qualified` | `active` | Exact Windows CUDA 13.3 profile; path-free verified virtual headers. |
+| `<cuda/atomic>` device-scope publication | `planned` | `implemented` | `qualified` | `active` | Exact generic fixture/profile only; not a scheduler/search/performance claim. |
+| Explicit device selection / multi-GPU | `planned` | `not-implemented` | `not-qualified` | `next` | Proposed SPEC-0017/SPEC-0024; exact topology evidence required. |
+| MIG | `deferred` | `not-implemented` | `not-qualified` | `deferred` | Identity, isolation, quota, and lifecycle contract remains absent. |
+| Managed/unified memory | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Separate placement/migration/coherence capability; not required for ordinary residency. |
+| Pinned/registered host memory and async transfer | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0019 depends on accepted operation scheduling. |
+| Memory pools/async allocation | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Requires separate pressure/stream/lifetime semantics. |
+| Prepared batches/CUDA Graphs | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0020 retains a non-graph semantic fallback. |
+| Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |
+| Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
+| Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
+| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Portable controls and adapters exist; native Driver/compiler/GPU chain remains open. |
+| Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors
 
@@ -344,9 +370,9 @@ False. CUDA Driver ownership is in a dedicated `DriverActor` Worker; compiler/li
 
 False for the accepted execution path. CUDA-JS owns a private nonblocking stream and private completion events. What is currently missing is **public multi-stream/concurrent-launch control**, not all stream/event usage.
 
-### "One in-flight launch means CUDA-JS has no GPU concurrency."
+### "One pending operation means CUDA-JS has no GPU concurrency."
 
-False. One-in-flight is a host submission/error-attribution rule for the current runtime profile. CUDA kernels still execute with ordinary massive GPU parallelism. Multi-stream overlapping kernel submission is a distinct, currently unqualified capability.
+False. One-pending-operation is a host admission/error-attribution rule for the current runtime profile. CUDA kernels still execute with ordinary massive GPU parallelism. Multi-operation/private-stream scheduling is a distinct, currently unimplemented and unqualified capability.
 
 ### "Single-flight is the permanent CUDA-JS architecture."
 
@@ -403,8 +429,15 @@ For normative behavior and exact claim limits, start with:
 - [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md) — device memory;
 - [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md) — module/function/launch/stream/event completion;
 - [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md) — NVRTC/nvJitLink/cache;
+- [`SPEC-0006 target addendum`](specs/SPEC-0006-target-syntax-addendum.md) — canonical target syntax/admission-policy separation;
 - [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md) — public package/facade/multiple instances;
 - [`SPEC-0009`](specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md) — trusted CUDA headers and generic atomic publication;
+- [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md) — typed relocatable PTX;
+- [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md) — typed scalar launch arguments;
+- [`SPEC-0012`](specs/SPEC-0012-device-lto.md) — typed Device LTO;
+- [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md) and [addendum](specs/SPEC-0013-public-surface-addendum.md) — restricted Device-JS;
+- [`SPEC-0015`](specs/SPEC-0015-execution-scope-status-clarification.md) — execution-profile status semantics;
+- [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md) — opaque one-pending-operation lifecycle;
 - [`TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) — proposal-level extension shape;
 - [`V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md) — qualification boundaries;
 - [`next_step.yaml`](../next_step.yaml) — current operational plan state.

@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { validatePublicCapabilityProjection } from './public-capability-projection.mjs';
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
 const ignoredDirectories = new Set(['.git', 'build', 'node_modules', 'docs/archive']);
@@ -18,9 +20,10 @@ const required = [
   'agent_files/general_foundation/TESTING.md', 'agent_files/general_foundation/DEBUGGING.md',
   'agent_files/general_foundation/SANITY_CHECKING.md', 'agent_files/general_foundation/PULL_REQUEST_REVIEW_AND_MERGE.md',
   'agent_files/general_foundation/CLEANUP_AND_DISPOSITION.md', 'agent_files/general_foundation/TOKEN_DISCIPLINE.md',
-  'agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md', 'agent_files/general_foundation/SECURITY.md',
+  'agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md', 'agent_files/general_foundation/STATUS_SEMANTICS.md',
+  'agent_files/general_foundation/SECURITY.md',
   'agent_files/application_specific/CUDA_JS_PROFILE.md',
-  'docs/README.md', 'docs/FOUNDATION_INDEX.md', 'docs/PROJECT_CHARTER.md', 'docs/INTEROP_WITH_CUDA_MCGS.md',
+  'docs/README.md', 'docs/FOUNDATION_INDEX.md', 'docs/PROJECT_CHARTER.md', 'docs/CAPABILITIES.md', 'docs/INTEROP_WITH_CUDA_MCGS.md',
   'docs/HARDWARE_SUPPORT.md', 'docs/NODE_SUPPORT.md', 'docs/THIRD_PARTY_DEPENDENCIES.md',
   'docs/decisions/README.md', 'docs/decisions/ADR-0001-repository-boundary.md',
   'docs/decisions/ADR-0002-node-ffi-first-host-binding.md',
@@ -32,19 +35,27 @@ const required = [
   'docs/plans/2026-08-11-hardware-qualification-program.md',
   'docs/plans/2026-08-11-node-and-extended-qualification.md',
   'docs/plans/2026-08-11-f9-atomic-interop.md',
+  'docs/plans/2026-08-13-capability-expansion-roadmap.md',
   'docs/SPONSORSHIP.md',
   'docs/specs/README.md', 'docs/specs/SPEC-0000-runtime-contract-map.md',
   'docs/specs/SPEC-0001-cuda-schema-compiler.md',
   'docs/specs/SPEC-0002-windows-driver-bootstrap.md',
   'docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md',
+  'docs/specs/SPEC-0003-disposal-failure-addendum.md',
   'docs/specs/SPEC-0004-device-memory-foundation.md',
   'docs/specs/SPEC-0005-module-launch-completion.md',
   'docs/specs/SPEC-0006-compiler-linker-cache.md',
+  'docs/specs/SPEC-0006-target-syntax-addendum.md',
   'docs/specs/SPEC-0007-windows-platform-hardening.md',
   'docs/specs/SPEC-0008-package-public-facade.md',
   'docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md',
+  'docs/specs/SPEC-0010-relocatable-device-code.md',
+  'docs/specs/SPEC-0011-scalar-kernel-arguments.md',
+  'docs/specs/SPEC-0012-device-lto.md',
   'docs/specs/SPEC-0013-restricted-device-js.md',
   'docs/specs/SPEC-0013-public-surface-addendum.md',
+  'docs/specs/SPEC-0015-execution-scope-status-clarification.md',
+  'docs/specs/SPEC-0016-operation-lifecycle.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
@@ -170,7 +181,8 @@ const required = [
   '.github/CODEOWNERS', '.github/FUNDING.yml', '.github/pull_request_template.md', '.github/ISSUE_TEMPLATE/config.yml',
   '.github/ISSUE_TEMPLATE/bug-report.yml', '.github/ISSUE_TEMPLATE/feature-request.yml', '.github/workflows/docs.yml',
   '.github/workflows/node-compatibility.yml',
-  'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
+  'scripts/verify-docs.sh', 'scripts/verify-docs.mjs', 'scripts/public-capability-projection.mjs',
+  'scripts/public-capability-projection.test.mjs', 'scripts/run-exp-000.mjs', 'scripts/run-f1b.mjs',
   'scripts/run-exp-001.mjs', 'scripts/run-exp-012.mjs', 'scripts/run-f3.mjs', 'scripts/run-f4.mjs', 'scripts/run-f5.mjs', 'scripts/run-f6.mjs', 'scripts/run-f7.mjs', 'scripts/run-f8.mjs', 'scripts/run-f9.mjs', 'scripts/run-hardware-qualification.mjs',
   'scripts/run-hyperv-readiness.mjs', 'scripts/run-node-qualification.mjs',
   '.github/ISSUE_TEMPLATE/hardware-qualification.yml', '.github/ISSUE_TEMPLATE/node-qualification.yml',
@@ -237,6 +249,27 @@ try {
   if (!/^github: \[iteathen\]$/m.test(funding)) errors.push('.github/FUNDING.yml: expected iteathen GitHub Sponsors entry');
 } catch (error) {
   errors.push(`license/funding validation failed: ${error.message}`);
+}
+
+try {
+  const [packageJson, compatibility, extensions, readme, capabilities, interop, hardware, packaging] = await Promise.all([
+    readFile(path.join(root, 'package.json'), 'utf8').then(JSON.parse),
+    readFile(path.join(root, 'packaging/compatibility-manifest.json'), 'utf8').then(JSON.parse),
+    readFile(path.join(root, 'conformance/hardware/extensions.json'), 'utf8').then(JSON.parse),
+    readFile(path.join(root, 'README.md'), 'utf8'),
+    readFile(path.join(root, 'docs/CAPABILITIES.md'), 'utf8'),
+    readFile(path.join(root, 'docs/INTEROP_WITH_CUDA_MCGS.md'), 'utf8'),
+    readFile(path.join(root, 'docs/HARDWARE_SUPPORT.md'), 'utf8'),
+    readFile(path.join(root, 'packaging/README.md'), 'utf8'),
+  ]);
+  errors.push(...validatePublicCapabilityProjection({
+    packageJson,
+    compatibility,
+    extensions,
+    documents: { readme, capabilities, interop, hardware, packaging },
+  }));
+} catch (error) {
+  errors.push(`public capability projection validation failed: ${error.message}`);
 }
 
 async function filesUnder(relative = '') {

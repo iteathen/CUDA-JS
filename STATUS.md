@@ -9,7 +9,7 @@
 The exact protected-`main` input baseline for this implementation packet is:
 
 ```text
-962b120d3056d82492f0e99f3e11d44a7afe958b
+0fd146a285a19feb393d2c29b11b8c952326354c
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -56,21 +56,37 @@ Two contradictions in already-accepted authority are implemented as separate imp
 
 ### SPEC-0006 target-syntax addendum — issue #65
 
-**Architectural disposition:** selected correction.  
+**Architectural disposition:** planned correction.
+
 **Implementation status:** implemented in portable/software and package paths.
+
 **Qualification status:** existing qualified targets unchanged; newly represented targets remain not-qualified.
 
 The implementation provides one shared target parser/policy owner across CompilerActor, linker, Device-JS and hardware target validation. It structurally represents current numeric, family-specific (`f`) and architecture-specific (`a`) CUDA target forms, while policy revision 1 admits only the reviewed unsuffixed target bases already owned by the hardware registry. Target-policy identity participates in compiler/linker cache identity and both Device-JS identity layers. The internal owner is included in the installed package without becoming a public export. Parser/policy admission, provider/toolkit acceptance, device compatibility and CUDA-JS native qualification remain separate facts.
 
 ### SPEC-0003 disposal-failure addendum — issue #66
 
-**Architectural disposition:** selected correction.  
+**Architectural disposition:** planned correction.
+
 **Implementation status:** implemented in portable/software paths.
+
 **Qualification status:** portable defect reproduced; destructive native cleanup partitions remain unqualified pending independent exact-profile evidence.
 
 The implementation keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth. DriverActor transport and facade projection preserve the bounded failure envelope and apply the resulting admission state.
 
 Both accepted P0 corrections are implemented in portable/software paths. Destructive native cleanup failures were not induced in this environment and remain explicitly unqualified; this correction does not claim new native negative-path or Blackwell support.
+
+## Public capability projection — issue #67
+
+**Documentation status:** reconciled in this implementation packet.
+
+**Validation status:** package identity and the duplicated RDC/scalar/LTO/Device-JS/operation/interop facts are checked by the documentation gate.
+
+**Qualification effect:** none; documentation reconciliation does not broaden native support.
+
+The public README and capability map now separate architecture, implementation, qualification and priority; describe the accepted portable/package RDC, scalar, Device-LTO, Device-JS and opaque-operation surfaces; and retain each capability's exact native gate. CUDA-MCGS interop now keeps consumer semantics in canonical Device-JS while CUDA-JS owns validation, CUDA lowering, compilation and runtime mechanics. The generated hardware matrix uses the same independent status dimensions and retains an exact `known-incompatible` Hyper-V profile without turning that evidence into architectural rejection.
+
+`scripts/public-capability-projection.mjs` validates those duplicated projections against `package.json`, the package compatibility manifest, accepted capability markers and the hardware registry. `scripts/verify-docs.sh` runs focused mutation tests so obsolete version/capability/ownership or aggregate-status language fails CI.
 
 ## Execution baseline
 
