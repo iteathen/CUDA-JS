@@ -1,12 +1,12 @@
 {
-  "schema_version": 30,
+  "schema_version": 31,
   "updated": "2026-08-13",
-  "status": "ready_for_p0_responsiveness_oracle_repair",
-  "objective": "After protected-main read-back of the #67 public documentation reconciliation, repair the Windows-fragile EXP-013 responsiveness oracle (#64) without changing mailbox semantics or production authority, while continuing independent native qualification and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
+  "status": "ready_for_p0_action_dependency_pinning",
+  "objective": "After protected-main read-back of the #64 EXP-013 oracle repair, pin GitHub Actions dependencies to reviewed immutable revisions (#69) while retaining #64's exact merged-head Windows F5 revalidation as an independent open evidence gate and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
   "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. The accepted P0 addenda correct existing owners; they do not authorize new consumer semantics or future capability proposals.",
   "exact_input_revisions": {
     "protected_main_capability_authority": "5233a046c57813532a71763bb36cdba5894e43e0",
-    "implementation_baseline": "0fd146a285a19feb393d2c29b11b8c952326354c",
+    "implementation_baseline": "a5b0ab92e0b3a62af8169fe3915c5cbc38956187",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
     "implemented_corrections": [
@@ -50,13 +50,14 @@
     "docs/specs/SPEC-0016-operation-lifecycle.md"
   ],
   "current_focus": {
-    "id": "CJS-P0-ORACLE-64",
+    "id": "CJS-P0-ACTIONS-69",
     "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "After protected-main read-back confirms the independently reviewed #67 documentation packet is integrated, create a separate #64 focus branch from that exact main. Replace the fixed Windows timer-callback-count assumption with a bounded responsiveness oracle that still fails when the application event loop is actually blocked.",
-    "exit": "The focused EXP-013 oracle has a proved blocked-loop negative control, remains bounded, passes on the exact Windows Node 26.7.0 profile, and the complete F5 capsule passes on the exact repaired head."
+    "next_action": "After protected-main read-back confirms the independently reviewed #64 oracle-repair packet is integrated, create a separate #69 focus branch from that exact main. Pin every remote GitHub Action to a reviewed full commit SHA with readable release comments, add an immutable-reference validation gate, and configure controlled Dependabot updates without widening workflow permissions or Node/toolchain policy.",
+    "exit": "Every remote action reference is immutable and provenance-recorded, mutable references fail repository validation, Dependabot proposes controlled updates, and both protected workflows pass on the exact reviewed head."
   },
   "deliverables": [
-    "Windows-safe EXP-013 responsiveness oracle repair (#64)",
+    "immutable GitHub Actions dependency identities and update policy (#69)",
+    "exact merged-head Windows F5 revalidation for the integrated EXP-013 repair (#64)",
     "continued public capability projection coverage as authoritative facts change",
     "continued exact native qualification evidence for already-implemented capabilities when suitable environments exist",
     "reviewed dispositions for SPEC-0017/SPEC-0018/SPEC-0021 before any new capability implementation"
@@ -69,6 +70,7 @@
   },
   "blockers": [
     "this environment does not itself expose the exact NVIDIA Windows profile required for new native support promotion",
+    "issue #64 cannot close until the exact merged repair head passes the focused EXP-013 and complete F5 capsule on Windows Node 26.7.0",
     "SPEC-0017 through SPEC-0026 remain proposals and cannot be implemented until separately accepted",
     "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",
     "multi-stream execution remains proposal-only until SPEC-0018 is accepted after trustworthy SPEC-0016 evidence",

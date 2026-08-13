@@ -1,9 +1,38 @@
 import assert from 'node:assert/strict';
+import { performance } from 'node:perf_hooks';
+import { setImmediate as scheduleImmediate } from 'node:timers';
 import { setTimeout as delay } from 'node:timers/promises';
 import test from 'node:test';
 
 import { DetachedMockOperation, DetachedOperationError } from '../src/detached-operation.mjs';
 import { PublicationMailbox, PublicationMailboxError } from '../src/mailbox.mjs';
+
+function observeApplicationTurn({ clock = () => performance.now(), schedule = scheduleImmediate, timeoutMilliseconds = 500 } = {}) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const deadline = clock() + timeoutMilliseconds;
+    const timeoutError = () => {
+      const error = new Error('Application event-loop turn did not run before the bounded deadline.');
+      error.code = 'APPLICATION_TURN_TIMEOUT';
+      return error;
+    };
+    const finish = (complete, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      complete(value);
+    };
+    const timeout = setTimeout(() => finish(reject, timeoutError()), timeoutMilliseconds);
+    try {
+      schedule(() => {
+        if (clock() >= deadline) finish(reject, timeoutError());
+        else finish(resolve);
+      });
+    } catch (error) {
+      finish(reject, error);
+    }
+  });
+}
 
 function mailbox() {
   return new PublicationMailbox({
@@ -73,18 +102,29 @@ test('application loop remains responsive while experiment work is active', { ti
   const box = mailbox();
   box.hostStore(0, 1);
   const operation = new DetachedMockOperation({ mailbox: box, multiplierLane: 0, observationLane: 1, stopLane: 2 });
-  let turns = 0;
-  let timer = null;
   try {
     await operation.ready();
-    timer = setInterval(() => { turns += 1; }, 1);
-    await delay(40);
-    assert.ok(turns >= 5, `expected responsive host event loop, got ${turns} turns`);
+    await observeApplicationTurn();
     assert.equal(operation.state, 'pending');
   } finally {
-    if (timer) clearInterval(timer);
     await cleanup(box, operation);
   }
+});
+
+test('application-turn oracle rejects a missing or deadline-late turn', { timeout: 10_000 }, async () => {
+  await assert.rejects(
+    observeApplicationTurn({ schedule() {}, timeoutMilliseconds: 25 }),
+    (error) => error.code === 'APPLICATION_TURN_TIMEOUT',
+  );
+  let now = 0;
+  await assert.rejects(
+    observeApplicationTurn({
+      clock: () => now,
+      schedule(callback) { now = 501; callback(); },
+      timeoutMilliseconds: 500,
+    }),
+    (error) => error.code === 'APPLICATION_TURN_TIMEOUT',
+  );
 });
 
 test('controlled mock-device loss releases the mailbox lease but reports failure', { timeout: 10_000 }, async () => {

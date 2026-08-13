@@ -9,7 +9,7 @@
 The exact protected-`main` input baseline for this implementation packet is:
 
 ```text
-0fd146a285a19feb393d2c29b11b8c952326354c
+a5b0ab92e0b3a62af8169fe3915c5cbc38956187
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -87,6 +87,16 @@ Both accepted P0 corrections are implemented in portable/software paths. Destruc
 The public README and capability map now separate architecture, implementation, qualification and priority; describe the accepted portable/package RDC, scalar, Device-LTO, Device-JS and opaque-operation surfaces; and retain each capability's exact native gate. CUDA-MCGS interop now keeps consumer semantics in canonical Device-JS while CUDA-JS owns validation, CUDA lowering, compilation and runtime mechanics. The generated hardware matrix uses the same independent status dimensions and retains an exact `known-incompatible` Hyper-V profile without turning that evidence into architectural rejection.
 
 `scripts/public-capability-projection.mjs` validates those duplicated projections against `package.json`, the package compatibility manifest, accepted capability markers and the hardware registry. `scripts/verify-docs.sh` runs focused mutation tests so obsolete version/capability/ownership or aggregate-status language fails CI.
+
+## EXP-013 responsiveness oracle — issue #64
+
+**Architectural effect:** none; SPEC-0014 remains a proposal and SPEC-0016 remains the sole operation-lifecycle owner.
+
+**Implementation status:** the EXP-013 test oracle is repaired in this packet by replacing the Windows-fragile 1 ms callback-count threshold with one bounded application-turn observation and an explicit timeout negative control.
+
+**Qualification status:** focused exact-Node and F5 portable evidence passes. The exact Windows Node 26.7.0 F5 capsule must be rerun on the merged head before issue #64 closes; earlier candidate evidence is retained but does not qualify a later head automatically.
+
+The Worker readiness handshake, independently progressing mock work, mailbox directions/generation/leases, pending-close truth, failure cleanup and 10-second outer bounds are unchanged. This repair changes no production mailbox, DriverActor, runtime, CUDA, or support behavior.
 
 ## Execution baseline
 

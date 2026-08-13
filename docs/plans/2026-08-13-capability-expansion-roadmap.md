@@ -108,7 +108,7 @@ Dependencies are capability-specific. A successor must not wait on an unrelated 
 
 ### CAP-P0-ORACLE — #64
 
-Repair the EXP-013 responsiveness oracle without changing mailbox semantics or production authority. The issue has candidate evidence, but protected main still contains the old timer-count assertion. Integrate only after exact diff/evidence review.
+The repair packet replaces EXP-013's Windows-fragile 1 ms callback-count assertion with one bounded application-turn observation plus a deliberate timeout negative control. It changes no mailbox semantics or production authority. Exact-Node focused and F5 portable evidence passes; the complete Windows F5 capsule must still be rerun on the exact merged head before #64 closes.
 
 ### CAP-P0-TARGET — #65
 
