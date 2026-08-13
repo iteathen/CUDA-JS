@@ -340,6 +340,9 @@ export class SerializedOperationOwner {
     const run = this.#queue.then(async () => {
       if (this.#state === 'closing' && !allowClosing) fail('RUNTIME_CLOSING', 'Owner is closing.', { command: name });
       if (this.#state === 'restart-required' && !allowRestartRequired) fail('RUNTIME_RESTART_REQUIRED', 'Owner requires restart.', { command: name });
+      if (this.#pendingId !== null && !['submit', 'status', 'operation-close', 'runtime-close', 'legacy-timeout'].includes(name)) {
+        fail('EXECUTION_COMMAND_BLOCKED', 'Command is outside the first-slice pending-operation allowlist.', { command: name, pendingOperationId: this.#pendingId });
+      }
       this.#commandCount += 1;
       return callback();
     });
@@ -354,7 +357,7 @@ export async function legacyLaunch(owner, request, { maxCompletionMilliseconds =
   for (;;) {
     const status = await operation.status();
     if (status.status !== 'pending') {
-      if (status.status === 'completed') await operation.close();
+      if (status.status === 'completed' || status.status === 'failed') await operation.close();
       return status;
     }
     if (Date.now() - started >= maxCompletionMilliseconds) return owner.legacyTimeout(operation.id);
