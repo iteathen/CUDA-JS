@@ -14,6 +14,7 @@ test('OPL-001/002/003: submit returns pending, device progresses without polling
   const before = owner.commandCount;
   const operation = await owner.submit({ functionId: 'f', memoryIds: ['m'], durationTicks: 100, intervalMilliseconds: 2 });
   assert.equal(owner.commandCount, before + 1);
+  assert.equal(await operation.readyForTest(), true, 'mock device must reach its own ready point independently');
   const immediate = await operation.status();
   assert.equal(immediate.status, 'pending');
   const commandsAfterImmediateStatus = owner.commandCount;
@@ -63,9 +64,12 @@ test('OPL-007/008/009: pending close is not cancellation and terminalization is 
   const owner = new SerializedOperationOwner();
   owner.defineMemory('m', 1);
   const operation = await owner.submit({ functionId: 'f', memoryIds: ['m'], durationTicks: 35, intervalMilliseconds: 2 });
+  assert.equal(await operation.readyForTest(), true, 'mock device must reach its own ready point independently');
   const first = await operation.status();
   await assert.rejects(operation.close(), code('OPERATION_BUSY'));
+  const commandsAfterFailedClose = owner.commandCount;
   await delay(20);
+  assert.equal(owner.commandCount, commandsAfterFailedClose, 'failed close must not drive device work');
   const second = await operation.status();
   assert.ok(second.ticks > first.ticks, 'failed close must not stop device progress');
 
