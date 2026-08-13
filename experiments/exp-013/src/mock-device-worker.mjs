@@ -9,6 +9,8 @@ let ticks = 0;
 function u32Load(index) { return Atomics.load(words, index) >>> 0; }
 function u32Store(index, value) { Atomics.store(words, index, value | 0); }
 
+parentPort.postMessage({ kind: 'ready' });
+
 const timer = setInterval(() => {
   if (u32Load(stopLane) !== 0) {
     clearInterval(timer);
