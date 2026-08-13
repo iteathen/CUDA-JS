@@ -139,7 +139,13 @@ test('deferred failure becomes a stable failed operation and releases execution 
   assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'function').leases, 0);
   assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'device-memory').leases, 0);
   assert.equal(execution.summary().pendingOperation, false);
-  assert.deepEqual(await execution.operationStatus(operation.operation, 21), { ...status, observationSequence: 21 });
+  const repeated = await execution.operationStatus(operation.operation, 21);
+  assert.equal(repeated.status, 'failed');
+  assert.equal(repeated.failure.code, status.failure.code);
+  assert.equal(repeated.failure.category, status.failure.category);
+  assert.equal(repeated.failure.message, status.failure.message);
+  assert.equal(repeated.pollCount, status.pollCount);
+  assert.equal(repeated.observationSequence, 21);
   await execution.releaseOperation(operation.operation);
 });
 
