@@ -2,7 +2,25 @@
 
 ## Status and authority
 
-Every durable document states or inherits a clear status: accepted, proposal, research note, informational, superseded, or active operational state. Plans, research, experiments, summaries, and archives do not silently become authority.
+Every durable document states or inherits a clear document status: accepted, proposal, research note, informational, superseded, or active operational state. Plans, research, experiments, summaries, and archives do not silently become authority.
+
+Document authority/status is separate from the status of a capability described inside the document.
+
+## Capability status semantics
+
+Use [`STATUS_SEMANTICS.md`](STATUS_SEMANTICS.md) whenever a document tracks capability state.
+
+Architecture, implementation, qualification/support, and priority are independent dimensions. A status word may describe only its named dimension; it must not be used to infer another dimension.
+
+In particular:
+
+- `not-qualified`, `unsupported`, or historical `no-support` does not mean architecturally rejected;
+- `does not authorize` and `out of scope` are local scope statements, not project-wide rejections;
+- `deferred` does not mean rejected;
+- a verified negative result applies only to the exact profile/evidence it names;
+- an architectural rejection requires explicit accepted rationale.
+
+Ambiguous legacy wording is stale terminology. Report and reconcile it rather than silently choosing an interpretation.
 
 ## One owner, one location
 
@@ -16,7 +34,8 @@ Root entry points lead to the charter, decisions, specifications, architecture, 
 
 A material documentation change reconciles affected:
 
-- authority and status markers;
+- authority and document status markers;
+- capability status dimensions;
 - indexes and registry;
 - public terminology and ownership;
 - callers/dependencies and interoperability;
