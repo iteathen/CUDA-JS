@@ -136,11 +136,7 @@ export class SerializedOperationOwner {
         const words = new Int32Array(buffer);
         const id = this.#nextId++;
         let readyResolve;
-        let readyReject;
-        const readyPromise = new Promise((resolve, reject) => {
-          readyResolve = resolve;
-          readyReject = reject;
-        });
+        const readyPromise = new Promise((resolve) => { readyResolve = resolve; });
         const worker = new Worker(new URL('./mock-device-worker.mjs', import.meta.url), {
           workerData: { buffer, durationTicks, failAtTick, intervalMilliseconds },
         });
@@ -155,30 +151,35 @@ export class SerializedOperationOwner {
           worker,
           workerLost: false,
           ready: false,
+          readySettled: false,
           readyPromise,
           readyResolve,
-          readyReject,
           state: 'pending',
           eventActive: true,
           terminal: null,
           logicalClosed: false,
           terminalized: false,
         };
+        const settleReady = (value) => {
+          if (operation.readySettled) return;
+          operation.readySettled = true;
+          operation.readyResolve(value);
+        };
         worker.on('message', (message) => {
           if (message?.kind === 'ready' && !operation.ready) {
             operation.ready = true;
-            operation.readyResolve();
+            settleReady(true);
           }
         });
         worker.on('exit', (code) => {
-          if (!operation.ready) operation.readyReject(new Error(`mock device exited before readiness: ${code}`));
+          if (!operation.ready) settleReady(false);
           if (operation.state === 'pending' && Atomics.load(words, 0) === 0) {
             operation.workerLost = true;
             operation.workerExitCode = code;
           }
         });
-        worker.on('error', (error) => {
-          if (!operation.ready) operation.readyReject(error);
+        worker.on('error', () => {
+          if (!operation.ready) settleReady(false);
           if (operation.state === 'pending' && Atomics.load(words, 0) === 0) operation.workerLost = true;
         });
         this.#operations.set(id, operation);
