@@ -53,6 +53,8 @@ Accepted follow-up contracts `SPEC-0010` (relocatable device code), `SPEC-0011` 
 
 `SPEC-0005` remains the accepted current single-flight execution baseline. `SPEC-0015` clarifies that its one-stream/one-in-flight exclusions are F5 scope boundaries, not architectural rejection. Submission/completion separation is architecturally planned under issue #51 but requires a new accepted operation-lifecycle specification before production implementation. Bounded private multi-stream execution is architecturally planned under issue #40 after that lifecycle foundation and likewise requires its own accepted contract/evidence. Neither planned capability is authorized merely by issue state.
 
+**Current owner-authorized decision experiment:** `EXP-014` may contain JavaScript only under `experiments/exp-014/` plus its exact runner `scripts/run-exp-014.mjs`. Its sole purpose is to test the host/lifecycle model proposed by `SPEC-0016` before production execution code changes. `SPEC-0016` remains `Proposal`; EXP-014 does not authorize changes under `components/`, CUDA ABI/schema expansion, public API changes, or native/support claims. If the experiment is falsified, repair/reassess the proposal or stop; do not promote around it.
+
 F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. Accepted specifications authorize only their explicitly bounded slices. Linux GPU-free preparation may follow the retained experiment and conformance runbooks; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. CUDA-MCGS consumer interop remains blocked on independent CUDA-MCGS conformance and an exact compatible-pair record.
 
 Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready Windows boundary.
@@ -98,7 +100,13 @@ npm run exp:012
 npm run f3
 ```
 
-Experiment branches add their own commands. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
+The active EXP-014 branch additionally runs:
+
+```bash
+npm run exp:014
+```
+
+Experiment branches add their own commands only when the named experiment is explicitly authorized. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
 
 ## Publication state
 

@@ -334,6 +334,7 @@ for (const relative of files) {
       && !relative.startsWith('experiments/exp-001/')
       && !relative.startsWith('experiments/exp-012/')
       && !relative.startsWith('experiments/exp-009/')
+      && !relative.startsWith('experiments/exp-014/')
       && !relative.startsWith('components/resource-registry/')
       && !relative.startsWith('components/driver-actor/')
       && !relative.startsWith('components/memory/')
@@ -353,7 +354,7 @@ for (const relative of files) {
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
-    errors.push(`JavaScript source is outside an authorized F1A/F1B/F2L-preparation/F2W/F3-F9 boundary: ${relative}`);
+    errors.push(`JavaScript source is outside an authorized accepted-or-named-experiment boundary: ${relative}`);
   }
 }
 
@@ -366,4 +367,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries, exact Node matrix, extended no-support profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including owner-authorized EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
