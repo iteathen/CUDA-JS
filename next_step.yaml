@@ -1,21 +1,39 @@
 {
-  "schema_version": 25,
-  "updated": "2026-08-12",
-  "status": "ready_with_native_environment_gate",
-  "objective": "Complete the remaining Device-JS native proof and CUDA-MCGS external deletion/compatible-pair path while keeping independent native/platform qualification and future execution-capability lanes separately governed.",
-  "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. It does not own CUDA-MCGS/search/domain/product semantics. Each future execution expansion must consume existing owners rather than redefine them.",
+  "schema_version": 26,
+  "updated": "2026-08-13",
+  "status": "ready_for_authority_review",
+  "objective": "Reconcile the expanded CUDA-JS issue tracker with durable proposal authority before starting new production capability implementation, while preserving already-implemented SPEC-0010/0011/0012/0013/0016 work and its independent native qualification lanes.",
+  "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. New capability proposals must extend those owners explicitly rather than import consumer/search/model semantics or create parallel lifecycles.",
   "exact_input_revisions": {
-    "plan_reconciliation_baseline": "83f44a21f6bf556f3ff6d58acaee644659777383",
+    "protected_main_reconciliation_baseline": "d5c6795b06f86b7239cc1730dd60dc09844d126b",
     "implementation_baseline": "fe9ed78939d3876790291421cec367fde58a8310",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
     "proposal_evidence_only": ["SPEC-0014 + EXP-013"],
+    "new_proposal_authority": [
+      "SPEC-0003 disposal-failure addendum",
+      "SPEC-0006 target-syntax addendum",
+      "SPEC-0017",
+      "SPEC-0018",
+      "SPEC-0019",
+      "SPEC-0020",
+      "SPEC-0021",
+      "SPEC-0022",
+      "SPEC-0023",
+      "SPEC-0024",
+      "SPEC-0025",
+      "SPEC-0026"
+    ],
     "retained_orchestration_evidence": ["EXP-014"]
   },
   "authority": [
     "AGENTS.md",
+    "agent_files/AI_RULES.md",
     "agent_files/AGENTS.md",
+    "agent_files/general_foundation/STATUS_SEMANTICS.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
+    "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
+    "docs/specs/SPEC-0006-compiler-linker-cache.md",
     "docs/specs/SPEC-0008-package-public-facade.md",
     "docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md",
     "docs/specs/SPEC-0010-relocatable-device-code.md",
@@ -27,44 +45,47 @@
     "docs/specs/SPEC-0016-operation-lifecycle.md"
   ],
   "current_focus": {
-    "id": "CJS-DJS-NATIVE-01",
-    "plan": "docs/plans/2026-08-12-compatible-pair-continuation.md",
-    "next_action": "Run the consumer-neutral DJS-2 exact Windows native public-path proof from Device-JS source only. If the qualified native environment is unavailable, do not substitute portable evidence; advance only independent dependency-ready lanes.",
-    "exit": "SPEC-0013 native evidence passes with independent oracle and terminal cleanup, enabling the CUDA-MCGS external deletion test."
+    "id": "CJS-CAP-AUTH-01",
+    "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
+    "next_action": "Review the proposal corpus against accepted authority and exact issue requirements. Prioritize the SPEC-0003 disposal addendum, SPEC-0006 target-syntax addendum, SPEC-0017 device selection, SPEC-0018 operation scheduling, and SPEC-0021 numeric/view contract as dependency roots. Accept a contract only after its unresolved semantics and evidence plan are complete; do not begin production implementation from proposal status.",
+    "exit": "The proposal corpus is integrated and each first-wave dependency root has an explicit accepted/deferred/revise disposition, leaving implementation work packages unambiguous."
   },
   "deliverables": [
-    "exact native qualification evidence for implemented capability/profile lanes selected for promotion",
+    "reviewed proposal authority for the expanded generic CUDA-JS capability graph",
+    "accepted or explicitly revised first-wave contracts before production code",
+    "continued exact native qualification evidence for already-implemented capabilities when suitable environments exist",
     "consumer-neutral SPEC-0013 DJS-2 native public-path proof",
-    "CUDA-MCGS Connect Four external deletion proof with no maintained consumer CUDA/PTX implementation",
-    "exact CUDA-JS/CUDA-MCGS compatible-pair identity and F9-C evidence",
-    "accepted and natively evidenced sideband/multi-stream capabilities only if their independent plans reach acceptance",
+    "CUDA-MCGS external deletion/compatible-pair evidence only after independent consumer readiness",
     "independent Linux and extended hardware/profile qualification as suitable environments and owning contracts exist"
   ],
   "forward_lanes": {
+    "capability_expansion": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
     "native_and_platform": "docs/plans/2026-08-12-native-and-platform-qualification-continuation.md",
-    "execution_expansion": "docs/plans/2026-08-12-execution-capability-continuation.md",
+    "execution_expansion_legacy_spine": "docs/plans/2026-08-12-execution-capability-continuation.md",
     "compatible_pair": "docs/plans/2026-08-12-compatible-pair-continuation.md"
   },
   "blockers": [
+    "proposal presence does not authorize production implementation",
     "this environment does not itself expose the exact NVIDIA Windows profile required for native promotion",
-    "CUDA-MCGS universal/product contracts and production adapter/Search Program work remain independently incomplete",
-    "production long-lived sideband remains proposal-only until an accepted bounded CUDA-JS contract and native evidence exist",
-    "multi-stream execution remains unimplemented and depends on a trustworthy native SPEC-0016 lifecycle plus its own accepted contract"
+    "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",
+    "multi-stream execution remains proposal-only until SPEC-0018 is accepted after trustworthy SPEC-0016 evidence",
+    "issues #70-#84 propose NN ownership that conflicts with the current accepted generic-core charter until a charter/component/package/spec authority change is accepted"
   ],
   "validation": [
     "./scripts/verify-docs.sh",
     "npm run verify",
-    "capability-specific exact native oracle/conformance commands before promotion",
+    "proposal/authority exact-diff review",
+    "capability-specific exact native oracle/conformance commands before support promotion",
     "remote protected-main read-back before any integrated/support claim"
   ],
   "do_not": [
-    "treat open issues or plans as implementation authority",
+    "treat open issues, plans, or proposal specs as implementation authority",
     "describe SPEC-0010/0011/0012/0013/0016 as unimplemented merely because native qualification remains open",
     "infer native support from portable/mock/neighboring-profile evidence",
-    "make sideband, multi-stream, graph/cooperative, RDC or LTO a compatible-pair prerequisite without an actual selected-profile dependency",
-    "duplicate SPEC-0016 operation lifecycle in issue 38 or 40",
+    "duplicate SPEC-0016 operation lifecycle in sideband, scheduler, transfer, graph, library, graphics, or multi-GPU work",
     "add CUDA-MCGS/search/domain semantics to CUDA-JS",
-    "expose raw native pointers, streams, events, providers or generated CUDA through the ordinary public API",
+    "inject tensor/autodiff/training semantics into generic core before the NN authority gap is reconciled",
+    "expose raw native pointers, streams, events, device identifiers, providers or generated CUDA through the ordinary public API",
     "rewrite archived historical plans as if their completed work were still pending"
   ],
   "historical_baseline": [
