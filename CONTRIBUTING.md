@@ -83,7 +83,7 @@ npm run exp:012  # qualified Windows x64 Driver/GPU host only
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64; GPU-free preparation plus readiness
 ```
 
-On Windows, `npm run hardware:probe:hyperv` performs a read-only Hyper-V readiness inventory. It does not create or modify VMs, partition or assign a GPU, dismount a device, or change driver state. A negative readiness result documents no-support for that exact host; it does not characterize other hosts.
+On Windows, `npm run hardware:probe:hyperv` performs a read-only Hyper-V readiness inventory. It does not create or modify VMs, partition or assign a GPU, dismount a device, or change driver state. A blocked result records `known-incompatible` only when the exact host has a verified incompatibility; otherwise it remains `not-qualified`. Neither result characterizes other hosts or rejects virtualization architecturally.
 
 Node qualification submissions use the [Node qualification issue template](.github/ISSUE_TEMPLATE/node-qualification.yml). Hardware submissions use the [hardware qualification issue template](.github/ISSUE_TEMPLATE/hardware-qualification.yml). Support promotion requires an exact tested commit, sanitized evidence, the relevant public work issue, and maintainer review; passing only a portable probe never promotes native support.
 

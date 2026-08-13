@@ -65,7 +65,7 @@
       "verified_uses": [
         "DDA and GPU-P vendor support boundary",
         "read-only partitionable-GPU inventory",
-        "client-host and desktop-class no-support interpretation",
+        "exact client-host and desktop-class known-incompatible profile classification",
         "DDA hardware, security, and administrator prerequisites"
       ],
       "reuse_disposition": "normative external platform source; no implementation reuse"

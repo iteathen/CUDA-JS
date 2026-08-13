@@ -120,7 +120,7 @@ The accepted SPEC-0003 disposal-failure correction is implemented in portable/so
 
 ### CAP-P0-DOCS — #67
 
-Reconcile public capability/interop/version documentation against accepted main and extend validation so semantic drift fails CI.
+The reconciliation packet updates public capability/interop/version documentation against accepted main and adds semantic projection checks to the documentation gate. It separates architecture, implementation, qualification and priority; keeps native gates narrow; and makes stale package/capability/Device-JS ownership and aggregate-status projections fail CI.
 
 ### CAP-P0-SECURITY — #68/#69
 

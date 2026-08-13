@@ -29,7 +29,7 @@
 ## Architecture and plan
 
 - [`HARDWARE_SUPPORT.md`](HARDWARE_SUPPORT.md) — generated exact-profile hardware support list and qualification entry point.
-- [`NODE_SUPPORT.md`](NODE_SUPPORT.md) — generated exact-version Node support and verified no-support matrix.
+- [`NODE_SUPPORT.md`](NODE_SUPPORT.md) — generated exact-version Node qualification matrix with qualified, testing-unconfirmed, and known-incompatible rows.
 - [`architecture/README.md`](architecture/README.md)
 - [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md)
 - [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md)

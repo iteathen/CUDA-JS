@@ -1,9 +1,7 @@
 {
-  "schemaVersion": 1,
-  "updated": "2026-08-12",
+  "schemaVersion": 2,
+  "updated": "2026-08-13",
   "policy": {
-    "defaultDisposition": "no-support",
-    "defaultDispositionMeaning": "legacy generator field: no current qualified public support claim; never architectural rejection",
     "statusSemanticsOwner": "agent_files/general_foundation/STATUS_SEMANTICS.md",
     "requiredIndependentDimensions": [
       "architecturalDisposition",
@@ -38,8 +36,6 @@
   "axes": [
     {
       "id": "multi-gpu",
-      "status": "contract-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
@@ -53,8 +49,6 @@
     },
     {
       "id": "mig",
-      "status": "contract-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
@@ -68,8 +62,6 @@
     },
     {
       "id": "virtualization",
-      "status": "verified-no-support-current-host",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "partial",
       "qualificationStatus": "not-qualified",
@@ -79,9 +71,10 @@
       "requiredEnvironment": ["vendor-supported GPU-P, DDA, passthrough, or vGPU host", "exact independently qualified guest"],
       "requiredEvidence": ["read-only host readiness", "guest F2 through F8 native chain", "virtualization reset and cleanup disposition", "provider-specific independent oracle"],
       "safetyRules": ["never configure a VM or GPU assignment", "never dismount, partition, or reset a device"],
-      "verifiedNoSupportProfiles": [
+      "knownIncompatibleProfiles": [
         {
           "id": "hyper-v-windows-11-pro-gtx-1660-ti",
+          "qualificationStatus": "known-incompatible",
           "testedAt": "2026-08-11",
           "sourceCommit": "0ae02ed2b9d1f23593a12e1144c8867942eb6bca",
           "host": "Windows 11 Pro 10.0.26200",
@@ -98,15 +91,13 @@
     },
     {
       "id": "concurrent-launch",
-      "status": "runtime-contract-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "planned",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
       "priority": "after:issue-51",
       "coordinationIssue": 40,
       "dependencies": [51],
-      "currentBoundary": "SPEC-0005 one in-flight launch with serialized Worker command processing; SPEC-0015 clarifies this is not an architectural ceiling",
+      "currentBoundary": "SPEC-0016 implements one pending opaque operation on one private stream; proposed SPEC-0018 owns bounded widening",
       "requiredEnvironment": ["controlled exact native profile", "kernels with an overlap mechanism oracle"],
       "requiredEvidence": ["accepted submission/completion operation lifecycle", "accepted bounded multiple-in-flight contract", "conservative deferred-error provenance", "overlap mechanism evidence and terminal cleanup"],
       "safetyRules": ["do not infer overlap from wall-clock timing alone", "retain exact resource leases until each operation is terminal", "do not expose raw streams/events merely to demonstrate concurrency"],
@@ -114,8 +105,6 @@
     },
     {
       "id": "performance-thermal-soak",
-      "status": "measurement-contract-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "partial",
       "qualificationStatus": "not-qualified",
@@ -129,8 +118,6 @@
     },
     {
       "id": "ecc",
-      "status": "profile-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
@@ -144,8 +131,6 @@
     },
     {
       "id": "driver-toolkit-matrix",
-      "status": "infrastructure-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "partial",
       "qualificationStatus": "not-qualified",
@@ -159,8 +144,6 @@
     },
     {
       "id": "windows-tcc-server",
-      "status": "profile-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
@@ -174,8 +157,6 @@
     },
     {
       "id": "independent-attestation",
-      "status": "infrastructure-required",
-      "publicDisposition": "no-support",
       "architecturalDisposition": "deferred",
       "implementationStatus": "partial",
       "qualificationStatus": "not-qualified",

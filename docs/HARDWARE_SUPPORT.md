@@ -59,23 +59,23 @@ Windows x64 is the only native profile currently qualified. Native Linux x64, WS
 
 ## Extended qualification axes
 
-Every axis below is explicitly **no support** until its own accepted contract and exact native evidence pass. Empty command chains are intentional: an incomplete axis cannot be promoted by the current runner.
+Every axis below records architecture, implementation, qualification, and priority independently. All listed axes remain not-qualified; empty command chains are intentional because no axis yet has an accepted runner-ready qualification packet.
 
-| Axis | Current state | Public disposition | Current boundary | Work issue |
-|---|---|---|---|---|
-| multi-gpu | contract required | **no support** | device zero, one private context, and no public device selector | [#20](https://github.com/iteathen/CUDA-JS/issues/20) |
-| mig | contract required | **no support** | MIG identity, isolation, quotas, and lifecycle are not modeled | [#27](https://github.com/iteathen/CUDA-JS/issues/27) |
-| virtualization | verified no support current host | **no support** | virtualization mechanisms require separate host/guest/provider profiles | [#21](https://github.com/iteathen/CUDA-JS/issues/21) |
-| concurrent-launch | runtime contract required | **no support** | SPEC-0005 one in-flight launch with serialized Worker command processing; SPEC-0015 clarifies this is not an architectural ceiling | [#40](https://github.com/iteathen/CUDA-JS/issues/40) |
-| performance-thermal-soak | measurement contract required | **no support** | F7 elapsed time and process memory are broad regression observations only | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
-| ecc | profile required | **no support** | ECC capability and error-health semantics are not in the runtime contract | [#24](https://github.com/iteathen/CUDA-JS/issues/24) |
-| driver-toolkit-matrix | infrastructure required | **no support** | only exact recorded Node, Driver, toolkit/header, provider, and GPU cells are supported | [#22](https://github.com/iteathen/CUDA-JS/issues/22) |
-| windows-tcc-server | profile required | **no support** | the accepted Windows profile is Windows 11 x64 WDDM with watchdog enabled | [#26](https://github.com/iteathen/CUDA-JS/issues/26) |
-| independent-attestation | infrastructure required | **no support** | contributor bundles are hashed and sanitized but are not independently tamper-proof | [#29](https://github.com/iteathen/CUDA-JS/issues/29) |
+| Axis | Architecture | Implementation | Qualification | Priority | Current boundary | Work issue |
+|---|---|---|---|---|---|---|
+| multi-gpu | deferred | not implemented | **not qualified** | deferred | device zero, one private context, and no public device selector | [#20](https://github.com/iteathen/CUDA-JS/issues/20) |
+| mig | deferred | not implemented | **not qualified** | deferred | MIG identity, isolation, quotas, and lifecycle are not modeled | [#27](https://github.com/iteathen/CUDA-JS/issues/27) |
+| virtualization | deferred | partial | **not qualified** | deferred | virtualization mechanisms require separate host/guest/provider profiles | [#21](https://github.com/iteathen/CUDA-JS/issues/21) |
+| concurrent-launch | planned | not implemented | **not qualified** | after:issue 51 | SPEC-0016 implements one pending opaque operation on one private stream; proposed SPEC-0018 owns bounded widening | [#40](https://github.com/iteathen/CUDA-JS/issues/40) |
+| performance-thermal-soak | deferred | partial | **not qualified** | deferred | F7 elapsed time and process memory are broad regression observations only | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
+| ecc | deferred | not implemented | **not qualified** | deferred | ECC capability and error-health semantics are not in the runtime contract | [#24](https://github.com/iteathen/CUDA-JS/issues/24) |
+| driver-toolkit-matrix | deferred | partial | **not qualified** | deferred | only exact recorded Node, Driver, toolkit/header, provider, and GPU cells are supported | [#22](https://github.com/iteathen/CUDA-JS/issues/22) |
+| windows-tcc-server | deferred | not implemented | **not qualified** | deferred | the accepted Windows profile is Windows 11 x64 WDDM with watchdog enabled | [#26](https://github.com/iteathen/CUDA-JS/issues/26) |
+| independent-attestation | deferred | partial | **not qualified** | deferred | contributor bundles are hashed and sanitized but are not independently tamper-proof | [#29](https://github.com/iteathen/CUDA-JS/issues/29) |
 
 ### Verified negative virtualization profile
 
-The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile is **no support**. The read-only probe found 0 partitionable GPUs and 0 assigned GPU partitions; Microsoft also excludes the client-host class from the supported DDA/GPU-P deployment profile. No VM or device state was changed.
+The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile is **known incompatible**. The read-only probe found 0 partitionable GPUs and 0 assigned GPU partitions; Microsoft also excludes the client-host class from the supported DDA/GPU-P deployment profile. The broader virtualization capability remains architecturally deferred and not-qualified; no VM or device state was changed.
 
 ## How hardware is added
 
@@ -105,7 +105,7 @@ The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile
 - Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.
 - Successful operation on unconfirmed hardware is test evidence, not a support claim.
 - A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.
-- CUDA-JS currently selects device zero and one in-flight launch. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner profiles remain no-support.
+- CUDA-JS currently selects device zero and admits one pending GPU operation. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified; their architectural and implementation dispositions are recorded separately.
 - Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.
 
 The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md). The Node matrix, verified-negative profiles, and extended qualification contracts are maintained in [`docs/plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md).

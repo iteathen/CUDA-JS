@@ -17,7 +17,8 @@ export function classifyHyperVReadiness(observed) {
   if (observed.partitionableGpuCount === 0) reasons.push('no-partitionable-gpu');
   if (observed.assignedGpuPartitionAdapterCount === 0) reasons.push('no-assigned-gpu-partition');
   return {
-    disposition: reasons.length === 0 ? 'qualification-required' : 'no-support',
+    readinessStatus: reasons.length === 0 ? 'ready-for-qualification' : 'blocked',
+    qualificationStatus: reasons.includes('client-host-vendor-unsupported') ? 'known-incompatible' : 'not-qualified',
     reasons,
   };
 }
@@ -78,6 +79,6 @@ export async function runHyperVReadiness() {
   const output = path.join(repositoryRoot, 'build', 'hardware-qualification', 'hyperv-readiness', runId, 'readiness.json');
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(record, null, 2)}\n`);
-  console.log(JSON.stringify({ output: path.relative(repositoryRoot, output), disposition: record.disposition, reasons: record.reasons }));
+  console.log(JSON.stringify({ output: path.relative(repositoryRoot, output), readinessStatus: record.readinessStatus, qualificationStatus: record.qualificationStatus, reasons: record.reasons }));
   return record;
 }
