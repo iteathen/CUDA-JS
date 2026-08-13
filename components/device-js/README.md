@@ -1,6 +1,6 @@
 # Restricted Device-JS frontend
 
-`components/device-js` owns the accepted SPEC-0013 restricted JavaScript-to-CUDA-C++ frontend. It is a generic CUDA-JS component: no search, graph, game, model, evaluator, tensor, or CUDA-MCGS semantics belong here.
+`components/device-js` owns the accepted SPEC-0013 restricted JavaScript-to-CUDA-C++ frontend. It is a generic CUDA-JS component: no search, graph, game, model, evaluator, tensor, or consumer-domain semantics belong here.
 
 The component exposes one synchronous translation function:
 

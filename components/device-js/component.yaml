@@ -9,7 +9,7 @@
     "purpose": "Own the restricted consumer-neutral Device-JS syntax/type/helper contract, deterministic program identity, and private CUDA C++ lowering without owning native compiler or Driver resources.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "acorn-8.15.0-syntax-only"],
-    "forbidden_dependencies": ["cuda-driver", "node-ffi", "nvrtc-resource-ownership", "nvjitlink-resource-ownership", "cuda-mcgs", "search-semantics", "domain-semantics", "public-generated-cuda-source"],
+    "forbidden_dependencies": ["cuda-driver", "node-ffi", "nvrtc-resource-ownership", "nvjitlink-resource-ownership", "consumer-domain-semantics", "search-semantics", "public-generated-cuda-source"],
     "validation": ["node --test components/device-js/test/translator.test.mjs components/device-js/test/strict-contract.test.mjs", "npm run f8:unit", "npm run f8:portable"],
     "owner": "runtime.device-js",
     "lifecycle": "Pure JavaScript preprocessing only; owns no native resource. Generated CUDA source is private transient input to the existing CompilerActor through runtime.facade.",
