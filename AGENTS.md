@@ -51,9 +51,11 @@ The repository is in an **active implementation phase** with `CJS-F1A`, `CJS-F1B
 
 Accepted follow-up contracts `SPEC-0010` (relocatable device code), `SPEC-0011` (typed scalar kernel arguments), and `SPEC-0012` (typed Device LTO) have portable/software implementations integrated on `main`. Their exact native promotion/qualification gates remain open; portable success must not be described as native support.
 
-`SPEC-0005` remains the accepted current single-flight execution baseline. `SPEC-0015` clarifies that its one-stream/one-in-flight exclusions are F5 scope boundaries, not architectural rejection. Submission/completion separation is architecturally planned under issue #51 but requires a new accepted operation-lifecycle specification before production implementation. Bounded private multi-stream execution is architecturally planned under issue #40 after that lifecycle foundation and likewise requires its own accepted contract/evidence. Neither planned capability is authorized merely by issue state.
+`SPEC-0005` remains the accepted currently implemented single-flight execution baseline. `SPEC-0015` clarifies that its one-stream/one-in-flight exclusions are F5 scope boundaries, not architectural rejection. `SPEC-0016` is now accepted after EXP-014 portable evidence and authorizes the bounded submission/completion operation-lifecycle integration described in that specification. Its first slice still has one private stream and one pending operation; it does not authorize general Driver interleaving, multiple in-flight kernels, or multi-stream scheduling. Native support remains unqualified until SPEC-0016's exact Windows evidence passes.
 
-**Current owner-authorized decision experiment:** `EXP-014` may contain JavaScript only under `experiments/exp-014/` plus its exact runner `scripts/run-exp-014.mjs`. Its sole purpose is to test the host/lifecycle model proposed by `SPEC-0016` before production execution code changes. `SPEC-0016` remains `Proposal`; EXP-014 does not authorize changes under `components/`, CUDA ABI/schema expansion, public API changes, or native/support claims. If the experiment is falsified, repair/reassess the proposal or stop; do not promote around it.
+Bounded private multi-stream execution remains architecturally planned under issue #40 **after** the SPEC-0016 operation lifecycle is implemented and trustworthy. Issue state alone does not authorize that work.
+
+EXP-014 remains a retained regression experiment under `experiments/exp-014/` and `scripts/run-exp-014.mjs`. Its passing JavaScript model is evidence for SPEC-0016 orchestration only and does not establish CUDA ordering/native support. Production work under SPEC-0016 must modify only the exact owners and surfaces that specification authorizes; do not use EXP-014 as permission to broaden `components/` beyond those boundaries.
 
 F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. Accepted specifications authorize only their explicitly bounded slices. Linux GPU-free preparation may follow the retained experiment and conformance runbooks; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. CUDA-MCGS consumer interop remains blocked on independent CUDA-MCGS conformance and an exact compatible-pair record.
 
@@ -95,15 +97,10 @@ For the current phase:
 ```bash
 ./scripts/verify-docs.sh
 npm run exp:000:build
+npm run exp:014
 npm run verify
 npm run exp:012
 npm run f3
-```
-
-The active EXP-014 branch additionally runs:
-
-```bash
-npm run exp:014
 ```
 
 Experiment branches add their own commands only when the named experiment is explicitly authorized. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
