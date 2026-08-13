@@ -2,11 +2,25 @@
 
 **Status:** Informational
 
-- [`2026-08-10-master-plan.md`](2026-08-10-master-plan.md) — dependency-ordered Node-FFI-first implementation and validation plan.
-- [`2026-08-10-focus-branch-map.json`](2026-08-10-focus-branch-map.json) — machine-readable ownership/dependency/status map.
-- [`2026-08-11-hardware-qualification-program.md`](2026-08-11-hardware-qualification-program.md) — evidence registry, contributor qualification kit, dedicated test-host design, and staged platform coverage.
-- [`2026-08-11-node-and-extended-qualification.md`](2026-08-11-node-and-extended-qualification.md) — exact Node matrix, verified negative profiles, and qualification contracts for topology, virtualization, concurrency, stability, ECC, TCC, version matrices, and attestation.
-- [`2026-08-11-f9-atomic-interop.md`](2026-08-11-f9-atomic-interop.md) — verified issue #32 assessment and sequential CUDA-JS prerequisite/cross-repository integration plan.
-- [`2026-08-12-cuda-isolation-device-js.md`](2026-08-12-cuda-isolation-device-js.md) — owner-directed amendment making CUDA-specific implementation exclusive to CUDA-JS and planning the restricted Device-JS/helper boundary for CUDA-MCGS and other high-level consumers.
+Active plans contain **unfinished work only**. Completed or mixed historical plans are retained unchanged under [`../archive/plans/`](../archive/plans/) and replaced here by explicit Superseded pointers so stale work cannot be reread as the current execution queue.
 
-The combined adversarial assessment and architectural rationale are in [`../architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](../architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md). Superseded native-bootstrap plans remain in the archive.
+## Active forward plans
+
+- [`2026-08-12-native-and-platform-qualification-continuation.md`](2026-08-12-native-and-platform-qualification-continuation.md) — exact native promotion for implemented capabilities plus independent Linux/hardware/Node profile qualification.
+- [`2026-08-12-execution-capability-continuation.md`](2026-08-12-execution-capability-continuation.md) — future generic sideband, multi-stream, graph/cooperative, and other execution expansions; none is production-authorized merely by appearing here.
+- [`2026-08-12-compatible-pair-continuation.md`](2026-08-12-compatible-pair-continuation.md) — neutral Device-JS native proof, CUDA-MCGS external deletion, and exact F9-C compatible-pair completion.
+
+The machine-readable current focus is [`../../next_step.yaml`](../../next_step.yaml).
+
+## Superseded plan pointers
+
+The legacy filenames remain as small Superseded pointers to preserve links and discovery. Their exact original contents live under [`../archive/plans/`](../archive/plans/):
+
+- `2026-08-10-master-plan.md`;
+- `2026-08-10-focus-branch-map.json`;
+- `2026-08-11-hardware-qualification-program.md`;
+- `2026-08-11-node-and-extended-qualification.md`;
+- `2026-08-11-f9-atomic-interop.md`;
+- `2026-08-12-cuda-isolation-device-js.md`.
+
+Accepted specs/ADRs remain authority; plans sequence work beneath them.
