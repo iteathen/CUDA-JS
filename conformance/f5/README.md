@@ -7,9 +7,12 @@ This capsule owns the evidence for [`SPEC-0005`](../../docs/specs/SPEC-0005-modu
 - `run-mock.mjs` proves copied PTX identity, exact schema validation, deterministic parameter packing, memory leases, private event polling, deferred-failure provenance, timeout owner loss, and dependency-safe teardown. It does not execute PTX.
 - `build-native-windows.mjs` builds an independent MSVC oracle against the accepted CUDA 13.3 header and import library.
 - `run-native-windows.mjs` loads the tracked PTX through the DriverActor, launches vector addition, and compares all output bytes and the checksum with the C oracle.
+- `build-capabilities-native-windows.mjs` and `run-capabilities-native-windows.mjs` own the exact Windows native promotion evidence for SPEC-0011 mixed scalar arguments and SPEC-0016 opaque operations. An independent MSVC/Driver oracle declares the mixed signature, verifies type/layout facts and boundary values, and proves a bounded delayed event is initially not-ready. The public facade then proves the same scalar results, separate submit/status/wait/close turns, pending-command backpressure, pending-aware runtime close, conservative deferred-failure provenance in an isolated child context, and terminal cleanup.
 - `verify.mjs` checks ignored evidence under `build/f5/`.
 
 Use `npm run f5:portable` with exact Node 26.7.0 on any supported development host. Use `npm run f5` only on the qualified Windows x64 Driver/GPU profile.
+
+The narrower capability lane can be run directly with `npm run f5:capabilities`. Its bounded delay is a semantic event-readiness oracle, not a performance threshold.
 
 ## Linux contributor handoff
 

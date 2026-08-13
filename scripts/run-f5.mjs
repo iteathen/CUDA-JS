@@ -46,6 +46,11 @@ const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   mock: [{ args: ['conformance/f5/run-mock.mjs'] }],
   build: [{ windowsOnly: true, args: ['conformance/f5/build-native-windows.mjs'] }],
+  'capabilities-build': [{ windowsOnly: true, args: ['conformance/f5/build-capabilities-native-windows.mjs'] }],
+  capabilities: [
+    { windowsOnly: true, args: ['conformance/f5/build-capabilities-native-windows.mjs'] },
+    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f5/run-capabilities-native-windows.mjs'] },
+  ],
   native: [
     { windowsOnly: true, args: ['conformance/f5/build-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f5/run-native-windows.mjs'] },
@@ -61,6 +66,8 @@ const steps = {
     { args: ['conformance/f5/run-mock.mjs'] },
     { windowsOnly: true, args: ['conformance/f5/build-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f5/run-native-windows.mjs'] },
+    { windowsOnly: true, args: ['conformance/f5/build-capabilities-native-windows.mjs'] },
+    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f5/run-capabilities-native-windows.mjs'] },
     { args: ['conformance/f5/verify.mjs'] },
   ],
 };
@@ -71,7 +78,7 @@ if (!(action in steps)) {
 
 for (const step of steps[action]) {
   if (step.windowsOnly && process.platform !== 'win32') {
-    if (['build', 'native'].includes(action)) {
+    if (['build', 'native', 'capabilities-build', 'capabilities'].includes(action)) {
       console.error('CJS-F5 native conformance requires the exact qualified Windows x64 Driver/GPU profile.');
       process.exit(2);
     }

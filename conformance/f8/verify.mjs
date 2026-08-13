@@ -48,10 +48,22 @@ if (process.platform === 'win32') {
   assert.equal(native.status, 'pass');
   assert.equal(native.observation.checksum, 15_600_773);
   assert.equal(native.observation.graceful, true);
+  assert.equal(native.deviceJsObservation.sourceOnly, true);
+  assert.equal(native.deviceJsObservation.structuredIntegerBitwise, true);
+  assert.equal(native.deviceJsObservation.dataDependentWhile, true);
+  assert.equal(native.deviceJsObservation.globalIndex, true);
+  assert.equal(native.deviceJsObservation.exactU64, 'ffffffffffffffff');
+  assert.deepEqual(native.deviceJsObservation.atomicBuckets, [16, 16, 16, 16]);
+  assert.equal(native.deviceJsObservation.atomicCasUniqueFlags, true);
+  assert.equal(native.deviceJsObservation.rejectionBeforeCompilerResources, true);
+  assert.equal(native.deviceJsObservation.graceful, true);
+  assert.equal(native.deviceJsObservation.compilerResources.programsCreated, native.deviceJsObservation.compilerResources.programsDestroyed);
+  assert.equal(native.deviceJsObservation.driverResourceCounts.live, 0);
+  assert.equal(native.deviceJsObservation.driverResourceCounts.orphaned, 0);
 }
 if (process.platform === 'linux') {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));
   assert.equal(readiness.status, 'backend-unavailable');
   assert.equal(readiness.observations.nativeOpenCode, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
 }
-console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade execution' : 'retained native Linux qualification gates'}.`);
+console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade plus source-only Device-JS execution' : 'retained native Linux qualification gates'}.`);

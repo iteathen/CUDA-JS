@@ -418,6 +418,7 @@ for (const relative of files) {
       && !relative.startsWith('experiments/exp-012/generated/')
       && !relative.startsWith('conformance/f4/native/')
       && !relative.startsWith('conformance/f5/native/')
+      && !relative.startsWith('conformance/f6/native/')
       && !relative.startsWith('experiments/exp-009/native/')
       && relative !== 'schemas/cuda-13.3/linux-x64/generated/native-abi-probe.c') {
     errors.push(`C source is outside a registered generated-source boundary: ${relative}`);

@@ -23,6 +23,21 @@ if (process.platform === 'win32') {
   assert.equal(native.observations.launches[0].checksum, native.observations.launches[1].checksum);
   assert.equal(native.observations.compilerTerminal.graceful, true);
   assert.equal(native.observations.driverTerminal.graceful, true);
+  const oracle = JSON.parse(await readFile(path.join(evidenceRoot, 'capability-oracle-build.json'), 'utf8'));
+  assert.equal(oracle.status, 'pass');
+  assert.equal(oracle.oracle.PROGRAMS_CREATED, oracle.oracle.PROGRAMS_DESTROYED);
+  assert.equal(oracle.oracle.LINKS_CREATED, oracle.oracle.LINKS_DESTROYED);
+  assert.equal(oracle.oracle.DRIVER_CLEANUP, 'proved');
+  const capabilities = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows-capabilities.json'), 'utf8'));
+  assert.equal(capabilities.status, 'pass');
+  assert.equal(capabilities.observations.defaultPtxStable, true);
+  assert.equal(capabilities.observations.applicationTimerFired, true);
+  assert.equal(capabilities.observations.artifacts.rdc.inputs.length, 2);
+  assert.equal(capabilities.observations.artifacts.lto.inputs.length, 2);
+  assert.deepEqual(capabilities.observations.launches.map((entry) => entry.capability), ['rdc', 'lto']);
+  assert(capabilities.observations.launches.every((entry) => entry.exactIndependentOracleParity === true));
+  assert.equal(capabilities.observations.terminal.graceful, true);
+  assert.equal(capabilities.observations.terminal.driver.resourceCounts.live, 0);
 }
 
-console.log(`F6 verification passed for ${process.platform}-${process.arch}: compiler contract, cache validation/corruption, lifecycle${process.platform === 'win32' ? ', exact MSVC parity, and PTX/cubin Driver execution' : ''}.`);
+console.log(`F6 verification passed for ${process.platform}-${process.arch}: compiler contract, cache validation/corruption, lifecycle${process.platform === 'win32' ? ', exact MSVC parity, RDC, Device LTO, and public-facade Driver execution' : ''}.`);

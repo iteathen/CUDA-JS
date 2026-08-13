@@ -7,6 +7,8 @@ The F6 capsule separates two claims:
 
 Run `npm run f6:portable` on any exact Node 26.7.0 qualification host. Native Linux x86-64 engineers can run `npm run f6:linux-readiness`; it checks only canonical provider locations, ELF identity, required exports, exact versions when available, and the Linux option profile, then writes an honest `ready` or `not-ready` record. Run `npm run f6:native` only on the accepted Windows x64 CUDA 13.3 provider, Driver, and GPU profile. Generated artifacts and evidence stay under ignored `build/` storage.
 
+The native Windows lane now includes the promotion suites for SPEC-0010 relocatable device code and SPEC-0012 Device LTO. An independent MSVC oracle compiles two RDC PTX units and two LTO-IR units with the exact normalized native options, links both pairs, loads both cubins through the CUDA Driver, records exact outputs, and proves program/link/Driver cleanup. The public-facade lane repeats the same compilation and linking, requires byte-for-byte parity for all six compiler artifacts and both GPU outputs, checks default PTX stability and raw/mixed/corrupt/incompatible controls, and requires balanced CompilerActor and DriverActor terminal reports. `npm run f6:capabilities` runs this focused qualification lane; `npm run f6:native` includes it in the full native F6 capsule.
+
 ## Linux engineering handoff
 
 Native Linux F6 remains incomplete. A contributor should begin from a native glibc x86-64 host, not WSL or a Windows guest without NVIDIA Driver access, and complete these steps:
