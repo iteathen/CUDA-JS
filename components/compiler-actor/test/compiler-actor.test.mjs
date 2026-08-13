@@ -1,14 +1,29 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertCompilerPublicRecord, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, snapshotHeaderProfile } from '../testing.mjs';
+import { assertCompilerPublicRecord, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
 import { openCompilerRuntime } from '../index.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
+const POLICY_BASES = Object.freeze(['75', '80', '86', '87', '88', '89', '90', '100', '103', '110', '120', '121']);
+const NVRTC_COMPUTE_TARGETS = Object.freeze([
+  'compute_75', 'compute_80', 'compute_86', 'compute_87', 'compute_89', 'compute_90', 'compute_90a',
+  'compute_100', 'compute_100f', 'compute_100a', 'compute_101', 'compute_101f', 'compute_101a',
+  'compute_103', 'compute_103f', 'compute_103a', 'compute_120', 'compute_120f', 'compute_120a',
+  'compute_121', 'compute_121f', 'compute_121a',
+]);
+const NVJITLINK_SM_TARGETS = Object.freeze([
+  'sm_75', 'sm_80', 'sm_86', 'sm_87', 'sm_88', 'sm_89', 'sm_90', 'sm_90a',
+  'sm_100', 'sm_100f', 'sm_100a', 'sm_103', 'sm_103f', 'sm_103a', 'sm_110', 'sm_110f',
+  'sm_110a', 'sm_120', 'sm_120f', 'sm_120a', 'sm_121', 'sm_121f', 'sm_121a',
+]);
+const compilerProviderManifest = JSON.parse(readFileSync(new URL('../../../schemas/cuda-13.3/win-x64/compiler-provider-manifest.json', import.meta.url), 'utf8'));
+const NATIVE_TARGET_CAPABILITIES = providerTargetProfile(compilerProviderManifest.targetCapabilities);
 
 test('typed compiler and linker contracts normalize deterministically and reject ambient inputs', () => {
   assert.deepEqual(normalizeCompileOptions({}, 'win32').native, [
@@ -28,6 +43,7 @@ test('typed compiler and linker contracts normalize deterministically and reject
     platform: 'win32', architecture: 'x64', node: 'v26.7.0', nodeAbi: '147',
     identity: {
       profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null,
+      targetCapabilities: NATIVE_TARGET_CAPABILITIES,
       headerProfiles: { cudaCccl: { profile: 'fixture-cccl', algorithm: 'fixture', roots: ['cuda', 'nv'], fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) } },
     },
   };
@@ -46,7 +62,7 @@ test('typed compiler and linker contracts normalize deterministically and reject
 test('compiler and linker consume admitted three-digit targets and target-policy identity', () => {
   const provider = {
     platform: 'win32', architecture: 'x64', node: 'v26.7.0', nodeAbi: '147',
-    identity: { profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null, headerProfiles: {} },
+    identity: { profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null, targetCapabilities: NATIVE_TARGET_CAPABILITIES, headerProfiles: {} },
   };
   const compile75 = normalizeCompileRequest({ source, options: { architecture: 'compute_75' } }, 'win32');
   const compile120 = normalizeCompileRequest({ source, options: { architecture: 'compute_120' } }, 'win32');
@@ -67,6 +83,50 @@ test('compiler and linker consume admitted three-digit targets and target-policy
   assert.throws(() => normalizeLinkRequest({ inputs: [ptx], options: { architecture: 'compute_120' } }), { code: 'LINKER_ARCHITECTURE_INVALID' });
 });
 
+test('exact CUDA 13.3 provider targets preflight every policy-admitted compile and link target', () => {
+  const provider = {
+    platform: 'win32', architecture: 'x64', node: 'v26.7.0', nodeAbi: '147',
+    identity: {
+      profile: 'cuda-13.3-windows-x64-compiler', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null,
+      targetCapabilities: NATIVE_TARGET_CAPABILITIES, headerProfiles: {},
+    },
+  };
+  assert.equal(compilerProviderManifest.schemaVersion, 3);
+  assert.equal(compilerProviderManifest.targetCapabilities.revision, 'cuda-13.3-documented-provider-targets-v1');
+  assert.deepEqual(compilerProviderManifest.targetCapabilities.compile, NVRTC_COMPUTE_TARGETS);
+  assert.deepEqual(compilerProviderManifest.targetCapabilities.link, NVJITLINK_SM_TARGETS);
+  assert.deepEqual(NATIVE_TARGET_CAPABILITIES.compile, [...NVRTC_COMPUTE_TARGETS].sort());
+  assert.deepEqual(NATIVE_TARGET_CAPABILITIES.link, [...NVJITLINK_SM_TARGETS].sort());
+
+  for (const base of POLICY_BASES) {
+    const compileRequest = normalizeCompileRequest({ source, options: { architecture: `compute_${base}` } }, 'win32');
+    if (base === '88' || base === '110') {
+      assert.throws(() => compileIdentity(compileRequest, provider), {
+        code: 'COMPILER_ARCHITECTURE_UNSUPPORTED',
+        category: 'unsupported',
+        details: { architecture: `compute_${base}`, providerProfile: provider.identity.profile },
+      });
+    } else {
+      assert.doesNotThrow(() => compileIdentity(compileRequest, provider));
+    }
+    const linkRequest = normalizeLinkRequest({ inputs: [new Uint8Array([1, 2, 3])], options: { architecture: `sm_${base}` } });
+    assert.doesNotThrow(() => linkIdentity(linkRequest, provider));
+  }
+
+  const missingProfile = { ...provider, identity: { ...provider.identity, targetCapabilities: undefined } };
+  assert.throws(() => compileIdentity(normalizeCompileRequest({ source }, 'win32'), missingProfile), { code: 'COMPILER_PROVIDER_TARGET_PROFILE_INVALID', category: 'unsupported' });
+  const compile75 = compileIdentity(normalizeCompileRequest({ source }, 'win32'), provider);
+  assert.equal(Object.hasOwn(compile75.provider, 'targetCapabilities'), true);
+  const revisedProvider = {
+    ...provider,
+    identity: {
+      ...provider.identity,
+      targetCapabilities: { ...provider.identity.targetCapabilities, revision: 'cuda-13.3-documented-provider-targets-v2' },
+    },
+  };
+  assert.notDeepEqual(compile75, compileIdentity(normalizeCompileRequest({ source }, 'win32'), revisedProvider));
+});
+
 test('CompilerActor serializes work, validates cache hits, rejects corruption, and invalidates exact keys', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f6-cache-'));
   try {
@@ -74,6 +134,7 @@ test('CompilerActor serializes work, validates cache hits, rejects corruption, a
     const first = await runtime.compile({ source });
     assert.equal(first.cache.status, 'miss');
     assert.equal(first.artifact.format, 'ptx');
+    assert.equal(Object.hasOwn(first.provider, 'targetCapabilities'), false);
     const second = await runtime.compile({ source });
     assert.equal(second.cache.status, 'hit');
     assert.deepEqual(second.artifact.bytes, first.artifact.bytes);

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "profile": "cuda-13.3-windows-x64-compiler",
   "node": "v26.7.0",
   "toolkitVersion": "13.3",
@@ -23,6 +23,58 @@
       "version": "13.3"
     }
   },
+  "targetCapabilities": {
+    "revision": "cuda-13.3-documented-provider-targets-v1",
+    "compile": [
+      "compute_75",
+      "compute_80",
+      "compute_86",
+      "compute_87",
+      "compute_89",
+      "compute_90",
+      "compute_90a",
+      "compute_100",
+      "compute_100f",
+      "compute_100a",
+      "compute_101",
+      "compute_101f",
+      "compute_101a",
+      "compute_103",
+      "compute_103f",
+      "compute_103a",
+      "compute_120",
+      "compute_120f",
+      "compute_120a",
+      "compute_121",
+      "compute_121f",
+      "compute_121a"
+    ],
+    "link": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_87",
+      "sm_88",
+      "sm_89",
+      "sm_90",
+      "sm_90a",
+      "sm_100",
+      "sm_100f",
+      "sm_100a",
+      "sm_103",
+      "sm_103f",
+      "sm_103a",
+      "sm_110",
+      "sm_110f",
+      "sm_110a",
+      "sm_120",
+      "sm_120f",
+      "sm_120a",
+      "sm_121",
+      "sm_121f",
+      "sm_121a"
+    ]
+  },
   "headers": {
     "nvrtc.h": "316a1375c18c69c5f1857dfc154c47a58a6795ffe462d2fcb50f5272ea472d21",
     "nvJitLink.h": "164d0a1109a316d07da012bd898af3c93cd896b0f3b4368844d1bcfc418c54d9"
@@ -37,5 +89,5 @@
       "sha256": "e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c"
     }
   },
-  "claim": "Exact reviewed local CUDA 13.3 Windows x64 compiler provider profile only."
+  "claim": "Exact reviewed local CUDA 13.3 Windows x64 compiler provider and documented target-capability profile only."
 }

@@ -24,6 +24,11 @@ const provider = {
     nvrtc: null,
     nvrtcBuiltins: null,
     nvJitLink: null,
+    targetCapabilities: {
+      revision: 'fixture-targets-v1',
+      compile: ['compute_75'],
+      link: ['sm_75'],
+    },
     headerProfiles: {
       cudaCccl: {
         profile: 'fixture-cccl',
