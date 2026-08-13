@@ -58,10 +58,7 @@ export interface DeviceCompileOptions {
   relocatableDeviceCode?: boolean;
 }
 
-export interface DeviceCompileHeader {
-  name: string;
-  source: string;
-}
+export interface DeviceCompileHeader { name: string; source: string; }
 
 export interface DeviceCompileRequest {
   source: string;
@@ -111,16 +108,9 @@ export interface CompilerResult {
 }
 
 export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32';
+export interface FunctionParameter { readonly kind: FunctionParameterKind; }
 
-export interface FunctionParameter {
-  readonly kind: FunctionParameterKind;
-}
-
-export interface LaunchDimensions {
-  x: number;
-  y: number;
-  z: number;
-}
+export interface LaunchDimensions { x: number; y: number; z: number; }
 
 export interface CudaDeviceMemory {
   readonly kind: 'device-memory';
@@ -133,6 +123,37 @@ export interface CudaDeviceMemory {
 }
 
 export type CudaLaunchArgument = CudaDeviceMemory | number | bigint;
+export interface CudaLaunchOptions {
+  grid: LaunchDimensions;
+  block: LaunchDimensions;
+  sharedMemoryBytes?: number;
+  arguments: readonly CudaLaunchArgument[];
+}
+
+export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned' | 'closed';
+
+export interface CudaOperationStatus {
+  readonly schemaVersion: 1;
+  readonly status: 'pending' | 'completed' | 'failed' | 'orphaned';
+  readonly grid: LaunchDimensions;
+  readonly block: LaunchDimensions;
+  readonly sharedMemoryBytes: number;
+  readonly argumentKinds: readonly FunctionParameterKind[];
+  readonly pollCount: number;
+  readonly elapsedMilliseconds: number;
+  readonly operationSequence: number;
+  readonly health: Readonly<Record<string, unknown>>;
+  readonly failure?: Readonly<Record<string, unknown>>;
+  readonly orphanReason?: string;
+}
+
+export interface CudaOperation {
+  readonly kind: 'operation';
+  readonly state: CudaOperationState | string;
+  status(): Promise<CudaOperationStatus>;
+  wait(): Promise<CudaOperationStatus>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
 
 export interface CudaFunction {
   readonly kind: 'function';
@@ -140,7 +161,8 @@ export interface CudaFunction {
   readonly parameters: readonly FunctionParameter[];
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
-  launch(options: { grid: LaunchDimensions; block: LaunchDimensions; sharedMemoryBytes?: number; arguments: readonly CudaLaunchArgument[] }): Promise<Readonly<Record<string, unknown>>>;
+  submit(options: CudaLaunchOptions): Promise<CudaOperation>;
+  launch(options: CudaLaunchOptions): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 

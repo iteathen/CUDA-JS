@@ -4,24 +4,25 @@
 
 **Updated:** 2026-08-12
 
-## Current accepted baseline
+## Current repository state
 
-This status transition is based on protected `main`:
+The protected baseline through the reconciled publication-mailbox experiment is:
 
 ```text
-f49f2621ef741b54255aad0877c1baffbfc79d1d
+d91c025c6f27aa40cbac8081cee687b60de1dd1b
 ```
 
-That baseline contains:
+This SPEC-0016 integration branch adds the bounded portable/software operation-lifecycle implementation on top of that protected baseline. After protected merge, remote `main` read-back is required before claiming the integration as merged.
+
+The repository state represented by this branch contains:
 
 - the accepted Windows F1–F9 foundation;
 - integrated portable/software SPEC-0010 RDC, SPEC-0011 extended scalar ABI, and SPEC-0012 Device LTO follow-ups, each retaining separate native promotion gates;
+- integrated proposed SPEC-0014 + EXP-013 publication-mailbox evidence, explicitly consuming rather than redefining SPEC-0016;
 - SPEC-0015 status/scope clarification;
-- durable EXP-014 portable evidence and proposed SPEC-0016.
+- accepted SPEC-0016 and its bounded portable/software `CudaOperation` implementation.
 
-The current authority change accepts SPEC-0016 and authorizes its bounded production integration. Native SPEC-0016 support remains **not qualified** until its exact Windows native evidence passes.
-
-For discovery continuity, the accepted foundation still includes `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W` and later accepted Windows slices, exact Node 26.7.0 evidence, and the retained Linux x86-64 qualification path. Linux portable/ABI evidence is not native Linux CUDA support.
+Native SPEC-0016 support remains **not qualified** until its exact Windows native evidence passes. Portable/mock success does not establish native CUDA ordering, cleanup, or support.
 
 ## Status semantics
 
@@ -29,41 +30,40 @@ Capability state follows [`agent_files/general_foundation/STATUS_SEMANTICS.md`](
 
 Legacy `no-support` wording is qualification/public-support language only unless accepted architecture explicitly says `rejected`.
 
-## Execution baseline and next widening
-
-### Currently implemented baseline — SPEC-0005
+## Execution baseline
 
 ```text
 DriverActor Workers:          1 per runtime
 private CUDA contexts:        1 per runtime
 private execution streams:    1
 max pending GPU operations:   1
-public launch behavior:       terminal launch-and-wait
+public terminal convenience:  CudaFunction.launch()
+public operation lifecycle:   CudaFunction.submit() -> CudaOperation
 ```
 
 ### SPEC-0016 submission/completion lifecycle
 
 ```text
 architectural disposition: selected
-implementation status:       accepted/authorized, implementation pending
+implementation status:       integrated on this branch
 qualification status:        not qualified
-priority:                    active
+priority:                    active native qualification
 issue:                       #51
 ```
 
-Accepted first slice:
+Implemented first slice:
 
-- one opaque `CudaOperation` lifecycle;
-- submission returns only after private completion-event provenance exists;
-- later status uses short serialized DriverActor turns;
-- explicit operation wait does not occupy DriverActor between polls;
+- `CudaFunction.submit()` returns one opaque `CudaOperation` only after kernel submission and private completion-event record provenance exist;
+- `CudaOperation.status()` performs one short serialized DriverActor event-query turn;
+- `CudaOperation.wait()` performs repeated short status turns outside the DriverActor and does not itself impose the legacy launch deadline;
+- `CudaOperation.close()` is logical release after terminality; pending close is busy and never claims cancellation;
 - one private stream / one pending operation remains the limit;
-- while pending, only an explicit operation-safe DriverActor command allowlist is admitted;
-- ordinary Driver/memory/resource commands remain blocked until terminality unless a later accepted capability widens the allowlist;
-- existing terminal `launch()` compatibility and timeout/restart-required truth must be preserved;
-- close terminalizes pending work before dependency teardown or reports orphan/restart-required state.
+- while pending, only operation status/release/legacy-timeout and bounded runtime close are admitted; ordinary Driver/memory/resource commands and another submit fail before native work;
+- legacy `CudaFunction.launch()` is host-side submit + repeated short status turns and preserves the SPEC-0005 terminal result/timeout semantics without retaining the DriverActor inside one polling command;
+- runtime close may bounded-poll the pending operation before dependency teardown; if terminality remains unproved, teardown is refused and restart-required/orphan truth is preserved;
+- no raw event, stream, context, pointer, operation token, or native handle crosses the public facade.
 
-EXP-014 passed all OPL-001 through OPL-015 portable lifecycle cases on the protected PR #53 merge-ref run. That is orchestration evidence only, not native CUDA qualification.
+EXP-014 remains the retained orchestration experiment. The production implementation has its own execution-owner, DriverActor, facade, package, and installed-consumer regression coverage.
 
 ### Bounded multi-stream execution
 
@@ -71,48 +71,51 @@ EXP-014 passed all OPL-001 through OPL-015 portable lifecycle cases on the prote
 architectural disposition: planned
 implementation status:       not implemented
 qualification status:        not qualified
-priority:                    after trustworthy SPEC-0016 implementation
+priority:                    after trustworthy SPEC-0016 lifecycle
 issue:                       #40
 ```
 
 #40 must consume SPEC-0016 rather than create another operation lifecycle. Raw public CUDA streams/events remain outside the selected direction.
 
-### Long-lived sideband
+### Publication mailbox / long-lived sideband
 
 ```text
-architectural disposition: planned
-implementation status:       portable experiment exists on open PR #50
+architectural disposition: proposal direction selected for experiment
+implementation status:       EXP-013 portable experiment integrated; no production mailbox
 qualification status:        not qualified
-priority:                    after SPEC-0016 lifecycle
+priority:                    after trustworthy SPEC-0016 lifecycle
 issue:                       #38
 ```
 
-#38 owns mailbox/sideband-specific semantics only. Its operation-lifecycle portions must be reconciled with SPEC-0016 before integration.
+SPEC-0014 owns mailbox/sideband-specific semantics only. SPEC-0016 exclusively owns operation state, terminalization, leases, close, and pending-command behavior.
 
 ## Open unintegrated work
 
-- **PR #49 Device-JS** — open/unmerged; do not claim integration before protected merge + main read-back.
-- **PR #50 sideband prototype** — open/unmerged; reassess against accepted SPEC-0016 before integration.
+- **PR #49 Device-JS** — open/unmerged and under repair; do not claim integration before protected merge + main read-back.
 
 ## Platform qualification
 
-The exact accepted Windows x64 profile remains the native evidence baseline. Native Linux x64, WSL2, Linux ARM64/SBSA, Jetson, additional GPU models, Windows Server/TCC, virtualization, multi-GPU, MIG, ECC, soak/performance, and other axes retain their own independent status/evidence.
+The exact accepted Windows x64 profile remains the native evidence baseline. SPEC-0010/0011/0012/0016 retain their own explicit native promotion gates. Native Linux x64, WSL2, Linux ARM64/SBSA, Jetson, additional GPU models, Windows Server/TCC, virtualization, multi-GPU, MIG, ECC, soak/performance, and other axes retain their own independent status/evidence.
 
-A profile that is not qualified is not thereby architecturally rejected.
+A profile or capability that is not qualified is not thereby architecturally rejected.
 
 ## Current blockers / claim limits
 
-- this sandbox has no NVIDIA GPU/toolkit exposure for exact native SPEC-0016 qualification;
+- this environment has no NVIDIA GPU/toolkit exposure for exact native SPEC-0016 qualification;
 - native Linux CUDA requires suitable NVIDIA Linux hardware/provider exposure;
-- #40 implementation remains gated on a trustworthy SPEC-0016 operation implementation, not merely spec acceptance;
-- #49/#50 remain open and must not be represented as integrated.
+- #40 remains gated on a trustworthy SPEC-0016 lifecycle rather than spec acceptance alone;
+- #49 remains open and must not be represented as integrated;
+- lower-authority unfinished plan records such as `next_step.yaml` are intentionally **not** reconciled in this PR-repair phase; they will be repaired in the later plan-reconciliation phase.
 
-## Current next action
+## Current remediation sequence
 
-Follow `next_step.yaml` schema 24:
+The owner-directed remediation sequence is:
 
-1. implement the exact accepted SPEC-0016 portable/software work package;
-2. preserve SPEC-0005 legacy `launch()` behavior and all existing regressions;
-3. merge only after complete author-side exact-head review and protected checks;
-4. leave #51 open for exact native Windows qualification if the software slice passes;
-5. only after the operation lifecycle is trustworthy, restart #40's bounded multi-stream cycle.
+```text
+focused sanity
+→ repair merged main
+→ repair existing PRs
+→ repair remaining unfinished plans
+```
+
+This status records current reality only and does not silently rewrite unfinished plans.

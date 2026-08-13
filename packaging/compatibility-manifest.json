@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.3",
+    "version": "0.1.0-alpha.4",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -36,24 +36,16 @@
       "driverApi": 13030,
       "compilerProviders": "optional-exact-cuda-13.3"
     },
-    {
-      "host": "linux-native-x64",
-      "status": "backend-unavailable"
-    },
-    {
-      "host": "linux-native-arm64",
-      "status": "backend-unavailable"
-    },
-    {
-      "host": "wsl2-x64",
-      "status": "backend-unavailable"
-    }
+    { "host": "linux-native-x64", "status": "backend-unavailable" },
+    { "host": "linux-native-arm64", "status": "backend-unavailable" },
+    { "host": "wsl2-x64", "status": "backend-unavailable" }
   ],
   "capabilities": {
     "deviceMemory": "bounded-synchronous-copied-bytes",
     "moduleFormats": ["ptx", "cubin"],
     "functionParameters": ["device-memory", "u32", "u64", "i32", "f32"],
     "launchConcurrency": 1,
+    "gpuOperationLifecycle": "opaque-submit-status-wait-close-one-pending",
     "compiler": "optional-nvrtc-13.3",
     "compilerHeaderProfiles": {
       "none": "default",
@@ -85,6 +77,7 @@
     "Unconfirmed Windows x64 CUDA profiles may operate for testing without a separate opt-in.",
     "Only the exact Windows x64 Node 26.7.0 evidence profile is qualified; successful operation does not promote support.",
     "SPEC-0010 relocatable PTX, SPEC-0011 u64/i32/f32 scalar launch kinds, and SPEC-0012 Device LTO are implemented public capabilities but are not natively qualified until their exact promotion evidence passes.",
+    "SPEC-0016 opaque GPU operation submission/completion is implemented in portable/software paths but is not natively qualified until its exact Windows promotion evidence passes.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",

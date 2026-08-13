@@ -11,8 +11,10 @@ const unitFiles = [
   'components/memory/test/memory-manager.test.mjs',
   'components/execution/test/execution-manager.test.mjs',
   'components/execution/test/scalar-arguments.test.mjs',
+  'components/execution/test/operation-lifecycle.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
+  'components/driver-actor/test/operation-lifecycle.test.mjs',
   'experiments/exp-013/test/prototype.test.mjs',
 ];
 
