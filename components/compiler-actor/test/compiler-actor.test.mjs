@@ -43,6 +43,30 @@ test('typed compiler and linker contracts normalize deterministically and reject
   assert.equal(Object.hasOwn(linkedIdentity.provider, 'headerProfiles'), false);
 });
 
+test('compiler and linker consume admitted three-digit targets and target-policy identity', () => {
+  const provider = {
+    platform: 'win32', architecture: 'x64', node: 'v26.7.0', nodeAbi: '147',
+    identity: { profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null, headerProfiles: {} },
+  };
+  const compile75 = normalizeCompileRequest({ source, options: { architecture: 'compute_75' } }, 'win32');
+  const compile120 = normalizeCompileRequest({ source, options: { architecture: 'compute_120' } }, 'win32');
+  assert.equal(compile120.options.architecture, 'compute_120');
+  assert.notDeepEqual(compileIdentity(compile75, provider), compileIdentity(compile120, provider));
+  assert.equal(compileIdentity(compile120, provider).targetPolicy.revision, 'SPEC-0006-target-v1');
+  const ptx = { format: 'ptx', bytes: new Uint8Array([1, 2, 3]), architecture: 'compute_120' };
+  const linked = normalizeLinkRequest({ inputs: [ptx], options: { architecture: 'sm_120' } });
+  assert.equal(linked.options.architecture, 'sm_120');
+  assert.equal(linkIdentity(linked, provider).targetPolicy.revision, 'SPEC-0006-target-v1');
+  const link75 = normalizeLinkRequest({ inputs: [new Uint8Array([1, 2, 3])], options: { architecture: 'sm_75' } });
+  const link120 = normalizeLinkRequest({ inputs: [new Uint8Array([1, 2, 3])], options: { architecture: 'sm_120' } });
+  assert.notDeepEqual(linkIdentity(link75, provider), linkIdentity(link120, provider));
+  assert.throws(() => normalizeCompileOptions({ architecture: 'sm_120' }), { code: 'COMPILER_ARCHITECTURE_INVALID' });
+  assert.throws(() => normalizeCompileOptions({ architecture: 'compute_120f' }), { code: 'COMPILER_ARCHITECTURE_INVALID' });
+  assert.throws(() => normalizeCompileOptions({ architecture: 'compute_1000' }), { code: 'COMPILER_ARCHITECTURE_INVALID' });
+  assert.throws(() => normalizeLinkRequest({ inputs: [ptx], options: { architecture: 'sm_121' } }), { code: 'LINKER_ARCHITECTURE_MISMATCH' });
+  assert.throws(() => normalizeLinkRequest({ inputs: [ptx], options: { architecture: 'compute_120' } }), { code: 'LINKER_ARCHITECTURE_INVALID' });
+});
+
 test('CompilerActor serializes work, validates cache hits, rejects corruption, and invalidates exact keys', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-f6-cache-'));
   try {

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
+import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
 import { compilerError } from './errors.mjs';
 
 export const LIMITS = Object.freeze({
@@ -275,6 +275,7 @@ export function compileIdentity(request, provider) {
     schemaVersion: 1,
     contractVersion: request.output === 'lto-ir' ? 'SPEC-0012-v1' : request.options.relocatableDeviceCode ? 'SPEC-0010-v1' : selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
     operation: 'compile',
+    targetPolicy: CUDA_TARGET_POLICY_IDENTITY,
     platform: provider.platform,
     architecture: provider.architecture,
     node: provider.node,
@@ -299,6 +300,7 @@ export function linkIdentity(request, provider) {
     schemaVersion: 1,
     contractVersion: request.mode === 'lto' ? 'SPEC-0012-v1' : 'SPEC-0006-v1',
     operation: 'link',
+    targetPolicy: CUDA_TARGET_POLICY_IDENTITY,
     platform: provider.platform,
     architecture: provider.architecture,
     node: provider.node,

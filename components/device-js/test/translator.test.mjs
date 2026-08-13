@@ -112,6 +112,23 @@ test('program identity changes with semantic source, type metadata and compile i
   assert.match(baseline.generatedName, /^device-js-[a-f0-9]{16}\.cu$/);
 });
 
+test('Device-JS uses canonical CUDA target policy and preserves validation ownership', () => {
+  const accepted = translateDeviceProgram({ source, functions, compile: { architecture: 'compute_120' } });
+  assert.equal(accepted.compile.architecture, 'compute_120');
+  for (const [architecture, reason] of [
+    ['compute_120f', 'policy'], ['compute_120a', 'policy'], ['compute_1000', 'policy'], ['sm_120', 'prefix'], ['compute_7', 'syntax'],
+  ]) {
+    assert.throws(
+      () => translateDeviceProgram({ source, functions, compile: { architecture } }),
+      (error) => error instanceof DeviceJsError
+        && error.code === 'DEVICE_JS_COMPILE_OPTIONS_INVALID'
+        && error.category === 'validation'
+        && error.details.reason === reason,
+      architecture,
+    );
+  }
+});
+
 test('numeric literals require explicit scalar constructors and are range checked', () => {
   const metadata = [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }];
   assert.throws(() => translateDeviceProgram({ source: 'function k(out) { let x = 1; out[gpu.u32(0)] = x; }', functions: metadata }), expectDeviceCode('DEVICE_JS_LITERAL_REQUIRES_CAST'));

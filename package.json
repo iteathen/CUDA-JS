@@ -27,6 +27,7 @@
     "LICENSE",
     "LICENSING.md",
     "components/compiler-actor/",
+    "components/cuda-target/",
     "components/device-js/",
     "components/driver-actor/",
     "components/execution/",

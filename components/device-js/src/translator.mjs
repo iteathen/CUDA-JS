@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { parse, version as acornVersion } from 'acorn';
+import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
@@ -78,7 +79,8 @@ function normalizeCompile(value = {}) {
   const deviceAsDefaultExecutionSpace = value.deviceAsDefaultExecutionSpace ?? false;
   const headerProfile = value.headerProfile ?? 'none';
   const relocatableDeviceCode = value.relocatableDeviceCode ?? false;
-  if (!/^compute_[5-9][0-9]$/.test(architecture)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS architecture must use compute_NN syntax.');
+  const target = inspectCudaTarget(architecture, { expectedPrefix: 'compute' });
+  if (!target.ok) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
   if (!['c++17', 'c++20'].includes(languageStandard)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS languageStandard must be c++17 or c++20.');
   if (!['none', 'cuda-cccl'].includes(headerProfile)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS headerProfile must be none or cuda-cccl.');
   if (typeof fmad !== 'boolean' || typeof deviceAsDefaultExecutionSpace !== 'boolean' || typeof relocatableDeviceCode !== 'boolean') throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS compile boolean options must be booleans.');
@@ -144,6 +146,7 @@ function programIdentity(source, functions, compile) {
   const hash = createHash('sha256');
   hashField(hash, 'contract', encoder.encode(CONTRACT));
   hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
+  hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
   hashField(hash, 'source', encoder.encode(source));
   hashField(hash, 'functions', encoder.encode(canonicalJson(canonicalMetadata(functions))));
   hashField(hash, 'compile', encoder.encode(canonicalJson(compile)));
