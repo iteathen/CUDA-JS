@@ -1,6 +1,6 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
   "license": "AGPL-3.0-or-later",
@@ -42,7 +42,7 @@
     "type": "git",
     "url": "git+https://github.com/iteathen/CUDA-JS.git"
   },
-  "keywords": ["cuda", "gpu", "node", "ffi", "nvrtc", "nvjitlink"],
+  "keywords": ["cuda", "gpu", "node", "ffi", "gpgpu", "gpu-computing", "gpu-programming", "javascript", "node-cuda", "node-ffi", "nodejs", "nvidia", "nvjitlink", "nvrtc", "ptx", "typescript", "windows"],
   "scripts": {
     "exp:000:generate": "node scripts/run-exp-000.mjs generate",
     "exp:000:build": "node scripts/run-exp-000.mjs build",
