@@ -16,6 +16,7 @@ const unitFiles = [
   'components/execution/test/extended-numeric-execution.test.mjs',
   'components/execution/test/operation-lifecycle.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
+  'components/driver-actor/test/protocol-numeric.test.mjs',
   'components/driver-actor/test/health.test.mjs',
   'components/driver-actor/test/operation-lifecycle.test.mjs',
   'experiments/exp-013/test/prototype.test.mjs',
