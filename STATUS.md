@@ -9,9 +9,10 @@
 ```text
 main:    334b903be827dedb5345608a34a6df444912fe1b
 package: cuda-js@0.1.0-alpha.5
+Node:    26.7.0 exact qualification baseline
 ```
 
-The baseline contains the accepted Windows F1-F9 foundation and portable/software/package implementations of:
+The baseline contains the accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations of:
 
 - SPEC-0010 typed relocatable device code;
 - SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
@@ -21,7 +22,7 @@ The baseline contains the accepted Windows F1-F9 foundation and portable/softwar
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
-- ADR-0004/SPEC-0027 optional NN product authority as a separate future publish unit.
+- ADR-0004 and SPEC-0027 optional NN product authority as a separate future publish unit.
 
 Portable/software implementation and native qualification remain independent.
 
@@ -38,7 +39,7 @@ qualification status:        not-qualified
 priority:                    dependency-ready
 ```
 
-SPEC-0017 now accepts sanitized opaque device discovery/selection, exactly one selected physical device per runtime, and selected-device-driven compile/link target resolution. It exposes no ordinal/UUID/serial/PCI/native handle. Multi-device orchestration remains SPEC-0024 and proposal-only.
+SPEC-0017 accepts sanitized opaque device discovery/selection, exactly one selected physical device per runtime, and selected-device-driven compile/link target resolution. It exposes no ordinal/UUID/serial/PCI/native handle. Multi-device orchestration remains SPEC-0024 and proposal-only.
 
 ### Accepted foundation: SPEC-0021 / #39/#88
 
@@ -49,7 +50,7 @@ qualification status:        not-qualified
 priority:                    current implementation focus
 ```
 
-SPEC-0021 now accepts `f64`, `f16`, and `bf16` scalar packing plus contiguous one-dimensional generic typed device views. The proposal’s accidental conflict with SPEC-0011 was corrected: existing `f32` remains finite-only and continues rejecting NaN/infinity. New half/bfloat conversion is deterministic round-to-nearest-even with an explicit new-kind special-value bit contract.
+SPEC-0021 accepts `f64`, `f16`, and `bf16` scalar packing plus contiguous one-dimensional generic typed device views. The proposal’s accidental conflict with SPEC-0011 was corrected: existing `f32` remains finite-only and continues rejecting NaN/infinity. New half/bfloat conversion is deterministic round-to-nearest-even with an explicit new-kind special-value bit contract.
 
 ### Still gated: SPEC-0018 / #40
 
@@ -97,9 +98,15 @@ SPEC-0026 process-isolated execution
 
 Their dependency order is retained in the capability-expansion roadmap and the 2026-08-14 sweep record.
 
-## Optional NN product
+## Optional NN extension authority
 
-ADR-0004/SPEC-0027 authorize an optional application-neutral NN product in this repository only as a **separate future publish unit**. The published `cuda-js` core package, exports, dependencies, compatibility identity, source tree and import/provider-discovery behavior remain generic.
+**Architectural disposition:** planned under accepted ADR-0004 and SPEC-0027.
+
+**Implementation status:** not implemented.
+
+**Qualification status:** not qualified.
+
+The optional application-neutral NN product is authorized in this repository only as a **separate publish unit**. The published `cuda-js` core package, exports, dependencies, compatibility identity, source tree and import/provider-discovery behavior remain generic. The future NN package name and source directory remain unselected.
 
 Issues #70 and #72-#84 contain useful research, but portions of their original text still assume a same-package `cuda-js/nn` shape. That assumption is superseded. Every `nn.*` production boundary requires a separately accepted child specification, beginning with tensor semantics (#72) and then graph/autodiff dependencies. No NN production implementation is implied by the master-program issue bodies.
 
