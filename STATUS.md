@@ -9,8 +9,9 @@
 ```text
 main:    334b903be827dedb5345608a34a6df444912fe1b
 package: cuda-js@0.1.0-alpha.5
-Node:    26.7.0 exact qualification baseline
 ```
+
+**Node 26.7.0** remains the exact Node qualification baseline.
 
 The baseline contains the accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations of:
 
