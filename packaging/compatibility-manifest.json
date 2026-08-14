@@ -43,7 +43,8 @@
   "capabilities": {
     "deviceMemory": "bounded-synchronous-copied-bytes",
     "moduleFormats": ["ptx", "cubin"],
-    "functionParameters": ["device-memory", "u32", "u64", "i32", "f32"],
+    "functionParameters": ["device-memory", "u32", "u64", "i32", "f32", "f64", "f16", "bf16"],
+    "typedDeviceViews": "contiguous-1d-component-foundation-no-public-facade-yet",
     "launchConcurrency": 1,
     "gpuOperationLifecycle": "opaque-submit-status-wait-close-one-pending",
     "compiler": "optional-nvrtc-13.3",
@@ -83,6 +84,8 @@
     "Unconfirmed Windows x64 CUDA profiles may operate for testing without a separate opt-in.",
     "Only exact capability/profile combinations with their required evidence are qualified; successful operation does not promote support.",
     "SPEC-0010 relocatable PTX, SPEC-0011 u64/i32/f32 scalar launch kinds, and SPEC-0012 Device LTO are implemented public capabilities but are not natively qualified until their exact promotion evidence passes.",
+    "SPEC-0021 f64/f16/bf16 scalar launch kinds are implemented in the public portable/software/package path; their exact native ABI/launch promotion evidence remains open.",
+    "SPEC-0021 contiguous one-dimensional typed device-view range/lifecycle semantics are implemented as a generic component foundation; no public cuda-js facade entry for views has been selected or qualified yet.",
     "SPEC-0016 opaque GPU operation submission/completion is implemented but is not natively qualified until its exact Windows promotion evidence passes.",
     "SPEC-0013 Device-JS is an implemented restricted portable/software frontend using pinned Acorn only for syntax parsing; native Device-JS support remains unqualified until its exact generated-source/compiler/launch/oracle/lifecycle evidence passes.",
     "Linux and WSL package import and portable testing are not native CUDA support.",

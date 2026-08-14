@@ -86,7 +86,17 @@ test('f32 uses finite IEEE-754 binary32 packing and rejects non-finite or overfl
   assert.throws(() => packParameterValues(parameters, ['1.5']), (error) => error.code === 'EXECUTION_ARGUMENT_VALUE');
 });
 
-test('unsupported scalar kinds fail closed', () => {
+test('SPEC-0021 scalar kinds are admitted with exact natural widths', () => {
+  const layout = parameterLayout([{ kind: 'f64' }, { kind: 'f16' }, { kind: 'bf16' }]);
+  assert.deepEqual(layout.entries.map(({ kind, offset, byteLength, alignment }) => ({ kind, offset, byteLength, alignment })), [
+    { kind: 'f64', offset: 0, byteLength: 8, alignment: 8 },
+    { kind: 'f16', offset: 8, byteLength: 2, alignment: 2 },
+    { kind: 'bf16', offset: 10, byteLength: 2, alignment: 2 },
+  ]);
+  assert.equal(layout.byteLength, 12);
+});
+
+test('unsupported scalar kinds still fail closed', () => {
   assert.throws(() => parameterLayout([{ kind: 'i64' }]), (error) => error.code === 'EXECUTION_PARAMETER_INVALID');
-  assert.throws(() => parameterLayout([{ kind: 'f64' }]), (error) => error.code === 'EXECUTION_PARAMETER_INVALID');
+  assert.throws(() => parameterLayout([{ kind: 'f128' }]), (error) => error.code === 'EXECUTION_PARAMETER_INVALID');
 });

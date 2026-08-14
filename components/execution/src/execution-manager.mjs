@@ -1,15 +1,12 @@
 import { createHash } from 'node:crypto';
+import {
+  isParameterKind,
+  packParameterValues as packNumericParameterValues,
+  parameterLayout as numericParameterLayout,
+} from './numeric-abi.mjs';
 
 const MIB = 1_048_576;
 const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds']);
-const PARAMETER_KINDS = new Set(['device-memory', 'u32', 'u64', 'i32', 'f32']);
-const PARAMETER_WIDTH = Object.freeze({
-  'device-memory': 8,
-  u32: 4,
-  u64: 8,
-  i32: 4,
-  f32: 4,
-});
 const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
@@ -270,58 +267,17 @@ export function normalizeExecutionPolicy(value = {}) {
 function normalizeParameters(parameters, maximum) {
   if (!Array.isArray(parameters) || parameters.length < 1 || parameters.length > maximum) fail('EXECUTION_PARAMETERS_INVALID', 'validation', 'Function parameters must be a nonempty bounded array.', { count: parameters?.length ?? null, maximum });
   return Object.freeze(parameters.map((parameter, index) => {
-    if (!exactFields(parameter, ['kind']) || !PARAMETER_KINDS.has(parameter.kind)) fail('EXECUTION_PARAMETER_INVALID', 'validation', 'Function parameter record is invalid.', { index, kind: parameter?.kind ?? null });
+    if (!exactFields(parameter, ['kind']) || !isParameterKind(parameter.kind)) fail('EXECUTION_PARAMETER_INVALID', 'validation', 'Function parameter record is invalid.', { index, kind: parameter?.kind ?? null });
     return Object.freeze({ kind: parameter.kind });
   }));
 }
 
-function checkedAlign(offset, alignment) {
-  const remainder = offset % alignment;
-  const result = remainder === 0 ? offset : offset + alignment - remainder;
-  if (!Number.isSafeInteger(result)) fail('EXECUTION_PARAMETER_LAYOUT', 'validation', 'Parameter layout exceeds the safe integer range.');
-  return result;
-}
-
 export function parameterLayout(parameters) {
-  if (!Array.isArray(parameters) || parameters.length < 1) fail('EXECUTION_PARAMETERS_INVALID', 'validation', 'Parameter layout requires a nonempty schema.');
-  let size = 0;
-  const entries = parameters.map((parameter, index) => {
-    const kind = parameter?.kind;
-    if (!PARAMETER_KINDS.has(kind)) fail('EXECUTION_PARAMETER_INVALID', 'validation', 'Parameter kind is unsupported.', { index, kind: kind ?? null });
-    const width = PARAMETER_WIDTH[kind];
-    size = checkedAlign(size, width);
-    const entry = Object.freeze({ index, kind, offset: size, byteLength: width, alignment: width });
-    size += width;
-    if (!Number.isSafeInteger(size)) fail('EXECUTION_PARAMETER_LAYOUT', 'validation', 'Parameter layout exceeds the safe integer range.');
-    return entry;
-  });
-  return Object.freeze({ entries: Object.freeze(entries), byteLength: size });
+  return numericParameterLayout(parameters, fail);
 }
 
 export function packParameterValues(parameters, values) {
-  if (!Array.isArray(values) || values.length !== parameters.length) fail('EXECUTION_ARGUMENT_COUNT', 'validation', 'Launch argument count must exactly match the declared parameter count.', { expected: parameters.length, actual: values?.length ?? null });
-  const layout = parameterLayout(parameters);
-  const buffer = Buffer.alloc(layout.byteLength);
-  for (const entry of layout.entries) {
-    const value = values[entry.index];
-    if (entry.kind === 'device-memory') {
-      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'Private device-memory value is invalid.', { index: entry.index });
-      buffer.writeBigUInt64LE(value, entry.offset);
-    } else if (entry.kind === 'u64') {
-      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'u64 argument is out of range or not an exact bigint.', { index: entry.index });
-      buffer.writeBigUInt64LE(value, entry.offset);
-    } else if (entry.kind === 'u32') {
-      if (!Number.isInteger(value) || value < 0 || value > 0xffff_ffff) fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'u32 argument is out of range.', { index: entry.index, value });
-      buffer.writeUInt32LE(value, entry.offset);
-    } else if (entry.kind === 'i32') {
-      if (!Number.isInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'i32 argument is out of range.', { index: entry.index, value });
-      buffer.writeInt32LE(value, entry.offset);
-    } else if (entry.kind === 'f32') {
-      if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) fail('EXECUTION_ARGUMENT_VALUE', 'validation', 'f32 argument must be finite and representable without binary32 overflow.', { index: entry.index });
-      buffer.writeFloatLE(value, entry.offset);
-    }
-  }
-  return Object.freeze({ buffer, layout });
+  return packNumericParameterValues(parameters, values, fail);
 }
 
 function moduleBytes(format, value, maximum) {

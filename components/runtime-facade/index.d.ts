@@ -107,7 +107,7 @@ export interface CompilerResult {
   readonly operationSequence: number;
 }
 
-export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32';
+export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32' | 'f64' | 'f16' | 'bf16';
 export interface FunctionParameter { readonly kind: FunctionParameterKind; }
 
 export interface LaunchDimensions { x: number; y: number; z: number; }

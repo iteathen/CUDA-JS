@@ -1,23 +1,21 @@
 {
-  "schema_version": 34,
+  "schema_version": 35,
   "updated": "2026-08-14",
   "status": "active_open_issue_development_sweep",
   "objective": "Process every open CUDA-JS issue through investigate, assess, primary-source research, reassess, plan, authorized implementation, and test without collapsing architecture, implementation, qualification, and priority. Advance only dependency-ready ownership boundaries and record exact external/hardware blockers for the rest.",
   "exact_input_revisions": {
-    "protected_main": "334b903be827dedb5345608a34a6df444912fe1b",
+    "protected_main_authority_baseline": "66b449a5ae81d51620fd5004e1b75e89d5a9ac67",
     "package": "cuda-js@0.1.0-alpha.5",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
       "#65 target-syntax correction integrated",
       "#66 disposal-failure correction integrated",
-      "#67 public capability projection reconciliation integrated"
+      "#67 public capability projection reconciliation integrated",
+      "CJS-CAP-NUMVIEW-0021: SPEC-0021 f64/f16/bf16 public portable/software/package scalar implementation plus contiguous 1D generic typed-view component implementation; native qualification and public view facade remain open"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
-    "accepted_in_current_authority_packet": [
-      "SPEC-0017 device selection and target resolution",
-      "SPEC-0021 extended numeric ABI and contiguous 1D generic device views"
-    ],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016", "SPEC-0021"],
+    "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
     "still_proposal_only": ["SPEC-0014", "SPEC-0018", "SPEC-0019", "SPEC-0020", "SPEC-0022", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
@@ -41,17 +39,22 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-CAP-NUMVIEW-0021",
-    "issues": [39, 88],
+    "id": "CJS-CAP-DEVSEL-0017",
+    "issues": [20],
     "plan": "docs/plans/2026-08-14-open-issue-development-sweep.md",
-    "next_action": "Implement the accepted portable/software SPEC-0021 slice as one ownership packet: deterministic f64/f16/bf16 packing while preserving finite-only f32, plus contiguous 1D generic typed device views and focused mutation/property/lifecycle tests. Do not claim native support until independent exact-profile evidence passes.",
-    "exit": "Portable/package implementation, exact-effect review and protected checks pass; implementation status is updated without changing qualification status."
+    "next_action": "Implement the accepted portable/software SPEC-0017 foundation as one ownership packet: finite sanitized device discovery snapshots, opaque selector capabilities, exactly one selected device bound before context/resource creation, default-device compatibility, stale/foreign/ambiguous selector rejection, and selected-device propagation into target/cache identity. Keep native ordinals and stable hardware identifiers private and do not claim multi-GPU qualification without a controlled multi-device oracle.",
+    "exit": "Portable/software selector and target-resolution implementation, ownership-focused tests, exact-effect review, protected checks, and remote protected-main read-back pass without changing native qualification."
   },
-  "parallel_dependency_ready": [
+  "parallel_or_external_next": [
     {
-      "id": "CJS-CAP-DEVSEL-0017",
-      "issues": [20],
-      "action": "Implement the accepted portable/software selector snapshot and selected-device target-resolution foundation without exposing native identifiers; native multi-device qualification remains separate."
+      "id": "CJS-OPS-NATIVE-0016",
+      "issues": [51],
+      "action": "Recover or recreate verifiable current-protected-main native SPEC-0016 delayed-kernel/NOT_READY/deferred-fault/cleanup evidence on the exact qualified Windows profile; publish and read it back before SPEC-0018 can advance."
+    },
+    {
+      "id": "CJS-NUMVIEW-NATIVE-0021",
+      "issues": [39, 88],
+      "action": "Run the independent native mixed-signature scalar ABI/launch oracle and at least one native/library view-range consumer fixture on an exact qualified profile. A public view-facade API remains unselected and requires separate accepted surface authority if needed."
     }
   ],
   "blocked_or_deferred_lanes": [
@@ -72,8 +75,8 @@
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
-      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 35, 42, 43, 51],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence unavailable in this execution environment. Portable preparation may continue, but no native/support claim is inferred."
+      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 35, 39, 42, 43, 51, 88],
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence unavailable in this execution environment. Portable preparation/implementation may continue where authorized, but no native/support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",
@@ -102,6 +105,7 @@
     "treat an open issue, roadmap, proposal, or experiment as production implementation authority",
     "accept SPEC-0018 before its published native SPEC-0016 widening gate is satisfied",
     "widen accepted SPEC-0011 finite-only f32 semantics implicitly while adding new floating kinds",
+    "treat the implemented SPEC-0021 view component as a selected public facade API",
     "infer native support from portable/mock/neighboring-profile evidence",
     "duplicate SPEC-0016 operation lifecycle in scheduler, transfer, graph, library, graphics, sideband, multi-GPU, or NN work",
     "add NN exports/dependencies/provider discovery/tensor/autodiff/training semantics to the cuda-js core package",

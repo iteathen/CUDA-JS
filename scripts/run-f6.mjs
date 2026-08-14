@@ -11,8 +11,11 @@ const unitFiles = [
   'components/compiler-actor/test/compiler-actor.test.mjs',
   'components/compiler-actor/test/relocatable-device-code.test.mjs',
   'components/compiler-actor/test/device-lto.test.mjs',
+  'components/memory/test/device-view-manager.test.mjs',
   'components/execution/test/execution-manager.test.mjs',
   'components/execution/test/scalar-arguments.test.mjs',
+  'components/execution/test/extended-numeric-abi.test.mjs',
+  'components/execution/test/extended-numeric-execution.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
 ];
 

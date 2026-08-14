@@ -1,3 +1,4 @@
+import { isParameterKind, isScalarParameterValue } from '../../execution/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { validationError } from './errors.mjs';
 
@@ -13,7 +14,6 @@ const TEST_OPERATIONS = new Set([
   'testing.block', 'testing.inject-health', 'testing.execution-mode',
   'testing.disposal-mode', 'testing.disposal-status',
 ]);
-const EXECUTION_PARAMETER_KINDS = new Set(['device-memory', 'u32', 'u64', 'i32', 'f32']);
 
 function exactFields(value, fields) {
   return Object.keys(value).sort().join('\0') === [...fields].sort().join('\0');
@@ -44,21 +44,16 @@ function dimensions(value) {
 
 function parameterSchema(value, maximum) {
   return Array.isArray(value) && value.length > 0 && value.length <= maximum
-    && value.every((entry) => plainObject(entry) && exactFields(entry, ['kind']) && EXECUTION_PARAMETER_KINDS.has(entry.kind));
+    && value.every((entry) => plainObject(entry) && exactFields(entry, ['kind']) && isParameterKind(entry.kind));
 }
 
 function scalarArgument(entry) {
-  if (!exactFields(entry, ['kind', 'value'])) return false;
-  if (entry.kind === 'u32') return Number.isInteger(entry.value) && entry.value >= 0 && entry.value <= 0xffff_ffff;
-  if (entry.kind === 'u64') return typeof entry.value === 'bigint' && entry.value >= 0n && entry.value <= 0xffff_ffff_ffff_ffffn;
-  if (entry.kind === 'i32') return Number.isInteger(entry.value) && entry.value >= -0x8000_0000 && entry.value <= 0x7fff_ffff;
-  if (entry.kind === 'f32') return typeof entry.value === 'number' && Number.isFinite(entry.value) && Number.isFinite(Math.fround(entry.value));
-  return false;
+  return exactFields(entry, ['kind', 'value']) && isScalarParameterValue(entry.kind, entry.value);
 }
 
 function launchArguments(value, maximum) {
   return Array.isArray(value) && value.length > 0 && value.length <= maximum && value.every((entry) => {
-    if (!plainObject(entry) || !EXECUTION_PARAMETER_KINDS.has(entry.kind)) return false;
+    if (!plainObject(entry) || !isParameterKind(entry.kind)) return false;
     if (entry.kind !== 'device-memory') return scalarArgument(entry);
     const fields = Object.keys(entry);
     return fields.every((key) => ['kind', 'memory', 'byteOffset'].includes(key))

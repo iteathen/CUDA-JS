@@ -6,3 +6,9 @@ export {
   packParameterValues,
   parameterLayout,
 } from './src/execution-manager.mjs';
+
+export {
+  isParameterKind,
+  isScalarParameterValue,
+  parameterWidth,
+} from './src/numeric-abi.mjs';

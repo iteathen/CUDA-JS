@@ -53,6 +53,8 @@ for (const required of [
   'components/device-js/src/strict-translator.mjs',
   'components/cuda-target/index.mjs',
   'components/cuda-target/component.yaml',
+  'components/execution/src/numeric-abi.mjs',
+  'components/memory/src/device-view-manager.mjs',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
   'components/runtime-facade/compatibility.mjs',
@@ -95,7 +97,7 @@ for (const fixture of fixtureNames) {
 
 const memoryObservation = observations.find((entry) => entry.consumer === 'portable-memory');
 assert(memoryObservation);
-assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32']);
+assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
 for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
@@ -112,10 +114,13 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0008-package-public-facade.md',
     'docs/specs/SPEC-0013-restricted-device-js.md',
     'docs/specs/SPEC-0013-public-surface-addendum.md',
+    'docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
     'packaging/compatibility-manifest.json',
+    'components/execution/src/numeric-abi.mjs',
+    'components/memory/src/device-view-manager.mjs',
     'components/device-js/src/strict-translator.mjs',
     'components/runtime-facade/src/runtime.mjs',
     'components/runtime-facade/src/device-program.mjs',
@@ -125,6 +130,11 @@ const target = await writeEvidence('portable-package.json', {
   ]),
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
-  claimLimits: ['Portable package, public facade, Device-JS translation, mock lifecycle, and install/uninstall behavior only.', 'RDC, extended scalar ABI, Device LTO, Device-JS, and SPEC-0016 operations remain subject to their exact native promotion gates.', 'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.'],
+  claimLimits: [
+    'Portable package, public facade, SPEC-0021 scalar ABI, Device-JS translation, mock lifecycle, and install/uninstall behavior only.',
+    'The contiguous 1D typed device-view component is packaged for internal/downstream use but has no selected public cuda-js facade entry yet.',
+    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, and typed device-view native consumers remain subject to their exact native promotion gates.',
+    'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',
+  ],
 });
 console.log(`F8 portable package conformance passed for ${packageRecord.name}@${packageRecord.version}; evidence: ${target}`);
