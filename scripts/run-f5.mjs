@@ -13,6 +13,7 @@ const unitFiles = [
   'components/execution/test/execution-manager.test.mjs',
   'components/execution/test/scalar-arguments.test.mjs',
   'components/execution/test/extended-numeric-abi.test.mjs',
+  'components/execution/test/extended-numeric-execution.test.mjs',
   'components/execution/test/operation-lifecycle.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
