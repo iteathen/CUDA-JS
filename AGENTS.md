@@ -43,9 +43,10 @@ Correctness, safety, lifecycle truth, recoverability and compatibility are gates
 ## Non-negotiable boundaries
 
 - The published `cuda-js` package is a generic Node/CUDA runtime/toolchain. It contains no MCGS, minimax, graph-search, game, tensor, model, training, optimizer, evaluator, or application scheduler semantics.
-- ADR-0004/SPEC-0027 authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
+- **ADR-0004 and SPEC-0027** authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon. Custom AsmJit/register stubs remain a deferred measured-gap option.
+- A `fast-jit-required` claim requires exact-profile qualification evidence; generic fallback is allowed only in a declared cold/bootstrap profile.
 - Generated header/ABI facts and curated semantic/lifecycle overlays are separate owners. Unknown public semantics fail closed.
 - Node FFI and raw native/device memory remain private. JavaScript receives opaque capabilities and bounded data.
 - `cuGetProcAddress` may verify version/status/semantics, but v0 invokes only approved named exports unless a separately qualified capability says otherwise.
@@ -68,7 +69,17 @@ Protected `main` before the 2026-08-14 open-issue sweep is:
 cuda-js@0.1.0-alpha.5
 ```
 
-Accepted and implemented in portable/software/package paths include the Windows F1-F9 foundation plus:
+The repository is in an **active implementation phase**. Accepted and implemented portable/software/package paths include the historical Windows foundation plus current generic capabilities.
+
+Durable historical anchors retained for validation and provenance:
+
+- `CJS-F1A / EXP-000` is the accepted synthetic Node-FFI foundation and remains a regression capsule.
+- `CJS-F1B` owns pinned header facts, generated ABI products and independent native layout probes.
+- `CJS-F2W / EXP-012` is the accepted Windows Driver bootstrap/native-smoke foundation.
+- Windows `CJS-F3W` through `CJS-F7W` and `CJS-F8W` remain accepted historical implementation/evidence owners.
+- `EXP-001` remains the native Linux x86-64 preparation/qualification handoff; its portable preparation is not Linux Driver support.
+
+Current accepted portable/software/package capabilities additionally include:
 
 ```text
 SPEC-0010 typed relocatable device code
