@@ -1,61 +1,53 @@
 # SPEC-0021: Extended Numeric ABI and Generic Device Views
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-13
+
+**Accepted:** 2026-08-14 after adversarial contract review against protected `main` `334b903be827dedb5345608a34a6df444912fe1b`, accepted SPEC-0011, and current CUDA 13.3 half/bfloat semantics.
 
 **Issue owners:** #39 and #88
 
 ## Outcome
 
-Extend the closed kernel-argument ABI with `f64`, `f16` and `bf16`, and define generic typed bounded views over opaque CUDA-JS device allocations.
+Extend the closed kernel-argument ABI with `f64`, `f16` and `bf16`, and define generic typed bounded one-dimensional views over existing opaque CUDA-JS device allocations.
 
-The numeric ABI and view contract share dtype authority but remain distinct layers:
+Scalar launch arguments and device views share one dtype authority but remain separate layers:
 
-- scalar launch arguments describe by-value kernel parameter packing;
-- device views describe bounded interpretation/ranges over existing opaque device memory.
+- scalar arguments describe by-value kernel parameter packing;
+- device views describe a bounded typed interpretation/range over opaque device memory.
 
-This specification does not create a tensor framework.
+This contract does not create tensor algebra, broadcasting, model semantics or a raw-pointer API.
 
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented for new scalar kinds/views
+architectural disposition: selected
+implementation status:       authorized; not yet integrated at acceptance
 qualification status:        not-qualified
-priority:                    after accepted contract review; views before library adapters
+priority:                    dependency-ready foundation
 ```
 
-## Dependencies
+## Accepted correction to the proposal
 
-This proposal extends SPEC-0004 and SPEC-0011. Device-JS may consume accepted dtype/view semantics, but cannot redefine them. CUDA library adapters in SPEC-0023 depend on the generic view contract.
+The proposal said its special-value rules applied to “all floating scalar kinds,” which contradicted accepted SPEC-0011: current `f32` is deliberately finite-only and rejects NaN/infinity. The accepted contract resolves that conflict instead of silently widening old behavior.
+
+**Legacy `f32` remains exactly SPEC-0011 finite-only.** The explicit NaN/infinity bit contract below applies only to the newly added `f64`, `f16`, and `bf16` kinds. A later accepted revision may widen `f32` explicitly, but this specification does not.
+
+The first accepted device-view profile is deliberately contiguous 1D. Multidimensional positive-stride descriptors remain a later widening after total range semantics/property evidence exists. This keeps the foundational view primitive small and reusable.
+
+## Authority and dependencies
+
+This specification extends SPEC-0004 and SPEC-0011. Device-JS and CUDA library adapters may consume these meanings but cannot redefine them. SPEC-0023 depends on the generic view contract.
 
 ## Closed dtype registry
 
-The first extended registry is:
-
 ```text
-existing: u32, u64, i32, f32
+existing: device-memory, u32, u64, i32, f32
 new:      f64, f16, bf16
 ```
 
-Every dtype has exactly defined:
-
-- storage width;
-- natural alignment;
-- host input representation;
-- byte order;
-- validation;
-- conversion/rounding policy;
-- NaN/Infinity/signed-zero/subnormal policy;
-- deterministic packing;
-- compatibility identity.
-
-Arbitrary C/C++ types, structs/vectors by value and caller-supplied raw parameter buffers remain unavailable.
-
-## Width and alignment
-
-The proposed new by-value ABI kinds are:
+New scalar ABI facts:
 
 ```text
 f64:  8 bytes, natural alignment 8
@@ -63,73 +55,64 @@ f16:  2 bytes, natural alignment 2
 bf16: 2 bytes, natural alignment 2
 ```
 
-These are CUDA-JS ABI meanings and must be checked against the independent native parameter-layout oracle before acceptance/promotion. They do not authorize arbitrary C++ half/bfloat wrapper structs by value.
+These meanings do not authorize arbitrary C/C++ types, wrapper structs, vectors, raw parameter buffers or generic pointers.
 
 ## Public scalar representation
 
+All three new kinds accept a JavaScript `number` and use CUDA-JS-owned deterministic packing.
+
 ### `f64`
 
-Public input is a JavaScript `number`.
-
-Packing emits the exact IEEE-754 binary64 bit pattern for finite values, infinities and signed zero under the existing kernel-argument byte-order contract. JavaScript `number` is the semantic input, but CUDA-JS explicitly owns packing and special-value policy rather than assuming host ABI layout or preserving an engine-specific NaN payload.
+- encode IEEE-754 binary64 in 8 little-endian bytes;
+- preserve finite values, signed zero and signed infinity;
+- every JavaScript NaN canonicalizes to positive quiet NaN bits `0x7ff8000000000000`;
+- no JavaScript-engine NaN payload is preserved.
 
 ### `f16`
 
-Public input is a JavaScript `number` converted deterministically to IEEE-754 binary16 using round-to-nearest, ties-to-even for finite values.
+- convert binary64 input to IEEE-754 binary16 using round-to-nearest, ties-to-even;
+- preserve signed zero and infinity;
+- finite overflow becomes signed infinity;
+- finite underflow produces the correctly rounded subnormal or signed zero;
+- every JavaScript NaN canonicalizes to `0x7e00`.
 
 ### `bf16`
 
-Public input is a JavaScript `number` converted deterministically to bfloat16 using round-to-nearest, ties-to-even for finite values.
+- convert binary64 input to bfloat16 using round-to-nearest, ties-to-even;
+- preserve signed zero and infinity;
+- finite overflow becomes signed infinity;
+- finite underflow produces the correctly rounded subnormal or signed zero;
+- every JavaScript NaN canonicalizes to `0x7fc0`.
 
-Using `number` as the public input is an ergonomics choice, not a claim that JavaScript natively executes half/bfloat arithmetic. CUDA-JS defines conversion independently and validates it against native/reference oracles.
+Current CUDA Math API documentation uses round-to-nearest-even for half/bfloat operations/conversions. CUDA-JS nevertheless owns host packing independently so provider/GPU conversion behavior cannot redefine the public ABI.
 
-## Special values and conversion policy
+Non-number values reject. No implicit string, bigint, object or symbol coercion occurs.
 
-For all floating scalar kinds:
+## Legacy `f32`
 
-- `+0` and `-0` remain distinguishable in packed bits;
-- positive/negative infinity are preserved;
-- NaN is canonicalized by CUDA-JS rather than preserving an engine/provider payload;
-- finite overflow converts to signed infinity for `f16`/`bf16`;
-- normal/subnormal conversion follows round-to-nearest, ties-to-even;
-- underflow may produce a correctly rounded subnormal or signed zero; it is not silently flushed to zero by the host packer;
-- no implicit saturation is performed;
-- `undefined`, strings, bigint, symbols and objects reject;
-- no fast-math/flush-to-zero device-execution promise follows from scalar packing.
+SPEC-0011 remains authoritative without change:
 
-The proposed canonical quiet-NaN bit patterns are:
+- JavaScript `number` only;
+- finite only;
+- binary32 overflow rejects;
+- NaN and ±infinity reject;
+- signed zero and finite subnormal/underflow behavior remain unchanged.
 
-```text
-f64:  0x7ff8000000000000
-f16:  0x7e00
-bf16: 0x7fc0
-```
-
-JavaScript does not provide a portable NaN payload/sign contract to preserve through this API, so every JavaScript NaN maps to the positive canonical quiet NaN above. These exact bits enter the ABI contract and mutation tests.
-
-Finite conversion must be implemented by CUDA-JS-owned deterministic bit/conversion logic or another implementation proven byte-identical to that logic. It must not depend on whatever half/bfloat conversion happens to be exposed by a particular GPU/provider.
-
-Device arithmetic behavior remains governed by the compiled device program/provider profile. Packing correctness is separate from kernel arithmetic semantics.
+Legacy parameter layouts and bytes must remain byte-identical.
 
 ## Mixed parameter layout
 
-The accepted launch packer continues to compute natural alignment, offsets, total size and zero padding deterministically from the closed parameter schema.
+The existing packer continues checked natural alignment, safe-integer arithmetic and deterministic zero padding. Adding 2-byte and 8-byte kinds must not alter offsets/bytes for unchanged legacy signatures.
 
-Adding new kinds must not alter legacy layouts for existing signatures.
+## Generic device view v1
 
-Every padding byte is deterministically zeroed. Size/alignment arithmetic is safe-integer checked.
-
-## Generic device view
-
-A device view is an opaque logical descriptor over one existing CUDA-JS device allocation.
-
-Required fields are equivalent to:
+A v1 view is a contiguous one-dimensional logical descriptor over one live opaque CUDA-JS device allocation. Public-safe fields are equivalent to:
 
 ```text
 view contract/version
-view identity
+opaque view identity
 runtime/device/epoch identity
-parent allocation capability + generation
+opaque parent allocation identity/generation
 dtype
 byte offset
 element count
@@ -137,42 +120,9 @@ logical byte span
 access role
 ```
 
-Optional finite metadata may include:
+Accepted dtypes for view v1 are the scalar storage dtypes owned by this registry (`u32`, `u64`, `i32`, `f32`, `f64`, `f16`, `bf16`) where the selected consumer/provider supports them. `device-memory` is not a view element dtype.
 
-```text
-rank
-shape
-strides
-layout label from a closed registry
-```
-
-No native device address is exposed.
-
-## Range arithmetic
-
-Before creating/using a view CUDA-JS proves:
-
-- dtype is accepted;
-- offset/count/dimensions/strides are finite safe integers;
-- multiplication/addition cannot overflow safe bounds;
-- every reachable byte lies within the parent allocation;
-- required alignment is satisfied;
-- rank/dimension/stride counts are within configured finite limits;
-- any layout label is accepted by the view contract.
-
-Negative offsets/strides and arbitrary overlapping strided regions may be rejected in the first slice unless a later accepted profile defines them.
-
-## View shape semantics
-
-The generic view layer does not define broadcasting, tensor algebra, FFT semantics, sparse semantics or image interpretation.
-
-A shape/stride descriptor means only a bounded index-to-byte mapping. Library/application adapters add their own semantic legality checks.
-
-The first accepted profile should support contiguous one-dimensional views. Finite multidimensional positive-stride descriptors may be added in the same contract only when property tests make their range semantics total and unambiguous.
-
-## Access roles and aliasing
-
-A view declares an access role such as:
+Access role is one of:
 
 ```text
 read
@@ -180,104 +130,102 @@ write
 read-write
 ```
 
-The view itself does not globally prevent aliases. Scheduler/library owners use view ranges/access roles to detect or require ordering for hazards.
+A view never exposes a native address.
 
-A view cannot grant write authority if the owning capability/profile marks the underlying range read-only.
+## View range semantics
+
+Before view creation/use CUDA-JS proves:
+
+- dtype accepted;
+- offset/count finite safe integers;
+- offset non-negative and count non-negative;
+- multiplication/addition cannot exceed the safe-integer domain;
+- logical byte span lies wholly inside the parent allocation;
+- offset satisfies dtype alignment;
+- parent runtime/device/epoch/generation is live and compatible;
+- requested write authority does not exceed parent/profile authority.
+
+Zero-element views are allowed only when offset itself is within the closed allocation boundary and no reachable byte exists. This makes empty slices composable without permitting an out-of-range sentinel offset.
+
+Multidimensional shape/stride/layout semantics are **not** part of v1 and require an accepted follow-up revision rather than accidental interpretation here.
+
+## Aliasing and hazards
+
+Views may overlap; the view component describes exact byte ranges/access roles but does not invent global scheduling semantics. Scheduler/library owners consume those facts to prove ordering or reject hazards. A view cannot grant capabilities absent from its parent.
 
 ## Lifecycle
 
-A view is a child logical resource of its parent allocation.
+A view is a logical child/dependency of its parent allocation.
 
-- creation acquires/records parent-generation dependency;
-- a stale/closed/wrong-runtime parent rejects before native work;
-- view close releases only the logical view dependency;
-- closing a view never frees the parent allocation by itself;
-- parent allocation close is blocked while live leases/views/operations require it according to resource-registry policy;
-- a view never extends a parent past an accepted closing/orphan boundary.
-
-Operation/library use acquires the necessary parent/view lease through the owning execution contract.
+- creation records/acquires the parent generation dependency;
+- stale/closed/wrong-runtime parent rejects before native work;
+- closing a view releases only its logical dependency;
+- closing a view never frees the parent;
+- parent release remains blocked while accepted live view/operation leases require it;
+- an orphaned/closing parent cannot be extended back into a live allocation by a view.
 
 ## Compatibility identity
 
-Numeric ABI identity changes when any of these change:
+Numeric ABI identity changes with dtype definition, conversion/special-value policy, canonical NaN bits, width/alignment or packing rules. View identity changes with contract version, dtype registry, range/access semantics and parent generation.
 
-```text
-dtype definitions
-conversion/special-value policy
-canonical NaN bits
-size/alignment/packing rules
-```
+Caches/providers that depend on these meanings include the relevant identity rather than inferring compatibility from names alone.
 
-View compatibility identity changes with:
-
-```text
-view contract version
-dtype registry
-range/layout semantics
-access-role semantics
-```
-
-Artifact/provider caches that depend on these meanings include the relevant identities.
-
-## Portable conformance
+## Portable implementation acceptance
 
 ### Scalar ABI
 
-- every mixed argument position and alignment partition;
-- boundary finite values;
-- signed zero;
-- infinities;
-- exact canonical NaN bit patterns;
-- largest/smallest normal and subnormal boundaries;
-- halfway/tie rounding cases in both signs;
-- overflow and underflow behavior;
+Required cases:
+
+- all new kinds in every alignment position;
+- representative finite values and exact expected bytes;
+- signed zero and infinities;
+- exact canonical NaN bytes for new kinds;
+- largest/smallest normal/subnormal boundaries;
+- halfway/tie cases of both signs for f16/bf16;
+- overflow and underflow;
 - deterministic zero padding;
-- legacy signature byte identity;
-- invalid/ambiguous input rejection;
-- mutation tests for wrong width/alignment/offset/padding/rounding/NaN policy.
+- legacy `device-memory`/`u32`/`u64`/`i32`/`f32` byte identity;
+- invalid type rejection;
+- mutation controls for width/alignment/offset/padding/rounding/NaN policy.
 
 ### Views
 
-- offset/count boundary properties;
-- alignment partitions;
-- multidimensional range calculations where admitted;
-- wrong-runtime/stale/closed parent;
-- alias-range classification;
-- parent-close/view-close behavior;
+Required cases:
+
+- zero/tail/full/subrange boundaries;
+- dtype alignment;
+- safe-integer overflow rejection;
+- stale/closed/wrong-runtime parent rejection;
+- overlap classification using exact byte ranges;
+- read/write/read-write role normalization;
+- parent-close/view-close lifetime behavior;
 - deterministic descriptor identity;
 - no native address leakage.
+
+Mocks prove orchestration/range/lifecycle only.
 
 ## Native promotion evidence
 
 ### Scalars
 
-An independent native C/CUDA Driver oracle must consume mixed signatures covering every new kind and position, compare exact parameter bytes/offsets where observable, launch bounded fixtures and validate output/special-value behavior under the declared profile. The oracle vectors must include the same exact canonical NaN, signed-zero, subnormal, tie and overflow cases and must not reuse production conversion code.
+An independent native C/CUDA Driver oracle must consume mixed signatures containing every new kind/position, independently confirm ABI/layout expectations, launch bounded fixtures and compare exact values/bytes. It must include canonical NaN, signed-zero, subnormal, tie, overflow and infinity cases without reusing production conversion code.
 
 ### Views
 
-At least one independent native/library fixture consumes the same logical range semantics. It must prove correct offset/count interpretation, reject invalid/misaligned ranges before native work, retain allocation lifetime through use and close terminally.
+At least one independent native/library fixture must consume the same offset/count semantics, prove exact byte interpretation, reject invalid/misaligned ranges before native work, retain parent lifetime through use and close terminally.
 
-Every profile records exact Node/ABI/Driver/toolkit/GPU/provider identity.
+Every promotion records exact Node/ABI/OS/Driver/toolkit/GPU/provider identity. No portable pass becomes a native support claim.
 
-## Falsifiers / rollback
+## Falsifiers and rollback
 
-Do not accept this contract if new scalar kinds require raw caller buffers, depend on provider-specific conversion for their host ABI meaning, or if view range semantics cannot be proven without exposing pointers.
-
-Rollback is SPEC-0011 scalar ABI plus raw opaque device-allocation bytes under SPEC-0004.
+Stop implementation if new scalar kinds require caller raw buffers/provider-specific host conversion or if view safety requires pointer exposure. Rollback is accepted SPEC-0011 plus opaque allocation bytes under SPEC-0004.
 
 ## Non-goals
 
-- arbitrary ABI kinds or by-value structs/vectors;
-- caller raw launch buffers;
-- generic pointers;
-- tensor algebra/autograd/broadcasting;
-- library-specific FFT/sparse/image semantics;
-- preserving JavaScript-engine NaN payloads;
-- implying device arithmetic/fast-math behavior from host packing;
-- raw device addresses.
+Arbitrary ABI kinds; structs/vectors by value; raw launch buffers; generic pointers; multidimensional views in v1; tensor algebra/autograd/broadcasting; FFT/sparse/image semantics; preserving JS NaN payloads; deriving device arithmetic/fast-math behavior from host packing; raw device addresses.
 
 ## Primary references
 
-- https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/structs.html
 - https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/group__CUDA__MATH____HALF__ARITHMETIC.html
+- https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/group__CUDA__MATH____BFLOAT16__ARITHMETIC.html
 - https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/group__CUDA__MATH____BFLOAT16__MISC.html

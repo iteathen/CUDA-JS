@@ -2,113 +2,67 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-13
+**Updated:** 2026-08-14
 
-## Current implementation state
-
-The exact protected-`main` input baseline for this implementation packet is:
+## Protected-main baseline entering the open-issue sweep
 
 ```text
-7ba8e07db76f2b18dd97d344698bd2d90a41c9de
+main:    334b903be827dedb5345608a34a6df444912fe1b
+package: cuda-js@0.1.0-alpha.5
 ```
 
-The capability-authority proposal corpus is integrated on protected `main` at:
+**Node 26.7.0** remains the exact Node qualification baseline.
+
+The baseline contains the accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations of:
+
+- SPEC-0010 typed relocatable device code;
+- SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
+- SPEC-0012 typed Device LTO;
+- SPEC-0013 restricted Device-JS;
+- SPEC-0016 opaque one-pending-operation submission/completion;
+- the SPEC-0006 target-syntax correction;
+- the SPEC-0003 disposal-failure correction;
+- immutable GitHub Actions provenance and public capability projection checks;
+- ADR-0004 and SPEC-0027 optional NN product authority as a separate future publish unit.
+
+Portable/software implementation and native qualification remain independent.
+
+## 2026-08-14 open-issue sweep
+
+The project owner requested every open issue be processed through investigate, assess, primary-source research, reassess, plan, authorized implementation and test. The durable per-issue result is `docs/plans/2026-08-14-open-issue-development-sweep.md`.
+
+### Accepted foundation: SPEC-0017 / #20
 
 ```text
-5233a046c57813532a71763bb36cdba5894e43e0
+architectural disposition: selected
+implementation status:       authorized; portable/software integration next
+qualification status:        not-qualified
+priority:                    dependency-ready
 ```
 
-Package identity is `cuda-js@0.1.0-alpha.5`.
+SPEC-0017 accepts sanitized opaque device discovery/selection, exactly one selected physical device per runtime, and selected-device-driven compile/link target resolution. It exposes no ordinal/UUID/serial/PCI/native handle. Multi-device orchestration remains SPEC-0024 and proposal-only.
 
-The implementation baseline contains:
-
-- the accepted Windows F1–F9 foundation, including `CJS-F1B`, Windows `CJS-F2W` through `CJS-F7W`, exact Node 26.7.0 evidence, and retained Linux x86-64 qualification paths;
-- portable/software implementations of SPEC-0010 typed RDC, SPEC-0011 `u64`/`i32`/`f32` scalar arguments, SPEC-0012 Device LTO, SPEC-0013 restricted Device-JS, and SPEC-0016 opaque GPU operations;
-- the SPEC-0006 target-syntax correction in portable/software paths: one package-internal CUDA target syntax/admission-policy owner consumed by CompilerActor, linker, Device-JS, hardware validation, cache identity, and installed-package conformance;
-- proposed SPEC-0014 plus EXP-013 publication-mailbox evidence, without production mapped/sideband support;
-- retained EXP-014 lifecycle orchestration evidence;
-- a public facade that keeps DriverActor/CompilerActor/native capabilities private and exposes Device-JS only through the standalone `compileDeviceProgram()` helper.
-
-Portable/software implementation and native qualification are separate. SPEC-0010/0011/0012/0013/0016 retain their exact native promotion gates.
-
-## 2026-08-13 capability authority expansion
-
-The open capability tracker had begun referring to `SPEC-0017` through `SPEC-0026` and a capability-expansion roadmap before those files existed on protected main. PR #97 repaired that ownership gap by adding the following **proposal-only** contracts:
+### Accepted foundation: SPEC-0021 / #39/#88
 
 ```text
-SPEC-0017 device selection and target resolution
-SPEC-0018 bounded multi-operation scheduling
-SPEC-0019 host memory and async transfer
-SPEC-0020 prepared batch and CUDA Graph execution
-SPEC-0021 extended numeric ABI and generic device views
-SPEC-0022 Device-JS parallel and service profiles
-SPEC-0023 context-bound CUDA library adapters
-SPEC-0024 multi-GPU orchestration
-SPEC-0025 graphics interop
-SPEC-0026 process-isolated execution
+architectural disposition: selected
+implementation status:       authorized; portable/software integration next
+qualification status:        not-qualified
+priority:                    current implementation focus
 ```
 
-Proposal presence does not authorize their production implementation. Each must be separately reviewed and accepted before its implementation dimension may advance.
+SPEC-0021 accepts `f64`, `f16`, and `bf16` scalar packing plus contiguous one-dimensional generic typed device views. The proposal’s accidental conflict with SPEC-0011 was corrected: existing `f32` remains finite-only and continues rejecting NaN/infinity. New half/bfloat conversion is deterministic round-to-nearest-even with an explicit new-kind special-value bit contract.
 
-## Accepted P0 authority corrections
+### Still gated: SPEC-0018 / #40
 
-Two contradictions in already-accepted authority are implemented as separate implementation packets:
+```text
+architectural disposition: planned
+implementation status:       not-implemented
+qualification status:        not-qualified
+priority:                    blocked on published SPEC-0016 native evidence
+```
 
-### SPEC-0006 target-syntax addendum — issue #65
-
-**Architectural disposition:** planned correction.
-
-**Implementation status:** implemented in portable/software and package paths.
-
-**Qualification status:** existing qualified targets unchanged; newly represented targets remain not-qualified.
-
-The implementation provides one shared target parser/policy owner across CompilerActor, linker, Device-JS and hardware target validation. It structurally represents current numeric, family-specific (`f`) and architecture-specific (`a`) CUDA target forms, while policy revision 1 admits only the reviewed unsuffixed target bases already owned by the hardware registry. Target-policy identity participates in compiler/linker cache identity and both Device-JS identity layers. The internal owner is included in the installed package without becoming a public export. Parser/policy admission, provider/toolkit acceptance, device compatibility and CUDA-JS native qualification remain separate facts.
-
-### SPEC-0003 disposal-failure addendum — issue #66
-
-**Architectural disposition:** planned correction.
-
-**Implementation status:** implemented in portable/software paths.
-
-**Qualification status:** portable defect reproduced; destructive native cleanup partitions remain unqualified pending independent exact-profile evidence.
-
-The implementation keeps `RESOURCE_DISPOSE_FAILED` as registry context while preserving the underlying semantic category, observation operation and health transition directly. Failed disposal leaves the logical resource orphaned/unusable, unstructured disposer failure becomes restart-required, repeated close does not repeat native disposal by default, and rollback/cascade cleanup retains bounded primary + cleanup failure truth. DriverActor transport and facade projection preserve the bounded failure envelope and apply the resulting admission state.
-
-Both accepted P0 corrections are implemented in portable/software paths. Destructive native cleanup failures were not induced in this environment and remain explicitly unqualified; this correction does not claim new native negative-path or Blackwell support.
-
-## Public capability projection — issue #67
-
-**Documentation status:** reconciled in this implementation packet.
-
-**Validation status:** package identity and the duplicated RDC/scalar/LTO/Device-JS/operation/interop facts are checked by the documentation gate.
-
-**Qualification effect:** none; documentation reconciliation does not broaden native support.
-
-The public README and capability map now separate architecture, implementation, qualification and priority; describe the accepted portable/package RDC, scalar, Device-LTO, Device-JS and opaque-operation surfaces; and retain each capability's exact native gate. CUDA-MCGS interop now keeps consumer semantics in canonical Device-JS while CUDA-JS owns validation, CUDA lowering, compilation and runtime mechanics. The generated hardware matrix uses the same independent status dimensions and retains an exact `known-incompatible` Hyper-V profile without turning that evidence into architectural rejection.
-
-`scripts/public-capability-projection.mjs` validates those duplicated projections against `package.json`, the package compatibility manifest, accepted capability markers and the hardware registry. `scripts/verify-docs.sh` runs focused mutation tests so obsolete version/capability/ownership or aggregate-status language fails CI.
-
-## EXP-013 responsiveness oracle — issue #64
-
-**Architectural effect:** none; SPEC-0014 remains a proposal and SPEC-0016 remains the sole operation-lifecycle owner.
-
-**Implementation status:** the EXP-013 test oracle is repaired in this packet by replacing the Windows-fragile 1 ms callback-count threshold with one bounded application-turn observation and an explicit timeout negative control.
-
-**Qualification status:** focused exact-Node and F5 portable evidence passes. The exact Windows Node 26.7.0 F5 capsule must be rerun on the merged head before issue #64 closes; earlier candidate evidence is retained but does not qualify a later head automatically.
-
-The Worker readiness handshake, independently progressing mock work, mailbox directions/generation/leases, pending-close truth, failure cleanup and 10-second outer bounds are unchanged. This repair changes no production mailbox, DriverActor, runtime, CUDA, or support behavior.
-
-## Immutable GitHub Actions — issue #69
-
-**Security disposition:** source-controlled supply-chain hardening implemented in this packet.
-
-**Runtime/support effect:** none; package behavior, native qualification and exact Node/toolchain gates are unchanged.
-
-The `verify` and `node-compatibility` workflows pin every remote Action to a reviewed full commit SHA with a same-line release comment. `.github/actions-provenance.json` owns exact release, commit, license and workflow-usage facts, and `docs/PUBLIC_REPOSITORY.md` carries the validator-checked human-readable projection. Remote reusable workflows follow the same full-SHA rule; normalized repository-local `./...` references are explicitly allowed; Docker references are prohibited.
-
-The repository validator and focused mutation tests reject tags/branches/short SHAs, expression-based or malformed references, undeclared dependencies, commit/comment/provenance mismatches, stale workflow inventories, and drift from the weekly three-PR Dependabot update path. Dependency pull requests remain proposals: an upstream release/commit and its provenance must be reviewed before the protected checks can pass.
-
-Issue #68 remains a separate external-control gate. Source files cannot prove the private vulnerability reporting setting, an unaffiliated reporter's Security-tab entry point, or maintainer advisory management.
+Issue #51 records a successful Windows OSC-3 candidate that observed native NOT_READY and controlled deferred failure correctly, but also explicitly records that the candidate commits/evidence packet were not pushed/integrated on protected main. SPEC-0018 therefore remains proposal-only under its own widening gate. Multiple operations/private streams are not implemented in this sweep packet.
 
 ## Execution baseline
 
@@ -121,29 +75,31 @@ public operation lifecycle:   CudaFunction.submit() -> CudaOperation
 legacy terminal convenience:  CudaFunction.launch()
 ```
 
-SPEC-0016 is implemented in software/portable paths. Direct submit backpressures while another operation is pending; legacy terminal `launch()` preserves serialized compatibility above the actor. Native SPEC-0016 qualification remains open under issue #51.
-
-Bounded multi-stream execution remains architecturally planned under issue #40 and proposed SPEC-0018. It is not implemented or qualified and must consume SPEC-0016 rather than define another lifecycle.
+SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU, sideband and future NN execution work must consume it rather than duplicate it.
 
 ## Device-JS
 
-SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is a syntax-only parser adapter; CUDA-JS owns the accepted subset, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, diagnostics, identity and compiler handoff.
+SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Native DJS-2 promotion remains open under #43.
 
-Native DJS-2 evidence remains open under issue #43. Proposed SPEC-0022 may later widen trusted generic GPU primitives and, separately, define a service-safe profile. Neither proposal changes the current trusted-source Device-JS support state.
+## Proposal-only successor capabilities
 
-The CUDA-MCGS external deletion/compatible-pair proof remains cross-repository future work.
+The following remain proposal authority only and do not authorize production code:
 
-## Sideband
+```text
+SPEC-0014 long-lived sideband
+SPEC-0018 bounded multi-operation scheduling
+SPEC-0019 host memory and async transfer
+SPEC-0020 prepared batches / CUDA Graph execution
+SPEC-0022 Device-JS parallel + service profiles
+SPEC-0023 context-bound CUDA library adapters
+SPEC-0024 multi-GPU orchestration
+SPEC-0025 graphics interop
+SPEC-0026 process-isolated execution
+```
 
-SPEC-0014 remains a proposal. EXP-013 proves bounded portable publication-mailbox mechanics only. There is no production mapped/pinned sideband or arbitrary-duration live-operation support claim. Issue #38 must consume the accepted operation lifecycle and, if selected, accepted SPEC-0019 host-registration/mapping ownership before production sideband acceptance.
+Their dependency order is retained in the capability-expansion roadmap and the 2026-08-14 sweep record.
 
-## Platform qualification
-
-The exact accepted Windows x64 profile remains the native evidence baseline. Native Linux CUDA, WSL2, Linux ARM64/SBSA, Jetson, additional GPU models, Windows Server/TCC, virtualization, multi-GPU, MIG, ECC, soak/performance, and other axes remain independently qualified or unqualified according to their exact registries/evidence.
-
-Not-qualified is not architectural rejection.
-
-## Optional NN extension authority — issue #71
+## Optional NN extension authority
 
 **Architectural disposition:** planned under accepted ADR-0004 and SPEC-0027.
 
@@ -151,19 +107,44 @@ Not-qualified is not architectural rejection.
 
 **Qualification status:** not qualified.
 
-The CUDA-JS project now authorizes an optional application-neutral NN training product as a separate future publish unit in this repository. The published `cuda-js` package, exports, dependencies, compatibility identity, source tree, import behavior, and existing discovery behavior remain unchanged; no NN-shaped/eager provider discovery is added. The NN registry package name and repository directory remain unselected. SPEC-0027 records planned `nn.*` ownership anchors only; every production boundary still requires a separately accepted child specification, and no tensor, graph, autodiff, provider, training, checkpoint, or conformance implementation is implied.
+The optional application-neutral NN product is authorized in this repository only as a **separate publish unit**. The published `cuda-js` core package, exports, dependencies, compatibility identity, source tree and import/provider-discovery behavior remain generic. The future NN package name and source directory remain unselected.
 
-cuBLAS/cuDNN handles and all provider work over DriverActor-owned device/context/stream/memory resources remain under a future accepted generic adapter; cuBLASLt's distinct handle semantics do not relax current-device or execution-resource ownership. No NN-shaped commands or semantics enter DriverActor, CompilerActor, generic memory, execution, or Device-JS core. This authority packet changes no package behavior or native support claim.
+Issues #70 and #72-#84 contain useful research, but portions of their original text still assume a same-package `cuda-js/nn` shape. That assumption is superseded. Every `nn.*` production boundary requires a separately accepted child specification, beginning with tensor semantics (#72) and then graph/autodiff dependencies. No NN production implementation is implied by the master-program issue bodies.
 
-## Forward plans
+## Open native/platform/external gates
 
-Active plans contain unfinished work only:
+These remain independently open because the exact environment/control is unavailable here, not because the architecture is rejected:
 
-- [`docs/plans/2026-08-12-native-and-platform-qualification-continuation.md`](docs/plans/2026-08-12-native-and-platform-qualification-continuation.md);
-- [`docs/plans/2026-08-12-execution-capability-continuation.md`](docs/plans/2026-08-12-execution-capability-continuation.md);
-- [`docs/plans/2026-08-12-compatible-pair-continuation.md`](docs/plans/2026-08-12-compatible-pair-continuation.md);
-- [`docs/plans/2026-08-13-capability-expansion-roadmap.md`](docs/plans/2026-08-13-capability-expansion-roadmap.md).
+- native Linux x64 #4 and distro expansion #17;
+- additional GPU models #12;
+- WSL2 #13;
+- Linux ARM64/SBSA #14;
+- Jetson #15;
+- controlled GPU hosts #16 and independently attested runners #29;
+- virtualization #21;
+- compatibility matrix #22;
+- ECC #24;
+- Windows Server/TCC #26;
+- MIG #27;
+- performance/soak #28;
+- exact CUDA-MCGS pair #32;
+- native RDC/LTO/Device-JS/operations #35/#42/#43/#51;
+- exact merged-head Windows F5 oracle revalidation #64;
+- GitHub private vulnerability reporting end-to-end external control #68.
 
-The former master/focus/hardware/Node/F9/Device-JS plans are preserved unchanged under [`docs/archive/plans/`](docs/archive/plans/) and remain non-authoritative provenance. Their old active paths are explicit Superseded pointers.
+Not-qualified is not architectural rejection.
 
-[`next_step.yaml`](next_step.yaml) identifies the current dependency-ready focus. Plans organize work beneath accepted authority and do not reopen completed implementation.
+## Current forward order
+
+```text
+1. implement/test SPEC-0021 portable/software (#39/#88)
+2. implement/test SPEC-0017 portable/software (#20)
+3. publish/recreate exact current-head native SPEC-0016 evidence (#51)
+4. reassess SPEC-0018 only after step 3
+5. unlock SPEC-0019 / SPEC-0020 / SPEC-0023 and their consumers in dependency order
+6. begin NN child-spec acceptance in dependency order without changing generic core
+```
+
+Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.
+
+`next_step.yaml` is the machine-readable current focus. Plans organize work beneath accepted authority and never reopen completed implementation by implication.

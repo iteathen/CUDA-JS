@@ -1,31 +1,33 @@
 # SPEC-0017: Explicit Device Selection and Target Resolution
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-13
+
+**Accepted:** 2026-08-14 after adversarial contract review against protected `main` `334b903be827dedb5345608a34a6df444912fe1b` and current CUDA 13.3.1 Driver device/context semantics.
 
 **Issue owner:** #20
 
 ## Outcome
 
-Define a consumer-neutral CUDA-JS contract for enumerating available CUDA devices through sanitized opaque selectors and creating one runtime bound to exactly one selected physical device, without exposing `CUdevice`, CUDA ordinals, UUIDs, serials, PCI identifiers, native pointers, contexts, or provider-private identifiers.
+Define the consumer-neutral CUDA-JS contract for enumerating CUDA devices through sanitized opaque selector capabilities and creating one runtime bound to exactly one selected physical device. The contract also owns selected-device-driven compiler/link target resolution.
 
-This specification also owns the relationship between the selected device and default compiler/link target resolution. It does not authorize multiple-device orchestration inside one logical operation; that remains SPEC-0024.
+It does **not** expose `CUdevice`, CUDA ordinals, UUIDs, serials, PCI identifiers, contexts, pointers, provider paths or other native identifiers. It does not authorize multi-device orchestration inside one runtime/operation; that remains SPEC-0024.
 
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented
+architectural disposition: selected
+implementation status:       authorized; not yet integrated at acceptance
 qualification status:        not-qualified
-priority:                    before multi-GPU and graphics-device matching
+priority:                    dependency-ready foundation
 ```
+
+Acceptance authorizes only the bounded implementation below. Native/public support still requires exact-profile evidence.
 
 ## Authority and dependencies
 
-This proposal is additive to SPEC-0002, SPEC-0003, SPEC-0006, SPEC-0007, SPEC-0008, SPEC-0013 and SPEC-0016.
-
-It preserves the existing default ownership model:
+This specification is additive to SPEC-0002, SPEC-0003, SPEC-0006, SPEC-0007, SPEC-0008, SPEC-0013 and SPEC-0016. It preserves:
 
 ```text
 one CudaRuntime
@@ -34,154 +36,119 @@ one CudaRuntime
   -> one selected physical device
 ```
 
-The first implementation may widen **which** device the runtime owns; it does not widen the number of devices owned by one runtime.
+The first implementation widens **which** device a runtime owns, not how many devices it owns.
 
-## Public capability model
+## Selected design after reassessment
 
-A device-discovery request returns a finite snapshot of sanitized descriptors. Each descriptor contains only bounded public facts needed for selection and compatibility, such as:
+The strongest credible alternatives were:
+
+1. expose raw ordinal/device identity — rejected because it leaks native identity and becomes stale/ambiguous across visibility changes;
+2. allow a live runtime to switch devices — rejected because context/resource ownership would become ambiguous;
+3. use one sanitized discovery snapshot plus opaque selector capabilities — selected because it is finite, fail-closed and preserves one-context ownership;
+4. defer all selection until multi-GPU — rejected because explicit single-device targeting and correct compiler target derivation are independently useful foundations.
+
+Current CUDA Driver documentation independently supports finite device enumeration through `cuDeviceGetCount`/`cuDeviceGet`, while context ownership remains an explicit host-thread/current-context boundary. CUDA-JS owns the safer capability representation rather than exposing those native handles.
+
+## Discovery snapshot
+
+A discovery request returns one finite immutable snapshot containing only public-safe facts required for selection/compatibility, for example:
 
 ```text
 snapshot identity
-device selector capability
-architecture/compute-capability class
+opaque selector capability
+architecture / compute-capability class
 bounded memory-capacity facts
-selected capability flags needed by accepted CUDA-JS profiles
-sanitized display label if policy permits
+accepted capability flags needed by CUDA-JS profiles
+sanitized display label only when policy permits
 ```
 
-The selector is opaque. It must not encode or expose a raw ordinal, UUID, serial, PCI bus address, `CUdevice`, pointer, or another stable hardware identifier in ordinary public records.
+The selector is opaque and scoped to the issuing discovery authority/snapshot. It must not encode a public raw ordinal, UUID, serial, PCI address, `CUdevice`, pointer or another stable machine identifier.
 
 ### Selector validity
 
-A selector is valid only for the discovery snapshot/runtime factory contract that issued it. CUDA-JS rejects before native work when the selector is:
+Before native context/resource work, reject selectors that are malformed, stale, foreign, ambiguous, duplicated, outside the accepted snapshot or incompatible with the requested profile. Explicit selection never silently falls back to another device.
 
-- malformed;
-- stale according to the selected generation/snapshot policy;
-- foreign to another runtime/discovery authority;
-- ambiguous;
-- outside the accepted device set;
-- incompatible with the requested capability profile.
+## Default compatibility behavior
 
-Silent fallback to another device is forbidden after an explicit selector is supplied.
-
-## Default selection
-
-The existing default behavior remains available as an explicit compatibility profile. If no selector is supplied, CUDA-JS may choose the existing default-device policy, but the selected device becomes a first-class compatibility/evidence fact after runtime creation.
-
-The public result must not imply that the default device is permanently device ordinal zero. Native ordinals remain implementation details.
+Omitting a selector retains the current default-device compatibility path. After runtime creation, however, the selected device becomes a first-class compatibility/evidence fact. Public contracts must not promise that the default device is permanently native ordinal zero.
 
 ## DriverActor ownership
 
-Device enumeration and device selection occur through the accepted private native boundary. Context creation remains on the DriverActor owner thread.
+Enumeration/selection occurs behind the accepted private native boundary. The selected device is fixed before private context creation and before any context-owned resource exists. A runtime cannot change physical devices in place; selecting another device creates a distinct runtime/epoch.
 
-The selected device identity is bound before creation of context-owned resources. A runtime cannot switch physical devices in place after context/resource creation. Changing devices requires a distinct runtime/epoch.
+All identities that could otherwise be confused across devices carry the runtime/device epoch internally. Cross-runtime/device use fails before native dispatch.
 
-All resource identities that can be confused across devices include the runtime/device generation internally. Cross-runtime or cross-device resource use fails before native dispatch.
+## Compiler/link target resolution
 
-## Compiler and linker target resolution
+Default compiler/link targets derive from the selected device capability and accepted target policy rather than a hard-coded first architecture profile.
 
-Compiler and linker defaults must derive from the selected runtime/device capability rather than from a hard-coded first architecture profile.
-
-Target resolution produces a bounded private/public-safe target record containing normalized facts such as:
+A resolved target record contains bounded facts equivalent to:
 
 ```text
 selected architecture class
 compile target
 link target
-policy/profile version
+target-policy version
 resolution provenance
 ```
 
 Rules:
 
-- explicit accepted compile/link target requests remain subject to SPEC-0006 and later target-syntax authority;
-- defaults must be compatible with the selected device and selected provider/toolkit policy;
-- changing selected device architecture or target policy changes compile/link/cache compatibility identity;
-- a cached artifact for an incompatible target/device profile is rejected before load/launch;
-- device selection does not itself claim that every syntactically valid target is supported by the installed toolkit.
+- explicit accepted targets remain governed by SPEC-0006 and its target-syntax addendum;
+- default targets must be compatible with the selected device plus provider/toolkit policy;
+- changing device architecture or target policy changes compiler/link/cache compatibility identity;
+- incompatible cached artifacts reject before load/launch;
+- syntactic target admission is not toolkit/provider/device qualification.
 
-## Compatibility identity
+## Compatibility and privacy
 
-At minimum, exact compatibility/evidence identity for a device-bound runtime includes:
+Exact compatibility/evidence identity includes the relevant CUDA-JS contract versions, Node/ABI/OS, Driver/providers, sanitized selected-device architecture/capability profile, context policy, target-resolution policy and compiled artifact target identities.
 
-```text
-CUDA-JS contract versions
-Node/ABI/OS profile
-Driver/provider identities
-sanitized selected-device architecture/capability profile
-context policy
-target-resolution policy
-compiled artifact target identities
-```
-
-Stable private hardware identifiers may be retained only in protected local evidence if required for qualification correlation and must be sanitized from public bundles according to the validation policy.
+Stable private hardware identifiers may exist only in protected local qualification evidence when needed for correlation and are sanitized from public bundles.
 
 ## Failure and health
 
-Enumeration/selection failures are classified without inventing context health transitions when no context exists.
+Enumeration/selection failures before context creation do not fabricate context-health transitions. After context creation, device-loss/deferred-error behavior remains governed by DriverActor health authority. A selector never revives a poisoned/lost runtime epoch.
 
-After context creation, device-loss/deferred-error behavior remains governed by existing DriverActor health authority. A selector cannot be reused to imply recovery of a poisoned or lost runtime epoch.
+## Portable implementation acceptance
 
-## Portable conformance
+The first production/software slice must prove without a GPU:
 
-Portable tests must cover:
-
-- zero/one/many synthetic device snapshots;
-- deterministic selector generation within the declared model;
-- stale, malformed, foreign, ambiguous and duplicated selectors;
+- zero/one/many synthetic snapshots;
+- deterministic finite snapshot/selector ownership;
+- stale, malformed, foreign, ambiguous and duplicate rejection;
 - default versus explicit selection;
 - selected-device propagation into target/cache identity;
-- cross-runtime/device resource rejection;
-- public-record sanitization;
-- no raw ordinal/UUID/PCI/native-handle leakage.
+- cross-runtime/device rejection;
+- public sanitization/no native identifier leakage;
+- unchanged legacy default-device behavior.
 
-Mocks prove only selection/identity orchestration.
+Mocks prove only orchestration and identity.
 
 ## Native promotion evidence
 
 For each promoted exact profile:
 
-1. enumerate the native device set and compare sanitized capability facts with an independent native C oracle;
-2. create the default runtime and an explicitly selected runtime;
-3. prove each context is bound to the intended device through private/native oracle evidence;
-4. compile/load/launch a bounded fixture using the derived target and compare exact output;
-5. prove cache/artifact separation across distinct accepted architecture/target profiles;
-6. reject a stale/foreign selector before native context/resource work;
-7. close all context/library/stream/event/module/memory resources terminally;
+1. compare enumerated capability facts with an independent native C Driver oracle;
+2. create default and explicitly selected runtimes;
+3. prove each private context is bound to the intended device;
+4. compile/load/launch with the derived target and compare exact output;
+5. prove target/cache separation across distinct accepted architecture profiles;
+6. reject stale/foreign selectors before context/resource work;
+7. close all resources terminally;
 8. publish only sanitized device evidence.
 
-A multi-device machine is required to qualify explicit selection between distinct physical devices. A one-device host may prove API behavior only for that exact one-device profile.
+A multi-device host is required to qualify selecting between distinct physical devices. A one-device host can prove only the exact one-device behavior.
 
-## Security and privacy
+## Falsifiers and rollback
 
-Ordinary public APIs and evidence do not expose:
-
-- CUDA device ordinals as stable identities;
-- GPU UUIDs or serial numbers;
-- PCI domain/bus/device identifiers;
-- raw `CUdevice`, context, pointer, stream, event, or provider handles.
-
-The selector is a capability for selection, not a globally stable machine identifier.
-
-## Falsifiers / rollback
-
-Do not accept or implement this proposal if the design requires public native identifiers, in-place device switching of a live runtime, ambiguous artifact targeting, or weakening context-thread ownership.
-
-Rollback is the accepted single default-device runtime behavior.
+Implementation stops if it requires public native identifiers, in-place live-runtime device switching, ambiguous target identity, or weaker context-thread ownership. Rollback is the accepted default-device runtime path.
 
 ## Non-goals
 
-- multiple devices owned by one operation/runtime coordinator;
-- peer access/copies;
-- automatic workload partitioning;
-- MIG administration or identity policy;
-- GPU reset/mode changes;
-- transparent migration/failover;
-- NCCL/collectives;
-- public raw device identifiers.
+Multi-device ownership/orchestration, peer access/copies, automatic partitioning, MIG administration, GPU reset/mode changes, transparent migration/failover, NCCL/collectives or public raw device identifiers.
 
 ## Primary references
 
 - https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__DEVICE.html
 - https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__CTX.html
-- https://docs.nvidia.com/cuda/cuda-driver-api/
