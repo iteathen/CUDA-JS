@@ -179,13 +179,16 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
 
 export function validatePublicCapabilityProjection({ packageJson, compatibility, extensions, documents }) {
   const errors = [];
-  const expectedParameters = ['device-memory', 'u32', 'u64', 'i32', 'f32'];
+  const expectedParameters = ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16'];
 
   if (compatibility.package?.name !== packageJson.name || compatibility.package?.version !== packageJson.version) {
     errors.push('package.json and packaging compatibility package identity differ');
   }
   if (JSON.stringify(compatibility.capabilities?.functionParameters) !== JSON.stringify(expectedParameters)) {
     errors.push('packaging compatibility scalar parameter projection is stale');
+  }
+  if (compatibility.capabilities?.typedDeviceViews !== 'contiguous-1d-component-foundation-no-public-facade-yet') {
+    errors.push('packaging compatibility typed device-view projection is stale');
   }
   if (!compatibility.capabilities?.compilerOutputFormats?.includes('lto-ir')) {
     errors.push('packaging compatibility omits typed Device LTO output');
@@ -204,10 +207,12 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0012',
     'SPEC-0013',
     'SPEC-0016',
+    'SPEC-0021',
     'SPEC-0027',
     'separate future publish unit',
     'compileDeviceProgram()',
     '`u64`/`i32`/`f32`',
+    '`f64`/`f16`/`bf16`',
     'typed `lto-ir`',
     'one pending GPU operation',
   ]);
@@ -217,13 +222,18 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0012',
     'SPEC-0013',
     'SPEC-0016',
+    'SPEC-0021',
     'SPEC-0027',
     'Optional separately packaged NN product',
     'compileDeviceProgram()',
     '`u64`',
     '`i32`',
     '`f32`',
+    '`f64`',
+    '`f16`',
+    '`bf16`',
     '`lto-ir`',
+    'contiguous 1D typed device views',
     '| Capability | Architecture | Implementation | Qualification | Priority |',
   ]);
   requireMarkers(errors, 'docs/INTEROP_WITH_CUDA_MCGS.md', documents.interop, [
@@ -236,7 +246,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'known incompatible',
     'not-qualified',
   ]);
-  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0027', 'separate future publish unit']);
+  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0021', 'SPEC-0027', 'separate future publish unit']);
   validateCapabilityTable(errors, documents.capabilities);
   validateNnAuthorityProjection(errors, packageJson, documents);
 
