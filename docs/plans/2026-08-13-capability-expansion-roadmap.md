@@ -1,6 +1,6 @@
 # CUDA-JS Capability Expansion Roadmap
 
-**Status:** Active sequencing plan beneath accepted specifications
+**Status:** Informational
 
 **Originally:** 2026-08-13
 
@@ -151,7 +151,7 @@ Do not use timing alone to prove overlap and do not create another operation lif
 
 ## Separate NN program
 
-Issues #70/#72-#84 remain an optional NN-program track under accepted ADR-0004/SPEC-0027. The authoritative package decision is now:
+Issues #70/#72-#84 remain an optional NN-program track under accepted ADR-0004 and SPEC-0027. The authoritative package decision is now:
 
 ```text
 same repository
