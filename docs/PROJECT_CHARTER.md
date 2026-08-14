@@ -22,7 +22,9 @@ CUDA-JS owns:
 - normalized errors and context health;
 - generic mocks, conformance, diagnostics, packaging, and compatibility.
 
-CUDA-JS does not own any consumer's domain algorithm, graph model, scheduler policy, evaluator semantics, model semantics, or resource plan.
+The published `cuda-js` core package does not own any consumer's domain algorithm, graph model, scheduler policy, evaluator semantics, model semantics, tensor/training semantics, or resource plan.
+
+The CUDA-JS project may also own an optional, application-neutral NN training product under accepted [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) and [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md). That product is a separate future publish unit: it may consume accepted public core contracts, but core never imports it or inherits its exports, dependencies, NN-shaped/eager provider discovery, release identity, or semantics. Every NN production boundary requires a separately accepted child specification. Consumers continue to own model architecture, datasets, objectives, domain policy, deployment, and unrelated search semantics.
 
 ## Universality rule
 

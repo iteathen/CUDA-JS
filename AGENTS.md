@@ -27,7 +27,7 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 
 ## Non-negotiable boundaries
 
-- CUDA-JS is a generic Node/CUDA runtime. It contains no MCGS, minimax, graph-search, game, tensor, model, or evaluator semantics.
+- The published `cuda-js` package is a generic Node/CUDA runtime. It contains no MCGS, minimax, graph-search, game, tensor, model, training, or evaluator semantics. An optional NN product may exist only as the separate publish unit governed by accepted ADR-0004/SPEC-0027 and separately accepted `nn.*` child contracts.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon.
 - Custom AsmJit/register stubs are a deferred measured-gap option, not the baseline.
@@ -61,7 +61,7 @@ Bounded private multi-stream execution remains architecturally planned under iss
 
 The 2026-08-13 capability-expansion corpus `SPEC-0017` through `SPEC-0026` remains **proposal authority only**. It repairs issue/ownership/dependency definition for device selection, multi-operation scheduling, host transfers, prepared/CUDA Graph execution, extended numeric/views, Device-JS parallel/service profiles, CUDA library adapters, multi-GPU, graphics interop, and process isolation. Each proposal must be separately reviewed and accepted before production code enters its boundary. Do not scaffold multiple future proposals simply because they exist.
 
-Issues #70 through #84 propose a separately layered optional NN training extension, but the currently accepted charter and this entry point still exclude tensor/model/training semantics from generic CUDA-JS core. Before any NN production implementation, explicit project-owner direction must be made durable through the charter/component/package/spec authority reconciliation required by #71. Generic capability proposals do not silently authorize tensor/autodiff/training code in DriverActor, CompilerActor, memory, execution, or Device-JS core.
+ADR-0004 and SPEC-0027 accept an authority-only boundary for an optional application-neutral NN training product in this repository. It must be a separate future publish unit with an independently selected package name, compatibility identity, dependency graph, and release lifecycle. The existing `cuda-js` package remains generic and gains no NN export, dependency, source tree, NN-shaped/eager provider discovery, or NN initialization effect. SPEC-0027 names planned ownership anchors but authorizes no NN implementation: every `nn.*` production boundary still requires a separately accepted child specification. Tensor/autodiff/training semantics must not enter DriverActor, CompilerActor, generic memory, execution, or Device-JS core.
 
 EXP-013 is owner-authorized as a bounded CUDA-free publication-mailbox experiment for proposed SPEC-0014. It may execute only under `experiments/exp-013/` and the named F5 regression hook. Its `DetachedMockOperation` is a test harness for independently progressing work, not production operation authority; accepted SPEC-0016 exclusively owns submission/status/wait/close, operation state, terminalization, pending-command gating, and runtime-close semantics. EXP-013 does not authorize native host registration/mapping, mapped-memory support, or production mailbox code.
 

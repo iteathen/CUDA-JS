@@ -2,7 +2,7 @@
 
 **Schema-driven Node.js runtime and toolchain for CUDA host APIs**
 
-CUDA-JS is a public, pre-release framework for compiling, loading, launching, observing, and tearing down CUDA work from Node.js through finite, versioned, capability-checked contracts. It is deliberately independent of graph search, games, tensor frameworks, neural-network semantics, and any one application.
+The published `cuda-js` package is a public, pre-release framework for compiling, loading, launching, observing, and tearing down CUDA work from Node.js through finite, versioned, capability-checked contracts. It is deliberately independent of graph search, games, tensor frameworks, neural-network semantics, and any one application. The wider CUDA-JS project has accepted SPEC-0027 authority for an optional NN product only as a separate future publish unit; that product is not implemented or qualified.
 
 ## Capability map — current profile vs architectural ceiling
 
@@ -21,7 +21,7 @@ CUDA-JS is broader than a shallow CUDA wrapper, but intentionally narrower than 
 - **Fault isolation has precise scope.** Workers provide event-loop isolation, context/resource ownership, and restart-required handling after owner loss. They do **not** provide OS-process crash isolation; a process-isolated backend is a separate deferred capability.
 - **Multiple runtime instances are supported for isolation.** Simultaneous instances and cross-runtime capability rejection are proven. That is not yet a claim of multi-stream or multi-GPU performance concurrency.
 - **Typed compiler and device-language extensions are implemented without native overclaim.** The public/package path includes typed relocatable PTX, `u64`/`i32`/`f32` scalar arguments, typed `lto-ir` compilation and homogeneous Device-LTO linking, restricted Device-JS, and the opaque SPEC-0016 operation lifecycle. Their portable/software implementation is distinct from their still-open exact native qualification gates.
-- **CUDA-JS is not a tensor, neural-network, or search framework.** It does not bundle cuBLAS/cuDNN, autograd, optimizers, MCGS/MCTS semantics, or application schedulers. Consumers supply their own device programs and domain semantics while CUDA-JS owns the generic CUDA runtime/toolchain boundary.
+- **Generic `cuda-js` core is not a tensor, neural-network, or search framework.** It does not bundle cuBLAS/cuDNN, autograd, optimizers, MCGS/MCTS semantics, or application schedulers. Accepted ADR-0004/SPEC-0027 permit a separately packaged optional NN product, but no package name, implementation, provider, or qualification exists and every `nn.*` boundary still needs an accepted child specification.
 
 Current public implementation includes schema-generated Driver bindings, Worker/context ownership, opaque resources, device memory, copied transfers, PTX/cubin modules, function lookup, typed packed kernel arguments, launch validation, opaque GPU operations, NVRTC, nvJitLink, typed RDC and Device LTO, restricted Device-JS, artifact/cache identity, trusted CUDA headers, package/facade isolation, diagnostics, errors, health, and deterministic teardown. Qualification remains capability- and profile-specific; the exact Windows evidence baseline does not automatically qualify every later additive public capability.
 

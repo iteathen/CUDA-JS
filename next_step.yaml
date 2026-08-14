@@ -1,12 +1,12 @@
 {
-  "schema_version": 32,
+  "schema_version": 33,
   "updated": "2026-08-13",
-  "status": "blocked_on_external_private_vulnerability_reporting_control",
-  "objective": "After protected-main read-back of the #69 immutable GitHub Actions packet, complete the external private-vulnerability-reporting control (#68) while retaining #64's exact merged-head Windows F5 revalidation as an independent open evidence gate and keeping SPEC-0017 through SPEC-0026 proposal-only until separately accepted.",
-  "ownership_boundary": "CUDA-JS owns consumer-neutral Node/CUDA runtime, compiler/linker, Device-JS validation/lowering, memory/resource/operation lifecycle, compatibility and platform qualification. The accepted P0 addenda correct existing owners; they do not authorize new consumer semantics or future capability proposals.",
+  "status": "active_nn_extension_authority_reconciliation",
+  "objective": "Revise and accept issue #71 as an authority-only packet: preserve generic CUDA-JS core, authorize a separately packaged optional NN product in the same repository, and name planned component boundaries without creating exports, dependencies, directories, runtime behavior, or native-support claims.",
+  "ownership_boundary": "The cuda-js core package owns consumer-neutral Node/CUDA runtime and toolchain capabilities. A future separately published NN product may own application-neutral tensor/graph/autodiff/training semantics only inside accepted nn.* contracts; it may not add NN exports or dependencies to core or inject those semantics into DriverActor, CompilerActor, memory, execution, or Device-JS core.",
   "exact_input_revisions": {
-    "protected_main_capability_authority": "5233a046c57813532a71763bb36cdba5894e43e0",
-    "implementation_baseline": "ff0d497b23d7c1ff7e602e1a558ea3128b4aabfe",
+    "protected_main_capability_authority": "7ba8e07db76f2b18dd97d344698bd2d90a41c9de",
+    "implementation_baseline": "7ba8e07db76f2b18dd97d344698bd2d90a41c9de",
     "package": "cuda-js@0.1.0-alpha.5",
     "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
     "implemented_corrections": [
@@ -27,6 +27,7 @@
       "SPEC-0025",
       "SPEC-0026"
     ],
+    "accepted_authority_only": ["ADR-0004 + SPEC-0027 optional NN product/package/component boundary (#71); no implementation or qualification"],
     "retained_orchestration_evidence": ["EXP-014"]
   },
   "authority": [
@@ -34,6 +35,8 @@
     "agent_files/AI_RULES.md",
     "agent_files/AGENTS.md",
     "agent_files/general_foundation/STATUS_SEMANTICS.md",
+    "docs/PROJECT_CHARTER.md",
+    "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
     "docs/specs/SPEC-0003-disposal-failure-addendum.md",
@@ -47,15 +50,17 @@
     "docs/specs/SPEC-0013-restricted-device-js.md",
     "docs/specs/SPEC-0013-public-surface-addendum.md",
     "docs/specs/SPEC-0015-execution-scope-status-clarification.md",
-    "docs/specs/SPEC-0016-operation-lifecycle.md"
+    "docs/specs/SPEC-0016-operation-lifecycle.md",
+    "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-P0-SECURITY-68",
+    "id": "CJS-NN-AUTHORITY-71",
     "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "A maintainer with repository-settings access must enable GitHub private vulnerability reporting, read back enabled: true, verify the private-report entry point as an unaffiliated reporter, and verify maintainer advisory management without exposing test vulnerability details. Then reconcile the security policy and record the durable owner/periodic check.",
-    "exit": "GitHub read-back records enabled: true, unaffiliated reporter and maintainer advisory flows are privately verified, security links describe the working path exactly, and a named operational owner/check cadence prevents silent regression."
+    "next_action": "Land one authority-only ADR/spec/charter/registry packet selecting a same-repository separate publish unit for the optional NN product, with core package isolation and contradiction mutation tests. Keep the future registry package name and every NN implementation contract unselected or planned until separately accepted.",
+    "exit": "Protected main accepts the bounded NN product/package/component authority, core exports and dependencies remain unchanged, the exact protected checks pass, and issue #71 closes without claiming an NN implementation or native support."
   },
   "deliverables": [
+    "accepted issue #71 NN extension authority and package-isolation boundary",
     "external private-vulnerability-reporting enablement and end-to-end verification (#68)",
     "exact merged-head Windows F5 revalidation for the integrated EXP-013 repair (#64)",
     "continued public capability projection coverage as authoritative facts change",
@@ -75,7 +80,7 @@
     "SPEC-0017 through SPEC-0026 remain proposals and cannot be implemented until separately accepted",
     "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",
     "multi-stream execution remains proposal-only until SPEC-0018 is accepted after trustworthy SPEC-0016 evidence",
-    "issues #70-#84 propose NN ownership that conflicts with the current accepted generic-core charter until a charter/component/package/spec authority change is accepted"
+    "NN production implementation remains blocked until each consuming child specification is separately accepted"
   ],
   "validation": [
     "./scripts/verify-docs.sh",
@@ -95,7 +100,8 @@
     "infer native support from portable/mock/neighboring-profile evidence",
     "duplicate SPEC-0016 operation lifecycle in sideband, scheduler, transfer, graph, library, graphics, or multi-GPU work",
     "add CUDA-MCGS/search/domain semantics to CUDA-JS",
-    "inject tensor/autodiff/training semantics into generic core before the NN authority gap is reconciled",
+    "add NN exports, dependencies, provider discovery, tensor/autodiff/training semantics, or deep imports to the cuda-js core package",
+    "assume a future NN registry package name before namespace control is verified",
     "expose raw native pointers, streams, events, device identifiers, providers or generated CUDA through the ordinary public API"
   ],
   "historical_baseline": [

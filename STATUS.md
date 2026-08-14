@@ -9,7 +9,7 @@
 The exact protected-`main` input baseline for this implementation packet is:
 
 ```text
-ff0d497b23d7c1ff7e602e1a558ea3128b4aabfe
+7ba8e07db76f2b18dd97d344698bd2d90a41c9de
 ```
 
 The capability-authority proposal corpus is integrated on protected `main` at:
@@ -143,9 +143,17 @@ The exact accepted Windows x64 profile remains the native evidence baseline. Nat
 
 Not-qualified is not architectural rejection.
 
-## NN extension authority gap
+## Optional NN extension authority — issue #71
 
-Issues #70–#84 describe an optional NN training extension, but the currently accepted project charter still states that CUDA-JS does not own tensor/model semantics. The first NN work package must therefore reconcile durable charter/component/package/spec authority as required by #71 before NN production implementation. Generic core capability proposals do not silently authorize tensor/autodiff/training code.
+**Architectural disposition:** planned under accepted ADR-0004 and SPEC-0027.
+
+**Implementation status:** not implemented.
+
+**Qualification status:** not qualified.
+
+The CUDA-JS project now authorizes an optional application-neutral NN training product as a separate future publish unit in this repository. The published `cuda-js` package, exports, dependencies, compatibility identity, source tree, import behavior, and existing discovery behavior remain unchanged; no NN-shaped/eager provider discovery is added. The NN registry package name and repository directory remain unselected. SPEC-0027 records planned `nn.*` ownership anchors only; every production boundary still requires a separately accepted child specification, and no tensor, graph, autodiff, provider, training, checkpoint, or conformance implementation is implied.
+
+cuBLAS/cuDNN handles and all provider work over DriverActor-owned device/context/stream/memory resources remain under a future accepted generic adapter; cuBLASLt's distinct handle semantics do not relax current-device or execution-resource ownership. No NN-shaped commands or semantics enter DriverActor, CompilerActor, generic memory, execution, or Device-JS core. This authority packet changes no package behavior or native support claim.
 
 ## Forward plans
 

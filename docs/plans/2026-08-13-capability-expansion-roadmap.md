@@ -245,11 +245,11 @@ Every composed promotion records exact source/tree, Node/ABI, OS, Driver/toolkit
 
 ## Separate NN-extension authority track
 
-Issues #70-#84 propose an optional CUDA-JS NN training extension. Current accepted `docs/PROJECT_CHARTER.md` still states that CUDA-JS does not own tensor/model semantics.
+Issues #70-#84 propose an optional CUDA-JS NN training extension. ADR-0004 and SPEC-0027 now accept the product/package/component foundation required by #71: same repository, separate future publish unit, independent compatibility/dependency/release identity, and no change to the published `cuda-js` package.
 
-Therefore no NN production implementation may proceed merely from those issues. The first NN work package must reconcile durable authority as required by #71: charter/addendum, component ownership, package isolation and accepted NN contracts. Generic core capabilities above may be developed independently and later consumed by an accepted NN extension.
+This remains authority only. The registry package name and directory are unselected, and every planned `nn.*` boundary requires its own accepted child specification before production source enters it. Generic core capabilities above may be developed independently and later consumed only through accepted public contracts.
 
-Do not silently inject tensors/autodiff/training semantics into `runtime.memory`, `runtime.execution`, DriverActor or CompilerActor while that authority gap remains.
+Do not add an NN export/dependency to core, deep-import core internals from the future NN package, or inject tensors/autodiff/training semantics into `runtime.memory`, `runtime.execution`, DriverActor, CompilerActor, or Device-JS core.
 
 ## Focus packet map
 
