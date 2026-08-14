@@ -5,7 +5,8 @@ import { openCudaRuntimeForTesting } from 'cuda-js/testing';
 
 const ptx = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
 assert.equal(CUDA_JS_COMPATIBILITY.publicApi.schemaVersion, 1);
-assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32']);
+assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'contiguous-1d-component-foundation-no-public-facade-yet');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
@@ -13,7 +14,10 @@ const first = await openCudaRuntimeForTesting();
 const second = await openCudaRuntimeForTesting();
 const module = await first.loadModule({ format: 'ptx', bytes: ptx });
 const fn = await module.getFunction({ name: 'portable_copy_consumer', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
-const scalarFn = await module.getFunction({ name: 'portable_scalar_consumer', parameters: [{ kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }] });
+const scalarFn = await module.getFunction({
+  name: 'portable_scalar_consumer',
+  parameters: [{ kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }, { kind: 'f64' }, { kind: 'f16' }, { kind: 'bf16' }],
+});
 const firstMemory = await first.allocateDevice({ byteLength: 8 });
 const secondMemory = await second.allocateDevice({ byteLength: 8 });
 await firstMemory.write(Uint8Array.of(1, 3, 5, 7));
@@ -34,10 +38,17 @@ assert.equal((await operation.status()).status, 'pending');
 assert.equal((await operation.wait()).status, 'completed');
 assert.equal((await operation.close()).state, 'closed');
 const scalarCompletion = await scalarFn.launch({
-  grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [0xffff_ffff_ffff_ffffn, -2, 1.5],
+  grid: { x: 1, y: 1, z: 1 },
+  block: { x: 1, y: 1, z: 1 },
+  arguments: [0xffff_ffff_ffff_ffffn, -2, 1.5, Number.NaN, Infinity, -Infinity],
 });
 assert.equal(scalarCompletion.status, 'completed');
-assert.deepEqual(scalarCompletion.argumentKinds, ['u64', 'i32', 'f32']);
+assert.deepEqual(scalarCompletion.argumentKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
+await assert.rejects(scalarFn.launch({
+  grid: { x: 1, y: 1, z: 1 },
+  block: { x: 1, y: 1, z: 1 },
+  arguments: [0n, 0, Infinity, 0, 0, 0],
+}), { code: 'DRIVER_LAUNCH_OPTIONS' });
 await scalarFn.close();
 await fn.close();
 await module.close();
@@ -47,4 +58,12 @@ await secondMemory.write(Uint8Array.of(9));
 assert.deepEqual([...(await secondMemory.read({ byteLength: 1 })).bytes], [9]);
 assert.equal((await second.close()).graceful, true);
 
-console.log(JSON.stringify({ consumer: 'portable-memory', packageVersion: CUDA_JS_COMPATIBILITY.package.version, crossRuntimeRejected: true, completion: completion.status, scalarKinds: scalarCompletion.argumentKinds, operationLifecycle: true, graceful: true }));
+console.log(JSON.stringify({
+  consumer: 'portable-memory',
+  packageVersion: CUDA_JS_COMPATIBILITY.package.version,
+  crossRuntimeRejected: true,
+  completion: completion.status,
+  scalarKinds: scalarCompletion.argumentKinds,
+  operationLifecycle: true,
+  graceful: true,
+}));
