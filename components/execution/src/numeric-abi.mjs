@@ -17,6 +17,15 @@ const BF16_CANONICAL_NAN = 0x7fc0;
 export function isParameterKind(kind) { return KINDS.has(kind); }
 export function parameterWidth(kind) { return WIDTHS[kind] ?? null; }
 
+export function isScalarParameterValue(kind, value) {
+  if (kind === 'u32') return Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff;
+  if (kind === 'u64') return typeof value === 'bigint' && value >= 0n && value <= 0xffff_ffff_ffff_ffffn;
+  if (kind === 'i32') return Number.isInteger(value) && value >= -0x8000_0000 && value <= 0x7fff_ffff;
+  if (kind === 'f32') return typeof value === 'number' && Number.isFinite(value) && Number.isFinite(Math.fround(value));
+  if (kind === 'f64' || kind === 'f16' || kind === 'bf16') return typeof value === 'number';
+  return false;
+}
+
 function throwFailure(fail, code, message, details = {}) {
   if (typeof fail === 'function') return fail(code, 'validation', message, details);
   const error = new TypeError(message);
@@ -122,18 +131,18 @@ export function encodeBfloat16(value) {
 }
 
 function writeF64(buffer, offset, value, fail, index) {
-  if (typeof value !== 'number') throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f64 argument must be a JavaScript number.', { index });
+  if (!isScalarParameterValue('f64', value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f64 argument must be a JavaScript number.', { index });
   if (Number.isNaN(value)) buffer.writeBigUInt64LE(F64_CANONICAL_NAN, offset);
   else buffer.writeDoubleLE(value, offset);
 }
 
 function writeF16(buffer, offset, value, fail, index) {
-  if (typeof value !== 'number') throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f16 argument must be a JavaScript number.', { index });
+  if (!isScalarParameterValue('f16', value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f16 argument must be a JavaScript number.', { index });
   buffer.writeUInt16LE(encodeReducedFloat(value, { exponentBits: 5, fractionBits: 10, bias: 15, canonicalNaN: F16_CANONICAL_NAN }), offset);
 }
 
 function writeBf16(buffer, offset, value, fail, index) {
-  if (typeof value !== 'number') throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'bf16 argument must be a JavaScript number.', { index });
+  if (!isScalarParameterValue('bf16', value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'bf16 argument must be a JavaScript number.', { index });
   buffer.writeUInt16LE(encodeReducedFloat(value, { exponentBits: 8, fractionBits: 7, bias: 127, canonicalNaN: BF16_CANONICAL_NAN }), offset);
 }
 
@@ -147,16 +156,16 @@ export function packParameterValues(parameters, values, fail) {
       if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'Private device-memory value is invalid.', { index: entry.index });
       buffer.writeBigUInt64LE(value, entry.offset);
     } else if (entry.kind === 'u64') {
-      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'u64 argument is out of range or not an exact bigint.', { index: entry.index });
+      if (!isScalarParameterValue(entry.kind, value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'u64 argument is out of range or not an exact bigint.', { index: entry.index });
       buffer.writeBigUInt64LE(value, entry.offset);
     } else if (entry.kind === 'u32') {
-      if (!Number.isInteger(value) || value < 0 || value > 0xffff_ffff) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'u32 argument is out of range.', { index: entry.index, value });
+      if (!isScalarParameterValue(entry.kind, value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'u32 argument is out of range.', { index: entry.index, value });
       buffer.writeUInt32LE(value, entry.offset);
     } else if (entry.kind === 'i32') {
-      if (!Number.isInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'i32 argument is out of range.', { index: entry.index, value });
+      if (!isScalarParameterValue(entry.kind, value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'i32 argument is out of range.', { index: entry.index, value });
       buffer.writeInt32LE(value, entry.offset);
     } else if (entry.kind === 'f32') {
-      if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f32 argument must be finite and representable without binary32 overflow.', { index: entry.index });
+      if (!isScalarParameterValue(entry.kind, value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'f32 argument must be finite and representable without binary32 overflow.', { index: entry.index });
       buffer.writeFloatLE(value, entry.offset);
     } else if (entry.kind === 'f64') writeF64(buffer, entry.offset, value, fail, entry.index);
     else if (entry.kind === 'f16') writeF16(buffer, entry.offset, value, fail, entry.index);
