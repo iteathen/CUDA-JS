@@ -14,7 +14,7 @@ Read this file before changing the repository.
 8. Plans, experiments, status packets, and summaries.
 9. Archived or superseded material.
 
-A plan or experiment organizes work beneath accepted authority. Stop when a conflict changes ownership, public contracts, ABI, safety, resource/lifetime behavior, compatibility, evidence, or cleanup.
+A plan, issue, experiment, branch name, or dependency-ready label organizes work beneath accepted authority. Stop when a conflict changes ownership, public contracts, ABI, safety, resource/lifetime behavior, compatibility, evidence, or cleanup.
 
 ## Mandatory startup
 
@@ -23,86 +23,123 @@ A plan or experiment organizes work beneath accepted authority. Stop when a conf
 3. Read the owning accepted ADR/specification and only objectively triggered supporting doctrine under `agent_files/general_foundation/`.
 4. Inspect exact Git state, generated artifacts, environment capabilities, and unrelated work.
 5. Establish the smallest coherent outcome, decisive falsifier, and validation/cleanup/handoff reserve.
-6. Do not broaden implementation beyond the dependency-ready boundary.
+6. Do not broaden implementation beyond the dependency-ready accepted boundary.
+
+## Design hierarchy
+
+```text
+platform truth and accepted authority
+  -> purpose, support bounds and contextual value ordering
+  -> domain-appropriate ranges / identities / schemas / lifecycles
+  -> LEGO component and public-contract boundaries
+  -> SOLID internal responsibilities
+  -> CUPID composability and developer clarity
+  -> KISS after the total lifecycle is sound
+  -> independent evidence, cleanup and evolution
+```
+
+Correctness, safety, lifecycle truth, recoverability and compatibility are gates; performance and simplicity cannot buy them away.
 
 ## Non-negotiable boundaries
 
-- The published `cuda-js` package is a generic Node/CUDA runtime. It contains no MCGS, minimax, graph-search, game, tensor, model, training, or evaluator semantics. An optional NN product may exist only as the separate publish unit governed by accepted ADR-0004/SPEC-0027 and separately accepted `nn.*` child contracts.
+- The published `cuda-js` package is a generic Node/CUDA runtime/toolchain. It contains no MCGS, minimax, graph-search, game, tensor, model, training, optimizer, evaluator, or application scheduler semantics.
+- ADR-0004/SPEC-0027 authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
-- Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon.
-- Custom AsmJit/register stubs are a deferred measured-gap option, not the baseline.
-- Generated header facts and curated semantic overlays are separate owners. Unknown public semantics fail closed.
-- Node FFI and raw memory remain private; JavaScript receives opaque capabilities and bounded data.
-- `cuGetProcAddress` verifies version/status/semantics; v0 invokes approved named exports and does not assume arbitrary pfn calls.
-- A `fast-jit-required` claim requires exact-profile qualification evidence; generic fallback is allowed only in a declared cold/bootstrap profile.
-- NVRTC compiles device code, not the Node host bridge. Host binding and device compilation/linking use separate owners and cache identities.
-- One DriverActor Worker owns one private context and every raw Driver resource by default.
-- Potentially blocking compilation, linking, or broad native work cannot run on the application event loop.
-- Device, staged, pinned, mapped, managed, and mock memory are distinct capabilities; none is marketed generically as zero-copy.
-- Every library, actor, context, allocation, module, function, stream, event, operation, compiler/linker object, view, cache entry, and artifact has one owner and terminal disposition.
-- Errors distinguish validation, unsupported capability, immediate failure, deferred failure, cancellation, pressure, stale resource, suspect/poisoned context, closed runtime, and restart-required state.
-- Mocks validate lifecycle/orchestration only; they do not prove native ABI, CUDA ordering, performance, or consumer semantics.
-- No support/performance/platform claim exceeds exact native evidence.
-- **Architectural disposition, implementation status, qualification/support status, and priority are independent.** Never infer one from another. `unsupported`/`not-qualified`/legacy `no-support` describe support evidence only unless accepted authority explicitly records `architectural disposition: rejected`. Slice-local phrases such as `does not authorize` or `out of scope` do not become project-wide prohibitions. Follow `agent_files/general_foundation/STATUS_SEMANTICS.md`.
+- Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon. Custom AsmJit/register stubs remain a deferred measured-gap option.
+- Generated header/ABI facts and curated semantic/lifecycle overlays are separate owners. Unknown public semantics fail closed.
+- Node FFI and raw native/device memory remain private. JavaScript receives opaque capabilities and bounded data.
+- `cuGetProcAddress` may verify version/status/semantics, but v0 invokes only approved named exports unless a separately qualified capability says otherwise.
+- NVRTC compiles device code, not the Node host bridge. Host binding and device compilation/linking have separate owners/cache identities.
+- One DriverActor Worker owns one private context and every raw Driver resource by default. Context-dependent work stays on that owner.
+- Potentially blocking compile/link/native work never runs on the application event loop.
+- Device, staged, pinned, mapped, managed, external and mock memory are distinct capabilities; none is marketed generically as zero-copy.
+- Every library, actor, context, allocation, module, function, stream, event, operation, compiler/linker object, logical view, cache entry and artifact has one owner and terminal disposition.
+- Errors distinguish validation, unsupported capability, pressure/backpressure, stale resource, immediate/deferred native failure, suspect/poisoned context, closed runtime and restart-required/orphan truth.
+- Mocks validate only the lifecycle/orchestration they execute; they do not prove native ABI, CUDA ordering, overlap, performance, platform support or consumer semantics.
+- Architectural disposition, implementation status, qualification/support status and priority are independent. Follow `agent_files/general_foundation/STATUS_SEMANTICS.md`.
+- No native/platform/performance claim exceeds exact independent evidence for the exact revision/profile.
 
-## Current phase gate
+## Current accepted implementation baseline
 
-The repository is in an **active implementation phase** with `CJS-F1A`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, `CJS-F7W`, `CJS-F8W`, and the CUDA-JS-owned `CJS-F9-A/B` trusted-header/atomic-publication prerequisite accepted on their bounded evidence. The platform-neutral F3 through F8 controls also pass without native Linux CUDA providers, but native Linux Driver/compiler execution remains blocked on `CJS-F2L / EXP-001` and qualified external hardware. The exact CUDA-MCGS compatible pair remains blocked on the independently owned CUDA-MCGS package/adapter and frozen-pair evidence. EXP-000 remains the mandatory exact Node 26.7.0 Windows x64/native Linux x86-64 regression capsule.
+Protected `main` before the 2026-08-14 open-issue sweep is:
 
-Accepted follow-up contracts `SPEC-0010` (relocatable device code), `SPEC-0011` (typed scalar kernel arguments), and `SPEC-0012` (typed Device LTO) have portable/software implementations integrated in the current repository state. Their exact native promotion/qualification gates remain open; portable success must not be described as native support.
+```text
+334b903be827dedb5345608a34a6df444912fe1b
+cuda-js@0.1.0-alpha.5
+```
 
-`SPEC-0013` is accepted as the restricted Device-JS authoring boundary. Its portable/software implementation uses pinned `acorn@8.15.0` only for syntax parsing; CUDA-JS owns the accepted grammar subset, typing, helper semantics, deterministic code-unit ordering, CUDA C++ lowering, identity, diagnostics, and compilation boundary. `compileDeviceProgram(runtime, request)` is a standalone facade helper and does not add a language subsystem to every runtime instance. Generated CUDA remains private. Native SPEC-0013 support remains unqualified until its exact compiler/launch/oracle/lifecycle promotion evidence passes.
+Accepted and implemented in portable/software/package paths include the Windows F1-F9 foundation plus:
 
-`SPEC-0005` remains the legacy terminal-launch compatibility baseline. `SPEC-0015` clarifies that its one-stream/one-in-flight exclusions are F5 scope boundaries, not architectural rejection. `SPEC-0016` is accepted and its bounded portable/software submission/completion lifecycle is implemented in the current repository state: one opaque operation, one private stream, one pending operation, short DriverActor submit/status/release/timeout turns, host-side `wait()`, and legacy `launch()` implemented above the actor as submit plus repeated short status turns. It does not authorize general Driver interleaving, multiple in-flight kernels, or multi-stream scheduling. Native SPEC-0016 support remains unqualified until its exact Windows evidence passes.
+```text
+SPEC-0010 typed relocatable device code
+SPEC-0011 u64 / i32 / finite-only f32 scalar arguments
+SPEC-0012 typed Device LTO
+SPEC-0013 restricted Device-JS
+SPEC-0016 opaque one-pending-operation lifecycle
+SPEC-0006 target-syntax correction
+SPEC-0003 disposal-failure correction
+```
 
-The SPEC-0003 disposal-failure addendum and SPEC-0006 target-syntax addendum are accepted authority. They authorize only their bounded correctness repairs: preserve disposal/native-cleanup category, observation and health truth; and centralize target syntax/policy so current CUDA numeric/`f`/`a` forms can be represented while only reviewed targets are admitted. Acceptance does not itself qualify new cleanup failure partitions or GPU/toolkit targets.
+Exact native promotion gates for additive capabilities remain independent unless their exact evidence is integrated and published.
 
-Bounded private multi-stream execution remains architecturally planned under issue #40 **after** the SPEC-0016 operation lifecycle is trustworthy. Proposed SPEC-0018 now describes that intended boundary, but proposal state does not authorize implementation.
+## 2026-08-14 foundation authority
 
-The 2026-08-13 capability-expansion corpus `SPEC-0017` through `SPEC-0026` remains **proposal authority only**. It repairs issue/ownership/dependency definition for device selection, multi-operation scheduling, host transfers, prepared/CUDA Graph execution, extended numeric/views, Device-JS parallel/service profiles, CUDA library adapters, multi-GPU, graphics interop, and process isolation. Each proposal must be separately reviewed and accepted before production code enters its boundary. Do not scaffold multiple future proposals simply because they exist.
+The open-issue sweep reviewed the first dependency-ready expansion contracts against current authority and primary CUDA 13.3 documentation.
 
-ADR-0004 and SPEC-0027 accept an authority-only boundary for an optional application-neutral NN training product in this repository. It must be a separate future publish unit with an independently selected package name, compatibility identity, dependency graph, and release lifecycle. The existing `cuda-js` package remains generic and gains no NN export, dependency, source tree, NN-shaped/eager provider discovery, or NN initialization effect. SPEC-0027 names planned ownership anchors but authorizes no NN implementation: every `nn.*` production boundary still requires a separately accepted child specification. Tensor/autodiff/training semantics must not enter DriverActor, CompilerActor, generic memory, execution, or Device-JS core.
+- `SPEC-0017` is **Accepted**: sanitized opaque device discovery/selection, one selected device per runtime, and selected-device-driven target resolution. Production portable/software implementation is authorized; native/multi-device qualification remains open.
+- `SPEC-0021` is **Accepted**: new `f64`/`f16`/`bf16` packed scalar kinds plus contiguous one-dimensional generic typed device views. Accepted SPEC-0011 finite-only `f32` behavior is preserved. Production portable/software implementation is authorized; native promotion remains open.
+- `SPEC-0018` remains **Proposal**. Its own gate requires trustworthy published native SPEC-0016 lifecycle evidence. Issue #51 records a passing Windows candidate, but the exact candidate commits/evidence were not integrated on protected main; do not widen to multi-operation/multi-stream production code until that gap is repaired.
 
-EXP-013 is owner-authorized as a bounded CUDA-free publication-mailbox experiment for proposed SPEC-0014. It may execute only under `experiments/exp-013/` and the named F5 regression hook. Its `DetachedMockOperation` is a test harness for independently progressing work, not production operation authority; accepted SPEC-0016 exclusively owns submission/status/wait/close, operation state, terminalization, pending-command gating, and runtime-close semantics. EXP-013 does not authorize native host registration/mapping, mapped-memory support, or production mailbox code.
+`SPEC-0014`, `SPEC-0019`, `SPEC-0020`, and `SPEC-0022` through `SPEC-0026` remain proposal-only. Their presence or roadmap position is not implementation permission.
 
-EXP-014 remains a retained regression experiment under `experiments/exp-014/` and `scripts/run-exp-014.mjs`. Its passing JavaScript model is evidence for SPEC-0016 orchestration only and does not establish CUDA ordering/native support. The production SPEC-0016 implementation is governed by the accepted specification and its owned execution/DriverActor/facade/package conformance, not by the experiment implementation.
+## Execution and Device-JS gates
 
-F1B authorizes pinned official-header provenance, deterministic import, generated ABI facts, the separately reviewed Tier-0 semantic overlay, normalized Runtime IR products, and independent native C ABI probes. Accepted specifications authorize only their explicitly bounded slices. Linux GPU-free preparation may follow the retained experiment and conformance runbooks; Linux Driver execution remains deferred on a qualified native CUDA/GPU profile. CUDA-MCGS consumer interop remains blocked on independent CUDA-MCGS conformance and an exact compatible-pair record.
+`SPEC-0005` remains the legacy terminal-launch compatibility baseline. `SPEC-0016` owns submit/status/wait/close, terminalization, leases, pending-command gating and runtime-close semantics. Successors must consume that lifecycle rather than duplicate it.
 
-Do not create implementation scaffolding “for later,” imply Linux support from Windows evidence, or advance beyond the dependency-ready boundary selected by accepted authority and `next_step.yaml`.
+Current execution profile remains one DriverActor/context, one private stream and at most one pending GPU operation until an accepted successor changes it.
+
+`SPEC-0013` owns the restricted trusted-source Device-JS authoring boundary. `acorn@8.15.0` is syntax parsing only; CUDA-JS owns accepted grammar, typing, helper semantics, deterministic lowering/identity/diagnostics and compiler handoff. Generated CUDA remains private.
+
+EXP-013 is bounded publication-mailbox experiment evidence only. EXP-014 is retained JavaScript orchestration evidence only. Neither creates native support or production sideband/scheduler authority.
+
+## Platform and external gates
+
+Native Linux CUDA, WSL2, ARM64/SBSA, Jetson, additional GPU models, Windows Server/TCC, virtualization, MIG, ECC, multi-GPU, graphics interop and broad performance/soak claims require independent exact environments and evidence.
+
+Issue #64 still requires exact merged-head Windows Node 26.7.0 F5 revalidation. Issue #68 requires GitHub private-vulnerability-reporting control-plane mutation/read-back and reporter/advisory-flow proof; source changes alone cannot satisfy it.
+
+The exact CUDA-MCGS compatible pair remains cross-repository work. Generic CUDA-JS contracts must remain coherent if CUDA-MCGS is removed.
 
 ## Reasoning and experiment gate
 
-Node FFI safety, ABI packing, Fast FFI qualification, context/thread affinity, asynchronous completion, memory views, error poisoning, device compilation, cache identity, native security, and teardown are critical boundaries.
-
-Before changing one:
+Before changing Node FFI safety, ABI packing, context affinity, asynchronous completion, memory visibility, error poisoning, compiler semantics, cache identity, native security or teardown:
 
 - identify accepted authority and the unresolved empirical question;
-- state hard gates and competing paths;
-- use the cheapest decisive experiment;
+- state hard gates and strongest competing paths;
+- use the cheapest decisive experiment when a fact is missing;
 - define an independent oracle and complete evidence identity;
-- define failure interpretation, rollback, and cleanup;
-- avoid implementation beyond what the experiment can decide.
+- define failure interpretation, rollback and cleanup;
+- avoid implementation beyond what the experiment/evidence can decide.
 
 ## Repository organization
 
 ```text
-components/    generic runtime components after contract acceptance
+components/    accepted generic runtime components
 schemas/       generated facts, semantic overlays, Runtime IR, generated products
 conformance/   synthetic/native/public-contract capsules
-experiments/   disposable decision experiments
-benchmarks/    reproducible mechanism and regression evidence
+experiments/   bounded decision experiments
+benchmarks/    reproducible mechanism/regression evidence
 packaging/     package/compatibility/release metadata
 tools/         schema/code-generation and developer tools
 tests/         cross-component/end-to-end tests only
 third_party/   donor material with exact provenance
 ```
 
-No production source belongs in the repository root. Do not create unowned catch-all directories.
+No production source belongs in the repository root or an unowned catch-all directory.
 
 ## Validation
 
-For the current phase:
+For current portable/integration work, run the owning focused tests plus:
 
 ```bash
 ./scripts/verify-docs.sh
@@ -113,8 +150,10 @@ npm run exp:012
 npm run f3
 ```
 
-Experiment branches add their own commands only when the named experiment is explicitly authorized. Completion requires exact-effect inspection, evidence, cleanup, Git state, and honest claim limits.
+Native/support promotion additionally requires its exact capability runner/oracle/profile. Do not replace missing native evidence with mocks.
+
+Completion requires exact-effect inspection, evidence, cleanup, Git state, contradiction-free authority and honest claim limits.
 
 ## Publication state
 
-The public `iteathen/CUDA-JS` repository exists. Publication claims require remote read-back of the exact branch and tree being claimed. Local evidence is not a publication claim until the exact remote branch/tree and its native CI result are read back.
+The public `iteathen/CUDA-JS` repository exists. Publication/integration claims require remote read-back of the exact protected branch/tree. Local or candidate evidence is not a protected-main publication claim until the exact remote revision and its required checks/evidence are read back.
