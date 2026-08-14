@@ -58,7 +58,7 @@ test('live views are registry children and prevent parent release until view clo
   assert.equal(releasedView.released.kind, 'device-view');
   await registry.close(memory);
   assert.equal(parentDisposeCount(), 1);
-  assert.throws(() => views.status(view.view), { code: 'RESOURCE_STALE_TOKEN' });
+  assert.throws(() => views.status(view.view), { code: 'RESOURCE_CLOSED' });
 });
 
 test('view leases enforce declared access and block view close while in flight', async () => {
