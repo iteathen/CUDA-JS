@@ -66,7 +66,7 @@ test('public facade admits SPEC-0021 f64/f16/bf16 without widening legacy f32', 
       grid: { x: 1, y: 1, z: 1 },
       block: { x: 1, y: 1, z: 1 },
       arguments: [1, 1, 1, Infinity],
-    }), expectCode('EXECUTION_ARGUMENT_VALUE'));
+    }), expectCode('DRIVER_LAUNCH_OPTIONS'));
   } finally {
     if (fn?.state === 'open') await fn.close();
     if (module?.state === 'open') await module.close();
