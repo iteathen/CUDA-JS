@@ -1,112 +1,116 @@
 {
-  "schema_version": 33,
-  "updated": "2026-08-13",
-  "status": "active_nn_extension_authority_reconciliation",
-  "objective": "Revise and accept issue #71 as an authority-only packet: preserve generic CUDA-JS core, authorize a separately packaged optional NN product in the same repository, and name planned component boundaries without creating exports, dependencies, directories, runtime behavior, or native-support claims.",
-  "ownership_boundary": "The cuda-js core package owns consumer-neutral Node/CUDA runtime and toolchain capabilities. A future separately published NN product may own application-neutral tensor/graph/autodiff/training semantics only inside accepted nn.* contracts; it may not add NN exports or dependencies to core or inject those semantics into DriverActor, CompilerActor, memory, execution, or Device-JS core.",
+  "schema_version": 34,
+  "updated": "2026-08-14",
+  "status": "active_open_issue_development_sweep",
+  "objective": "Process every open CUDA-JS issue through investigate, assess, primary-source research, reassess, plan, authorized implementation, and test without collapsing architecture, implementation, qualification, and priority. Advance only dependency-ready ownership boundaries and record exact external/hardware blockers for the rest.",
   "exact_input_revisions": {
-    "protected_main_capability_authority": "7ba8e07db76f2b18dd97d344698bd2d90a41c9de",
-    "implementation_baseline": "7ba8e07db76f2b18dd97d344698bd2d90a41c9de",
+    "protected_main": "334b903be827dedb5345608a34a6df444912fe1b",
     "package": "cuda-js@0.1.0-alpha.5",
-    "portable_implemented": ["SPEC-0006 target-syntax addendum (#65)", "SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
-    "implemented_corrections": [
-      "SPEC-0006 target-syntax addendum (#65)",
-      "SPEC-0003 disposal-failure addendum (#66)"
+    "completed_since_previous_control_state": [
+      "#71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main",
+      "#69 immutable GitHub Actions provenance integrated",
+      "#65 target-syntax correction integrated",
+      "#66 disposal-failure correction integrated",
+      "#67 public capability projection reconciliation integrated"
     ],
-    "accepted_unimplemented_corrections": [],
-    "proposal_evidence_only": ["SPEC-0014 + EXP-013"],
-    "proposal_authority": [
-      "SPEC-0017",
-      "SPEC-0018",
-      "SPEC-0019",
-      "SPEC-0020",
-      "SPEC-0021",
-      "SPEC-0022",
-      "SPEC-0023",
-      "SPEC-0024",
-      "SPEC-0025",
-      "SPEC-0026"
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016"],
+    "accepted_in_current_authority_packet": [
+      "SPEC-0017 device selection and target resolution",
+      "SPEC-0021 extended numeric ABI and contiguous 1D generic device views"
     ],
-    "accepted_authority_only": ["ADR-0004 + SPEC-0027 optional NN product/package/component boundary (#71); no implementation or qualification"],
-    "retained_orchestration_evidence": ["EXP-014"]
+    "still_proposal_only": ["SPEC-0014", "SPEC-0018", "SPEC-0019", "SPEC-0020", "SPEC-0022", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
+    "accepted_authority_only": ["SPEC-0027 optional NN product boundary; no nn.* implementation without accepted child specifications"]
   },
   "authority": [
     "AGENTS.md",
     "agent_files/AI_RULES.md",
     "agent_files/AGENTS.md",
+    "agent_files/general_foundation/PRINCIPLES.md",
+    "agent_files/general_foundation/ASSESSMENT_AND_PLANNING.md",
+    "agent_files/general_foundation/ENGINEERING_JUDGMENT.md",
+    "agent_files/general_foundation/PLAN_EXECUTION.md",
+    "agent_files/general_foundation/SANITY_CHECKING.md",
     "agent_files/general_foundation/STATUS_SEMANTICS.md",
+    "agent_files/DESIGN_ALIGNMENT_CARD.md",
+    "agent_files/VALIDATION_POLICY.md",
     "docs/PROJECT_CHARTER.md",
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
-    "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
-    "docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md",
-    "docs/specs/SPEC-0003-disposal-failure-addendum.md",
-    "docs/specs/SPEC-0006-compiler-linker-cache.md",
-    "docs/specs/SPEC-0006-target-syntax-addendum.md",
-    "docs/specs/SPEC-0008-package-public-facade.md",
-    "docs/specs/SPEC-0009-trusted-toolkit-headers-and-cuda-mcgs-interop.md",
-    "docs/specs/SPEC-0010-relocatable-device-code.md",
-    "docs/specs/SPEC-0011-scalar-kernel-arguments.md",
-    "docs/specs/SPEC-0012-device-lto.md",
-    "docs/specs/SPEC-0013-restricted-device-js.md",
-    "docs/specs/SPEC-0013-public-surface-addendum.md",
-    "docs/specs/SPEC-0015-execution-scope-status-clarification.md",
-    "docs/specs/SPEC-0016-operation-lifecycle.md",
+    "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
+    "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-NN-AUTHORITY-71",
-    "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "Land one authority-only ADR/spec/charter/registry packet selecting a same-repository separate publish unit for the optional NN product, with core package isolation and contradiction mutation tests. Keep the future registry package name and every NN implementation contract unselected or planned until separately accepted.",
-    "exit": "Protected main accepts the bounded NN product/package/component authority, core exports and dependencies remain unchanged, the exact protected checks pass, and issue #71 closes without claiming an NN implementation or native support."
+    "id": "CJS-CAP-NUMVIEW-0021",
+    "issues": [39, 88],
+    "plan": "docs/plans/2026-08-14-open-issue-development-sweep.md",
+    "next_action": "Implement the accepted portable/software SPEC-0021 slice as one ownership packet: deterministic f64/f16/bf16 packing while preserving finite-only f32, plus contiguous 1D generic typed device views and focused mutation/property/lifecycle tests. Do not claim native support until independent exact-profile evidence passes.",
+    "exit": "Portable/package implementation, exact-effect review and protected checks pass; implementation status is updated without changing qualification status."
   },
-  "deliverables": [
-    "accepted issue #71 NN extension authority and package-isolation boundary",
-    "external private-vulnerability-reporting enablement and end-to-end verification (#68)",
-    "exact merged-head Windows F5 revalidation for the integrated EXP-013 repair (#64)",
-    "continued public capability projection coverage as authoritative facts change",
-    "continued exact native qualification evidence for already-implemented capabilities when suitable environments exist",
-    "reviewed dispositions for SPEC-0017/SPEC-0018/SPEC-0021 before any new capability implementation"
+  "parallel_dependency_ready": [
+    {
+      "id": "CJS-CAP-DEVSEL-0017",
+      "issues": [20],
+      "action": "Implement the accepted portable/software selector snapshot and selected-device target-resolution foundation without exposing native identifiers; native multi-device qualification remains separate."
+    }
   ],
-  "forward_lanes": {
-    "capability_expansion": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "native_and_platform": "docs/plans/2026-08-12-native-and-platform-qualification-continuation.md",
-    "execution_expansion_legacy_spine": "docs/plans/2026-08-12-execution-capability-continuation.md",
-    "compatible_pair": "docs/plans/2026-08-12-compatible-pair-continuation.md"
-  },
-  "blockers": [
-    "this environment does not itself expose the exact NVIDIA Windows profile required for new native support promotion",
-    "the available GitHub connector does not expose private-vulnerability-reporting setting mutation/read-back or an unaffiliated reporter/maintainer advisory verification flow required by issue #68",
-    "issue #64 cannot close until the exact merged repair head passes the focused EXP-013 and complete F5 capsule on Windows Node 26.7.0",
-    "SPEC-0017 through SPEC-0026 remain proposals and cannot be implemented until separately accepted",
-    "production sideband remains proposal-only until host-memory/registration ownership and operation dependencies are accepted and natively evidenced",
-    "multi-stream execution remains proposal-only until SPEC-0018 is accepted after trustworthy SPEC-0016 evidence",
-    "NN production implementation remains blocked until each consuming child specification is separately accepted"
+  "blocked_or_deferred_lanes": [
+    {
+      "id": "CJS-CAP-SCHED-0018",
+      "issues": [40],
+      "reason": "SPEC-0018 explicitly requires trustworthy published native SPEC-0016 lifecycle evidence. #51 records a passing local Windows candidate, but its exact candidate commits/evidence were never integrated on protected main. Keep SPEC-0018 proposal-only until that publication gap is repaired."
+    },
+    {
+      "id": "CJS-EXTERNAL-SECURITY-68",
+      "issues": [68],
+      "reason": "Requires GitHub private-vulnerability-reporting setting mutation/read-back plus unaffiliated reporter and maintainer advisory-flow proof; current connector does not expose that setting/control path."
+    },
+    {
+      "id": "CJS-WINDOWS-F5-64",
+      "issues": [64],
+      "reason": "Requires exact merged-head Windows x64 Node 26.7.0 F5 execution on the qualified NVIDIA profile."
+    },
+    {
+      "id": "CJS-NATIVE-QUALIFICATION",
+      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 35, 42, 43, 51],
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence unavailable in this execution environment. Portable preparation may continue, but no native/support claim is inferred."
+    },
+    {
+      "id": "CJS-INFRASTRUCTURE",
+      "issues": [16, 29],
+      "reason": "Requires controlled runner ownership/hardware/attestation infrastructure outside source-code-only changes; repository-side design may advance independently."
+    },
+    {
+      "id": "CJS-SUCCESSOR-PROPOSALS",
+      "issues": [38, 85, 86, 87, 89, 90, 91, 92, 93, 94, 95, 96],
+      "reason": "Governing SPEC-0014/0018-0020/0022-0026 contracts remain proposal-only and/or depend on accepted foundations not yet implemented/evidenced. Process through research/reassessment/plan; do not scaffold production code early."
+    },
+    {
+      "id": "CJS-NN-PROGRAM",
+      "issues": [70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84],
+      "reason": "SPEC-0027 authorizes only the separate future NN product boundary. Every nn.* production boundary needs a separately accepted child specification; issue bodies that still assume cuda-js/nn or same-package distribution are stale and must be reconciled before implementation."
+    }
   ],
   "validation": [
     "./scripts/verify-docs.sh",
     "npm run verify",
-    "focused ownership-boundary regression tests for each implementation packet",
-    "capability-specific exact native oracle/conformance commands before support promotion",
-    "remote protected-main read-back before any integrated/support claim"
+    "ownership-focused unit/mutation tests for each implementation packet",
+    "capability-specific independent native oracle before qualification/support promotion",
+    "remote protected-main read-back before any integrated/publication claim"
   ],
   "do_not": [
-    "combine #65 and #66 implementation into one mixed ownership branch merely because their authority was accepted together",
-    "treat target parser/policy admission as NVRTC/nvJitLink/GPU native support",
-    "treat RESOURCE_DISPOSE_FAILED as stale-resource when native cleanup ran and failed",
-    "retry a failed disposer by default on repeated close",
-    "treat open issues, plans, or proposal specs as implementation authority",
-    "use a fixed sub-millisecond or callback-count timer threshold as an event-loop responsiveness oracle",
-    "describe SPEC-0010/0011/0012/0013/0016 as unimplemented merely because native qualification remains open",
+    "treat an open issue, roadmap, proposal, or experiment as production implementation authority",
+    "accept SPEC-0018 before its published native SPEC-0016 widening gate is satisfied",
+    "widen accepted SPEC-0011 finite-only f32 semantics implicitly while adding new floating kinds",
     "infer native support from portable/mock/neighboring-profile evidence",
-    "duplicate SPEC-0016 operation lifecycle in sideband, scheduler, transfer, graph, library, graphics, or multi-GPU work",
-    "add CUDA-MCGS/search/domain semantics to CUDA-JS",
-    "add NN exports, dependencies, provider discovery, tensor/autodiff/training semantics, or deep imports to the cuda-js core package",
-    "assume a future NN registry package name before namespace control is verified",
-    "expose raw native pointers, streams, events, device identifiers, providers or generated CUDA through the ordinary public API"
+    "duplicate SPEC-0016 operation lifecycle in scheduler, transfer, graph, library, graphics, sideband, multi-GPU, or NN work",
+    "add NN exports/dependencies/provider discovery/tensor/autodiff/training semantics to the cuda-js core package",
+    "assume the future NN package name or directory before its own accepted child authority selects it",
+    "expose raw native pointers, streams, events, device ordinals/UUIDs, providers, generated CUDA, or machine-specific identifiers through ordinary public products",
+    "weaken tests or claim completion around missing hardware/external controls"
   ],
   "historical_baseline": [
-    "CJS-F0 through CJS-F9 implementation history is retained under docs/archive/plans/",
-    "CJS-F1A synthetic Node FFI qualification remains accepted historical foundation",
-    "docs/decisions/ADR-0002-node-ffi-first-host-binding.md remains accepted host-binding authority"
+    "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
+    "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
+    "the unpublished Windows OSC-3 candidate described on #51 remains candidate evidence until exact reviewed publication/integration"
   ]
 }
