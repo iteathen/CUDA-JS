@@ -3,6 +3,8 @@ const RELEASE = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const REMOTE_SOURCE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
 const USES_PREFIX = /^\s*(?:-\s*)?uses\s*:/;
 const USES_LINE = /^\s*(?:-\s*)?uses\s*:\s*([^\s#]+)(?:\s+#\s*(\S(?:.*\S)?))?\s*$/;
+const PROJECTION_START = '<!-- actions-provenance:start -->';
+const PROJECTION_END = '<!-- actions-provenance:end -->';
 
 const expectedPolicy = {
   remoteReferences: 'full-length-git-commit-sha',
@@ -33,6 +35,46 @@ function sortedUnique(values) {
 
 function sameStrings(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function renderDependencies(dependencies) {
+  const rows = dependencies.map((dependency) => {
+    const workflows = (Array.isArray(dependency.workflows) ? dependency.workflows : [])
+      .map((workflow) => `\`${workflow}\``)
+      .join(', ');
+    return `| [\`${dependency.source}\`](${dependency.releaseUrl}) | \`${dependency.release}\` | [\`${dependency.commit}\`](${dependency.commitUrl}) | ${workflows} |`;
+  });
+  return [
+    PROJECTION_START,
+    '| Dependency | Release | Immutable commit | Workflow inventory |',
+    '|---|---|---|---|',
+    ...rows,
+    PROJECTION_END,
+  ].join('\n');
+}
+
+export function renderActionProvenanceProjection(provenance) {
+  return renderDependencies(Array.isArray(provenance?.dependencies) ? provenance.dependencies : []);
+}
+
+function validateActionProvenanceProjection(errors, publicRepository, dependencies) {
+  if (typeof publicRepository !== 'string') {
+    errors.push('docs/PUBLIC_REPOSITORY.md action provenance projection is missing');
+    return;
+  }
+  const startCount = publicRepository.split(PROJECTION_START).length - 1;
+  const endCount = publicRepository.split(PROJECTION_END).length - 1;
+  if (startCount !== 1 || endCount !== 1) {
+    errors.push('docs/PUBLIC_REPOSITORY.md must contain exactly one action provenance projection');
+    return;
+  }
+  const start = publicRepository.indexOf(PROJECTION_START);
+  const end = publicRepository.indexOf(PROJECTION_END, start + PROJECTION_START.length);
+  const actual = publicRepository.slice(start, end + PROJECTION_END.length);
+  const expected = renderDependencies([...dependencies.values()]);
+  if (actual !== expected) {
+    errors.push('docs/PUBLIC_REPOSITORY.md action provenance projection differs from canonical provenance');
+  }
 }
 
 function validateProvenance(errors, provenance) {
@@ -116,7 +158,7 @@ function validateDependabot(errors, dependabot) {
   }
 }
 
-export function validateWorkflowActionPolicy({ workflows, provenance, dependabot }) {
+export function validateWorkflowActionPolicy({ workflows, provenance, dependabot, publicRepository }) {
   const errors = [];
   const dependencies = validateProvenance(errors, provenance);
   const observed = new Map();
@@ -171,6 +213,7 @@ export function validateWorkflowActionPolicy({ workflows, provenance, dependabot
       errors.push(`action provenance workflow inventory differs for ${source}: expected ${JSON.stringify(actual)}`);
     }
   }
+  validateActionProvenanceProjection(errors, publicRepository, dependencies);
   validateDependabot(errors, dependabot);
   return errors;
 }

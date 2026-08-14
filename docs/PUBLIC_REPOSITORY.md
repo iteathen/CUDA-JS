@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-12
+**Updated:** 2026-08-13
 
 CUDA-JS is already public at `iteathen/CUDA-JS`. This document records the public-repository security and collaboration posture, the assessment behind the current hardening pass, and the remaining GitHub-settings work that is not represented by source files.
 
@@ -90,13 +90,15 @@ The existing `verify`, `schema`, and `node-compatibility` checks are repository-
 
 GitHub-hosted remote actions and remote reusable workflows must use a full 40-character commit SHA. The same `uses:` line must end with the reviewed release tag so humans and Dependabot retain a readable version identity. Repository-local actions and reusable workflows may use only normalized `./...` paths because they execute from the already reviewed repository commit; Docker `uses:` references are prohibited by the current policy.
 
-The canonical machine-readable provenance owner is [`.github/actions-provenance.json`](../.github/actions-provenance.json). The current reviewed set is:
+The canonical machine-readable provenance owner is [`.github/actions-provenance.json`](../.github/actions-provenance.json). The current reviewed set below is a validated human-readable projection of that owner:
 
-| Dependency | Release | Immutable commit | Role |
+<!-- actions-provenance:start -->
+| Dependency | Release | Immutable commit | Workflow inventory |
 |---|---|---|---|
-| [`actions/checkout`](https://github.com/actions/checkout/releases/tag/v7.0.1) | `v7.0.1` | [`3d3c42e5aac5ba805825da76410c181273ba90b1`](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) | Fetch the exact workflow revision |
-| [`actions/setup-node`](https://github.com/actions/setup-node/releases/tag/v7.0.0) | `v7.0.0` | [`820762786026740c76f36085b0efc47a31fe5020`](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020) | Install exact Node matrix/toolchain versions |
-| [`actions/upload-artifact`](https://github.com/actions/upload-artifact/releases/tag/v4.6.2) | `v4.6.2` | [`ea165f8d65b6e75b540449e92b4886f43607fa02`](https://github.com/actions/upload-artifact/commit/ea165f8d65b6e75b540449e92b4886f43607fa02) | Retain generated/readiness artifacts |
+| [`actions/checkout`](https://github.com/actions/checkout/releases/tag/v7.0.1) | `v7.0.1` | [`3d3c42e5aac5ba805825da76410c181273ba90b1`](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) | `.github/workflows/docs.yml`, `.github/workflows/node-compatibility.yml` |
+| [`actions/setup-node`](https://github.com/actions/setup-node/releases/tag/v7.0.0) | `v7.0.0` | [`820762786026740c76f36085b0efc47a31fe5020`](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020) | `.github/workflows/docs.yml`, `.github/workflows/node-compatibility.yml` |
+| [`actions/upload-artifact`](https://github.com/actions/upload-artifact/releases/tag/v7.0.1) | `v7.0.1` | [`043fb46d1a93c77aae656e7c1c64a875d1fc6a0a`](https://github.com/actions/upload-artifact/commit/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a) | `.github/workflows/docs.yml` |
+<!-- actions-provenance:end -->
 
 `.github/dependabot.yml` checks for Action releases weekly. A proposed update is not accepted merely because the bot changed a SHA/comment: review the upstream release and commit in the source repository, confirm role/license/permissions and workflow behavior, update the provenance entry, then require the normal protected checks. `scripts/verify-public-repository.mjs` rejects mutable, undeclared, mismatched, expression-based, and prohibited Action references plus stale workflow inventory or update configuration.
 

@@ -40,12 +40,12 @@
     {
       "source": "actions/upload-artifact",
       "repository": "actions/upload-artifact",
-      "release": "v4.6.2",
-      "commit": "ea165f8d65b6e75b540449e92b4886f43607fa02",
-      "releaseUrl": "https://github.com/actions/upload-artifact/releases/tag/v4.6.2",
-      "commitUrl": "https://github.com/actions/upload-artifact/commit/ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "release": "v7.0.1",
+      "commit": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+      "releaseUrl": "https://github.com/actions/upload-artifact/releases/tag/v7.0.1",
+      "commitUrl": "https://github.com/actions/upload-artifact/commit/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
       "license": "MIT",
-      "licenseUrl": "https://github.com/actions/upload-artifact/blob/ea165f8d65b6e75b540449e92b4886f43607fa02/LICENSE",
+      "licenseUrl": "https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/LICENSE",
       "workflows": [
         ".github/workflows/docs.yml"
       ]
