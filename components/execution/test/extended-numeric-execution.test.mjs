@@ -97,7 +97,10 @@ test('function registration and launch carry f64/f16/bf16 through the real execu
   await execution.releaseFunction(fn.function);
   await execution.releaseModule(module.module);
   const terminal = await registry.closeAll();
-  assert.equal(terminal.graceful, true);
+  assert.equal(terminal.errorCount, 0);
+  assert.equal(terminal.skippedCount, 0);
+  assert.equal(terminal.inventory.counts.live, 0);
+  assert.equal(terminal.inventory.counts.orphaned, 0);
 });
 
 test('invalid extended scalar values reject before native submission', async () => {
