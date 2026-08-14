@@ -23,10 +23,27 @@ This contract does not create tensor algebra, broadcasting, model semantics or a
 
 ```text
 architectural disposition: selected
-implementation status:       authorized; not yet integrated at acceptance
+implementation status:       implemented in portable/software/package paths for scalar ABI; contiguous 1D view component implemented without a selected public facade
 qualification status:        not-qualified
-priority:                    dependency-ready foundation
+priority:                    native evidence plus downstream consumers
 ```
+
+Portable/software/package implementation does not promote native support. Public view-facade naming remains unselected because this specification defines view semantics/lifecycle but does not choose facade spelling.
+
+## 2026-08-14 implementation result
+
+The accepted first slice is implemented without widening operation, native-pointer, or Device-JS authority:
+
+- `components/execution/src/numeric-abi.mjs` owns the closed parameter-kind registry, width/alignment, scalar-value admission, mixed layout and deterministic packing;
+- DriverActor protocol validation consumes the same execution-owned kind/value predicates instead of retaining a duplicate scalar whitelist;
+- `ExecutionManager` consumes the same numeric ABI owner while preserving SPEC-0016 submission/completion, stream/event and lease behavior;
+- the public runtime facade and TypeScript declarations admit `f64`/`f16`/`bf16` scalar launch kinds, while legacy finite-only `f32` remains unchanged;
+- `components/memory/src/device-view-manager.mjs` implements contiguous 1D view dtype/range/access semantics as ResourceRegistry `device-view` children of opaque device allocations, including generation, child-before-parent close, leases, exact half-open overlap and no native address exposure;
+- no new root `cuda-js` view export or runtime method was invented. A later accepted public-surface decision may expose the implemented component when a consumer boundary requires it.
+
+Portable conformance covers exact new-kind bytes, canonical NaNs, signed zero/infinity, f16/bf16 normal/subnormal/overflow/underflow/ties-to-even, deterministic padding, unchanged legacy `f32`, Worker-protocol admission, real `ExecutionManager` packing, public-facade launch behavior, view range/alignment/safe-integer partitions, access roles, leases, overlap and parent/view close ordering.
+
+The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed the repository `verify` and `node-compatibility` workflows before status/projection reconciliation. The fully integrated documentation/compatibility head must pass the same protected checks before merge. No native SPEC-0021 qualification is inferred from those portable/package checks.
 
 ## Accepted correction to the proposal
 
