@@ -11,7 +11,7 @@ const NN_COMPONENT_ANCHORS = [
 
 function fixture() {
   const common = '0.1.0-alpha.5 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0016 SPEC-0027 separate future publish unit compileDeviceProgram() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
-  const capabilityTable = `${common} Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
+  const capabilityTable = `${common} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
   const nnAnchors = NN_COMPONENT_ANCHORS.map((anchor) => `\`${anchor}\``).join(' ');
   return {
     packageJson: {
@@ -28,7 +28,8 @@ function fixture() {
     compatibility: {
       package: { name: 'cuda-js', version: '0.1.0-alpha.5' },
       capabilities: {
-        functionParameters: ['device-memory', 'u32', 'u64', 'i32', 'f32'],
+        functionParameters: ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16'],
+        typedDeviceViews: 'contiguous-1d-component-foundation-no-public-facade-yet',
         compilerOutputFormats: ['ptx', 'lto-ir'],
         gpuOperationLifecycle: 'opaque-submit-status-wait-close-one-pending',
         deviceJsFrontend: 'restricted-spec-0013-v1',
@@ -43,7 +44,7 @@ function fixture() {
       capabilities: capabilityTable,
       interop: 'Device-JS generated CUDA C++ external-deletion test',
       hardware: '| Axis | Architecture | Implementation | Qualification | Priority | known incompatible not-qualified',
-      packaging: 'cuda-js 0.1.0-alpha.5 SPEC-0027 separate future publish unit',
+      packaging: 'cuda-js 0.1.0-alpha.5 SPEC-0021 SPEC-0027 separate future publish unit',
       agents: 'ADR-0004 and SPEC-0027 separate future publish unit',
       charter: 'separate future publish unit Every NN production boundary requires a separately accepted child specification.',
       registry: `project.nn-extension Accepted authority only; not implemented or qualified ${nnAnchors}`,
@@ -64,6 +65,8 @@ test('package, capability, interop, and status-dimension drift are independently
   const cases = [
     (value) => { value.documents.readme = value.documents.readme.replace('0.1.0-alpha.5', '0.1.0-alpha.2'); },
     (value) => { value.compatibility.capabilities.functionParameters = ['device-memory', 'u32']; },
+    (value) => { value.compatibility.capabilities.typedDeviceViews = 'missing'; },
+    (value) => { value.documents.capabilities = value.documents.capabilities.replace('SPEC-0021', ''); },
     (value) => { value.documents.capabilities = value.documents.capabilities.replace('SPEC-0012', ''); },
     (value) => { value.documents.interop = value.documents.interop.replace('external-deletion test', 'consumer module test'); },
     (value) => { value.documents.capabilities = value.documents.capabilities.replace('`not-qualified`', '`unsupported`'); },
