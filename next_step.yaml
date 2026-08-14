@@ -7,7 +7,7 @@
     "protected_main": "334b903be827dedb5345608a34a6df444912fe1b",
     "package": "cuda-js@0.1.0-alpha.5",
     "completed_since_previous_control_state": [
-      "#71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main",
+      "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
       "#65 target-syntax correction integrated",
       "#66 disposal-failure correction integrated",
@@ -19,7 +19,7 @@
       "SPEC-0021 extended numeric ABI and contiguous 1D generic device views"
     ],
     "still_proposal_only": ["SPEC-0014", "SPEC-0018", "SPEC-0019", "SPEC-0020", "SPEC-0022", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
-    "accepted_authority_only": ["SPEC-0027 optional NN product boundary; no nn.* implementation without accepted child specifications"]
+    "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
   "authority": [
     "AGENTS.md",
@@ -34,6 +34,7 @@
     "agent_files/DESIGN_ALIGNMENT_CARD.md",
     "agent_files/VALIDATION_POLICY.md",
     "docs/PROJECT_CHARTER.md",
+    "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
@@ -109,6 +110,7 @@
     "weaken tests or claim completion around missing hardware/external controls"
   ],
   "historical_baseline": [
+    "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
     "the unpublished Windows OSC-3 candidate described on #51 remains candidate evidence until exact reviewed publication/integration"
