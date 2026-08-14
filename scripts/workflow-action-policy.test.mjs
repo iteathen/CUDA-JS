@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { validateWorkflowActionPolicy } from './workflow-action-policy.mjs';
+import {
+  renderActionProvenanceProjection,
+  validateWorkflowActionPolicy,
+} from './workflow-action-policy.mjs';
 
 const actionSha = '1111111111111111111111111111111111111111';
 const reusableSha = '2222222222222222222222222222222222222222';
@@ -22,7 +25,7 @@ function dependency(source, release, commit, workflows) {
 }
 
 function fixture() {
-  return {
+  const value = {
     workflows: {
       '.github/workflows/ci.yml': [
         `      - uses: owner/action@${actionSha} # v1.2.3`,
@@ -55,6 +58,12 @@ function fixture() {
       '    open-pull-requests-limit: 3',
     ].join('\n'),
   };
+  value.publicRepository = [
+    '# Public Repository Hardening',
+    '',
+    renderActionProvenanceProjection(value.provenance),
+  ].join('\n');
+  return value;
 }
 
 test('full-SHA actions, remote reusable workflows, and repository-local actions satisfy policy', () => {
@@ -79,5 +88,30 @@ test('mutable, unreviewed, stale, malformed, docker, and uncontrolled update pat
     const value = fixture();
     mutate(value);
     assert.notDeepEqual(validateWorkflowActionPolicy(value), []);
+  }
+});
+
+test('human-readable exact action versions and commits cannot drift from canonical provenance', () => {
+  const replacementSha = '3333333333333333333333333333333333333333';
+  const cases = [
+    (value) => { value.publicRepository = value.publicRepository.replaceAll('v1.2.3', 'v1.2.4'); },
+    (value) => { value.publicRepository = value.publicRepository.replaceAll(actionSha, replacementSha); },
+    (value) => {
+      value.workflows['.github/workflows/ci.yml'] = value.workflows['.github/workflows/ci.yml']
+        .replace(`${actionSha} # v1.2.3`, `${replacementSha} # v1.2.4`);
+      value.provenance.dependencies[0] = dependency(
+        'owner/action',
+        'v1.2.4',
+        replacementSha,
+        ['.github/workflows/ci.yml'],
+      );
+    },
+  ];
+  for (const mutate of cases) {
+    const value = fixture();
+    mutate(value);
+    assert.ok(validateWorkflowActionPolicy(value).includes(
+      'docs/PUBLIC_REPOSITORY.md action provenance projection differs from canonical provenance',
+    ));
   }
 });

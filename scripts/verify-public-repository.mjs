@@ -71,7 +71,7 @@ for (const [relative, workflow] of Object.entries(workflows)) {
 
 try {
   const provenance = JSON.parse(provenanceText);
-  errors.push(...validateWorkflowActionPolicy({ workflows, provenance, dependabot }));
+  errors.push(...validateWorkflowActionPolicy({ workflows, provenance, dependabot, publicRepository }));
 } catch (error) {
   errors.push(`.github/actions-provenance.json must contain valid JSON: ${error.message}`);
 }

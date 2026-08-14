@@ -104,7 +104,7 @@ The Worker readiness handshake, independently progressing mock work, mailbox dir
 
 **Runtime/support effect:** none; package behavior, native qualification and exact Node/toolchain gates are unchanged.
 
-The `verify` and `node-compatibility` workflows pin `actions/checkout@v7.0.1`, `actions/setup-node@v7.0.0`, and `actions/upload-artifact@v4.6.2` to reviewed full commit SHAs with same-line release comments. `.github/actions-provenance.json` owns exact release, commit, license and workflow-usage facts. Remote reusable workflows follow the same full-SHA rule; normalized repository-local `./...` references are explicitly allowed; Docker references are prohibited.
+The `verify` and `node-compatibility` workflows pin every remote Action to a reviewed full commit SHA with a same-line release comment. `.github/actions-provenance.json` owns exact release, commit, license and workflow-usage facts, and `docs/PUBLIC_REPOSITORY.md` carries the validator-checked human-readable projection. Remote reusable workflows follow the same full-SHA rule; normalized repository-local `./...` references are explicitly allowed; Docker references are prohibited.
 
 The repository validator and focused mutation tests reject tags/branches/short SHAs, expression-based or malformed references, undeclared dependencies, commit/comment/provenance mismatches, stale workflow inventories, and drift from the weekly three-PR Dependabot update path. Dependency pull requests remain proposals: an upstream release/commit and its provenance must be reviewed before the protected checks can pass.
 
