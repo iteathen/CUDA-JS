@@ -7,25 +7,28 @@
 ## Protected-main baseline entering the open-issue sweep
 
 ```text
-main:    334b903be827dedb5345608a34a6df444912fe1b
-package: cuda-js@0.1.0-alpha.5
+initial sweep main: 334b903be827dedb5345608a34a6df444912fe1b
+authority main:     66b449a5ae81d51620fd5004e1b75e89d5a9ac67
+package:            cuda-js@0.1.0-alpha.5
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
 
-The baseline contains the accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations of:
+The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations include:
 
 - SPEC-0010 typed relocatable device code;
 - SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
 - SPEC-0012 typed Device LTO;
 - SPEC-0013 restricted Device-JS;
 - SPEC-0016 opaque one-pending-operation submission/completion;
+- SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
+- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
 - ADR-0004 and SPEC-0027 optional NN product authority as a separate future publish unit.
 
-Portable/software implementation and native qualification remain independent.
+Portable/software/package implementation and native qualification remain independent.
 
 ## 2026-08-14 open-issue sweep
 
@@ -37,21 +40,25 @@ The project owner requested every open issue be processed through investigate, a
 architectural disposition: selected
 implementation status:       authorized; portable/software integration next
 qualification status:        not-qualified
-priority:                    dependency-ready
+priority:                    current dependency-ready implementation focus
 ```
 
 SPEC-0017 accepts sanitized opaque device discovery/selection, exactly one selected physical device per runtime, and selected-device-driven compile/link target resolution. It exposes no ordinal/UUID/serial/PCI/native handle. Multi-device orchestration remains SPEC-0024 and proposal-only.
 
-### Accepted foundation: SPEC-0021 / #39/#88
+### Implemented foundation: SPEC-0021 / #39/#88
 
 ```text
 architectural disposition: selected
-implementation status:       authorized; portable/software integration next
+implementation status:       implemented in portable/software/package scalar path; contiguous 1D view component implemented
 qualification status:        not-qualified
-priority:                    current implementation focus
+priority:                    native evidence / downstream public-view consumer decision
 ```
 
-SPEC-0021 accepts `f64`, `f16`, and `bf16` scalar packing plus contiguous one-dimensional generic typed device views. The proposal’s accidental conflict with SPEC-0011 was corrected: existing `f32` remains finite-only and continues rejecting NaN/infinity. New half/bfloat conversion is deterministic round-to-nearest-even with an explicit new-kind special-value bit contract.
+SPEC-0021 preserves accepted finite-only `f32` and implements new `f64`, `f16`, and `bf16` scalar packing with deterministic width/alignment, round-to-nearest-even half/bfloat conversion, signed-zero/infinity behavior and canonical new-kind NaNs. Execution packing and DriverActor protocol admission share one execution-owned scalar-kind/value authority, preventing duplicate Worker/execution whitelists from drifting.
+
+The same specification implements a generic contiguous 1D `device-view` component over opaque device allocations. Views use ResourceRegistry parent/child/generation/lease behavior, exact dtype/range/access semantics and half-open overlap classification without exposing native addresses. No root `cuda-js` view method/export has been invented because SPEC-0021 did not select public facade spelling; that remains a later accepted public-surface decision when a consumer requires it.
+
+The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed `verify` and `node-compatibility`, including F4/F5/F6 and the F8 public package/facade path. The fully reconciled implementation/documentation head must pass the same protected checks before merge. Native scalar ABI/launch and native view-consumer qualification remain open.
 
 ### Still gated: SPEC-0018 / #40
 
@@ -62,7 +69,7 @@ qualification status:        not-qualified
 priority:                    blocked on published SPEC-0016 native evidence
 ```
 
-Issue #51 records a successful Windows OSC-3 candidate that observed native NOT_READY and controlled deferred failure correctly, but also explicitly records that the candidate commits/evidence packet were not pushed/integrated on protected main. SPEC-0018 therefore remains proposal-only under its own widening gate. Multiple operations/private streams are not implemented in this sweep packet.
+Issue #51 records a successful Windows OSC-3 candidate that observed native NOT_READY and controlled deferred failure correctly, but also explicitly records that the candidate commits/evidence packet were not pushed/integrated on protected main. SPEC-0018 therefore remains proposal-only under its own widening gate. Multiple operations/private streams are not implemented.
 
 ## Execution baseline
 
@@ -73,13 +80,14 @@ private execution streams:    1
 max pending GPU operations:   1
 public operation lifecycle:   CudaFunction.submit() -> CudaOperation
 legacy terminal convenience:  CudaFunction.launch()
+public scalar launch kinds:   device-memory/u32/u64/i32/f32/f64/f16/bf16
 ```
 
 SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU, sideband and future NN execution work must consume it rather than duplicate it.
 
 ## Device-JS
 
-SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Native DJS-2 promotion remains open under #43.
+SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. SPEC-0021 does not silently widen Device-JS scalar types; Device-JS parallel/numeric widening remains separately governed by proposed SPEC-0022. Native DJS-2 promotion remains open under #43.
 
 ## Proposal-only successor capabilities
 
@@ -129,6 +137,7 @@ These remain independently open because the exact environment/control is unavail
 - performance/soak #28;
 - exact CUDA-MCGS pair #32;
 - native RDC/LTO/Device-JS/operations #35/#42/#43/#51;
+- native SPEC-0021 scalar/view-consumer qualification #39/#88;
 - exact merged-head Windows F5 oracle revalidation #64;
 - GitHub private vulnerability reporting end-to-end external control #68.
 
@@ -137,11 +146,11 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. implement/test SPEC-0021 portable/software (#39/#88)
-2. implement/test SPEC-0017 portable/software (#20)
-3. publish/recreate exact current-head native SPEC-0016 evidence (#51)
-4. reassess SPEC-0018 only after step 3
-5. unlock SPEC-0019 / SPEC-0020 / SPEC-0023 and their consumers in dependency order
+1. implement/test SPEC-0017 portable/software (#20)
+2. publish/recreate exact current-head native SPEC-0016 evidence (#51)
+3. reassess SPEC-0018 only after step 2
+4. unlock SPEC-0019 / SPEC-0020 / SPEC-0023 and their consumers in dependency order
+5. add a SPEC-0021 public view-facade addendum only when a concrete accepted consumer needs that surface
 6. begin NN child-spec acceptance in dependency order without changing generic core
 ```
 
