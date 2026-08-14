@@ -200,6 +200,8 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     errors.push('packaging compatibility Device-JS projection is stale');
   }
 
+  // README is a concise overview, not the exhaustive capability registry. Exact additive
+  // SPEC-0021 projection is owned by docs/CAPABILITIES.md plus the compatibility manifest.
   requireMarkers(errors, 'README.md', documents.readme, [
     packageJson.version,
     'SPEC-0010',
@@ -207,12 +209,10 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0012',
     'SPEC-0013',
     'SPEC-0016',
-    'SPEC-0021',
     'SPEC-0027',
     'separate future publish unit',
     'compileDeviceProgram()',
     '`u64`/`i32`/`f32`',
-    '`f64`/`f16`/`bf16`',
     'typed `lto-ir`',
     'one pending GPU operation',
   ]);
