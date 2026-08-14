@@ -111,6 +111,10 @@ Unknown or contradictory public semantics fail closed. Support is an evidence-ba
 - Public compatible-pair capsules test exact consumer/runtime artifact combinations.
 - Mocks test orchestration only and are never native or performance oracles.
 
+## Optional NN product
+
+Accepted ADR-0004/SPEC-0027 layer a future application-neutral NN product above public core contracts as a separate publish unit in this repository. Its package name and location remain unselected, and no NN implementation or qualification exists. Generic core never imports the NN product or acquires its exports, dependencies, NN-shaped/eager provider discovery, or tensor/training semantics. Every planned `nn.*` boundary requires a separately accepted child specification. Context-bound CUDA-library calls remain under a future accepted generic DriverActor adapter, while NN code owns only logical plans and provider selection. See [`NN_EXTENSION_BOUNDARY.md`](NN_EXTENSION_BOUNDARY.md).
+
 ## Current phase
 
 `CJS-F1A / EXP-000`, `CJS-F1B`, Windows `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the generic Windows CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence. The F3 through F8 control/package path and deterministic schema generation also pass without authorizing native Linux CUDA execution. Exact CUDA-MCGS compatible-pair integration still requires the independently assessed CUDA-MCGS package/adapter in `iteathen/UMCGS` and revision-keyed evidence.

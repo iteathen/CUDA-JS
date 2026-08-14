@@ -32,7 +32,8 @@
 - [`SPEC-0024-multi-gpu-orchestration.md`](SPEC-0024-multi-gpu-orchestration.md) — proposal for finite multi-GPU coordination, device-scoped resources, peer/staged copies and heterogeneous per-device artifacts.
 - [`SPEC-0025-graphics-interop.md`](SPEC-0025-graphics-interop.md) — proposal for API-specific opaque external graphics memory/synchronization interoperability with exact device matching and ownership epochs.
 - [`SPEC-0026-process-isolated-execution.md`](SPEC-0026-process-isolated-execution.md) — proposal for child-process Driver/compiler backends, bounded IPC, process epochs and supervised recovery without fabricating CUDA cleanup.
+- [`SPEC-0027-nn-extension-foundation.md`](SPEC-0027-nn-extension-foundation.md) — accepted authority-only foundation for an optional separately packaged NN product, planned ownership anchors, core isolation, and child-specification gates; no NN implementation or qualification.
 
-SPEC-0003 and SPEC-0006 addenda are accepted authority. SPEC-0014 and SPEC-0017 through SPEC-0026 remain proposal authority only; their presence does not grant production implementation permission or native support.
+SPEC-0003 and SPEC-0006 addenda are accepted authority. SPEC-0014 and SPEC-0017 through SPEC-0026 remain proposal authority only; their presence does not grant production implementation permission or native support. SPEC-0027 is accepted product/package/component authority only; its planned anchors do not authorize production code without separately accepted child specifications.
 
 No production implementation is authorized merely because a function appears in generated schema, a proposal exists, or an issue is open. Production work must remain inside the exact bounds of an accepted specification; native/support claims additionally require their exact evidence gates.

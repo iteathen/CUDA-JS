@@ -31,6 +31,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
 | Host-binding baseline | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) |
 | Generated ABI facts versus reviewed semantics | [`decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md`](decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md) |
+| Optional NN product and core-package isolation | [`decisions/ADR-0004-nn-extension-package-boundary.md`](decisions/ADR-0004-nn-extension-package-boundary.md), [`specs/SPEC-0027-nn-extension-foundation.md`](specs/SPEC-0027-nn-extension-foundation.md), and [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md) |
 | Foundation assessment | [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md) |
 | Framework and target architecture | [`architecture/FRAMEWORK_OVERVIEW.md`](architecture/FRAMEWORK_OVERVIEW.md), [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) |
 | Version-zero support bounds | [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md) |
@@ -75,3 +76,4 @@ The foundation is considered present only when all of the following are true:
 7. source provenance and superseded alternatives remain traceable;
 8. documentation/static validation passes;
 9. implementation source remains inside its accepted component, conformance, experiment, or tool boundary and no native binary is tracked.
+10. the optional NN product remains a separate publish unit, generic core contains no NN export/dependency/semantics, and every NN implementation boundary has its own accepted child specification.

@@ -12,7 +12,7 @@
 8. Rank values contextually after purpose, bounds, and failure tolerance are known. Correctness and safety gates cannot be traded away for speed.
 9. Apply LEGO at public/component boundaries, SOLID internally, CUPID for composability and developer clarity, and KISS only after sound fundamentals are preserved.
 10. Do not encode accidental first-consumer limits in foundational schemas, ranges, identifiers, layouts, or capability models.
-11. Keep CUDA-JS generic. Do not import CUDA-MCGS, MCGS, minimax, game, graph, evaluator, model, tensor, or search-policy semantics.
+11. Keep the published `cuda-js` core generic. Do not import CUDA-MCGS, MCGS, minimax, game, graph, evaluator, model, tensor, training, or search-policy semantics into core. The optional NN product selected by ADR-0004/SPEC-0027 is a separate future publish unit, and no `nn.*` production source is authorized without its own accepted child specification.
 12. Do not expose raw pointers, arbitrary executable schemas, unchecked native capabilities, or private provider details through ordinary public contracts.
 13. Generated ABI facts and curated semantic/lifecycle overlays must have separate owners and independently reviewable diffs.
 14. Unknown or contradictory public semantics fail closed.

@@ -6,7 +6,7 @@
 
 This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
 
-CUDA-JS is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. Its current public profiles are intentionally narrower than its architectural extension surface.
+The published `cuda-js` package is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. The CUDA-JS project has accepted an authority-only boundary for an optional NN product as a separate future publish unit; no NN package, implementation, or qualification exists yet. Current public profiles remain intentionally narrower than the architectural extension surface.
 
 ## Executive summary
 
@@ -34,7 +34,7 @@ Important current limits are equally explicit:
 - public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed/pinned/mapped memory, CUDA Graph execution, graphics interop, external contexts, process isolation, broad arbitrary kernel signatures, and native Linux CUDA execution are not currently qualified public capabilities;
 - typed Device LTO is implemented in portable/software and package paths but remains natively unqualified;
-- CUDA-JS does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
+- the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
 Those limits describe the applicable **implementation and qualification dimensions**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
 
@@ -62,11 +62,11 @@ Native CUDA handles and device addresses stay inside the owning Worker. Public J
 
 This is an intentional ownership and safety boundary, not an inability to use CUDA pointers internally.
 
-### CUDA-JS is not a neural-network or search framework
+### Generic core remains independent from NN and search products
 
-CUDA-JS owns the generic CUDA runtime/toolchain boundary. Consumers own tensor layouts, autograd, neural-network layers, optimizers, MCGS/MCTS/search semantics, model architecture, batching policy, and domain-specific device programs.
+The published `cuda-js` package owns the generic CUDA runtime/toolchain boundary. It does not own tensor layouts, autograd, neural-network layers, optimizers, MCGS/MCTS/search semantics, model architecture, batching policy, or domain-specific device programs.
 
-CUDA-JS can compile or load consumer CUDA device programs and keep their state in device memory, but it does not claim that its generic runtime is itself a deep-learning library or search engine.
+Accepted [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) and [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) permit a future separately published, application-neutral NN product to own bounded tensor/graph/autodiff/training contracts. That authority is not implementation: the package name and location remain unselected, every production boundary needs a child specification, and consumer model/data/objective/domain semantics remain outside the project. Generic core can compile or load device programs without becoming a deep-learning library or search engine.
 
 ## Current capability surface
 
@@ -353,6 +353,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
+| Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
 | Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Portable controls and adapters exist; native Driver/compiler/GPU chain remains open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
@@ -438,6 +439,7 @@ For normative behavior and exact claim limits, start with:
 - [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md) and [addendum](specs/SPEC-0013-public-surface-addendum.md) — restricted Device-JS;
 - [`SPEC-0015`](specs/SPEC-0015-execution-scope-status-clarification.md) — execution-profile status semantics;
 - [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md) — opaque one-pending-operation lifecycle;
+- [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) — authority-only optional NN product boundary and separate-publish-unit isolation;
 - [`TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) — proposal-level extension shape;
 - [`V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md) — qualification boundaries;
 - [`next_step.yaml`](../next_step.yaml) — current operational plan state.

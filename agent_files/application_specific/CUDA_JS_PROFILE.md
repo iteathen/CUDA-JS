@@ -4,6 +4,8 @@
 
 Provide a generic, no-project-addon Node runtime for CUDA host APIs using trusted generated schemas, Node 26 built-in FFI, thread-affine actors, opaque resources, explicit memory/lifecycle/error contracts, and independent conformance.
 
+This mission describes the published `cuda-js` core package. Accepted ADR-0004/SPEC-0027 also permit an optional application-neutral NN product only as a separate future publish unit. Core remains independently installable and gains no NN exports, dependencies, NN-shaped/eager provider discovery, or tensor/training semantics. Each `nn.*` production boundary requires its own accepted child specification; no NN implementation or native-provider qualification currently exists.
+
 ## Required architecture
 
 - Node FFI is a private backend, never the public API.

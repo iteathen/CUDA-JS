@@ -142,6 +142,15 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 | nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; LTO remains deferred |
 | runtime host-code compilation | out of scope; NVRTC is device-only |
 
+## Product/package profiles
+
+| Product | Current disposition |
+|---|---|
+| published `cuda-js` core | implemented public alpha under the exact profiles above; generic package exports/dependencies remain unchanged |
+| optional NN product | accepted SPEC-0027 architecture only; separate future publish unit, package name/location unselected, not implemented, not qualified, and outside current v0 support |
+
+NN authority does not change any Node, platform, Driver, CUDA, provider, memory, execution, or support row above. Every NN production boundary needs a separately accepted child specification and its own package/portable/native evidence.
+
 ## Release maturity
 
 - **Foundation accepted:** architecture, schemas, experiments, and support matrix coherent; no native claim.

@@ -68,6 +68,10 @@ Validation, immediate native failure, deferred asynchronous failure, cancellatio
 
 NVRTC/nvJitLink outputs, logs, options, providers, target architecture, headers, schema/argument layouts, Driver/toolkit versions, and source/artifact bytes form complete content-addressed identities. Host-call and device-artifact identity remain separate.
 
-## 8. Current executable boundary
+## 8. Optional NN product boundary
+
+Accepted ADR-0004/SPEC-0027 permit an optional application-neutral NN product only as a separate future publish unit. The published `cuda-js` package remains generic and unchanged. The NN product may later consume accepted public core contracts but cannot deep-import core components; context-bound native provider operations remain under a separately accepted generic DriverActor adapter. This is product/component authority only, not implementation or native qualification. See [`NN_EXTENSION_BOUNDARY.md`](NN_EXTENSION_BOUNDARY.md).
+
+## 9. Current executable boundary
 
 EXP-000 is promoted after its GPU-free synthetic C/Node FFI ABI, Worker, library-lifetime, and teardown capsules passed on Windows x64 and native Linux x86-64. CJS-F1B owns pinned CUDA facts, reviewed Tier-0 semantics, normalized Runtime IR products, and native ABI/layout probes. Windows CJS-F2W/EXP-012 through CJS-F5W prove the bounded DriverActor, memory, and execution path. Windows CJS-F6W/EXP-009 proves the separate CompilerActor, exact NVRTC/nvJitLink C parity, validated cache, and PTX/cubin Driver handoff. Windows CJS-F7W proves platform hardening, CJS-F8W proves the package facade and independent consumers, and the CUDA-JS-owned F9 prerequisite proves a manifest-verified CUDA 13.3 CCCL profile plus generic public atomic publication. Portable F3 through F8 controls pass without native Linux CUDA providers. Linux CJS-F2L through F8L remain deferred/incomplete; exact CUDA-MCGS compatible-pair evidence remains a separate cross-repository result.

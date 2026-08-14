@@ -1,6 +1,6 @@
 {
   "schema_version": 5,
-  "inspected": "2026-08-11",
+  "inspected": "2026-08-13",
   "sources": [
     {
       "id": "NODE-FFI-26.7.0",
@@ -323,6 +323,72 @@
         "device-closure and interop constraints"
       ],
       "reuse_disposition": "accepted peer-project boundary authority"
+    },
+    {
+      "id": "NODE-PACKAGES-26.7.0",
+      "kind": "primary",
+      "project": "nodejs/node",
+      "revision": "v26.7.0 package documentation",
+      "license": "MIT",
+      "locations": [
+        "https://github.com/nodejs/node/blob/v26.7.0/doc/api/packages.md",
+        "https://nodejs.org/download/release/v26.7.0/docs/api/packages.html"
+      ],
+      "verified_uses": [
+        "package exports define and encapsulate public entry points",
+        "package subpath encapsulation is not a separately installable dependency or release boundary"
+      ],
+      "reuse_disposition": "normative package-boundary reference; no source copying"
+    },
+    {
+      "id": "NPM-PACKAGE-WORKSPACES-2026-08-13",
+      "kind": "primary",
+      "project": "npm CLI",
+      "revision": "npm CLI v12 documentation inspected 2026-08-13",
+      "license": "npm documentation terms",
+      "locations": [
+        "https://docs.npmjs.com/cli/v12/configuring-npm/package-json/",
+        "https://docs.npmjs.com/cli/v12/using-npm/workspaces/"
+      ],
+      "verified_uses": [
+        "dependencies and optional dependencies belong to a package manifest",
+        "workspaces permit multiple package roots in one repository",
+        "a separate publish unit makes install, dependency, compatibility and release isolation falsifiable"
+      ],
+      "reuse_disposition": "normative package-management reference; no implementation reuse"
+    },
+    {
+      "id": "NVIDIA-CUBLAS-13.3-NN-BOUNDARY",
+      "kind": "primary",
+      "project": "NVIDIA cuBLAS",
+      "revision": "CUDA Toolkit 13.3 cuBLAS documentation inspected 2026-08-13",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/cuda/archive/13.3.0/cublas/index.html"
+      ],
+      "verified_uses": [
+        "cuBLAS section 2.1.2 and cublasCreate section 2.4.1 bind cuBLAS handles to the current CUDA device/context",
+        "cuBLASLt section 3.3.3 says its handle is generally not tied to a particular CUDA context",
+        "cublasLtCreate section 3.4.1 requires the appropriate current device, while calls consume execution-context-affine streams, memory, and workspaces",
+        "provider calls against DriverActor-owned execution resources must remain under the accepted owner"
+      ],
+      "reuse_disposition": "normative external provider-ownership source; no bundled provider"
+    },
+    {
+      "id": "NVIDIA-CUDNN-BACKEND-NN-BOUNDARY",
+      "kind": "primary",
+      "project": "NVIDIA cuDNN Backend API",
+      "revision": "cuDNN Backend 9.17.1 documentation inspected 2026-08-13",
+      "license": "NVIDIA documentation terms",
+      "locations": [
+        "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.17.1/api/cudnn-graph-library.html"
+      ],
+      "verified_uses": [
+        "cuDNN handles are tied to the current CUDA device/context",
+        "handle creation and destruction have native resource and synchronization implications",
+        "logical NN planning must not bypass context-bound provider ownership"
+      ],
+      "reuse_disposition": "normative external provider-ownership source; no bundled provider"
     }
   ]
 }

@@ -28,9 +28,10 @@ const required = [
   'docs/decisions/README.md', 'docs/decisions/ADR-0001-repository-boundary.md',
   'docs/decisions/ADR-0002-node-ffi-first-host-binding.md',
   'docs/decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md',
+  'docs/decisions/ADR-0004-nn-extension-package-boundary.md',
   'docs/architecture/README.md', 'docs/architecture/FRAMEWORK_OVERVIEW.md',
   'docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md', 'docs/architecture/TARGET_ARCHITECTURE.md',
-  'docs/architecture/V0_SUPPORT_MATRIX.md', 'docs/plans/README.md',
+  'docs/architecture/V0_SUPPORT_MATRIX.md', 'docs/architecture/NN_EXTENSION_BOUNDARY.md', 'docs/plans/README.md',
   'docs/plans/2026-08-10-master-plan.md', 'docs/plans/2026-08-10-focus-branch-map.json',
   'docs/plans/2026-08-11-hardware-qualification-program.md',
   'docs/plans/2026-08-11-node-and-extended-qualification.md',
@@ -56,8 +57,10 @@ const required = [
   'docs/specs/SPEC-0013-public-surface-addendum.md',
   'docs/specs/SPEC-0015-execution-scope-status-clarification.md',
   'docs/specs/SPEC-0016-operation-lifecycle.md',
+  'docs/specs/SPEC-0027-nn-extension-foundation.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
-  'docs/research/2026-08-10-node-ffi-cuda-landscape.md', 'docs/research/source-register.yaml',
+  'docs/research/2026-08-10-node-ffi-cuda-landscape.md',
+  'docs/research/2026-08-13-nn-extension-authority-assessment.md', 'docs/research/source-register.yaml',
   'docs/archive/README.md', 'experiments/README.md', 'experiments/EXPERIMENT_MATRIX.md',
   'experiments/EXP-000-node-ffi-synthetic-abi.md', 'experiments/EXP-001-node-ffi-cuda-smoke.md',
   'experiments/EXP-012-windows-node-ffi-cuda-smoke.md',
@@ -256,7 +259,39 @@ try {
 }
 
 try {
-  const [packageJson, compatibility, extensions, readme, capabilities, interop, hardware, packaging] = await Promise.all([
+  const sourceRegister = JSON.parse(await readFile(path.join(root, 'docs/research/source-register.yaml'), 'utf8'));
+  if (sourceRegister.schema_version !== 5) errors.push('docs/research/source-register.yaml: expected schema_version 5');
+  if (!Array.isArray(sourceRegister.sources)) {
+    errors.push('docs/research/source-register.yaml: sources must be an array');
+  } else {
+    const ids = new Set();
+    for (const source of sourceRegister.sources) {
+      for (const field of ['id', 'kind', 'project', 'revision', 'license', 'reuse_disposition']) {
+        if (typeof source[field] !== 'string' || source[field].length === 0) {
+          errors.push(`docs/research/source-register.yaml: source ${source.id ?? '<unknown>'} is missing ${field}`);
+        }
+      }
+      for (const field of ['locations', 'verified_uses']) {
+        if (!Array.isArray(source[field]) || source[field].length === 0 || source[field].some((value) => typeof value !== 'string' || value.length === 0)) {
+          errors.push(`docs/research/source-register.yaml: source ${source.id ?? '<unknown>'} has invalid ${field}`);
+        }
+      }
+      if (ids.has(source.id)) errors.push(`docs/research/source-register.yaml: duplicate source id ${source.id}`);
+      ids.add(source.id);
+    }
+    for (const id of ['NODE-PACKAGES-26.7.0', 'NPM-PACKAGE-WORKSPACES-2026-08-13', 'NVIDIA-CUBLAS-13.3-NN-BOUNDARY', 'NVIDIA-CUDNN-BACKEND-NN-BOUNDARY']) {
+      if (!ids.has(id)) errors.push(`docs/research/source-register.yaml: missing NN authority source ${id}`);
+    }
+  }
+} catch (error) {
+  errors.push(`source-register validation failed: ${error.message}`);
+}
+
+try {
+  const [
+    packageJson, compatibility, extensions, readme, capabilities, interop, hardware, packaging,
+    agents, charter, registry, nnArchitecture, status, nextStep, nnDecision, nnSpec,
+  ] = await Promise.all([
     readFile(path.join(root, 'package.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'packaging/compatibility-manifest.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'conformance/hardware/extensions.json'), 'utf8').then(JSON.parse),
@@ -265,12 +300,23 @@ try {
     readFile(path.join(root, 'docs/INTEROP_WITH_CUDA_MCGS.md'), 'utf8'),
     readFile(path.join(root, 'docs/HARDWARE_SUPPORT.md'), 'utf8'),
     readFile(path.join(root, 'packaging/README.md'), 'utf8'),
+    readFile(path.join(root, 'AGENTS.md'), 'utf8'),
+    readFile(path.join(root, 'docs/PROJECT_CHARTER.md'), 'utf8'),
+    readFile(path.join(root, 'agent_files/SYSTEM_REGISTRY.md'), 'utf8'),
+    readFile(path.join(root, 'docs/architecture/NN_EXTENSION_BOUNDARY.md'), 'utf8'),
+    readFile(path.join(root, 'STATUS.md'), 'utf8'),
+    readFile(path.join(root, 'next_step.yaml'), 'utf8'),
+    readFile(path.join(root, 'docs/decisions/ADR-0004-nn-extension-package-boundary.md'), 'utf8'),
+    readFile(path.join(root, 'docs/specs/SPEC-0027-nn-extension-foundation.md'), 'utf8'),
   ]);
   errors.push(...validatePublicCapabilityProjection({
     packageJson,
     compatibility,
     extensions,
-    documents: { readme, capabilities, interop, hardware, packaging },
+    documents: {
+      readme, capabilities, interop, hardware, packaging, agents, charter, registry,
+      nnArchitecture, status, nextStep, nnDecision, nnSpec,
+    },
   }));
 } catch (error) {
   errors.push(`public capability projection validation failed: ${error.message}`);
@@ -350,6 +396,9 @@ const markers = {
   'docs/specs/SPEC-0006-compiler-linker-cache.md': ['CJS-F6', 'runtime.compiler-actor', 'nvJitLink', '--modify-stack-limit=false'],
   'docs/specs/SPEC-0007-windows-platform-hardening.md': ['CJS-F7', 'runtime.platform-diagnostics', 'wddm-watchdog', 'Linux ARM64'],
   'docs/specs/SPEC-0008-package-public-facade.md': ['CJS-F8', 'runtime.facade', 'first-consumer-deletion', 'EXP-010', 'EXP-011'],
+  'docs/decisions/ADR-0004-nn-extension-package-boundary.md': ['separate publish unit', 'registry package name remains unselected', 'Neither document implements or qualifies NN behavior'],
+  'docs/specs/SPEC-0027-nn-extension-foundation.md': ['nn.facade', 'nn.operator', 'nn.provider.cudnn', 'not-implemented', 'not-qualified'],
+  'docs/architecture/NN_EXTENSION_BOUNDARY.md': ['**Projection:** Accepted ADR-0004 and SPEC-0027', 'separate publish unit', 'not-implemented', 'not-qualified'],
   'schemas/README.md': ['cuda-runtime-ir.schema.json', 'cuda-13.3/tier-0/', 'generated/'],
 };
 for (const [relative, values] of Object.entries(markers)) {

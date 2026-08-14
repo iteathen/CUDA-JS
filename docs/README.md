@@ -23,6 +23,7 @@
 - [`research/README.md`](research/README.md)
 - [`research/2026-08-10-node-ffi-cuda-landscape.md`](research/2026-08-10-node-ffi-cuda-landscape.md)
 - [`research/2026-08-10-technical-assumption-audit.md`](research/2026-08-10-technical-assumption-audit.md)
+- [`research/2026-08-13-nn-extension-authority-assessment.md`](research/2026-08-13-nn-extension-authority-assessment.md)
 - [`research/source-register.yaml`](research/source-register.yaml)
 - [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md)
 
@@ -34,6 +35,7 @@
 - [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md)
 - [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md)
 - [`architecture/FRAMEWORK_OVERVIEW.md`](architecture/FRAMEWORK_OVERVIEW.md)
+- [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md)
 - [`plans/README.md`](plans/README.md)
 - [`plans/2026-08-10-master-plan.md`](plans/2026-08-10-master-plan.md)
 - [`plans/2026-08-10-focus-branch-map.json`](plans/2026-08-10-focus-branch-map.json)
