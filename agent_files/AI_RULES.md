@@ -2,6 +2,19 @@
 
 **Scope:** Hard rules for automated agents. Linked doctrine provides the method.
 
+## Non-negotiable LEGO isolation, naming, and transient topology
+
+These are architecture gates, not style preferences, and apply before implementation or acceptance.
+
+- **Complete module isolation:** every LEGO module is self-contained. Internal logic, types, state, and names describe only that module's owned domain and local contract. Never reference an external module/repository/product/provider name, foreign object type, or neighbor-specific context merely because it is connected today. External identity belongs in composition or in the adapter that intrinsically owns that integration.
+- **Agnostic interface naming:** inputs, outputs, ports, events, properties, commands, queries, DTOs, callbacks, and public types describe local data, intent, or action, never the identity of the current upstream source or downstream target. A domain identity is valid inside the component that owns that domain; it is a leak when copied into another generic brick.
+- **Transient topology:** treat every external connection as temporary. Replacing, removing, isolating, or rewiring a neighbor must not require internal logic or vocabulary changes. Composition owns relationships and lifecycle wiring; components do not discover neighbors or branch on product/repository/provider identity.
+- **Rewiring test:** mentally replace the current neighbor with another conforming implementation or remove it. If internal names become false, foreign types surface, or topology-specific branches are required, redesign the boundary.
+- **No abstraction theater:** do not create a port, interface, event bus, registry, or generic wrapper merely to appear modular. A boundary exists only for real ownership, substitution, lifecycle, failure, or testing value. Direct private calls inside one brick are preferred when there is no genuine boundary.
+- **Single authority remains explicit:** neutral naming must not create `common`, `shared`, `generic`, `manager`, callback, or registry dumping grounds with competing semantic ownership.
+
+Any violation above is an architecture defect and a stop condition, not a naming nit to defer.
+
 1. Read root `AGENTS.md` before changing the repository.
 2. Follow the authority order and report material contradictions rather than choosing silently.
 3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence; native Linux portable/package controls are not Linux Driver support, Linux `CJS-F2L / EXP-001` remains retained/deferred/incomplete, and no exact CUDA-MCGS pair exists before independent CUDA-MCGS evidence passes.
