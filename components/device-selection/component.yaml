@@ -1,0 +1,13 @@
+schemaVersion: 1
+id: device-selection
+purpose: Portable SPEC-0017 sanitized discovery snapshots, opaque selectors, selected-device compatibility facts, and target-resolution handoff.
+publicBoundary: components/device-selection/index.mjs
+internalOwner: components/device-selection/src/device-selection.mjs
+dependencies: []
+lifecycleOwner: DeviceSelectionAuthority
+validationOwner: components/device-selection/test/device-selection.test.mjs
+nonPurposes:
+  - native CUDA enumeration or context creation
+  - raw device ordinals, UUIDs, serials, PCI identifiers, or CUdevice exposure
+  - compiler target syntax/admission policy
+  - multi-GPU orchestration, peer access, MIG, or scheduling
