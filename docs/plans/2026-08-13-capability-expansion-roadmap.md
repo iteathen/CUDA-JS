@@ -4,7 +4,7 @@
 
 **Originally:** 2026-08-13
 
-**Reconciled:** 2026-08-14 against protected-main baseline `334b903be827dedb5345608a34a6df444912fe1b`
+**Reconciled:** 2026-08-22 against protected-main baseline `bf2fc00d2a9452b14e7c4484e76aa0b1a84f0b9f`
 
 ## Purpose
 
@@ -23,7 +23,9 @@ The detailed 2026-08-14 issue-by-issue development-cycle record is `docs/plans/2
 - generated ABI facts remain separate from reviewed semantic overlays;
 - architecture, implementation, qualification and priority remain independent;
 - exact native evidence is required for support/performance claims;
-- generic core remains free of consumer/search/model/training semantics.
+- generic core remains free of consumer/search/model/training semantics;
+- concurrent eligibility is distinct from guaranteed physical overlap;
+- independently meaningful atomic observations do not require snapshot consistency or an artificial whole-operation dependency.
 
 ## Current authority state
 
@@ -35,13 +37,13 @@ SPEC-0011 scalar arguments (u64 / i32 / finite-only f32)
 SPEC-0012 Device LTO
 SPEC-0013 restricted Device-JS
 SPEC-0016 opaque one-pending-operation lifecycle
+SPEC-0021 extended scalar ABI + contiguous 1D generic device views
 ```
 
-Accepted on the 2026-08-14 foundation review, with implementation still to be integrated:
+Accepted foundation with implementation status tracked separately:
 
 ```text
 SPEC-0017 explicit device selection + target resolution
-SPEC-0021 f64/f16/bf16 scalar ABI + contiguous 1D generic device views
 ```
 
 Still proposal-only:
@@ -65,10 +67,10 @@ SPEC-0027 is accepted authority only for an optional **separate future NN publis
 ```text
 accepted baseline
   ├─ native qualification of already implemented capabilities
-  ├─ SPEC-0017 [accepted; implementation next]
+  ├─ SPEC-0017 [accepted]
   │    ├─ SPEC-0024 multi-GPU [proposal]
   │    └─ SPEC-0025 graphics matching [proposal]
-  ├─ SPEC-0021 [accepted; implementation next]
+  ├─ SPEC-0021 [implemented portable/software]
   │    ├─ SPEC-0022 trusted Device-JS primitives [proposal]
   │    ├─ SPEC-0023 CUDA library adapters [proposal]
   │    └─ SPEC-0025 graphics typed-view use [proposal]
@@ -77,6 +79,9 @@ accepted baseline
        ├─ SPEC-0020 prepared batch / CUDA Graph
        ├─ SPEC-0023 CUDA library adapters
        └─ SPEC-0024 multi-device dependencies
+
+SPEC-0022 scoped atomic observation
+  └─ composes with SPEC-0018 for independently pending observer/producer operations
 
 SPEC-0026 process isolation
   └─ SPEC-0022 service-safe Device-JS
@@ -93,53 +98,82 @@ Dependencies are capability-specific; unrelated hardware or optimizations do not
 
 - #64: EXP-013 oracle repair is integrated; exact merged-head Windows Node 26.7.0 F5 rerun still required.
 - #68: private vulnerability reporting remains an external GitHub control-plane task.
-- #35/#42/#43/#51: portable/software implementations exist; exact native promotion remains open.
+- #35/#42/#43/#51: portable/software implementations exist where recorded; exact native promotion remains open.
 - platform/hardware issues remain exact-profile qualification work and must not be inferred from vendor compatibility.
 
-## P1 — implement accepted generic foundations
+## P1 — accepted generic foundations
 
 ### CAP-D / SPEC-0021 — #39/#88
 
-Current first implementation packet.
-
-- add deterministic `f64`/`f16`/`bf16` packing;
-- preserve SPEC-0011 finite-only `f32` exactly;
-- add contiguous 1D generic typed views with exact byte ranges/access roles/parent generation;
-- add focused boundary/mutation/lifecycle tests;
-- update package/public compatibility projections only for implemented behavior;
-- do not claim native support before independent native oracle evidence.
+Portable/software/package scalar implementation plus the generic contiguous 1D view component exist. Native scalar/view-consumer qualification and any public view-facade spelling remain independently open.
 
 ### CAP-B / SPEC-0017 — #20
 
-Parallel/next packet.
+- finite sanitized discovery snapshots and opaque selectors;
+- exactly one selected device bound before context/resource creation;
+- default compatibility behavior;
+- selected architecture propagated into target/cache identity;
+- stale/foreign/ambiguous selection rejected before native context work;
+- native identifiers remain private;
+- explicit selection between physical devices requires a controlled multi-GPU oracle before qualification.
 
-- add finite sanitized discovery snapshots and opaque selectors;
-- bind exactly one selected device before context/resource creation;
-- retain default compatibility behavior;
-- propagate selected architecture into target/cache identity;
-- reject stale/foreign/ambiguous selection before native context work;
-- keep native identifiers private;
-- qualify explicit selection between physical devices only on a controlled multi-GPU host.
-
-## P2 — repair the scheduling gate
+## P2 — repair the scheduling gate and take the smallest useful concurrency slice
 
 ### #51 then SPEC-0018 / #40
 
-Issue #51 records a successful exact Windows candidate for native SPEC-0016 behavior, but also records that its candidate commits/evidence were not pushed/integrated on protected main. Before widening concurrency:
+Issue #51 records successful candidate evidence for native SPEC-0016 behavior, but the proposal's published-evidence gate remains authoritative until exact current protected-main evidence is available.
+
+Before widening concurrency:
 
 1. recreate or recover verifiable native SPEC-0016 evidence on the exact current protected revision;
 2. publish/integrate the evidence and required runner/oracle records;
 3. reread the exact result and lifecycle cleanup;
 4. reassess SPEC-0018 against the now-published baseline;
-5. only then accept and implement finite multi-operation/private-stream scheduling.
+5. accept and implement the smallest dependency-ready multi-operation profile before generalizing.
 
-Do not use timing alone to prove overlap and do not create another operation lifecycle.
+The first useful multi-operation profile may be deliberately narrow:
+
+```text
+one long-lived operation
++ one short independent observer
++ same runtime/context
++ private streams
++ shared allocation leased by both
++ declared concurrency-safe atomic observation/update
++ no producer-completion dependency
+```
+
+This is a generic execution shape. CUDA-JS must not encode graph, search, ranking, game, model or other consumer semantics.
+
+The scheduler must distinguish ordinary overlapping read/write hazards from explicitly admitted atomic observation/update. It must not serialize an independently observable atomic overlap merely because the operations touch the same allocation or byte range.
+
+Do not use timing alone to prove overlap. Separate streams make work eligible for independent execution; CUDA may still serialize it. Correctness must not depend on simultaneous residency.
+
+## P2A — smallest Device-JS primitive needed by the observer shape
+
+### SPEC-0022 / #87 scoped atomic load/store
+
+Accepted SPEC-0013 already provides atomic add/CAS. The first justified SPEC-0022 widening is explicit scoped atomic load/store so consumers do not emulate observation with RMW operations.
+
+This slice is independent of shared-memory, warp, local-array, multidimensional-index and service-safe expansion. Do not bundle those larger features into the atomic-observation change.
+
+Required direction:
+
+- exact type/order/scope/return semantics;
+- map directly to documented CUDA atomics rather than inventing another memory model;
+- independently meaningful fields may be sampled at different moments;
+- no implicit multi-location snapshot or happens-before relation beyond the selected order/scope;
+- compound facts require their own coherent publication mechanism;
+- when composed with SPEC-0018, atomic overlap must not create an artificial operation dependency;
+- native qualification proves exact visibility/order semantics; physical kernel overlap is a separate performance/mechanism claim.
+
+Atomic helper implementation may be prepared independently once its bounded child contract is accepted. Using it concurrently from two pending operations additionally requires SPEC-0018.
 
 ## P3 — successors unlocked by SPEC-0018/0021/0017
 
 - SPEC-0019 / #86: pinned/registered host memory and async transfers; bounded staging; mechanism-level overlap evidence.
 - SPEC-0020 / #85: semantic prepared-batch baseline first, CUDA Graph realization second.
-- SPEC-0022 trusted / #87: only generic parallel primitives demanded by concrete consumers.
+- remaining SPEC-0022 trusted / #87 primitives: shared/local memory, multidimensional and warp helpers only when concrete consumers demand them.
 - SPEC-0026 / #95: process-isolation prototype may research independently; production/service claims require accepted contract/evidence.
 - SPEC-0023 / #90: generic context-bound library adapter after scheduler + views.
 - #92/#91/#93: cuRAND/cuSPARSE/cuFFT only through the generic adapter and exact provider oracles.
@@ -182,6 +216,8 @@ benchmark passes                 -> only the named performance claim may be prom
 - implement from an issue body or this roadmap without accepted governing authority;
 - duplicate SPEC-0016 lifecycle;
 - accept SPEC-0018 before its published native evidence gate;
+- serialize declared concurrency-safe atomic observation merely because memory ranges overlap;
+- promise snapshot consistency for independently meaningful atomic fields;
 - expose raw pointers/streams/events/devices/providers;
 - infer support across GPU/OS/Driver/toolkit/library profiles;
 - add unbounded queues/pinned memory/workspaces/cache;
