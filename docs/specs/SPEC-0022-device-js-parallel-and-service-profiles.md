@@ -4,6 +4,8 @@
 
 **Date:** 2026-08-13
 
+**Reconciled:** 2026-08-22 for scoped atomic observation
+
 **Issue owners:** #87 and #89
 
 ## Outcome
@@ -12,6 +14,8 @@ Extend accepted SPEC-0013 in two explicitly separate directions:
 
 1. a **trusted-source parallel profile** adding bounded generic GPU programming primitives needed for efficient reductions, scans, stencils, sorting and other consumer-neutral kernels;
 2. a later **service-safe admission profile** for adversarial user-submitted Device-JS with length-bearing bounds, finite work budgets, quotas and process isolation.
+
+The trusted-source profile may be implemented incrementally. The smallest justified first widening is **scoped atomic observation/publication**: generic atomic load/store semantics that let one device operation sample independently meaningful state while another operation updates that state, without requiring snapshot consistency or an artificial whole-operation dependency.
 
 Trusted-source capability is not a sandbox. Service safety cannot be inferred from ordinary Device-JS correctness evidence.
 
@@ -22,7 +26,7 @@ trusted parallel profile:
   architectural disposition: planned
   implementation status:       not-implemented
   qualification status:        not-qualified
-  priority:                    after accepted prerequisite type/view contracts
+  priority:                    atomic observation first when dependency-ready; broader primitives remain demand-driven
 
 service-safe profile:
   architectural disposition: planned
@@ -35,7 +39,7 @@ service-safe profile:
 
 This proposal extends SPEC-0013 and its public-surface addendum.
 
-Numeric/view-dependent helpers consume SPEC-0021. Service-safe execution additionally consumes SPEC-0026 process isolation and accepted operation/quota contracts.
+Numeric/view-dependent helpers consume SPEC-0021. Concurrent use of atomic observation across independently pending operations consumes SPEC-0018 scheduling semantics, but the atomic helper contract itself does not require multiple operations to exist. Service-safe execution additionally consumes SPEC-0026 process isolation and accepted operation/quota contracts.
 
 ## Preserved language invariants
 
@@ -54,6 +58,12 @@ Unsupported syntax/helpers reject before compiler dispatch.
 ## Trusted-source parallel profile
 
 Only consumer-justified generic primitives are added. Every helper has one exact typed semantic meaning and deterministic lowering identity.
+
+### Incremental acceptance rule
+
+This proposal is a family of generic parallel primitives, not a requirement to implement them all together. A concrete dependency-ready child slice may select only the minimum helper set needed by a real consumer while preserving the rest as proposal-only.
+
+For the first identified need, atomic load/store observation is independent of shared-memory, warp, local-array or multidimensional-index expansion. Those broader features must not be pulled into an atomic-observation implementation merely because they share this parent specification.
 
 ### Local arrays
 
@@ -119,6 +129,39 @@ alignment/address-space constraints
 No generic `atomic(...)` escape accepts native enum integers. Unsupported order/scope/type combinations reject before compilation.
 
 Device-JS helper semantics map to documented CUDA C++ atomic behavior rather than inventing a second memory model.
+
+#### First scoped-atomic widening
+
+Accepted SPEC-0013 v0 already provides bounded RMW/CAS helpers (`gpu.atomic.add` and `gpu.atomic.cas`). The next minimum Device-JS atomic widening should add explicit load/store observation rather than forcing consumers to emulate reads through RMW operations.
+
+The first candidate surface is conceptually:
+
+```text
+gpu.atomic.load(pointer, index, order?, scope?)
+gpu.atomic.store(pointer, index, value, order?, scope?)
+```
+
+Exact spelling, defaulting and supported combinations remain subject to accepted child review. The contract must prefer the weakest documented order/scope that satisfies the declared semantics rather than silently imposing stronger synchronization. A relaxed device-scope profile is a candidate for independently meaningful device-resident observations, but is not accepted merely by this proposal text; exact CUDA lowering and profile support require primary-source review and native evidence.
+
+#### Independent-observation semantics
+
+An atomic load of one location guarantees only an individually valid value according to its accepted CUDA atomic order/scope. It does **not** imply:
+
+- a coherent snapshot across neighboring locations;
+- that two locations were observed at the same instant;
+- a happens-before relationship to unrelated locations when the selected order does not provide one;
+- ordering between otherwise independent operations;
+- freshness beyond what the selected memory semantics guarantee.
+
+This distinction is intentional. Some consumers only need a recent valid sample of each independently meaningful datum. CUDA-JS must not turn that use into a global snapshot or stream dependency.
+
+If multiple locations jointly define one semantic fact and mixing versions could manufacture an invalid value, that compound relationship must use a separately accepted coherent publication pattern, such as an appropriately packed atomic unit, generation/sequence protocol, or explicit operation dependency. CUDA-JS owns the generic mechanism; consumers own which fields are semantically dependent.
+
+#### Relationship to multi-operation scheduling
+
+When SPEC-0018 admits independently pending operations over the same allocation, atomic observation/update declarations may make an overlapping access pair concurrency-safe. In that case CUDA-JS must not insert an inter-operation dependency solely because the byte ranges overlap.
+
+This only makes the operations **eligible** to proceed independently. CUDA may still serialize their physical execution. Correctness must not rely on simultaneous kernel residency or overlap.
 
 ### Numeric extensions
 
@@ -232,10 +275,13 @@ It does **not** claim immunity from GPU firmware/Driver defects, complete side-c
 ### Trusted profile
 
 - type/lowering tests for every helper;
-- shared/local layout and bounds;
-- multidimensional index arithmetic;
-- warp/helper profile rejection;
-- atomic order/scope/type combinations;
+- atomic load/store/RMW/CAS order/scope/type combinations;
+- atomic observation tests prove one-location semantics without accidentally promising multi-location snapshot consistency;
+- cross-contract tests with SPEC-0018 prove declared atomic overlap does not create an artificial operation dependency;
+- compound/coherent publication cases still require their declared mechanism;
+- shared/local layout and bounds when those features are selected;
+- multidimensional index arithmetic when selected;
+- warp/helper profile rejection when selected;
 - deterministic source/artifact identity;
 - unsupported syntax/helper rejection before compiler work.
 
@@ -250,17 +296,19 @@ It does **not** claim immunity from GPU firmware/Driver defects, complete side-c
 - diagnostic/source redaction;
 - next-job health gating.
 
-Mocks do not prove GPU sandboxing.
+Mocks do not prove GPU atomic visibility, memory ordering, overlap or GPU sandboxing.
 
 ## Native promotion evidence
 
 Trusted-profile helpers require independent native oracles for each selected shared/warp/atomic/numeric primitive on every promoted exact architecture/profile.
 
+For atomic observation specifically, the native oracle must prove exact accepted load/store order/scope/type behavior and, when composed with SPEC-0018, prove that an observer operation can read only valid atomically published values without an inserted producer-completion dependency. Physical overlap may be measured separately but is not a correctness requirement.
+
 Service promotion additionally requires destructive-but-controlled child-process tests for compiler crash, Driver child crash/hang, quota exhaustion and stale capability rejection, plus explicit evidence of containment limits and terminal/supervisor resource disposition.
 
 ## Falsifiers / rollback
 
-Do not accept a helper whose semantics vary silently by architecture or require raw CUDA escape. Do not label a profile service-safe until bounds, work budgets, quotas and process containment all exist together.
+Do not accept a helper whose semantics vary silently by architecture, require raw CUDA escape, or accidentally promise snapshot/happens-before semantics stronger than its documented CUDA lowering. Do not label a profile service-safe until bounds, work budgets, quotas and process containment all exist together.
 
 Rollback is accepted trusted-source SPEC-0013.
 
@@ -272,7 +320,9 @@ Rollback is accepted trusted-source SPEC-0013.
 - consumer-domain helpers;
 - universal GPU sandboxing;
 - guaranteed preemption;
-- service-safety claims from trusted-source evidence.
+- service-safety claims from trusted-source evidence;
+- global snapshots for independently meaningful atomic observations;
+- automatic inference of semantic dependencies between neighboring fields.
 
 ## Primary references
 
