@@ -8,6 +8,8 @@ import test from 'node:test';
 
 import { assertCompilerPublicRecord, combineCompilerCleanupFailures, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
 import { CompilerRuntimeError, openCompilerRuntime } from '../index.mjs';
+import { resolveLinuxNativeProfile, resolveWindowsNativeProfile } from '../src/backends/native-profiles.mjs';
+import { selectNativeBackend } from '../src/compiler-runtime.mjs';
 
 const source = 'extern "C" __global__ void k() {}\n';
 const POLICY_BASES = Object.freeze(['75', '80', '86', '87', '88', '89', '90', '100', '103', '110', '120', '121']);
@@ -23,7 +25,80 @@ const NVJITLINK_SM_TARGETS = Object.freeze([
   'sm_110a', 'sm_120', 'sm_120f', 'sm_120a', 'sm_121', 'sm_121f', 'sm_121a',
 ]);
 const compilerProviderManifest = JSON.parse(readFileSync(new URL('../../../schemas/cuda-13.3/win-x64/compiler-provider-manifest.json', import.meta.url), 'utf8'));
+const linuxCompilerProviderManifest = JSON.parse(readFileSync(new URL('../../../schemas/cuda-13.3/linux-x64/compiler-provider-manifest.json', import.meta.url), 'utf8'));
 const NATIVE_TARGET_CAPABILITIES = providerTargetProfile(compilerProviderManifest.targetCapabilities);
+
+function providerFilesystem(manifest, { root, providerDirectory, includeDirectory, pathApi }) {
+  const records = new Map();
+  for (const record of Object.values(manifest.providers)) records.set(pathApi.join(providerDirectory, record.file), record);
+  for (const [name, sha256] of Object.entries(manifest.headers)) records.set(pathApi.join(includeDirectory, name), { sha256 });
+  return {
+    exists: (candidate) => candidate === root || records.has(candidate),
+    realpath: (candidate) => candidate,
+    statFile: async (candidate) => ({ size: records.get(candidate)?.byteLength ?? 0 }),
+    hashFile: async (candidate) => records.get(candidate).sha256,
+  };
+}
+
+test('native CompilerActor selection and provider discovery remain thin exact platform profiles', async () => {
+  assert.equal(selectNativeBackend('win32', 'x64'), 'windows-native');
+  assert.equal(selectNativeBackend('linux', 'x64'), 'linux-native');
+  assert.throws(() => selectNativeBackend('linux', 'arm64'), { code: 'COMPILER_PROFILE_UNSUPPORTED' });
+  assert.deepEqual(linuxCompilerProviderManifest.targetCapabilities, compilerProviderManifest.targetCapabilities);
+
+  const windowsRoot = 'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3';
+  const windowsFiles = providerFilesystem(compilerProviderManifest, {
+    root: windowsRoot,
+    providerDirectory: path.win32.join(windowsRoot, 'bin', 'x64'),
+    includeDirectory: path.win32.join(windowsRoot, 'include'),
+    pathApi: path.win32,
+  });
+  const windows = await resolveWindowsNativeProfile({
+    platform: 'win32',
+    architecture: 'x64',
+    cudaPathV13_3: windowsRoot,
+    manifest: compilerProviderManifest,
+    ...windowsFiles,
+  });
+  assert.equal(windows.backend, 'windows-native');
+  assert.equal(windows.manifest.profile, 'cuda-13.3-windows-x64-compiler');
+  assert.equal(windows.nvrtcPath, path.win32.join(windowsRoot, 'bin', 'x64', compilerProviderManifest.providers.nvrtc.file));
+
+  const linuxRoot = '/usr/local/cuda-13.3';
+  const linuxTarget = path.posix.join(linuxRoot, 'targets', 'x86_64-linux');
+  const linuxFiles = providerFilesystem(linuxCompilerProviderManifest, {
+    root: linuxRoot,
+    providerDirectory: path.posix.join(linuxTarget, 'lib'),
+    includeDirectory: path.posix.join(linuxTarget, 'include'),
+    pathApi: path.posix,
+  });
+  const linux = await resolveLinuxNativeProfile({
+    platform: 'linux',
+    architecture: 'x64',
+    manifest: linuxCompilerProviderManifest,
+    ...linuxFiles,
+  });
+  assert.equal(linux.backend, 'linux-native');
+  assert.equal(linux.manifest.profile, 'cuda-13.3-ubuntu-24.04-x64-compiler');
+  assert.equal(linux.ccclRoot, '/usr/local/cuda-13.3/targets/x86_64-linux/include/cccl');
+  assert.equal(linux.claim, 'native-linux-f6l-profile-unqualified');
+  await assert.rejects(resolveLinuxNativeProfile({
+    platform: 'linux',
+    architecture: 'x64',
+    manifest: linuxCompilerProviderManifest,
+    ...linuxFiles,
+    hashFile: async (candidate) => candidate.endsWith(linuxCompilerProviderManifest.providers.nvrtc.file)
+      ? '0'.repeat(64)
+      : linuxFiles.hashFile(candidate),
+  }), { code: 'COMPILER_PROVIDER_IDENTITY' });
+  await assert.rejects(resolveLinuxNativeProfile({
+    platform: 'linux',
+    architecture: 'x64',
+    manifest: linuxCompilerProviderManifest,
+    ...linuxFiles,
+    realpath: (candidate) => candidate === linuxRoot ? '/opt/cuda-13.3' : candidate,
+  }), { code: 'COMPILER_TOOLKIT_NONCANONICAL' });
+});
 
 test('typed compiler and linker contracts normalize deterministically and reject ambient inputs', () => {
   assert.deepEqual(normalizeCompileOptions({}, 'win32').native, [

@@ -6,7 +6,7 @@
 
 This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
 
-ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The shared Driver backend and Linux F3L runner are implemented, but the native chain remains incomplete, so this priority is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.
+ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, and exact F3L/F6L runner source are implemented, but the native and installed-package chain remains incomplete, so this priority is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.
 
 CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.
 
@@ -52,12 +52,12 @@ CUDA 13.3 compiler targets define the candidate set below. â€œSeeking evidenceâ€
 | Profile | Current runner state | Promotion target | Missing native work |
 |---|---|---|---|
 | `windows-native-x64` | runner ready | qualified experimental | none |
-| `linux-native-x64` | adapter incomplete | qualified experimental | EXP-001 exact native Driver/GPU evidence; native F3 context lifecycle evidence; native F4 memory C oracle and runner; native F5 execution C oracle and runner; native F6 NVRTC/nvJitLink C oracle and runner; native F7 permission and lifecycle stress runner; native F8 installed-package consumer |
+| `linux-native-x64` | Driver/compiler profiles and F3/F6 source runners ready; facade/package incomplete | qualified experimental | run exact EXP-001 and F3-F6 evidence; complete/run F7 diagnostics and stress; complete/run F8 installed-package consumer |
 | `wsl2-x64` | adapter incomplete | qualified experimental | WSL2-specific Driver/provider adapter; WSL2 native oracle and F2 through F8 qualification chain |
 | `linux-native-arm64-sbsa` | schema and adapter incomplete | qualified experimental | ARM64 Runtime IR and native ABI oracle; ARM64 Driver/compiler adapters; ARM64 F2 through F8 native qualification chain |
 | `linux-native-arm64-jetson` | contract required | future profile | accepted Jetson profile contract; Jetson Node/ABI/provider qualification; Jetson F2 through F8 native qualification chain |
 
-Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority but its exact Driver/compiler/package chain remains incomplete; WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.
+Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority; its Driver/compiler source adapters exist, but exact native evidence and the facade/package chain remain incomplete. WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.
 
 ## Extended qualification axes
 

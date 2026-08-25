@@ -138,6 +138,30 @@
       "reuse_disposition": "installed official build/runtime prerequisite and exact-profile evidence; no NVIDIA binary or header redistribution"
     },
     {
+      "id": "CUDA-LINUX-COMPILER-PROVIDERS-13.3-UBUNTU2404",
+      "kind": "primary-build-and-runtime-input",
+      "project": "NVIDIA CUDA Toolkit",
+      "revision": "Ubuntu 24.04 x86-64 NVRTC/nvJitLink 13.3.33-1 and CCCL 13.3.3.4.1-1 packages inspected 2026-08-25",
+      "license": "NVRTC/nvJitLink: NVIDIA Software License Agreement and CUDA Supplement; CCCL: package Apache-2.0 and LLVM-exception notices",
+      "locations": [
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-13-3_13.3.33-1_amd64.deb",
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-dev-13-3_13.3.33-1_amd64.deb",
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/libnvjitlink-13-3_13.3.33-1_amd64.deb",
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/libnvjitlink-dev-13-3_13.3.33-1_amd64.deb",
+        "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cccl-13-3_13.3.3.4.1-1_amd64.deb",
+        "schemas/cuda-13.3/linux-x64/compiler-provider-manifest.json"
+      ],
+      "verified_uses": [
+        "exact package length and SHA-256 provenance for the Ubuntu 24.04 reference compiler profile",
+        "exact x86-64 ELF NVRTC, builtins, and nvJitLink installed-file lengths and SHA-256 identities",
+        "exact nvrtc.h and nvJitLink.h hashes",
+        "manifest-owned Linux cuda/nv CCCL virtual-header aggregate",
+        "NVRTC/nvJitLink license notice SHA-256 088381bc2d891e719a2a9398645b00bb45f3b24231473a8283ac7e3e66b8a028",
+        "CCCL package notice SHA-256 f96f51edda77fb9897de29d924d615e6bd153f4969db85fc6b7a22d7a624631e"
+      ],
+      "reuse_disposition": "ignored reacquirable official system inputs; no NVIDIA binary or header redistribution"
+    },
+    {
       "id": "CUDA-NVRTC-13.3",
       "kind": "primary",
       "project": "NVIDIA NVRTC",

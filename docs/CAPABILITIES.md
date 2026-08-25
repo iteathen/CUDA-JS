@@ -12,7 +12,7 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
-CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. Its DriverActor adapter and F3L runner are implemented; exact Linux Driver/compiler/package evidence remains incomplete. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
+CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. DriverActor and CompilerActor share OS-neutral native engines with thin Linux profiles, and exact F3L/F6L runner source exists; exact Linux Driver/compiler/package evidence remains incomplete. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
@@ -427,7 +427,7 @@ At the time of this document:
 - public contracts and shared runtime owners are OS-neutral; native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
 - Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current retained secondary native qualification evidence;
 - other FFI-capable Node 26.1.0-or-later and structurally admissible Windows CUDA profiles may operate as `testing-unconfirmed` without inheriting support;
-- the native Linux Driver adapter and F3L runner are implemented, while exact Driver evidence and the compiler/GPU/package chain remain incomplete;
+- the native Linux Driver/compiler profiles and F3L/F6L source runners are implemented, while exact native evidence and the facade/GPU/package chain remain incomplete;
 - portable Linux controls do not imply native Linux CUDA support;
 - performance claims require separate representative measurement and are not inferred from functional correctness.
 

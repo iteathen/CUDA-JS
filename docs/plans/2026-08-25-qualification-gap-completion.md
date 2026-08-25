@@ -30,7 +30,7 @@ These issues do not describe one missing runtime feature:
 
 - #42 is stale qualification state. Accepted SPEC-0012 and the exact Windows NQ-LTO capsule are integrated by PR #116, but current documentation still says `not-qualified`.
 - #28 needs an owned reproducible observation/soak harness plus exact controlled-host evidence. Speed cannot promote correctness or support.
-- #4 owns the first native Ubuntu x86-64 Driver-to-installed-package profile. The repository still lists native Linux adapters/capsules as missing and the current machine cannot execute them.
+- #4 owns the first native Ubuntu x86-64 Driver-to-installed-package profile. Shared Driver/compiler adapters and F3L/F6L runner source are now implemented; facade/package source and every native Linux result still require completion on an exact host. The current machine cannot execute them.
 - #17 is a profile-matrix expansion that is dependency-blocked by #4 and then by access to each named native distribution host.
 - #32 is a cross-repository integration closure. CUDA-JS generic prerequisites exist, including the unintegrated #123 candidate, but CUDA-MCGS has not yet accepted or produced the required restricted Device-JS Search Program/execution package and semantic oracle. CUDA-JS must not fabricate that consumer-owned artifact.
 

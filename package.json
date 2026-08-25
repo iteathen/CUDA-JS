@@ -40,6 +40,7 @@
     "packaging/compatibility-manifest.json",
     "schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs",
     "schemas/cuda-13.3/linux-x64/generated/packers.mjs",
+    "schemas/cuda-13.3/linux-x64/compiler-provider-manifest.json",
     "schemas/cuda-13.3/win-x64/compiler-provider-manifest.json"
   ],
   "dependencies": {
@@ -95,6 +96,7 @@
     "f6:unit": "node scripts/run-f6.mjs unit",
     "f6:portable": "node scripts/run-f6.mjs portable",
     "f6:linux-readiness": "node scripts/run-f6.mjs linux-readiness",
+    "f6:linux-build": "node scripts/run-f6.mjs linux-build",
     "f6:experiment": "node scripts/run-f6.mjs experiment",
     "f6:capabilities-build": "node scripts/run-f6.mjs capabilities-build",
     "f6:capabilities": "node scripts/run-f6.mjs capabilities",

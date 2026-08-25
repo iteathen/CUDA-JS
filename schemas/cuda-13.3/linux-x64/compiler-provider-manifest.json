@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 3,
+  "profile": "cuda-13.3-ubuntu-24.04-x64-compiler",
+  "node": "v26.7.0",
+  "toolkitVersion": "13.3",
+  "sourcePackages": [
+    {
+      "file": "cuda-nvrtc-13-3_13.3.33-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-13-3_13.3.33-1_amd64.deb",
+      "byteLength": 37131996,
+      "sha256": "2cba44ef4330d1cb7f9298e1bd0d91e023321168d08d6c2f330b158b5f0cf0f5"
+    },
+    {
+      "file": "cuda-nvrtc-dev-13-3_13.3.33-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-dev-13-3_13.3.33-1_amd64.deb",
+      "byteLength": 32577376,
+      "sha256": "a2437c0e8ddd70120584641cce4bc4961f9c6d82b55809ea178728063e40d882"
+    },
+    {
+      "file": "libnvjitlink-13-3_13.3.33-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/libnvjitlink-13-3_13.3.33-1_amd64.deb",
+      "byteLength": 29489832,
+      "sha256": "e28b5f35b6b3b5a0d80eeb7e77a8c2066b9ec5849eacc316575767e55e5b683b"
+    },
+    {
+      "file": "libnvjitlink-dev-13-3_13.3.33-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/libnvjitlink-dev-13-3_13.3.33-1_amd64.deb",
+      "byteLength": 26695336,
+      "sha256": "897fd71342a559e4450c3be4fcab8cc656f3225b7e5ff3fad67595ebf683815b"
+    },
+    {
+      "file": "cccl-13-3_13.3.3.4.1-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cccl-13-3_13.3.3.4.1-1_amd64.deb",
+      "byteLength": 1316752,
+      "sha256": "7fb49a9a684e97f48374c230b7a548cee61f62ff925d09238f038aba601dbdb2"
+    }
+  ],
+  "providers": {
+    "nvrtc": {
+      "file": "libnvrtc.so.13.3.33",
+      "byteLength": 120072328,
+      "sha256": "afff6fa2eae856b90f66c2d83bbce4a4177404c506291e3a83486244d86c2815",
+      "version": "13.3"
+    },
+    "nvrtcBuiltins": {
+      "file": "libnvrtc-builtins.so.13.3.33",
+      "byteLength": 6555592,
+      "sha256": "7394c640e5761d13d2bbcdbc4b4c5dbac7cb53cd5bc732d78f8a5cb38638e913",
+      "version": "13.3"
+    },
+    "nvJitLink": {
+      "file": "libnvJitLink.so.13.3.33",
+      "byteLength": 97839144,
+      "sha256": "3ba1e744347cd68617b862eccfd98b125482e882b7a6319f42abc9a768513db8",
+      "version": "13.3"
+    }
+  },
+  "targetCapabilities": {
+    "revision": "cuda-13.3-documented-provider-targets-v1",
+    "compile": [
+      "compute_75",
+      "compute_80",
+      "compute_86",
+      "compute_87",
+      "compute_89",
+      "compute_90",
+      "compute_90a",
+      "compute_100",
+      "compute_100f",
+      "compute_100a",
+      "compute_101",
+      "compute_101f",
+      "compute_101a",
+      "compute_103",
+      "compute_103f",
+      "compute_103a",
+      "compute_120",
+      "compute_120f",
+      "compute_120a",
+      "compute_121",
+      "compute_121f",
+      "compute_121a"
+    ],
+    "link": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_87",
+      "sm_88",
+      "sm_89",
+      "sm_90",
+      "sm_90a",
+      "sm_100",
+      "sm_100f",
+      "sm_100a",
+      "sm_103",
+      "sm_103f",
+      "sm_103a",
+      "sm_110",
+      "sm_110f",
+      "sm_110a",
+      "sm_120",
+      "sm_120f",
+      "sm_120a",
+      "sm_121",
+      "sm_121f",
+      "sm_121a"
+    ]
+  },
+  "headers": {
+    "nvrtc.h": "8d0373dc86a2c68528ddd13247204c82df670636383a0fe7f31b791195181f9d",
+    "nvJitLink.h": "d1f43e48b34cb8bdc2ac32c192e60b1fec882c09c5dae691cb876aae4eafb48e"
+  },
+  "headerProfiles": {
+    "cudaCccl": {
+      "profile": "cuda-13.3-cccl-cuda-nv-linux-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": ["cuda", "nv"],
+      "fileCount": 1166,
+      "byteLength": 8527243,
+      "sha256": "e887b82b535a6c7281f6ecf589f067ed68ca4047979ef61b19df19ebd7f05020"
+    }
+  },
+  "claim": "Exact official Ubuntu 24.04 x86-64 CUDA 13.3 compiler-provider package and file identities only; native operation and support remain unqualified."
+}
