@@ -2,14 +2,14 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-14
+**Updated:** 2026-08-24
 
-## Protected-main baseline entering the open-issue sweep
+## CUDA-MCGS prerequisite execution baseline
 
 ```text
-initial sweep main: 334b903be827dedb5345608a34a6df444912fe1b
-authority main:     66b449a5ae81d51620fd5004e1b75e89d5a9ac67
-package:            cuda-js@0.1.0-alpha.5
+protected main:     1318baaeb18f613bdda5d281a733a8a973f3a8a3
+P0 evidence PR:     #116 / acf1ca85eb9859d5f54618c17cbe2c959745e388 / green / review required
+execution package:  cuda-js@0.1.0-alpha.6
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -20,6 +20,7 @@ The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through
 - SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
 - SPEC-0012 typed Device LTO;
 - SPEC-0013 restricted Device-JS;
+- SPEC-0022 accepted relaxed device-scope `u32`/`u64` atomic-observation child;
 - SPEC-0016 opaque one-pending-operation submission/completion;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
@@ -66,10 +67,10 @@ The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` pa
 architectural disposition: planned
 implementation status:       not-implemented
 qualification status:        not-qualified
-priority:                    blocked on published SPEC-0016 native evidence
+priority:                    blocked on independent review and protected-main integration of green PR #116
 ```
 
-Issue #51 records a successful Windows OSC-3 candidate that observed native NOT_READY and controlled deferred failure correctly, but also explicitly records that the candidate commits/evidence packet were not pushed/integrated on protected main. SPEC-0018 therefore remains proposal-only under its own widening gate. Multiple operations/private streams are not implemented.
+Green PR #116 reconciles the retained Windows candidate onto the current authority baseline and reproduces delayed NOT_READY-to-terminal completion, controlled deferred failure, and balanced teardown. Branch checks and exact local native evidence pass, but the repository requires independent review before protected-main integration. SPEC-0018 remains proposal-only until that merge and read-back close its widening gate. Multiple operations/private streams are not implemented.
 
 ## Execution baseline
 
@@ -87,7 +88,7 @@ SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph
 
 ## Device-JS
 
-SPEC-0013 is accepted and implemented in portable/software/package paths. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. SPEC-0021 does not silently widen Device-JS scalar types; Device-JS parallel/numeric widening remains separately governed by proposed SPEC-0022. Native DJS-2 promotion remains open under #43.
+SPEC-0013 and the accepted bounded SPEC-0022 scoped-atomic-observation child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers consume the manifest-owned `cuda-cccl` profile and provide one-location device-scope relaxed semantics only. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
 
 ## Proposal-only successor capabilities
 
@@ -98,7 +99,7 @@ SPEC-0014 long-lived sideband
 SPEC-0018 bounded multi-operation scheduling
 SPEC-0019 host memory and async transfer
 SPEC-0020 prepared batches / CUDA Graph execution
-SPEC-0022 Device-JS parallel + service profiles
+SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation child accepted)
 SPEC-0023 context-bound CUDA library adapters
 SPEC-0024 multi-GPU orchestration
 SPEC-0025 graphics interop
@@ -136,7 +137,8 @@ These remain independently open because the exact environment/control is unavail
 - MIG #27;
 - performance/soak #28;
 - exact CUDA-MCGS pair #32;
-- native RDC/LTO/Device-JS/operations #35/#42/#43/#51;
+- protected-main integration of green exact-profile RDC/Device-JS/operations evidence #35/#43/#51 (PR #116, independent review required);
+- native LTO qualification #42;
 - native SPEC-0021 scalar/view-consumer qualification #39/#88;
 - exact merged-head Windows F5 oracle revalidation #64;
 - GitHub private vulnerability reporting end-to-end external control #68.
@@ -146,12 +148,11 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. implement/test SPEC-0017 portable/software (#20)
-2. publish/recreate exact current-head native SPEC-0016 evidence (#51)
-3. reassess SPEC-0018 only after step 2
-4. unlock SPEC-0019 / SPEC-0020 / SPEC-0023 and their consumers in dependency order
-5. add a SPEC-0021 public view-facade addendum only when a concrete accepted consumer needs that surface
-6. begin NN child-spec acceptance in dependency order without changing generic core
+1. obtain independent review and integrate/read back P0 evidence PR #116 (#35/#43/#51)
+2. obtain independent review and integrate/read back the scoped atomic-observation slice (#87)
+3. accept and implement SPEC-0018 only after steps 1-2
+4. advance SPEC-0019 async host transfer and SPEC-0014 sideband in dependency order
+5. close the exact CUDA-MCGS compatible pair only against frozen reviewed artifacts (#32)
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

@@ -67,7 +67,7 @@ function spin() {
   assert.throws(() => translateDeviceProgram(request), expectCode('DEVICE_JS_RETURN_INCOMPLETE'));
 });
 
-test('void synchronization helpers are accepted only as standalone expression statements', () => {
+test('void helpers are accepted only as standalone expression statements', () => {
   const metadata = [{ name: 'kernel', kind: 'kernel', parameters: [], returns: 'void' }];
   assert.doesNotThrow(() => translateDeviceProgram({
     source: 'function kernel() { gpu.barrier.block(); gpu.fence.device(); }',
@@ -80,5 +80,10 @@ test('void synchronization helpers are accepted only as standalone expression st
   assert.throws(() => translateDeviceProgram({
     source: 'function kernel() { for (; false; gpu.fence.device()) {} }',
     functions: metadata,
+  }), expectCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function kernel(words) { for (gpu.atomic.storeRelaxedDevice(words, gpu.u32(0), gpu.u32(0)); false; ) {} }',
+    functions: [{ name: 'kernel', kind: 'kernel', parameters: [{ name: 'words', type: 'ptr<u32>' }], returns: 'void' }],
+    compile: { headerProfile: 'cuda-cccl' },
   }), expectCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
 });

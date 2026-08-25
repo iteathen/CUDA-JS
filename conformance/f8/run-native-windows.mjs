@@ -47,6 +47,11 @@ assert.equal(deviceJsObservation.globalIndex, true);
 assert.equal(deviceJsObservation.exactU64, 'ffffffffffffffff');
 assert.deepEqual(deviceJsObservation.atomicBuckets, [16, 16, 16, 16]);
 assert.equal(deviceJsObservation.atomicCasUniqueFlags, true);
+assert.equal(deviceJsObservation.atomicRelaxedDeviceU32, true);
+assert.equal(deviceJsObservation.atomicRelaxedDeviceU64, true);
+assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor, 7);
+assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor, 5);
+assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
 assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);
 assert.equal(deviceJsObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
@@ -63,6 +68,7 @@ const target = await writeEvidence('native-windows-package.json', {
     'docs/specs/SPEC-0008-package-public-facade.md',
     'docs/specs/SPEC-0013-restricted-device-js.md',
     'docs/specs/SPEC-0013-public-surface-addendum.md',
+    'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-windows.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',

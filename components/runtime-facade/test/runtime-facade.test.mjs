@@ -14,7 +14,7 @@ function expectCode(code) {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.5');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.6');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
@@ -23,7 +23,7 @@ test('compatibility and host inspection are immutable and reconcile the current 
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
-  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1');
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.deviceJsParser, { name: 'acorn', version: '8.15.0', role: 'syntax-only-replaceable-adapter' });
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY), true);
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.nativeProfiles), true);

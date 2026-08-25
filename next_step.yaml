@@ -1,22 +1,23 @@
 {
-  "schema_version": 35,
-  "updated": "2026-08-14",
-  "status": "active_open_issue_development_sweep",
-  "objective": "Process every open CUDA-JS issue through investigate, assess, primary-source research, reassess, plan, authorized implementation, and test without collapsing architecture, implementation, qualification, and priority. Advance only dependency-ready ownership boundaries and record exact external/hardware blockers for the rest.",
+  "schema_version": 36,
+  "updated": "2026-08-24",
+  "status": "active_cuda_mcgs_p0_p1_execution",
+  "objective": "Complete the CUDA-MCGS P0/P1 CUDA-JS prerequisites as dependency-ready LEGO ownership packets with exact native evidence, clean integration, and no consumer-domain leakage.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "66b449a5ae81d51620fd5004e1b75e89d5a9ac67",
-    "package": "cuda-js@0.1.0-alpha.5",
+    "protected_main_authority_baseline": "1318baaeb18f613bdda5d281a733a8a973f3a8a3",
+    "package": "cuda-js@0.1.0-alpha.6",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
       "#65 target-syntax correction integrated",
       "#66 disposal-failure correction integrated",
       "#67 public capability projection reconciliation integrated",
-      "CJS-CAP-NUMVIEW-0021: SPEC-0021 f64/f16/bf16 public portable/software/package scalar implementation plus contiguous 1D generic typed-view component implementation; native qualification and public view facade remain open"
+      "CJS-CAP-NUMVIEW-0021: SPEC-0021 f64/f16/bf16 public portable/software/package scalar implementation plus contiguous 1D generic typed-view component implementation; native qualification and public view facade remain open",
+      "MCGS-P0-ATOMIC-0022 candidate: accepted scoped atomic-observation child, alpha.6 implementation, and exact installed-package Windows oracle pass; independent review/integration remain open"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016", "SPEC-0021"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
-    "still_proposal_only": ["SPEC-0014", "SPEC-0018", "SPEC-0019", "SPEC-0020", "SPEC-0022", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
+    "still_proposal_only": ["SPEC-0014", "SPEC-0018", "SPEC-0019", "SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation child", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
   "authority": [
@@ -36,20 +37,21 @@
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
+    "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md",
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-CAP-DEVSEL-0017",
-    "issues": [20],
-    "plan": "docs/plans/2026-08-14-open-issue-development-sweep.md",
-    "next_action": "Implement the accepted portable/software SPEC-0017 foundation as one ownership packet: finite sanitized device discovery snapshots, opaque selector capabilities, exactly one selected device bound before context/resource creation, default-device compatibility, stale/foreign/ambiguous selector rejection, and selected-device propagation into target/cache identity. Keep native ordinals and stable hardware identifiers private and do not claim multi-GPU qualification without a controlled multi-device oracle.",
-    "exit": "Portable/software selector and target-resolution implementation, ownership-focused tests, exact-effect review, protected checks, and remote protected-main read-back pass without changing native qualification."
+    "id": "MCGS-P0-ATOMIC-0022",
+    "issues": [87],
+    "plan": "docs/plans/2026-08-24-cuda-mcgs-p0-p1-execution.md",
+    "next_action": "Obtain independent review and integrate the accepted relaxed device-scope u32/u64 Device-JS atomic-observation slice, then advance SPEC-0018 only after the stacked native SPEC-0016 qualification prerequisite is also integrated.",
+    "exit": "Exact atomic child contract, deterministic portable implementation, installed-package Windows oracle, full validation, independent review, protected-main integration/read-back, issue closure, and clean branch/worktree disposition."
   },
   "parallel_or_external_next": [
     {
       "id": "CJS-OPS-NATIVE-0016",
       "issues": [51],
-      "action": "Recover or recreate verifiable current-protected-main native SPEC-0016 delayed-kernel/NOT_READY/deferred-fault/cleanup evidence on the exact qualified Windows profile; publish and read it back before SPEC-0018 can advance."
+      "action": "Obtain independent review and integrate green PR #116, which reconciles current-head native SPEC-0016 delayed-kernel/NOT_READY/deferred-fault/cleanup evidence on the exact qualified Windows profile; read protected main back before SPEC-0018 advances."
     },
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
@@ -61,7 +63,7 @@
     {
       "id": "CJS-CAP-SCHED-0018",
       "issues": [40],
-      "reason": "SPEC-0018 explicitly requires trustworthy published native SPEC-0016 lifecycle evidence. #51 records a passing local Windows candidate, but its exact candidate commits/evidence were never integrated on protected main. Keep SPEC-0018 proposal-only until that publication gap is repaired."
+      "reason": "SPEC-0018 explicitly requires trustworthy published native SPEC-0016 lifecycle evidence. Green PR #116 repairs the evidence gap but still awaits required independent review and protected-main integration/read-back."
     },
     {
       "id": "CJS-EXTERNAL-SECURITY-68",
@@ -75,8 +77,8 @@
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
-      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 35, 39, 42, 43, 51, 88],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence unavailable in this execution environment. Portable preparation/implementation may continue where authorized, but no native/support claim is inferred."
+      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 39, 42, 88],
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence not supplied by the current single-GPU Windows profile. Portable preparation/implementation may continue where authorized, but no broader native/support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",
@@ -85,8 +87,8 @@
     },
     {
       "id": "CJS-SUCCESSOR-PROPOSALS",
-      "issues": [38, 85, 86, 87, 89, 90, 91, 92, 93, 94, 95, 96],
-      "reason": "Governing SPEC-0014/0018-0020/0022-0026 contracts remain proposal-only and/or depend on accepted foundations not yet implemented/evidenced. Process through research/reassessment/plan; do not scaffold production code early."
+      "issues": [38, 85, 86, 89, 90, 91, 92, 93, 94, 95, 96],
+      "reason": "Governing SPEC-0014/0018-0020 and the unaccepted remainder of SPEC-0022 plus SPEC-0023-0026 remain proposal-only and/or depend on accepted foundations not yet integrated. Process through research/reassessment/plan; do not scaffold production code early."
     },
     {
       "id": "CJS-NN-PROGRAM",
@@ -117,6 +119,6 @@
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "the unpublished Windows OSC-3 candidate described on #51 remains candidate evidence until exact reviewed publication/integration"
+    "green PR #116 carries the reconciled Windows OSC-3 evidence for #51 but remains candidate evidence until independent review, protected-main integration, and read-back"
   ]
 }

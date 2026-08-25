@@ -43,7 +43,7 @@ test('public Device-JS bridge translates privately then reuses CompilerActor', {
   try {
     const result = await compileDeviceProgram(runtime, request);
     assert.equal(result.schemaVersion, 1);
-    assert.equal(result.deviceProgram.contract, 'SPEC-0013-v1');
+    assert.equal(result.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1');
     assert.equal(result.deviceProgram.parser.name, 'acorn');
     assert.equal(result.deviceProgram.kernels.length, 1);
     assert.deepEqual(result.deviceProgram.kernels[0].parameters, [

@@ -196,7 +196,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.gpuOperationLifecycle !== 'opaque-submit-status-wait-close-one-pending') {
     errors.push('packaging compatibility operation lifecycle is stale');
   }
-  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1') {
+  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
 
