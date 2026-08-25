@@ -70,4 +70,4 @@ assert.equal(terminal.driver.workerExitCode, 0);
 assert.equal(terminal.driver.resourceCounts.live, 0);
 assert.equal(terminal.driver.resourceCounts.closing, 0);
 assert.equal(terminal.driver.resourceCounts.orphaned, 0);
-console.log(JSON.stringify({ consumer: 'native-windows-vector', checksum: 15_600_773, graceful: terminal.graceful, workerExitCode: terminal.driver.workerExitCode }));
+console.log(JSON.stringify({ consumer: 'native-vector', checksum: 15_600_773, graceful: terminal.graceful, workerExitCode: terminal.driver.workerExitCode }));

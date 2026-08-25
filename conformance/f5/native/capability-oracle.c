@@ -1,11 +1,16 @@
-/* Independent SPEC-0011/SPEC-0016 oracle compiled with MSVC and CUDA 13.3. */
+/* Independent native scalar/operation/transfer/mailbox oracle compiled against CUDA 13.3. */
 #include <cuda.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <errno.h>
+#include <time.h>
+#endif
 
 #define SCALAR_PARAMETER_BYTES 32U
 #define DELAY_PARAMETER_BYTES 16U
@@ -13,6 +18,59 @@
 #define OUTPUT_WORDS 5U
 #define COMPLETION_TIMEOUT_MS 30000ULL
 #define DELAY_CYCLES UINT64_C(250000000)
+
+static int open_binary(FILE **file, const char *path) {
+#ifdef _WIN32
+    return fopen_s(file, path, "rb");
+#else
+    *file = fopen(path, "rb");
+    return *file == NULL ? 1 : 0;
+#endif
+}
+
+static uint64_t monotonic_milliseconds(void) {
+#ifdef _WIN32
+    return (uint64_t)GetTickCount64();
+#else
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) return UINT64_MAX;
+    return (uint64_t)now.tv_sec * UINT64_C(1000) + (uint64_t)now.tv_nsec / UINT64_C(1000000);
+#endif
+}
+
+static void sleep_one_millisecond(void) {
+#ifdef _WIN32
+    Sleep(1U);
+#else
+    struct timespec delay = { 0, 1000000L };
+    while (nanosleep(&delay, &delay) != 0 && errno == EINTR) {}
+#endif
+}
+
+static uint32_t *allocate_mailbox(void) {
+#ifdef _WIN32
+    return (uint32_t *)VirtualAlloc(NULL, 4096U, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+#else
+    return (uint32_t *)aligned_alloc(4096U, 4096U);
+#endif
+}
+
+static int free_mailbox(uint32_t *mailbox) {
+#ifdef _WIN32
+    return VirtualFree(mailbox, 0U, MEM_RELEASE) ? 1 : 0;
+#else
+    free(mailbox);
+    return 1;
+#endif
+}
+
+static void publish_host_u32(uint32_t *address, uint32_t value) {
+#ifdef _WIN32
+    InterlockedExchange((volatile long *)address, (long)value);
+#else
+    __atomic_store_n(address, value, __ATOMIC_SEQ_CST);
+#endif
+}
 
 struct scalar_layout {
     uint32_t legacy;
@@ -33,7 +91,7 @@ static unsigned char *read_ptx(const char *path, size_t *byte_length) {
     FILE *file = NULL;
     long length;
     unsigned char *bytes;
-    if (fopen_s(&file, path, "rb") != 0 || file == NULL) return NULL;
+    if (open_binary(&file, path) != 0 || file == NULL) return NULL;
     if (fseek(file, 0, SEEK_END) != 0) { fclose(file); return NULL; }
     length = ftell(file);
     if (length <= 0 || length > 64L * 1024L * 1024L || fseek(file, 0, SEEK_SET) != 0) { fclose(file); return NULL; }
@@ -69,7 +127,7 @@ static CUresult launch_buffered(
 }
 
 static CUresult wait_event(CUevent event, unsigned int *polls) {
-    ULONGLONG started = GetTickCount64();
+    uint64_t started = monotonic_milliseconds();
     CUresult result;
     *polls = 0U;
     for (;;) {
@@ -77,8 +135,8 @@ static CUresult wait_event(CUevent event, unsigned int *polls) {
         *polls += 1U;
         if (result == CUDA_SUCCESS) return result;
         if (result != CUDA_ERROR_NOT_READY) return result;
-        if (GetTickCount64() - started >= COMPLETION_TIMEOUT_MS) return CUDA_ERROR_TIMEOUT;
-        Sleep(1U);
+        if (monotonic_milliseconds() - started >= COMPLETION_TIMEOUT_MS) return CUDA_ERROR_TIMEOUT;
+        sleep_one_millisecond();
     }
 }
 
@@ -225,8 +283,9 @@ int main(int argc, char **argv) {
     printf("ASYNC_TRANSFER\t%u\t%u\t%u\t%u\n", transfer_output[0], transfer_output[1], transfer_output[2], transfer_output[3]);
     if (memcmp(transfer_input, transfer_output, 4U * sizeof(uint32_t)) != 0) exit_code = 39;
 
-    mailbox_words = (uint32_t *)VirtualAlloc(NULL, 4096U, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    mailbox_words = allocate_mailbox();
     if (mailbox_words == NULL) { exit_code = 45; goto cleanup; }
+    memset(mailbox_words, 0, 4096U);
     result = cuMemHostRegister(mailbox_words, 4096U, CU_MEMHOSTREGISTER_DEVICEMAP);
     if (result != CUDA_SUCCESS) { exit_code = 46; goto cleanup; }
     mailbox_registered = 1;
@@ -244,7 +303,7 @@ int main(int argc, char **argv) {
     if (result != CUDA_SUCCESS) { exit_code = 49; goto cleanup; }
     result = cuEventQuery(event);
     if (result != CUDA_ERROR_NOT_READY) { exit_code = 50; goto cleanup; }
-    InterlockedExchange((volatile long *)&mailbox_words[0], 41L);
+    publish_host_u32(&mailbox_words[0], UINT32_C(41));
     result = wait_event(event, &polls);
     if (result != CUDA_SUCCESS) { exit_code = 51; goto cleanup; }
     printf("MAILBOX_PUBLICATION\t%u\t%u\n", mailbox_words[0], mailbox_words[1]);
@@ -252,7 +311,7 @@ int main(int argc, char **argv) {
 
 cleanup:
     if (mailbox_registered) { result = cuMemHostUnregister(mailbox_words); printf("MAILBOX_UNREGISTER\t%d\n", (int)result); if (result == CUDA_SUCCESS) mailbox_registered = 0; else if (exit_code == 0) exit_code = 53; mailbox_device = 0; }
-    if (mailbox_words != NULL && !mailbox_registered) { if (!VirtualFree(mailbox_words, 0U, MEM_RELEASE) && exit_code == 0) exit_code = 54; mailbox_words = NULL; }
+    if (mailbox_words != NULL && !mailbox_registered) { if (!free_mailbox(mailbox_words) && exit_code == 0) exit_code = 54; mailbox_words = NULL; }
     if (event != NULL) { result = cuEventDestroy(event); printf("EVENT_DESTROY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 25; }
     if (transfer_copy_device != 0) { result = cuMemFree(transfer_copy_device); printf("FREE_TRANSFER_COPY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 40; }
     if (transfer_device != 0) { result = cuMemFree(transfer_device); printf("FREE_TRANSFER\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 41; }

@@ -61,22 +61,40 @@
         "architecture": "x64",
         "environment": "native"
       },
-      "status": "facade-source-ready",
+      "status": "runner-ready",
       "promotionTarget": "qualified-experimental",
       "requiredNode": "v26.7.0",
       "requiredCapsules": [
         "EXP-001 native Driver and C-oracle parity",
         "F3 through F8 native Linux actor, memory, execution, compiler, hardening, and installed-package capsules"
       ],
-      "commands": [],
-      "evidenceFiles": [],
-      "missingCapsules": [
-        "run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence",
-        "native F4 memory C oracle and runner",
-        "native F5 execution C oracle and runner",
-        "complete and run F7 Linux native permission and lifecycle stress runner",
-        "complete and run F8 installed-package Linux native consumer runner"
-      ]
+      "commands": [
+        ["scripts/run-exp-001.mjs", "all"],
+        ["scripts/run-f1b.mjs", "check"],
+        ["scripts/run-f3.mjs", "all"],
+        ["scripts/run-f4.mjs", "all"],
+        ["scripts/run-f5.mjs", "all"],
+        ["scripts/run-f6.mjs", "all"],
+        ["scripts/run-f7.mjs", "all"],
+        ["scripts/run-f8.mjs", "all"]
+      ],
+      "evidenceFiles": [
+        "build/exp-001/linux-x64/evidence/build.json",
+        "build/exp-001/linux-x64/evidence/readiness.json",
+        "build/exp-001/linux-x64/evidence/smoke.json",
+        "build/f3/linux-x64/evidence/native-linux.json",
+        "build/f4/linux-x64/evidence/oracle-build.json",
+        "build/f4/linux-x64/evidence/native-linux.json",
+        "build/f5/linux-x64/evidence/oracle-build.json",
+        "build/f5/linux-x64/evidence/native-linux.json",
+        "build/f5/linux-x64/evidence/capability-oracle-build.json",
+        "build/f5/linux-x64/evidence/native-linux-capabilities.json",
+        "build/f6/linux-x64/evidence/native-linux-oracle.json",
+        "build/f6/linux-x64/evidence/native-linux.json",
+        "build/f7/linux-x64/evidence/native-linux.json",
+        "build/f8/linux-x64/evidence/native-linux-package.json"
+      ],
+      "missingCapsules": []
     },
     {
       "id": "wsl2-x64",

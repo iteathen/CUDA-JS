@@ -9,6 +9,8 @@ import { parameterLayout } from '../../components/execution/index.mjs';
 import {
   capabilityPtxPath,
   evidenceRoot,
+  nativeCapabilitiesEvidenceName,
+  nativeProfile,
   parseOracle,
   repositoryRoot,
   sha256,
@@ -16,9 +18,10 @@ import {
   writeEvidence,
 } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32', 'F5 native capability conformance requires Windows.');
-assert.equal(process.arch, 'x64', 'F5 native capability conformance requires Windows x64.');
+assert(['win32', 'linux'].includes(process.platform), 'F5 native capability conformance requires Windows or native Linux.');
+assert.equal(process.arch, 'x64', 'F5 native capability conformance requires x86-64.');
 assert.equal(process.version, 'v26.7.0', 'F5 native capability conformance requires official Node v26.7.0.');
+if (process.platform === 'linux') assert.doesNotMatch(os.release(), /microsoft/i, 'F5 native Linux capability conformance does not accept WSL.');
 
 function u32Words(bytes) {
   assert.equal(bytes.byteLength % 4, 0);
@@ -304,7 +307,7 @@ assert.equal(pendingCloseTerminal.graceful, true);
 assert.equal(pendingCloseTerminal.driver.resourceCounts.live, 0);
 assert.equal(pendingCloseTerminal.driver.resourceCounts.orphaned, 0);
 
-const child = spawnSync(process.execPath, ['--experimental-ffi', 'conformance/f5/run-operation-failure-native-windows.mjs'], { cwd: repositoryRoot, encoding: 'utf8' });
+const child = spawnSync(process.execPath, ['--experimental-ffi', 'conformance/f5/run-operation-failure-native.mjs'], { cwd: repositoryRoot, encoding: 'utf8' });
 if (child.error) throw child.error;
 if (child.status !== 0) throw new Error(`Native deferred-failure child failed (${child.status}).\n${child.stdout}\n${child.stderr}`);
 const deferredFailure = JSON.parse(child.stdout.trim().split(/\r?\n/).at(-1));
@@ -338,32 +341,32 @@ const sources = [
   'components/device-js/src/translator.mjs',
   'components/execution/src/execution-manager.mjs',
   'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
-  'components/driver-actor/src/backends/windows-native.mjs',
+  `components/driver-actor/src/backends/${nativeProfile}-native.mjs`,
   'components/driver-actor/src/backends/native-profiles.mjs',
   'components/driver-actor/src/backends/native.mjs',
   'components/runtime-facade/src/runtime.mjs',
   'conformance/f5/fixtures/native-capabilities.cu.txt',
-  'conformance/f5/native/windows-capability-oracle.c',
-  'conformance/f5/run-capabilities-native-windows.mjs',
-  'conformance/f5/run-operation-failure-native-windows.mjs',
+  'conformance/f5/native/capability-oracle.c',
+  'conformance/f5/run-capabilities-native.mjs',
+  'conformance/f5/run-operation-failure-native.mjs',
 ];
-const target = await writeEvidence('native-windows-capabilities.json', {
+const target = await writeEvidence(nativeCapabilitiesEvidenceName, {
   schemaVersion: 1,
   workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER/NQ-MAILBOX',
   capsule: 'public-facade-native-scalar-operation-transfer-mailbox-lifecycle',
   status: 'pass',
   generatedAt: new Date().toISOString(),
-  environment: { node: { version: process.version, moduleAbi: process.versions.modules, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version() },
+  environment: { node: { version: process.version, moduleAbi: process.versions.modules, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version() },
   sources: await sourceIdentity(sources),
   oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], asyncTransferWords: oracle.ASYNC_TRANSFER, mailboxPublication: oracle.MAILBOX_PUBLICATION, ptxSha256: await sha256(capabilityPtxPath) },
   observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, asyncTransfer: transferObservation, transferTerminal, mailbox: mailboxObservation, mailboxTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
   capabilityBoundary: 'All native handles, packed bytes, stream/event identity, mapped mailbox storage, and faulting context state remained private. The deferred fault ran in a child process with its own private runtime/context.',
   claimLimits: [
-    'Exact Windows x64 Node 26.7.0 / Driver 610.74 / CUDA 13.3 / GTX 1660 Ti sm_75 profile only.',
+    `Exact ${nativeProfile} x64 Node 26.7.0 / Driver / CUDA 13.3 / GPU input profile only; Linux remains unqualified until the complete exact Ubuntu chain is reviewed and promoted.`,
     'The delay proves asynchronous not-ready/status/close semantics, not a latency or performance guarantee.',
     'The qualified widened profile is exactly two private streams, two pending operations, no queue, and declared u32/u64 relaxed device-scope atomic access.',
     'The async transfer profile is exactly two internal pinned staging blocks, contiguous H2D/D2H/D2D, snapshot ingress, and terminal-result egress; it makes no universal overlap claim.',
     'The mailbox profile is exactly one privately mapped mailbox, named u32 lanes, one direction and writer per lane, one live GPU operation lease, and system-scope acquire/release publication.',
   ],
 });
-console.log(`F5 native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, mapped mailbox publication, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);
+console.log(`F5${nativeProfile === 'windows' ? 'W' : 'L'} native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, mapped mailbox publication, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);

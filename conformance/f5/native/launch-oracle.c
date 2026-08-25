@@ -1,16 +1,49 @@
-/* Independent CJS-F5W launch oracle compiled with MSVC and pinned CUDA 13.3 headers. */
+/* Independent CJS-F5 native launch oracle compiled against pinned CUDA 13.3 headers. */
 #include <cuda.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <errno.h>
+#include <time.h>
+#endif
 
 #define ELEMENT_COUNT 1024U
 #define VECTOR_BYTES (ELEMENT_COUNT * sizeof(uint32_t))
 #define PARAMETER_BYTES 28U
 #define COMPLETION_TIMEOUT_MS 30000ULL
+
+static int open_binary(FILE **file, const char *path) {
+#ifdef _WIN32
+    return fopen_s(file, path, "rb");
+#else
+    *file = fopen(path, "rb");
+    return *file == NULL ? 1 : 0;
+#endif
+}
+
+static uint64_t monotonic_milliseconds(void) {
+#ifdef _WIN32
+    return (uint64_t)GetTickCount64();
+#else
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) return UINT64_MAX;
+    return (uint64_t)now.tv_sec * UINT64_C(1000) + (uint64_t)now.tv_nsec / UINT64_C(1000000);
+#endif
+}
+
+static void sleep_one_millisecond(void) {
+#ifdef _WIN32
+    Sleep(1U);
+#else
+    struct timespec delay = { 0, 1000000L };
+    while (nanosleep(&delay, &delay) != 0 && errno == EINTR) {}
+#endif
+}
 
 static uint32_t checksum_bytes(const unsigned char *bytes, size_t length) {
     uint32_t checksum = UINT32_C(2166136261);
@@ -26,7 +59,7 @@ static unsigned char *read_ptx(const char *path, size_t *byte_length) {
     FILE *file = NULL;
     long length;
     unsigned char *bytes;
-    if (fopen_s(&file, path, "rb") != 0 || file == NULL) return NULL;
+    if (open_binary(&file, path) != 0 || file == NULL) return NULL;
     if (fseek(file, 0, SEEK_END) != 0) { fclose(file); return NULL; }
     length = ftell(file);
     if (length <= 0 || length > 64L * 1024L * 1024L || fseek(file, 0, SEEK_SET) != 0) { fclose(file); return NULL; }
@@ -63,7 +96,7 @@ int main(int argc, char **argv) {
     unsigned int index;
     unsigned int polls = 0;
     const uint32_t element_count = ELEMENT_COUNT;
-    ULONGLONG started;
+    uint64_t started;
     int exit_code = 0;
 
     if (argc != 2) return 2;
@@ -143,14 +176,14 @@ int main(int argc, char **argv) {
     result = cuEventRecord(event, stream);
     printf("EVENT_RECORD\t%d\n", (int)result);
     if (result != CUDA_SUCCESS) { exit_code = 14; goto cleanup; }
-    started = GetTickCount64();
+    started = monotonic_milliseconds();
     for (;;) {
         result = cuEventQuery(event);
         polls++;
         if (result == CUDA_SUCCESS) break;
         if (result != CUDA_ERROR_NOT_READY) { exit_code = 15; goto cleanup; }
-        if (GetTickCount64() - started >= COMPLETION_TIMEOUT_MS) { exit_code = 16; goto cleanup; }
-        Sleep(1U);
+        if (monotonic_milliseconds() - started >= COMPLETION_TIMEOUT_MS) { exit_code = 16; goto cleanup; }
+        sleep_one_millisecond();
     }
     printf("COMPLETE\t%d\t%u\n", (int)result, polls);
     result = cuMemcpyDtoH(output, output_device, VECTOR_BYTES);

@@ -1,4 +1,4 @@
-/* Independent CJS-F4W memory oracle compiled with MSVC and the pinned CUDA 13.3 headers. */
+/* Independent CJS-F4 native memory oracle compiled against pinned CUDA 13.3 headers. */
 #include <cuda.h>
 #include <stdint.h>
 #include <stdio.h>

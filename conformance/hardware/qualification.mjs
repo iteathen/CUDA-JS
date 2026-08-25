@@ -152,7 +152,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     'This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.',
     '',
-    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, diagnostics, testing-only public-facade admission, compatibility metadata, and exact F3L/F6L runner source are implemented, but F4/F5/F7/F8 native runners and the exact installed-package chain remain incomplete. Source admission is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.',
+    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The complete EXP-001/F1B/F3L-F8L runner and evidence-validation source chain is implemented. Exact native evidence remains unrun, so runner readiness is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.',
     '',
     'CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.',
     '',
@@ -205,7 +205,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
 
   lines.push(
     '',
-    'Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority; its Driver/compiler source adapters exist, but exact native evidence and the facade/package chain remain incomplete. WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.',
+    'Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority; its complete exact-profile runner chain is ready, but its native Driver/compiler/GPU/package evidence remains unrun and unqualified. WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.',
     '',
     '## Extended qualification axes',
     '',
@@ -320,6 +320,79 @@ async function writeJson(target, value) {
 }
 
 async function summarizeProfileEvidence(profile, device) {
+  if (profile.id === 'linux-native-x64') {
+    const exp001Build = await loadJson(path.join(repositoryRoot, 'build', 'exp-001', 'linux-x64', 'evidence', 'build.json'));
+    const exp001Readiness = await loadJson(path.join(repositoryRoot, 'build', 'exp-001', 'linux-x64', 'evidence', 'readiness.json'));
+    const exp001Smoke = await loadJson(path.join(repositoryRoot, 'build', 'exp-001', 'linux-x64', 'evidence', 'smoke.json'));
+    const f3 = await loadJson(path.join(repositoryRoot, 'build', 'f3', 'linux-x64', 'evidence', 'native-linux.json'));
+    const f4Oracle = await loadJson(path.join(repositoryRoot, 'build', 'f4', 'linux-x64', 'evidence', 'oracle-build.json'));
+    const f4 = await loadJson(path.join(repositoryRoot, 'build', 'f4', 'linux-x64', 'evidence', 'native-linux.json'));
+    const f5Oracle = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'linux-x64', 'evidence', 'oracle-build.json'));
+    const f5 = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'linux-x64', 'evidence', 'native-linux.json'));
+    const f5CapabilityOracle = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'linux-x64', 'evidence', 'capability-oracle-build.json'));
+    const f5Capabilities = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'linux-x64', 'evidence', 'native-linux-capabilities.json'));
+    const f6Oracle = await loadJson(path.join(repositoryRoot, 'build', 'f6', 'linux-x64', 'evidence', 'native-linux-oracle.json'));
+    const f6 = await loadJson(path.join(repositoryRoot, 'build', 'f6', 'linux-x64', 'evidence', 'native-linux.json'));
+    const f7 = await loadJson(path.join(repositoryRoot, 'build', 'f7', 'linux-x64', 'evidence', 'native-linux.json'));
+    const f8 = await loadJson(path.join(repositoryRoot, 'build', 'f8', 'linux-x64', 'evidence', 'native-linux-package.json'));
+    for (const [name, record] of Object.entries({ exp001Build, exp001Smoke, f3, f4Oracle, f4, f5Oracle, f5, f5CapabilityOracle, f5Capabilities, f6Oracle, f6, f7, f8 })) invariant(record.status === 'pass', `${name} evidence is not passing.`);
+    invariant(exp001Readiness.status === 'ready' && exp001Readiness.observed.isWsl === false, 'EXP-001 native environment readiness is incomplete.');
+    const diagnostic = f7.observations.driverCycles[0];
+    const computeCapability = `${diagnostic.attributes.computeCapabilityMajor}.${diagnostic.attributes.computeCapabilityMinor}`;
+    invariant(computeCapability === device.computeCapability, 'Linux Driver diagnostics and nvidia-smi disagree on device-zero compute capability.');
+    invariant(exp001Smoke.result.cuda.driverVersion.value === diagnostic.assessment.cuda.driverApiVersion, 'EXP-001 and F7L disagree on the Driver API version.');
+    invariant(f3.observations.terminal?.graceful === true && f3.observations.terminal?.workerExitCode === 0, 'F3L actor lifecycle or cleanup is incomplete.');
+    invariant(f4.observations.checksum === f4.observations.oracleChecksum && f4.observations.checksum === f4Oracle.oracle.RESULT?.[1] && f4.observations.terminal?.graceful === true, 'F4L memory parity or cleanup is incomplete.');
+    invariant(f5.observations.checksum === f5.observations.oracleChecksum && f5.observations.checksum === f5Oracle.oracle.RESULT?.[1] && f5.observations.terminal?.graceful === true, 'F5L launch parity or cleanup is incomplete.');
+    invariant(f8.observation.checksum === 15_600_773 && f8.observation.graceful === true && f8.observation.workerExitCode === 0, 'F8L installed-package vector or cleanup evidence is incomplete.');
+    invariant(f5CapabilityOracle.oracle.DELAY_FIRST_QUERY?.[0] === 600, 'The F5L independent operation oracle did not observe CUDA_ERROR_NOT_READY.');
+    invariant(f5Capabilities.observations.scalarCases?.length === 3, 'F5L scalar boundary evidence is incomplete.');
+    invariant(f5Capabilities.observations.operation?.first?.status === 'pending' && f5Capabilities.observations.operation?.completed?.status === 'completed', 'F5L opaque-operation lifecycle evidence is incomplete.');
+    invariant(f5Capabilities.observations.deferredFailure?.failure?.observedAt?.driverCall === 'cuEventQuery', 'F5L deferred native failure provenance is incomplete.');
+    invariant(f5Capabilities.observations.transferTerminal?.graceful === true && f5Capabilities.observations.mailboxTerminal?.graceful === true && f5Capabilities.observations.terminal?.graceful === true, 'F5L transfer/mailbox/operation cleanup is incomplete.');
+    invariant(f6.oracle.ptx.sha256 === f6Oracle.oracle.ptx.sha256 && f6.oracle.cubin.sha256 === f6Oracle.oracle.cubin.sha256, 'F6L independent compiler artifacts disagree.');
+    invariant(f6.observations.launches?.length === 2 && f6.observations.launches[0].checksum === f6.observations.launches[1].checksum, 'F6L compiler artifact execution parity is incomplete.');
+    invariant(f6.observations.compilerTerminal?.graceful === true && f6.observations.driverTerminal?.graceful === true, 'F6L compiler/Driver cleanup is incomplete.');
+    invariant(f8.deviceJsObservation?.sourceOnly === true && f8.deviceJsObservation?.structuredIntegerBitwise === true && f8.deviceJsObservation?.dataDependentWhile === true && f8.deviceJsObservation?.globalIndex === true, 'F8L installed-package Device-JS semantic evidence is incomplete.');
+    invariant(f8.deviceJsObservation?.exactU64 === 'ffffffffffffffff' && f8.deviceJsObservation?.atomicCasUniqueFlags === true && f8.deviceJsObservation?.rejectionBeforeCompilerResources === true, 'F8L installed-package Device-JS typed/atomic/rejection evidence is incomplete.');
+    invariant(f8.deviceJsObservation?.graceful === true && f8.deviceJsObservation?.driverResourceCounts?.live === 0, 'F8L installed-package Device-JS cleanup is incomplete.');
+    return {
+      cuda: {
+        driverPackage: device.driverVersion,
+        driverApi: diagnostic.assessment.cuda.driverApiVersion,
+        toolkit: f5CapabilityOracle.environment.toolkit.version,
+        header: f5CapabilityOracle.environment.toolkit.packageVersion,
+        headerSha256: f5CapabilityOracle.environment.toolkit.headerSha256,
+        driverModel: diagnostic.assessment.cuda.driverModel,
+        watchdog: diagnostic.assessment.cuda.watchdog,
+        computeMode: diagnostic.assessment.cuda.computeMode,
+      },
+      compilerProviders: {
+        profile: f6.observations.provider.profile,
+        nvrtc: f6.observations.provider.nvrtc.version,
+        nvrtcBuiltins: f6.observations.provider.nvrtcBuiltins.version,
+        nvJitLink: f6.observations.provider.nvJitLink.version,
+      },
+      observations: {
+        installedPackage: `${f8.package.name}@${f8.package.version}`,
+        installedPackageSha256: f8.package.sha256,
+        vectorChecksum: f8.observation.checksum,
+        compilerArtifacts: f6.oracle,
+        nativeCapabilities: {
+          scalarBoundaryCases: f5Capabilities.observations.scalarCases.length,
+          operationFirstStatus: f5Capabilities.observations.operation.first.status,
+          operationTerminalStatus: f5Capabilities.observations.operation.completed.status,
+          asyncTransferParity: f5Capabilities.observations.transferTerminal.graceful,
+          mailboxPublication: f5CapabilityOracle.oracle.MAILBOX_PUBLICATION,
+          deviceJsSourceOnly: f8.deviceJsObservation.sourceOnly,
+          deviceJsProgram: f8.deviceJsObservation.deviceProgram,
+          rdcDeviceLtoQualification: 'not-included-in-linux-baseline',
+        },
+        permissionControls: 'DriverActor and CompilerActor denial/allow passed',
+        terminalCleanup: true,
+      },
+    };
+  }
   if (profile.id !== 'windows-native-x64') return null;
   const exp012Build = await loadJson(path.join(repositoryRoot, 'build', 'exp-012', 'windows-x64', 'evidence', 'build.json'));
   const exp012Smoke = await loadJson(path.join(repositoryRoot, 'build', 'exp-012', 'windows-x64', 'evidence', 'smoke.json'));
