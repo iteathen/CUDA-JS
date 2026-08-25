@@ -32,20 +32,21 @@ try {
     try { status = await operation.status(); }
     catch (error) {
       cleanupError = { code: error.code, category: error.category, healthBefore: error.healthBefore, healthAfter: error.healthAfter, details: error.details };
+      const primary = error.details?.primaryFailure;
       failure = {
-        code: error.details?.terminalFailureCode,
-        category: error.details?.terminalFailureCategory,
-        message: error.details?.terminalFailureMessage,
-        healthBefore: error.details?.terminalFailureHealthBefore,
-        healthAfter: error.details?.terminalFailureHealthAfter,
-        nativeStatus: error.details?.terminalFailureNativeStatus,
-        nativeName: error.details?.terminalFailureNativeName,
-        nativeDescription: error.details?.terminalFailureNativeDescription,
+        code: primary?.code,
+        category: primary?.category,
+        message: primary?.message,
+        healthBefore: primary?.healthBefore,
+        healthAfter: primary?.healthAfter,
+        nativeStatus: primary?.details?.nativeStatus,
+        nativeName: primary?.details?.nativeName,
+        nativeDescription: primary?.details?.nativeDescription,
         observedAt: {
-          driverCall: error.details?.terminalFailureObservedAtDriverCall,
-          operationSequence: error.details?.terminalFailureObservedAtOperationSequence,
+          driverCall: primary?.operation,
+          operationSequence: primary?.operationId,
         },
-        causalOperation: error.details?.terminalFailureCausalOperation,
+        causalOperation: primary?.details?.causalOperation,
       };
       break;
     }
@@ -63,8 +64,8 @@ try {
   assert(Number.isSafeInteger(failure.nativeStatus));
   assert.equal(typeof failure.nativeName, 'string');
   assert.equal(typeof failure.nativeDescription, 'string');
-  await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), (error) => ['DRIVER_RUNTIME_POISONED', 'DRIVER_RUNTIME_RESTART_REQUIRED', 'DRIVER_RESTART_REQUIRED'].includes(error.code));
-  await assert.rejects(operation.close(), (error) => ['DRIVER_RESTART_REQUIRED', 'DRIVER_RUNTIME_CLOSED'].includes(error.code));
+  await assert.rejects(runtime.allocateDevice({ byteLength: 1 }), (error) => ['DRIVER_RUNTIME_POISONED', 'DRIVER_RUNTIME_RESTART_REQUIRED', 'DRIVER_RESTART_REQUIRED', 'CUDA_JS_RUNTIME_CLOSED', 'CUDA_JS_RESOURCE_ORPHANED'].includes(error.code));
+  await assert.rejects(operation.close(), (error) => ['DRIVER_RESTART_REQUIRED', 'DRIVER_RUNTIME_CLOSED', 'CUDA_JS_RUNTIME_CLOSED', 'CUDA_JS_RESOURCE_ORPHANED'].includes(error.code));
 } finally {
   terminal = await runtime.close();
 }
