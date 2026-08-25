@@ -10,6 +10,7 @@ For the complete, crawler-friendly capability inventory, read **[`docs/CAPABILIT
 
 CUDA-JS is broader than a shallow CUDA wrapper, but intentionally narrower than unrestricted raw native access:
 
+- **JavaScript-authored and JIT/native-realized.** The maintained core runtime is JavaScript/ESM. Node FFI and NVIDIA libraries provide native execution, while Device-JS may lower to private generated CUDA C++ and JIT-produced device artifacts. Repository C/C++ probes/oracles are independent evidence, not shipped runtime implementation. See [ADR-0005](docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md).
 - **No CUDA-JS-specific native addon in the v0 baseline.** CUDA host calls use Node 26's experimental `node:ffi` privately from Worker-owned components; generated ABI facts and reviewed semantics define the approved CUDA surface.
 - **Asynchronous host architecture.** A dedicated `DriverActor` Worker owns one private CUDA context and raw Driver resources. A separate `CompilerActor` Worker owns NVRTC, nvJitLink, compiler/linker logs, artifacts, and cache work. Potentially blocking native work stays off the Node.js application event loop.
 - **Real CUDA stream/event execution today.** The qualified legacy terminal-launch path uses a private `CU_STREAM_NON_BLOCKING` stream and private CUDA events. The implemented SPEC-0016 public surface adds one opaque `submit()` → `status()` / `wait()` / `close()` operation lifecycle; exact Windows evidence covers delayed completion, deferred failure attribution, and teardown on the recorded profile.
@@ -52,6 +53,8 @@ CUDA-JS version zero is **Node-FFI-first**:
 - a CompilerActor Worker owns NVRTC/nvJitLink and content-addressed device artifacts;
 - JavaScript receives opaque resource capabilities, not raw native/device pointers;
 - strict hot-path JIT is a measured support profile, not an assumption.
+
+This is the concrete meaning of **JavaScript-authored and JIT/native-realized**. “Pure JavaScript” is not used as an unqualified architecture claim because CUDA-JS intentionally invokes native providers, generates private CUDA C++/device artifacts, and retains independent C/C++ conformance oracles. None of those facts makes the shipped core runtime a maintained C/C++ implementation.
 
 The rejected native-bootstrap/AsmJit-first design is preserved under [`docs/archive/`](docs/archive/) for provenance and adversarial rationale.
 
@@ -140,6 +143,7 @@ Run `npm run f8:portable` for package and independent-consumer controls or `npm 
 - [`agent_files/SYSTEM_REGISTRY.md`](agent_files/SYSTEM_REGISTRY.md)
 - [`docs/decisions/README.md`](docs/decisions/README.md)
 - [`docs/decisions/ADR-0002-node-ffi-first-host-binding.md`](docs/decisions/ADR-0002-node-ffi-first-host-binding.md)
+- [`docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md`](docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md)
 - [`docs/specs/SPEC-0002-windows-driver-bootstrap.md`](docs/specs/SPEC-0002-windows-driver-bootstrap.md)
 - [`docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](docs/architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md)
 - [`docs/architecture/TARGET_ARCHITECTURE.md`](docs/architecture/TARGET_ARCHITECTURE.md)

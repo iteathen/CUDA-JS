@@ -46,6 +46,7 @@ Correctness, safety, lifecycle truth, recoverability and compatibility are gates
 - **ADR-0004 and SPEC-0027** authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon. Custom AsmJit/register stubs remain a deferred measured-gap option.
+- The canonical source-architecture description is **JavaScript-authored and JIT/native-realized**. Maintained core runtime source is JavaScript; Node/native CUDA libraries and generated device artifacts realize execution; C/C++ probes/oracles remain independent evidence rather than package runtime. Do not use unqualified “pure JavaScript” as normative wording or introduce a maintained native host backend without an accepted measured-gap decision under ADR-0005.
 - A `fast-jit-required` claim requires exact-profile qualification evidence; generic fallback is allowed only in a declared cold/bootstrap profile.
 - Generated header/ABI facts and curated semantic/lifecycle overlays are separate owners. Unknown public semantics fail closed.
 - Node FFI and raw native/device memory remain private. JavaScript receives opaque capabilities and bounded data.

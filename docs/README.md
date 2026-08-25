@@ -12,6 +12,7 @@
 - [`FOUNDATION_INDEX.md`](FOUNDATION_INDEX.md)
 - [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md)
 - [`decisions/README.md`](decisions/README.md)
+- [`decisions/ADR-0005-javascript-authored-jit-native-realized.md`](decisions/ADR-0005-javascript-authored-jit-native-realized.md) — canonical JavaScript-authored and JIT/native-realized source/runtime split.
 - [`specs/README.md`](specs/README.md)
 - [`specs/SPEC-0000-runtime-contract-map.md`](specs/SPEC-0000-runtime-contract-map.md)
 - [`specs/SPEC-0001-cuda-schema-compiler.md`](specs/SPEC-0001-cuda-schema-compiler.md)

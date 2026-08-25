@@ -8,6 +8,8 @@ This page is the discoverable capability map for CUDA-JS. It summarizes accepted
 
 The published `cuda-js` package is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. The CUDA-JS project has accepted an authority-only boundary for an optional NN product as a separate future publish unit; no NN package, implementation, or qualification exists yet. Current public profiles remain intentionally narrower than the architectural extension surface.
 
+Its canonical source-architecture description is **JavaScript-authored and JIT/native-realized**. Maintained core runtime source is JavaScript/ESM; Node FFI and NVIDIA libraries provide native execution; Device-JS may deterministically produce private CUDA C++ and JIT-compiled device artifacts. C/C++ ABI probes, conformance oracles and generated fixtures are independent evidence rather than shipped runtime implementation. Unqualified “pure JavaScript” is deliberately avoided; see [`ADR-0005`](decisions/ADR-0005-javascript-authored-jit-native-realized.md).
+
 ## Executive summary
 
 CUDA-JS currently provides a public/package implementation with an exact qualified Windows x64 foundation. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
