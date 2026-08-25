@@ -60,6 +60,7 @@ const multiOperationOutput = runNode(['--experimental-ffi', 'multi-operation-con
 const multiOperationObservation = JSON.parse(multiOperationOutput.split(/\r?\n/).at(-1));
 assert.equal(multiOperationObservation.producerPendingAfterObserver, true);
 assert.deepEqual(multiOperationObservation.observedWords, [1]);
+assert.deepEqual(multiOperationObservation.transferBytes, [3, 5, 7, 11]);
 assert.equal(multiOperationObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
@@ -67,7 +68,7 @@ assert(!existsSync(installed));
 const target = await writeEvidence('native-windows-package.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8W',
-  capsule: 'installed-package-native-windows-vector-and-device-js-consumers',
+  capsule: 'installed-package-native-windows-vector-device-js-operation-transfer-consumers',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch },
@@ -76,6 +77,7 @@ const target = await writeEvidence('native-windows-package.json', {
     'docs/specs/SPEC-0013-restricted-device-js.md',
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
+    'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-windows.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
@@ -86,6 +88,6 @@ const target = await writeEvidence('native-windows-package.json', {
   observation,
   deviceJsObservation,
   multiOperationObservation,
-  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector consumer retains the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector and async-transfer consumers retain the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
 console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum} and source-only Device-JS qualification; evidence: ${target}`);

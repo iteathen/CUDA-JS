@@ -1,6 +1,7 @@
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
 import { ExecutionManager } from '../../../execution/index.mjs';
+import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, healthForErrorCategory, observeErrorHealth } from '../health.mjs';
 
@@ -104,6 +105,26 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
     },
   });
+  const stagingAllocations = new Set();
+  const transfer = new HostMemoryTransferManager({
+    registry,
+    contextToken,
+    memory,
+    execution,
+    maxTransferBytes: memoryPolicy.maxTransferBytes,
+    operations: {
+      async allocateStaging({ byteLength }) { const storage = new Uint8Array(byteLength); stagingAllocations.add(storage); return storage; },
+      async freeStaging({ native }) {
+        if (!stagingAllocations.delete(native)) throw Object.assign(new Error('Mock staging block is not live.'), { code: 'MOCK_STAGING_STALE' });
+        recordDisposal('pinned-staging');
+        return { mockStorageReleased: true };
+      },
+      stagingView({ native }) { return native; },
+      async copyHtoDAsync({ destinationNative, destinationOffset, stagingNative, byteLength }) { destinationNative.set(stagingNative.subarray(0, byteLength), destinationOffset); },
+      async copyDtoHAsync({ stagingNative, sourceNative, sourceOffset, byteLength }) { stagingNative.set(sourceNative.subarray(sourceOffset, sourceOffset + byteLength), 0); },
+      async copyDtoDAsync({ destinationNative, destinationOffset, sourceNative, sourceOffset, byteLength }) { destinationNative.set(sourceNative.subarray(sourceOffset, sourceOffset + byteLength), destinationOffset); },
+    },
+  });
 
   async function description(operationSequence = 0) {
     return {
@@ -114,6 +135,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       device: { ordinal: 0, attributes: { ...deviceLimits, multiprocessorCount: 1, kernelExecTimeout: 0, integrated: 0, computeMode: 0, tccDriver: 0, computeCapabilityMajor: 0, computeCapabilityMinor: 0 } },
       context: contextToken,
       memory: await memory.usage(operationSequence),
+      transfer: transfer.summary(),
       execution: execution.summary(),
       health: health.snapshot(),
       inventory: registry.inventory(),
@@ -186,6 +208,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       };
     },
     memory,
+    transfer,
     execution,
     async testingBlock({ milliseconds, operationId }) {
       const storage = new Int32Array(new SharedArrayBuffer(4)); Atomics.wait(storage, 0, 0, milliseconds);

@@ -18,8 +18,8 @@ This specification distinguishes host-memory capabilities explicitly. It does no
 
 ```text
 architectural disposition: accepted
-implementation status:       not-implemented
-qualification status:        not-qualified
+implementation status:       implemented-first-profile
+qualification status:        exact-windows-profile-qualified
 priority:                    P1 implementation for CUDA-MCGS readiness
 ```
 

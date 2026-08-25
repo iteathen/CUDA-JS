@@ -7,8 +7,9 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     1318baaeb18f613bdda5d281a733a8a973f3a8a3
-P0 evidence PR:     #116 / acf1ca85eb9859d5f54618c17cbe2c959745e388 / green / review required
+protected main:     5653d5dffdb8b763232e8d6c6a0c1353d8678151
+completed P0/P1:    #116 P0 / #118 SPEC-0018 scheduler
+active P1:          #119 SPEC-0019 bounded asynchronous transfer
 execution package:  cuda-js@0.1.0-alpha.6
 ```
 
@@ -21,7 +22,9 @@ The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through
 - SPEC-0012 typed Device LTO;
 - SPEC-0013 restricted Device-JS;
 - SPEC-0022 accepted relaxed device-scope `u32`/`u64` atomic-observation child;
-- SPEC-0016 opaque one-pending-operation submission/completion;
+- SPEC-0016 opaque submission/completion with a one-pending compatibility default;
+- SPEC-0018 exact opt-in capacity-two/two-private-stream/no-queue scheduling;
+- SPEC-0019 exact two-internal-pinned-staging contiguous H2D/D2H/D2D profile;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
 - the SPEC-0006 target-syntax correction;
@@ -61,24 +64,24 @@ The same specification implements a generic contiguous 1D `device-view` componen
 
 The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed `verify` and `node-compatibility`, including F4/F5/F6 and the F8 public package/facade path. The fully reconciled implementation/documentation head must pass the same protected checks before merge. Native scalar ABI/launch and native view-consumer qualification remain open.
 
-### Still gated: SPEC-0018 / #40
+### Implemented and qualified first profiles: SPEC-0018 / #40 and SPEC-0019 / #86
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented
-qualification status:        not-qualified
-priority:                    blocked on independent review and protected-main integration of green PR #116
+architectural disposition: selected
+implementation status:       SPEC-0018 merged; SPEC-0019 implemented on PR #119
+qualification status:        exact recorded Windows profile plus installed-package evidence
+priority:                    integrate #86, then advance dependent SPEC-0014/#38
 ```
 
-Green PR #116 reconciles the retained Windows candidate onto the current authority baseline and reproduces delayed NOT_READY-to-terminal completion, controlled deferred failure, and balanced teardown. Branch checks and exact local native evidence pass, but the repository requires independent review before protected-main integration. SPEC-0018 remains proposal-only until that merge and read-back close its widening gate. Multiple operations/private streams are not implemented.
+PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 implements SPEC-0019 with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Caller registration, mapped memory, chunk queues, and overlap claims remain excluded.
 
 ## Execution baseline
 
 ```text
 DriverActor Workers:          1 per runtime
 private CUDA contexts:        1 per runtime
-private execution streams:    1
-max pending GPU operations:   1
+private execution streams:    1 default / exactly 2 opt-in
+max pending GPU operations:   1 default / exactly 2 opt-in
 public operation lifecycle:   CudaFunction.submit() -> CudaOperation
 legacy terminal convenience:  CudaFunction.launch()
 public scalar launch kinds:   device-memory/u32/u64/i32/f32/f64/f16/bf16
@@ -96,8 +99,6 @@ The following remain proposal authority only and do not authorize production cod
 
 ```text
 SPEC-0014 long-lived sideband
-SPEC-0018 bounded multi-operation scheduling
-SPEC-0019 host memory and async transfer
 SPEC-0020 prepared batches / CUDA Graph execution
 SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation child accepted)
 SPEC-0023 context-bound CUDA library adapters
@@ -137,7 +138,6 @@ These remain independently open because the exact environment/control is unavail
 - MIG #27;
 - performance/soak #28;
 - exact CUDA-MCGS pair #32;
-- protected-main integration of green exact-profile RDC/Device-JS/operations evidence #35/#43/#51 (PR #116, independent review required);
 - native LTO qualification #42;
 - native SPEC-0021 scalar/view-consumer qualification #39/#88;
 - exact merged-head Windows F5 oracle revalidation #64;
@@ -148,11 +148,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. obtain independent review and integrate/read back P0 evidence PR #116 (#35/#43/#51)
-2. obtain independent review and integrate/read back the scoped atomic-observation slice (#87)
-3. accept and implement SPEC-0018 only after steps 1-2
-4. advance SPEC-0019 async host transfer and SPEC-0014 sideband in dependency order
-5. close the exact CUDA-MCGS compatible pair only against frozen reviewed artifacts (#32)
+1. complete exact-head verification and integrate/read back SPEC-0019 PR #119 (#86)
+2. advance SPEC-0014 publication mailboxes (#38) against accepted scheduler/host-memory ownership
+3. run the final integrated P0/P1 exact-head verification and cleanup
+4. close the exact CUDA-MCGS compatible pair only against frozen reviewed artifacts (#32)
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

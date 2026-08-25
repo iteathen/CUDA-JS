@@ -31,6 +31,7 @@ export interface ExecutionPolicy {
   maxModuleBytes?: number;
   maxArguments?: number;
   maxCompletionMilliseconds?: number;
+  maxPendingGpuOperations?: 1 | 2;
 }
 
 export interface DriverOptions {
@@ -119,6 +120,9 @@ export interface CudaDeviceMemory {
   status(): Promise<Readonly<Record<string, unknown>>>;
   write(bytes: Uint8Array, options?: { deviceOffset?: number }): Promise<Readonly<Record<string, unknown>>>;
   read(options: { deviceOffset?: number; byteLength: number }): Promise<Readonly<{ schemaVersion: 1; deviceOffset: number; byteLength: number; bytes: Uint8Array; usage: unknown }>>;
+  writeAsync(bytes: Uint8Array, options?: { deviceOffset?: number; after?: CudaOperation | null }): Promise<CudaOperation>;
+  readAsync(options: { deviceOffset?: number; byteLength: number; after?: CudaOperation | null }): Promise<CudaOperation>;
+  copyFromAsync(source: CudaDeviceMemory, options: { destinationOffset?: number; sourceOffset?: number; byteLength: number; after?: CudaOperation | null }): Promise<CudaOperation>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
@@ -128,6 +132,14 @@ export interface CudaLaunchOptions {
   block: LaunchDimensions;
   sharedMemoryBytes?: number;
   arguments: readonly CudaLaunchArgument[];
+  after?: CudaOperation | null;
+  accesses?: readonly Readonly<{
+    argumentIndex: number;
+    byteOffset: number;
+    byteLength: number;
+    mode: 'read' | 'write' | 'read-write' | 'atomic-observe-relaxed-device' | 'atomic-update-relaxed-device';
+    dtype?: 'u32' | 'u64';
+  }>[];
 }
 
 export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned' | 'closed';
@@ -135,16 +147,18 @@ export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned'
 export interface CudaOperationStatus {
   readonly schemaVersion: 1;
   readonly status: 'pending' | 'completed' | 'failed' | 'orphaned';
-  readonly grid: LaunchDimensions;
-  readonly block: LaunchDimensions;
-  readonly sharedMemoryBytes: number;
-  readonly argumentKinds: readonly FunctionParameterKind[];
+  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device';
+  readonly grid?: LaunchDimensions;
+  readonly block?: LaunchDimensions;
+  readonly sharedMemoryBytes?: number;
+  readonly argumentKinds?: readonly FunctionParameterKind[];
   readonly pollCount: number;
   readonly elapsedMilliseconds: number;
   readonly operationSequence: number;
   readonly health: Readonly<Record<string, unknown>>;
   readonly failure?: Readonly<Record<string, unknown>>;
   readonly orphanReason?: string;
+  readonly result?: Readonly<{ bytes: Uint8Array }>;
 }
 
 export interface CudaOperation {

@@ -30,10 +30,10 @@ CUDA-JS currently provides a public/package implementation with an exact qualifi
 
 Important current limits are equally explicit:
 
-- one public runtime currently permits **one pending GPU operation at a time**;
-- multiple in-flight operations/private multi-stream scheduling are planned but not implemented or qualified;
+- one pending GPU operation remains the compatibility default, while an explicit profile permits **exactly two pending operations** on two private streams;
+- the capacity-two scheduler and bounded internal-pinned asynchronous transfers are implemented and qualified only on the recorded exact Windows profile;
 - public caller-controlled raw streams/events are not part of the current public contract;
-- multi-GPU, MIG, managed/pinned/mapped memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
+- multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
 - contiguous 1D typed device views are implemented as a reusable component/lifecycle foundation, but no public `cuda-js` facade API for creating views has been selected or qualified;
 - typed Device LTO is implemented in portable/software and package paths but remains natively unqualified;
 - the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
@@ -128,9 +128,9 @@ Current behavior includes:
 
 SPEC-0021 also implements a generic **contiguous 1D typed device-view component foundation** over opaque allocations. A view records one accepted dtype, aligned byte offset, element count/byte span, access role, parent generation and registry child/lease lifetime without exposing a native address. Exact half-open overlap classification, safe-integer arithmetic, stale/closed/wrong-parent rejection, and parent-close blocking are covered by portable conformance. This component is not yet a public facade capability; public API spelling and package exposure require a separate accepted public-surface decision.
 
-The current memory contract deliberately does **not** market managed, unified, pinned, mapped, pooled, imported/exported, peer, or zero-copy memory as aliases for ordinary device memory. Those are separate capability families because placement, migration, coherence, synchronization, pressure, and lifetime differ.
+The ordinary memory contract deliberately does **not** market managed, unified, pinned, mapped, pooled, imported/exported, peer, or zero-copy memory as aliases for device memory. SPEC-0019 adds a distinct internal-pinned profile with exactly two lazy `maxTransferBytes` staging blocks, snapshot H2D, terminal-result D2H, and contiguous D2D through the existing opaque operation lifecycle. Caller-owned registration, mapped memory, 2D/3D copies, and unbounded chunk queues remain excluded.
 
-See [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md) and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
+See [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0019`](specs/SPEC-0019-host-memory-and-async-transfer.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
 
 ### 4. Module, function, launch, stream, and completion
 
@@ -143,7 +143,7 @@ CUDA-JS currently supports a bounded execution slice with:
 - public `device-memory`, `u32`, `u64`, `i32`, finite-only `f32`, `f64`, `f16`, and `bf16` parameter kinds;
 - deterministic SPEC-0021 binary64/binary16/bfloat16 host packing, including round-to-nearest-even half/bfloat conversion and canonical NaN bits for the new kinds;
 - grid/block/shared-memory validation against queried device limits;
-- one private nonblocking CUDA stream;
+- one private nonblocking CUDA stream by default, or exactly two in the explicit capacity-two profile;
 - one private event per pending operation;
 - event-based terminal completion observed through short serialized status turns;
 - an opaque `CudaOperation` with `status()`, host-side `wait()`, and logical `close()`;
@@ -157,7 +157,7 @@ A single CUDA kernel is still massively parallel across GPU threads, warps, bloc
 
 The terminal F5 launch path is qualified on the recorded Windows profile. SPEC-0016 now has current-head exact Windows delayed-completion/deferred-failure/cleanup evidence on that profile; SPEC-0011 and SPEC-0021 scalar kinds retain their separate native promotion gates.
 
-See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md), [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
+See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md), [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md), [`SPEC-0018`](specs/SPEC-0018-bounded-multi-operation-scheduling.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
 
 ### 5. Concurrency: the uncompressed model
 
@@ -355,7 +355,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Multi-GPU orchestration | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0024; depends on selected-device and generalized operation foundations. |
 | MIG | `deferred` | `not-implemented` | `not-qualified` | `deferred` | Identity, isolation, quota, and lifecycle contract remains absent. |
 | Managed/unified memory | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Separate placement/migration/coherence capability; not required for ordinary residency. |
-| Pinned/registered host memory and async transfer | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0019 depends on accepted operation scheduling. |
+| Internal pinned host staging and async transfer | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0019 first profile: two private bounded staging blocks plus contiguous H2D/D2H/D2D; caller registration/mapping remains later. |
 | Memory pools/async allocation | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Requires separate pressure/stream/lifetime semantics. |
 | Prepared batches/CUDA Graphs | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0020 retains a non-graph semantic fallback. |
 | Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |

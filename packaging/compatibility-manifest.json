@@ -47,6 +47,8 @@
     "typedDeviceViews": "contiguous-1d-component-foundation-no-public-facade-yet",
     "launchConcurrency": 1,
     "gpuOperationLifecycle": "opaque-submit-status-wait-close-one-pending",
+    "boundedMultiOperationScheduling": "opt-in-capacity-two-two-private-streams-one-predecessor-no-queue",
+    "asyncTransfers": "opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d",
     "compiler": "optional-nvrtc-13.3",
     "compilerHeaderProfiles": {
       "none": "default",
@@ -87,6 +89,7 @@
     "SPEC-0021 f64/f16/bf16 scalar launch kinds are implemented in the public portable/software/package path; their exact native ABI/launch promotion evidence remains open.",
     "SPEC-0021 contiguous one-dimensional typed device-view range/lifecycle semantics are implemented as a generic component foundation; no public cuda-js facade entry for views has been selected or qualified yet.",
     "SPEC-0016 opaque GPU operation submission/completion has exact Windows delayed-completion/deferred-failure/cleanup evidence only for its recorded Node/Driver/GPU profile; no broader support is implied.",
+    "SPEC-0018 capacity-two scheduling and SPEC-0019 internal-pinned async transfers have exact Windows and installed-package evidence only for the recorded Node/Driver/GPU profile; the compatibility default remains one pending operation.",
     "SPEC-0013 Device-JS plus the scoped atomic-observation child is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",

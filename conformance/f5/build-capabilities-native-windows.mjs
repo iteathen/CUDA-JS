@@ -71,7 +71,8 @@ assert.deepEqual(oracle.SCALAR_LAYOUT, [0, 8, 16, 20, 24, 32]);
 assert.deepEqual(oracle.TYPE_LAYOUT, [4, 4, 8, 8, 4, 4, 4, 4, 8, 8]);
 assert.deepEqual(oracle.DELAY_FIRST_QUERY, [600]);
 assert.equal(oracle.DELAY_RESULT[0], 0xc001d00d);
-for (const key of ['EVENT_DESTROY', 'FREE_OUTPUT', 'MODULE_UNLOAD', 'STREAM_DESTROY', 'CONTEXT_DESTROY']) assert.deepEqual(oracle[key], [0]);
+assert.deepEqual(oracle.ASYNC_TRANSFER, [3, 5, 7, 11]);
+for (const key of ['EVENT_DESTROY', 'FREE_TRANSFER_COPY', 'FREE_TRANSFER', 'FREE_TRANSFER_OUTPUT', 'FREE_TRANSFER_INPUT', 'FREE_OUTPUT', 'MODULE_UNLOAD', 'STREAM_DESTROY', 'CONTEXT_DESTROY']) assert.deepEqual(oracle[key], [0]);
 
 const sources = [
   'docs/specs/SPEC-0011-scalar-kernel-arguments.md',
@@ -82,8 +83,8 @@ const sources = [
 ];
 await writeFile(path.join(evidenceRoot, 'capability-oracle-build.json'), `${JSON.stringify({
   schemaVersion: 1,
-  workPackage: 'NQ-SCALAR/NQ-OPERATION',
-  capsule: 'independent-msvc-driver-scalar-operation-oracle',
+  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER',
+  capsule: 'independent-msvc-driver-scalar-operation-transfer-oracle',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, osVersion: os.version(), compiler: 'MSVC x64 + nvcc PTX', toolkit: manifest.toolkit },

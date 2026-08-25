@@ -34,6 +34,12 @@ if (process.platform === 'win32') {
   assert.equal(capabilities.observations.scalarCases.length, 3);
   assert.equal(capabilities.observations.operation.first.status, 'pending');
   assert.equal(capabilities.observations.operation.completed.status, 'completed');
+  assert.deepEqual(capabilities.oracle.asyncTransferWords, [3, 5, 7, 11]);
+  assert.deepEqual(capabilities.observations.asyncTransfer.incrementedWords, [4, 6, 8, 12]);
+  assert.deepEqual(capabilities.observations.asyncTransfer.copiedWords, [4, 6, 8, 12]);
+  assert.equal(capabilities.observations.transferTerminal.graceful, true);
+  assert.equal(capabilities.observations.transferTerminal.driver.resourceCounts.live, 0);
+  assert.equal(capabilities.observations.transferTerminal.driver.resourceCounts.orphaned, 0);
   assert.equal(capabilities.observations.pendingRuntimeClose.graceful, true);
   assert.equal(capabilities.observations.deferredFailure.status, 'pass');
   assert.equal(capabilities.observations.deferredFailure.failure.observedAt.driverCall, 'cuEventQuery');
@@ -41,4 +47,4 @@ if (process.platform === 'win32') {
   assert.equal(capabilities.observations.terminal.driver.resourceCounts.orphaned, 0);
 }
 
-console.log(`F5 verification passed for ${process.platform}-${process.arch}: bounded PTX, declared packing, leases, event completion, deferred failure, timeout loss${process.platform === 'win32' ? ', independent native Windows vector/scalar parity, and opaque native operation lifecycle' : ''}.`);
+console.log(`F5 verification passed for ${process.platform}-${process.arch}: bounded PTX, declared packing, leases, event completion, deferred failure, timeout loss${process.platform === 'win32' ? ', independent native Windows vector/scalar/transfer parity, bounded scheduling, and opaque operation lifecycle' : ''}.`);

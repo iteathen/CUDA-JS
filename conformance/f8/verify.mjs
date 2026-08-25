@@ -19,6 +19,8 @@ assert.equal(compatibility.node.minimumVersion, 'v26.1.0');
 assert.equal(compatibility.node.version, 'v26.7.0');
 assert.deepEqual(compatibility.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
+assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
+assert.equal(compatibility.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
@@ -36,6 +38,7 @@ assert(memoryConsumer);
 assert.equal(memoryConsumer.packageVersion, packageJson.version);
 assert.deepEqual(memoryConsumer.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(memoryConsumer.operationLifecycle, true);
+assert.equal(memoryConsumer.asyncTransferLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
@@ -65,6 +68,8 @@ if (process.platform === 'win32') {
   assert.equal(native.deviceJsObservation.compilerResources.programsCreated, native.deviceJsObservation.compilerResources.programsDestroyed);
   assert.equal(native.deviceJsObservation.driverResourceCounts.live, 0);
   assert.equal(native.deviceJsObservation.driverResourceCounts.orphaned, 0);
+  assert.deepEqual(native.multiOperationObservation.transferBytes, [3, 5, 7, 11]);
+  assert.equal(native.multiOperationObservation.graceful, true);
 }
 if (process.platform === 'linux') {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));
