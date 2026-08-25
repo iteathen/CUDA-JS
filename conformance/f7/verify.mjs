@@ -33,7 +33,7 @@ if (process.platform === 'win32') {
 
 if (process.platform === 'linux') {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));
-  assert.equal(readiness.status, 'prepared-not-qualified');
+  assert(['diagnostic-source-ready-not-qualified', 'prepared-not-qualified'].includes(readiness.status));
   assert(['linux-native-x64', 'linux-native-arm64'].includes(readiness.host.hostKind));
   assert(!readiness.host.hostKind.startsWith('wsl'));
 }

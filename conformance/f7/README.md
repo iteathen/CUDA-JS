@@ -21,6 +21,8 @@ A `wddm-watchdog` result means CUDA reports a kernel execution timeout for devic
 
 ## Native Linux x86-64 handoff
 
+Platform diagnostics now assess copied native Linux x86-64 DriverActor descriptions through the same testing-unconfirmed contract as Windows, using a Linux-specific driver-model label. This is source readiness only; the native F7 permission/lifecycle runner and exact evidence remain incomplete.
+
 Linux support remains present and incomplete. Work on a native glibc x86-64 machine with a real NVIDIA Driver and supported GPU; WSL cannot supply native Linux evidence. Start with the public issue and complete the retained F2L through F6L runbooks in order. Then:
 
 1. Use exact Node 26.7.0 and run `npm run f7:unit`, `npm run f7:portable`, and `npm run f7:linux-readiness` unchanged.

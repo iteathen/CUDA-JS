@@ -23,7 +23,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; shared Driver backend, Linux discovery profile and F3L runner implemented; exact native chain incomplete | complete Ubuntu 24.04 F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
+| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; shared Driver/compiler engines, platform diagnostics, public-facade admission, compatibility profile and F3L/F6L runners implemented; exact native chain incomplete | complete Linux F4/F5/F7/F8 runners and Ubuntu 24.04 F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
 | Windows 11 | x86-64 Win64 | maintained secondary public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
@@ -127,7 +127,7 @@ Graphs are not a prerequisite for the first real-kernel slice. They become a per
 | Windows device-zero WDDM/TCC/watchdog/compute-mode diagnostics | accepted F7W on exact Node 26.7.0 and Driver 13030; diagnostic only and never mutates device state |
 | Node permission-model inheritance into DriverActor and CompilerActor | accepted F7W; denial without FFI authority and explicit-allow success are mandatory |
 | deterministic failure/property and repeated lifecycle stress | accepted portable F7 and native Windows F7W; broad elapsed/RSS ceilings are regression checks, not performance claims |
-| native Linux x86-64 hardening | retained F7L handoff; blocked on native F2L through F6L qualification |
+| native Linux x86-64 hardening | copied diagnostic assessment source implemented; F7L permission/lifecycle runner and native F2L through F8L qualification remain open |
 | Linux ARM64 SBSA | independently classified; no ABI, Driver, compiler, GPU, or cleanup support claim |
 | WSL2 CUDA | diagnostics-only until an independent compatibility profile passes |
 

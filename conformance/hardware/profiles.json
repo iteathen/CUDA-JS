@@ -61,7 +61,7 @@
         "architecture": "x64",
         "environment": "native"
       },
-      "status": "driver-compiler-source-ready",
+      "status": "facade-source-ready",
       "promotionTarget": "qualified-experimental",
       "requiredNode": "v26.7.0",
       "requiredCapsules": [
@@ -74,8 +74,8 @@
         "run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence",
         "native F4 memory C oracle and runner",
         "native F5 execution C oracle and runner",
-        "complete and run F7 Linux diagnostics, permission, and lifecycle stress evidence",
-        "complete and run F8 installed-package Linux consumer evidence"
+        "complete and run F7 Linux native permission and lifecycle stress runner",
+        "complete and run F8 installed-package Linux native consumer runner"
       ]
     },
     {

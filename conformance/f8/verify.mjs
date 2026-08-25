@@ -8,7 +8,7 @@ import { evidenceRoot } from './evidence.mjs';
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.7');
+assert.equal(packageJson.version, '0.1.0-alpha.8');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -78,7 +78,14 @@ if (process.platform === 'win32') {
 }
 if (process.platform === 'linux') {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));
-  assert.equal(readiness.status, 'backend-unavailable');
-  assert.equal(readiness.observations.nativeOpenCode, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  if (process.arch === 'x64') {
+    assert.equal(readiness.status, 'facade-source-ready-not-qualified');
+    assert.equal(readiness.observations.compatibility.status, 'testing-unconfirmed-by-default');
+    assert(['environment-blocked', 'operational-unqualified'].includes(readiness.observations.admission.status));
+    assert.notEqual(readiness.observations.admission.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  } else {
+    assert.equal(readiness.status, 'backend-unavailable');
+    assert.equal(readiness.observations.admission.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  }
 }
 console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade plus source-only Device-JS execution' : 'retained native Linux qualification gates'}.`);

@@ -6,7 +6,7 @@
 
 **Originally:** 2026-08-13
 
-**Reconciled:** 2026-08-25 against protected `main@347c95edfa63ebe647f350909842ad65be08dca6`
+**Reconciled:** 2026-08-25 against protected `main@ee32d5e1309e1e9d2d6d235e61141290fe05db75`
 
 ## Purpose
 
@@ -17,7 +17,8 @@ Sequence accepted or proposal-backed generic CUDA-JS work without confusing arch
 ```text
 P0 active: OS-neutral native Linux reference path (#4)
   shared Driver/compiler source complete
-  -> diagnostics/public facade/package source parity
+  -> diagnostics/public facade/package testing-only source admission complete
+  -> native F4/F5 oracle/runners and F7/F8 installed-package runners
   -> exact Ubuntu 24.04 x86-64 F2L-F8L evidence
 
 P1 next: accepted SPEC-0017 explicit device selection (#20)

@@ -6,7 +6,7 @@
 
 This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
 
-ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, and exact F3L/F6L runner source are implemented, but the native and installed-package chain remains incomplete, so this priority is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.
+ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, diagnostics, testing-only public-facade admission, compatibility metadata, and exact F3L/F6L runner source are implemented, but F4/F5/F7/F8 native runners and the exact installed-package chain remain incomplete. Source admission is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.
 
 CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.
 
@@ -52,7 +52,7 @@ CUDA 13.3 compiler targets define the candidate set below. â€œSeeking evidenceâ€
 | Profile | Current runner state | Promotion target | Missing native work |
 |---|---|---|---|
 | `windows-native-x64` | runner ready | qualified experimental | none |
-| `linux-native-x64` | driver compiler source ready | qualified experimental | run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence; native F4 memory C oracle and runner; native F5 execution C oracle and runner; complete and run F7 Linux diagnostics, permission, and lifecycle stress evidence; complete and run F8 installed-package Linux consumer evidence |
+| `linux-native-x64` | facade source ready | qualified experimental | run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence; native F4 memory C oracle and runner; native F5 execution C oracle and runner; complete and run F7 Linux native permission and lifecycle stress runner; complete and run F8 installed-package Linux native consumer runner |
 | `wsl2-x64` | adapter incomplete | qualified experimental | WSL2-specific Driver/provider adapter; WSL2 native oracle and F2 through F8 qualification chain |
 | `linux-native-arm64-sbsa` | schema and adapter incomplete | qualified experimental | ARM64 Runtime IR and native ABI oracle; ARM64 Driver/compiler adapters; ARM64 F2 through F8 native qualification chain |
 | `linux-native-arm64-jetson` | contract required | future profile | accepted Jetson profile contract; Jetson Node/ABI/provider qualification; Jetson F2 through F8 native qualification chain |
