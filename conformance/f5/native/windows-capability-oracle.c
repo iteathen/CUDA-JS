@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
     uint32_t *transfer_output = NULL;
     uint32_t *mailbox_words = NULL;
     CUdeviceptr mailbox_device = 0;
+    int mailbox_registered = 0;
     unsigned char *ptx = NULL;
     size_t ptx_length = 0U;
     size_t index;
@@ -228,6 +229,7 @@ int main(int argc, char **argv) {
     if (mailbox_words == NULL) { exit_code = 45; goto cleanup; }
     result = cuMemHostRegister(mailbox_words, 4096U, CU_MEMHOSTREGISTER_DEVICEMAP);
     if (result != CUDA_SUCCESS) { exit_code = 46; goto cleanup; }
+    mailbox_registered = 1;
     result = cuMemHostGetDevicePointer(&mailbox_device, mailbox_words, 0U);
     if (result != CUDA_SUCCESS || mailbox_device == 0) { exit_code = 47; goto cleanup; }
     memset(mailbox_parameters, 0, sizeof(mailbox_parameters));
@@ -249,8 +251,8 @@ int main(int argc, char **argv) {
     if (mailbox_words[0] != UINT32_C(41) || mailbox_words[1] != UINT32_C(42)) exit_code = 52;
 
 cleanup:
-    if (mailbox_device != 0) { result = cuMemHostUnregister(mailbox_words); printf("MAILBOX_UNREGISTER\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 53; mailbox_device = 0; }
-    if (mailbox_words != NULL) { if (!VirtualFree(mailbox_words, 0U, MEM_RELEASE) && exit_code == 0) exit_code = 54; mailbox_words = NULL; }
+    if (mailbox_registered) { result = cuMemHostUnregister(mailbox_words); printf("MAILBOX_UNREGISTER\t%d\n", (int)result); if (result == CUDA_SUCCESS) mailbox_registered = 0; else if (exit_code == 0) exit_code = 53; mailbox_device = 0; }
+    if (mailbox_words != NULL && !mailbox_registered) { if (!VirtualFree(mailbox_words, 0U, MEM_RELEASE) && exit_code == 0) exit_code = 54; mailbox_words = NULL; }
     if (event != NULL) { result = cuEventDestroy(event); printf("EVENT_DESTROY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 25; }
     if (transfer_copy_device != 0) { result = cuMemFree(transfer_copy_device); printf("FREE_TRANSFER_COPY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 40; }
     if (transfer_device != 0) { result = cuMemFree(transfer_device); printf("FREE_TRANSFER\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 41; }
