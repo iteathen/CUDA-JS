@@ -186,6 +186,29 @@ class DriverRuntime {
     return this.#request('memory.read', { token, deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength });
   }
 
+  async writeDeviceAsync(token, bytes, options = {}) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'writeDeviceAsync requires an exact opaque memory token.');
+    if (!(bytes instanceof Uint8Array) || Buffer.isBuffer(bytes) || bytes.byteLength < 1) throw validationError('MEMORY_BYTES_INVALID', 'writeDeviceAsync requires a nonempty ordinary Uint8Array.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'writeDeviceAsync options contain unknown fields.');
+    if (bytes.byteLength > this.#memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'writeDeviceAsync bytes exceed the configured transfer limit.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'writeDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.h2d', { token, bytes: Uint8Array.from(bytes), deviceOffset: options.deviceOffset ?? 0, after: options.after ?? null });
+  }
+
+  async readDeviceAsync(token, options) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'readDeviceAsync requires an exact opaque memory token.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'byteLength', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'readDeviceAsync options are invalid.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'readDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.d2h', { token, deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength, after: options.after ?? null });
+  }
+
+  async copyDeviceAsync(destinationToken, sourceToken, options) {
+    if (!isResourceToken(destinationToken) || !isResourceToken(sourceToken)) throw validationError('DRIVER_MEMORY_TOKEN', 'copyDeviceAsync requires exact opaque destination and source memory tokens.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['destinationOffset', 'sourceOffset', 'byteLength', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'copyDeviceAsync options are invalid.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'copyDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.d2d', { destinationToken, sourceToken, destinationOffset: options.destinationOffset ?? 0, sourceOffset: options.sourceOffset ?? 0, byteLength: options.byteLength, after: options.after ?? null });
+  }
+
   async releaseMemory(token) {
     if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'releaseMemory requires an exact opaque memory token.');
     return this.#request('memory.release', { token });

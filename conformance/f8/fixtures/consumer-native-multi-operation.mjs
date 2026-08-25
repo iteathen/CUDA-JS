@@ -13,6 +13,7 @@ const runtime = await openCudaRuntime({
 let terminal;
 let observedWords;
 let producerPendingAfterObserver;
+let transferBytes;
 try {
   const module = await runtime.loadModule({ format: 'ptx', bytes: ptx });
   const producer = await module.getFunction({ name: 'cuda_js_native_atomic_producer', parameters: [{ kind: 'device-memory' }, { kind: 'u64' }] });
@@ -39,6 +40,23 @@ try {
   const bytes = (await observed.read({ byteLength: 4 })).bytes;
   observedWords = [new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0, true)];
   assert.deepEqual(observedWords, [1]);
+  const transferSource = await runtime.allocateDevice({ byteLength: 4 });
+  const transferDestination = await runtime.allocateDevice({ byteLength: 4 });
+  const input = Uint8Array.of(3, 5, 7, 11);
+  const uploadPromise = transferSource.writeAsync(input);
+  input.fill(0);
+  const upload = await uploadPromise;
+  const deviceCopy = await transferDestination.copyFromAsync(transferSource, { byteLength: 4, after: upload });
+  await upload.wait();
+  const download = await transferDestination.readAsync({ byteLength: 4, after: deviceCopy });
+  transferBytes = [...(await download.wait()).result.bytes];
+  assert.deepEqual(transferBytes, [3, 5, 7, 11]);
+  await deviceCopy.wait();
+  await download.close();
+  await deviceCopy.close();
+  await upload.close();
+  await transferDestination.close();
+  await transferSource.close();
   await observerOperation.close();
   await producerOperation.close();
   await observer.close();
@@ -52,4 +70,4 @@ try {
 assert.equal(terminal.graceful, true);
 assert.equal(terminal.driver.resourceCounts.live, 0);
 assert.equal(terminal.driver.resourceCounts.orphaned, 0);
-console.log(JSON.stringify({ consumer: 'native-multi-operation', producerPendingAfterObserver, observedWords, graceful: terminal.graceful }));
+console.log(JSON.stringify({ consumer: 'native-multi-operation-transfer', producerPendingAfterObserver, observedWords, transferBytes, graceful: terminal.graceful }));

@@ -4,6 +4,7 @@ import path from 'node:path';
 import ffi from 'node:ffi';
 
 import { ExecutionManager } from '../../../execution/index.mjs';
+import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
@@ -17,7 +18,8 @@ const DRIVER_ACTOR_SYMBOLS = Object.freeze([
   'cuInit', 'cuDriverGetVersion', 'cuDeviceGetCount', 'cuDeviceGet', 'cuDeviceGetAttribute',
   'cuGetErrorName', 'cuGetErrorString', 'cuCtxCreate_v4', 'cuCtxDestroy_v2',
   'cuCtxSetCurrent', 'cuCtxGetCurrent',
-  'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2',
+  'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemHostAlloc', 'cuMemFreeHost',
+  'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2', 'cuMemcpyHtoDAsync_v2', 'cuMemcpyDtoHAsync_v2', 'cuMemcpyDtoDAsync_v2',
   'cuModuleLoadData', 'cuModuleGetFunction', 'cuModuleUnload',
   'cuStreamCreate', 'cuStreamDestroy_v2',
   'cuEventCreate', 'cuEventRecord', 'cuEventQuery', 'cuEventDestroy_v2',
@@ -75,6 +77,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
   let contextToken;
   let memory;
   let execution;
+  let transfer;
 
   function errorText(functionName, status) {
     try {
@@ -409,6 +412,46 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
     });
 
+    transfer = new HostMemoryTransferManager({
+      registry,
+      contextToken,
+      memory,
+      execution,
+      maxTransferBytes: memoryPolicy.maxTransferBytes,
+      operations: {
+        async allocateStaging({ byteLength, operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          const status = functions.cuMemHostAlloc(output, BigInt(byteLength), 0);
+          if (status === 2) {
+            throw new DriverRuntimeError('CUDA_OUT_OF_MEMORY', 'pressure', 'CUDA pinned host allocation reported out of memory.', { nativeStatus: status, byteLength }, { operation: 'cuMemHostAlloc', operationId, healthBefore: health.current, healthAfter: health.current });
+          }
+          requireSuccess('cuMemHostAlloc', status, operationId);
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_HOST_MEMORY_NULL', 'immediate-driver', 'CUDA pinned host allocation succeeded but returned a null address.', { byteLength }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async freeStaging({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemFreeHost', functions.cuMemFreeHost(native), operationId, 'poisoned');
+          return { nativeFreed: true };
+        },
+        stagingView({ native, byteLength }) { return ffi.toBuffer(native, byteLength, false); },
+        async copyHtoDAsync({ destinationNative, destinationOffset, stagingNative, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyHtoDAsync_v2', functions.cuMemcpyHtoDAsync_v2(destinationNative + BigInt(destinationOffset), stagingNative, BigInt(byteLength), streamNative), operationId);
+        },
+        async copyDtoHAsync({ stagingNative, sourceNative, sourceOffset, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyDtoHAsync_v2', functions.cuMemcpyDtoHAsync_v2(stagingNative, sourceNative + BigInt(sourceOffset), BigInt(byteLength), streamNative), operationId);
+        },
+        async copyDtoDAsync({ destinationNative, destinationOffset, sourceNative, sourceOffset, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyDtoDAsync_v2', functions.cuMemcpyDtoDAsync_v2(destinationNative + BigInt(destinationOffset), sourceNative + BigInt(sourceOffset), BigInt(byteLength), streamNative), operationId);
+        },
+      },
+    });
+
     async function description(operationSequence = 0) {
       const executionSummary = execution.summary();
       return {
@@ -419,6 +462,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         device: { ordinal: 0, attributes },
         context: contextToken,
         memory: await memory.usage(operationSequence),
+        transfer: transfer.summary(),
         execution: executionSummary,
         health: health.snapshot(),
         inventory: registry.inventory(),
@@ -493,6 +537,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         };
       },
       memory,
+      transfer,
       execution,
     };
   } catch (error) {

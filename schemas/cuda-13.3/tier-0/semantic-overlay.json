@@ -174,6 +174,50 @@
       ],
       "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "synchronous-copy-may-block", "asynchronousBehavior": "copy-complete-on-return-for-f4-profile", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "conservative-on-driver-failure", "callbackPolicy": "none", "securityCapability": "memory.read.device", "cleanup": "returned-bytes-are-owned-copy;device-allocation-independent", "conformanceCases": ["f4.read.full", "f4.read.offset", "f4.read.bounds", "f4.read.owned-copy"]
     },
+    "cuMemHostAlloc": {
+      "stableId": "cuda.driver.function.cuMemHostAlloc", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "pp", "direction": "out", "nullable": false, "representation": "private-pinned-host-pointer-out", "ownership": "driver-actor", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "memory.staging.pinned" },
+        { "name": "bytesize", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 1, "maximum": "runtime.maxTransferBytes", "unit": "bytes" }, "capability": "memory.staging.pinned" },
+        { "name": "Flags", "direction": "in", "nullable": false, "representation": "u32-host-allocation-flags", "ownership": "value", "length": null, "bounds": { "constant": 0 }, "capability": "memory.staging.pinned" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-create", "asynchronousBehavior": "creates-private-page-locked-staging", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "allocation-failure-conservative", "callbackPolicy": "none", "securityCapability": "memory.staging.pinned", "cleanup": "free-once-with-cuMemFreeHost-after-terminal-transfer", "conformanceCases": ["f5.transfer.staging.allocate", "f5.transfer.staging.pressure", "f5.transfer.staging.cleanup"]
+    },
+    "cuMemFreeHost": {
+      "stableId": "cuda.driver.function.cuMemFreeHost", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "p", "direction": "in", "nullable": false, "representation": "private-pinned-host-pointer", "ownership": "driver-actor", "length": null, "bounds": { "source": "idle-live-staging-block" }, "capability": "memory.staging.pinned" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-release", "asynchronousBehavior": "terminal-pinned-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-free-keeps-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "memory.staging.pinned", "cleanup": "terminal-release-once", "conformanceCases": ["f5.transfer.staging.cleanup", "f5.transfer.staging.free-failure"]
+    },
+    "cuMemcpyHtoDAsync": {
+      "stableId": "cuda.driver.function.cuMemcpyHtoDAsync", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "dstDevice", "direction": "in", "nullable": false, "representation": "private-device-address-plus-validated-offset", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-device-memory-registry-entry" }, "capability": "memory.transfer.h2d.async" },
+        { "name": "srcHost", "direction": "in", "nullable": false, "representation": "private-pinned-staging-pointer", "ownership": "borrowed-leased", "length": "ByteCount", "bounds": { "source": "leased-staging-block" }, "capability": "memory.transfer.h2d.async" },
+        { "name": "ByteCount", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 1, "maximum": "runtime.maxTransferBytes", "unit": "bytes" }, "capability": "memory.transfer.h2d.async" },
+        { "name": "hStream", "direction": "in", "nullable": false, "representation": "private-stream-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "operation-private-stream" }, "capability": "memory.transfer.h2d.async" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "enqueue-only", "asynchronousBehavior": "copy-completes-before-operation-event", "deferredErrors": "may-report-submitted-or-prior-asynchronous-error", "healthEffect": "post-submit-failure-conservative", "callbackPolicy": "none", "securityCapability": "memory.transfer.h2d.async", "cleanup": "staging-and-device-leases-retained-through-terminal-event", "conformanceCases": ["f5.transfer.h2d.snapshot", "f5.transfer.h2d.dependency", "f5.transfer.h2d.cleanup"]
+    },
+    "cuMemcpyDtoHAsync": {
+      "stableId": "cuda.driver.function.cuMemcpyDtoHAsync", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "dstHost", "direction": "out", "nullable": false, "representation": "private-pinned-staging-pointer", "ownership": "borrowed-leased", "length": "ByteCount", "bounds": { "source": "leased-staging-block" }, "capability": "memory.transfer.d2h.async" },
+        { "name": "srcDevice", "direction": "in", "nullable": false, "representation": "private-device-address-plus-validated-offset", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-device-memory-registry-entry" }, "capability": "memory.transfer.d2h.async" },
+        { "name": "ByteCount", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 1, "maximum": "runtime.maxTransferBytes", "unit": "bytes" }, "capability": "memory.transfer.d2h.async" },
+        { "name": "hStream", "direction": "in", "nullable": false, "representation": "private-stream-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "operation-private-stream" }, "capability": "memory.transfer.d2h.async" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "enqueue-only", "asynchronousBehavior": "result-readable-only-after-operation-event", "deferredErrors": "may-report-submitted-or-prior-asynchronous-error", "healthEffect": "post-submit-failure-conservative", "callbackPolicy": "none", "securityCapability": "memory.transfer.d2h.async", "cleanup": "terminalization-copies-result-before-staging-reuse", "conformanceCases": ["f5.transfer.d2h.result", "f5.transfer.d2h.dependency", "f5.transfer.d2h.cleanup"]
+    },
+    "cuMemcpyDtoDAsync": {
+      "stableId": "cuda.driver.function.cuMemcpyDtoDAsync", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "dstDevice", "direction": "in", "nullable": false, "representation": "private-device-address-plus-validated-offset", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-device-memory-registry-entry" }, "capability": "memory.transfer.d2d.async" },
+        { "name": "srcDevice", "direction": "in", "nullable": false, "representation": "private-device-address-plus-validated-offset", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-device-memory-registry-entry" }, "capability": "memory.transfer.d2d.async" },
+        { "name": "ByteCount", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 1, "maximum": "runtime.maxTransferBytes", "unit": "bytes" }, "capability": "memory.transfer.d2d.async" },
+        { "name": "hStream", "direction": "in", "nullable": false, "representation": "private-stream-handle", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "operation-private-stream" }, "capability": "memory.transfer.d2d.async" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "enqueue-only", "asynchronousBehavior": "copy-completes-before-operation-event", "deferredErrors": "may-report-submitted-or-prior-asynchronous-error", "healthEffect": "post-submit-failure-conservative", "callbackPolicy": "none", "securityCapability": "memory.transfer.d2d.async", "cleanup": "source-and-destination-leases-retained-through-terminal-event", "conformanceCases": ["f5.transfer.d2d.bytes", "f5.transfer.d2d.hazard", "f5.transfer.d2d.cleanup"]
+    },
     "cuModuleLoadData": {
       "stableId": "cuda.driver.function.cuModuleLoadData", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
       "parameters": [

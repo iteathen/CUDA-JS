@@ -26,6 +26,13 @@ function u32Words(bytes) {
   return Array.from({ length: bytes.byteLength / 4 }, (_, index) => view.getUint32(index * 4, true));
 }
 
+function u32Bytes(words) {
+  const storage = new Uint8Array(words.length * 4);
+  const view = new DataView(storage.buffer);
+  words.forEach((word, index) => view.setUint32(index * 4, word, true));
+  return storage;
+}
+
 const ptx = Uint8Array.from(await readFile(capabilityPtxPath));
 const oracle = parseOracle(await readFile(path.join(evidenceRoot, 'capability-oracle.txt'), 'utf8'));
 const scalarCases = [
@@ -150,6 +157,59 @@ assert.equal(concurrentTerminal.graceful, true);
 assert.equal(concurrentTerminal.driver.resourceCounts.live, 0);
 assert.equal(concurrentTerminal.driver.resourceCounts.orphaned, 0);
 
+const transferRuntime = await openCudaRuntime({
+  driver: {
+    memory: { maxDeviceBytes: 64, maxAllocationBytes: 16, maxTransferBytes: 16 },
+    execution: { maxModuleBytes: 1_048_576, maxArguments: 4, maxCompletionMilliseconds: 30_000, maxPendingGpuOperations: 2 },
+  },
+});
+let transferTerminal;
+let transferObservation;
+try {
+  const transferModule = await transferRuntime.loadModule({ format: 'ptx', bytes: ptx });
+  const increment = await transferModule.getFunction({ name: 'cuda_js_native_transfer_increment', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
+  const transferMemory = await transferRuntime.allocateDevice({ byteLength: 16 });
+  const copyMemory = await transferRuntime.allocateDevice({ byteLength: 16 });
+  const hostWords = [3, 5, 7, 11];
+  const hostBytes = u32Bytes(hostWords);
+  const uploadPromise = transferMemory.writeAsync(hostBytes);
+  hostBytes.fill(0);
+  const upload = await uploadPromise;
+  const compute = await increment.submit({
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 4, y: 1, z: 1 }, arguments: [transferMemory, 4], after: upload,
+    accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 16, mode: 'read-write' }],
+  });
+  await upload.wait();
+  const download = await transferMemory.readAsync({ byteLength: 16, after: compute });
+  assert.equal(Object.hasOwn(download, 'result'), false);
+  const downloadTerminal = await download.wait();
+  const incrementedWords = u32Words(downloadTerminal.result.bytes);
+  assert.deepEqual(incrementedWords, [4, 6, 8, 12], 'H2D -> kernel -> D2H must preserve the independent source vector and same-stream dependencies.');
+  await compute.wait();
+
+  const deviceCopy = await copyMemory.copyFromAsync(transferMemory, { byteLength: 16, after: compute });
+  const copiedDownload = await copyMemory.readAsync({ byteLength: 16, after: deviceCopy });
+  const copiedWords = u32Words((await copiedDownload.wait()).result.bytes);
+  assert.deepEqual(copiedWords, incrementedWords, 'D2D -> D2H must preserve exact bytes.');
+  await deviceCopy.wait();
+  transferObservation = { oracleInputWords: oracle.ASYNC_TRANSFER, incrementedWords, copiedWords };
+
+  await copiedDownload.close();
+  await deviceCopy.close();
+  await download.close();
+  await compute.close();
+  await upload.close();
+  await increment.close();
+  await transferModule.close();
+  await copyMemory.close();
+  await transferMemory.close();
+} finally {
+  transferTerminal = await transferRuntime.close();
+}
+assert.equal(transferTerminal.graceful, true);
+assert.equal(transferTerminal.driver.resourceCounts.live, 0);
+assert.equal(transferTerminal.driver.resourceCounts.orphaned, 0);
+
 const closeRuntime = await openCudaRuntime({
   driver: {
     memory: { maxDeviceBytes: 4, maxAllocationBytes: 4, maxTransferBytes: 4 },
@@ -193,7 +253,9 @@ const sources = [
   'docs/specs/SPEC-0011-scalar-kernel-arguments.md',
   'docs/specs/SPEC-0016-operation-lifecycle.md',
   'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
+  'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
   'components/execution/src/execution-manager.mjs',
+  'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/runtime-facade/src/runtime.mjs',
   'conformance/f5/fixtures/native-capabilities.cu.txt',
@@ -203,19 +265,20 @@ const sources = [
 ];
 const target = await writeEvidence('native-windows-capabilities.json', {
   schemaVersion: 1,
-  workPackage: 'NQ-SCALAR/NQ-OPERATION',
-  capsule: 'public-facade-native-scalar-operation-lifecycle',
+  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER',
+  capsule: 'public-facade-native-scalar-operation-transfer-lifecycle',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: { version: process.version, moduleAbi: process.versions.modules, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version() },
   sources: await sourceIdentity(sources),
-  oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], ptxSha256: await sha256(capabilityPtxPath) },
-  observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
+  oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], asyncTransferWords: oracle.ASYNC_TRANSFER, ptxSha256: await sha256(capabilityPtxPath) },
+  observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, asyncTransfer: transferObservation, transferTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
   capabilityBoundary: 'All native handles, packed bytes, stream/event identity, and faulting context state remained private. The deferred fault ran in a child process with its own private runtime/context.',
   claimLimits: [
     'Exact Windows x64 Node 26.7.0 / Driver 610.74 / CUDA 13.3 / GTX 1660 Ti sm_75 profile only.',
     'The delay proves asynchronous not-ready/status/close semantics, not a latency or performance guarantee.',
     'The qualified widened profile is exactly two private streams, two pending operations, no queue, and declared u32/u64 relaxed device-scope atomic access.',
+    'The async transfer profile is exactly two internal pinned staging blocks, contiguous H2D/D2H/D2D, snapshot ingress, and terminal-result egress; it makes no universal overlap claim.',
   ],
 });
 console.log(`F5 native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);

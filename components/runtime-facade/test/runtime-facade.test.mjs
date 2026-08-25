@@ -20,6 +20,8 @@ test('compatibility and host inspection are immutable and reconcile the current 
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);

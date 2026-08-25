@@ -27,8 +27,8 @@ try {
   module = await runtime.loadModule({ format: 'ptx', bytes: ptx });
   fn = await module.getFunction({ name: 'cuda_js_native_deferred_fault', parameters: [{ kind: 'device-memory' }] });
   operation = await fn.submit({ grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [memory] });
-  let status = await operation.status();
-  for (let attempt = 0; status.status === 'pending' && attempt < 20; attempt += 1) {
+  let status = { status: 'pending' };
+  for (let attempt = 0; status.status === 'pending' && attempt < 21; attempt += 1) {
     try { status = await operation.status(); }
     catch (error) {
       cleanupError = { code: error.code, category: error.category, healthBefore: error.healthBefore, healthAfter: error.healthAfter, details: error.details };

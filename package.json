@@ -31,6 +31,7 @@
     "components/device-js/",
     "components/driver-actor/",
     "components/execution/",
+    "components/host-memory-transfer/",
     "components/memory/",
     "components/platform-diagnostics/",
     "components/resource-registry/",

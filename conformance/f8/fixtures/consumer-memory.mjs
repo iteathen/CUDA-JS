@@ -8,10 +8,13 @@ assert.equal(CUDA_JS_COMPATIBILITY.publicApi.schemaVersion, 1);
 assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'contiguous-1d-component-foundation-no-public-facade-yet');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
 const first = await openCudaRuntimeForTesting();
 const second = await openCudaRuntimeForTesting();
+const transferRuntime = await openCudaRuntimeForTesting({ driver: { memory: { maxDeviceBytes: 16, maxAllocationBytes: 8, maxTransferBytes: 8 }, execution: { maxPendingGpuOperations: 2 } } });
 const module = await first.loadModule({ format: 'ptx', bytes: ptx });
 const fn = await module.getFunction({ name: 'portable_copy_consumer', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
 const scalarFn = await module.getFunction({
@@ -57,6 +60,22 @@ assert.equal((await first.close()).graceful, true);
 await secondMemory.write(Uint8Array.of(9));
 assert.deepEqual([...(await secondMemory.read({ byteLength: 1 })).bytes], [9]);
 assert.equal((await second.close()).graceful, true);
+const transferSource = await transferRuntime.allocateDevice({ byteLength: 8 });
+const transferDestination = await transferRuntime.allocateDevice({ byteLength: 8 });
+const transferInput = Uint8Array.of(2, 4, 6, 8);
+const upload = await transferSource.writeAsync(transferInput);
+transferInput.fill(0);
+const deviceCopy = await transferDestination.copyFromAsync(transferSource, { byteLength: 4, after: upload });
+await upload.wait();
+const download = await transferDestination.readAsync({ byteLength: 4, after: deviceCopy });
+assert.deepEqual([...(await download.wait()).result.bytes], [2, 4, 6, 8]);
+await deviceCopy.wait();
+await download.close();
+await deviceCopy.close();
+await upload.close();
+await transferDestination.close();
+await transferSource.close();
+assert.equal((await transferRuntime.close()).graceful, true);
 
 console.log(JSON.stringify({
   consumer: 'portable-memory',
@@ -65,5 +84,6 @@ console.log(JSON.stringify({
   completion: completion.status,
   scalarKinds: scalarCompletion.argumentKinds,
   operationLifecycle: true,
+  asyncTransferLifecycle: true,
   graceful: true,
 }));

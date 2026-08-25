@@ -96,10 +96,14 @@ int main(int argc, char **argv) {
     CUfunction delayed_function = NULL;
     CUevent event = NULL;
     CUdeviceptr output_device = 0;
+    CUdeviceptr transfer_device = 0;
+    CUdeviceptr transfer_copy_device = 0;
     CUctxCreateParams context_parameters;
     unsigned char scalar_parameters[SCALAR_PARAMETER_BYTES];
     unsigned char delay_parameters[DELAY_PARAMETER_BYTES];
     uint32_t output[OUTPUT_WORDS];
+    uint32_t *transfer_input = NULL;
+    uint32_t *transfer_output = NULL;
     unsigned char *ptx = NULL;
     size_t ptx_length = 0U;
     size_t index;
@@ -187,8 +191,38 @@ int main(int argc, char **argv) {
     printf("DELAY_RESULT\t%u\t%u\t%u\n", output[0], polls, (unsigned int)(DELAY_CYCLES / UINT64_C(1000000)));
     if (output[0] != UINT32_C(0xc001d00d)) exit_code = 24;
 
+    result = cuMemAlloc(&transfer_device, 4U * sizeof(uint32_t));
+    if (result != CUDA_SUCCESS || transfer_device == 0) { exit_code = 30; goto cleanup; }
+    result = cuMemAlloc(&transfer_copy_device, 4U * sizeof(uint32_t));
+    if (result != CUDA_SUCCESS || transfer_copy_device == 0) { exit_code = 31; goto cleanup; }
+    result = cuMemHostAlloc((void **)&transfer_input, 4U * sizeof(uint32_t), 0U);
+    if (result != CUDA_SUCCESS || transfer_input == NULL) { exit_code = 32; goto cleanup; }
+    result = cuMemHostAlloc((void **)&transfer_output, 4U * sizeof(uint32_t), 0U);
+    if (result != CUDA_SUCCESS || transfer_output == NULL) { exit_code = 33; goto cleanup; }
+    transfer_input[0] = UINT32_C(3);
+    transfer_input[1] = UINT32_C(5);
+    transfer_input[2] = UINT32_C(7);
+    transfer_input[3] = UINT32_C(11);
+    memset(transfer_output, 0, 4U * sizeof(uint32_t));
+    result = cuMemcpyHtoDAsync(transfer_device, transfer_input, 4U * sizeof(uint32_t), stream);
+    if (result != CUDA_SUCCESS) { exit_code = 34; goto cleanup; }
+    result = cuMemcpyDtoDAsync(transfer_copy_device, transfer_device, 4U * sizeof(uint32_t), stream);
+    if (result != CUDA_SUCCESS) { exit_code = 35; goto cleanup; }
+    result = cuMemcpyDtoHAsync(transfer_output, transfer_copy_device, 4U * sizeof(uint32_t), stream);
+    if (result != CUDA_SUCCESS) { exit_code = 36; goto cleanup; }
+    result = cuEventRecord(event, stream);
+    if (result != CUDA_SUCCESS) { exit_code = 37; goto cleanup; }
+    result = wait_event(event, &polls);
+    if (result != CUDA_SUCCESS) { exit_code = 38; goto cleanup; }
+    printf("ASYNC_TRANSFER\t%u\t%u\t%u\t%u\n", transfer_output[0], transfer_output[1], transfer_output[2], transfer_output[3]);
+    if (memcmp(transfer_input, transfer_output, 4U * sizeof(uint32_t)) != 0) exit_code = 39;
+
 cleanup:
     if (event != NULL) { result = cuEventDestroy(event); printf("EVENT_DESTROY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 25; }
+    if (transfer_copy_device != 0) { result = cuMemFree(transfer_copy_device); printf("FREE_TRANSFER_COPY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 40; }
+    if (transfer_device != 0) { result = cuMemFree(transfer_device); printf("FREE_TRANSFER\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 41; }
+    if (transfer_output != NULL) { result = cuMemFreeHost(transfer_output); printf("FREE_TRANSFER_OUTPUT\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 42; }
+    if (transfer_input != NULL) { result = cuMemFreeHost(transfer_input); printf("FREE_TRANSFER_INPUT\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 43; }
     if (output_device != 0) { result = cuMemFree(output_device); printf("FREE_OUTPUT\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 26; }
     if (module != NULL) { result = cuModuleUnload(module); printf("MODULE_UNLOAD\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 27; }
     if (stream != NULL) { result = cuStreamDestroy(stream); printf("STREAM_DESTROY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 28; }

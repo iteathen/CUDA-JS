@@ -227,6 +227,10 @@ function translateLaunch(entry, options, operation) {
 
 function publicOperationStatus(result) {
   const output = { schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health };
+  if (result.kind && result.kind !== 'kernel') output.kind = result.kind;
+  if (result.result) output.result = result.result.bytes instanceof Uint8Array
+    ? { bytes: Uint8Array.from(result.result.bytes) }
+    : { ...result.result };
   if (result.failure) output.failure = publicFailureRecord(result.failure, 'operation.status', 'GPU operation failed asynchronously.');
   if (result.orphanReason) output.orphanReason = result.orphanReason;
   return freezePublic(output);
@@ -245,6 +249,28 @@ class CudaDeviceMemory {
   async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.status'); const result = await invoke('memory.status', () => runtimeData.get(entry.runtime).driver.memoryStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'device-memory', state: entry.state, byteLength: result.byteLength, usage: result.usage }); }
   async write(bytes, options = {}) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.write'); const result = await invoke('memory.write', () => runtimeData.get(entry.runtime).driver.writeDevice(entry.token, bytes, options)); return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, usage: result.usage }); }
   async read(options) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.read'); const result = await invoke('memory.read', () => runtimeData.get(entry.runtime).driver.readDevice(entry.token, options)); return freezePublic({ schemaVersion: 1, deviceOffset: result.deviceOffset, byteLength: result.byteLength, bytes: result.bytes, usage: result.usage }); }
+  async writeAsync(bytes, options = {}) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.writeAsync');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'after'].includes(key))) throw facadeError('CUDA_JS_TRANSFER_OPTIONS_INVALID', 'validation', 'writeAsync options contain unknown fields.', {}, 'memory.writeAsync');
+    const after = options.after === undefined || options.after === null ? null : resourceFor(options.after, entry.runtime, 'operation', 'memory.writeAsync').token;
+    const result = await invoke('memory.writeAsync', () => runtimeData.get(entry.runtime).driver.writeDeviceAsync(entry.token, bytes, { deviceOffset: options.deviceOffset ?? 0, after }));
+    return registerResource(entry.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
+  }
+  async readAsync(options) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.readAsync');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'byteLength', 'after'].includes(key))) throw facadeError('CUDA_JS_TRANSFER_OPTIONS_INVALID', 'validation', 'readAsync options are invalid.', {}, 'memory.readAsync');
+    const after = options.after === undefined || options.after === null ? null : resourceFor(options.after, entry.runtime, 'operation', 'memory.readAsync').token;
+    const result = await invoke('memory.readAsync', () => runtimeData.get(entry.runtime).driver.readDeviceAsync(entry.token, { deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength, after }));
+    return registerResource(entry.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
+  }
+  async copyFromAsync(source, options) {
+    const destination = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.copyFromAsync');
+    const sourceEntry = resourceFor(source, destination.runtime, 'device-memory', 'memory.copyFromAsync');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['destinationOffset', 'sourceOffset', 'byteLength', 'after'].includes(key))) throw facadeError('CUDA_JS_TRANSFER_OPTIONS_INVALID', 'validation', 'copyFromAsync options are invalid.', {}, 'memory.copyFromAsync');
+    const after = options.after === undefined || options.after === null ? null : resourceFor(options.after, destination.runtime, 'operation', 'memory.copyFromAsync').token;
+    const result = await invoke('memory.copyFromAsync', () => runtimeData.get(destination.runtime).driver.copyDeviceAsync(destination.token, sourceEntry.token, { destinationOffset: options.destinationOffset ?? 0, sourceOffset: options.sourceOffset ?? 0, byteLength: options.byteLength, after }));
+    return registerResource(destination.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
+  }
   async close() { return closeResource(this, 'memory.close', (entry) => runtimeData.get(entry.runtime).driver.releaseMemory(entry.token)); }
 }
 
@@ -308,7 +334,7 @@ class CudaRuntime {
   }
   get compilerEnabled() { return runtimeData.get(this)?.compiler !== null; }
   get terminalReport() { return runtimeData.get(this)?.terminalReport ?? null; }
-  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
+  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, transfer: driver.transfer, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
   async allocateDevice(options) { const data = dataFor(this, 'memory.allocate'); const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options)); return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory); }
   async loadModule(options) { const data = dataFor(this, 'module.load'); const result = await invoke('module.load', () => data.driver.loadModule(options)); return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule); }
   async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(request))); }

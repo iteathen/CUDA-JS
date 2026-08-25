@@ -449,7 +449,10 @@ export class ExecutionManager {
   assertCommandAllowed(command, operationId = null) {
     if (this.#pendingOperations.size === 0) return;
     if (PENDING_OPERATION_COMMANDS.has(command)) return;
-    if (command === 'execution.submit' && this.#pendingOperations.size < this.#policy.maxPendingGpuOperations) return;
+    if (['execution.submit', 'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d'].includes(command)) {
+      if (this.#pendingOperations.size < this.#policy.maxPendingGpuOperations) return;
+      if (this.#policy.maxPendingGpuOperations > 1) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    }
     fail('EXECUTION_COMMAND_BLOCKED', 'backpressure', 'DriverActor command is unavailable while a GPU operation is pending.', { command }, { operationId });
   }
 
@@ -568,7 +571,7 @@ export class ExecutionManager {
       catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Launch was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
 
       const record = {
-        state: 'pending', eventToken, streamToken, functionToken, functionLease, memoryLeases, dependencyLease, accesses, module: functionLease.value.module, grid, block, sharedMemoryBytes,
+        kind: 'kernel', state: 'pending', eventToken, streamToken, functionToken, functionLease, memoryLeases, dependencyLease, accesses, module: functionLease.value.module, grid, block, sharedMemoryBytes,
         argumentKinds: Object.freeze(functionLease.value.parameters.map((entry) => entry.kind)), submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
       };
       let operationToken;
@@ -619,6 +622,94 @@ export class ExecutionManager {
         for (let index = memoryLeases.length - 1; index >= 0; index -= 1) memoryLeases[index].release();
         dependencyLease?.release();
         functionLease.release();
+      }
+    }
+  }
+
+  async submitTransfer({ kind, after = null, accesses, leases, enqueue, complete = null, operationId = null }) {
+    this.#assertAdmission();
+    if (!['host-to-device', 'device-to-host', 'device-to-device'].includes(kind) || !Array.isArray(accesses) || !Array.isArray(leases) || typeof enqueue !== 'function' || (complete !== null && typeof complete !== 'function')) fail('EXECUTION_TRANSFER_INVALID', 'internal', 'Transfer operation adapter request is invalid.');
+    if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    let dependencyLease = null;
+    let eventToken = null;
+    let eventNative = null;
+    let submitted = false;
+    let ownershipTransferred = false;
+    try {
+      if (this.#streamTokens.length === 0) await this.initialize(operationId);
+      let dependency = null;
+      if (after !== null) {
+        dependencyLease = this.#registry.acquire(after, { kind: 'operation' });
+        if (dependencyLease.value.submissionSequence >= operationId) fail('EXECUTION_DEPENDENCY_ORDER', 'validation', 'Dependency must be an earlier operation from this runtime epoch.', { operationId });
+        if (dependencyLease.value.state === 'failed' || dependencyLease.value.state === 'orphaned') fail('EXECUTION_DEPENDENCY_TERMINAL', 'validation', 'Failed or orphaned work cannot be used as a dependency.', { state: dependencyLease.value.state });
+        dependency = dependencyLease.value.state === 'pending' ? dependencyLease.value : null;
+      }
+      for (const pending of this.#pendingOperations.values()) {
+        if (dependency === pending.record) continue;
+        for (const currentAccess of accesses) for (const priorAccess of pending.record.accesses) {
+          if (ordinaryConflict(currentAccess, priorAccess)) fail('EXECUTION_RESOURCE_HAZARD', 'backpressure', 'Overlapping ordinary access requires an explicit dependency on the pending operation.');
+        }
+      }
+      const streamToken = dependency?.streamToken ?? this.#streamTokens.find((candidate) => ![...this.#pendingOperations.values()].some((entry) => tokenIdentity(entry.streamToken) === tokenIdentity(candidate)));
+      if (!streamToken) fail('EXECUTION_BUSY', 'backpressure', 'No private execution stream is available.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+      const stream = this.#registry.get(streamToken, { kind: 'stream' });
+      eventNative = await this.#operations.createEvent({ operationId });
+      eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
+      await enqueue(stream.native);
+      submitted = true;
+      try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }
+      catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Transfer was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
+      const record = {
+        kind, state: 'pending', eventToken, streamToken, dependencyLease, accesses: Object.freeze(accesses), externalLeases: leases, complete,
+        submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
+      };
+      let operationToken;
+      try {
+        operationToken = this.#registry.allocate({
+          kind: 'operation', value: record, parent: this.#contextToken,
+          dispose: async (value) => {
+            if (value.state === 'pending') fail('EXECUTION_OPERATION_BUSY', 'backpressure', 'Pending GPU operation cannot be closed.', { operationId: value.submissionSequence });
+            if (value.state === 'orphaned') fail('EXECUTION_OPERATION_ORPHANED', 'restart-required', 'Orphaned GPU operation cannot claim logical cleanup.', { operationId: value.submissionSequence });
+            return Object.freeze({ kind: 'operation', logicalClosed: true, terminalState: value.state });
+          },
+        });
+      } catch (error) {
+        throw this.#operations.restartRequired({ code: 'EXECUTION_OPERATION_REGISTRATION_LOST', message: 'Transfer provenance exists but logical operation ownership could not be registered.', details: { causeCode: error?.code ?? null }, operationId });
+      }
+      ownershipTransferred = true;
+      this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
+      return this.#operationDescriptor(operationToken, record, operationId);
+    } catch (error) {
+      if (submitted && error?.category === 'restart-required') { ownershipTransferred = true; throw error; }
+      if (eventNative !== null) {
+        try {
+          if (eventToken !== null) await this.#registry.close(eventToken);
+          else await this.#operations.destroyEvent({ native: eventNative, operationId });
+        } catch (cleanupError) {
+          const combined = combinedRollbackError({
+            code: 'EXECUTION_TRANSFER_ROLLBACK_FAILED',
+            message: 'Transfer submission failed and completion-event rollback cleanup was unproved.',
+            operation: 'memory.transfer',
+            operationId,
+            primaryError: error,
+            primaryFallbackCode: 'EXECUTION_TRANSFER_FAILED',
+            primaryFallbackOperation: 'memory.transfer',
+            cleanupErrors: [cleanupError],
+            cleanupFallbackCode: 'EXECUTION_EVENT_CLEANUP_UNPROVED',
+            cleanupFallbackOperation: eventToken === null ? 'execution.event.destroy' : 'resource.close',
+            registry: this.#registry,
+            unprovedResources: [{ kind: 'event', registered: eventToken !== null }],
+            restartRequired: this.#operations.restartRequired,
+          });
+          if (eventToken === null) this.#rollbackFailure ??= combined;
+          throw eventToken === null ? this.#rollbackFailure : combined;
+        }
+      }
+      throw error;
+    } finally {
+      if (!ownershipTransferred) {
+        dependencyLease?.release();
+        for (let index = leases.length - 1; index >= 0; index -= 1) leases[index].release();
       }
     }
   }
@@ -744,11 +835,15 @@ export class ExecutionManager {
 
   #operationDescriptor(token, record, observationSequence) {
     const elapsed = Math.max(0, Math.trunc(this.#clock() - record.startedAt));
-    const base = {
-      schemaVersion: 1, operation: token, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
+    const base = record.kind === 'kernel' ? {
+      schemaVersion: 1, operation: token, kind: record.kind, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
       sharedMemoryBytes: record.sharedMemoryBytes, argumentKinds: record.argumentKinds, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
+    } : {
+      schemaVersion: 1, operation: token, kind: record.kind, status: record.state, pollCount: record.pollCount,
+      elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
     };
+    if (record.result) base.result = record.result;
     if (record.failure) base.failure = record.failure;
     if (record.orphanReason) base.orphanReason = record.orphanReason;
     return Object.freeze(base);
@@ -759,6 +854,16 @@ export class ExecutionManager {
   }
 
   async #terminalizeCompleted(token, record, operationId) {
+    if (record.complete !== null && record.complete !== undefined) {
+      try { record.result = Object.freeze(await record.complete()); }
+      catch (error) {
+        const completionError = typeof error?.code === 'string' && typeof error?.category === 'string'
+          ? error
+          : new ExecutionError('EXECUTION_TRANSFER_RESULT_FAILED', 'internal', 'Transfer result materialization failed after GPU completion.', {});
+        await this.#terminalizeFailure(token, record, completionError, operationId);
+        return;
+      }
+    }
     try { await this.#registry.close(record.eventToken); }
     catch (cleanupError) {
       const combined = combinedRollbackError({
@@ -827,9 +932,10 @@ export class ExecutionManager {
   #releaseExecutionLeases(record) {
     if (record.leasesReleased) return;
     record.leasesReleased = true;
-    for (let index = record.memoryLeases.length - 1; index >= 0; index -= 1) record.memoryLeases[index].release();
+    for (let index = (record.memoryLeases ?? []).length - 1; index >= 0; index -= 1) record.memoryLeases[index].release();
+    for (let index = (record.externalLeases ?? []).length - 1; index >= 0; index -= 1) record.externalLeases[index].release();
     record.dependencyLease?.release();
-    record.functionLease.release();
+    record.functionLease?.release();
   }
 
   #admissionFailure() {

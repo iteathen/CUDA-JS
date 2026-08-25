@@ -47,3 +47,10 @@ extern "C" __global__ void cuda_js_native_atomic_observer(
   if (blockIdx.x != 0 || threadIdx.x != 0) return;
   observation[0] = atomicAdd(shared_value, UINT32_C(0));
 }
+
+extern "C" __global__ void cuda_js_native_transfer_increment(
+    uint32_t *values,
+    uint32_t word_count) {
+  const uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < word_count) values[index] += UINT32_C(1);
+}

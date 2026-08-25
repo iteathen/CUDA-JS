@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.host-memory-transfer",
+    "name": "Bounded asynchronous host transfer",
+    "status": "accepted-windows-exact-internal-experimental",
+    "product_area": "components",
+    "path": "components/host-memory-transfer",
+    "purpose": "Own two bounded internal pinned staging blocks and contiguous H2D, D2H, and D2D operation production.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["runtime.resource-registry", "runtime.memory", "runtime.execution", "injected-transfer-backend"],
+    "forbidden_dependencies": ["public-native-handle", "public-stream", "public-event", "caller-owned-registration", "mapped-memory", "unbounded-queue"],
+    "validation": ["npm run f5:unit", "npm run f5:portable", "npm run f5:capabilities", "npm run f8:native"],
+    "owner": "runtime.host-memory-transfer",
+    "lifecycle": "Pinned staging is allocated lazily under the context, leased through one SPEC-0016 operation, wiped before reuse, and freed only after terminal work.",
+    "design": {
+      "owned_invariant": "No staging block is reused or D2H result exposed before the owning GPU operation is terminal.",
+      "public_ports": ["HostMemoryTransferManager"],
+      "injected_dependencies": ["resource registry", "context token", "memory range lease port", "execution operation producer port", "backend pinned/copy operations"],
+      "adapter_boundaries": ["Windows DriverActor transfer backend", "platform-neutral transfer mock"],
+      "simplest_sufficient_total_system": "Two fixed lazy staging blocks, three contiguous copy directions, no queue, and the existing operation lifecycle."
+    }
+  }
+}

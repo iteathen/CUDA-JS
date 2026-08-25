@@ -6,6 +6,7 @@ const REQUEST_FIELDS = Object.freeze(['schemaVersion', 'requestId', 'operation',
 const BASE_OPERATIONS = new Set([
   'runtime.describe', 'context.status', 'runtime.close',
   'memory.allocate', 'memory.status', 'memory.write', 'memory.read', 'memory.release',
+  'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d',
   'execution.module.load', 'execution.module.status', 'execution.module.release',
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
@@ -36,6 +37,7 @@ function tokenPayload(payload) {
 function positiveSafeInteger(value) { return Number.isSafeInteger(value) && value > 0; }
 function nonnegativeSafeInteger(value) { return Number.isSafeInteger(value) && value >= 0; }
 function ordinaryBytes(value) { return value instanceof Uint8Array && !Buffer.isBuffer(value); }
+function optionalOperationToken(value) { return value === null || isResourceToken(value); }
 
 function dimensions(value) {
   return plainObject(value) && exactFields(value, ['x', 'y', 'z'])
@@ -96,6 +98,23 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(payload) || !exactFields(payload, ['token', 'deviceOffset', 'byteLength']) || !isResourceToken(payload.token)
         || !nonnegativeSafeInteger(payload.deviceOffset) || !positiveSafeInteger(payload.byteLength)) throw validationError('DRIVER_MEMORY_READ', 'Memory read payload is invalid.', {}, message.requestId);
     if (payload.byteLength > memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'Memory read exceeds the configured transfer limit.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.h2d') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'bytes', 'deviceOffset', 'after']) || !isResourceToken(payload.token)
+        || !ordinaryBytes(payload.bytes) || payload.bytes.byteLength < 1 || payload.bytes.byteLength > memoryPolicy.maxTransferBytes
+        || !nonnegativeSafeInteger(payload.deviceOffset) || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous H2D payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.d2h') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'deviceOffset', 'byteLength', 'after']) || !isResourceToken(payload.token)
+        || !nonnegativeSafeInteger(payload.deviceOffset) || !positiveSafeInteger(payload.byteLength) || payload.byteLength > memoryPolicy.maxTransferBytes
+        || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous D2H payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.d2d') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['destinationToken', 'sourceToken', 'destinationOffset', 'sourceOffset', 'byteLength', 'after'])
+        || !isResourceToken(payload.destinationToken) || !isResourceToken(payload.sourceToken)
+        || !nonnegativeSafeInteger(payload.destinationOffset) || !nonnegativeSafeInteger(payload.sourceOffset)
+        || !positiveSafeInteger(payload.byteLength) || payload.byteLength > memoryPolicy.maxTransferBytes
+        || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous D2D payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.module.load') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['format', 'bytes']) || !['ptx', 'cubin'].includes(payload.format) || !ordinaryBytes(payload.bytes)

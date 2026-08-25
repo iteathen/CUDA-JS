@@ -57,6 +57,8 @@ const required = [
   'docs/specs/SPEC-0013-public-surface-addendum.md',
   'docs/specs/SPEC-0015-execution-scope-status-clarification.md',
   'docs/specs/SPEC-0016-operation-lifecycle.md',
+  'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
+  'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
   'docs/specs/SPEC-0027-nn-extension-foundation.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md',
@@ -96,6 +98,9 @@ const required = [
   'components/memory/README.md', 'components/memory/component.yaml',
   'components/memory/index.mjs', 'components/memory/src/memory-manager.mjs',
   'components/memory/test/memory-manager.test.mjs',
+  'components/host-memory-transfer/README.md', 'components/host-memory-transfer/component.yaml',
+  'components/host-memory-transfer/index.mjs', 'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
+  'components/host-memory-transfer/test/host-memory-transfer.test.mjs',
   'components/execution/README.md', 'components/execution/component.yaml',
   'components/execution/index.mjs', 'components/execution/src/execution-manager.mjs',
   'components/execution/test/execution-manager.test.mjs',
@@ -223,6 +228,7 @@ for (const relative of [
   'components/resource-registry/component.yaml',
   'components/driver-actor/component.yaml',
   'components/memory/component.yaml',
+  'components/host-memory-transfer/component.yaml',
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
   'components/cuda-target/component.yaml',
@@ -438,6 +444,7 @@ for (const relative of files) {
       && !relative.startsWith('components/resource-registry/')
       && !relative.startsWith('components/driver-actor/')
       && !relative.startsWith('components/memory/')
+      && !relative.startsWith('components/host-memory-transfer/')
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
       && !relative.startsWith('components/cuda-target/')
