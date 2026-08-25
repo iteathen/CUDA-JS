@@ -23,7 +23,7 @@ npm run hardware:qualify
 
 On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A readiness result is not virtualized CUDA support.
 
-The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order and retains the accepted peer-profile evidence. ADR-0006 keeps architecture OS-neutral and makes Linux x64 the reference priority. Its EXP-001/F1B/F3L-F8L command and evidence-validation chain is runner-ready, but exact Ubuntu Driver/compiler/GPU/package execution remains unrun and unqualified. WSL2, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles.
+The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order and retains the accepted peer-profile evidence. ADR-0006 keeps architecture OS-neutral and makes Linux x64 the reference priority. Its EXP-001/F1B/F3L-F8L command and evidence-validation chain is runner-ready, but exact Ubuntu Driver/compiler/GPU/package execution remains unrun and unqualified. The project’s available VM hosts cannot currently provide an accepted CUDA qualification environment, so issue #4 waits for contributor-run evidence from native Ubuntu with a directly exposed physical NVIDIA GPU. VM, emulated, WSL, container, hosted-CI, portable, or mock results do not qualify this native profile. WSL2, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles.
 
 ## Result bundle
 
@@ -45,10 +45,11 @@ Before uploading anything, inspect every file. Do not publish host names, accoun
 1. Open or join the public issue for the exact platform profile and GPU architecture.
 2. Check out the requested commit without local modifications.
 3. Use the official exact Node release and the profile's required Driver/toolkit/providers.
-4. Run `npm run hardware:plan`; stop if the profile is incomplete and contribute the named adapter/capsules first.
-5. Run `npm run hardware:qualify` unchanged on a runner-ready profile.
-6. Review and attach `public-summary.json`; retain the complete local bundle until review closes.
-7. Submit a registry PR only after maintainers accept the evidence. One entry represents one exact profile.
+4. Confirm the native profile uses directly exposed physical NVIDIA hardware; do not submit VM/emulated/WSL/container/hosted-CI evidence as native qualification.
+5. Run `npm run hardware:plan`; stop if the profile is incomplete and contribute the named adapter/capsules first.
+6. Run `npm run hardware:qualify` unchanged on a runner-ready profile.
+7. Review and attach `public-summary.json`; retain the complete local bundle until review closes.
+8. Submit a registry PR only after maintainers accept the evidence. One entry represents one exact profile.
 
 Test failures are useful results. A command, evidence-validation, or final-worktree failure still produces the standardized bundle and a sanitized public failure kind. Report the first failing case and preserve the bundle; do not weaken assertions, substitute package self-comparison for a native oracle, or edit a result into a pass.
 

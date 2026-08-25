@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-14
+**Updated:** 2026-08-25
 
 This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
 
@@ -12,7 +12,7 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
-CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. The repository-side EXP-001/F1B/F3L–F8L runner/evidence chain is complete behind shared native owners; exact Linux Driver/compiler/GPU/package evidence remains unrun and unqualified. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
+CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. The repository-side EXP-001/F1B/F3L–F8L runner/evidence chain is complete behind shared native owners; exact Linux Driver/compiler/GPU/package evidence remains unrun and unqualified and now waits in a contributor-operated physical-hardware lane. VM/emulated CUDA does not qualify that cell. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
@@ -356,7 +356,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Restricted Device-JS + scoped atomic observation/publication | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows source-only profile; private CUDA lowering and fixed device-scope `u32`/`u64` relaxed plus release/acquire operations through `compileDeviceProgram()`. |
 | Trusted CCCL `cuda/` + `nv/` profile | `planned` | `implemented` | `qualified` | `active` | Exact Windows CUDA 13.3 profile; path-free verified virtual headers. |
 | `<cuda/atomic>` device-scope publication | `planned` | `implemented` | `qualified` | `active` | Exact generic fixture/profile only; not a scheduler/search/performance claim. |
-| Explicit device selection | `planned` | `not-implemented` | `not-qualified` | `next` | Accepted SPEC-0017; portable implementation is the next dependency-ready packet. |
+| Explicit device selection | `planned` | `not-implemented` | `not-qualified` | `active` | Accepted SPEC-0017; portable/software integration is the current dependency-ready packet, with native promotion separate. |
 | Multi-GPU orchestration | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0024; depends on selected-device and generalized operation foundations. |
 | MIG | `deferred` | `not-implemented` | `not-qualified` | `deferred` | Identity, isolation, quota, and lifecycle contract remains absent. |
 | Managed/unified memory | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Separate placement/migration/coherence capability; not required for ordinary residency. |
@@ -368,7 +368,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
 | Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
-| Native Linux x64 CUDA execution | `planned` | `implemented` | `not-qualified` | `active` | Shared native engines, diagnostics, alpha.8 facade admission, compatibility metadata, OS-neutral C oracles and an EXP-001/F1B/F3L–F8L command/evidence chain are source-complete; exact Ubuntu evidence remains open. |
+| Native Linux x64 CUDA execution | `planned` | `implemented` | `not-qualified` | `blocked:physical-contributor-host` | Shared native engines, diagnostics, alpha.8 facade admission, compatibility metadata, OS-neutral C oracles and an EXP-001/F1B/F3L–F8L command/evidence chain are source-complete; contributor-run exact native Ubuntu/physical-NVIDIA evidence remains open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors
@@ -427,8 +427,8 @@ At the time of this document:
 - public contracts and shared runtime owners are OS-neutral; native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
 - Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current retained secondary native qualification evidence;
 - other FFI-capable Node 26.1.0-or-later and structurally admissible Windows CUDA profiles may operate as `testing-unconfirmed` without inheriting support;
-- native Linux x64 Driver/compiler profiles, diagnostics, facade admission, compatibility metadata, F4/F5 independent oracles and the EXP-001/F1B/F3L–F8L native/package runner chain are implemented, while exact GPU/package evidence remains unrun and not-qualified;
-- portable Linux controls do not imply native Linux CUDA support;
+- native Linux x64 Driver/compiler profiles, diagnostics, facade admission, compatibility metadata, F4/F5 independent oracles and the EXP-001/F1B/F3L–F8L native/package runner chain are implemented, while contributor-operated exact physical-GPU/package evidence remains unrun and not-qualified;
+- portable Linux, VM, emulated, WSL, container, hosted-CI, or mock controls do not imply native Linux CUDA support;
 - performance claims require separate representative measurement and are not inferred from functional correctness.
 
 For exact support state, read [`NODE_SUPPORT.md`](NODE_SUPPORT.md) and [`HARDWARE_SUPPORT.md`](HARDWARE_SUPPORT.md).

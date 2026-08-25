@@ -152,7 +152,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     'This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.',
     '',
-    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The complete EXP-001/F1B/F3L-F8L runner and evidence-validation source chain is implemented. Exact native evidence remains unrun, so runner readiness is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.',
+    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The complete EXP-001/F1B/F3L-F8L runner and evidence-validation source chain is implemented. Exact native evidence remains unrun, so runner readiness is not a support claim. Qualification waits for contributor-operated native Ubuntu with a directly exposed physical NVIDIA GPU; VM, emulated, WSL, container, hosted-CI, portable, or mock evidence does not qualify this cell. The accepted Windows x64 result remains valid as a maintained peer profile.',
     '',
     'CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.',
     '',
@@ -205,7 +205,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
 
   lines.push(
     '',
-    'Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority; its complete exact-profile runner chain is ready, but its native Driver/compiler/GPU/package evidence remains unrun and unqualified. WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.',
+    'Windows x64 is the only native profile currently qualified and is retained as peer evidence. Native Linux x64 is the reference priority; its complete exact-profile runner chain is ready, but its contributor-operated physical-GPU Driver/compiler/package evidence remains unrun and unqualified. Available VM hosts are not a qualification substitute. WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.',
     '',
     '## Extended qualification axes',
     '',

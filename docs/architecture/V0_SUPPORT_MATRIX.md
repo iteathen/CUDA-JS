@@ -23,7 +23,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; complete EXP-001/F1B/F3L-F8L command and evidence-validation source chain implemented; exact native evidence unrun | execute the unchanged runner on Ubuntu 24.04 and review exact Driver/provider/context/memory/execution/permission/stress/package/teardown evidence before promotion |
+| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; complete EXP-001/F1B/F3L-F8L command and evidence-validation source chain implemented; exact native evidence waits for a contributor physical-GPU host | execute the unchanged runner on native Ubuntu 24.04 with a directly exposed physical NVIDIA GPU and review exact Driver/provider/context/memory/execution/permission/stress/package/teardown evidence before promotion; VM/emulated/WSL/container/hosted-CI evidence is non-qualifying |
 | Windows 11 | x86-64 Win64 | maintained secondary public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
@@ -32,7 +32,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 | macOS | any | unsupported | no current CUDA deployment target |
 | 32-bit hosts | any | unsupported | outside foundational data model |
 
-Cross-compilation can prove artifact shape, but native execution is required for support.
+Cross-compilation, VM/emulated CUDA, WSL, containers, hosted CI, portable controls, and mocks can prove only their named properties; direct native physical-GPU execution is required for this support cell.
 
 ## CUDA profiles
 
@@ -127,7 +127,7 @@ Graphs are not a prerequisite for the first real-kernel slice. They become a per
 | Windows device-zero WDDM/TCC/watchdog/compute-mode diagnostics | accepted F7W on exact Node 26.7.0 and Driver 13030; diagnostic only and never mutates device state |
 | Node permission-model inheritance into DriverActor and CompilerActor | accepted F7W; denial without FFI authority and explicit-allow success are mandatory |
 | deterministic failure/property and repeated lifecycle stress | accepted portable F7 and native Windows F7W; broad elapsed/RSS ceilings are regression checks, not performance claims |
-| native Linux x86-64 hardening | F7L permission/lifecycle runner source complete; unchanged exact Ubuntu F2L through F8L execution and promotion remain open |
+| native Linux x86-64 hardening | F7L permission/lifecycle runner source complete; contributor-run unchanged exact Ubuntu F2L through F8L execution on directly exposed physical NVIDIA hardware and promotion remain open |
 | Linux ARM64 SBSA | independently classified; no ABI, Driver, compiler, GPU, or cleanup support claim |
 | WSL2 CUDA | diagnostics-only until an independent compatibility profile passes |
 
