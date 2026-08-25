@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, isScopedAtomicHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 1_048_576;
@@ -473,8 +473,9 @@ class FunctionEmitter {
       return { code: `${reference}.store(${value.code}, cuda::memory_order_release)`, type: parseType('void', { allowVoid: true }) };
     }
 
-    if (isScopedAtomicHelper(path)) {
-      const store = path === 'gpu.atomic.storeRelaxedDevice';
+    const pointerAtomic = devicePointerAtomicHelper(path);
+    if (pointerAtomic) {
+      const store = pointerAtomic.operation === 'store';
       if (args.length !== (store ? 3 : 2)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
       if (this.compile.headerProfile !== 'cuda-cccl') {
         fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
@@ -487,10 +488,10 @@ class FunctionEmitter {
       const address = `${pointer.code}[${index.code}]`;
       const reference = `cuda::atomic_ref<${CUDA_TYPES[pointer.type.scalar]}, cuda::thread_scope_device>(${address})`;
       this.usesScopedAtomic = true;
-      if (!store) return { code: `${reference}.load(cuda::memory_order_relaxed)`, type: pointee };
+      if (!store) return { code: `${reference}.load(cuda::memory_order_${pointerAtomic.order})`, type: pointee };
       const value = this.expression(args[2], scope);
       if (!sameType(value.type, pointee)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic store value type must match pointer pointee.', args[2]);
-      return { code: `${reference}.store(${value.code}, cuda::memory_order_relaxed)`, type: parseType('void', { allowVoid: true }) };
+      return { code: `${reference}.store(${value.code}, cuda::memory_order_${pointerAtomic.order})`, type: parseType('void', { allowVoid: true }) };
     }
 
     if (path === 'gpu.barrier.block' || path === 'gpu.fence.device') {

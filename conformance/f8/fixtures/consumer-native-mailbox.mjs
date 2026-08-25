@@ -33,7 +33,7 @@ function mailboxKernel(control, result) {
     }],
     compile: { headerProfile: 'cuda-cccl' },
   });
-  assert.equal(compiled.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0014-publication-mailbox-v1');
+  assert.equal(compiled.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1');
   const kernel = compiled.deviceProgram.kernels.find((entry) => entry.name === 'mailboxKernel');
   assert(kernel);
   const module = await runtime.loadModule({ format: 'ptx', bytes: compiled.compiler.artifact.bytes });

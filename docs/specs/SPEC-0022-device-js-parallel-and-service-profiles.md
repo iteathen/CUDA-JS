@@ -4,11 +4,11 @@
 
 **Date:** 2026-08-13
 
-**Reconciled:** 2026-08-22 for scoped atomic observation
+**Reconciled:** 2026-08-25 for scoped atomic observation and device publication
 
-**Accepted child:** [`SPEC-0022-scoped-atomic-observation-addendum.md`](SPEC-0022-scoped-atomic-observation-addendum.md) accepts only relaxed device-scope `u32`/`u64` load/store observation; this parent and all other families remain proposal-only.
+**Accepted children:** [`SPEC-0022-scoped-atomic-observation-addendum.md`](SPEC-0022-scoped-atomic-observation-addendum.md) accepts relaxed device-scope `u32`/`u64` load/store observation; [`SPEC-0022-device-publication-addendum.md`](SPEC-0022-device-publication-addendum.md) accepts device-scope `u32`/`u64` release/acquire publication. This parent and all other families remain proposal-only.
 
-**Issue owners:** #87 and #89
+**Issue owners:** #87, #89, and #123
 
 ## Outcome
 
@@ -26,9 +26,9 @@ Trusted-source capability is not a sandbox. Service safety cannot be inferred fr
 ```text
 trusted parallel profile:
   architectural disposition: planned
-  implementation status:       atomic-observation child implemented; remaining families not implemented
-  qualification status:        atomic-observation exact Windows profile qualified; remaining families not qualified
-  priority:                    atomic observation first when dependency-ready; broader primitives remain demand-driven
+  implementation status:       atomic-observation and device-publication children implemented; remaining families not implemented
+  qualification status:        atomic-observation and device-publication exact Windows profiles qualified; remaining families not qualified
+  priority:                    accepted atomic children complete; broader primitives remain demand-driven
 
 service-safe profile:
   architectural disposition: planned
@@ -143,7 +143,7 @@ gpu.atomic.load(pointer, index, order?, scope?)
 gpu.atomic.store(pointer, index, value, order?, scope?)
 ```
 
-The accepted child addendum selects the exact `loadRelaxedDevice` / `storeRelaxedDevice` spelling, `u32`/`u64` types, relaxed order and device scope. Other order/scope/type combinations remain subject to later accepted child review.
+The accepted child addenda select exact `loadRelaxedDevice` / `storeRelaxedDevice` and `loadAcquireDevice` / `storeReleaseDevice` spellings for `u32`/`u64` at device scope. Other order/scope/type combinations remain subject to later accepted child review.
 
 #### Independent-observation semantics
 

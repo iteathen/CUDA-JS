@@ -26,7 +26,7 @@ CUDA-JS currently provides a public/package implementation with an exact qualifi
 - exact tested device-scope release/acquire atomic publication through generated device code;
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
-- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation and direction-specific mailbox publication, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
+- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation, device-scope release/acquire publication and direction-specific mailbox publication, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
 - a portable/software contiguous 1D typed device-view component foundation with exact dtype/range/access/parent-lifetime semantics and no selected public facade entry yet;
 - exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and known-incompatible exact profiles.
 
@@ -38,7 +38,7 @@ Important current limits are equally explicit:
 - public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
 - contiguous 1D typed device views are implemented as a reusable component/lifecycle foundation, but no public `cuda-js` facade API for creating views has been selected or qualified;
-- typed Device LTO is implemented in portable/software and package paths but remains natively unqualified;
+- typed Device LTO is implemented and qualified on the exact recorded Windows x64 Node 26.7.0/CUDA 13.3/`sm_75` profile; Linux, other devices/providers and LTO performance remain separately unqualified;
 - the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
 Those limits describe the applicable **implementation and qualification dimensions**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
@@ -208,7 +208,7 @@ Current compiler/toolchain behavior includes:
 
 **CUDA-JS does not require recompilation on every kernel launch.** Compilation can occur during setup, artifacts can be cached, and PTX/cubin can be loaded later. The compiler is a toolchain capability, not a mandatory hot-loop stage.
 
-The base PTX/cubin F6 path is qualified on the recorded Windows profile. Typed RDC and Device LTO are implemented public/package capabilities but remain natively unqualified until their SPEC-0010/SPEC-0012 promotion evidence passes.
+The base PTX/cubin F6 path, typed RDC and typed Device LTO are qualified on the recorded Windows profile. The SPEC-0012 lane proves two independently compiled LTO-IR units, homogeneous link-to-cubin execution, exact native-oracle artifact/output parity, fail-closed controls and terminal cleanup. Every other OS/device/provider profile and LTO performance remain separate gates.
 
 See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md), [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md), and [`SPEC-0012`](specs/SPEC-0012-device-lto.md).
 
@@ -251,13 +251,13 @@ See [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
 ### 10. Restricted Device-JS
 
-SPEC-0013, the bounded SPEC-0022 scoped-atomic-observation child, and the SPEC-0014 publication-mailbox child are accepted and implemented. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff. `loadRelaxedDevice` / `storeRelaxedDevice` provide only relaxed device-scope one-location `u32`/`u64` semantics. `gpu.mailbox.loadAcquireSystem` and `gpu.mailbox.storeReleaseSystem` accept only the matching opaque directional u32 lane types and lower through the explicit `cuda-cccl` profile to system-scope acquire/release operations; no indexing, conversion, dereference, or RMW surface exists.
+SPEC-0013, the bounded SPEC-0022 scoped-atomic-observation and device-publication children, and the SPEC-0014 publication-mailbox child are accepted and implemented. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff. `loadRelaxedDevice` / `storeRelaxedDevice` provide only relaxed device-scope one-location `u32`/`u64` semantics. `loadAcquireDevice` / `storeReleaseDevice` establish payload ordering only when acquire observes the matching release; they do not own freshness, progress, generation or queue policy. `gpu.mailbox.loadAcquireSystem` and `gpu.mailbox.storeReleaseSystem` accept only the matching opaque directional u32 lane types and lower through the explicit `cuda-cccl` profile to system-scope acquire/release operations; no indexing, conversion, dereference, or RMW surface exists.
 
 Pinned `acorn@8.15.0` is a syntax-only replaceable parser adapter. It does not own Device-JS semantics or code generation. Generated CUDA source, parser ASTs, native options, and provider capabilities do not enter ordinary public results.
 
-Exact Windows source-only Device-JS evidence now passes generated-source → compiler → Driver launch → independent scalar/control-flow/atomic/mailbox oracle → terminal cleanup on the recorded profile. The mailbox kernel is observably pending before host publication, rejects reset/close while leased, observes host value `41`, publishes device value `42`, unregisters, and leaves zero live/orphaned resources. It does not qualify other OS/GPU/provider profiles. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
+Exact Windows source-only Device-JS evidence now passes generated-source → compiler → Driver launch → independent scalar/control-flow/atomic/mailbox oracle → terminal cleanup on the recorded profile. Device publication covers both readiness widths and an exact immutable multiword payload, with a separate CUDA-free protocol oracle for immutable-message and unrelated work-slot consumers plus stale/wrong-generation negatives. The mailbox kernel is observably pending before host publication, rejects reset/close while leased, observes host value `41`, publishes device value `42`, unregisters, and leaves zero live/orphaned resources. It does not qualify other OS/GPU/provider profiles or universal scheduler progress. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
 
-See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), the [scoped atomic-observation addendum](specs/SPEC-0022-scoped-atomic-observation-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
+See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), the [scoped atomic-observation addendum](specs/SPEC-0022-scoped-atomic-observation-addendum.md), the [device-publication addendum](specs/SPEC-0022-device-publication-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
 
 ## GPU residency and device-resident workloads
 
@@ -325,8 +325,8 @@ Device LTO has independent status dimensions:
 ```text
 architectural disposition: planned
 implementation status:    implemented in portable/software/package paths
-qualification status:     not-qualified for native CUDA execution
-priority:                 active native-evidence lane
+qualification status:     qualified on the exact recorded Windows profile
+priority:                 active maintenance; other profiles independently gated
 ```
 
 Accepted SPEC-0012 keeps PTX as the default compile path and adds a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The implementation excludes raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, arbitrary nvJitLink controls, and cross-major compatibility claims.
@@ -352,8 +352,8 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Multiple CUDA-JS runtime instances | `planned` | `implemented` | `qualified` | `active` | Isolation behavior only; not a GPU-overlap performance claim. |
 | NVRTC source compilation / nvJitLink PTX linking / cache | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; optional bounded typed compiler/linker owner. |
 | Typed relocatable PTX | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows two-unit RDC compile/link/load/execute/cleanup profile. |
-| Typed Device LTO | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0012 gate remains open; typed `lto-ir` and homogeneous LTO linking only. |
-| Restricted Device-JS + scoped atomic observation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows source-only profile; private CUDA lowering and relaxed device-scope `u32`/`u64` observation through `compileDeviceProgram()`. |
+| Typed Device LTO | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows two-unit LTO-IR/link/cubin/execute/cleanup profile; typed `lto-ir` and homogeneous LTO linking only. |
+| Restricted Device-JS + scoped atomic observation/publication | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows source-only profile; private CUDA lowering and fixed device-scope `u32`/`u64` relaxed plus release/acquire operations through `compileDeviceProgram()`. |
 | Trusted CCCL `cuda/` + `nv/` profile | `planned` | `implemented` | `qualified` | `active` | Exact Windows CUDA 13.3 profile; path-free verified virtual headers. |
 | `<cuda/atomic>` device-scope publication | `planned` | `implemented` | `qualified` | `active` | Exact generic fixture/profile only; not a scheduler/search/performance claim. |
 | Explicit device selection | `planned` | `not-implemented` | `not-qualified` | `next` | Accepted SPEC-0017; portable implementation is the next dependency-ready packet. |

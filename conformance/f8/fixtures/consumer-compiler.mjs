@@ -7,7 +7,7 @@ import { openCudaRuntimeForTesting } from 'cuda-js/testing';
 assert.deepEqual(compatibilitySubpath.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
-assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0014-publication-mailbox-v1');
+assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
 
 const runtime = await openCudaRuntimeForTesting({ compiler: true });
 const source = 'extern "C" __global__ void portable_consumer() {}\n';
@@ -22,6 +22,15 @@ const deviceJs = await compileDeviceProgram(runtime, {
   functions: [{ name: 'portableKernel', kind: 'kernel', parameters: [], returns: 'void' }],
   compile: { architecture: 'compute_120' },
 });
+const devicePublication = await compileDeviceProgram(runtime, {
+  source: 'function publish(payload, ready32, ready64) { payload[gpu.u32(0)] = gpu.u32(17); gpu.atomic.storeReleaseDevice(ready32, gpu.u32(0), gpu.u32(3)); gpu.atomic.storeReleaseDevice(ready64, gpu.u32(0), gpu.u64(3n)); let observed32 = gpu.atomic.loadAcquireDevice(ready32, gpu.u32(0)); let observed64 = gpu.atomic.loadAcquireDevice(ready64, gpu.u32(0)); }',
+  functions: [{ name: 'publish', kind: 'kernel', parameters: [
+    { name: 'payload', type: 'ptr<u32>' },
+    { name: 'ready32', type: 'ptr<u32>' },
+    { name: 'ready64', type: 'ptr<u64>' },
+  ], returns: 'void' }],
+  compile: { architecture: 'compute_120', headerProfile: 'cuda-cccl' },
+});
 
 assert.equal(compiled.artifact.format, 'ptx');
 assert.equal(relocatable.artifact.format, 'ptx');
@@ -29,13 +38,15 @@ assert.equal(relocatable.artifact.relocatableDeviceCode, true);
 assert.equal(ltoFirst.artifact.format, 'lto-ir');
 assert.equal(ltoLinked.artifact.format, 'cubin');
 assert.equal(linked.artifact.format, 'cubin');
-assert.equal(deviceJs.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0014-publication-mailbox-v1');
+assert.equal(deviceJs.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1');
 assert.equal(deviceJs.deviceProgram.parser.name, 'acorn');
 assert.equal(deviceJs.deviceProgram.parser.version, '8.15.0');
 assert.equal(deviceJs.deviceProgram.kernels[0].name, 'portableKernel');
 assert.equal(deviceJs.compiler.artifact.format, 'ptx');
 assert.equal(deviceJs.compiler.artifact.architecture, 'compute_120');
-for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact]) {
+assert.equal(devicePublication.deviceProgram.contract, deviceJs.deviceProgram.contract);
+assert.equal(devicePublication.compiler.artifact.format, 'ptx');
+for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact]) {
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/);
 }
 assert.notEqual(compiled.cache.key, relocatable.cache.key);
@@ -58,6 +69,7 @@ console.log(JSON.stringify({
   cubin: linked.artifact.sha256,
   deviceJs: deviceJs.compiler.artifact.sha256,
   deviceJsProgram: deviceJs.deviceProgram.sha256,
+  devicePublication: devicePublication.deviceProgram.sha256,
   deviceJsParser: deviceJs.deviceProgram.parser,
   graceful: terminal.graceful,
 }));

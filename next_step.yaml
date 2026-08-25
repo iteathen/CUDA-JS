@@ -1,11 +1,11 @@
 {
-  "schema_version": 39,
-  "updated": "2026-08-24",
-  "status": "cuda_mcgs_p0_p1_prerequisites_complete",
-  "objective": "Complete the CUDA-MCGS P0/P1 CUDA-JS prerequisites as dependency-ready LEGO ownership packets with exact native evidence, clean integration, and no consumer-domain leakage.",
+  "schema_version": 40,
+  "updated": "2026-08-25",
+  "status": "issue_123_device_publication_complete_awaiting_integration",
+  "objective": "Integrate the completed consumer-neutral Device-JS release/acquire publication packet from codex/issue-123-device-publication, then resume exact CUDA-JS/CUDA-MCGS compatible-pair work.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "b6062f691a27093df0e5d55e482e69ebbd39a9eb",
-    "package": "cuda-js@0.1.0-alpha.6",
+    "protected_main_authority_baseline": "2135216b1a9fd88066a1c82b61ae533645eac9c2",
+    "package": "cuda-js@0.1.0-alpha.7",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
@@ -17,11 +17,12 @@
       "MCGS-P0 evidence PR #116 integrated and issues #35/#43/#51/#87 closed",
       "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed",
       "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed",
-      "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed"
+      "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed",
+      "CJS-DEVICE-PUBLICATION-123 completed on remote branch codex/issue-123-device-publication: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
-    "still_proposal_only": ["SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation child", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
+    "still_proposal_only": ["SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation and device-publication children", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
   "authority": [
@@ -46,14 +47,15 @@
     "docs/specs/SPEC-0014-long-lived-sideband.md",
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
     "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md",
+    "docs/specs/SPEC-0022-device-publication-addendum.md",
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "MCGS-P0-PAIR-0009C",
-    "issues": [32],
-    "plan": "docs/plans/2026-08-24-cuda-mcgs-p0-p1-execution.md",
-    "next_action": "Create and freeze the smallest bounded CUDA-MCGS artifact that consumes only integrated CUDA-JS public contracts, then execute the exact compatible-pair identity, semantic-oracle, post-ignition progress, and terminal cleanup proof required by issue #32.",
-    "exit": "One exact frozen CUDA-JS/CUDA-MCGS pair passes compatibility identity, semantic-oracle parity, device-owned post-ignition progress, and terminal cross-repository cleanup without private coupling."
+    "id": "CJS-DEVICE-PUBLICATION-123-INTEGRATION",
+    "issues": [123],
+    "plan": "docs/archive/plans/2026-08-25-device-js-release-acquire-publication.md",
+    "next_action": "Review and integrate remote branch codex/issue-123-device-publication without widening the accepted helper contract, then close issue #123 and resume MCGS-P0-PAIR-0009C.",
+    "exit": "The exact reviewed branch is integrated on protected main, issue #123 is closed, public/package identity agrees, and no generated or worktree residue remains."
   },
   "parallel_or_external_next": [
     {
@@ -76,7 +78,7 @@
     {
       "id": "MCGS-P0-PAIR-0009C",
       "issues": [32],
-      "reason": "CUDA-JS implementation prerequisites are complete, but exact pair qualification necessarily awaits the first frozen bounded CUDA-MCGS artifact. This does not block starting that artifact."
+      "reason": "CUDA-JS implementation prerequisites, including the issue #123 device-publication branch, are complete; exact pair qualification necessarily awaits integration plus the first frozen bounded CUDA-MCGS artifact. This does not block preparing that artifact."
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
@@ -123,6 +125,6 @@
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116, PR #118, PR #119, and PR #120 are integrated protected-main CUDA-MCGS prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact"
+    "PR #116, PR #118, PR #119, and PR #120 are integrated protected-main CUDA-MCGS prerequisites; issue #123 is complete on its remote integration branch; exact pair issue #32 awaits integration and the frozen CUDA-MCGS artifact"
   ]
 }
