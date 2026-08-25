@@ -2,11 +2,11 @@
 
 **Status:** Accepted F5W internal experimental component
 
-This component turns the accepted Windows bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical Windows CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library.
+This component turns the accepted native bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical platform CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library. Windows and native Linux x86-64 use thin library-discovery profiles around the same Driver, memory, execution, transfer, and teardown implementation.
 
 The component surface is [`index.mjs`](index.mjs):
 
-- `openDriverRuntime()` opens the Windows x64 backend on Node 26.1.0 or later; exact Node 26.7.0 remains the qualified evidence baseline while other operational releases remain testing-unconfirmed;
+- `openDriverRuntime()` selects the Windows x64 or native Linux x86-64 backend on Node 26.1.0 or later; exact Node 26.7.0 remains the evidence baseline. Windows retains the accepted native evidence, while Linux remains operational-source-only until the exact Ubuntu qualification chain passes;
 - `runtime.describe()` returns bounded Driver/device metadata, health, inventory, and an opaque context token;
 - `runtime.contextStatus(token)` verifies on the owning Worker that the same private context remains current;
 - `runtime.allocateDevice`, `memoryStatus`, `writeDevice`, `readDevice`, and `releaseMemory` provide the bounded synchronous copied-byte contract from SPEC-0004;
@@ -23,6 +23,6 @@ Any unexpected Worker exit or unproved operation terminality invalidates the run
 
 Disposal failures retain their sanitized native observation operation, category, and health transition across the Worker boundary. The backend observes that transition before responding, immediately applies poisoned/restart admission rules, and preserves acknowledged ungraceful teardown evidence when the owner exits.
 
-[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. `setDisposalFailureMode()` selects `none`, `immediate`, `poisoned`, `restart-required`, or `unstructured` device-memory free behavior; `disposalStatus()` reports bounded call-count and inventory evidence. Mock success proves protocol/resource behavior only. Exact Windows destructive disposal injection remains independently unqualified, as do native SPEC-0016 and native Linux Driver support.
+[`testing.mjs`](testing.mjs) exposes the platform-neutral lifecycle mock and test-only fault controls. `setDisposalFailureMode()` selects `none`, `immediate`, `poisoned`, `restart-required`, or `unstructured` device-memory free behavior; `disposalStatus()` reports bounded call-count and inventory evidence. Mock success proves protocol/resource behavior only. Exact Windows destructive disposal injection remains independently unqualified, as do native SPEC-0016 and native Linux Driver qualification. The presence of the Linux adapter is not a support or qualification claim.
 
 The governing contracts are [`SPEC-0003`](../../docs/specs/SPEC-0003-driver-actor-resource-lifecycle.md), [`SPEC-0004`](../../docs/specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0005`](../../docs/specs/SPEC-0005-module-launch-completion.md), [`SPEC-0014`](../../docs/specs/SPEC-0014-long-lived-sideband.md), [`SPEC-0016`](../../docs/specs/SPEC-0016-operation-lifecycle.md), [`SPEC-0018`](../../docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md), and [`SPEC-0019`](../../docs/specs/SPEC-0019-host-memory-and-async-transfer.md).

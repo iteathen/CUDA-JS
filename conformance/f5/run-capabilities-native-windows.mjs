@@ -339,6 +339,8 @@ const sources = [
   'components/execution/src/execution-manager.mjs',
   'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
+  'components/driver-actor/src/backends/native-profiles.mjs',
+  'components/driver-actor/src/backends/native.mjs',
   'components/runtime-facade/src/runtime.mjs',
   'conformance/f5/fixtures/native-capabilities.cu.txt',
   'conformance/f5/native/windows-capability-oracle.c',

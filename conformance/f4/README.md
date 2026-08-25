@@ -15,7 +15,7 @@ Use `npm run f4:portable` on an exact Node 26.7.0 development profile. Use `npm 
 
 The maintained Ubuntu CI job regenerates the expanded schema from the pinned CUDA 13.3.29 headers with native Clang, publishes the complete generated-product artifact, and rejects a checked-in difference. Native Linux CI also runs the memory manager, registry, actor protocol, byte mock, quota/range partitions, stale capability checks, teardown, and unexpected-loss accounting with exact Node 26.7.0.
 
-This leaves a Linux contributor with shared control-plane code, five imported signatures, reviewed semantics, deterministic generated files, portable tests, a Windows adapter that demonstrates the intended backend boundary, an independent C fixture, and exact expected observations. None of that substitutes for a native Linux NVIDIA Driver/GPU run.
+This leaves a Linux contributor with shared control-plane code, imported signatures, reviewed semantics, deterministic generated files, portable tests, one shared native Driver backend with thin Windows/Linux discovery profiles, an independent C fixture, and exact expected observations. None of that substitutes for a native Linux NVIDIA Driver/GPU run.
 
 ## Native Linux work still required
 
@@ -24,7 +24,7 @@ Keep the Linux path present and complete these gates in order on a native Linux 
 1. Run `npm run exp:001:prepare` and preserve its unmodified readiness evidence. Do not install or replace a system Driver from repository automation.
 2. Qualify canonical `libcuda.so.1` discovery. Reject arbitrary caller library paths, missing libraries, stubs used as runtime Drivers, and unsupported Node/platform identities.
 3. Run the retained F2L Node/C Driver, device, procedure-version/status, permission, context, cleanup, and Worker-exit capsule. Linux memory work cannot bypass this prerequisite.
-4. Add a `linux-native` DriverActor adapter beside `windows-native.mjs`. It must use the same generated definitions and the same `MemoryManager`; platform code should own only canonical library discovery, private native calls, context-currentness checks, and error translation.
+4. Exercise the integrated `linux-native` profile and shared native Driver backend. Do not fork the `MemoryManager`, execution owners or teardown semantics; platform code owns only canonical library discovery and exact platform evidence.
 5. Bind exactly `cuMemGetInfo_v2`, `cuMemAlloc_v2`, `cuMemFree_v2`, `cuMemcpyHtoD_v2`, and `cuMemcpyDtoH_v2`. Do not add public symbol or signature selection.
 6. Compile `native/windows-memory-oracle.c` as a Linux oracle or add a minimal sibling that keeps the same 4,096-byte fixture, 257-byte patch at offset 777, checksum algorithm, capacity observation, explicit free, context destroy, and current-null records. Platform conditionals are acceptable; divergent semantics are not.
 7. Run the same exact-edge, out-of-bounds, configured-pressure, explicit-release, stale-generation, slot-reuse, allocation-before-context teardown, and zero-terminal-resource controls. A rejected range must be shown not to invoke the Driver.

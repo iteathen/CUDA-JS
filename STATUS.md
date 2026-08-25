@@ -23,7 +23,7 @@ This wording does not claim that every host call or device artifact is JIT-produ
 
 ## Reference-platform direction
 
-ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell; the public/component architecture remains distribution-neutral. The accepted Windows x64 evidence below remains valid as a secondary exact profile, but it no longer determines forward platform priority. The current package still lacks Linux DriverActor and compiler-provider adapters, so this direction is not yet a Linux support claim.
+ADR-0006 keeps the public/component architecture OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell. The accepted Windows x64 evidence below remains valid as a peer exact profile, but it no longer determines forward platform priority. The shared native Driver backend now has thin Windows/Linux discovery profiles and an F3L runner; Linux Driver evidence, compiler providers and the complete installed-package chain remain open, so this direction is not yet a Linux support claim.
 
 The active dependency path is issue #4: canonical Linux Driver/context ownership, then NVRTC/nvJitLink providers, native F3–F8/package evidence and exact compatibility promotion. Issue #17 expands Linux distributions only after that baseline. SPEC-0017 remains the next platform-neutral capability foundation and will use Linux for its first native selection promotion. Multi-GPU and topology-aware performance require a controlled 2+ physical-GPU Linux host.
 

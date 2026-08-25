@@ -1,6 +1,6 @@
 # CUDA-JS Validation Policy
 
-## Linux-first adapter phase / accepted Windows evidence retained
+## OS-neutral adapter architecture / Linux reference qualification
 
 Run:
 
@@ -24,7 +24,7 @@ npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
 
-ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification platform. During Linux adapter development, `./scripts/verify-docs.sh`, `npm run exp:000:build`, `npm run verify`, and `npm run exp:001:prepare` are the minimum repository-wide gate. Run the exact Windows native commands when their owners change or before claiming their retained profile remains qualified; do not make the unavailable Windows host a prerequisite for unrelated Linux-only adapter work. Linux support promotion still requires a real Ubuntu 24.04 NVIDIA host and the complete F2L–F8L native/package chain.
+ADR-0006 keeps public contracts and shared owners OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. During platform-adapter development, `./scripts/verify-docs.sh`, `npm run exp:000:build`, `npm run verify`, and `npm run exp:001:prepare` are the minimum repository-wide gate. Run the exact Windows native commands when their shared owners change or before claiming their retained profile remains qualified; do not make the unavailable Windows host a prerequisite for unrelated Linux-adapter work. Linux support promotion still requires a real Ubuntu 24.04 NVIDIA host and the complete F2L–F8L native/package chain.
 
 The promoted F1A regression claim additionally requires:
 
