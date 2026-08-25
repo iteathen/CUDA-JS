@@ -205,7 +205,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.publicationMailboxes !== 'private-mapped-named-u32-one-operation-lease-system-acquire-release') {
     errors.push('packaging compatibility publication mailbox projection is stale');
   }
-  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0014-publication-mailbox-v1') {
+  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
 

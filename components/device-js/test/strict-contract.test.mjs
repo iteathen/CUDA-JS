@@ -86,4 +86,9 @@ test('void helpers are accepted only as standalone expression statements', () =>
     functions: [{ name: 'kernel', kind: 'kernel', parameters: [{ name: 'words', type: 'ptr<u32>' }], returns: 'void' }],
     compile: { headerProfile: 'cuda-cccl' },
   }), expectCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function kernel(words) { for (; false; gpu.atomic.storeReleaseDevice(words, gpu.u32(0), gpu.u32(0))) {} }',
+    functions: [{ name: 'kernel', kind: 'kernel', parameters: [{ name: 'words', type: 'ptr<u32>' }], returns: 'void' }],
+    compile: { headerProfile: 'cuda-cccl' },
+  }), expectCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
 });

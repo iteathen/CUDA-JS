@@ -52,6 +52,9 @@ assert.deepEqual(deviceJsObservation.atomicBuckets, [16, 16, 16, 16]);
 assert.equal(deviceJsObservation.atomicCasUniqueFlags, true);
 assert.equal(deviceJsObservation.atomicRelaxedDeviceU32, true);
 assert.equal(deviceJsObservation.atomicRelaxedDeviceU64, true);
+assert.equal(deviceJsObservation.atomicPublicationDeviceU32, true);
+assert.equal(deviceJsObservation.atomicPublicationDeviceU64, true);
+assert.deepEqual(deviceJsObservation.atomicPublicationPayload, [0x89abcdef, 0x01234567, 0x76543210, 0xfedcba98]);
 assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor, 7);
 assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor, 5);
 assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
@@ -77,7 +80,7 @@ assert(!existsSync(installed));
 const target = await writeEvidence('native-windows-package.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8W',
-  capsule: 'installed-package-native-windows-vector-device-js-operation-transfer-mailbox-consumers',
+  capsule: 'installed-package-native-windows-vector-device-js-device-publication-operation-transfer-mailbox-consumers',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch },
@@ -86,6 +89,7 @@ const target = await writeEvidence('native-windows-package.json', {
     'docs/specs/SPEC-0013-restricted-device-js.md',
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
+    'docs/specs/SPEC-0022-device-publication-addendum.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
     'components/runtime-facade/src/runtime.mjs',
@@ -100,6 +104,6 @@ const target = await writeEvidence('native-windows-package.json', {
   deviceJsObservation,
   multiOperationObservation,
   mailboxObservation,
-  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS, and mailbox publication qualification; evidence: ${target}`);
+console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, and mailbox publication qualification; evidence: ${target}`);

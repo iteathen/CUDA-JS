@@ -24,5 +24,6 @@ The legacy filenames remain as small Superseded pointers to preserve links and d
 - `2026-08-11-node-and-extended-qualification.md`;
 - `2026-08-11-f9-atomic-interop.md`;
 - `2026-08-12-cuda-isolation-device-js.md`.
+- `2026-08-25-device-js-release-acquire-publication.md`.
 
 Accepted specs/ADRs remain authority; plans sequence work beneath them.
