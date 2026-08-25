@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-08-11",
+  "updated": "2026-08-25",
   "profiles": [
     {
       "id": "windows-native-x64",
@@ -61,7 +61,7 @@
         "architecture": "x64",
         "environment": "native"
       },
-      "status": "adapter-incomplete",
+      "status": "driver-compiler-source-ready",
       "promotionTarget": "qualified-experimental",
       "requiredNode": "v26.7.0",
       "requiredCapsules": [
@@ -71,13 +71,11 @@
       "commands": [],
       "evidenceFiles": [],
       "missingCapsules": [
-        "EXP-001 exact native Driver/GPU evidence",
-        "native F3 context lifecycle evidence",
+        "run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence",
         "native F4 memory C oracle and runner",
         "native F5 execution C oracle and runner",
-        "native F6 NVRTC/nvJitLink C oracle and runner",
-        "native F7 permission and lifecycle stress runner",
-        "native F8 installed-package consumer"
+        "complete and run F7 Linux diagnostics, permission, and lifecycle stress evidence",
+        "complete and run F8 installed-package Linux consumer evidence"
       ]
     },
     {

@@ -52,7 +52,7 @@ CUDA 13.3 compiler targets define the candidate set below. â€œSeeking evidenceâ€
 | Profile | Current runner state | Promotion target | Missing native work |
 |---|---|---|---|
 | `windows-native-x64` | runner ready | qualified experimental | none |
-| `linux-native-x64` | Driver/compiler profiles and F3/F6 source runners ready; facade/package incomplete | qualified experimental | run exact EXP-001 and F3-F6 evidence; complete/run F7 diagnostics and stress; complete/run F8 installed-package consumer |
+| `linux-native-x64` | driver compiler source ready | qualified experimental | run exact EXP-001, F3, and F6 native Driver, context, compiler, execution, and cleanup evidence; native F4 memory C oracle and runner; native F5 execution C oracle and runner; complete and run F7 Linux diagnostics, permission, and lifecycle stress evidence; complete and run F8 installed-package Linux consumer evidence |
 | `wsl2-x64` | adapter incomplete | qualified experimental | WSL2-specific Driver/provider adapter; WSL2 native oracle and F2 through F8 qualification chain |
 | `linux-native-arm64-sbsa` | schema and adapter incomplete | qualified experimental | ARM64 Runtime IR and native ABI oracle; ARM64 Driver/compiler adapters; ARM64 F2 through F8 native qualification chain |
 | `linux-native-arm64-jetson` | contract required | future profile | accepted Jetson profile contract; Jetson Node/ABI/provider qualification; Jetson F2 through F8 native qualification chain |
