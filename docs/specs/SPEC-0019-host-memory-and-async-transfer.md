@@ -1,10 +1,12 @@
 # SPEC-0019: Host Memory and Asynchronous Transfer
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-13
 
 **Issue owner:** #86
+
+**Accepted:** 2026-08-24 after exact SPEC-0018 capacity-two qualification
 
 ## Outcome
 
@@ -15,15 +17,22 @@ This specification distinguishes host-memory capabilities explicitly. It does no
 ## Status dimensions
 
 ```text
-architectural disposition: planned
+architectural disposition: accepted
 implementation status:       not-implemented
 qualification status:        not-qualified
-priority:                    after accepted SPEC-0018
+priority:                    P1 implementation for CUDA-MCGS readiness
 ```
 
 ## Dependencies
 
-This proposal consumes SPEC-0003, SPEC-0004, SPEC-0016 and proposed SPEC-0018.
+This specification consumes accepted SPEC-0003, SPEC-0004, SPEC-0016 and SPEC-0018.
+
+The first accepted profile is deliberately closed: two internal pinned staging
+blocks, each bounded by `maxTransferBytes`; snapshot H2D, terminal-result D2H,
+and D2D contiguous copies; no chunk queue; and the exact SPEC-0018 capacity-two
+operation envelope. Caller-owned registration, transfer/detach ownership,
+mapped memory, 2D/3D copies, and exposed logical staging slots remain later
+profiles.
 
 SPEC-0014 publication mailboxes may later consume the registered/mapped host-memory ownership defined here. SPEC-0023 library adapters and higher-level consumers may use transfer operations but do not redefine their lifetime.
 
