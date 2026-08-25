@@ -83,4 +83,10 @@ test('runner-ready evidence paths include every accepted native phase', async ()
   for (const owner of ['exp-000', 'exp-012', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']) {
     assert(windows.evidenceFiles.some((entry) => entry.includes(`/${owner}/`) || entry.includes(`build/${owner}/`)), `missing ${owner}`);
   }
+  for (const relative of [
+    'build/f5/win32-x64/evidence/capability-oracle-build.json',
+    'build/f5/win32-x64/evidence/native-windows-capabilities.json',
+    'build/f6/win32-x64/evidence/capability-oracle-build.json',
+    'build/f6/win32-x64/evidence/native-windows-capabilities.json',
+  ]) assert(windows.evidenceFiles.includes(relative), `missing ${relative}`);
 });

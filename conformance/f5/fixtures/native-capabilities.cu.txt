@@ -1,0 +1,31 @@
+#include <stdint.h>
+
+extern "C" __global__ void cuda_js_native_scalar(
+    uint32_t legacy,
+    unsigned long long wide,
+    int32_t signed_value,
+    float fractional,
+    uint32_t *output) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  output[0] = legacy;
+  output[1] = (uint32_t)wide;
+  output[2] = (uint32_t)(wide >> 32);
+  output[3] = (uint32_t)signed_value;
+  output[4] = __float_as_uint(fractional);
+}
+
+extern "C" __global__ void cuda_js_native_delayed(
+    uint32_t *output,
+    unsigned long long cycles) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  const unsigned long long started = clock64();
+  while (clock64() - started < cycles) {
+  }
+  output[0] = UINT32_C(0xc001d00d);
+}
+
+extern "C" __global__ void cuda_js_native_deferred_fault(uint32_t *output) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  output[0] = UINT32_C(0x12345678);
+  asm volatile("trap;");
+}

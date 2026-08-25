@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.5",
+    "version": "0.1.0-alpha.6",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -56,7 +56,7 @@
     "ptxRelocatableDeviceCode": "typed-boolean-default-false",
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
-    "deviceJsFrontend": "restricted-spec-0013-v1",
+    "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1",
     "deviceJsParser": {
       "name": "acorn",
       "version": "8.15.0",
@@ -86,8 +86,8 @@
     "SPEC-0010 relocatable PTX, SPEC-0011 u64/i32/f32 scalar launch kinds, and SPEC-0012 Device LTO are implemented public capabilities but are not natively qualified until their exact promotion evidence passes.",
     "SPEC-0021 f64/f16/bf16 scalar launch kinds are implemented in the public portable/software/package path; their exact native ABI/launch promotion evidence remains open.",
     "SPEC-0021 contiguous one-dimensional typed device-view range/lifecycle semantics are implemented as a generic component foundation; no public cuda-js facade entry for views has been selected or qualified yet.",
-    "SPEC-0016 opaque GPU operation submission/completion is implemented but is not natively qualified until its exact Windows promotion evidence passes.",
-    "SPEC-0013 Device-JS is an implemented restricted portable/software frontend using pinned Acorn only for syntax parsing; native Device-JS support remains unqualified until its exact generated-source/compiler/launch/oracle/lifecycle evidence passes.",
+    "SPEC-0016 opaque GPU operation submission/completion has exact Windows delayed-completion/deferred-failure/cleanup evidence only for its recorded Node/Driver/GPU profile; no broader support is implied.",
+    "SPEC-0013 Device-JS plus the scoped atomic-observation child is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",

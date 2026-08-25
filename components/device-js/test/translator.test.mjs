@@ -63,7 +63,7 @@ test('Device-JS translates structured control flow, pointer access, helpers and 
   const first = translateDeviceProgram({ source, functions });
   const second = translateDeviceProgram({ source, functions });
 
-  assert.equal(first.contract, 'SPEC-0013-v1');
+  assert.equal(first.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1');
   assert.equal(first.sha256, second.sha256);
   assert.equal(first.generatedSource, second.generatedSource);
   assert.equal(first.parser.name, 'acorn');
@@ -110,6 +110,39 @@ test('program identity changes with semantic source, type metadata and compile i
   assert.notEqual(typeChange.sha256, baseline.sha256);
   assert.notEqual(compileChange.sha256, baseline.sha256);
   assert.match(baseline.generatedName, /^device-js-[a-f0-9]{16}\.cu$/);
+});
+
+test('scoped atomic observation fails closed outside its exact profile, dtype and void context', () => {
+  const metadata = [{
+    name: 'k',
+    kind: 'kernel',
+    parameters: [{ name: 'words', type: 'ptr<u32>' }, { name: 'floats', type: 'ptr<f32>' }],
+    returns: 'void',
+  }];
+  const compile = { headerProfile: 'cuda-cccl' };
+  const accepted = translateDeviceProgram({
+    source: 'function k(words, floats) { gpu.atomic.storeRelaxedDevice(words, gpu.u32(0), gpu.u32(1)); let x = gpu.atomic.loadRelaxedDevice(words, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  });
+  assert.match(accepted.generatedSource, /#include <cuda\/atomic>/);
+  assert.match(accepted.generatedSource, /cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\(p0\[/);
+  assert.match(accepted.generatedSource, /\.store\([^;]*, cuda::memory_order_relaxed\);/);
+  assert.match(accepted.generatedSource, /\.load\(cuda::memory_order_relaxed\)/);
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { let x = gpu.atomic.loadRelaxedDevice(words, gpu.u32(0)); }',
+    functions: metadata,
+  }), expectDeviceCode('DEVICE_JS_ATOMIC_PROFILE_REQUIRED'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { let x = gpu.atomic.loadRelaxedDevice(floats, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  }), expectDeviceCode('DEVICE_JS_ATOMIC_TYPE'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { for (gpu.atomic.storeRelaxedDevice(words, gpu.u32(0), gpu.u32(1)); false; ) {} }',
+    functions: metadata,
+    compile,
+  }), expectDeviceCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
 });
 
 test('Device-JS uses canonical CUDA target policy and preserves validation ownership', () => {

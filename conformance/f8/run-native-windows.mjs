@@ -29,6 +29,7 @@ await rm(directory, { recursive: true, force: true });
 await mkdir(directory, { recursive: true });
 await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: 'cuda-js-native-windows-consumer', version: '1.0.0', private: true, type: 'module' }, null, 2)}\n`);
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-windows.mjs'), path.join(directory, 'consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
 const installed = path.join(directory, 'node_modules', 'cuda-js');
@@ -37,24 +38,45 @@ const output = runNode(['--experimental-ffi', 'consumer.mjs'], directory);
 const observation = JSON.parse(output.split(/\r?\n/).at(-1));
 assert.equal(observation.checksum, 15_600_773);
 assert.equal(observation.graceful, true);
+const deviceJsOutput = runNode(['--experimental-ffi', 'device-js-consumer.mjs'], directory);
+const deviceJsObservation = JSON.parse(deviceJsOutput.split(/\r?\n/).at(-1));
+assert.equal(deviceJsObservation.sourceOnly, true);
+assert.equal(deviceJsObservation.structuredIntegerBitwise, true);
+assert.equal(deviceJsObservation.dataDependentWhile, true);
+assert.equal(deviceJsObservation.globalIndex, true);
+assert.equal(deviceJsObservation.exactU64, 'ffffffffffffffff');
+assert.deepEqual(deviceJsObservation.atomicBuckets, [16, 16, 16, 16]);
+assert.equal(deviceJsObservation.atomicCasUniqueFlags, true);
+assert.equal(deviceJsObservation.atomicRelaxedDeviceU32, true);
+assert.equal(deviceJsObservation.atomicRelaxedDeviceU64, true);
+assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor, 7);
+assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor, 5);
+assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
+assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);
+assert.equal(deviceJsObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
 
 const target = await writeEvidence('native-windows-package.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8W',
-  capsule: 'installed-package-native-windows-vector-consumer',
+  capsule: 'installed-package-native-windows-vector-and-device-js-consumers',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch },
   sources: await sourceIdentity([
     'docs/specs/SPEC-0008-package-public-facade.md',
+    'docs/specs/SPEC-0013-restricted-device-js.md',
+    'docs/specs/SPEC-0013-public-surface-addendum.md',
+    'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-windows.mjs',
+    'conformance/f8/fixtures/consumer-native-device-js.mjs',
     'conformance/f5/fixtures/vector-add.ptx.txt',
   ]),
   package: portable.package,
   observation,
-  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'Existing F5 independent native C evidence remains the output oracle.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  deviceJsObservation,
+  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector consumer retains the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8W installed-package native consumer passed with checksum ${observation.checksum}; evidence: ${target}`);
+console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum} and source-only Device-JS qualification; evidence: ${target}`);

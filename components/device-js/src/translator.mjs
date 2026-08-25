@@ -3,9 +3,9 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
+import { DEVICE_JS_CONTRACT as CONTRACT, isScopedAtomicHelper } from './contract-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
-const CONTRACT = 'SPEC-0013-v1';
 const SOURCE_LIMIT = 1_048_576;
 const FUNCTION_LIMIT = 64;
 const PARAMETER_LIMIT = 64;
@@ -270,14 +270,16 @@ function isIntegerType(type) { return type.kind === 'scalar' && INTEGER.has(type
 function boolType() { return parseType('bool'); }
 
 class FunctionEmitter {
-  constructor(fn, ast, functions, generatedNames) {
+  constructor(fn, ast, functions, generatedNames, compile) {
     this.fn = fn;
     this.ast = ast;
     this.functions = functions;
     this.generatedNames = generatedNames;
+    this.compile = compile;
     this.localCounter = 0;
     this.loopDepth = 0;
     this.calls = new Set();
+    this.usesScopedAtomic = false;
     this.root = new Scope();
     fn.parameters.forEach((parameter, index) => {
       this.root.declare(parameter.name, { type: parameter.type, mutable: true, code: `p${index}`, parameter: true }, ast.params[index]);
@@ -448,6 +450,26 @@ class FunctionEmitter {
       return { code, type: pointee };
     }
 
+    if (isScopedAtomicHelper(path)) {
+      const store = path === 'gpu.atomic.storeRelaxedDevice';
+      if (args.length !== (store ? 3 : 2)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
+      if (this.compile.headerProfile !== 'cuda-cccl') {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      }
+      const pointer = this.expression(args[0], scope);
+      const index = this.expression(args[1], scope);
+      if (pointer.type.kind !== 'pointer' || !isIntegerType(index.type)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic helper requires a pointer and integer index.', node);
+      if (!['u32', 'u64'].includes(pointer.type.scalar)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic helper supports only ptr<u32> and ptr<u64>.', node, { type: pointer.type.text });
+      const pointee = parseType(pointer.type.scalar);
+      const address = `${pointer.code}[${index.code}]`;
+      const reference = `cuda::atomic_ref<${CUDA_TYPES[pointer.type.scalar]}, cuda::thread_scope_device>(${address})`;
+      this.usesScopedAtomic = true;
+      if (!store) return { code: `${reference}.load(cuda::memory_order_relaxed)`, type: pointee };
+      const value = this.expression(args[2], scope);
+      if (!sameType(value.type, pointee)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic store value type must match pointer pointee.', args[2]);
+      return { code: `${reference}.store(${value.code}, cuda::memory_order_relaxed)`, type: parseType('void', { allowVoid: true }) };
+    }
+
     if (path === 'gpu.barrier.block' || path === 'gpu.fence.device') {
       if (args.length !== 0) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} takes no arguments.`, node);
       return { code: path === 'gpu.barrier.block' ? '__syncthreads()' : '__threadfence()', type: parseType('void', { allowVoid: true }) };
@@ -590,7 +612,7 @@ class FunctionEmitter {
     const lines = [header];
     for (const statement of this.ast.body.body) lines.push(...this.statementLines(statement, this.root, 1));
     lines.push('}');
-    return { code: lines.join('\n'), calls: this.calls };
+    return { code: lines.join('\n'), calls: this.calls, usesScopedAtomic: this.usesScopedAtomic };
   }
 }
 
@@ -665,15 +687,18 @@ export function translateDeviceProgram(request) {
   });
   const definitions = [];
   const calls = new Map();
+  let usesScopedAtomic = false;
   for (const fn of functions) {
-    const emitted = new FunctionEmitter(fn, sourceFunctions.get(fn.name), functionMap, generatedNames).emit();
+    const emitted = new FunctionEmitter(fn, sourceFunctions.get(fn.name), functionMap, generatedNames, compile).emit();
     definitions.push(emitted.code);
     calls.set(fn.name, emitted.calls);
+    usesScopedAtomic ||= emitted.usesScopedAtomic;
   }
   rejectRecursion(calls);
 
   const generatedSource = [
     `/* cuda-js Device-JS ${CONTRACT}; generated; do not edit */`,
+    ...(usesScopedAtomic ? ['#include <cuda/atomic>', ''] : []),
     ...prototypes,
     ...(prototypes.length ? [''] : []),
     ...definitions.flatMap((definition, index) => index === definitions.length - 1 ? [definition] : [definition, '']),

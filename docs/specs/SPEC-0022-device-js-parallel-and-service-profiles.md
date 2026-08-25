@@ -6,6 +6,8 @@
 
 **Reconciled:** 2026-08-22 for scoped atomic observation
 
+**Accepted child:** [`SPEC-0022-scoped-atomic-observation-addendum.md`](SPEC-0022-scoped-atomic-observation-addendum.md) accepts only relaxed device-scope `u32`/`u64` load/store observation; this parent and all other families remain proposal-only.
+
 **Issue owners:** #87 and #89
 
 ## Outcome
@@ -24,8 +26,8 @@ Trusted-source capability is not a sandbox. Service safety cannot be inferred fr
 ```text
 trusted parallel profile:
   architectural disposition: planned
-  implementation status:       not-implemented
-  qualification status:        not-qualified
+  implementation status:       atomic-observation child implemented; remaining families not implemented
+  qualification status:        atomic-observation exact Windows profile qualified; remaining families not qualified
   priority:                    atomic observation first when dependency-ready; broader primitives remain demand-driven
 
 service-safe profile:
@@ -141,7 +143,7 @@ gpu.atomic.load(pointer, index, order?, scope?)
 gpu.atomic.store(pointer, index, value, order?, scope?)
 ```
 
-Exact spelling, defaulting and supported combinations remain subject to accepted child review. The contract must prefer the weakest documented order/scope that satisfies the declared semantics rather than silently imposing stronger synchronization. A relaxed device-scope profile is a candidate for independently meaningful device-resident observations, but is not accepted merely by this proposal text; exact CUDA lowering and profile support require primary-source review and native evidence.
+The accepted child addendum selects the exact `loadRelaxedDevice` / `storeRelaxedDevice` spelling, `u32`/`u64` types, relaxed order and device scope. Other order/scope/type combinations remain subject to later accepted child review.
 
 #### Independent-observation semantics
 
