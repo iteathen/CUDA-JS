@@ -66,7 +66,7 @@ Protected `main` before the 2026-08-14 open-issue sweep is:
 
 ```text
 334b903be827dedb5345608a34a6df444912fe1b
-cuda-js@0.1.0-alpha.5
+cuda-js@0.1.0-alpha.6
 ```
 
 The repository is in an **active implementation phase**. Accepted and implemented portable/software/package paths include the historical Windows foundation plus current generic capabilities.

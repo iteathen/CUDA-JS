@@ -214,7 +214,7 @@ export interface DeviceJsCompileRequest {
 }
 
 export interface DeviceJsProgramDescriptor {
-  readonly contract: 'SPEC-0013-v1';
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1';
   readonly sha256: string;
   readonly parser: Readonly<{ name: 'acorn'; version: string }>;
   readonly functions: readonly Readonly<Record<string, unknown>>[];

@@ -24,6 +24,8 @@ Ambient locale is not part of Device-JS semantics. Public function ordering and 
 
 Device-JS accepts only the closed SPEC-0013 subset and typed metadata. It never exposes generated CUDA source through the public package result, raw CUDA options, native handles, pointers, ASTs, or arbitrary C/C++ syntax authority. Generated CUDA is passed to the existing CompilerActor owner with typed compile options.
 
+The accepted SPEC-0022 atomic-observation child adds `gpu.atomic.loadRelaxedDevice` and `gpu.atomic.storeRelaxedDevice` for naturally aligned `ptr<u32>`/`ptr<u64>` device locations. Their names fix relaxed order and device scope; use requires the accepted `cuda-cccl` compile profile. Each load observes one atomic location only—never a multi-location snapshot, freshness guarantee, or ordering of unrelated memory.
+
 Portable tests prove translation/contract behavior only. Native support requires the exact SPEC-0013 compiler/launch/oracle/lifecycle promotion evidence.
 
 Run the component tests through the F5/F8 portable chains; direct package consumers should use `compileDeviceProgram` from `cuda-js`.

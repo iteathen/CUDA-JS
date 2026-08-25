@@ -7,7 +7,7 @@ import { openCudaRuntimeForTesting } from 'cuda-js/testing';
 assert.deepEqual(compatibilitySubpath.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
-assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1');
+assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1');
 
 const runtime = await openCudaRuntimeForTesting({ compiler: true });
 const source = 'extern "C" __global__ void portable_consumer() {}\n';
@@ -29,7 +29,7 @@ assert.equal(relocatable.artifact.relocatableDeviceCode, true);
 assert.equal(ltoFirst.artifact.format, 'lto-ir');
 assert.equal(ltoLinked.artifact.format, 'cubin');
 assert.equal(linked.artifact.format, 'cubin');
-assert.equal(deviceJs.deviceProgram.contract, 'SPEC-0013-v1');
+assert.equal(deviceJs.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1');
 assert.equal(deviceJs.deviceProgram.parser.name, 'acorn');
 assert.equal(deviceJs.deviceProgram.parser.version, '8.15.0');
 assert.equal(deviceJs.deviceProgram.kernels[0].name, 'portableKernel');

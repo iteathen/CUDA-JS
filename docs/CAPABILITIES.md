@@ -24,7 +24,7 @@ CUDA-JS currently provides a public/package implementation with an exact qualifi
 - exact tested device-scope release/acquire atomic publication through generated device code;
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
-- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS, and one opaque pending-operation lifecycle, each retaining its own exact native promotion gate;
+- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
 - a portable/software contiguous 1D typed device-view component foundation with exact dtype/range/access/parent-lifetime semantics and no selected public facade entry yet;
 - exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and known-incompatible exact profiles.
 
@@ -155,7 +155,7 @@ CUDA-JS currently supports a bounded execution slice with:
 
 A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-pending-operation** rule describes host-side admission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially.
 
-The terminal F5 launch path is qualified on the recorded Windows profile. The additive SPEC-0011 and SPEC-0021 scalar kinds and SPEC-0016 operation lifecycle are implemented in portable/software/package paths and retain their separate exact native promotion gates.
+The terminal F5 launch path is qualified on the recorded Windows profile. SPEC-0016 now has current-head exact Windows delayed-completion/deferred-failure/cleanup evidence on that profile; SPEC-0011 and SPEC-0021 scalar kinds retain their separate native promotion gates.
 
 See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md), [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
 
@@ -169,7 +169,7 @@ See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](sp
 | GPU threads/warps/blocks within a kernel | Yes. Normal CUDA device parallelism. |
 | DriverActor vs CompilerActor ownership | Separate Workers and queues. No claim that every operation overlaps or improves performance. |
 | Multiple CUDA-JS runtime instances | Isolation is proven; cross-runtime resources reject. This is not a performance claim about overlapping GPU execution. |
-| One opaque submitted GPU operation | Implemented in portable/software/package paths; exact native SPEC-0016 qualification remains open. |
+| One opaque submitted GPU operation | Implemented; exact Windows delayed-completion/deferred-failure/cleanup evidence passes on the recorded profile. |
 | Multiple GPU operations/private streams in flight in one runtime | Planned under proposed SPEC-0018; not implemented or qualified. |
 | Public stream/event capability objects | Not currently public/qualified. |
 | Multiple GPUs/MIG | Architecturally planned/deferred by exact capability; not implemented or qualified. |
@@ -246,13 +246,13 @@ See [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
 ### 10. Restricted Device-JS
 
-SPEC-0013 is accepted and implemented in portable/software/package paths. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff.
+SPEC-0013 and the bounded SPEC-0022 scoped-atomic-observation child are accepted and implemented. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff. `loadRelaxedDevice` / `storeRelaxedDevice` provide only relaxed device-scope one-location `u32`/`u64` semantics through the explicit `cuda-cccl` profile.
 
 Pinned `acorn@8.15.0` is a syntax-only replaceable parser adapter. It does not own Device-JS semantics or code generation. Generated CUDA source, parser ASTs, native options, and provider capabilities do not enter ordinary public results.
 
-Native Device-JS support remains not-qualified until the exact generated-source → compiler → Driver launch → independent oracle → terminal cleanup evidence passes. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
+Exact Windows source-only Device-JS evidence now passes generated-source → compiler → Driver launch → independent scalar/control-flow/atomic oracle → terminal cleanup on the recorded profile. It does not qualify other OS/GPU/provider profiles. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
 
-See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
+See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), the [scoped atomic-observation addendum](specs/SPEC-0022-scoped-atomic-observation-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
 
 ## GPU residency and device-resident workloads
 
@@ -341,14 +341,14 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | PTX/cubin module execution | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded copied module/function/terminal-launch path. |
 | `u64`/`i32`/`f32` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0011 gate remains open; portable/package ABI coverage exists. |
 | `f64`/`f16`/`bf16` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0021 public portable/software/package path; exact native ABI/launch gate remains open. |
-| Opaque submit/status/wait/close operation | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0016 gate remains open; one pending operation and one private stream. |
+| Opaque submit/status/wait/close operation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows delayed-completion/deferred-failure/cleanup profile; one pending operation and one private stream. |
 | Multiple in-flight operations/private streams | `planned` | `not-implemented` | `not-qualified` | `after:issue-51` | Proposed SPEC-0018 must extend, not duplicate, SPEC-0016. |
 | Public raw stream/event objects | `unselected` | `not-implemented` | `not-qualified` | `deferred` | No current contract exposes native stream/event capabilities. |
 | Multiple CUDA-JS runtime instances | `planned` | `implemented` | `qualified` | `active` | Isolation behavior only; not a GPU-overlap performance claim. |
 | NVRTC source compilation / nvJitLink PTX linking / cache | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; optional bounded typed compiler/linker owner. |
-| Typed relocatable PTX | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0010 gate remains open. |
+| Typed relocatable PTX | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows two-unit RDC compile/link/load/execute/cleanup profile. |
 | Typed Device LTO | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0012 gate remains open; typed `lto-ir` and homogeneous LTO linking only. |
-| Restricted Device-JS | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0013 gate remains open; private CUDA lowering through `compileDeviceProgram()`. |
+| Restricted Device-JS + scoped atomic observation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows source-only profile; private CUDA lowering and relaxed device-scope `u32`/`u64` observation through `compileDeviceProgram()`. |
 | Trusted CCCL `cuda/` + `nv/` profile | `planned` | `implemented` | `qualified` | `active` | Exact Windows CUDA 13.3 profile; path-free verified virtual headers. |
 | `<cuda/atomic>` device-scope publication | `planned` | `implemented` | `qualified` | `active` | Exact generic fixture/profile only; not a scheduler/search/performance claim. |
 | Explicit device selection | `planned` | `not-implemented` | `not-qualified` | `next` | Accepted SPEC-0017; portable implementation is the next dependency-ready packet. |

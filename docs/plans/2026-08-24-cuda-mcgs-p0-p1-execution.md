@@ -10,6 +10,12 @@
 
 **Frozen input:** `origin/main` `1318baaeb18f613bdda5d281a733a8a973f3a8a3`
 
+## Progress checkpoints
+
+- `2026-08-24T17:20:05-07:00`: created the clean-worktree execution spine from frozen `origin/main`; the pre-existing dirty `codex/capability-expansion-roadmap` worktree remained protected and untouched.
+- `2026-08-24T17:27:27-07:00`: published PR #116 at `acf1ca85eb9859d5f54618c17cbe2c959745e388` for #35/#43/#51. Exact local F5/F6/F8 native evidence and all protected checks pass; integration awaits the required independent review.
+- `2026-08-24T17:40:29.6535343-07:00` (`2026-08-25T00:40:29.6566741Z`): `MCGS-P0-ATOMIC-0022` implementation and installed-package native oracle pass for `u32`/`u64` relaxed device-scope atomic observation on the exact Node 26.7.0 / CUDA 13.3 / Driver API 13030 / GTX 1660 Ti profile. Full repository reconciliation and independent review remain pending.
+
 ## Objective and authority
 
 Complete the CUDA-JS issues labeled `cuda-mcgs:p0` and `cuda-mcgs:p1` before broad CUDA-MCGS implementation begins. The project-owner instruction authorizes the dependency-ready implementation and evidence program, but it does not authorize false native claims, consumer-specific CUDA-JS semantics, raw native authority, weakened tests, or fabricated cross-repository evidence.
