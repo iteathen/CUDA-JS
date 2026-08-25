@@ -16,6 +16,7 @@
 - `2026-08-24T17:27:27-07:00`: published PR #116 at `acf1ca85eb9859d5f54618c17cbe2c959745e388` for #35/#43/#51. Exact local F5/F6/F8 native evidence and all protected checks pass; integration awaits the required independent review.
 - `2026-08-24T17:40:29.6535343-07:00` (`2026-08-25T00:40:29.6566741Z`): `MCGS-P0-ATOMIC-0022` implementation and installed-package native oracle pass for `u32`/`u64` relaxed device-scope atomic observation on the exact Node 26.7.0 / CUDA 13.3 / Driver API 13030 / GTX 1660 Ti profile. Full repository reconciliation and independent review remain pending.
 - `2026-08-24T19:00:53-07:00` (`2026-08-25T02:00:53Z`): after the owner authorized the sole-maintainer review exception, stacked PR #117 merged at `64ce41ebc183258596f99d2c06ebfbe480131f2e` into the P0 integration branch. Exact-head author review and all prior checks passed; the combined PR #116 head must rerun required checks before the approval-only admin merge to protected `main`.
+- `2026-08-24T19:20:10.5504275-07:00` (`2026-08-25T02:20:10.5504275Z`): protected `main` P0 revision `9f13785e4d1d8d887099571a7a41be0b5b42f749` passed exact merged-head F5/F6/F8 portable and native qualification; issues #35, #43, #51, and #87 are closed. SPEC-0018 is accepted and the capacity-two scheduler passes 103 F5 portable tests, a native producer/observer mechanism oracle in which the observer terminalizes while the producer remains pending and reads publication value `1`, balanced cleanup, and the same path through an installed package. P1 scheduler integration/review remains in progress.
 
 ## Objective and authority
 
@@ -77,7 +78,7 @@ The exact CUDA-MCGS compatible-pair closure in issue #32 necessarily consumes a 
 
 **Outcome:** finite private multi-operation scheduling, beginning with one long-lived producer and one short atomic observer over explicitly concurrency-safe shared memory.
 
-**Acceptance:** accepted SPEC-0018, finite admission/backpressure, explicit dependency/hazard model, per-operation leases and failure attribution, native same/cross-stream oracle, terminal teardown, and no raw stream/event surface.
+**Acceptance:** accepted SPEC-0018, finite admission/backpressure, explicit dependency/hazard model, per-operation leases and failure attribution, native same-stream predecessor plus cross-stream independent-observer oracle, terminal teardown, and no raw stream/event surface. Cross-stream dependency waits remain a separately gated wider profile.
 
 **Falsifier:** correctness depends on physical overlap, lifecycle duplicates SPEC-0016, or failure/resource ownership cannot remain attributable.
 

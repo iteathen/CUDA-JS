@@ -15,6 +15,14 @@ async function prepared() {
   return { runtime, module, fn, memory };
 }
 
+async function preparedConcurrent() {
+  const runtime = await openCudaRuntimeForTesting({ driver: { execution: { maxPendingGpuOperations: 2 } } });
+  const module = await runtime.loadModule({ format: 'ptx', bytes: PTX });
+  const fn = await module.getFunction({ name: 'operation_kernel', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }] });
+  const memory = await runtime.allocateDevice({ byteLength: 16 });
+  return { runtime, module, fn, memory };
+}
+
 const launch = (memory) => ({ grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [memory, 4] });
 
 test('public submit returns an opaque operation and wait uses later actor turns', { timeout: 10_000 }, async () => {
@@ -60,4 +68,18 @@ test('runtime close terminalizes an outstanding public operation and closes its 
   assert.equal(operation.state, 'closed');
   assert.equal(memory.state, 'closed');
   assert.equal(fn.state, 'closed');
+});
+
+test('public capacity-two profile admits declared atomic overlap without an artificial dependency', { timeout: 10_000 }, async () => {
+  const { runtime, fn, memory } = await preparedConcurrent();
+  const accesses = [{ argumentIndex: 0, byteOffset: 0, byteLength: 16, mode: 'atomic-observe-relaxed-device', dtype: 'u32' }];
+  const first = await fn.submit({ ...launch(memory), accesses });
+  const second = await fn.submit({ ...launch(memory), accesses });
+  assert.equal(first.state, 'pending');
+  assert.equal(second.state, 'pending');
+  await first.wait();
+  await second.wait();
+  await first.close();
+  await second.close();
+  assert.equal((await runtime.close()).graceful, true);
 });

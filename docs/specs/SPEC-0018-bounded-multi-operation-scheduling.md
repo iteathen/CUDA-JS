@@ -22,8 +22,8 @@ SPEC-0016 remains the sole operation lifecycle authority. This specification may
 
 ```text
 architectural disposition: accepted
-implementation status:       not-implemented
-qualification status:        not-qualified
+implementation status:       implemented for the exact two-operation profile
+qualification status:        qualified on the recorded Windows profile
 priority:                    P1 implementation for CUDA-MCGS readiness
 ```
 
@@ -42,7 +42,9 @@ conservative deferred-failure containment, terminal event cleanup, and installed
 public-facade execution. The first accepted widened profile is exactly two pending
 operations on two private nonblocking streams, no admitted queue, at most one
 explicit earlier-operation dependency per submission, and fail-closed ordinary
-hazards. A caller may select the compatibility profile of one pending operation.
+hazards. The first profile lowers a pending predecessor by placing its successor
+on the same stream; it does not yet expose cross-stream event-wait dependencies.
+A caller may select the compatibility profile of one pending operation.
 
 ## Design invariants
 
@@ -124,7 +126,7 @@ Before native work CUDA-JS validates:
 - all referenced resources remain live/leaseable;
 - no impossible or contradictory ordering.
 
-Dependencies lower privately to same-stream order or DriverActor-owned event record/wait operations.
+Dependencies lower privately to same-stream order or, in a later accepted profile, DriverActor-owned event record/wait operations. The exact first profile always chooses the pending predecessor's stream, so its one-edge ordering needs no additional native primitive or host observation.
 
 Public callers never receive raw CUDA events.
 
@@ -249,7 +251,7 @@ Mocks do not prove actual CUDA overlap, device atomic visibility, memory-order s
 For each promoted profile:
 
 1. prove same-stream ordering against an independent native oracle;
-2. prove cross-stream dependency ordering with explicit events;
+2. prove same-stream predecessor ordering, and prove cross-stream event ordering before promoting any profile that selects cross-stream dependencies;
 3. use a mechanism-level fixture to prove actual concurrent progress for at least one eligible pair before claiming overlap;
 4. prove an independent atomic observer can execute while a long-lived writer remains pending, read only valid atomically published values, and complete without waiting for producer terminality when hardware scheduling permits;
 5. prove CUDA-JS inserts no hidden dependency for that declared concurrency-safe overlap;

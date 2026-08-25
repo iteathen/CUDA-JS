@@ -30,7 +30,9 @@ await mkdir(directory, { recursive: true });
 await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: 'cuda-js-native-windows-consumer', version: '1.0.0', private: true, type: 'module' }, null, 2)}\n`);
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-windows.mjs'), path.join(directory, 'consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
+await cp(path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
 const installed = path.join(directory, 'node_modules', 'cuda-js');
 assert(existsSync(installed));
@@ -54,6 +56,11 @@ assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabil
 assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
 assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);
 assert.equal(deviceJsObservation.graceful, true);
+const multiOperationOutput = runNode(['--experimental-ffi', 'multi-operation-consumer.mjs'], directory);
+const multiOperationObservation = JSON.parse(multiOperationOutput.split(/\r?\n/).at(-1));
+assert.equal(multiOperationObservation.producerPendingAfterObserver, true);
+assert.deepEqual(multiOperationObservation.observedWords, [1]);
+assert.equal(multiOperationObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
 
@@ -72,11 +79,13 @@ const target = await writeEvidence('native-windows-package.json', {
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-windows.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
+    'conformance/f8/fixtures/consumer-native-multi-operation.mjs',
     'conformance/f5/fixtures/vector-add.ptx.txt',
   ]),
   package: portable.package,
   observation,
   deviceJsObservation,
+  multiOperationObservation,
   claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector consumer retains the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
 console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum} and source-only Device-JS qualification; evidence: ${target}`);

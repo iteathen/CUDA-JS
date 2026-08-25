@@ -6,19 +6,19 @@
     "status": "accepted-f5w-internal-experimental",
     "product_area": "components",
     "path": "components/execution",
-    "purpose": "Own bounded PTX identity, declared function schemas, packed launch parameters, memory leases, one private completion event, adaptive polling, and terminal records without exposing native state.",
+    "purpose": "Own bounded PTX identity, declared function schemas, packed launch parameters, finite operation scheduling, access hazards, memory leases, private completion events, adaptive polling, and terminal records without exposing native state.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "runtime.resource-registry", "runtime.memory", "injected-execution-backend"],
-    "forbidden_dependencies": ["node-ffi", "cuda-driver", "public-native-handle", "public-stream", "public-event", "concurrent-launch", "compiler"],
+    "forbidden_dependencies": ["node-ffi", "cuda-driver", "public-native-handle", "public-stream", "public-event", "compiler"],
     "validation": ["npm run f5:unit", "npm run f5:mock", "npm run f5:native"],
     "owner": "runtime.execution",
-    "lifecycle": "One private stream is a context child; modules, functions, and completion events follow dependency order while function and memory leases fence every submitted launch through terminal completion.",
+    "lifecycle": "A fixed one- or two-stream pool is a context child; modules, functions, operations, dependencies, and completion events follow dependency order while function, operation, and memory leases fence every submitted launch through terminal completion.",
     "design": {
       "owned_invariant": "A launch cannot resolve before terminal event completion and cannot release any argument capability while device use may continue.",
       "public_ports": ["ExecutionManager", "normalizeExecutionPolicy", "parameterLayout", "packParameterValues", "ExecutionError"],
       "injected_dependencies": ["resource registry", "context token", "memory lease port", "device limits", "backend operations"],
       "adapter_boundaries": ["Windows DriverActor execution backend", "platform-neutral orchestration mock"],
-      "simplest_sufficient_total_system": "One bounded PTX/cubin policy owner, one private stream, one launch at a time, one event poller, and explicit resource dependencies."
+      "simplest_sufficient_total_system": "One bounded PTX/cubin policy owner, a fixed one- or two-stream pool, no queue, at most two operations, explicit access declarations, one optional predecessor, and one event per pending operation."
     }
   }
 }
