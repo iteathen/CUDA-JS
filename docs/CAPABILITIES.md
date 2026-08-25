@@ -12,7 +12,7 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
-CUDA-JS currently provides a public/package implementation with an exact qualified Windows x64 foundation. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
+CUDA-JS currently provides a public/package implementation with an exact qualified Windows x64 foundation retained as a secondary profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path; its adapters/evidence are not yet complete. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
@@ -424,7 +424,8 @@ CUDA-JS is a public alpha. Exact support claims are intentionally narrower than 
 At the time of this document:
 
 - exact Node 26.7.0 is the qualified Node evidence baseline;
-- Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current native qualification evidence;
+- native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
+- Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current retained secondary native qualification evidence;
 - other FFI-capable Node 26.1.0-or-later and structurally admissible Windows CUDA profiles may operate as `testing-unconfirmed` without inheriting support;
 - native Linux Driver/compiler/GPU execution remains incomplete;
 - portable Linux controls do not imply native Linux CUDA support;

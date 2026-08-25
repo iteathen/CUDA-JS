@@ -6,6 +6,8 @@
 
 This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
 
+ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The current Linux adapter is incomplete, so this priority is not a support claim. The accepted Windows x64 result remains valid as a maintained secondary profile.
+
 CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.
 
 ## Directly qualified hardware
@@ -55,7 +57,7 @@ CUDA 13.3 compiler targets define the candidate set below. â€œSeeking evidenceâ€
 | `linux-native-arm64-sbsa` | schema and adapter incomplete | qualified experimental | ARM64 Runtime IR and native ABI oracle; ARM64 Driver/compiler adapters; ARM64 F2 through F8 native qualification chain |
 | `linux-native-arm64-jetson` | contract required | future profile | accepted Jetson profile contract; Jetson Node/ABI/provider qualification; Jetson F2 through F8 native qualification chain |
 
-Windows x64 is the only native profile currently qualified. Native Linux x64, WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.
+Windows x64 is the only native profile currently qualified and is retained as secondary evidence. Native Linux x64 is the reference priority but remains adapter-incomplete; WSL2 x64, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles because their ABI, loader, Driver/provider, packaging, permission, or deployment boundaries differ.
 
 ## Extended qualification axes
 

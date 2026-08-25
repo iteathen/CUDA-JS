@@ -73,13 +73,13 @@ Remaining evidence:
 
 ### Native Linux
 
-Linux F2L through the public/package equivalents remain independently incomplete. Resume only on a qualified native Linux NVIDIA environment. Windows, WSL, portable mocks, schema generation, or successful import cannot substitute for native Driver/compiler/GPU evidence.
+ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference-platform workstream. Ubuntu 24.04 LTS x86-64 is the first exact cell. Implement the canonical Linux DriverActor adapter and NVRTC/nvJitLink providers through existing public/component contracts, then promote only on a qualified native Linux NVIDIA environment. Windows, WSL, portable mocks, schema generation, or successful import cannot substitute for native Driver/compiler/GPU evidence.
 
 Capability-specific Linux RDC/LTO/Device-JS/operation qualification follows only after the owning Linux baseline and capability dependencies exist.
 
-### Additional Windows/architecture profiles
+### Secondary Windows and additional architecture profiles
 
-Continue exact-profile evidence for additional Turing, Ampere, Ada, Hopper, Blackwell, WDDM/TCC, Server, ARM64/SBSA, WSL, Jetson, and other selected profiles according to the hardware registry. One successful model never promotes a family.
+Retain the accepted Windows x64 exact evidence and continue additional Windows profiles only when a concrete consumer or available host justifies them. Continue exact-profile evidence for Turing, Ampere, Ada, Hopper, Blackwell, Server, ARM64/SBSA, WSL, Jetson, and other selected profiles according to the hardware registry. One successful model never promotes a family.
 
 ### Extended axes
 

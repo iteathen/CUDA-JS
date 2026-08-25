@@ -1,6 +1,6 @@
 # CUDA-JS Validation Policy
 
-## Accepted Windows F8W / hardware-deferred Linux Driver phase
+## Linux-first adapter phase / accepted Windows evidence retained
 
 Run:
 
@@ -23,6 +23,8 @@ npm run hardware:probe:hyperv  # read-only sanitized Windows Hyper-V readiness/n
 npm run f1b:verify-native  # exact pinned Linux x86-64/Clang profile
 npm run exp:001:prepare  # native Ubuntu 24.04 x86-64 preparation and readiness
 ```
+
+ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification platform. During Linux adapter development, `./scripts/verify-docs.sh`, `npm run exp:000:build`, `npm run verify`, and `npm run exp:001:prepare` are the minimum repository-wide gate. Run the exact Windows native commands when their owners change or before claiming their retained profile remains qualified; do not make the unavailable Windows host a prerequisite for unrelated Linux-only adapter work. Linux support promotion still requires a real Ubuntu 24.04 NVIDIA host and the complete F2L–F8L native/package chain.
 
 The promoted F1A regression claim additionally requires:
 
@@ -50,7 +52,7 @@ F8W changes additionally require accepted SPEC-0008, a non-private package manif
 
 F9 CUDA-JS prerequisite changes additionally require accepted SPEC-0009, exact manifest agreement for the selected toolkit virtual-header roots, header verification before cache lookup, caller/profile name-conflict rejection, link/reparse/non-regular-entry rejection, opened-file identity checks, no ambient include path, cache-key separation, path-free public records, successful public-facade `<cuda/atomic>` compilation, exact publication output, no host-produced intermediate work after launch, balanced CompilerActor resources, zero live/orphaned DriverActor resources, and graceful aggregate close. Run `npm run f9:portable` and `npm run f9:linux-readiness` in native Linux CI; these prove shared controls and bounded header inventory only, not Linux NVRTC, Driver, GPU, cleanup, support, the independently owned CUDA-MCGS package, or an exact compatible pair.
 
-F2L preparation changes additionally require the exact Ubuntu/Node profile, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support.
+F2L preparation and adapter changes additionally require the exact Ubuntu/Node profile, canonical `libcuda.so.1` discovery, hash-pinned official packages, successful native ABI comparison, successful independent C-oracle compilation, portable actor/resource regression coverage, and an unmodified readiness report. F2L promotion additionally requires `readiness` status `ready` and a passing real-Driver/GPU smoke with exact C parity, negative controls, permissions, and terminal context/library/Worker cleanup. GPU-free preparation is not Linux Driver support. Linux compiler/provider promotion then requires canonical CUDA 13.3 NVRTC/nvJitLink identity, exact compile/link/cache/oracle parity, path-free public records and terminal provider cleanup before F8L installed-package promotion.
 
 Hardware registry changes additionally require a clean exact commit, direct hardware execution, the complete profile-required native capsule chain, independent C-oracle agreement, permission controls, installed-package execution, terminal cleanup, sanitized evidence identity, generated-list agreement, and claim limits. An incomplete profile may describe missing work but must not expose a promotable command chain. Architecture-level coverage records at most that one or more exact models have passed; it does not infer family-wide support.
 

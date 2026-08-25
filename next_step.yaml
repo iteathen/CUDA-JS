@@ -1,10 +1,10 @@
 {
-  "schema_version": 40,
+  "schema_version": 41,
   "updated": "2026-08-25",
-  "status": "issue_123_device_publication_complete_awaiting_integration",
-  "objective": "Integrate the completed consumer-neutral Device-JS release/acquire publication packet from codex/issue-123-device-publication, then resume exact CUDA-JS/CUDA-MCGS compatible-pair work.",
+  "status": "linux_first_reference_platform_active",
+  "objective": "Implement the native Linux x86-64 reference path from canonical DriverActor ownership through compiler providers and installed-package qualification, preserving Windows as a secondary exact profile.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "2135216b1a9fd88066a1c82b61ae533645eac9c2",
+    "protected_main_authority_baseline": "05008fb988558e909cb3802fa12a73d612e70bf0",
     "package": "cuda-js@0.1.0-alpha.7",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -18,7 +18,8 @@
       "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed",
       "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed",
       "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed",
-      "CJS-DEVICE-PUBLICATION-123 completed on remote branch codex/issue-123-device-publication: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence"
+      "CJS-DEVICE-PUBLICATION-123 integrated on PR #125: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence",
+      "CJS-LINUX-FIRST-ADR-0006 selected: native Linux x86-64 reference implementation, exact Ubuntu 24.04 first cell, Windows retained as a secondary adapter/profile"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
@@ -41,6 +42,7 @@
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md",
+    "docs/decisions/ADR-0006-linux-first-reference-platform.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md",
     "docs/specs/SPEC-0019-host-memory-and-async-transfer.md",
@@ -51,13 +53,18 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-DEVICE-PUBLICATION-123-INTEGRATION",
-    "issues": [123],
-    "plan": "docs/archive/plans/2026-08-25-device-js-release-acquire-publication.md",
-    "next_action": "Review and integrate remote branch codex/issue-123-device-publication without widening the accepted helper contract, then close issue #123 and resume MCGS-P0-PAIR-0009C.",
-    "exit": "The exact reviewed branch is integrated on protected main, issue #123 is closed, public/package identity agrees, and no generated or worktree residue remains."
+    "id": "CJS-LINUX-REFERENCE-F2L-F8L",
+    "issues": [4],
+    "plan": "docs/plans/2026-08-12-native-and-platform-qualification-continuation.md",
+    "next_action": "Implement the canonical native Linux x86-64 DriverActor adapter through existing public contracts, then add canonical NVRTC/nvJitLink providers and complete the exact Ubuntu 24.04 F2L-F8L package chain.",
+    "exit": "One exact Ubuntu 24.04 x86-64 Node 26.7.0/Driver/GPU/CUDA 13.3 profile passes independent Driver, memory, execution, compiler, permission, installed-package and terminal-cleanup evidence, and compatibility/support projections promote only that profile."
   },
   "parallel_or_external_next": [
+    {
+      "id": "CJS-DEVICE-SELECTION-0017",
+      "issues": [20],
+      "action": "Continue the accepted platform-neutral selector/target foundation without adding Windows-specific public semantics; use Linux as the first native promotion target after the reference Driver/compiler ports exist."
+    },
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
       "issues": [39, 88],
@@ -82,8 +89,8 @@
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
-      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence not supplied by the current single-GPU Windows profile. Portable preparation/implementation may continue where authorized, but no broader native/support claim is inferred."
+      "issues": [12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence. Issue #4 Linux adapter implementation is active, while its support promotion still requires an external Ubuntu 24.04 NVIDIA host. Portable preparation/implementation may continue where authorized, but no broader native/support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",
@@ -125,6 +132,7 @@
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116, PR #118, PR #119, and PR #120 are integrated protected-main CUDA-MCGS prerequisites; issue #123 is complete on its remote integration branch; exact pair issue #32 awaits integration and the frozen CUDA-MCGS artifact"
+    "PR #116, PR #118, PR #119, PR #120, PR #124, and PR #125 are integrated protected-main CUDA-MCGS prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact",
+    "Windows F2W-F9 remains accepted secondary exact-profile evidence after ADR-0006; it is not deleted or used as Linux proof"
   ]
 }
