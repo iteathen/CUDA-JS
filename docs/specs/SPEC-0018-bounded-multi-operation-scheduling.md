@@ -1,10 +1,12 @@
 # SPEC-0018: Bounded Multi-Operation Scheduling
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-13
 
 **Reconciled:** 2026-08-22 for concurrent atomic observation
+
+**Accepted:** 2026-08-24 after protected-main SPEC-0016 native qualification
 
 **Issue owner:** #40
 
@@ -19,10 +21,10 @@ SPEC-0016 remains the sole operation lifecycle authority. This specification may
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented
-qualification status:        not-qualified
-priority:                    after trustworthy SPEC-0016 integration/evidence
+architectural disposition: accepted
+implementation status:       implemented for the exact two-operation profile
+qualification status:        qualified on the recorded Windows profile
+priority:                    P1 implementation for CUDA-MCGS readiness
 ```
 
 ## Dependencies
@@ -32,6 +34,17 @@ This proposal consumes SPEC-0003, SPEC-0004, SPEC-0005, SPEC-0015 and SPEC-0016.
 Concurrent atomic observation may consume accepted Device-JS atomic load/store semantics from SPEC-0022 when a Device-JS consumer is used. The scheduler itself remains language-neutral and does not own atomic helper syntax.
 
 Downstream proposals include SPEC-0019 asynchronous transfer, SPEC-0020 prepared batches/graphs, SPEC-0023 CUDA library adapters, SPEC-0024 multi-GPU orchestration, SPEC-0025 graphics interop and application-layer execution plans.
+
+The acceptance gate is satisfied by protected `main` revision
+`9f13785e4d1d8d887099571a7a41be0b5b42f749`: its exact-revision F5 evidence proves
+the SPEC-0016 pending/terminal lifecycle, delayed `CUDA_ERROR_NOT_READY`,
+conservative deferred-failure containment, terminal event cleanup, and installed
+public-facade execution. The first accepted widened profile is exactly two pending
+operations on two private nonblocking streams, no admitted queue, at most one
+explicit earlier-operation dependency per submission, and fail-closed ordinary
+hazards. The first profile lowers a pending predecessor by placing its successor
+on the same stream; it does not yet expose cross-stream event-wait dependencies.
+A caller may select the compatibility profile of one pending operation.
 
 ## Design invariants
 
@@ -113,7 +126,7 @@ Before native work CUDA-JS validates:
 - all referenced resources remain live/leaseable;
 - no impossible or contradictory ordering.
 
-Dependencies lower privately to same-stream order or DriverActor-owned event record/wait operations.
+Dependencies lower privately to same-stream order or, in a later accepted profile, DriverActor-owned event record/wait operations. The exact first profile always chooses the pending predecessor's stream, so its one-edge ordering needs no additional native primitive or host observation.
 
 Public callers never receive raw CUDA events.
 
@@ -238,7 +251,7 @@ Mocks do not prove actual CUDA overlap, device atomic visibility, memory-order s
 For each promoted profile:
 
 1. prove same-stream ordering against an independent native oracle;
-2. prove cross-stream dependency ordering with explicit events;
+2. prove same-stream predecessor ordering, and prove cross-stream event ordering before promoting any profile that selects cross-stream dependencies;
 3. use a mechanism-level fixture to prove actual concurrent progress for at least one eligible pair before claiming overlap;
 4. prove an independent atomic observer can execute while a long-lived writer remains pending, read only valid atomically published values, and complete without waiting for producer terminality when hardware scheduling permits;
 5. prove CUDA-JS inserts no hidden dependency for that declared concurrency-safe overlap;

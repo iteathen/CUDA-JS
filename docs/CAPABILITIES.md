@@ -153,7 +153,7 @@ CUDA-JS currently supports a bounded execution slice with:
 - timeout handling that fails the runtime conservatively rather than claiming inaccessible cleanup;
 - explicit function/module release and dependency-safe teardown.
 
-A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The current **one-pending-operation** rule describes host-side admission/attribution policy for one runtime; it does not mean the GPU executes a kernel serially.
+A single CUDA kernel is still massively parallel across GPU threads, warps, blocks, and SM resources. The default **one-pending-operation** profile remains the compatibility baseline; an explicit accepted profile widens this to exactly two pending operations on two private streams.
 
 The terminal F5 launch path is qualified on the recorded Windows profile. SPEC-0016 now has current-head exact Windows delayed-completion/deferred-failure/cleanup evidence on that profile; SPEC-0011 and SPEC-0021 scalar kinds retain their separate native promotion gates.
 
@@ -170,11 +170,11 @@ See [`SPEC-0005`](specs/SPEC-0005-module-launch-completion.md), [`SPEC-0011`](sp
 | DriverActor vs CompilerActor ownership | Separate Workers and queues. No claim that every operation overlaps or improves performance. |
 | Multiple CUDA-JS runtime instances | Isolation is proven; cross-runtime resources reject. This is not a performance claim about overlapping GPU execution. |
 | One opaque submitted GPU operation | Implemented; exact Windows delayed-completion/deferred-failure/cleanup evidence passes on the recorded profile. |
-| Multiple GPU operations/private streams in flight in one runtime | Planned under proposed SPEC-0018; not implemented or qualified. |
+| Multiple GPU operations/private streams in flight in one runtime | Implemented and qualified for the exact SPEC-0018 capacity-two profile with declared accesses, no queue, and one optional predecessor. |
 | Public stream/event capability objects | Not currently public/qualified. |
 | Multiple GPUs/MIG | Architecturally planned/deferred by exact capability; not implemented or qualified. |
 
-The target architecture already models memory/module/function/**stream/event/operation** resources as separate bricks. Therefore the current one-pending-operation rule is an accepted **profile boundary**, not a claim that multi-stream support is architecturally impossible. Adding multiple in-flight operations/private streams requires accepted scheduling rules for ownership, ordering, event provenance, deferred errors, cancellation, resource leases, backpressure, teardown, and native evidence.
+The target architecture models memory/module/function/**stream/event/operation** resources as separate bricks. SPEC-0018 composes those bricks without exposing streams or events: ordinary hazards fail closed or use one explicit predecessor, independently meaningful atomic overlap remains unordered, and every operation retains its own leases and completion event.
 
 See the [target architecture](architecture/TARGET_ARCHITECTURE.md) and [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
@@ -341,8 +341,8 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | PTX/cubin module execution | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded copied module/function/terminal-launch path. |
 | `u64`/`i32`/`f32` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0011 gate remains open; portable/package ABI coverage exists. |
 | `f64`/`f16`/`bf16` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0021 public portable/software/package path; exact native ABI/launch gate remains open. |
-| Opaque submit/status/wait/close operation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows delayed-completion/deferred-failure/cleanup profile; one pending operation and one private stream. |
-| Multiple in-flight operations/private streams | `planned` | `not-implemented` | `not-qualified` | `after:issue-51` | Proposed SPEC-0018 must extend, not duplicate, SPEC-0016. |
+| Opaque submit/status/wait/close operation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows delayed-completion/deferred-failure/cleanup profile; capacity one remains the default. |
+| Multiple in-flight operations/private streams | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0018 capacity-two profile, two private streams, no queue, one predecessor, declared access hazards, and native/installed-package atomic observer evidence. |
 | Public raw stream/event objects | `unselected` | `not-implemented` | `not-qualified` | `deferred` | No current contract exposes native stream/event capabilities. |
 | Multiple CUDA-JS runtime instances | `planned` | `implemented` | `qualified` | `active` | Isolation behavior only; not a GPU-overlap performance claim. |
 | NVRTC source compilation / nvJitLink PTX linking / cache | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; optional bounded typed compiler/linker owner. |

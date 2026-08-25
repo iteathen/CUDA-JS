@@ -18,10 +18,10 @@
         "EXP-012 Windows Driver and C-oracle parity",
         "F3 native actor/context lifecycle",
         "F4 native memory and C-oracle parity",
-        "F5 native execution, scalar ABI, opaque-operation lifecycle, deferred-failure provenance, and C-oracle parity",
+        "F5 native execution, scalar ABI, opaque-operation lifecycle, exact capacity-two atomic producer/observer scheduling, deferred-failure provenance, and C-oracle parity",
         "F6 native compiler/linker/cache, RDC, Device LTO, and C-oracle parity",
         "F7 native diagnostics/permissions/stress",
-        "F8 installed-package native vector and source-only Device-JS consumers"
+        "F8 installed-package native vector, source-only Device-JS, and capacity-two atomic producer/observer consumers"
       ],
       "commands": [
         ["scripts/run-exp-000.mjs", "all"],

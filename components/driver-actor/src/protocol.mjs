@@ -62,6 +62,14 @@ function launchArguments(value, maximum) {
   });
 }
 
+function launchAccesses(value, maximum) {
+  return value === undefined || (Array.isArray(value) && value.length <= maximum && value.every((entry) => plainObject(entry)
+    && Object.keys(entry).every((key) => ['argumentIndex', 'byteOffset', 'byteLength', 'mode', 'dtype'].includes(key))
+    && nonnegativeSafeInteger(entry.argumentIndex) && nonnegativeSafeInteger(entry.byteOffset) && positiveSafeInteger(entry.byteLength)
+    && ['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device'].includes(entry.mode)
+    && (!Object.hasOwn(entry, 'dtype') || ['u32', 'u64'].includes(entry.dtype))));
+}
+
 export function validateRequest(message, { testHooks = false, memoryPolicy = { maxTransferBytes: 16 * 1_048_576 }, executionPolicy = { maxModuleBytes: 4 * 1_048_576, maxArguments: 32 } } = {}) {
   if (!plainObject(message) || !exactFields(message, REQUEST_FIELDS)) throw validationError('DRIVER_COMMAND_INVALID', 'Command envelope is invalid.');
   if (message.schemaVersion !== 1) throw validationError('DRIVER_COMMAND_VERSION', 'Command schema version is unsupported.', { schemaVersion: message.schemaVersion }, message.requestId);
@@ -100,8 +108,10 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
         || typeof payload.name !== 'string' || !parameterSchema(payload.parameters, executionPolicy.maxArguments)) throw validationError('DRIVER_FUNCTION_OPTIONS', 'Function lookup payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.submit') {
     const payload = message.payload;
-    if (!plainObject(payload) || !exactFields(payload, ['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments'])
+    if (!plainObject(payload) || Object.keys(payload).some((key) => !['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'after', 'accesses'].includes(key))
+        || !['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments'].every((key) => Object.hasOwn(payload, key))
         || !isResourceToken(payload.functionToken) || !dimensions(payload.grid) || !dimensions(payload.block)
+        || (payload.after !== undefined && payload.after !== null && !isResourceToken(payload.after)) || !launchAccesses(payload.accesses, executionPolicy.maxArguments)
         || !nonnegativeSafeInteger(payload.sharedMemoryBytes) || !launchArguments(payload.arguments, executionPolicy.maxArguments)) throw validationError('DRIVER_LAUNCH_OPTIONS', 'Submission payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'testing.block') {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['milliseconds']) || !Number.isSafeInteger(message.payload.milliseconds) || message.payload.milliseconds < 1 || message.payload.milliseconds > 2_000) throw validationError('DRIVER_TEST_BLOCK', 'Mock block duration must be an integer from 1 through 2000.', {}, message.requestId);

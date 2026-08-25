@@ -29,3 +29,21 @@ extern "C" __global__ void cuda_js_native_deferred_fault(uint32_t *output) {
   output[0] = UINT32_C(0x12345678);
   asm volatile("trap;");
 }
+
+extern "C" __global__ void cuda_js_native_atomic_producer(
+    uint32_t *shared_value,
+    unsigned long long cycles) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  atomicExch(shared_value, UINT32_C(1));
+  const unsigned long long started = clock64();
+  while (clock64() - started < cycles) {
+  }
+  atomicExch(shared_value, UINT32_C(2));
+}
+
+extern "C" __global__ void cuda_js_native_atomic_observer(
+    uint32_t *shared_value,
+    uint32_t *observation) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  observation[0] = atomicAdd(shared_value, UINT32_C(0));
+}

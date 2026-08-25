@@ -102,6 +102,54 @@ assert.equal(terminal.graceful, true);
 assert.equal(terminal.driver.resourceCounts.live, 0);
 assert.equal(terminal.driver.resourceCounts.orphaned, 0);
 
+const concurrentRuntime = await openCudaRuntime({
+  driver: {
+    memory: { maxDeviceBytes: 16, maxAllocationBytes: 4, maxTransferBytes: 4 },
+    execution: { maxModuleBytes: 1_048_576, maxArguments: 4, maxCompletionMilliseconds: 30_000, maxPendingGpuOperations: 2 },
+  },
+});
+let concurrentTerminal;
+let concurrentObservation;
+try {
+  const concurrentModule = await concurrentRuntime.loadModule({ format: 'ptx', bytes: ptx });
+  const producer = await concurrentModule.getFunction({ name: 'cuda_js_native_atomic_producer', parameters: [{ kind: 'device-memory' }, { kind: 'u64' }] });
+  const observer = await concurrentModule.getFunction({ name: 'cuda_js_native_atomic_observer', parameters: [{ kind: 'device-memory' }, { kind: 'device-memory' }] });
+  const shared = await concurrentRuntime.allocateDevice({ byteLength: 4 });
+  const observed = await concurrentRuntime.allocateDevice({ byteLength: 4 });
+  await shared.write(new Uint8Array(4));
+  await observed.write(new Uint8Array(4));
+  const producerOperation = await producer.submit({
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [shared, 500_000_000n],
+    accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'atomic-update-relaxed-device', dtype: 'u32' }],
+  });
+  const observerOperation = await observer.submit({
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [shared, observed],
+    accesses: [
+      { argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'atomic-observe-relaxed-device', dtype: 'u32' },
+      { argumentIndex: 1, byteOffset: 0, byteLength: 4, mode: 'write' },
+    ],
+  });
+  const observerTerminal = await observerOperation.wait();
+  const producerWhileObserverTerminal = await producerOperation.status();
+  assert.equal(producerWhileObserverTerminal.status, 'pending', 'Independent observer must terminalize before the long producer on the qualified profile.');
+  await producerOperation.wait();
+  const observedWords = u32Words((await observed.read({ byteLength: 4 })).bytes);
+  assert.deepEqual(observedWords, [1], 'The independent observer must read the valid in-progress atomic publication.');
+  concurrentObservation = { observerTerminal, producerWhileObserverTerminal, observedWords };
+  await observerOperation.close();
+  await producerOperation.close();
+  await observer.close();
+  await producer.close();
+  await concurrentModule.close();
+  await observed.close();
+  await shared.close();
+} finally {
+  concurrentTerminal = await concurrentRuntime.close();
+}
+assert.equal(concurrentTerminal.graceful, true);
+assert.equal(concurrentTerminal.driver.resourceCounts.live, 0);
+assert.equal(concurrentTerminal.driver.resourceCounts.orphaned, 0);
+
 const closeRuntime = await openCudaRuntime({
   driver: {
     memory: { maxDeviceBytes: 4, maxAllocationBytes: 4, maxTransferBytes: 4 },
@@ -144,6 +192,7 @@ assert.equal(postFaultTerminal.driver.resourceCounts.orphaned, 0);
 const sources = [
   'docs/specs/SPEC-0011-scalar-kernel-arguments.md',
   'docs/specs/SPEC-0016-operation-lifecycle.md',
+  'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
   'components/execution/src/execution-manager.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/runtime-facade/src/runtime.mjs',
@@ -161,12 +210,12 @@ const target = await writeEvidence('native-windows-capabilities.json', {
   environment: { node: { version: process.version, moduleAbi: process.versions.modules, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version() },
   sources: await sourceIdentity(sources),
   oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], ptxSha256: await sha256(capabilityPtxPath) },
-  observations: { scalarCases: scalarObservations, operation: operationObservation, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
+  observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
   capabilityBoundary: 'All native handles, packed bytes, stream/event identity, and faulting context state remained private. The deferred fault ran in a child process with its own private runtime/context.',
   claimLimits: [
     'Exact Windows x64 Node 26.7.0 / Driver 610.74 / CUDA 13.3 / GTX 1660 Ti sm_75 profile only.',
     'The delay proves asynchronous not-ready/status/close semantics, not a latency or performance guarantee.',
-    'One private stream and one pending operation remain the only qualified execution profile.',
+    'The qualified widened profile is exactly two private streams, two pending operations, no queue, and declared u32/u64 relaxed device-scope atomic access.',
   ],
 });
 console.log(`F5 native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);

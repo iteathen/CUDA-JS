@@ -210,7 +210,8 @@ async function closeResource(resource, operation, release) {
 }
 
 function translateLaunch(entry, options, operation) {
-  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key)) || !Array.isArray(options.arguments)) throw facadeError('CUDA_JS_LAUNCH_OPTIONS_INVALID', 'validation', 'Launch requires grid, block, and an arguments array.', {}, operation);
+  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments', 'after', 'accesses'].includes(key)) || !Array.isArray(options.arguments)) throw facadeError('CUDA_JS_LAUNCH_OPTIONS_INVALID', 'validation', 'Launch requires grid, block, and an arguments array.', {}, operation);
+  if (options.accesses !== undefined && !Array.isArray(options.accesses)) throw facadeError('CUDA_JS_LAUNCH_OPTIONS_INVALID', 'validation', 'Launch accesses must be an array when supplied.', {}, operation);
   if (options.arguments.length !== entry.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Launch argument count must match the function declaration.', { expected: entry.parameters.length, actual: options.arguments.length }, operation);
   const argumentsForActor = entry.parameters.map((parameter, index) => {
     const value = options.arguments[index];
@@ -218,7 +219,10 @@ function translateLaunch(entry, options, operation) {
     const memory = resourceFor(value, entry.runtime, 'device-memory', operation);
     return { kind: 'device-memory', memory: memory.token };
   });
-  return { grid: options.grid, block: options.block, sharedMemoryBytes: options.sharedMemoryBytes ?? 0, arguments: argumentsForActor };
+  let after = null;
+  if (options.after !== undefined && options.after !== null) after = resourceFor(options.after, entry.runtime, 'operation', operation).token;
+  const accesses = options.accesses === undefined ? undefined : options.accesses.map((access) => plainObject(access) ? { ...access } : access);
+  return { grid: options.grid, block: options.block, sharedMemoryBytes: options.sharedMemoryBytes ?? 0, arguments: argumentsForActor, after, accesses };
 }
 
 function publicOperationStatus(result) {

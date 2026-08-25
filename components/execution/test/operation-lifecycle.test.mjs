@@ -35,15 +35,16 @@ function fixture({ query = () => 'pending', policy = {}, clock = () => Date.now(
     },
   });
   let handle = 10n;
+  const submissions = [];
   const operations = {
     async createStream() { return ++handle; }, async destroyStream() {}, async loadModule() { return ++handle; }, async unloadModule() {}, async getFunction() { return ++handle; },
-    async createEvent() { return ++handle; }, async destroyEvent() {}, async devicePointer({ native, byteOffset }) { return native + BigInt(byteOffset); }, async submitLaunch() {}, async recordEvent() {},
+    async createEvent() { return ++handle; }, async destroyEvent() {}, async devicePointer({ native, byteOffset }) { return native + BigInt(byteOffset); }, async submitLaunch(request) { submissions.push(request); }, async recordEvent() {},
     async queryEvent(request) { return query(request); },
     health() { return { current: 'healthy', history: [] }; },
     restartRequired({ code, message, details, operationId }) { return new ExecutionError(code, 'restart-required', message, details, { operationId, healthBefore: 'healthy', healthAfter: 'restart-required' }); },
   };
   const execution = new ExecutionManager({ registry, contextToken: context, memory, policy, deviceLimits: LIMITS, operations, clock, sleep });
-  return { registry, memory, execution };
+  return { registry, memory, execution, submissions };
 }
 
 async function prepared(value = {}) {
@@ -71,6 +72,55 @@ test('submit creates one pending logical operation and retains exact execution l
   assert.equal(resources.find((entry) => entry.kind === 'device-memory').leases, 2);
   assert.equal(resources.find((entry) => entry.kind === 'event').state, 'live');
   assert.equal(resources.find((entry) => entry.kind === 'operation').state, 'live');
+});
+
+test('capacity two admits independent atomic overlap, rejects ordinary hazards, and colocates explicit dependencies', async () => {
+  const { execution, fn, allocation, submissions } = await prepared({ policy: { maxPendingGpuOperations: 2 } });
+  const request = launchRequest(allocation);
+  const atomicAccesses = [
+    { argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'atomic-update-relaxed-device', dtype: 'u32' },
+    { argumentIndex: 1, byteOffset: 0, byteLength: 4, mode: 'atomic-observe-relaxed-device', dtype: 'u32' },
+  ];
+  await assert.rejects(execution.submit(fn.function, { ...request, operationId: 8 }), (error) => error.code === 'EXECUTION_ACCESSES_REQUIRED');
+  await assert.rejects(execution.submit(fn.function, {
+    ...request,
+    accesses: [
+      { argumentIndex: 0, byteOffset: 1, byteLength: 4, mode: 'atomic-update-relaxed-device', dtype: 'u32' },
+      atomicAccesses[1],
+    ],
+    operationId: 9,
+  }), (error) => error.code === 'EXECUTION_ACCESS_ATOMIC_ALIGNMENT');
+  const first = await execution.submit(fn.function, { ...request, accesses: atomicAccesses, operationId: 10 });
+  const second = await execution.submit(fn.function, { ...request, accesses: atomicAccesses, operationId: 11 });
+  assert.equal(execution.summary().pendingOperationCount, 2);
+  assert.notEqual(submissions[0].streamNative, submissions[1].streamNative);
+  await assert.rejects(execution.submit(fn.function, { ...request, accesses: atomicAccesses, operationId: 12 }), (error) => error.code === 'EXECUTION_BUSY');
+
+  const ordered = await prepared({ policy: { maxPendingGpuOperations: 2 } });
+  const writes = [
+    { argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'write' },
+    { argumentIndex: 1, byteOffset: 0, byteLength: 4, mode: 'read' },
+  ];
+  const predecessor = await ordered.execution.submit(ordered.fn.function, { ...launchRequest(ordered.allocation), accesses: writes, operationId: 20 });
+  await assert.rejects(ordered.execution.submit(ordered.fn.function, { ...launchRequest(ordered.allocation), accesses: writes, operationId: 21 }), (error) => error.code === 'EXECUTION_RESOURCE_HAZARD');
+  await ordered.execution.submit(ordered.fn.function, { ...launchRequest(ordered.allocation), accesses: writes, after: predecessor.operation, operationId: 22 });
+  assert.equal(ordered.submissions[0].streamNative, ordered.submissions[1].streamNative);
+  assert.equal(first.status, 'pending');
+  assert.equal(second.status, 'pending');
+});
+
+test('a deferred error with two pending operations conservatively orphans both', async () => {
+  const failure = new ExecutionError('CUDA_DEFERRED_FAILURE', 'deferred-driver', 'unattributed', {}, { healthBefore: 'healthy', healthAfter: 'poisoned' });
+  const preparedPair = await prepared({ policy: { maxPendingGpuOperations: 2 }, query: () => { throw failure; } });
+  const accesses = [
+    { argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'atomic-update-relaxed-device', dtype: 'u32' },
+    { argumentIndex: 1, byteOffset: 0, byteLength: 4, mode: 'atomic-observe-relaxed-device', dtype: 'u32' },
+  ];
+  const first = await preparedPair.execution.submit(preparedPair.fn.function, { ...launchRequest(preparedPair.allocation), accesses, operationId: 30 });
+  const second = await preparedPair.execution.submit(preparedPair.fn.function, { ...launchRequest(preparedPair.allocation), accesses, operationId: 31 });
+  await assert.rejects(preparedPair.execution.operationStatus(first.operation, 32), (error) => error.code === 'EXECUTION_DEFERRED_FAILURE_UNATTRIBUTED');
+  assert.equal((await preparedPair.execution.operationStatus(first.operation, 33)).status, 'orphaned');
+  assert.equal((await preparedPair.execution.operationStatus(second.operation, 34)).status, 'orphaned');
 });
 
 test('pending gate admits only operation observation/release/timeout and runtime close', async () => {

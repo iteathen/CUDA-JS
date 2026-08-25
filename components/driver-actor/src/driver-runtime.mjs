@@ -55,18 +55,23 @@ function orphanInventory(lastInventory) {
 
 function launchPayload(functionToken, options, operationName) {
   if (!isResourceToken(functionToken)) throw validationError('DRIVER_FUNCTION_TOKEN', `${operationName} requires an exact opaque function token.`);
-  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key))
+  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments', 'after', 'accesses'].includes(key))
       || !Object.hasOwn(options, 'grid') || !Object.hasOwn(options, 'block') || !Object.hasOwn(options, 'arguments') || !Array.isArray(options.arguments)) {
     throw validationError('DRIVER_LAUNCH_OPTIONS', `${operationName} options are invalid.`);
   }
+  if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', `${operationName} after must be an exact opaque operation token.`);
+  if (options.accesses !== undefined && !Array.isArray(options.accesses)) throw validationError('DRIVER_LAUNCH_OPTIONS', `${operationName} accesses must be an array when supplied.`);
   const copyDimensions = (value) => plainObject(value) ? { ...value } : value;
   const argumentCopies = options.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry);
+  const accessCopies = options.accesses === undefined ? undefined : options.accesses.map((entry) => plainObject(entry) ? { ...entry } : entry);
   return {
     functionToken,
     grid: copyDimensions(options.grid),
     block: copyDimensions(options.block),
     sharedMemoryBytes: options.sharedMemoryBytes ?? 0,
     arguments: argumentCopies,
+    after: options.after ?? null,
+    accesses: accessCopies,
   };
 }
 
