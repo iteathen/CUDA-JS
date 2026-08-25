@@ -1,6 +1,8 @@
 # CUDA-MCGS P0/P1 Execution Program
 
-**Status:** Active operational plan
+**Status:** Informational
+
+**Operational state:** Active
 
 **Started:** 2026-08-24T17:17:50.395-07:00 (`2026-08-25T00:17:50.395Z`)
 
