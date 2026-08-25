@@ -3,7 +3,7 @@
   "component": {
     "id": "runtime.publication-mailbox",
     "name": "Bounded host-device publication mailbox",
-    "status": "accepted-spec0014-exact-windows-qualification-candidate",
+    "status": "accepted-integrated-spec0014-exact-windows-qualified",
     "product_area": "components",
     "path": "components/publication-mailbox",
     "purpose": "Own private registered/mapped SAB publication lanes, generation, binding validation, operation leases, and unregister truth.",

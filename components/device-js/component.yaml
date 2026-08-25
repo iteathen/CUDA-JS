@@ -3,7 +3,7 @@
   "component": {
     "id": "runtime.device-js",
     "name": "Restricted Device-JS frontend",
-    "status": "accepted-spec0013-plus-scoped-atomic-and-spec0014-mailbox-exact-windows-qualification-candidate",
+    "status": "accepted-integrated-spec0013-plus-scoped-atomic-and-spec0014-mailbox-exact-windows-qualified",
     "product_area": "components",
     "path": "components/device-js",
     "purpose": "Own the restricted consumer-neutral Device-JS syntax/type/helper contract, deterministic program identity, and private CUDA C++ lowering without owning native compiler or Driver resources.",
