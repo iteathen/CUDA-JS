@@ -13,8 +13,9 @@ assert.equal(portable.observations.cache.corruption, 'miss');
 assert.equal(portable.observations.applicationTimerFired, true);
 assert.equal(portable.observations.terminal.graceful, true);
 
-if (process.platform === 'win32') {
-  const native = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows.json'), 'utf8'));
+if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64') {
+  const platformKey = process.platform === 'win32' ? 'windows' : 'linux';
+  const native = JSON.parse(await readFile(path.join(evidenceRoot, `native-${platformKey}.json`), 'utf8'));
   assert.equal(native.status, 'pass');
   assert.equal(native.environment.processEnvironmentUnchanged, true);
   assert.equal(native.observations.compile.artifact.sha256, native.oracle.ptx.sha256);
@@ -23,12 +24,13 @@ if (process.platform === 'win32') {
   assert.equal(native.observations.launches[0].checksum, native.observations.launches[1].checksum);
   assert.equal(native.observations.compilerTerminal.graceful, true);
   assert.equal(native.observations.driverTerminal.graceful, true);
-  const oracle = JSON.parse(await readFile(path.join(evidenceRoot, 'capability-oracle-build.json'), 'utf8'));
+  if (process.platform === 'win32') {
+    const oracle = JSON.parse(await readFile(path.join(evidenceRoot, 'capability-oracle-build.json'), 'utf8'));
   assert.equal(oracle.status, 'pass');
   assert.equal(oracle.oracle.PROGRAMS_CREATED, oracle.oracle.PROGRAMS_DESTROYED);
   assert.equal(oracle.oracle.LINKS_CREATED, oracle.oracle.LINKS_DESTROYED);
   assert.equal(oracle.oracle.DRIVER_CLEANUP, 'proved');
-  const capabilities = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows-capabilities.json'), 'utf8'));
+    const capabilities = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows-capabilities.json'), 'utf8'));
   assert.equal(capabilities.status, 'pass');
   assert.equal(capabilities.observations.defaultPtxStable, true);
   assert.equal(capabilities.observations.applicationTimerFired, true);
@@ -37,7 +39,8 @@ if (process.platform === 'win32') {
   assert.deepEqual(capabilities.observations.launches.map((entry) => entry.capability), ['rdc', 'lto']);
   assert(capabilities.observations.launches.every((entry) => entry.exactIndependentOracleParity === true));
   assert.equal(capabilities.observations.terminal.graceful, true);
-  assert.equal(capabilities.observations.terminal.driver.resourceCounts.live, 0);
+    assert.equal(capabilities.observations.terminal.driver.resourceCounts.live, 0);
+  }
 }
 
-console.log(`F6 verification passed for ${process.platform}-${process.arch}: compiler contract, cache validation/corruption, lifecycle${process.platform === 'win32' ? ', exact MSVC parity, RDC, Device LTO, and public-facade Driver execution' : ''}.`);
+console.log(`F6 verification passed for ${process.platform}-${process.arch}: compiler contract, cache validation/corruption, lifecycle${process.platform === 'win32' ? ', exact MSVC parity, RDC, Device LTO, and public-facade Driver execution' : process.platform === 'linux' ? ', exact native Linux C parity and public-facade Driver execution' : ''}.`);

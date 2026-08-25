@@ -43,8 +43,8 @@ test('portable evidence cannot promote a hardware profile', async () => {
 
 test('an incomplete profile cannot expose a promotable command chain', async () => {
   const { registry, profiles, extensions } = await fixtures();
-  const linux = profiles.profiles.find((profile) => profile.id === 'linux-native-x64');
-  linux.commands.push(['scripts/run-exp-001.mjs', 'prepare']);
+  const wsl = profiles.profiles.find((profile) => profile.id === 'wsl2-x64');
+  wsl.commands.push(['scripts/run-exp-001.mjs', 'prepare']);
   assert.throws(() => validateRegistry(registry, profiles, extensions), /must not expose a promotable command chain/);
 });
 
@@ -80,6 +80,7 @@ test('a missing extension status dimension fails instead of collapsing to an agg
 test('runner-ready evidence paths include every accepted native phase', async () => {
   const { profiles } = await fixtures();
   const windows = profiles.profiles.find((profile) => profile.id === 'windows-native-x64');
+  const linux = profiles.profiles.find((profile) => profile.id === 'linux-native-x64');
   for (const owner of ['exp-000', 'exp-012', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']) {
     assert(windows.evidenceFiles.some((entry) => entry.includes(`/${owner}/`) || entry.includes(`build/${owner}/`)), `missing ${owner}`);
   }
@@ -89,4 +90,17 @@ test('runner-ready evidence paths include every accepted native phase', async ()
     'build/f6/win32-x64/evidence/capability-oracle-build.json',
     'build/f6/win32-x64/evidence/native-windows-capabilities.json',
   ]) assert(windows.evidenceFiles.includes(relative), `missing ${relative}`);
+  assert.equal(linux.status, 'runner-ready');
+  assert.deepEqual(linux.missingCapsules, []);
+  assert(linux.commands.some((entry) => entry[0] === 'scripts/run-exp-001.mjs' && entry[1] === 'all'));
+  for (const owner of ['exp-001', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']) {
+    assert(linux.evidenceFiles.some((entry) => entry.includes(`/${owner}/`) || entry.includes(`build/${owner}/`)), `missing Linux ${owner}`);
+  }
+  for (const relative of [
+    'build/f4/linux-x64/evidence/oracle-build.json',
+    'build/f5/linux-x64/evidence/capability-oracle-build.json',
+    'build/f5/linux-x64/evidence/native-linux-capabilities.json',
+    'build/f6/linux-x64/evidence/native-linux-oracle.json',
+    'build/f8/linux-x64/evidence/native-linux-package.json',
+  ]) assert(linux.evidenceFiles.includes(relative), `missing ${relative}`);
 });

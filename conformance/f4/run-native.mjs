@@ -6,26 +6,35 @@ import { spawnSync } from 'node:child_process';
 
 import { openDriverRuntime } from '../../components/driver-actor/index.mjs';
 import { assertPublicRecord } from '../../components/driver-actor/src/protocol.mjs';
-import { checksumBytes, fixtureBytes, oraclePath, parseOracle, patchBytes, repositoryRoot, sha256, sourceIdentity, writeEvidence } from './evidence.mjs';
+import { checksumBytes, fixtureBytes, nativeEvidenceName, nativeProfile, oraclePath, parseOracle, patchBytes, repositoryRoot, sha256, sourceIdentity, writeEvidence } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32', 'F4W native conformance requires Windows.');
-assert.equal(process.arch, 'x64', 'F4W native conformance requires Windows x64.');
-assert.equal(process.version, 'v26.7.0', 'F4W native conformance requires official Node v26.7.0.');
+assert(['win32', 'linux'].includes(process.platform), 'F4 native conformance requires Windows or native Linux.');
+assert.equal(process.arch, 'x64', 'F4 native conformance requires x86-64.');
+assert.equal(process.version, 'v26.7.0', 'F4 native conformance requires official Node v26.7.0.');
+if (process.platform === 'linux') assert.doesNotMatch(os.release(), /microsoft/i, 'F4 native Linux conformance does not accept WSL.');
 
 const oracleRun = spawnSync(oraclePath, [], { cwd: repositoryRoot, encoding: 'utf8' });
 if (oracleRun.error) throw oracleRun.error;
-if (oracleRun.status !== 0) throw new Error(`F4W oracle failed (${oracleRun.status}).\n${oracleRun.stdout}\n${oracleRun.stderr}`);
+if (oracleRun.status !== 0) throw new Error(`F4${nativeProfile === 'windows' ? 'W' : 'L'} oracle failed (${oracleRun.status}).\n${oracleRun.stdout}\n${oracleRun.stderr}`);
 const oracle = parseOracle(oracleRun.stdout);
+let prerequisite = null;
+if (process.platform === 'linux') {
+  const prerequisitePath = path.join(repositoryRoot, 'build', 'f3', 'linux-x64', 'evidence', 'native-linux.json');
+  prerequisite = JSON.parse(await readFile(prerequisitePath, 'utf8'));
+  assert.equal(prerequisite.status, 'pass', 'F4L requires passing F3L evidence from the same workspace.');
+  assert.equal(prerequisite.environment.kernel, os.release(), 'F4L requires the same native Linux kernel as F3L.');
+  prerequisite = { path: path.relative(repositoryRoot, prerequisitePath), sha256: await sha256(prerequisitePath) };
+}
 const sources = [
   'docs/specs/SPEC-0004-device-memory-foundation.md',
   'components/memory/src/memory-manager.mjs',
   'components/driver-actor/src/driver-runtime.mjs',
   'components/driver-actor/src/actor-worker.mjs',
-  'components/driver-actor/src/backends/windows-native.mjs',
+  `components/driver-actor/src/backends/${nativeProfile}-native.mjs`,
   'components/driver-actor/src/backends/native-profiles.mjs',
   'components/driver-actor/src/backends/native.mjs',
   'schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs',
-  'conformance/f4/native/windows-memory-oracle.c',
+  'conformance/f4/native/memory-oracle.c',
 ];
 const runtime = await openDriverRuntime({ memory: { maxDeviceBytes: 4_096, maxAllocationBytes: 4_096, maxTransferBytes: 4_096 } });
 let description;
@@ -38,7 +47,8 @@ let replacement;
 let terminal;
 try {
   description = assertPublicRecord(await runtime.describe(), { maxByteLength: 4_096 });
-  assert.equal(description.claim, 'exact-windows-f4w-profile');
+  assert.equal(description.runtime.backend, `${nativeProfile}-native`);
+  assert.equal(description.claim, nativeProfile === 'windows' ? 'exact-windows-f4w-profile' : 'native-linux-f4l-operational-unqualified');
   assert.equal(description.memory.policy.maxDeviceBytes, 4_096);
   assert(description.memory.native.totalBytes >= description.memory.native.freeBytes);
   allocation = await runtime.allocateDevice({ byteLength: 4_096 });
@@ -78,12 +88,13 @@ assert.deepEqual(oracle.CURRENT_NULL, [0, 1]);
 
 const evidence = {
   schemaVersion: 1,
-  workPackage: 'CJS-F4W',
-  capsule: 'windows-driver-actor-device-memory',
+  workPackage: `CJS-F4${nativeProfile === 'windows' ? 'W' : 'L'}`,
+  capsule: 'native-driver-actor-device-memory',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: { version: process.version, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version() },
   sources: await sourceIdentity(sources),
+  prerequisite,
   oracle: { executableSha256: await sha256(oraclePath), observations: oracle },
   observations: {
     memory: description.memory,
@@ -97,8 +108,12 @@ const evidence = {
     terminal,
   },
   rawPointerBoundary: 'All public records passed the bounded validator; evidence stores only opaque tokens, safe counts, checksums, and dispositions.',
-  claimLimits: ['Exact accepted Windows x64 Node 26.7.0 / CUDA Driver / toolkit / GPU profile only.', 'Synchronous bounded device allocation and copied transfers only.', 'No native Linux CUDA, asynchronous copy, module, launch, compiler, performance, packaging, or stable API claim.'],
+  claimLimits: [
+    `Exact ${nativeProfile} x64 Node 26.7.0 / CUDA Driver / toolkit / GPU input profile only.`,
+    nativeProfile === 'linux' ? 'Operational F4L evidence remains unqualified until the complete exact Ubuntu chain is reviewed and promoted.' : 'Accepted Windows support remains limited to its recorded exact profile.',
+    'Synchronous bounded device allocation and copied transfers only; no cross-platform inference, asynchronous copy, module, launch, compiler, performance, packaging, or stable API claim.',
+  ],
 };
-const target = await writeEvidence('native-windows.json', evidence);
-console.log(`F4W native memory passed: 4096-byte C/Node parity checksum ${checksum}, bounds and pressure controls, slot reuse, free-before-context teardown.`);
+const target = await writeEvidence(nativeEvidenceName, evidence);
+console.log(`F4${nativeProfile === 'windows' ? 'W' : 'L'} native memory passed: 4096-byte C/Node parity checksum ${checksum}, bounds and pressure controls, slot reuse, free-before-context teardown.`);
 console.log(`Evidence: ${path.relative(repositoryRoot, target)}`);

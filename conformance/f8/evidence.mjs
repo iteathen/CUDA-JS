@@ -8,6 +8,8 @@ export const profileName = `${process.platform}-${process.arch}`;
 export const evidenceRoot = path.join(repositoryRoot, 'build', 'f8', profileName, 'evidence');
 export const packageRoot = path.join(repositoryRoot, 'build', 'f8', profileName, 'package');
 export const consumersRoot = path.join(repositoryRoot, 'build', 'f8', profileName, 'consumers');
+export const nativeProfile = process.platform === 'win32' ? 'windows' : process.platform === 'linux' ? 'linux' : 'unsupported';
+export const nativePackageEvidenceName = `native-${nativeProfile}-package.json`;
 
 export async function sha256(filePath) {
   const hash = createHash('sha256');

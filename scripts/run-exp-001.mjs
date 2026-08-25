@@ -10,6 +10,7 @@ const entrypoints = {
   build: ['experiments/exp-001/src/build.mjs'],
   readiness: ['experiments/exp-001/src/readiness.mjs'],
   smoke: ['experiments/exp-001/src/readiness.mjs', 'experiments/exp-001/src/run-smoke.mjs'],
+  all: ['experiments/exp-001/src/build.mjs', 'experiments/exp-001/src/readiness.mjs', 'experiments/exp-001/src/run-smoke.mjs'],
   prepare: ['experiments/exp-001/src/build.mjs', 'experiments/exp-001/src/readiness.mjs'],
 };
 if (!(action in entrypoints)) {

@@ -136,7 +136,7 @@ const target = await writeEvidence(`native-${platformKey}.json`, {
   capsule: `${platformKey}-compiler-linker-cache-driver-handoff`,
   status: 'pass',
   generatedAt: new Date().toISOString(),
-  environment: { node: { version: process.version, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version(), processEnvironmentUnchanged: true },
+  environment: { node: { version: process.version, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version(), processEnvironmentUnchanged: true },
   sources: await sourceIdentity(sources),
   oracle: { ptx: { byteLength: oraclePtx.byteLength, sha256: digestBytes(oraclePtx) }, cubin: { byteLength: oracleCubin.byteLength, sha256: digestBytes(oracleCubin) } },
   observations: {

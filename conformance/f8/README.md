@@ -22,8 +22,8 @@ A Linux engineer should:
 
 1. Complete the retained F2L through F8L runbooks on a native glibc host with an NVIDIA Driver and GPU. WSL evidence is separate.
 2. Use the existing canonical `libcuda.so.1`, NVRTC, and nvJitLink profiles without changing the public facade. Preserve `--modify-stack-limit=false`, exact provider identity, copied artifacts, and the accepted cache boundary.
-3. Complete the independent Linux F4/F5 oracle/runners and F7 permission/lifecycle runner.
-4. Run the same installed-package vector, Device-JS, multi-operation, transfer, and mailbox consumers against their independent oracles. Do not replace an oracle with package self-comparison.
+3. Run the completed OS-neutral F4/F5 oracle/runners and F7 permission/lifecycle runner unchanged on the same exact host.
+4. Run `npm run f8:native` and `npm run f8:verify`. The shared runner installs the same tarball and runs the vector, Device-JS, multi-operation, transfer, and mailbox consumers against their independent oracles; package self-comparison cannot replace an oracle.
 5. Prove permission denial/allow behavior, repeated actor lifecycle balance, provider unload, context/resource teardown, Worker exit, and restart-required behavior after unproved loss.
 6. Promote the Linux compatibility qualification field, support matrix, and public issue only after the complete exact chain passes; source admission remains `not-qualified` until then.
 

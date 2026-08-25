@@ -52,7 +52,7 @@ const unit = { args: ['--test',
   'components/runtime-facade/test/device-js.test.mjs',
 ] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
-const native = { windowsOnly: true, args: ['conformance/f8/run-native-windows.mjs'] };
+const native = { nativeX64Only: true, args: ['conformance/f8/run-native.mjs'] };
 const linux = { linuxOnly: true, args: ['--experimental-ffi', 'conformance/f8/run-linux-readiness.mjs'] };
 const verify = { args: ['conformance/f8/verify.mjs'] };
 const steps = {
@@ -68,9 +68,9 @@ if (!(action in steps)) {
   process.exit(2);
 }
 for (const step of steps[action]) {
-  if (step.windowsOnly && process.platform !== 'win32') {
+  if (step.nativeX64Only && !(['win32', 'linux'].includes(process.platform) && process.arch === 'x64')) {
     if (action === 'native') {
-      console.error('CJS-F8 native conformance currently requires the exact qualified Windows x64 profile.');
+      console.error('CJS-F8 native conformance requires a native Windows or Linux x64 profile.');
       process.exit(2);
     }
     continue;

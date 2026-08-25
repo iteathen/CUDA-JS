@@ -51,7 +51,7 @@ const steps = {
   all: [
     { args: ['--test', ...unitFiles] },
     { args: ['conformance/f3/run-mock.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f3/run-native-windows.mjs'] },
+    ...(nativeEntrypoint ? [{ args: ['--experimental-ffi', nativeEntrypoint] }] : []),
     { args: ['conformance/f3/verify.mjs'] },
   ],
 };
@@ -65,13 +65,6 @@ if (action === 'native' && !nativeEntrypoint) {
 }
 
 for (const step of steps[action]) {
-  if (step.windowsOnly && process.platform !== 'win32') {
-    if (action === 'native') {
-      console.error('CJS-F3 native conformance requires the exact qualified Windows x64 Driver/GPU profile.');
-      process.exit(2);
-    }
-    continue;
-  }
   const result = spawnSync(node, step.args, {
     cwd: repositoryRoot,
     env: { ...process.env, CUDA_JS_F3_NODE: node },

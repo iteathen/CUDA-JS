@@ -6,7 +6,7 @@
 
 **Originally:** 2026-08-13
 
-**Reconciled:** 2026-08-25 against protected `main@ee32d5e1309e1e9d2d6d235e61141290fe05db75`
+**Reconciled:** 2026-08-25 against protected `main@f08e4538d96d9a9d04d8094733f34442a0b286f1`
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Sequence accepted or proposal-backed generic CUDA-JS work without confusing arch
 P0 active: OS-neutral native Linux reference path (#4)
   shared Driver/compiler source complete
   -> diagnostics/public facade/package testing-only source admission complete
-  -> native F4/F5 oracle/runners and F7/F8 installed-package runners
+  -> native F4/F5 oracle/runners and F7/F8 installed-package runners complete
   -> exact Ubuntu 24.04 x86-64 F2L-F8L evidence
 
 P1 next: accepted SPEC-0017 explicit device selection (#20)
@@ -84,7 +84,7 @@ SPEC-0027 is accepted authority only for a separate future NN publish unit. It d
 
 Issue #4 is the only active implementation path in this roadmap.
 
-1. Reconcile platform diagnostics, compatibility admission, the public facade, F7/F8 source runners, and installed-package behavior with the shared Linux Driver/compiler profiles.
+1. Keep the completed platform diagnostics, compatibility admission, public facade, F3L-F8L source runners, and installed-package behavior aligned with the shared Linux Driver/compiler profiles.
 2. Preserve `not-qualified` truth and fail closed outside the exact Linux x86-64 profile.
 3. Run EXP-001/F2L and F3L-F8L on exact Ubuntu 24.04 x86-64, Node 26.7.0, CUDA 13.3, NVIDIA Driver, and GPU hardware.
 4. Compare Driver, memory, execution, compiler/linker, package output, permissions, and teardown against independent native oracles.
