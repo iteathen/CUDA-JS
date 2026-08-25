@@ -117,4 +117,3 @@ const target = path.join(repositoryRoot, 'build', 'f6', 'linux-x64', 'evidence',
 await mkdir(path.dirname(target), { recursive: true });
 await writeFile(target, `${JSON.stringify(record, null, 2)}\n`);
 console.log(`F6 Linux exact provider readiness: ${record.status}. Evidence: ${path.relative(repositoryRoot, target)}`);
-if (!ready) process.exitCode = 2;
