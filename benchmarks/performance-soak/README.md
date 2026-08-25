@@ -6,6 +6,8 @@ This benchmark family owns reproducible observations for CUDA-JS issue #28. It e
 
 The two versioned profiles in [`profiles.json`](profiles.json) deliberately separate a 60-second presubmit observation from a 15-minute bounded soak. Each run records cold setup, warmup, workload and cooldown phases; latency/throughput distributions; GPU utilization, memory, temperature, power, clocks and throttle masks; process memory; repeated correctness digests; terminal resource state; raw-sample digests; exact source/toolchain/device identity; invalid-run reasons and explicit claim limits.
 
+These are deliberately **per-device** baselines: the first profiles require exactly one visible GPU and never infer multi-GPU behavior from multiple runtime instances. After accepted SPEC-0017 device selection is implemented and distinct physical devices are qualified, a separate topology-aware profile may run one selected runtime per device and report per-device plus aggregate observations. It must retain device-scoped artifact/resource/health identity and cannot silently discover-and-use-all devices, infer peer transfer, or turn aggregate throughput into a scaling claim.
+
 ## Commands
 
 Use exact Node v26.7.0 with `--experimental-ffi`:
@@ -25,3 +27,5 @@ A run is invalid—not slow—when required telemetry is missing, sample gaps ex
 The committed public summary may retain sanitized exact identities, distributions and raw-sample digests. Raw telemetry/latency files remain ignored review evidence and contain no host name, account name, GPU UUID, serial, PCI address, native handle, device address or process path. They are removed after review unless an explicit retention owner and trigger are recorded.
 
 These profiles are mechanism observations for one device/Driver/toolkit/Node/OS/workload only. They do not establish product performance, performance portability, ambient-normalized thermal capacity, indefinite leak freedom, production stability or support for another profile.
+
+The first natural multi-GPU consumer direction is independent work replicas with final aggregation after every device operation is terminal. Peer/staged transfer, shared mutable graphs and fine-grained cross-device synchronization remain separately selected and measured mechanisms rather than prerequisites for this baseline.

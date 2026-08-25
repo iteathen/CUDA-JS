@@ -6,7 +6,9 @@
 
 **Assessment depth:** Critical native performance/evidence work
 
-**Frozen input:** CUDA-JS protected `main@2135216b1a9fd88066a1c82b61ae533645eac9c2`, package `cuda-js@0.1.0-alpha.6`
+**Original frozen input:** CUDA-JS protected `main@2135216b1a9fd88066a1c82b61ae533645eac9c2`, package `cuda-js@0.1.0-alpha.6`
+
+**Reconciled input:** CUDA-JS protected `main@05008fb988558e909cb3802fa12a73d612e70bf0`, package `cuda-js@0.1.0-alpha.7`; final evidence is keyed to the later exact benchmark commit recorded below.
 
 **Issue:** #28
 
@@ -34,3 +36,9 @@ The selected LEGO boundary is therefore a fixed public Device-JS workload plus a
 Issue closure requires both profiles to pass their predeclared gates on the exact profile and the integrated public summary to retain honest noise and claim limits. A failure or unavailable controlled window leaves the corresponding evidence leaf blocked; thresholds are not weakened to obtain a pass.
 
 No command changes clocks, power limits, fans, persistence, compute mode, Driver mode, GPU assignment or host configuration. Before closure, generated builds, packages and raw telemetry are removed unless retained with an explicit review/recovery trigger.
+
+## Multi-GPU disposition
+
+This plan establishes one-device baselines only. Exactly one visible GPU is required so a result cannot accidentally inherit multi-GPU meaning. The benchmark now records and checks the public runtime's selected-device architecture, Driver API, compiler-provider identity and sanitized telemetry GPU/Driver identity.
+
+Multi-GPU observations are a separate successor after SPEC-0017 explicit selection is integrated and at least two physical GPUs are available. The successor should use one selected runtime/context owner per GPU, report per-device and aggregate measurements, and begin with independent work replicas plus final terminal aggregation. CUDA-JS does not choose consumer partitioning or reduction policy; peer copies, staged copies, shared mutable state and collective libraries remain separately selected mechanisms with their own evidence.

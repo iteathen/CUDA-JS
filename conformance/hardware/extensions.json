@@ -36,14 +36,14 @@
   "axes": [
     {
       "id": "multi-gpu",
-      "architecturalDisposition": "deferred",
+      "architecturalDisposition": "planned",
       "implementationStatus": "not-implemented",
       "qualificationStatus": "not-qualified",
-      "priority": "deferred",
+      "priority": "after:SPEC-0017-and-first-compatible-pair",
       "coordinationIssue": 20,
-      "currentBoundary": "device zero, one private context, and no public device selector",
+      "currentBoundary": "SPEC-0017 is accepted and has a draft portable foundation; protected main still has one default-selected private context, no integrated public selector, and no multi-device coordinator",
       "requiredEnvironment": ["at least two visible physical CUDA GPUs", "resettable controlled host"],
-      "requiredEvidence": ["accepted device-selection and per-device ownership contract", "cross-device rejection", "independent native oracle per device", "two-context terminal cleanup"],
+      "requiredEvidence": ["integrated device-selection and per-device ownership contract", "independent-replica per-device and aggregate observation", "cross-device rejection", "independent native oracle per device", "two-context terminal cleanup"],
       "safetyRules": ["omit UUID, serial, and bus identifiers from public evidence", "do not reset or reconfigure devices"],
       "commands": []
     },

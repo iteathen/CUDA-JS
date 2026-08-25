@@ -42,6 +42,14 @@ The strongest shortcut is to close all five from existing Windows tests and plan
 
 The selected path completes independently satisfiable leaves, implements only evidence infrastructure with a runnable falsifier, and converts external/dependency gaps into exact blocked leaves rather than false passes. Revisit when a native Linux NVIDIA host, a controlled soak window, CUDA-JS #123 integration, or the accepted CUDA-MCGS package/oracle revision becomes available.
 
+Current reconciliation on 2026-08-25:
+
+- `QG-LTO-42` integrated through PR #124 at `bdef316856e32bb72f6946a18614cf5ad6272926`; issue #42 is closed.
+- Device publication integrated through PR #125 at `05008fb988558e909cb3802fa12a73d612e70bf0`; issue #123 is closed.
+- CUDA-MCGS native-experiment removal and disposition integrated through PR #104 at `ef1ac7f816b8c73338f3bac51af82ab2fb011006`.
+- `QG-SOAK-28` is the active satisfiable leaf. It remains a per-device observation and does not imply multi-GPU support.
+- `QG-LINUX-4`, `QG-LINUX-17` and `QG-PAIR-32` retain exact issue comments naming their unavailable host or consumer-owned package/oracle dependency.
+
 ## Focus-branch map
 
 | ID | Status at start | Owner and outcome | Acceptance / decisive falsifier |
@@ -55,7 +63,7 @@ The selected path completes independently satisfiable leaves, implements only ev
 
 `accepted` and `integrated` remain distinct. A locally passing leaf is not an issue closure until its exact revision reaches protected `main` and the issue is read back.
 
-`QG-LTO-42` reran from protected-main source `2135216b1a9fd88066a1c82b61ae533645eac9c2` with exact Node v26.7.0 on 2026-08-25. `npm run f6:capabilities` passed both independent LTO-IR units, cubin and GPU-output parity, rejection controls and terminal cleanup. The ignored evidence record SHA-256 is `207c4580dacdcdeb7ad30f5317fed51f7e6ed3d448b2ffe062ee7f0af0cfc912`; the independent oracle-build record SHA-256 is `78377794ebbf03b8261d3121b7e21e0ae0826e73a08ba0e9e118e2c2d105a627`. `npm run verify` then passed after the required EXP-000 fixture build. Documentation integration and issue closure remain separate transactions.
+`QG-LTO-42` reran from protected-main source `2135216b1a9fd88066a1c82b61ae533645eac9c2` with exact Node v26.7.0 on 2026-08-25. `npm run f6:capabilities` passed both independent LTO-IR units, cubin and GPU-output parity, rejection controls and terminal cleanup. The ignored evidence record SHA-256 is `207c4580dacdcdeb7ad30f5317fed51f7e6ed3d448b2ffe062ee7f0af0cfc912`; the independent oracle-build record SHA-256 is `78377794ebbf03b8261d3121b7e21e0ae0826e73a08ba0e9e118e2c2d105a627`. `npm run verify` then passed after the required EXP-000 fixture build. PR #124 integrated the documentation truth and closed issue #42.
 
 ## Execution, validation and cleanup
 
