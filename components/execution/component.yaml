@@ -8,7 +8,7 @@
     "path": "components/execution",
     "purpose": "Own bounded PTX identity, declared function schemas, packed launch parameters, finite operation scheduling, access hazards, memory leases, private completion events, adaptive polling, and terminal records without exposing native state.",
     "public_contracts": ["index.mjs"],
-    "allowed_dependencies": ["node-standard-library", "runtime.resource-registry", "runtime.memory", "injected-execution-backend"],
+    "allowed_dependencies": ["node-standard-library", "runtime.resource-registry", "runtime.memory", "runtime.publication-mailbox", "injected-execution-backend"],
     "forbidden_dependencies": ["node-ffi", "cuda-driver", "public-native-handle", "public-stream", "public-event", "compiler"],
     "validation": ["npm run f5:unit", "npm run f5:mock", "npm run f5:native"],
     "owner": "runtime.execution",

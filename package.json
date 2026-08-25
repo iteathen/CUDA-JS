@@ -34,6 +34,7 @@
     "components/host-memory-transfer/",
     "components/memory/",
     "components/platform-diagnostics/",
+    "components/publication-mailbox/",
     "components/resource-registry/",
     "components/runtime-facade/",
     "packaging/compatibility-manifest.json",

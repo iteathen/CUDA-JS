@@ -52,6 +52,8 @@ function parseType(value, { allowVoid = false, allowPointer = true } = {}) {
   if (SCALARS.has(value)) return Object.freeze({ kind: 'scalar', scalar: value, text: value });
   const match = allowPointer && typeof value === 'string' ? /^ptr<(bool|u32|i32|u64|f32)>$/.exec(value) : null;
   if (match) return Object.freeze({ kind: 'pointer', scalar: match[1], text: value });
+  const mailbox = typeof value === 'string' ? /^mailbox<(host-to-device|device-to-host),u32>$/.exec(value) : null;
+  if (mailbox) return Object.freeze({ kind: 'mailbox', direction: mailbox[1], scalar: 'u32', text: value });
   throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Device-JS type is unsupported.', { type: typeof value === 'string' ? value : null });
 }
 
@@ -62,11 +64,13 @@ function sameType(left, right) {
 function cppType(type) {
   if (type.kind === 'void') return 'void';
   if (type.kind === 'pointer') return `${CUDA_TYPES[type.scalar]}*`;
+  if (type.kind === 'mailbox') return 'unsigned int*';
   return CUDA_TYPES[type.scalar];
 }
 
 function abiKind(type) {
   if (type.kind === 'pointer') return 'device-memory';
+  if (type.kind === 'mailbox') return `publication-mailbox-${type.direction}-u32`;
   if (type.kind === 'scalar' && KERNEL_SCALARS.has(type.scalar)) return type.scalar;
   return null;
 }
@@ -448,6 +452,25 @@ class FunctionEmitter {
         ? `atomicAdd(${address}, ${values[0].code})`
         : `atomicCAS(${address}, ${values[0].code}, ${values[1].code})`;
       return { code, type: pointee };
+    }
+
+    if (path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem') {
+      const store = path === 'gpu.mailbox.storeReleaseSystem';
+      if (args.length !== (store ? 2 : 1)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
+      if (this.compile.headerProfile !== 'cuda-cccl') {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      }
+      const lane = this.expression(args[0], scope);
+      const expectedDirection = store ? 'device-to-host' : 'host-to-device';
+      if (lane.type.kind !== 'mailbox' || lane.type.direction !== expectedDirection) {
+        fail('DEVICE_JS_MAILBOX_DIRECTION', 'Mailbox helper requires the exact direction-specific opaque u32 lane type.', node, { expectedDirection, actualType: lane.type.text });
+      }
+      const reference = `cuda::atomic_ref<unsigned int, cuda::thread_scope_system>(*${lane.code})`;
+      this.usesScopedAtomic = true;
+      if (!store) return { code: `${reference}.load(cuda::memory_order_acquire)`, type: parseType('u32') };
+      const value = this.expression(args[1], scope);
+      if (value.type.text !== 'u32') fail('DEVICE_JS_ATOMIC_TYPE', 'Mailbox release store value must be u32.', args[1]);
+      return { code: `${reference}.store(${value.code}, cuda::memory_order_release)`, type: parseType('void', { allowVoid: true }) };
     }
 
     if (isScopedAtomicHelper(path)) {

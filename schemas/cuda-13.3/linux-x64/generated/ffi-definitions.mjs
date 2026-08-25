@@ -22,6 +22,9 @@ export const cudaTier0SymbolAliases = Object.freeze({
   "cuMemFreeHost": "cuMemFreeHost",
   "cuMemGetInfo": "cuMemGetInfo_v2",
   "cuMemHostAlloc": "cuMemHostAlloc",
+  "cuMemHostGetDevicePointer": "cuMemHostGetDevicePointer_v2",
+  "cuMemHostRegister": "cuMemHostRegister_v2",
+  "cuMemHostUnregister": "cuMemHostUnregister",
   "cuMemcpyDtoDAsync": "cuMemcpyDtoDAsync_v2",
   "cuMemcpyDtoH": "cuMemcpyDtoH_v2",
   "cuMemcpyDtoHAsync": "cuMemcpyDtoHAsync_v2",
@@ -185,6 +188,28 @@ export const cudaTier0FfiDefinitions = Object.freeze({
       "pointer",
       "u64",
       "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostGetDevicePointer_v2": {
+    "arguments": [
+      "pointer",
+      "pointer",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostRegister_v2": {
+    "arguments": [
+      "pointer",
+      "u64",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostUnregister": {
+    "arguments": [
+      "pointer"
     ],
     "return": "i32"
   },

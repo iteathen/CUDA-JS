@@ -83,3 +83,42 @@ test('public capacity-two profile admits declared atomic overlap without an arti
   await second.close();
   assert.equal((await runtime.close()).graceful, true);
 });
+
+test('public publication mailbox keeps storage opaque and releases its operation lease only at terminality', { timeout: 10_000 }, async () => {
+  const runtime = await openCudaRuntimeForTesting();
+  const module = await runtime.loadModule({ format: 'ptx', bytes: PTX });
+  const fn = await module.getFunction({ name: 'mailbox_kernel', parameters: [
+    { kind: 'publication-mailbox-host-to-device-u32' },
+    { kind: 'publication-mailbox-device-to-host-u32' },
+  ] });
+  const mailbox = await runtime.createPublicationMailbox({ lanes: [
+    { name: 'control', direction: 'host-to-device' },
+    { name: 'observation', direction: 'device-to-host' },
+  ] });
+  try {
+    assert.equal(JSON.stringify(mailbox), '{}');
+    assert.equal(mailbox.store('control', 0xffff_ffff), 0xffff_ffff);
+    assert.throws(() => mailbox.store('observation', 1), expectCode('CUDA_JS_MAILBOX_DIRECTION'));
+    assert.throws(() => mailbox.load('control'), expectCode('CUDA_JS_MAILBOX_DIRECTION'));
+    assert.equal(mailbox.load('observation'), 0);
+    const operation = await fn.submit({
+      grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 },
+      arguments: [
+        { kind: 'publication-mailbox', mailbox, lane: 'control' },
+        { kind: 'publication-mailbox', mailbox, lane: 'observation' },
+      ],
+    });
+    await assert.rejects(mailbox.reset(), expectCode('MEMORY_MAILBOX_BUSY'));
+    await assert.rejects(mailbox.close(), expectCode('MEMORY_MAILBOX_BUSY'));
+    assert.equal((await mailbox.status()).leased, true);
+    assert.equal((await operation.wait()).status, 'completed');
+    assert.equal((await mailbox.reset()).generation, 2);
+    assert.equal(mailbox.load('observation'), 0);
+    await operation.close();
+  } finally {
+    if (mailbox.state === 'open') await mailbox.close();
+    if (fn.state === 'open') await fn.close();
+    if (module.state === 'open') await module.close();
+    assert.equal((await runtime.close()).graceful, true);
+  }
+});

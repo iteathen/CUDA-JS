@@ -54,6 +54,7 @@ for (const required of [
   'components/cuda-target/index.mjs',
   'components/cuda-target/component.yaml',
   'components/execution/src/numeric-abi.mjs',
+  'components/publication-mailbox/index.mjs',
   'components/memory/src/device-view-manager.mjs',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
@@ -99,6 +100,7 @@ const memoryObservation = observations.find((entry) => entry.consumer === 'porta
 assert(memoryObservation);
 assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
+assert.equal(memoryObservation.publicationMailboxLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
 for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
@@ -117,12 +119,14 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
+    'docs/specs/SPEC-0014-long-lived-sideband.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
     'packaging/compatibility-manifest.json',
     'components/execution/src/numeric-abi.mjs',
     'components/memory/src/device-view-manager.mjs',
+    'components/publication-mailbox/src/publication-mailbox-manager.mjs',
     'components/device-js/src/strict-translator.mjs',
     'components/runtime-facade/src/runtime.mjs',
     'components/runtime-facade/src/device-program.mjs',
@@ -133,7 +137,7 @@ const target = await writeEvidence('portable-package.json', {
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade, SPEC-0019 transfer lifecycle, SPEC-0021 scalar ABI, Device-JS translation, mock lifecycle, and install/uninstall behavior only.',
+    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0019 transfer lifecycle, SPEC-0021 scalar ABI, Device-JS translation, mock lifecycle, and install/uninstall behavior only.',
     'The contiguous 1D typed device-view component is packaged for internal/downstream use but has no selected public cuda-js facade entry yet.',
     'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, and typed device-view native consumers remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',

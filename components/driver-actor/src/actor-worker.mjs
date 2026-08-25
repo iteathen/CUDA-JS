@@ -39,6 +39,10 @@ try {
         else if (request.operation === 'memory.transfer.h2d') result = await backend.transfer.hostToDevice(request.payload.token, request.payload.bytes, { deviceOffset: request.payload.deviceOffset, after: request.payload.after, operationId: request.requestId });
         else if (request.operation === 'memory.transfer.d2h') result = await backend.transfer.deviceToHost(request.payload.token, { deviceOffset: request.payload.deviceOffset, byteLength: request.payload.byteLength, after: request.payload.after, operationId: request.requestId });
         else if (request.operation === 'memory.transfer.d2d') result = await backend.transfer.deviceToDevice(request.payload.destinationToken, request.payload.sourceToken, { destinationOffset: request.payload.destinationOffset, sourceOffset: request.payload.sourceOffset, byteLength: request.payload.byteLength, after: request.payload.after, operationId: request.requestId });
+        else if (request.operation === 'mailbox.create') result = await backend.mailboxes.create(request.payload.buffer, { lanes: request.payload.lanes, operationId: request.requestId });
+        else if (request.operation === 'mailbox.status') result = backend.mailboxes.status(request.payload.token, request.requestId);
+        else if (request.operation === 'mailbox.reset') result = backend.mailboxes.reset(request.payload.token, request.payload.generation, request.requestId);
+        else if (request.operation === 'mailbox.release') result = await backend.mailboxes.release(request.payload.token, request.requestId);
         else if (request.operation === 'memory.release') result = await backend.memory.release(request.payload.token, request.requestId);
         else if (request.operation === 'execution.module.load') result = await backend.execution.loadModule({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'execution.module.status') result = backend.execution.moduleStatus(request.payload.token, request.requestId);
@@ -62,7 +66,7 @@ try {
         else if (request.operation === 'testing.disposal-mode') result = await backend.testingSetDisposalMode({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.disposal-status') result = await backend.testingDisposalStatus({ operationId: request.requestId });
         else throw Object.assign(new Error('Validated command has no handler.'), { code: 'DRIVER_COMMAND_HANDLER', category: 'internal' });
-        const state = request.operation.startsWith('memory.')
+        const state = request.operation.startsWith('memory.') || request.operation.startsWith('mailbox.')
           ? { inventory: backend.inventory(), memory: result.usage ?? null, execution: backend.execution.summary() }
           : request.operation.startsWith('execution.')
             ? { inventory: backend.inventory(), execution: backend.execution.summary() }

@@ -2,6 +2,7 @@ import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
+import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, healthForErrorCategory, observeErrorHealth } from '../health.mjs';
 
@@ -67,10 +68,22 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     maxThreadsPerBlock: 1024, maxBlockDimX: 1024, maxBlockDimY: 1024, maxBlockDimZ: 64,
     maxGridDimX: 2_147_483_647, maxGridDimY: 65_535, maxGridDimZ: 65_535, maxSharedMemoryPerBlock: 49_152,
   });
+  const registeredMailboxes = new Set();
+  const mailboxAddresses = new WeakMap();
+  let nextMailboxAddress = 0x8000_0000n;
+  const mailboxes = new PublicationMailboxManager({
+    registry,
+    contextToken,
+    operations: {
+      async register({ view }) { registeredMailboxes.add(view); mailboxAddresses.set(view, nextMailboxAddress); nextMailboxAddress += 0x1000n; return view; },
+      async map({ view }) { return mailboxAddresses.get(view); },
+      async unregister({ view }) { if (!registeredMailboxes.delete(view)) throw Object.assign(new Error('Mock mailbox is not registered.'), { code: 'MEMORY_MAILBOX_STALE' }); recordDisposal('publication-mailbox'); return { mockUnregistered: true }; },
+    },
+  });
   let executionMode = 'complete';
   let nextNative = 1;
   const execution = new ExecutionManager({
-    registry, contextToken, memory, policy: executionPolicy, deviceLimits,
+    registry, contextToken, memory, mailboxes, policy: executionPolicy, deviceLimits,
     operations: {
       async createStream() { return Object.freeze({ kind: 'stream', id: nextNative++ }); },
       async destroyStream() { recordDisposal('stream'); return { mockStreamReleased: true }; },
@@ -136,6 +149,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       context: contextToken,
       memory: await memory.usage(operationSequence),
       transfer: transfer.summary(),
+      mailbox: mailboxes.summary(),
       execution: execution.summary(),
       health: health.snapshot(),
       inventory: registry.inventory(),
@@ -172,7 +186,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       const cleanupOrRead = new Set([
         'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
         'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
-        'execution.operation.status', 'execution.operation.release',
+        'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
         'testing.disposal-status',
       ]);
       if (health.current === 'restart-required') throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
@@ -208,6 +222,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       };
     },
     memory,
+    mailboxes,
     transfer,
     execution,
     async testingBlock({ milliseconds, operationId }) {

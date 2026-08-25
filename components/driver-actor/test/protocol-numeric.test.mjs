@@ -13,7 +13,8 @@ function tokens() {
   const context = registry.allocate({ kind: 'context', value: {}, dispose: async () => ({}) });
   const module = registry.allocate({ kind: 'module', value: {}, parent: context, dispose: async () => ({}) });
   const fn = registry.allocate({ kind: 'function', value: {}, parent: module, dispose: async () => ({}) });
-  return { module, fn };
+  const mailbox = registry.allocate({ kind: 'publication-mailbox', value: {}, parent: context, dispose: async () => ({}) });
+  return { module, fn, mailbox };
 }
 
 const OPTIONS = Object.freeze({ executionPolicy: Object.freeze({ maxModuleBytes: 4 * 1_048_576, maxArguments: 32 }) });
@@ -64,4 +65,26 @@ test('Driver protocol still rejects unsupported parameter kinds', () => {
     name: 'unsupported',
     parameters: [{ kind: 'i64' }],
   }), OPTIONS), { code: 'DRIVER_FUNCTION_OPTIONS' });
+});
+
+test('Driver protocol admits only opaque publication-mailbox bindings for mailbox parameter kinds', () => {
+  const { module, fn, mailbox } = tokens();
+  const declaration = requestRecord(6, 'execution.function.get', {
+    moduleToken: module,
+    name: 'mailbox',
+    parameters: [{ kind: 'publication-mailbox-host-to-device-u32' }, { kind: 'publication-mailbox-device-to-host-u32' }],
+  });
+  assert.equal(validateRequest(declaration, OPTIONS), declaration);
+  const submission = requestRecord(7, 'execution.submit', {
+    functionToken: fn,
+    grid: { x: 1, y: 1, z: 1 },
+    block: { x: 1, y: 1, z: 1 },
+    sharedMemoryBytes: 0,
+    arguments: [{ kind: 'publication-mailbox', mailbox, generation: 1, lane: 'control' }],
+  });
+  assert.equal(validateRequest(submission, OPTIONS), submission);
+  assert.throws(() => validateRequest(requestRecord(8, 'execution.submit', {
+    ...submission.payload,
+    arguments: [{ kind: 'publication-mailbox', mailbox, generation: 1, lane: 'control', pointer: 1n }],
+  }), OPTIONS), { code: 'DRIVER_LAUNCH_OPTIONS' });
 });

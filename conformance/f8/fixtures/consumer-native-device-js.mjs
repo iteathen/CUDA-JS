@@ -118,7 +118,7 @@ try {
   assert.deepEqual(compilerResourcesAfter, compilerResourcesBefore);
 
   const compiled = await compileDeviceProgram(runtime, { source, functions, compile: { headerProfile: 'cuda-cccl' } });
-  assert.equal(compiled.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1');
+  assert.equal(compiled.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0014-publication-mailbox-v1');
   assert.deepEqual(compiled.deviceProgram.parser, { name: 'acorn', version: '8.15.0' });
   assert.equal(compiled.compiler.artifact.format, 'ptx');
   assert.equal(JSON.stringify(compiled).includes('__global__'), false);

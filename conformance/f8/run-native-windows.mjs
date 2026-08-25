@@ -31,6 +31,7 @@ await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: 
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-windows.mjs'), path.join(directory, 'consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-mailbox.mjs'), path.join(directory, 'mailbox-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
 await cp(path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
@@ -62,13 +63,21 @@ assert.equal(multiOperationObservation.producerPendingAfterObserver, true);
 assert.deepEqual(multiOperationObservation.observedWords, [1]);
 assert.deepEqual(multiOperationObservation.transferBytes, [3, 5, 7, 11]);
 assert.equal(multiOperationObservation.graceful, true);
+const mailboxOutput = runNode(['--experimental-ffi', 'mailbox-consumer.mjs'], directory);
+const mailboxObservation = JSON.parse(mailboxOutput.split(/\r?\n/).at(-1));
+assert.equal(mailboxObservation.firstPending, true);
+assert.equal(mailboxObservation.applicationTimerFired, true);
+assert.equal(mailboxObservation.published, 41);
+assert.equal(mailboxObservation.observed, 42);
+assert.equal(mailboxObservation.opaque, true);
+assert.equal(mailboxObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
 
 const target = await writeEvidence('native-windows-package.json', {
   schemaVersion: 1,
   workPackage: 'CJS-F8W',
-  capsule: 'installed-package-native-windows-vector-device-js-operation-transfer-consumers',
+  capsule: 'installed-package-native-windows-vector-device-js-operation-transfer-mailbox-consumers',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch },
@@ -78,16 +87,19 @@ const target = await writeEvidence('native-windows-package.json', {
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
+    'docs/specs/SPEC-0014-long-lived-sideband.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-windows.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
     'conformance/f8/fixtures/consumer-native-multi-operation.mjs',
+    'conformance/f8/fixtures/consumer-native-mailbox.mjs',
     'conformance/f5/fixtures/vector-add.ptx.txt',
   ]),
   package: portable.package,
   observation,
   deviceJsObservation,
   multiOperationObservation,
-  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector and async-transfer consumers retain the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  mailboxObservation,
+  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; the Device-JS f32 result uses the recorded host binary32 oracle and declared tolerance.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum} and source-only Device-JS qualification; evidence: ${target}`);
+console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS, and mailbox publication qualification; evidence: ${target}`);

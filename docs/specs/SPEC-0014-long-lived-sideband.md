@@ -10,7 +10,7 @@
 
 Define the smallest consumer-neutral CUDA-JS contract for bounded host↔device control and observation while an accepted SPEC-0016 GPU operation remains pending.
 
-SPEC-0014 **does not define a second operation lifecycle**. SPEC-0016 exclusively owns submission, status, wait, logical close, operation states, terminalization, execution leases, legacy `launch()` compatibility, pending-command gating, and runtime-close behavior. This proposal adds only a bounded **publication mailbox** capability that a SPEC-0016 operation may lease and use.
+SPEC-0014 **does not define a second operation lifecycle**. SPEC-0016 exclusively owns submission, status, wait, logical close, operation states, terminalization, execution leases, legacy `launch()` compatibility, pending-command gating, and runtime-close behavior. This specification adds only a bounded **publication mailbox** capability that a SPEC-0016 operation may lease and use.
 
 The selected first mailbox design is backed by one internally allocated `SharedArrayBuffer` registered/mapped privately by CUDA-JS on qualified native profiles. Public callers receive only an opaque mailbox capability with bounded synchronous `store`/`load` methods. It exposes no backing store, CUDA stream, event, context, pointer, registration handle, or general concurrent-kernel API.
 
@@ -35,7 +35,7 @@ CudaOperation.close()
 
 The accepted mailbox integration allows a launch request to bind one or more named lanes from opaque mailbox capabilities. Those mailbox dependencies are acquired before native submission and remain leased until SPEC-0016 terminalization proves the operation completed or failed.
 
-Host publication is local JavaScript `Atomics` work and does not enqueue a DriverActor command. Status, wait, operation release, and runtime close remain the only relevant DriverActor commands while long-lived work is pending. SPEC-0018 capacity-two scheduling remains independently available but does not weaken mailbox single-device-writer ownership.
+Host publication is local JavaScript `Atomics` work and does not enqueue a DriverActor command. Operation status/wait/release and runtime close remain admitted while long-lived work is pending. Mailbox status/reset/release commands are also admitted so status can be observed and reset/close can return the mailbox owner's typed busy result instead of being masked by the generic pending-operation gate. SPEC-0018 capacity-two scheduling remains independently available but does not weaken mailbox single-device-writer ownership.
 
 ## Cancellation truth
 
@@ -72,7 +72,7 @@ Cross-host/device read-modify-write is unavailable in v1.
 
 The host side uses JavaScript `Atomics.load/store` on an `Int32Array` view while values are surfaced as unsigned 32-bit integers.
 
-On a qualified native CUDA profile, CUDA-JS would privately:
+On the qualified native CUDA profile, CUDA-JS privately:
 
 - obtain the stable SAB backing pointer through Node FFI;
 - page-lock/register the backing range with `cuMemHostRegister`;
@@ -180,7 +180,7 @@ Registration or mapping failure is immediate and rolls back any acquired native 
 
 ## Relationship to broader concurrency
 
-This capability does not authorize public streams or multiple independent kernels in flight. It consumes SPEC-0016's one-operation lifecycle. Issue #40's bounded multiple-in-flight/private-stream work remains separate and is not a prerequisite for a one-operation mailbox profile.
+This capability does not authorize public streams or broaden the number of independent kernels in flight. It consumes SPEC-0016's operation lifecycle and composes with the already accepted SPEC-0018 scheduler without changing that scheduler's capacity, hazard, dependency, or no-queue contracts.
 
 ## Non-goals
 

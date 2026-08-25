@@ -16,6 +16,7 @@ const unitFiles = [
   'components/execution/test/extended-numeric-execution.test.mjs',
   'components/execution/test/operation-lifecycle.test.mjs',
   'components/host-memory-transfer/test/host-memory-transfer.test.mjs',
+  'components/publication-mailbox/test/publication-mailbox.test.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/protocol-numeric.test.mjs',
   'components/driver-actor/test/health.test.mjs',

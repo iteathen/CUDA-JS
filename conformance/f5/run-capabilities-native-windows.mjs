@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { openCudaRuntime } from '../../components/runtime-facade/index.mjs';
+import { compileDeviceProgram, openCudaRuntime } from '../../components/runtime-facade/index.mjs';
 import { parameterLayout } from '../../components/execution/index.mjs';
 import {
   capabilityPtxPath,
@@ -210,6 +210,85 @@ assert.equal(transferTerminal.graceful, true);
 assert.equal(transferTerminal.driver.resourceCounts.live, 0);
 assert.equal(transferTerminal.driver.resourceCounts.orphaned, 0);
 
+const mailboxRuntime = await openCudaRuntime({
+  compiler: true,
+  driver: {
+    memory: { maxDeviceBytes: 4, maxAllocationBytes: 4, maxTransferBytes: 4 },
+    execution: { maxModuleBytes: 1_048_576, maxArguments: 4, maxCompletionMilliseconds: 30_000 },
+  },
+});
+let mailboxTerminal;
+let mailboxObservation;
+try {
+  const source = `
+function mailboxKernel(control, observation) {
+  let value = gpu.u32(0);
+  while (value === gpu.u32(0)) {
+    value = gpu.mailbox.loadAcquireSystem(control);
+  }
+  gpu.mailbox.storeReleaseSystem(observation, value + gpu.u32(1));
+}
+`;
+  const compiled = await compileDeviceProgram(mailboxRuntime, {
+    source,
+    functions: [{
+      name: 'mailboxKernel',
+      kind: 'kernel',
+      parameters: [
+        { name: 'control', type: 'mailbox<host-to-device,u32>' },
+        { name: 'observation', type: 'mailbox<device-to-host,u32>' },
+      ],
+      returns: 'void',
+    }],
+    compile: { headerProfile: 'cuda-cccl' },
+  });
+  const kernel = compiled.deviceProgram.kernels.find((entry) => entry.name === 'mailboxKernel');
+  assert(kernel);
+  const module = await mailboxRuntime.loadModule({ format: 'ptx', bytes: compiled.compiler.artifact.bytes });
+  const fn = await module.getFunction({ name: kernel.functionName, parameters: kernel.parameters });
+  const mailbox = await mailboxRuntime.createPublicationMailbox({ lanes: [
+    { name: 'control', direction: 'host-to-device' },
+    { name: 'observation', direction: 'device-to-host' },
+  ] });
+  const operation = await fn.submit({
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 },
+    arguments: [
+      { kind: 'publication-mailbox', mailbox, lane: 'control' },
+      { kind: 'publication-mailbox', mailbox, lane: 'observation' },
+    ],
+  });
+  let applicationTimerFired = false;
+  await new Promise((resolve) => setTimeout(() => { applicationTimerFired = true; resolve(); }, 0));
+  const first = await operation.status();
+  assert.equal(first.status, 'pending', 'The mailbox kernel must remain pending before the host publication.');
+  await assert.rejects(mailbox.reset(), (error) => error.code === 'MEMORY_MAILBOX_BUSY');
+  await assert.rejects(mailbox.close(), (error) => error.code === 'MEMORY_MAILBOX_BUSY');
+  assert.equal(mailbox.store('control', 41), 41);
+  const completed = await operation.wait();
+  assert.equal(completed.status, 'completed');
+  const observed = mailbox.load('observation');
+  assert.equal(observed, 42);
+  mailboxObservation = {
+    first,
+    completed,
+    applicationTimerFired,
+    published: 41,
+    observed,
+    generation: mailbox.generation,
+    compilerArtifact: { format: compiled.compiler.artifact.format, byteLength: compiled.compiler.artifact.byteLength, sha256: compiled.compiler.artifact.sha256 },
+  };
+  await operation.close();
+  await mailbox.close();
+  await fn.close();
+  await module.close();
+} finally {
+  mailboxTerminal = await mailboxRuntime.close();
+}
+assert.equal(mailboxTerminal.graceful, true);
+assert.equal(mailboxTerminal.compiler.graceful, true);
+assert.equal(mailboxTerminal.driver.resourceCounts.live, 0);
+assert.equal(mailboxTerminal.driver.resourceCounts.orphaned, 0);
+
 const closeRuntime = await openCudaRuntime({
   driver: {
     memory: { maxDeviceBytes: 4, maxAllocationBytes: 4, maxTransferBytes: 4 },
@@ -254,6 +333,9 @@ const sources = [
   'docs/specs/SPEC-0016-operation-lifecycle.md',
   'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
   'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
+  'docs/specs/SPEC-0014-long-lived-sideband.md',
+  'components/publication-mailbox/src/publication-mailbox-manager.mjs',
+  'components/device-js/src/translator.mjs',
   'components/execution/src/execution-manager.mjs',
   'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
@@ -265,20 +347,21 @@ const sources = [
 ];
 const target = await writeEvidence('native-windows-capabilities.json', {
   schemaVersion: 1,
-  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER',
-  capsule: 'public-facade-native-scalar-operation-transfer-lifecycle',
+  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER/NQ-MAILBOX',
+  capsule: 'public-facade-native-scalar-operation-transfer-mailbox-lifecycle',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: { version: process.version, moduleAbi: process.versions.modules, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version() },
   sources: await sourceIdentity(sources),
-  oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], asyncTransferWords: oracle.ASYNC_TRANSFER, ptxSha256: await sha256(capabilityPtxPath) },
-  observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, asyncTransfer: transferObservation, transferTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
-  capabilityBoundary: 'All native handles, packed bytes, stream/event identity, and faulting context state remained private. The deferred fault ran in a child process with its own private runtime/context.',
+  oracle: { scalarLayout: oracle.SCALAR_LAYOUT, typeLayout: oracle.TYPE_LAYOUT, firstEventQueryStatus: oracle.DELAY_FIRST_QUERY[0], delayedWord: oracle.DELAY_RESULT[0], asyncTransferWords: oracle.ASYNC_TRANSFER, mailboxPublication: oracle.MAILBOX_PUBLICATION, ptxSha256: await sha256(capabilityPtxPath) },
+  observations: { scalarCases: scalarObservations, operation: operationObservation, concurrentAtomicObservation: concurrentObservation, concurrentTerminal, asyncTransfer: transferObservation, transferTerminal, mailbox: mailboxObservation, mailboxTerminal, pendingRuntimeClose: pendingCloseTerminal, deferredFailure, postFaultTerminal, terminal },
+  capabilityBoundary: 'All native handles, packed bytes, stream/event identity, mapped mailbox storage, and faulting context state remained private. The deferred fault ran in a child process with its own private runtime/context.',
   claimLimits: [
     'Exact Windows x64 Node 26.7.0 / Driver 610.74 / CUDA 13.3 / GTX 1660 Ti sm_75 profile only.',
     'The delay proves asynchronous not-ready/status/close semantics, not a latency or performance guarantee.',
     'The qualified widened profile is exactly two private streams, two pending operations, no queue, and declared u32/u64 relaxed device-scope atomic access.',
     'The async transfer profile is exactly two internal pinned staging blocks, contiguous H2D/D2H/D2D, snapshot ingress, and terminal-result egress; it makes no universal overlap claim.',
+    'The mailbox profile is exactly one privately mapped mailbox, named u32 lanes, one direction and writer per lane, one live GPU operation lease, and system-scope acquire/release publication.',
   ],
 });
-console.log(`F5 native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);
+console.log(`F5 native capability conformance passed: ${scalarObservations.length} scalar cases, native pending/terminal lifecycle, mapped mailbox publication, conservative deferred failure, and terminal cleanup. Evidence: ${path.relative(repositoryRoot, target)}`);

@@ -41,4 +41,6 @@ await runtime.close();
 
 `writeAsync()` snapshots ingress before native ownership, `readAsync()` exposes bytes only in a completed operation result, and `copyFromAsync()` performs a bounded contiguous D2D copy. Each consumes the same SPEC-0016 operation capacity, dependency, hazard, and cleanup lifecycle as kernels.
 
+Accepted SPEC-0014 adds `runtime.createPublicationMailbox({ lanes })`. The returned opaque mailbox exposes direction-checked synchronous `store(name, u32)` and `load(name)` plus status/reset/close; its private `SharedArrayBuffer` and CUDA mapping never become public. Kernel arguments bind one named lane through `{ kind: 'publication-mailbox', mailbox, lane }`, and the mailbox remains exclusively leased through operation terminality.
+
 `cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux and WSL imports fail with stable backend-unavailable errors while their retained runbooks remain independently completable.

@@ -64,6 +64,9 @@ int main(void) {
   printf("FUNCTION\tcuMemFreeHost\tcuMemFreeHost\t%zu\n", sizeof(&cuMemFreeHost));
   printf("FUNCTION\tcuMemGetInfo\tcuMemGetInfo_v2\t%zu\n", sizeof(&cuMemGetInfo_v2));
   printf("FUNCTION\tcuMemHostAlloc\tcuMemHostAlloc\t%zu\n", sizeof(&cuMemHostAlloc));
+  printf("FUNCTION\tcuMemHostGetDevicePointer\tcuMemHostGetDevicePointer_v2\t%zu\n", sizeof(&cuMemHostGetDevicePointer_v2));
+  printf("FUNCTION\tcuMemHostRegister\tcuMemHostRegister_v2\t%zu\n", sizeof(&cuMemHostRegister_v2));
+  printf("FUNCTION\tcuMemHostUnregister\tcuMemHostUnregister\t%zu\n", sizeof(&cuMemHostUnregister));
   printf("FUNCTION\tcuMemcpyDtoDAsync\tcuMemcpyDtoDAsync_v2\t%zu\n", sizeof(&cuMemcpyDtoDAsync_v2));
   printf("FUNCTION\tcuMemcpyDtoH\tcuMemcpyDtoH_v2\t%zu\n", sizeof(&cuMemcpyDtoH_v2));
   printf("FUNCTION\tcuMemcpyDtoHAsync\tcuMemcpyDtoHAsync_v2\t%zu\n", sizeof(&cuMemcpyDtoHAsync_v2));

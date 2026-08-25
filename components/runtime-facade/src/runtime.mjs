@@ -12,6 +12,7 @@ const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restar
 const POISONED_ALLOWED_OPERATIONS = new Set([
   'runtime.describe', 'runtime.close',
   'memory.status', 'memory.close',
+  'mailbox.status', 'mailbox.close',
   'module.status', 'module.close',
   'function.status', 'function.close',
   'operation.status', 'operation.wait', 'operation.close',
@@ -215,6 +216,11 @@ function translateLaunch(entry, options, operation) {
   if (options.arguments.length !== entry.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Launch argument count must match the function declaration.', { expected: entry.parameters.length, actual: options.arguments.length }, operation);
   const argumentsForActor = entry.parameters.map((parameter, index) => {
     const value = options.arguments[index];
+    if (parameter.kind.startsWith('publication-mailbox-')) {
+      if (!plainObject(value) || Object.keys(value).sort().join('\0') !== ['kind', 'lane', 'mailbox'].sort().join('\0') || value.kind !== 'publication-mailbox' || typeof value.lane !== 'string') throw facadeError('CUDA_JS_MAILBOX_ARGUMENT_INVALID', 'validation', 'Mailbox launch argument requires exactly kind, mailbox, and lane.', { index }, operation);
+      const mailbox = resourceFor(value.mailbox, entry.runtime, 'publication-mailbox', operation);
+      return { kind: 'publication-mailbox', mailbox: mailbox.token, generation: mailbox.generation, lane: value.lane };
+    }
     if (parameter.kind !== 'device-memory') return { kind: parameter.kind, value };
     const memory = resourceFor(value, entry.runtime, 'device-memory', operation);
     return { kind: 'device-memory', memory: memory.token };
@@ -272,6 +278,39 @@ class CudaDeviceMemory {
     return registerResource(destination.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
   }
   async close() { return closeResource(this, 'memory.close', (entry) => runtimeData.get(entry.runtime).driver.releaseMemory(entry.token)); }
+}
+
+class CudaPublicationMailbox {
+  get kind() { return 'publication-mailbox'; }
+  get generation() { return resourceData.get(this)?.generation ?? null; }
+  get lanes() { return resourceData.get(this)?.publicLanes ?? null; }
+  get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  store(laneName, value) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'publication-mailbox', 'mailbox.store');
+    if (!Number.isInteger(value) || value < 0 || value > 0xffff_ffff) throw facadeError('CUDA_JS_MAILBOX_VALUE_INVALID', 'validation', 'Mailbox store value must be u32.', {}, 'mailbox.store');
+    const lane = entry.laneMap.get(laneName);
+    if (!lane || lane.direction !== 'host-to-device') throw facadeError('CUDA_JS_MAILBOX_DIRECTION', 'validation', 'Mailbox store requires a host-to-device lane.', { lane: typeof laneName === 'string' ? laneName : null }, 'mailbox.store');
+    Atomics.store(entry.view, lane.index, value | 0);
+    return value;
+  }
+  load(laneName) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'publication-mailbox', 'mailbox.load');
+    const lane = entry.laneMap.get(laneName);
+    if (!lane || lane.direction !== 'device-to-host') throw facadeError('CUDA_JS_MAILBOX_DIRECTION', 'validation', 'Mailbox load requires a device-to-host lane.', { lane: typeof laneName === 'string' ? laneName : null }, 'mailbox.load');
+    return Atomics.load(entry.view, lane.index) >>> 0;
+  }
+  async status() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'publication-mailbox', 'mailbox.status');
+    const result = await invoke('mailbox.status', () => runtimeData.get(entry.runtime).driver.publicationMailboxStatus(entry.token));
+    return freezePublic({ schemaVersion: 1, kind: 'publication-mailbox', state: entry.state, generation: result.generation, lanes: entry.publicLanes, leased: result.leased });
+  }
+  async reset() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'publication-mailbox', 'mailbox.reset');
+    const result = await invoke('mailbox.reset', () => runtimeData.get(entry.runtime).driver.resetPublicationMailbox(entry.token, entry.generation));
+    entry.generation = result.generation;
+    return freezePublic({ schemaVersion: 1, kind: 'publication-mailbox', state: entry.state, generation: entry.generation, lanes: entry.publicLanes, leased: false });
+  }
+  async close() { return closeResource(this, 'mailbox.close', (entry) => runtimeData.get(entry.runtime).driver.releasePublicationMailbox(entry.token)); }
 }
 
 class CudaModule {
@@ -334,8 +373,15 @@ class CudaRuntime {
   }
   get compilerEnabled() { return runtimeData.get(this)?.compiler !== null; }
   get terminalReport() { return runtimeData.get(this)?.terminalReport ?? null; }
-  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, transfer: driver.transfer, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
+  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, transfer: driver.transfer, mailbox: driver.mailbox, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
   async allocateDevice(options) { const data = dataFor(this, 'memory.allocate'); const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options)); return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory); }
+  async createPublicationMailbox(options) {
+    const data = dataFor(this, 'mailbox.create');
+    const result = await invoke('mailbox.create', () => data.driver.createPublicationMailbox(options));
+    const publicLanes = Object.freeze(result.lanes.map((lane) => Object.freeze({ name: lane.name, direction: lane.direction })));
+    const laneMap = new Map(result.lanes.map((lane) => [lane.name, lane]));
+    return registerResource(this, 'publication-mailbox', result.mailbox, { generation: result.generation, buffer: result.buffer, view: new Int32Array(result.buffer), publicLanes, laneMap }, CudaPublicationMailbox);
+  }
   async loadModule(options) { const data = dataFor(this, 'module.load'); const result = await invoke('module.load', () => data.driver.loadModule(options)); return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule); }
   async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(request))); }
   async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(request))); }
