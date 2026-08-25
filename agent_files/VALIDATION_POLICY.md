@@ -66,6 +66,8 @@ Require deterministic regeneration, pinned official inputs, native C layout prob
 
 Require exact Node build/flags, library paths, named symbols, signatures, pointer/out packing, permission behavior, close/invalidation behavior, and no public raw capability. Fast FFI/JIT claims require exact mechanism qualification, not timing inference alone.
 
+The current source architecture additionally requires published-package inventory proving a JavaScript/ESM core with no CUDA-JS-specific compiled addon or native wrapper library. C/C++ ABI probes, conformance oracles and generated fixtures must remain independently owned evidence outside shipped runtime files. Generated private CUDA C++ and JIT-produced device artifacts require deterministic identity and may not be misclassified as maintained public source. Any maintained native host backend requires accepted architecture, packaging, lifecycle, compatibility and qualification authority before implementation.
+
 ## Actor, resources, and errors
 
 Require context-thread affinity, opaque generation/state validation, parent/child and in-flight leases, immediate/deferred provenance, conservative context-health transitions, bounded queues, responsive application event loop, explicit close, worker shutdown, and leak census.

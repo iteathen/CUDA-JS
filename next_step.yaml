@@ -4,7 +4,7 @@
   "status": "cuda_mcgs_p0_p1_prerequisites_complete",
   "objective": "Complete the CUDA-MCGS P0/P1 CUDA-JS prerequisites as dependency-ready LEGO ownership packets with exact native evidence, clean integration, and no consumer-domain leakage.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "ed35718ea15ce7a878f67580e271aee5820948ee",
+    "protected_main_authority_baseline": "b6062f691a27093df0e5d55e482e69ebbd39a9eb",
     "package": "cuda-js@0.1.0-alpha.6",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -39,6 +39,7 @@
     "docs/PROJECT_CHARTER.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
+    "docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md",
     "docs/specs/SPEC-0019-host-memory-and-async-transfer.md",
@@ -114,6 +115,8 @@
     "add NN exports/dependencies/provider discovery/tensor/autodiff/training semantics to the cuda-js core package",
     "assume the future NN package name or directory before its own accepted child authority selects it",
     "expose raw native pointers, streams, events, device ordinals/UUIDs, providers, generated CUDA, or machine-specific identifiers through ordinary public products",
+    "use unqualified pure-JavaScript wording that hides native providers, generated device code, or independent C/C++ evidence",
+    "introduce a CUDA-JS-maintained native host backend or compiled addon without an accepted measured-gap architecture/package/lifecycle decision",
     "weaken tests or claim completion around missing hardware/external controls"
   ],
   "historical_baseline": [

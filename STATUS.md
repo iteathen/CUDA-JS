@@ -15,6 +15,12 @@ execution package:  cuda-js@0.1.0-alpha.6
 
 **Node 26.7.0** remains the exact Node qualification baseline.
 
+## Production-source architecture
+
+ADR-0005 records the canonical split: **CUDA-JS is JavaScript-authored and JIT/native-realized**. The published core runtime is maintained as JavaScript/ESM and currently ships no CUDA-JS-specific compiled addon. Node FFI, NVIDIA native providers, private generated CUDA C++ and produced device artifacts realize execution. Repository C/C++ probes, fixtures and native oracles remain independent evidence rather than shipped runtime implementation.
+
+This wording does not claim that every host call or device artifact is JIT-produced. Precompiled artifacts remain valid, and host JIT claims remain exact-profile gated under ADR-0002. A future maintained native host backend requires an accepted measured-gap decision rather than entering as incidental drift.
+
 The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations include:
 
 - SPEC-0010 typed relocatable device code;
