@@ -1,5 +1,7 @@
 const WIDTHS = Object.freeze({
   'device-memory': 8,
+  'publication-mailbox-host-to-device-u32': 8,
+  'publication-mailbox-device-to-host-u32': 8,
   u32: 4,
   u64: 8,
   i32: 4,
@@ -152,8 +154,8 @@ export function packParameterValues(parameters, values, fail) {
   const buffer = Buffer.alloc(layout.byteLength);
   for (const entry of layout.entries) {
     const value = values[entry.index];
-    if (entry.kind === 'device-memory') {
-      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'Private device-memory value is invalid.', { index: entry.index });
+    if (entry.kind === 'device-memory' || entry.kind.startsWith('publication-mailbox-')) {
+      if (typeof value !== 'bigint' || value < 0n || value > 0xffff_ffff_ffff_ffffn) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'Private pointer-width argument value is invalid.', { index: entry.index });
       buffer.writeBigUInt64LE(value, entry.offset);
     } else if (entry.kind === 'u64') {
       if (!isScalarParameterValue(entry.kind, value)) throwFailure(fail, 'EXECUTION_ARGUMENT_VALUE', 'u64 argument is out of range or not an exact bigint.', { index: entry.index });

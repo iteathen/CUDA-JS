@@ -7,6 +7,7 @@ const BASE_OPERATIONS = new Set([
   'runtime.describe', 'context.status', 'runtime.close',
   'memory.allocate', 'memory.status', 'memory.write', 'memory.read', 'memory.release',
   'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d',
+  'mailbox.create', 'mailbox.status', 'mailbox.reset', 'mailbox.release',
   'execution.module.load', 'execution.module.status', 'execution.module.release',
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
@@ -55,7 +56,13 @@ function scalarArgument(entry) {
 
 function launchArguments(value, maximum) {
   return Array.isArray(value) && value.length > 0 && value.length <= maximum && value.every((entry) => {
-    if (!plainObject(entry) || !isParameterKind(entry.kind)) return false;
+    if (!plainObject(entry)) return false;
+    if (entry.kind === 'publication-mailbox') {
+      return exactFields(entry, ['kind', 'mailbox', 'generation', 'lane'])
+        && isResourceToken(entry.mailbox) && positiveSafeInteger(entry.generation)
+        && typeof entry.lane === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(entry.lane);
+    }
+    if (!isParameterKind(entry.kind)) return false;
     if (entry.kind !== 'device-memory') return scalarArgument(entry);
     const fields = Object.keys(entry);
     return fields.every((key) => ['kind', 'memory', 'byteOffset'].includes(key))
@@ -88,6 +95,18 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(message.payload) || !exactFields(message.payload, ['byteLength']) || !positiveSafeInteger(message.payload.byteLength)) throw validationError('MEMORY_RANGE_INVALID', 'Memory allocation requires one positive safe-integer byteLength.', {}, message.requestId);
   } else if (message.operation === 'memory.status' || message.operation === 'memory.release') {
     if (!tokenPayload(message.payload)) throw validationError('DRIVER_MEMORY_TOKEN', 'Memory operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.create') {
+    const payload = message.payload;
+    const lanes = payload?.lanes;
+    if (!plainObject(payload) || !exactFields(payload, ['buffer', 'lanes']) || !(payload.buffer instanceof SharedArrayBuffer)
+        || !Array.isArray(lanes) || lanes.length < 1 || lanes.length > 64 || payload.buffer.byteLength !== lanes.length * 4
+        || !lanes.every((lane) => plainObject(lane) && exactFields(lane, ['name', 'direction'])
+          && typeof lane.name === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(lane.name)
+          && ['host-to-device', 'device-to-host'].includes(lane.direction))) throw validationError('MEMORY_MAILBOX_OPTIONS_INVALID', 'Mailbox create payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.status' || message.operation === 'mailbox.release') {
+    if (!tokenPayload(message.payload)) throw validationError('MEMORY_MAILBOX_TOKEN', 'Mailbox operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.reset') {
+    if (!plainObject(message.payload) || !exactFields(message.payload, ['token', 'generation']) || !isResourceToken(message.payload.token) || !positiveSafeInteger(message.payload.generation)) throw validationError('MEMORY_MAILBOX_RESET', 'Mailbox reset payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'memory.write') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['token', 'bytes', 'deviceOffset']) || !isResourceToken(payload.token)

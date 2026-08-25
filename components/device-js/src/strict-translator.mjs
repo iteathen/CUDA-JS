@@ -140,8 +140,9 @@ function cppType(type) {
   ]);
   if (scalar.has(type)) return scalar.get(type);
   const pointer = /^ptr<(bool|u32|i32|u64|f32)>$/.exec(type);
-  if (!pointer) throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Canonical Device-JS function type is invalid.', { type });
-  return `${cppType(pointer[1])}*`;
+  if (pointer) return `${cppType(pointer[1])}*`;
+  if (/^mailbox<(?:host-to-device|device-to-host),u32>$/.test(type)) return 'unsigned int*';
+  throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Canonical Device-JS function type is invalid.', { type });
 }
 
 function generatedNameMap(functions) {

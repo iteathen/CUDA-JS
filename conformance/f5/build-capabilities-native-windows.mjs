@@ -57,7 +57,7 @@ await mkdir(nativeRoot, { recursive: true });
 await mkdir(evidenceRoot, { recursive: true });
 const nvccCommand = [
   `call ${quote(vsDevCmd)} -arch=x64 -host_arch=x64 >nul`,
-  `${quote(nvccPath)} --ptx -arch=compute_75 --std=c++17 --fmad=false -x cu ${quote(capabilitySourcePath)} -o ${quote(capabilityPtxPath)}`,
+  `${quote(nvccPath)} --ptx -arch=compute_75 --std=c++17 --fmad=false -Xcompiler /Zc:preprocessor -x cu ${quote(capabilitySourcePath)} -o ${quote(capabilityPtxPath)}`,
 ].join(' && ');
 run(nvccCommand, [], { shell: true });
 const compileCommand = [
@@ -72,6 +72,8 @@ assert.deepEqual(oracle.TYPE_LAYOUT, [4, 4, 8, 8, 4, 4, 4, 4, 8, 8]);
 assert.deepEqual(oracle.DELAY_FIRST_QUERY, [600]);
 assert.equal(oracle.DELAY_RESULT[0], 0xc001d00d);
 assert.deepEqual(oracle.ASYNC_TRANSFER, [3, 5, 7, 11]);
+assert.deepEqual(oracle.MAILBOX_PUBLICATION, [41, 42]);
+assert.deepEqual(oracle.MAILBOX_UNREGISTER, [0]);
 for (const key of ['EVENT_DESTROY', 'FREE_TRANSFER_COPY', 'FREE_TRANSFER', 'FREE_TRANSFER_OUTPUT', 'FREE_TRANSFER_INPUT', 'FREE_OUTPUT', 'MODULE_UNLOAD', 'STREAM_DESTROY', 'CONTEXT_DESTROY']) assert.deepEqual(oracle[key], [0]);
 
 const sources = [
@@ -83,8 +85,8 @@ const sources = [
 ];
 await writeFile(path.join(evidenceRoot, 'capability-oracle-build.json'), `${JSON.stringify({
   schemaVersion: 1,
-  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER',
-  capsule: 'independent-msvc-driver-scalar-operation-transfer-oracle',
+  workPackage: 'NQ-SCALAR/NQ-OPERATION/NQ-TRANSFER/NQ-MAILBOX',
+  capsule: 'independent-msvc-driver-scalar-operation-transfer-mailbox-oracle',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, osVersion: os.version(), compiler: 'MSVC x64 + nvcc PTX', toolkit: manifest.toolkit },

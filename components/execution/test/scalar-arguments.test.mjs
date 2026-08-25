@@ -13,6 +13,23 @@ test('legacy device-memory/u32 layout remains unchanged', () => {
   assert.equal(layout.byteLength, 24);
 });
 
+test('publication mailbox lane parameters use private pointer width and natural alignment', () => {
+  const parameters = [
+    { kind: 'u32' },
+    { kind: 'publication-mailbox-host-to-device-u32' },
+    { kind: 'publication-mailbox-device-to-host-u32' },
+  ];
+  const layout = parameterLayout(parameters);
+  assert.deepEqual(layout.entries.map(({ kind, offset, byteLength, alignment }) => ({ kind, offset, byteLength, alignment })), [
+    { kind: 'u32', offset: 0, byteLength: 4, alignment: 4 },
+    { kind: 'publication-mailbox-host-to-device-u32', offset: 8, byteLength: 8, alignment: 8 },
+    { kind: 'publication-mailbox-device-to-host-u32', offset: 16, byteLength: 8, alignment: 8 },
+  ]);
+  const packed = packParameterValues(parameters, [7, 0x0102_0304_0506_0708n, 0x1112_1314_1516_1718n]);
+  assert.equal(packed.buffer.readBigUInt64LE(8), 0x0102_0304_0506_0708n);
+  assert.equal(packed.buffer.readBigUInt64LE(16), 0x1112_1314_1516_1718n);
+});
+
 test('mixed scalar signatures use deterministic natural alignment and zero padding', () => {
   const parameters = [
     { kind: 'u32' },

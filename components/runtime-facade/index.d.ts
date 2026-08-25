@@ -108,7 +108,7 @@ export interface CompilerResult {
   readonly operationSequence: number;
 }
 
-export type FunctionParameterKind = 'device-memory' | 'u32' | 'u64' | 'i32' | 'f32' | 'f64' | 'f16' | 'bf16';
+export type FunctionParameterKind = 'device-memory' | 'publication-mailbox-host-to-device-u32' | 'publication-mailbox-device-to-host-u32' | 'u32' | 'u64' | 'i32' | 'f32' | 'f64' | 'f16' | 'bf16';
 export interface FunctionParameter { readonly kind: FunctionParameterKind; }
 
 export interface LaunchDimensions { x: number; y: number; z: number; }
@@ -126,7 +126,19 @@ export interface CudaDeviceMemory {
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
-export type CudaLaunchArgument = CudaDeviceMemory | number | bigint;
+export interface CudaPublicationMailbox {
+  readonly kind: 'publication-mailbox';
+  readonly generation: number;
+  readonly lanes: readonly Readonly<{ name: string; direction: 'host-to-device' | 'device-to-host' }>[];
+  readonly state: string;
+  store(laneName: string, value: number): number;
+  load(laneName: string): number;
+  status(): Promise<Readonly<Record<string, unknown>>>;
+  reset(): Promise<Readonly<Record<string, unknown>>>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
+
+export type CudaLaunchArgument = CudaDeviceMemory | Readonly<{ kind: 'publication-mailbox'; mailbox: CudaPublicationMailbox; lane: string }> | number | bigint;
 export interface CudaLaunchOptions {
   grid: LaunchDimensions;
   block: LaunchDimensions;
@@ -198,6 +210,7 @@ export interface CudaRuntime {
   readonly terminalReport: Readonly<Record<string, unknown>> | null;
   describe(): Promise<Readonly<Record<string, unknown>>>;
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
+  createPublicationMailbox(options: { lanes: readonly Readonly<{ name: string; direction: 'host-to-device' | 'device-to-host' }>[] }): Promise<CudaPublicationMailbox>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
   link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
@@ -207,7 +220,8 @@ export interface CudaRuntime {
 
 export type DeviceJsScalarType = 'bool' | 'u32' | 'i32' | 'u64' | 'f32';
 export type DeviceJsPointerType = `ptr<${DeviceJsScalarType}>`;
-export type DeviceJsType = DeviceJsScalarType | DeviceJsPointerType;
+export type DeviceJsMailboxType = 'mailbox<host-to-device,u32>' | 'mailbox<device-to-host,u32>';
+export type DeviceJsType = DeviceJsScalarType | DeviceJsPointerType | DeviceJsMailboxType;
 
 export interface DeviceJsParameter {
   name: string;
@@ -228,7 +242,7 @@ export interface DeviceJsCompileRequest {
 }
 
 export interface DeviceJsProgramDescriptor {
-  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1';
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0014-publication-mailbox-v1';
   readonly sha256: string;
   readonly parser: Readonly<{ name: 'acorn'; version: string }>;
   readonly functions: readonly Readonly<Record<string, unknown>>[];

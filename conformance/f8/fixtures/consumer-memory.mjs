@@ -5,11 +5,12 @@ import { openCudaRuntimeForTesting } from 'cuda-js/testing';
 
 const ptx = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
 assert.equal(CUDA_JS_COMPATIBILITY.publicApi.schemaVersion, 1);
-assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
+assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32']);
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'contiguous-1d-component-foundation-no-public-facade-yet');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
 const first = await openCudaRuntimeForTesting();
@@ -21,6 +22,30 @@ const scalarFn = await module.getFunction({
   name: 'portable_scalar_consumer',
   parameters: [{ kind: 'u64' }, { kind: 'i32' }, { kind: 'f32' }, { kind: 'f64' }, { kind: 'f16' }, { kind: 'bf16' }],
 });
+const mailboxFn = await module.getFunction({
+  name: 'portable_mailbox_consumer',
+  parameters: [{ kind: 'publication-mailbox-host-to-device-u32' }, { kind: 'publication-mailbox-device-to-host-u32' }],
+});
+const mailbox = await first.createPublicationMailbox({ lanes: [
+  { name: 'control', direction: 'host-to-device' },
+  { name: 'observation', direction: 'device-to-host' },
+] });
+assert.equal(JSON.stringify(mailbox), '{}');
+mailbox.store('control', 41);
+assert.equal(mailbox.load('observation'), 0);
+const mailboxOperation = await mailboxFn.submit({
+  grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 },
+  arguments: [
+    { kind: 'publication-mailbox', mailbox, lane: 'control' },
+    { kind: 'publication-mailbox', mailbox, lane: 'observation' },
+  ],
+});
+await assert.rejects(mailbox.reset(), { code: 'MEMORY_MAILBOX_BUSY' });
+assert.equal((await mailboxOperation.wait()).status, 'completed');
+assert.equal((await mailbox.reset()).generation, 2);
+await mailboxOperation.close();
+await mailbox.close();
+await mailboxFn.close();
 const firstMemory = await first.allocateDevice({ byteLength: 8 });
 const secondMemory = await second.allocateDevice({ byteLength: 8 });
 await firstMemory.write(Uint8Array.of(1, 3, 5, 7));
@@ -85,5 +110,6 @@ console.log(JSON.stringify({
   scalarKinds: scalarCompletion.argumentKinds,
   operationLifecycle: true,
   asyncTransferLifecycle: true,
+  publicationMailboxLifecycle: true,
   graceful: true,
 }));

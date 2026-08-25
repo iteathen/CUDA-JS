@@ -24,7 +24,7 @@ CUDA-JS currently provides a public/package implementation with an exact qualifi
 - exact tested device-scope release/acquire atomic publication through generated device code;
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
-- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
+- portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation and direction-specific mailbox publication, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
 - a portable/software contiguous 1D typed device-view component foundation with exact dtype/range/access/parent-lifetime semantics and no selected public facade entry yet;
 - exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and known-incompatible exact profiles.
 
@@ -32,6 +32,7 @@ Important current limits are equally explicit:
 
 - one pending GPU operation remains the compatibility default, while an explicit profile permits **exactly two pending operations** on two private streams;
 - the capacity-two scheduler and bounded internal-pinned asynchronous transfers are implemented and qualified only on the recorded exact Windows profile;
+- the SPEC-0014 publication mailbox is implemented and qualified only for private mapped storage, named directional u32 lanes, one live operation lease, and system-scope acquire/release on the recorded exact Windows profile;
 - public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
 - contiguous 1D typed device views are implemented as a reusable component/lifecycle foundation, but no public `cuda-js` facade API for creating views has been selected or qualified;
@@ -130,7 +131,9 @@ SPEC-0021 also implements a generic **contiguous 1D typed device-view component 
 
 The ordinary memory contract deliberately does **not** market managed, unified, pinned, mapped, pooled, imported/exported, peer, or zero-copy memory as aliases for device memory. SPEC-0019 adds a distinct internal-pinned profile with exactly two lazy `maxTransferBytes` staging blocks, snapshot H2D, terminal-result D2H, and contiguous D2D through the existing opaque operation lifecycle. Caller-owned registration, mapped memory, 2D/3D copies, and unbounded chunk queues remain excluded.
 
-See [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0019`](specs/SPEC-0019-host-memory-and-async-transfer.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
+SPEC-0014 adds a separate **Publication mailbox** component for bounded host/device signaling while one SPEC-0016 operation is pending. `runtime.createPublicationMailbox({ lanes })` allocates and strongly retains one private registered/mapped `SharedArrayBuffer` with 1–64 named naturally aligned u32 lanes. Direction is immutable per lane, the public object exposes only `store`, `load`, `status`, `reset`, and `close`, and each kernel argument binds exactly one lane. One live GPU operation may lease a mailbox; reset and close fail with typed backpressure until terminality. Raw storage and host/device addresses never cross the facade.
+
+See [`SPEC-0004`](specs/SPEC-0004-device-memory-foundation.md), [`SPEC-0014`](specs/SPEC-0014-long-lived-sideband.md), [`SPEC-0019`](specs/SPEC-0019-host-memory-and-async-transfer.md), and [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md).
 
 ### 4. Module, function, launch, stream, and completion
 
@@ -140,7 +143,7 @@ CUDA-JS currently supports a bounded execution slice with:
 - named function lookup;
 - declared kernel parameter schemas;
 - naturally aligned packed launch-buffer construction;
-- public `device-memory`, `u32`, `u64`, `i32`, finite-only `f32`, `f64`, `f16`, and `bf16` parameter kinds;
+- public `device-memory`, `u32`, `u64`, `i32`, finite-only `f32`, `f64`, `f16`, `bf16`, and direction-specific publication-mailbox lane parameter kinds;
 - deterministic SPEC-0021 binary64/binary16/bfloat16 host packing, including round-to-nearest-even half/bfloat conversion and canonical NaN bits for the new kinds;
 - grid/block/shared-memory validation against queried device limits;
 - one private nonblocking CUDA stream by default, or exactly two in the explicit capacity-two profile;
@@ -246,11 +249,11 @@ See [`SPEC-0008`](specs/SPEC-0008-package-public-facade.md).
 
 ### 10. Restricted Device-JS
 
-SPEC-0013 and the bounded SPEC-0022 scoped-atomic-observation child are accepted and implemented. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff. `loadRelaxedDevice` / `storeRelaxedDevice` provide only relaxed device-scope one-location `u32`/`u64` semantics through the explicit `cuda-cccl` profile.
+SPEC-0013, the bounded SPEC-0022 scoped-atomic-observation child, and the SPEC-0014 publication-mailbox child are accepted and implemented. Callers provide canonical source text plus exact function/type metadata in a closed JavaScript syntax subset. CUDA-JS owns validation, static Device-JS semantics, deterministic code-unit ordering, helper contracts, private CUDA C++ lowering, identity, diagnostics, and CompilerActor handoff. `loadRelaxedDevice` / `storeRelaxedDevice` provide only relaxed device-scope one-location `u32`/`u64` semantics. `gpu.mailbox.loadAcquireSystem` and `gpu.mailbox.storeReleaseSystem` accept only the matching opaque directional u32 lane types and lower through the explicit `cuda-cccl` profile to system-scope acquire/release operations; no indexing, conversion, dereference, or RMW surface exists.
 
 Pinned `acorn@8.15.0` is a syntax-only replaceable parser adapter. It does not own Device-JS semantics or code generation. Generated CUDA source, parser ASTs, native options, and provider capabilities do not enter ordinary public results.
 
-Exact Windows source-only Device-JS evidence now passes generated-source → compiler → Driver launch → independent scalar/control-flow/atomic oracle → terminal cleanup on the recorded profile. It does not qualify other OS/GPU/provider profiles. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
+Exact Windows source-only Device-JS evidence now passes generated-source → compiler → Driver launch → independent scalar/control-flow/atomic/mailbox oracle → terminal cleanup on the recorded profile. The mailbox kernel is observably pending before host publication, rejects reset/close while leased, observes host value `41`, publishes device value `42`, unregisters, and leaves zero live/orphaned resources. It does not qualify other OS/GPU/provider profiles. The later CUDA-MCGS external-deletion proof is a separate cross-repository consumer test, not a substitute for neutral Device-JS qualification.
 
 See [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md), its [public-surface addendum](specs/SPEC-0013-public-surface-addendum.md), the [scoped atomic-observation addendum](specs/SPEC-0022-scoped-atomic-observation-addendum.md), and [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md).
 
@@ -356,6 +359,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | MIG | `deferred` | `not-implemented` | `not-qualified` | `deferred` | Identity, isolation, quota, and lifecycle contract remains absent. |
 | Managed/unified memory | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Separate placement/migration/coherence capability; not required for ordinary residency. |
 | Internal pinned host staging and async transfer | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0019 first profile: two private bounded staging blocks plus contiguous H2D/D2H/D2D; caller registration/mapping remains later. |
+| Publication mailbox | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0014 first profile: private mapped storage, 1–64 named directional u32 lanes, one live operation lease, and Device-JS system-scope acquire/release. |
 | Memory pools/async allocation | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Requires separate pressure/stream/lifetime semantics. |
 | Prepared batches/CUDA Graphs | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0020 retains a non-graph semantic fallback. |
 | Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |
@@ -445,6 +449,7 @@ For normative behavior and exact claim limits, start with:
 - [`SPEC-0011`](specs/SPEC-0011-scalar-kernel-arguments.md) — typed scalar launch arguments;
 - [`SPEC-0012`](specs/SPEC-0012-device-lto.md) — typed Device LTO;
 - [`SPEC-0013`](specs/SPEC-0013-restricted-device-js.md) and [addendum](specs/SPEC-0013-public-surface-addendum.md) — restricted Device-JS;
+- [`SPEC-0014`](specs/SPEC-0014-long-lived-sideband.md) — bounded publication mailboxes for long-lived operations;
 - [`SPEC-0015`](specs/SPEC-0015-execution-scope-status-clarification.md) — execution-profile status semantics;
 - [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md) — opaque one-pending-operation lifecycle;
 - [`SPEC-0017`](specs/SPEC-0017-device-selection-and-target-resolution.md) — accepted opaque device selection/target-resolution foundation;

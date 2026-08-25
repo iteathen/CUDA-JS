@@ -188,6 +188,29 @@
       "parameters": [{ "name": "p", "direction": "in", "nullable": false, "representation": "private-pinned-host-pointer", "ownership": "driver-actor", "length": null, "bounds": { "source": "idle-live-staging-block" }, "capability": "memory.staging.pinned" }],
       "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-release", "asynchronousBehavior": "terminal-pinned-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-free-keeps-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "memory.staging.pinned", "cleanup": "terminal-release-once", "conformanceCases": ["f5.transfer.staging.cleanup", "f5.transfer.staging.free-failure"]
     },
+    "cuMemHostRegister": {
+      "stableId": "cuda.driver.function.cuMemHostRegister", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "p", "direction": "inout", "nullable": false, "representation": "private-retained-shared-array-buffer-backing", "ownership": "driver-actor", "length": "bytesize", "bounds": { "alignment": 4, "source": "publication-mailbox" }, "capability": "memory.publication-mailbox.register" },
+        { "name": "bytesize", "direction": "in", "nullable": false, "representation": "size-bytes", "ownership": "value", "length": null, "bounds": { "minimum": 4, "maximum": 256, "multiple": 4 }, "capability": "memory.publication-mailbox.register" },
+        { "name": "Flags", "direction": "in", "nullable": false, "representation": "u32-host-registration-flags", "ownership": "value", "length": null, "bounds": { "constant": 2 }, "capability": "memory.publication-mailbox.register" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-create", "asynchronousBehavior": "registers-retained-mailbox-backing-for-device-map", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "registration-failure-rolls-back-without-support-claim", "callbackPolicy": "none", "securityCapability": "memory.publication-mailbox.register", "cleanup": "unregister-once-after-all-operation-leases-terminal", "conformanceCases": ["f5.mailbox.register-map", "f5.mailbox.registration-failure", "f5.mailbox.cleanup"]
+    },
+    "cuMemHostGetDevicePointer": {
+      "stableId": "cuda.driver.function.cuMemHostGetDevicePointer", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [
+        { "name": "pdptr", "direction": "out", "nullable": false, "representation": "private-mapped-device-address-out", "ownership": "driver-actor", "length": null, "bounds": { "nonzero-on-success": true }, "capability": "memory.publication-mailbox.map" },
+        { "name": "p", "direction": "in", "nullable": false, "representation": "private-registered-host-pointer", "ownership": "borrowed-leased", "length": null, "bounds": { "source": "live-publication-mailbox-registration" }, "capability": "memory.publication-mailbox.map" },
+        { "name": "Flags", "direction": "in", "nullable": false, "representation": "u32-zero", "ownership": "value", "length": null, "bounds": { "constant": 0 }, "capability": "memory.publication-mailbox.map" }
+      ],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-query", "asynchronousBehavior": "resolves-private-device-alias", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "mapping-failure-requires-registration-rollback", "callbackPolicy": "none", "securityCapability": "memory.publication-mailbox.map", "cleanup": "alias-invalid-after-cuMemHostUnregister", "conformanceCases": ["f5.mailbox.register-map", "f5.mailbox.map-failure"]
+    },
+    "cuMemHostUnregister": {
+      "stableId": "cuda.driver.function.cuMemHostUnregister", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
+      "parameters": [{ "name": "p", "direction": "in", "nullable": false, "representation": "private-registered-host-pointer", "ownership": "driver-actor", "length": null, "bounds": { "source": "unleased-live-publication-mailbox" }, "capability": "memory.publication-mailbox.unregister" }],
+      "return": { "representation": "cuda-result", "success": "CUDA_SUCCESS" }, "contextRequirement": "driver-actor-owner-thread-current-context", "hostBlocking": "short-resource-release", "asynchronousBehavior": "terminal-registration-release-on-success", "deferredErrors": "may-report-prior-asynchronous-error", "healthEffect": "failed-unregister-keeps-mailbox-orphaned-and-cleanup-unproved", "callbackPolicy": "none", "securityCapability": "memory.publication-mailbox.unregister", "cleanup": "terminal-release-once", "conformanceCases": ["f5.mailbox.cleanup", "f5.mailbox.unregister-failure"]
+    },
     "cuMemcpyHtoDAsync": {
       "stableId": "cuda.driver.function.cuMemcpyHtoDAsync", "exposure": "private-runtime", "releaseTier": "experimental", "requestedApiVersion": 13030, "optional": false,
       "parameters": [

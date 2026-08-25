@@ -88,6 +88,18 @@
       "nativeSymbol": "cuMemHostAlloc",
       "pointerSize": 8
     },
+    "cuMemHostGetDevicePointer": {
+      "nativeSymbol": "cuMemHostGetDevicePointer_v2",
+      "pointerSize": 8
+    },
+    "cuMemHostRegister": {
+      "nativeSymbol": "cuMemHostRegister_v2",
+      "pointerSize": 8
+    },
+    "cuMemHostUnregister": {
+      "nativeSymbol": "cuMemHostUnregister",
+      "pointerSize": 8
+    },
     "cuMemcpyDtoDAsync": {
       "nativeSymbol": "cuMemcpyDtoDAsync_v2",
       "pointerSize": 8

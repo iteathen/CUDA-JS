@@ -55,6 +55,7 @@ const required = [
   'docs/specs/SPEC-0012-device-lto.md',
   'docs/specs/SPEC-0013-restricted-device-js.md',
   'docs/specs/SPEC-0013-public-surface-addendum.md',
+  'docs/specs/SPEC-0014-long-lived-sideband.md',
   'docs/specs/SPEC-0015-execution-scope-status-clarification.md',
   'docs/specs/SPEC-0016-operation-lifecycle.md',
   'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
@@ -101,6 +102,9 @@ const required = [
   'components/host-memory-transfer/README.md', 'components/host-memory-transfer/component.yaml',
   'components/host-memory-transfer/index.mjs', 'components/host-memory-transfer/src/host-memory-transfer-manager.mjs',
   'components/host-memory-transfer/test/host-memory-transfer.test.mjs',
+  'components/publication-mailbox/README.md', 'components/publication-mailbox/component.yaml',
+  'components/publication-mailbox/index.mjs', 'components/publication-mailbox/src/publication-mailbox-manager.mjs',
+  'components/publication-mailbox/test/publication-mailbox.test.mjs',
   'components/execution/README.md', 'components/execution/component.yaml',
   'components/execution/index.mjs', 'components/execution/src/execution-manager.mjs',
   'components/execution/test/execution-manager.test.mjs',
@@ -229,6 +233,7 @@ for (const relative of [
   'components/driver-actor/component.yaml',
   'components/memory/component.yaml',
   'components/host-memory-transfer/component.yaml',
+  'components/publication-mailbox/component.yaml',
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
   'components/cuda-target/component.yaml',
@@ -445,6 +450,7 @@ for (const relative of files) {
       && !relative.startsWith('components/driver-actor/')
       && !relative.startsWith('components/memory/')
       && !relative.startsWith('components/host-memory-transfer/')
+      && !relative.startsWith('components/publication-mailbox/')
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
       && !relative.startsWith('components/cuda-target/')

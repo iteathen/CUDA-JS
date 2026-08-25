@@ -1,10 +1,10 @@
 {
-  "schema_version": 37,
+  "schema_version": 38,
   "updated": "2026-08-24",
   "status": "active_cuda_mcgs_p0_p1_execution",
   "objective": "Complete the CUDA-MCGS P0/P1 CUDA-JS prerequisites as dependency-ready LEGO ownership packets with exact native evidence, clean integration, and no consumer-domain leakage.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "5653d5dffdb8b763232e8d6c6a0c1353d8678151",
+    "protected_main_authority_baseline": "3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d",
     "package": "cuda-js@0.1.0-alpha.6",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -15,11 +15,12 @@
       "CJS-CAP-NUMVIEW-0021: SPEC-0021 f64/f16/bf16 public portable/software/package scalar implementation plus contiguous 1D generic typed-view component implementation; native qualification and public view facade remain open",
       "MCGS-P0-ATOMIC-0022 integrated: accepted scoped atomic-observation child, alpha.6 implementation, and exact installed-package Windows oracle pass",
       "MCGS-P0 evidence PR #116 integrated and issues #35/#43/#51/#87 closed",
-      "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed"
+      "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed",
+      "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile on PR #119", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
-    "still_proposal_only": ["SPEC-0014", "SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation child", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
+    "still_proposal_only": ["SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation child", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
   "authority": [
@@ -40,16 +41,17 @@
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md",
     "docs/specs/SPEC-0019-host-memory-and-async-transfer.md",
+    "docs/specs/SPEC-0014-long-lived-sideband.md",
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
     "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md",
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "MCGS-P1-TRANSFER-0019",
-    "issues": [86],
+    "id": "MCGS-P1-SIDEBAND-0014",
+    "issues": [38],
     "plan": "docs/plans/2026-08-24-cuda-mcgs-p0-p1-execution.md",
-    "next_action": "Finish exact-head repository verification for PR #119, apply the sole-maintainer review exception without waiving CI/evidence/head guards, integrate/read back protected main, close #86, then advance SPEC-0014/#38.",
-    "exit": "Accepted exact SPEC-0019 first profile, deterministic portable implementation, independent MSVC and public Windows oracles, installed-package evidence, full validation, protected-main integration/read-back, issue closure, and clean branch/worktree disposition."
+    "next_action": "Complete full-repository validation, commit and push the exact SPEC-0014 implementation head, reconcile protected checks and author review under the sole-maintainer exception, then merge with an expected-head guard and read back protected main.",
+    "exit": "Accepted exact SPEC-0014 first profile, deterministic portable implementation, independent native and public installed-package publication oracles, full validation, protected-main integration/read-back, issue closure, and clean branch/worktree disposition."
   },
   "parallel_or_external_next": [
     {
@@ -81,8 +83,8 @@
     },
     {
       "id": "CJS-SUCCESSOR-PROPOSALS",
-      "issues": [38, 85, 89, 90, 91, 92, 93, 94, 95, 96],
-      "reason": "Governing SPEC-0014/0020 and the unaccepted remainder of SPEC-0022 plus SPEC-0023-0026 remain proposal-only and/or depend on accepted foundations not yet integrated. Process through research/reassessment/plan; do not scaffold production code early."
+      "issues": [85, 89, 90, 91, 92, 93, 94, 95, 96],
+      "reason": "Governing SPEC-0020 and the unaccepted remainder of SPEC-0022 plus SPEC-0023-0026 remain proposal-only and/or depend on accepted foundations not yet integrated. Process through research/reassessment/plan; do not scaffold production code early."
     },
     {
       "id": "CJS-NN-PROGRAM",
@@ -112,6 +114,6 @@
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116 and PR #118 are integrated protected-main prerequisites for the active SPEC-0019 branch"
+    "PR #116, PR #118, and PR #119 are integrated protected-main prerequisites for the active SPEC-0014 branch"
   ]
 }

@@ -10,8 +10,8 @@ const NN_COMPONENT_ANCHORS = [
 ];
 
 function fixture() {
-  const common = '0.1.0-alpha.6 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0016 SPEC-0019 SPEC-0027 separate future publish unit compileDeviceProgram() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
-  const capabilityTable = `${common} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views Internal pinned host staging and async transfer Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
+  const common = '0.1.0-alpha.6 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0014 SPEC-0016 SPEC-0019 SPEC-0027 separate future publish unit compileDeviceProgram() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
+  const capabilityTable = `${common} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views Internal pinned host staging and async transfer Publication mailbox Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
   const nnAnchors = NN_COMPONENT_ANCHORS.map((anchor) => `\`${anchor}\``).join(' ');
   return {
     packageJson: {
@@ -28,13 +28,14 @@ function fixture() {
     compatibility: {
       package: { name: 'cuda-js', version: '0.1.0-alpha.6' },
       capabilities: {
-        functionParameters: ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16'],
+        functionParameters: ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32'],
         typedDeviceViews: 'contiguous-1d-component-foundation-no-public-facade-yet',
         compilerOutputFormats: ['ptx', 'lto-ir'],
         gpuOperationLifecycle: 'opaque-submit-status-wait-close-one-pending',
         boundedMultiOperationScheduling: 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue',
         asyncTransfers: 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d',
-        deviceJsFrontend: 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1',
+        publicationMailboxes: 'private-mapped-named-u32-one-operation-lease-system-acquire-release',
+        deviceJsFrontend: 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0014-publication-mailbox-v1',
       },
     },
     extensions: {

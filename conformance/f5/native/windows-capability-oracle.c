@@ -9,6 +9,7 @@
 
 #define SCALAR_PARAMETER_BYTES 32U
 #define DELAY_PARAMETER_BYTES 16U
+#define MAILBOX_PARAMETER_BYTES 16U
 #define OUTPUT_WORDS 5U
 #define COMPLETION_TIMEOUT_MS 30000ULL
 #define DELAY_CYCLES UINT64_C(250000000)
@@ -94,6 +95,7 @@ int main(int argc, char **argv) {
     CUmodule module = NULL;
     CUfunction scalar_function = NULL;
     CUfunction delayed_function = NULL;
+    CUfunction mailbox_function = NULL;
     CUevent event = NULL;
     CUdeviceptr output_device = 0;
     CUdeviceptr transfer_device = 0;
@@ -101,9 +103,13 @@ int main(int argc, char **argv) {
     CUctxCreateParams context_parameters;
     unsigned char scalar_parameters[SCALAR_PARAMETER_BYTES];
     unsigned char delay_parameters[DELAY_PARAMETER_BYTES];
+    unsigned char mailbox_parameters[MAILBOX_PARAMETER_BYTES];
     uint32_t output[OUTPUT_WORDS];
     uint32_t *transfer_input = NULL;
     uint32_t *transfer_output = NULL;
+    uint32_t *mailbox_words = NULL;
+    CUdeviceptr mailbox_device = 0;
+    int mailbox_registered = 0;
     unsigned char *ptx = NULL;
     size_t ptx_length = 0U;
     size_t index;
@@ -142,6 +148,8 @@ int main(int argc, char **argv) {
     if (result != CUDA_SUCCESS || scalar_function == NULL) { exit_code = 9; goto cleanup; }
     result = cuModuleGetFunction(&delayed_function, module, "cuda_js_native_delayed");
     if (result != CUDA_SUCCESS || delayed_function == NULL) { exit_code = 10; goto cleanup; }
+    result = cuModuleGetFunction(&mailbox_function, module, "cuda_js_native_mailbox");
+    if (result != CUDA_SUCCESS || mailbox_function == NULL) { exit_code = 44; goto cleanup; }
     result = cuMemAlloc(&output_device, sizeof(output));
     if (result != CUDA_SUCCESS || output_device == 0) { exit_code = 11; goto cleanup; }
     result = cuEventCreate(&event, CU_EVENT_DISABLE_TIMING);
@@ -217,7 +225,34 @@ int main(int argc, char **argv) {
     printf("ASYNC_TRANSFER\t%u\t%u\t%u\t%u\n", transfer_output[0], transfer_output[1], transfer_output[2], transfer_output[3]);
     if (memcmp(transfer_input, transfer_output, 4U * sizeof(uint32_t)) != 0) exit_code = 39;
 
+    mailbox_words = (uint32_t *)VirtualAlloc(NULL, 4096U, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (mailbox_words == NULL) { exit_code = 45; goto cleanup; }
+    result = cuMemHostRegister(mailbox_words, 4096U, CU_MEMHOSTREGISTER_DEVICEMAP);
+    if (result != CUDA_SUCCESS) { exit_code = 46; goto cleanup; }
+    mailbox_registered = 1;
+    result = cuMemHostGetDevicePointer(&mailbox_device, mailbox_words, 0U);
+    if (result != CUDA_SUCCESS || mailbox_device == 0) { exit_code = 47; goto cleanup; }
+    memset(mailbox_parameters, 0, sizeof(mailbox_parameters));
+    memcpy(mailbox_parameters + 0U, &mailbox_device, sizeof(mailbox_device));
+    {
+        const CUdeviceptr output_lane = mailbox_device + sizeof(uint32_t);
+        memcpy(mailbox_parameters + 8U, &output_lane, sizeof(output_lane));
+    }
+    result = launch_buffered(mailbox_function, stream, mailbox_parameters, sizeof(mailbox_parameters));
+    if (result != CUDA_SUCCESS) { exit_code = 48; goto cleanup; }
+    result = cuEventRecord(event, stream);
+    if (result != CUDA_SUCCESS) { exit_code = 49; goto cleanup; }
+    result = cuEventQuery(event);
+    if (result != CUDA_ERROR_NOT_READY) { exit_code = 50; goto cleanup; }
+    InterlockedExchange((volatile long *)&mailbox_words[0], 41L);
+    result = wait_event(event, &polls);
+    if (result != CUDA_SUCCESS) { exit_code = 51; goto cleanup; }
+    printf("MAILBOX_PUBLICATION\t%u\t%u\n", mailbox_words[0], mailbox_words[1]);
+    if (mailbox_words[0] != UINT32_C(41) || mailbox_words[1] != UINT32_C(42)) exit_code = 52;
+
 cleanup:
+    if (mailbox_registered) { result = cuMemHostUnregister(mailbox_words); printf("MAILBOX_UNREGISTER\t%d\n", (int)result); if (result == CUDA_SUCCESS) mailbox_registered = 0; else if (exit_code == 0) exit_code = 53; mailbox_device = 0; }
+    if (mailbox_words != NULL && !mailbox_registered) { if (!VirtualFree(mailbox_words, 0U, MEM_RELEASE) && exit_code == 0) exit_code = 54; mailbox_words = NULL; }
     if (event != NULL) { result = cuEventDestroy(event); printf("EVENT_DESTROY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 25; }
     if (transfer_copy_device != 0) { result = cuMemFree(transfer_copy_device); printf("FREE_TRANSFER_COPY\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 40; }
     if (transfer_device != 0) { result = cuMemFree(transfer_device); printf("FREE_TRANSFER\t%d\n", (int)result); if (result != CUDA_SUCCESS && exit_code == 0) exit_code = 41; }

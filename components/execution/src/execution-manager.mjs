@@ -11,6 +11,9 @@ const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
   'execution.operation.timeout',
+  'mailbox.status',
+  'mailbox.reset',
+  'mailbox.release',
   'runtime.close',
 ]);
 const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
@@ -357,6 +360,7 @@ export class ExecutionManager {
   #registry;
   #contextToken;
   #memory;
+  #mailboxes;
   #policy;
   #limits;
   #operations;
@@ -371,7 +375,7 @@ export class ExecutionManager {
   #functionDescriptors = new Map();
   #rollbackFailure = null;
 
-  constructor({ registry, contextToken, memory, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
+  constructor({ registry, contextToken, memory, mailboxes = null, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
     if (!registry || typeof registry.allocate !== 'function' || typeof registry.acquire !== 'function') fail('EXECUTION_REGISTRY_INVALID', 'internal', 'Execution manager requires a resource registry.');
     if (!memory || typeof memory.acquireForExecution !== 'function') fail('EXECUTION_MEMORY_INVALID', 'internal', 'Execution manager requires the internal memory lease port.');
     if (!plainObject(deviceLimits)) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Execution manager requires device launch limits.');
@@ -380,6 +384,7 @@ export class ExecutionManager {
     this.#registry = registry;
     this.#contextToken = contextToken;
     this.#memory = memory;
+    this.#mailboxes = mailboxes;
     this.#policy = normalizeExecutionPolicy(policy);
     this.#limits = Object.freeze({ ...deviceLimits });
     this.#operations = operations;
@@ -524,6 +529,7 @@ export class ExecutionManager {
     if (!Array.isArray(argumentValues)) fail('EXECUTION_ARGUMENTS_INVALID', 'validation', 'Launch arguments must be an array.');
     const functionLease = this.#registry.acquire(functionToken, { kind: 'function' });
     const memoryLeases = [];
+    const mailboxLeases = [];
     let dependencyLease = null;
     let eventToken = null;
     let eventNative = null;
@@ -531,6 +537,7 @@ export class ExecutionManager {
     let ownershipTransferred = false;
     try {
       const values = [];
+      const mailboxGroups = new Map();
       if (argumentValues.length !== functionLease.value.parameters.length) fail('EXECUTION_ARGUMENT_COUNT', 'validation', 'Launch argument count must exactly match the declared parameter count.', { expected: functionLease.value.parameters.length, actual: argumentValues.length });
       for (let index = 0; index < functionLease.value.parameters.length; index += 1) {
         const parameter = functionLease.value.parameters[index];
@@ -540,10 +547,26 @@ export class ExecutionManager {
           const lease = this.#memory.acquireForExecution(argument.memory, argument.byteOffset ?? 0);
           memoryLeases.push(lease);
           values.push(await this.#operations.devicePointer({ native: lease.native, byteOffset: lease.byteOffset, operationId }));
+        } else if (parameter.kind.startsWith('publication-mailbox-')) {
+          if (!exactFields(argument, ['kind', 'mailbox', 'generation', 'lane']) || argument.kind !== 'publication-mailbox' || typeof argument.lane !== 'string') fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Mailbox argument does not match its declared kind.', { index });
+          if (!this.#mailboxes || typeof this.#mailboxes.acquireForExecution !== 'function') fail('EXECUTION_MAILBOX_UNAVAILABLE', 'unsupported', 'Publication mailbox launch support is unavailable.');
+          const key = tokenIdentity(argument.mailbox);
+          const direction = parameter.kind === 'publication-mailbox-host-to-device-u32' ? 'host-to-device' : 'device-to-host';
+          const group = mailboxGroups.get(key) ?? { token: argument.mailbox, generation: argument.generation, bindings: [], indexes: [] };
+          if (group.generation !== argument.generation) fail('EXECUTION_MAILBOX_GENERATION_MISMATCH', 'validation', 'One mailbox cannot carry multiple generations in one launch.', { index });
+          group.bindings.push({ lane: argument.lane, direction });
+          group.indexes.push(index);
+          mailboxGroups.set(key, group);
+          values.push(null);
         } else {
           if (!exactFields(argument, ['kind', 'value']) || argument.kind !== parameter.kind) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Scalar argument does not match its declared kind.', { index, expectedKind: parameter.kind });
           values.push(argument.value);
         }
+      }
+      for (const group of mailboxGroups.values()) {
+        const lease = this.#mailboxes.acquireForExecution(group.token, group.generation, group.bindings);
+        mailboxLeases.push(lease);
+        group.indexes.forEach((argumentIndex, pointerIndex) => { values[argumentIndex] = lease.pointers[pointerIndex]; });
       }
       let dependency = null;
       if (after !== null) {
@@ -571,7 +594,7 @@ export class ExecutionManager {
       catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Launch was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
 
       const record = {
-        kind: 'kernel', state: 'pending', eventToken, streamToken, functionToken, functionLease, memoryLeases, dependencyLease, accesses, module: functionLease.value.module, grid, block, sharedMemoryBytes,
+        kind: 'kernel', state: 'pending', eventToken, streamToken, functionToken, functionLease, memoryLeases, mailboxLeases, dependencyLease, accesses, module: functionLease.value.module, grid, block, sharedMemoryBytes,
         argumentKinds: Object.freeze(functionLease.value.parameters.map((entry) => entry.kind)), submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
       };
       let operationToken;
@@ -620,6 +643,7 @@ export class ExecutionManager {
     } finally {
       if (!ownershipTransferred) {
         for (let index = memoryLeases.length - 1; index >= 0; index -= 1) memoryLeases[index].release();
+        for (let index = mailboxLeases.length - 1; index >= 0; index -= 1) mailboxLeases[index].release();
         dependencyLease?.release();
         functionLease.release();
       }
@@ -933,6 +957,7 @@ export class ExecutionManager {
     if (record.leasesReleased) return;
     record.leasesReleased = true;
     for (let index = (record.memoryLeases ?? []).length - 1; index >= 0; index -= 1) record.memoryLeases[index].release();
+    for (let index = (record.mailboxLeases ?? []).length - 1; index >= 0; index -= 1) record.mailboxLeases[index].release();
     for (let index = (record.externalLeases ?? []).length - 1; index >= 0; index -= 1) record.externalLeases[index].release();
     record.dependencyLease?.release();
     record.functionLease?.release();

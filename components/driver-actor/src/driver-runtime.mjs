@@ -214,6 +214,29 @@ class DriverRuntime {
     return this.#request('memory.release', { token });
   }
 
+  async createPublicationMailbox(options) {
+    if (!plainObject(options) || Object.keys(options).length !== 1 || !Object.hasOwn(options, 'lanes') || !Array.isArray(options.lanes) || options.lanes.length < 1 || options.lanes.length > 64) throw validationError('MEMORY_MAILBOX_OPTIONS_INVALID', 'createPublicationMailbox requires exactly one bounded lanes array.');
+    const lanes = options.lanes.map((lane) => plainObject(lane) ? { ...lane } : lane);
+    const buffer = new SharedArrayBuffer(lanes.length * 4);
+    const result = await this.#request('mailbox.create', { buffer, lanes });
+    return { ...result, buffer };
+  }
+
+  async publicationMailboxStatus(token) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'publicationMailboxStatus requires an exact opaque mailbox token.');
+    return this.#request('mailbox.status', { token });
+  }
+
+  async resetPublicationMailbox(token, generation) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'resetPublicationMailbox requires an exact opaque mailbox token.');
+    return this.#request('mailbox.reset', { token, generation });
+  }
+
+  async releasePublicationMailbox(token) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'releasePublicationMailbox requires an exact opaque mailbox token.');
+    return this.#request('mailbox.release', { token });
+  }
+
   async loadModule(options) {
     if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['bytes', 'format'].join('\0') || !['ptx', 'cubin'].includes(options.format)) throw validationError('DRIVER_MODULE_OPTIONS', 'loadModule requires exactly format "ptx" or "cubin" and bytes.');
     if (!(options.bytes instanceof Uint8Array) || Buffer.isBuffer(options.bytes) || options.bytes.byteLength < 1 || options.bytes.byteLength > this.#executionPolicy.maxModuleBytes) throw validationError('EXECUTION_MODULE_BYTES', 'loadModule requires bounded ordinary Uint8Array bytes.');

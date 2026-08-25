@@ -63,7 +63,7 @@ test('Device-JS translates structured control flow, pointer access, helpers and 
   const first = translateDeviceProgram({ source, functions });
   const second = translateDeviceProgram({ source, functions });
 
-  assert.equal(first.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1');
+  assert.equal(first.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0014-publication-mailbox-v1');
   assert.equal(first.sha256, second.sha256);
   assert.equal(first.generatedSource, second.generatedSource);
   assert.equal(first.parser.name, 'acorn');
@@ -143,6 +143,28 @@ test('scoped atomic observation fails closed outside its exact profile, dtype an
     functions: metadata,
     compile,
   }), expectDeviceCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
+});
+
+test('publication mailbox helpers lower only direction-specific opaque u32 lanes at system scope', () => {
+  const request = {
+    source: 'function k(control, observation) { let value = gpu.mailbox.loadAcquireSystem(control); gpu.mailbox.storeReleaseSystem(observation, value); }',
+    functions: [{ name: 'k', kind: 'kernel', parameters: [
+      { name: 'control', type: 'mailbox<host-to-device,u32>' },
+      { name: 'observation', type: 'mailbox<device-to-host,u32>' },
+    ], returns: 'void' }],
+    compile: { headerProfile: 'cuda-cccl' },
+  };
+  const translated = translateDeviceProgram(request);
+  assert.deepEqual(translated.kernels[0].parameters, [
+    { kind: 'publication-mailbox-host-to-device-u32' },
+    { kind: 'publication-mailbox-device-to-host-u32' },
+  ]);
+  assert.match(translated.generatedSource, /thread_scope_system/);
+  assert.match(translated.generatedSource, /memory_order_acquire/);
+  assert.match(translated.generatedSource, /memory_order_release/);
+  assert.throws(() => translateDeviceProgram({ ...request, source: 'function k(control, observation) { gpu.mailbox.storeReleaseSystem(control, gpu.u32(1)); }' }), expectDeviceCode('DEVICE_JS_MAILBOX_DIRECTION'));
+  assert.throws(() => translateDeviceProgram({ ...request, compile: { headerProfile: 'none' } }), expectDeviceCode('DEVICE_JS_ATOMIC_PROFILE_REQUIRED'));
+  assert.throws(() => translateDeviceProgram({ ...request, source: 'function k(control, observation) { control[gpu.u32(0)] = gpu.u32(1); }' }), expectDeviceCode('DEVICE_JS_POINTER_ACCESS_INVALID'));
 });
 
 test('Device-JS uses canonical CUDA target policy and preserves validation ownership', () => {

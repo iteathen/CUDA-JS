@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.publication-mailbox",
+    "name": "Bounded host-device publication mailbox",
+    "status": "accepted-spec0014-exact-windows-qualification-candidate",
+    "product_area": "components",
+    "path": "components/publication-mailbox",
+    "purpose": "Own private registered/mapped SAB publication lanes, generation, binding validation, operation leases, and unregister truth.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["runtime.resource-registry", "injected-mailbox-backend"],
+    "forbidden_dependencies": ["public-shared-array-buffer", "public-native-handle", "consumer-domain-semantics", "second-operation-lifecycle", "gpu-rmw"],
+    "validation": ["npm run f5:unit", "npm run f5:portable", "npm run f5:capabilities", "npm run f8:native"],
+    "owner": "runtime.publication-mailbox",
+    "lifecycle": "One private SAB is strongly retained from native registration through terminal unregister; one GPU operation may lease it; reset and close require zero leases.",
+    "design": {
+      "owned_invariant": "No mapped lane address outlives its retained registration, and no reset/unregister occurs while an operation can access it.",
+      "public_ports": ["PublicationMailboxManager"],
+      "injected_dependencies": ["resource registry", "context token", "backend register/map/unregister operations"],
+      "adapter_boundaries": ["Windows DriverActor mailbox backend", "platform-neutral mailbox mock"],
+      "simplest_sufficient_total_system": "One bounded lane table, one private backing registration, one generation, and one exclusive operation lease."
+    }
+  }
+}

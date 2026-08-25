@@ -7,9 +7,9 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     5653d5dffdb8b763232e8d6c6a0c1353d8678151
-completed P0/P1:    #116 P0 / #118 SPEC-0018 scheduler
-active P1:          #119 SPEC-0019 bounded asynchronous transfer
+protected main:     3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d
+completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019
+active P1:          #120 SPEC-0014 publication mailbox
 execution package:  cuda-js@0.1.0-alpha.6
 ```
 
@@ -25,6 +25,7 @@ The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through
 - SPEC-0016 opaque submission/completion with a one-pending compatibility default;
 - SPEC-0018 exact opt-in capacity-two/two-private-stream/no-queue scheduling;
 - SPEC-0019 exact two-internal-pinned-staging contiguous H2D/D2H/D2D profile;
+- SPEC-0014 exact private mapped named-u32 publication mailbox profile;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
 - the SPEC-0006 target-syntax correction;
@@ -68,12 +69,23 @@ The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` pa
 
 ```text
 architectural disposition: selected
-implementation status:       SPEC-0018 merged; SPEC-0019 implemented on PR #119
+implementation status:       SPEC-0018 and SPEC-0019 merged
 qualification status:        exact recorded Windows profile plus installed-package evidence
-priority:                    integrate #86, then advance dependent SPEC-0014/#38
+priority:                    implement accepted dependent SPEC-0014/#38
 ```
 
-PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 implements SPEC-0019 with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Caller registration, mapped memory, chunk queues, and overlap claims remain excluded.
+PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 merged SPEC-0019 at protected-main `3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d` with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Issue #86 is closed. Caller registration outside the accepted publication-mailbox specialization, chunk queues, and overlap claims remain excluded.
+
+### Implemented qualification candidate: SPEC-0014 / #38
+
+```text
+architectural disposition: accepted exact first profile
+implementation status:       complete candidate on PR #120; exact-head integration pending
+qualification status:        portable, independent native, public native, and installed-package evidence pass
+priority:                    exact-head review, CI, protected-main integration, and cleanup
+```
+
+The accepted profile owns an opaque `runtime.publication-mailbox` component with at most 64 named naturally aligned u32 lanes over one internally allocated and strongly retained `SharedArrayBuffer`. Every lane has one immutable host-to-device or device-to-host direction. Each kernel argument binds one named lane through a direction-specific parameter kind; Device-JS supplies only system-scope acquire-load and release-store helpers. The backing store and mapped alias remain private, one live GPU operation may lease a mailbox, and reset/unregister is forbidden before terminality. The current candidate proves generation/stale handling, mapping rollback, unregister-failure orphan retention, lease backpressure, independent MSVC/Driver publication, public Device-JS/native publication from `41` to `42`, installed-package use, and zero-resource terminal cleanup on the exact recorded Windows profile.
 
 ## Execution baseline
 
@@ -84,21 +96,20 @@ private execution streams:    1 default / exactly 2 opt-in
 max pending GPU operations:   1 default / exactly 2 opt-in
 public operation lifecycle:   CudaFunction.submit() -> CudaOperation
 legacy terminal convenience:  CudaFunction.launch()
-public scalar launch kinds:   device-memory/u32/u64/i32/f32/f64/f16/bf16
+public launch kinds:          device-memory/u32/u64/i32/f32/f64/f16/bf16 + directional mailbox-u32
 ```
 
 SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU, sideband and future NN execution work must consume it rather than duplicate it.
 
 ## Device-JS
 
-SPEC-0013 and the accepted bounded SPEC-0022 scoped-atomic-observation child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers consume the manifest-owned `cuda-cccl` profile and provide one-location device-scope relaxed semantics only. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
+SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation child, and the SPEC-0014 mailbox child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
 
 ## Proposal-only successor capabilities
 
 The following remain proposal authority only and do not authorize production code:
 
 ```text
-SPEC-0014 long-lived sideband
 SPEC-0020 prepared batches / CUDA Graph execution
 SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation child accepted)
 SPEC-0023 context-bound CUDA library adapters
@@ -148,10 +159,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. complete exact-head verification and integrate/read back SPEC-0019 PR #119 (#86)
-2. advance SPEC-0014 publication mailboxes (#38) against accepted scheduler/host-memory ownership
+1. complete exact-head review and protected-main integration for SPEC-0014/#38
+2. read back protected main and close #38 only after required checks pass
 3. run the final integrated P0/P1 exact-head verification and cleanup
-4. close the exact CUDA-MCGS compatible pair only against frozen reviewed artifacts (#32)
+4. leave the exact CUDA-MCGS compatible-pair gate (#32) open until its frozen CUDA-MCGS artifact exists
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.
