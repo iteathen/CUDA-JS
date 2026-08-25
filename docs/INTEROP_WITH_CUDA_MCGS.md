@@ -16,6 +16,8 @@ CUDA-JS validates and executes that package without understanding Search IR or s
 
 CUDA-JS owns Device-JS validation and deterministic lowering, generated CUDA C++, compiler/linker mechanics, artifact/cache identity, the safe generic runtime, Node FFI backend, actor/resource lifecycle, launch/operation completion, errors, and teardown. CUDA-MCGS owns the semantic correctness and finite search-resource plan of the generated package.
 
+CUDA-JS also owns the consumer-neutral device-scope `u32`/`u64` release/acquire publication primitive. CUDA-MCGS owns readiness values, generations, payload schema, bounded retry/progress policy, stale/wrong-generation rejection and any queue/search interpretation. The public helper contract is sufficient without CUDA-MCGS, and the CUDA-free conformance oracle includes an unrelated work-slot consumer.
+
 The direct CUDA C++/PTX APIs remain valid low-level CUDA-JS capabilities and independent evidence paths. Their existence is not permission for the first compatible-pair consumer to retain consumer-authored CUDA realization beside Device-JS.
 
 The CUDA-MCGS adapter belongs to the `iteathen/UMCGS` repository for now. A third repository is justified only by an independent lifecycle or multiple independent producers.

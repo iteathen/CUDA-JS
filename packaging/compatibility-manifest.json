@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.6",
+    "version": "0.1.0-alpha.7",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -59,7 +59,7 @@
     "ptxRelocatableDeviceCode": "typed-boolean-default-false",
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
-    "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0014-publication-mailbox-v1",
+    "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1",
     "deviceJsParser": {
       "name": "acorn",
       "version": "8.15.0",
@@ -92,7 +92,8 @@
     "SPEC-0016 opaque GPU operation submission/completion has exact Windows delayed-completion/deferred-failure/cleanup evidence only for its recorded Node/Driver/GPU profile; no broader support is implied.",
     "SPEC-0018 capacity-two scheduling and SPEC-0019 internal-pinned async transfers have exact Windows and installed-package evidence only for the recorded Node/Driver/GPU profile; the compatibility default remains one pending operation.",
     "SPEC-0014 publication mailboxes have exact Windows and installed-package evidence only for privately mapped named u32 lanes, one live GPU operation lease, and system-scope acquire/release publication on the recorded Node/Driver/GPU profile.",
-    "SPEC-0013 Device-JS plus the scoped atomic-observation child is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
+    "SPEC-0013 Device-JS plus the scoped atomic-observation and device-publication children is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
+    "SPEC-0022 device publication has exact Windows installed-package evidence only for naturally aligned u32/u64 device-scope release/acquire readiness and one immutable multiword payload on the recorded profile; freshness, progress, generation policy and queue correctness remain excluded.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",

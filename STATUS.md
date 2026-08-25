@@ -2,15 +2,15 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-24
+**Updated:** 2026-08-25
 
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     ed35718ea15ce7a878f67580e271aee5820948ee
-completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014
+protected main:     2135216b1a9fd88066a1c82b61ae533645eac9c2
+completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.6
+execution package:  cuda-js@0.1.0-alpha.7
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -28,6 +28,7 @@ The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through
 - SPEC-0012 typed Device LTO;
 - SPEC-0013 restricted Device-JS;
 - SPEC-0022 accepted relaxed device-scope `u32`/`u64` atomic-observation child;
+- SPEC-0022 accepted device-scope `u32`/`u64` release/acquire publication child;
 - SPEC-0016 opaque submission/completion with a one-pending compatibility default;
 - SPEC-0018 exact opt-in capacity-two/two-private-stream/no-queue scheduling;
 - SPEC-0019 exact two-internal-pinned-staging contiguous H2D/D2H/D2D profile;
@@ -111,7 +112,7 @@ SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph
 
 ## Device-JS
 
-SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation child, and the SPEC-0014 mailbox child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
+SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation and device-publication children, and the SPEC-0014 mailbox child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. `loadAcquireDevice` / `storeReleaseDevice` provide device-scope publication ordering when acquire observes the matching release; consumer generation, progress, payload and queue policy remain separate. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
 
 ## Proposal-only successor capabilities
 
@@ -119,7 +120,7 @@ The following remain proposal authority only and do not authorize production cod
 
 ```text
 SPEC-0020 prepared batches / CUDA Graph execution
-SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation child accepted)
+SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation and device-publication children accepted)
 SPEC-0023 context-bound CUDA library adapters
 SPEC-0024 multi-GPU orchestration
 SPEC-0025 graphics interop

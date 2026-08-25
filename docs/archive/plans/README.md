@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-These files are exact retained copies of former active plans. They were archived on 2026-08-12 during the owner-directed plan reconciliation after the implementation/PR repair phase. They remain provenance and rationale, not current work authority.
+These files retain completed or superseded execution plans with their archival disposition. The initial set was archived on 2026-08-12 during the owner-directed plan reconciliation; later completed records are added when their active execution queue closes. They remain provenance and rationale, not current work authority.
 
 | Archived file | Former active path | Why archived | Forward replacement |
 |---|---|---|---|
@@ -12,5 +12,6 @@ These files are exact retained copies of former active plans. They were archived
 | [`2026-08-11-node-and-extended-qualification.md`](2026-08-11-node-and-extended-qualification.md) | `docs/plans/2026-08-11-node-and-extended-qualification.md` | Exact Node registry and initial negative/qualification infrastructure are implemented; remaining axes are follow-on evidence/capability work. | `2026-08-12-native-and-platform-qualification-continuation.md` and `2026-08-12-execution-capability-continuation.md`. |
 | [`2026-08-11-f9-atomic-interop.md`](2026-08-11-f9-atomic-interop.md) | `docs/plans/2026-08-11-f9-atomic-interop.md` | F9-A/B CUDA-JS prerequisite is complete; only cross-repository F9-C remains. | `2026-08-12-compatible-pair-continuation.md`. |
 | [`2026-08-12-cuda-isolation-device-js.md`](2026-08-12-cuda-isolation-device-js.md) | `docs/plans/2026-08-12-cuda-isolation-device-js.md` | DJS-0/DJS-1 and portable/software SPEC-0013 are complete; native proof and external deletion remain. | `2026-08-12-compatible-pair-continuation.md`. |
+| [`2026-08-25-device-js-release-acquire-publication.md`](2026-08-25-device-js-release-acquire-publication.md) | `docs/plans/2026-08-25-device-js-release-acquire-publication.md` | Issue #123 fixed-helper implementation and exact Windows/package qualification completed. | Integration disposition in `next_step.yaml`, then compatible-pair continuation. |
 
 The archive preserves the exact old documents rather than rewriting history. Current work must follow accepted authority and the active forward plans.
