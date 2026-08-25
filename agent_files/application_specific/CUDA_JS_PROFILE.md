@@ -20,8 +20,9 @@ This mission describes the published `cuda-js` core package. Accepted ADR-0004/S
 
 ## Current support sequence
 
+- OS-neutral public/component architecture with platform details confined to injected adapters.
 - Linux x86-64 reference implementation, with Ubuntu 24.04 LTS as the first exact Node 26/CUDA 13.3/Driver qualification cell.
-- Windows x86-64 maintained secondary adapter, retaining its accepted exact-profile evidence.
+- Windows x86-64 maintained peer adapter, retaining its accepted exact-profile evidence.
 - Linux ARM64 SBSA.
 - WSL2 diagnostics.
 

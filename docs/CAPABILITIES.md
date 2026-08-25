@@ -12,7 +12,7 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
-CUDA-JS currently provides a public/package implementation with an exact qualified Windows x64 foundation retained as a secondary profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path; its adapters/evidence are not yet complete. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
+CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. Its DriverActor adapter and F3L runner are implemented; exact Linux Driver/compiler/package evidence remains incomplete. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;
 - generated CUDA ABI facts, private FFI definitions, argument packers, semantic overlays, compatibility products, and fail-closed unsupported declarations from pinned official CUDA headers;
@@ -368,7 +368,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
 | Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
-| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Portable controls and adapters exist; native Driver/compiler/GPU chain remains open. |
+| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Shared native Driver backend, thin Linux discovery profile and F3L runner exist; exact F2L–F8L Driver/compiler/GPU/package chain remains open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors
@@ -424,10 +424,10 @@ CUDA-JS is a public alpha. Exact support claims are intentionally narrower than 
 At the time of this document:
 
 - exact Node 26.7.0 is the qualified Node evidence baseline;
-- native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
+- public contracts and shared runtime owners are OS-neutral; native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
 - Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current retained secondary native qualification evidence;
 - other FFI-capable Node 26.1.0-or-later and structurally admissible Windows CUDA profiles may operate as `testing-unconfirmed` without inheriting support;
-- native Linux Driver/compiler/GPU execution remains incomplete;
+- the native Linux Driver adapter and F3L runner are implemented, while exact Driver evidence and the compiler/GPU/package chain remain incomplete;
 - portable Linux controls do not imply native Linux CUDA support;
 - performance claims require separate representative measurement and are not inferred from functional correctness.
 

@@ -1,4 +1,4 @@
-# ADR-0006: Linux-First Reference Platform
+# ADR-0006: OS-Neutral Architecture with a Linux Reference Platform
 
 **Status:** Accepted
 
@@ -8,11 +8,13 @@
 
 CUDA-JS established its first complete native package evidence on Windows x64 because that was the available CUDA host. That evidence remains useful, but availability accidentally became platform priority. The intended workloads are headless, long-running and often multi-GPU. Continuing to let the first Windows profile drive sequencing would make WDDM/watchdog behavior, one consumer GPU and local desktop tooling the center of a server-oriented runtime.
 
-Most CUDA-JS owners are already platform-neutral JavaScript: actor protocols, resources, memory, execution, compiler contracts, Device-JS, errors, packaging and conformance semantics do not require a Windows-first architecture. The current native adapters and exact promotion evidence are nevertheless Windows-only. Documentation alone cannot truthfully promote Linux while the public facade rejects Linux and the DriverActor and CompilerActor select only Windows providers.
+Most CUDA-JS owners are already OS-neutral JavaScript: actor protocols, resources, memory, execution, compiler contracts, Device-JS, errors, packaging and conformance semantics do not require an operating-system-shaped architecture. Native library discovery, loader behavior, permissions and exact evidence necessarily remain platform-specific. The initial native adapters and promotion evidence were Windows-only; availability must not turn those details into generic contracts.
 
 ## Decision
 
-CUDA-JS adopts **native Linux x86-64 as its reference implementation and primary qualification platform**.
+CUDA-JS adopts an **OS-neutral public and component architecture**, with **native Linux x86-64 as its reference implementation and primary qualification platform**.
+
+“Reference implementation” determines implementation order, canonical operational guidance and the first qualification cell. It does not authorize Linux paths, distribution identity, loader behavior or deployment policy in public contracts or shared runtime owners. Platform dependencies remain thin injected adapters. Windows remains a peer adapter even though Linux is qualified first for the forward server-oriented path.
 
 The first exact reference cell is:
 
@@ -24,13 +26,13 @@ CUDA baseline:     pinned project CUDA 13.3 inputs/providers
 qualification:     exact Driver/GPU/toolkit/provider/profile evidence only
 ```
 
-The public architecture remains distribution-neutral. Ubuntu 24.04 is the first exact evidence cell, not a distro assumption embedded in generic runtime components.
+The public architecture remains OS- and distribution-neutral. Ubuntu 24.04 is the first exact evidence cell, not an operating-system or distribution assumption embedded in generic runtime components.
 
-Windows x64 remains a maintained secondary adapter and exact-profile qualification lane. Its accepted F2W–F9 evidence is not invalidated, deleted or relabeled as Linux evidence. WSL remains a separate profile and cannot substitute for native Linux qualification.
+Windows x64 remains a maintained peer adapter and exact-profile qualification lane. Its accepted F2W–F9 evidence is not invalidated, deleted or relabeled as Linux evidence. WSL remains a separate profile and cannot substitute for native Linux qualification.
 
 ## Execution order
 
-1. Preserve portable/shared behavior and the accepted Windows evidence.
+1. Preserve OS-neutral contracts/shared behavior and the accepted Windows evidence.
 2. Complete issue #4's canonical Linux DriverActor path through installed-package qualification.
 3. Add the canonical Linux NVRTC/nvJitLink provider path as part of that dependency chain.
 4. Expand to additional Linux x86-64 distributions under issue #17 only after the Ubuntu reference cell passes.
@@ -42,10 +44,10 @@ Performance issue #28 remains open after any Windows seed observation. Its first
 
 ## Component consequences
 
-- `runtime.facade` selects a platform adapter without changing public lifecycle semantics.
+- `runtime.facade` selects an injected platform adapter without changing public lifecycle semantics or exposing operating-system identity as consumer policy.
 - `runtime.driver-actor` gains a canonical `libcuda.so.1` Linux adapter behind the existing Worker/context/resource contract.
 - `runtime.compiler-actor` gains canonical Linux NVRTC/nvJitLink discovery behind the existing provider contract.
-- Portable owners do not branch on distribution identity.
+- Shared owners do not branch on distribution identity and branch on operating system only at the private adapter-selection seam.
 - Linux-specific library discovery, permissions and loader behavior remain adapter-owned.
 - Exact device, provider and platform identity remains evidence/compatibility data; no raw native identity crosses the public boundary.
 

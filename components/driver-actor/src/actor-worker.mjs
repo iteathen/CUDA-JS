@@ -12,6 +12,7 @@ function post(message) {
 
 async function loadBackend() {
   if (workerData.backend === 'windows-native') return (await import('./backends/windows-native.mjs')).createBackend(workerData);
+  if (workerData.backend === 'linux-native') return (await import('./backends/linux-native.mjs')).createBackend(workerData);
   if (workerData.backend === 'mock' && workerData.testHooks === true) return (await import('./backends/mock.mjs')).createBackend(workerData);
   throw Object.assign(new Error('DriverActor backend profile is not allowlisted.'), { code: 'DRIVER_BACKEND_UNSUPPORTED', category: 'unsupported' });
 }

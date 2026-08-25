@@ -22,6 +22,8 @@ const sources = [
   'components/driver-actor/src/driver-runtime.mjs',
   'components/driver-actor/src/actor-worker.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
+  'components/driver-actor/src/backends/native-profiles.mjs',
+  'components/driver-actor/src/backends/native.mjs',
   'schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs',
   'conformance/f4/native/windows-memory-oracle.c',
 ];

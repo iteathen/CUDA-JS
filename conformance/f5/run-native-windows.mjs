@@ -98,6 +98,8 @@ const sources = [
   'docs/specs/SPEC-0005-module-launch-completion.md',
   'components/execution/src/execution-manager.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
+  'components/driver-actor/src/backends/native-profiles.mjs',
+  'components/driver-actor/src/backends/native.mjs',
   'schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs',
   'schemas/cuda-13.3/linux-x64/generated/packers.mjs',
   'conformance/f5/native/windows-launch-oracle.c',

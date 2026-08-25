@@ -8,7 +8,7 @@
     "path": "components/driver-actor",
     "purpose": "Provide a bounded asynchronous facade over one Worker-owned private CUDA context with opaque resources, synchronous copied and bounded pinned-staging asynchronous device transfers, PTX/cubin module launch and completion, conservative health, deterministic graceful teardown, and honest unexpected-loss reporting.",
     "public_contracts": ["index.mjs"],
-    "allowed_dependencies": ["node-standard-library", "node-ffi-26.1-or-later", "runtime.resource-registry", "runtime.memory", "runtime.execution", "runtime.host-memory-transfer", "runtime.publication-mailbox", "generated-tier-0-ffi-definitions", "canonical-windows-cuda-driver"],
+    "allowed_dependencies": ["node-standard-library", "node-ffi-26.1-or-later", "runtime.resource-registry", "runtime.memory", "runtime.execution", "runtime.host-memory-transfer", "runtime.publication-mailbox", "generated-tier-0-ffi-definitions", "canonical-windows-cuda-driver", "canonical-linux-libcuda-so-1"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-signature", "returned-function-pointer-invocation", "raw-public-pointer", "consumer-semantics", "compiler", "concurrent-launch"],
     "validation": ["npm run f3:unit", "npm run f4", "npm run f5", "npm run f7"],
     "owner": "runtime.driver-actor",
@@ -17,7 +17,7 @@
       "owned_invariant": "Every context-dependent native call executes on the one owning Worker and no raw native capability crosses its boundary.",
       "public_ports": ["openDriverRuntime", "DriverRuntimeError"],
       "injected_dependencies": ["private backend profile", "Worker constructor", "runtime identity"],
-      "adapter_boundaries": ["Windows Node FFI backend", "platform-neutral lifecycle mock"],
+      "adapter_boundaries": ["Windows Node FFI library profile", "native Linux x86-64 Node FFI library profile", "shared native Driver backend", "platform-neutral lifecycle mock"],
       "simplest_sufficient_total_system": "One async facade, one serialized Worker protocol, one context, one registry, injected bounded memory/execution/transfer owners, a fixed private stream pool, and one explicit close path."
     }
   }

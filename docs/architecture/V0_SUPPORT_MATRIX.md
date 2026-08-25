@@ -23,7 +23,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Linux glibc | x86-64 SysV | ADR-0006 reference platform; GPU-free schema plus F3–F8 portable/package path complete; native Driver/compiler adapter and qualification active but incomplete | complete Ubuntu 24.04 F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
+| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; shared Driver backend, Linux discovery profile and F3L runner implemented; exact native chain incomplete | complete Ubuntu 24.04 F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
 | Windows 11 | x86-64 Win64 | maintained secondary public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |

@@ -23,7 +23,7 @@ npm run hardware:qualify
 
 On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A readiness result is not virtualized CUDA support.
 
-The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order and retains the accepted secondary-profile evidence. ADR-0006 makes Linux x64 the reference priority, but its entry intentionally exposes no promotable command chain while the Driver/compiler adapters and F2L–F8L native capsules remain incomplete. WSL2, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles.
+The current Windows x64 runner executes EXP-000, F1B, EXP-012, and F3 through F8 in dependency order and retains the accepted peer-profile evidence. ADR-0006 keeps architecture OS-neutral and makes Linux x64 the reference priority. Its entry intentionally exposes no promotable command chain while exact F2L/F3L evidence, the compiler provider, and the remaining F4L–F8L native capsules are incomplete. WSL2, Linux ARM64 SBSA, and Jetson ARM64 remain separate profiles.
 
 ## Result bundle
 

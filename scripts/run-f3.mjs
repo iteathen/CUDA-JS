@@ -32,10 +32,16 @@ if (version.status !== 0 || version.stdout.trim() !== requestedVersion) {
   process.exit(2);
 }
 
+const nativeEntrypoint = process.platform === 'win32' && process.arch === 'x64'
+  ? 'conformance/f3/run-native-windows.mjs'
+  : process.platform === 'linux' && process.arch === 'x64'
+    ? 'conformance/f3/run-native-linux.mjs'
+    : null;
+
 const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   mock: [{ args: ['conformance/f3/run-mock.mjs'] }],
-  native: [{ windowsOnly: true, args: ['--experimental-ffi', 'conformance/f3/run-native-windows.mjs'] }],
+  native: nativeEntrypoint ? [{ args: ['--experimental-ffi', nativeEntrypoint] }] : [],
   verify: [{ args: ['conformance/f3/verify.mjs'] }],
   portable: [
     { args: ['--test', ...unitFiles] },
@@ -51,6 +57,10 @@ const steps = {
 };
 if (!(action in steps)) {
   console.error(`Unknown CJS-F3 action: ${action}`);
+  process.exit(2);
+}
+if (action === 'native' && !nativeEntrypoint) {
+  console.error('CJS-F3 native conformance requires Windows x64 or native Linux x86-64.');
   process.exit(2);
 }
 

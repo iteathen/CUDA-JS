@@ -71,8 +71,8 @@
       "commands": [],
       "evidenceFiles": [],
       "missingCapsules": [
-        "canonical Linux DriverActor backend",
-        "native F3 context lifecycle runner",
+        "EXP-001 exact native Driver/GPU evidence",
+        "native F3 context lifecycle evidence",
         "native F4 memory C oracle and runner",
         "native F5 execution C oracle and runner",
         "native F6 NVRTC/nvJitLink C oracle and runner",

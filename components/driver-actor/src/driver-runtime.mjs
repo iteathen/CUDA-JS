@@ -366,8 +366,8 @@ class DriverRuntime {
   }
 
   async #start() {
-    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
-    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
+    if (this.#backend.endsWith('-native') && !process.execArgv.includes('--experimental-ffi')) throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
+    if (this.#backend.endsWith('-native') && process.permission !== undefined && !process.execArgv.includes('--permission')) throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
       workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy },
       execArgv: workerExecArgv(),
@@ -526,9 +526,18 @@ function validateMaxPending(value) {
   return value;
 }
 
+export function selectNativeBackend(platform = process.platform, architecture = process.arch) {
+  if (platform === 'win32' && architecture === 'x64') return 'windows-native';
+  if (platform === 'linux' && architecture === 'x64') return 'linux-native';
+  throw new DriverRuntimeError('DRIVER_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires Windows x64 or native Linux x86-64.', { platform, architecture });
+}
+
 export async function openDriverRuntime(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}) });
+  const maxPending = validateMaxPending(options.maxPending ?? 64);
+  const memoryPolicy = normalizeMemoryPolicy(options.memory ?? {});
+  const executionPolicy = normalizeExecutionPolicy(options.execution ?? {});
+  return DriverRuntime.open({ backend: selectNativeBackend(), testHooks: false, maxPending, memoryPolicy, executionPolicy });
 }
 
 export async function openDriverRuntimeForTesting(options = {}) {

@@ -7,6 +7,8 @@ import { openMockDriverRuntime } from '../testing.mjs';
 import { assertPublicRecord, validateRequest } from '../src/protocol.mjs';
 import { deserializeError, serializeError } from '../src/errors.mjs';
 import { startupRollbackFailure } from '../src/startup-rollback.mjs';
+import { resolveLinuxNativeProfile, resolveWindowsNativeProfile } from '../src/backends/native-profiles.mjs';
+import { selectNativeBackend } from '../src/driver-runtime.mjs';
 
 function expectCode(code) {
   return (error) => error instanceof DriverRuntimeError && error.code === code;
@@ -156,7 +158,7 @@ test('native startup rollback product retains bounded primary and cleanup semant
 });
 
 test('native backend source directly rolls back pre-registration context/library ownership and retains failures', async () => {
-  const source = await readFile(new URL('../src/backends/windows-native.mjs', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../src/backends/native.mjs', import.meta.url), 'utf8');
   assert.match(source, /rawContext = context;\s*contextToken = registry\.allocate/);
   assert.match(source, /if \(rawContext !== null\)[\s\S]*destroyContextForRollback\(rawContext\)/);
   assert.match(source, /if \(!libraryToken && library && !dependencyCleanupBlocked\)[\s\S]*closeDriverLibrary\(library\)/);
@@ -164,6 +166,40 @@ test('native backend source directly rolls back pre-registration context/library
   assert.match(source, /startupRollbackFailure\(\{/);
   assert.doesNotMatch(source, /library\.close\(\);?\s*\} catch \{\}/);
   assert.doesNotMatch(source, /requireSuccess\('[^']*\(/);
+});
+
+test('native profiles keep platform discovery private, canonical, and unambiguous', () => {
+  assert.equal(selectNativeBackend('win32', 'x64'), 'windows-native');
+  assert.equal(selectNativeBackend('linux', 'x64'), 'linux-native');
+  assert.throws(() => selectNativeBackend('linux', 'arm64'), expectCode('DRIVER_PROFILE_UNSUPPORTED'));
+
+  const windows = resolveWindowsNativeProfile({
+    platform: 'win32', architecture: 'x64', systemRoot: 'C:\\Windows',
+    exists: () => true, realpath: (value) => value,
+  });
+  assert.equal(windows.backend, 'windows-native');
+  assert.equal(windows.driverPath, 'C:\\Windows\\System32\\nvcuda.dll');
+
+  const canonical = '/usr/lib/x86_64-linux-gnu/libcuda.so.610.74';
+  const linux = resolveLinuxNativeProfile({
+    platform: 'linux', architecture: 'x64', exists: () => true, realpath: () => canonical,
+  });
+  assert.equal(linux.backend, 'linux-native');
+  assert.equal(linux.driverPath, canonical);
+  assert.match(linux.memoryClaim, /unqualified$/);
+
+  assert.throws(() => resolveLinuxNativeProfile({
+    platform: 'linux', architecture: 'x64', exists: () => true,
+    realpath: (value) => value.startsWith('/usr/lib64') ? '/opt/other/libcuda.so.1' : canonical,
+  }), expectCode('DRIVER_LIBRARY_AMBIGUOUS'));
+  assert.throws(() => resolveLinuxNativeProfile({
+    platform: 'linux', architecture: 'x64', exists: () => true,
+    realpath: () => '/usr/local/cuda/lib64/stubs/libcuda.so',
+  }), expectCode('DRIVER_LIBRARY_NONCANONICAL'));
+  assert.throws(() => resolveLinuxNativeProfile({
+    platform: 'linux', architecture: 'x64', exists: (value) => value.startsWith('/usr/lib/x86_64-linux-gnu'),
+    realpath: () => '/opt/vendor/libcuda.so.1',
+  }), expectCode('DRIVER_LIBRARY_NONCANONICAL'));
 });
 
 for (const scenario of [
