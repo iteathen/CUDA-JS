@@ -331,7 +331,7 @@ priority:                 active maintenance; other profiles independently gated
 
 Accepted SPEC-0012 keeps PTX as the default compile path and adds a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The implementation excludes raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, arbitrary nvJitLink controls, and cross-major compatibility claims.
 
-Native promotion remains blocked on exact independent LTO artifact/oracle, link, execution, compatibility-negative, and cleanup evidence. Portable/package success alone does not establish native Device-LTO support.
+Typed Device LTO is qualified on the exact recorded Windows profile through independent artifact/oracle, link, execution, compatibility-negative, and cleanup evidence. Linux and every other provider/device profile remain separately unqualified; portable/package success alone does not promote them.
 
 See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO assessment](research/2026-08-11-lto-support-assessment.md).
 
@@ -368,7 +368,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
 | Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
-| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Shared native Driver backend, thin Linux discovery profile and F3L runner exist; exact F2L–F8L Driver/compiler/GPU/package chain remains open. |
+| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Shared native Driver/compiler engines, thin Linux profiles and exact F3L/F6L source runners exist; diagnostics/facade/package source plus exact F2L–F8L Driver/compiler/GPU evidence remain open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors
@@ -391,7 +391,7 @@ False. One-pending-operation is a host admission/error-attribution rule for the 
 
 ### "Single-flight is the permanent CUDA-JS architecture."
 
-False. Streams, events, operations, memory kinds, and other resource families are explicit architectural bricks. Widening the current profile requires a new accepted contract and evidence rather than bypassing ownership rules.
+False. SPEC-0018 implements and qualifies an exact opt-in capacity-two/two-private-stream profile while capacity one remains the compatibility default. Wider concurrency profiles still require explicit finite bounds and exact evidence rather than bypassing the shared operation lifecycle.
 
 ### "CUDA-JS allocations are released when V8 garbage-collects wrapper objects."
 

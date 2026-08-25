@@ -7,7 +7,7 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     9ca5dc0d8035e637f1608aa56206c0910c4acd95
+protected main:     347c95edfa63ebe647f350909842ad65be08dca6
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
 execution package:  cuda-js@0.1.0-alpha.7

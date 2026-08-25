@@ -2,190 +2,141 @@
 
 **Status:** Informational
 
+**Disposition:** Current execution dependency map
+
 **Originally:** 2026-08-13
 
-**Reconciled:** 2026-08-14 against protected-main baseline `334b903be827dedb5345608a34a6df444912fe1b`
+**Reconciled:** 2026-08-25 against protected `main@347c95edfa63ebe647f350909842ad65be08dca6`
 
 ## Purpose
 
-Coordinate unfinished generic CUDA-JS capabilities without treating issue state, plan presence, portable tests or one neighboring native profile as implementation/support authority. Each production lane follows its governing specification; each support claim follows exact native evidence.
+Sequence accepted or proposal-backed generic CUDA-JS work without confusing architectural selection, implementation, qualification, and priority. The broader non-committed inventory is the [long-horizon capability candidate map](2026-08-25-long-horizon-capability-map.md); it cannot reorder this execution path or authorize implementation.
 
-The detailed 2026-08-14 issue-by-issue development-cycle record is `docs/plans/2026-08-14-open-issue-development-sweep.md`.
+## Current dependency spine
+
+```text
+P0 active: OS-neutral native Linux reference path (#4)
+  shared Driver/compiler source complete
+  -> diagnostics/public facade/package source parity
+  -> exact Ubuntu 24.04 x86-64 F2L-F8L evidence
+
+P1 next: accepted SPEC-0017 explicit device selection (#20)
+  portable selector/target integration
+  -> exact one-device default/explicit selection evidence
+  -> controlled 2+ physical-GPU selection evidence
+
+P2 after accepted bounds: smallest necessary SPEC-0024 multi-GPU subset
+  finite selected runtimes and device-scoped ownership
+  -> cross-device misuse rejection and terminal aggregate status
+  -> topology/P2P/collectives only for independently justified profiles
+```
+
+Linux is the first native promotion platform; public and component contracts remain OS-neutral. Windows remains a maintained peer exact profile.
 
 ## Governing invariants
 
-- Node-FFI-first/no CUDA-JS-specific native addon baseline;
 - one private context owner per selected device;
-- raw native pointers/streams/events/device identifiers/providers remain private;
-- explicit finite resource ownership and child-before-parent teardown;
-- no unbounded queues, caches, pinned memory or workspaces;
-- SPEC-0016 remains the sole operation submit/status/wait/close lifecycle authority;
-- generated ABI facts remain separate from reviewed semantic overlays;
-- architecture, implementation, qualification and priority remain independent;
-- exact native evidence is required for support/performance claims;
-- generic core remains free of consumer/search/model/training semantics.
+- raw device identifiers, native handles, pointers, streams, events, providers, and generated CUDA remain private;
+- every resource, queue, staging area, cache, artifact, operation, and coordinator is finite and explicitly disposed;
+- SPEC-0016 remains the sole submit/status/wait/close lifecycle authority;
+- architecture, implementation, qualification, and priority remain independent;
+- native and performance claims require exact independent evidence;
+- generic core remains free of consumer/search/tensor/model/training policy.
 
-## Current authority state
+## Current authority and implementation state
 
-Accepted and implemented portable/software baseline:
+Implemented portable/software/package foundations include:
 
 ```text
-SPEC-0010 relocatable device code
-SPEC-0011 scalar arguments (u64 / i32 / finite-only f32)
-SPEC-0012 Device LTO
+SPEC-0010 typed relocatable device code
+SPEC-0011 u64/i32/finite-only-f32 scalar arguments
+SPEC-0012 typed Device LTO
 SPEC-0013 restricted Device-JS
-SPEC-0016 opaque one-pending-operation lifecycle
+SPEC-0014 bounded long-lived publication mailbox first profile
+SPEC-0016 opaque operation lifecycle
+SPEC-0018 bounded capacity-two/private-stream scheduling first profile
+SPEC-0019 bounded pinned staging and asynchronous transfer first profile
+SPEC-0021 f64/f16/bf16 scalar ABI and contiguous typed views
+SPEC-0022 accepted atomic-observation and release/acquire publication children
 ```
 
-Accepted on the 2026-08-14 foundation review, with implementation still to be integrated:
+Accepted and dependency-ready:
 
 ```text
-SPEC-0017 explicit device selection + target resolution
-SPEC-0021 f64/f16/bf16 scalar ABI + contiguous 1D generic device views
+SPEC-0017 explicit device selection and selected-device target resolution
 ```
 
-Still proposal-only:
+Proposal-only remainder:
 
 ```text
-SPEC-0014 sideband
-SPEC-0018 multi-operation scheduling
-SPEC-0019 host memory / async transfer
 SPEC-0020 prepared batch / CUDA Graph
-SPEC-0022 Device-JS parallel / service profiles
-SPEC-0023 CUDA library adapters
-SPEC-0024 multi-GPU
+SPEC-0022 except its accepted atomic-observation/publication children
+SPEC-0023 context-bound CUDA library adapters
+SPEC-0024 multi-GPU orchestration
 SPEC-0025 graphics interop
-SPEC-0026 process isolation
+SPEC-0026 process-isolated execution
 ```
 
-SPEC-0027 is accepted authority only for an optional **separate future NN publish unit**; each `nn.*` boundary needs its own accepted child specification.
+SPEC-0027 is accepted authority only for a separate future NN publish unit. It does not authorize NN code or dependencies in `cuda-js` core.
 
-## Dependency graph
+## P0 — complete the reference-platform chain
 
-```text
-accepted baseline
-  ├─ native qualification of already implemented capabilities
-  ├─ SPEC-0017 [accepted; implementation next]
-  │    ├─ SPEC-0024 multi-GPU [proposal]
-  │    └─ SPEC-0025 graphics matching [proposal]
-  ├─ SPEC-0021 [accepted; implementation next]
-  │    ├─ SPEC-0022 trusted Device-JS primitives [proposal]
-  │    ├─ SPEC-0023 CUDA library adapters [proposal]
-  │    └─ SPEC-0025 graphics typed-view use [proposal]
-  └─ SPEC-0018 [proposal; blocked on published native SPEC-0016 evidence]
-       ├─ SPEC-0019 async transfer
-       ├─ SPEC-0020 prepared batch / CUDA Graph
-       ├─ SPEC-0023 CUDA library adapters
-       └─ SPEC-0024 multi-device dependencies
+Issue #4 is the only active implementation path in this roadmap.
 
-SPEC-0026 process isolation
-  └─ SPEC-0022 service-safe Device-JS
+1. Reconcile platform diagnostics, compatibility admission, the public facade, F7/F8 source runners, and installed-package behavior with the shared Linux Driver/compiler profiles.
+2. Preserve `not-qualified` truth and fail closed outside the exact Linux x86-64 profile.
+3. Run EXP-001/F2L and F3L-F8L on exact Ubuntu 24.04 x86-64, Node 26.7.0, CUDA 13.3, NVIDIA Driver, and GPU hardware.
+4. Compare Driver, memory, execution, compiler/linker, package output, permissions, and teardown against independent native oracles.
+5. Promote only the exact compatibility cell after the entire chain passes.
 
-SPEC-0023
-  ├─ cuRAND #92
-  ├─ cuSPARSE #91
-  └─ cuFFT #93
-```
+Hosted portable Ubuntu readiness evidence cannot substitute for a native NVIDIA Driver/GPU run.
 
-Dependencies are capability-specific; unrelated hardware or optimizations do not block portable work that does not consume them.
+## P1 — integrate accepted device selection
 
-## P0 — current truth and external gates
+After the Linux source/package path is coherent, resume accepted SPEC-0017/#20:
 
-- #64: EXP-013 oracle repair is integrated; exact merged-head Windows Node 26.7.0 F5 rerun still required.
-- #68: private vulnerability reporting remains an external GitHub control-plane task.
-- #35/#42/#43/#51: portable/software implementations exist; exact native promotion remains open.
-- platform/hardware issues remain exact-profile qualification work and must not be inferred from vendor compatibility.
+- finite sanitized discovery snapshots and opaque selectors;
+- exactly one selected device bound before context/resource creation;
+- default compatibility behavior retained;
+- selected architecture propagated through target and cache identity;
+- stale, foreign, ambiguous, and cross-owner selection rejected before native work;
+- native identifiers remain private;
+- multi-device orchestration remains outside SPEC-0017.
 
-## P1 — implement accepted generic foundations
+Portable implementation does not prove distinct physical-device behavior. Exact multi-device promotion needs a controlled native Linux host with at least two independently visible GPUs.
 
-### CAP-D / SPEC-0021 — #39/#88
+## P2 — accept only the needed multi-GPU subset
 
-Current first implementation packet.
+The first demonstrated consumer need is finite independent device-resident replicas with pre-ignition assignment and final aggregation after every per-device operation is terminal. Reassess SPEC-0024 around that subset before implementation.
 
-- add deterministic `f64`/`f16`/`bf16` packing;
-- preserve SPEC-0011 finite-only `f32` exactly;
-- add contiguous 1D generic typed views with exact byte ranges/access roles/parent generation;
-- add focused boundary/mutation/lifecycle tests;
-- update package/public compatibility projections only for implemented behavior;
-- do not claim native support before independent native oracle evidence.
+Do not force P2 to include P2P, NCCL, shared graphs, automatic partitioning, migration, or multi-node execution. Those remain separate horizon candidates unless a concrete generic requirement justifies them.
 
-### CAP-B / SPEC-0017 — #20
+## Other successor lanes
 
-Parallel/next packet.
-
-- add finite sanitized discovery snapshots and opaque selectors;
-- bind exactly one selected device before context/resource creation;
-- retain default compatibility behavior;
-- propagate selected architecture into target/cache identity;
-- reject stale/foreign/ambiguous selection before native context work;
-- keep native identifiers private;
-- qualify explicit selection between physical devices only on a controlled multi-GPU host.
-
-## P2 — repair the scheduling gate
-
-### #51 then SPEC-0018 / #40
-
-Issue #51 records a successful exact Windows candidate for native SPEC-0016 behavior, but also records that its candidate commits/evidence were not pushed/integrated on protected main. Before widening concurrency:
-
-1. recreate or recover verifiable native SPEC-0016 evidence on the exact current protected revision;
-2. publish/integrate the evidence and required runner/oracle records;
-3. reread the exact result and lifecycle cleanup;
-4. reassess SPEC-0018 against the now-published baseline;
-5. only then accept and implement finite multi-operation/private-stream scheduling.
-
-Do not use timing alone to prove overlap and do not create another operation lifecycle.
-
-## P3 — successors unlocked by SPEC-0018/0021/0017
-
-- SPEC-0019 / #86: pinned/registered host memory and async transfers; bounded staging; mechanism-level overlap evidence.
-- SPEC-0020 / #85: semantic prepared-batch baseline first, CUDA Graph realization second.
-- SPEC-0022 trusted / #87: only generic parallel primitives demanded by concrete consumers.
-- SPEC-0026 / #95: process-isolation prototype may research independently; production/service claims require accepted contract/evidence.
-- SPEC-0023 / #90: generic context-bound library adapter after scheduler + views.
-- #92/#91/#93: cuRAND/cuSPARSE/cuFFT only through the generic adapter and exact provider oracles.
-- SPEC-0024 / #20: multi-GPU after selection + scheduler/transfer foundations.
-- SPEC-0025 / #94: one concrete graphics API/profile after selection + scheduler + views.
-- SPEC-0014 / #38: sideband revisited after accepted host-memory ownership; SPEC-0016/0018 remain operation authority.
-- SPEC-0022 service / #89: bounds + work budgets + quotas + process isolation together; trusted Device-JS alone is not a sandbox.
-- #96: composed qualification only after component implementation and runner-ready profiles.
-
-## Separate NN program
-
-Issues #70/#72-#84 remain an optional NN-program track under accepted ADR-0004 and SPEC-0027. The authoritative package decision is now:
-
-```text
-same repository
-separate future publish unit
-package name unselected
-source directory unselected
-no NN export/dependency/init effect in cuda-js core
-```
-
-Original issue text that assumes `cuda-js/nn` or same-package distribution is stale. Begin child-spec work at #72 (`nn.tensor`) and proceed in dependency order (#73 graph, #74 autodiff, then providers/memory/execution/training). Generic capability work above may be consumed only through accepted public contracts.
-
-## Native/platform campaign
-
-ADR-0006 makes native Linux x64 the reference and first-priority platform campaign: Ubuntu 24.04 issue #4 Driver/compiler/package completion, then issue #17 distro expansion. Windows evidence remains a secondary exact lane. WSL2, ARM64/SBSA, Jetson, additional GPUs, distro cells, Server/TCC, virtualization, ECC, MIG, performance/soak, controlled runners/attestations and the exact CUDA-MCGS pair remain independently qualified. Multi-GPU and topology-aware performance first target a controlled 2+ physical-GPU native Linux host. Vendor support lists are planning inputs, not CUDA-JS qualification.
+- SPEC-0020 prepared batches/graphs build on the accepted operation/scheduling owners.
+- SPEC-0023 library adapters build on selected device, typed views, scheduling, and provider-specific evidence.
+- SPEC-0025 graphics/external-resource interop builds on selected-device matching, typed views, and synchronization contracts.
+- SPEC-0026 process isolation remains distinct from Worker ownership.
+- Native SPEC-0021 scalar/view promotion, #28 benchmark methodology, other OS/GPU/toolkit profiles, and exact CUDA-MCGS compatible-pair evidence retain separate owners and gates.
 
 ## Acceptance discipline
 
 ```text
-proposal researched/revised      -> no implementation permission
-spec accepted                    -> bounded implementation authorized
-portable implementation passes   -> implementation may become implemented; native support unchanged
-exact native capsule passes      -> only that exact profile may become qualified
-benchmark passes                 -> only the named performance claim may be promoted
+candidate inventory              -> no architecture or implementation authority
+proposal researched/revised      -> no implementation authority
+accepted specification           -> bounded implementation authority
+portable implementation passes   -> implementation status may advance; native support does not
+exact native capsule passes       -> only that exact profile may become qualified
+benchmark passes                 -> only the named measured claim may advance
 ```
 
 ## Do not
 
-- implement from an issue body or this roadmap without accepted governing authority;
+- implement from this roadmap, a candidate row, or an issue body without accepted governing authority;
+- let the long-horizon inventory displace issue #4 or SPEC-0017;
 - duplicate SPEC-0016 lifecycle;
-- accept SPEC-0018 before its published native evidence gate;
-- expose raw pointers/streams/events/devices/providers;
-- infer support across GPU/OS/Driver/toolkit/library profiles;
-- add unbounded queues/pinned memory/workspaces/cache;
-- treat timing as concurrency proof;
-- add NN/search/application semantics to generic core;
-- call process isolation a universal GPU sandbox;
-- call graphics/mapped memory zero-copy without direct mechanism evidence.
+- expose native device or provider identity;
+- infer support across OS, GPU, Driver, toolkit, topology, or library profiles;
+- add unbounded queues, pinned memory, pools, workspaces, caches, or coordinators;
+- add MCGS, search, tensor, model, training, or application scheduling semantics to core;
+- present Workers as process isolation, MIG/MPS discovery as administration, timing as overlap proof, or CPU/WebGPU emulation as CUDA compatibility.
