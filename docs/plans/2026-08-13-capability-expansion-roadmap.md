@@ -165,7 +165,7 @@ Original issue text that assumes `cuda-js/nn` or same-package distribution is st
 
 ## Native/platform campaign
 
-Independent exact lanes remain for Linux x64, WSL2, ARM64/SBSA, Jetson, additional GPUs, distro cells, Server/TCC, virtualization, ECC, MIG, performance/soak, controlled runners/attestations and the exact CUDA-MCGS pair. Vendor support lists are planning inputs, not CUDA-JS qualification.
+ADR-0006 makes native Linux x64 the reference and first-priority platform campaign: Ubuntu 24.04 issue #4 Driver/compiler/package completion, then issue #17 distro expansion. Windows evidence remains a secondary exact lane. WSL2, ARM64/SBSA, Jetson, additional GPUs, distro cells, Server/TCC, virtualization, ECC, MIG, performance/soak, controlled runners/attestations and the exact CUDA-MCGS pair remain independently qualified. Multi-GPU and topology-aware performance first target a controlled 2+ physical-GPU native Linux host. Vendor support lists are planning inputs, not CUDA-JS qualification.
 
 ## Acceptance discipline
 

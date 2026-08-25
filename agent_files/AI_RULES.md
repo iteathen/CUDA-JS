@@ -17,7 +17,7 @@ Any violation above is an architecture defect and a stop condition, not a naming
 
 1. Read root `AGENTS.md` before changing the repository.
 2. Follow the authority order and report material contradictions rather than choosing silently.
-3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence; native Linux portable/package controls are not Linux Driver support, Linux `CJS-F2L / EXP-001` remains retained/deferred/incomplete, and no exact CUDA-MCGS pair exists before independent CUDA-MCGS evidence passes.
+3. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact bounded evidence; ADR-0006 makes native Linux x86-64 the reference and primary qualification path, but portable/package controls are not Linux Driver support and Linux `CJS-F2L / EXP-001` through F8L remain incomplete until their exact evidence passes. Windows remains a secondary maintained profile, and no exact CUDA-MCGS pair exists before independent CUDA-MCGS evidence passes.
 4. A plan, experiment protocol, reserved directory, or dependency-ready boundary is not implementation permission.
 5. Work by semantic ownership boundary, not arbitrary file count.
 6. For substantial or critical work, complete a proportional adversarial assessment before planning.

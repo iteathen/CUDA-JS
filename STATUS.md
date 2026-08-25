@@ -21,7 +21,13 @@ ADR-0005 records the canonical split: **CUDA-JS is JavaScript-authored and JIT/n
 
 This wording does not claim that every host call or device artifact is JIT-produced. Precompiled artifacts remain valid, and host JIT claims remain exact-profile gated under ADR-0002. A future maintained native host backend requires an accepted measured-gap decision rather than entering as incidental drift.
 
-The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations include:
+## Reference-platform direction
+
+ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell; the public/component architecture remains distribution-neutral. The accepted Windows x64 evidence below remains valid as a secondary exact profile, but it no longer determines forward platform priority. The current package still lacks Linux DriverActor and compiler-provider adapters, so this direction is not yet a Linux support claim.
+
+The active dependency path is issue #4: canonical Linux Driver/context ownership, then NVRTC/nvJitLink providers, native F3–F8/package evidence and exact compatibility promotion. Issue #17 expands Linux distributions only after that baseline. SPEC-0017 remains the next platform-neutral capability foundation and will use Linux for its first native selection promotion. Multi-GPU and topology-aware performance require a controlled 2+ physical-GPU Linux host.
+
+The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), active reference **Linux x86-64** implementation/qualification path, and portable/software/package implementations include:
 
 - SPEC-0010 typed relocatable device code;
 - SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
