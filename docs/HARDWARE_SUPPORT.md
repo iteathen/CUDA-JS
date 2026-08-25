@@ -59,7 +59,7 @@ Windows x64 is the only native profile currently qualified. Native Linux x64, WS
 
 ## Extended qualification axes
 
-Every axis below records architecture, implementation, qualification, and priority independently. All listed axes remain not-qualified; empty command chains are intentional because no axis yet has an accepted runner-ready qualification packet.
+Every axis below records architecture, implementation, qualification, and priority independently. The performance/thermal/soak axis exposes bounded observation commands at testing-unconfirmed status; every other axis remains not-qualified with an intentionally empty command chain.
 
 | Axis | Architecture | Implementation | Qualification | Priority | Current boundary | Work issue |
 |---|---|---|---|---|---|---|
@@ -67,7 +67,7 @@ Every axis below records architecture, implementation, qualification, and priori
 | mig | deferred | not implemented | **not qualified** | deferred | MIG identity, isolation, quotas, and lifecycle are not modeled | [#27](https://github.com/iteathen/CUDA-JS/issues/27) |
 | virtualization | deferred | partial | **not qualified** | deferred | virtualization mechanisms require separate host/guest/provider profiles | [#21](https://github.com/iteathen/CUDA-JS/issues/21) |
 | concurrent-launch | planned | partial | **not qualified** | after:exact capacity two profile | exact SPEC-0018 capacity-two profile is qualified; broader capacities, cross-stream dependency waits, priorities and operation classes remain unimplemented and unqualified | [#40](https://github.com/iteathen/CUDA-JS/issues/40) |
-| performance-thermal-soak | deferred | partial | **not qualified** | deferred | F7 elapsed time and process memory are broad regression observations only | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
+| performance-thermal-soak | planned | implemented | **testing unconfirmed** | active evidence | versioned public-package short and bounded-soak observation profiles exist; exact native evidence remains observational and cannot promote product performance or production stability | [#28](https://github.com/iteathen/CUDA-JS/issues/28) |
 | ecc | deferred | not implemented | **not qualified** | deferred | ECC capability and error-health semantics are not in the runtime contract | [#24](https://github.com/iteathen/CUDA-JS/issues/24) |
 | driver-toolkit-matrix | deferred | partial | **not qualified** | deferred | only exact recorded Node, Driver, toolkit/header, provider, and GPU cells are supported | [#22](https://github.com/iteathen/CUDA-JS/issues/22) |
 | windows-tcc-server | deferred | not implemented | **not qualified** | deferred | the accepted Windows profile is Windows 11 x64 WDDM with watchdog enabled | [#26](https://github.com/iteathen/CUDA-JS/issues/26) |
@@ -105,7 +105,7 @@ The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile
 - Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.
 - Successful operation on unconfirmed hardware is test evidence, not a support claim.
 - A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.
-- CUDA-JS currently selects device zero and admits one pending GPU operation. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified; their architectural and implementation dispositions are recorded separately.
+- CUDA-JS currently selects device zero and admits one pending GPU operation. Performance/thermal/soak has testing-unconfirmed bounded observation profiles without a performance or stability claim; multi-GPU, MIG, virtualization, concurrent launch, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified.
 - Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.
 
 The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md). The Node matrix, verified-negative profiles, and extended qualification contracts are maintained in [`docs/plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md).

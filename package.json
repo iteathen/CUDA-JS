@@ -127,8 +127,11 @@
     "node:check": "node scripts/run-node-qualification.mjs check",
     "node:render": "node scripts/run-node-qualification.mjs render",
     "node:probe": "node scripts/run-node-qualification.mjs probe",
+    "performance:check": "node --test benchmarks/performance-soak/harness.test.mjs && node scripts/run-performance-soak.mjs check",
+    "performance:short": "node --experimental-ffi scripts/run-performance-soak.mjs short",
+    "performance:soak": "node --experimental-ffi scripts/run-performance-soak.mjs soak",
     "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all && node scripts/run-f9.mjs all",
     "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run node:check && npm run hardware:check"
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run performance:check && npm run node:check && npm run hardware:check"
   }
 }

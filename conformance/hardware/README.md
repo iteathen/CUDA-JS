@@ -19,7 +19,7 @@ npm run hardware:qualify
 
 `hardware:check` validates registry invariants and rejects generated-document drift. `hardware:plan` is read-only and reports the current or explicitly requested profile. `hardware:qualify` is enabled only for a runner-ready profile and fails unless the process uses exact Node v26.7.0 from a clean Git worktree.
 
-`extensions.json` keeps multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, version-matrix, Windows TCC/server, and independent-attestation work fail-closed. It records architectural disposition, implementation status, qualification status, and priority independently. Every axis is currently `not-qualified` and exposes no promotable command chain.
+`extensions.json` keeps multi-GPU, MIG, virtualization, concurrent launch, ECC, version-matrix, Windows TCC/server, and independent-attestation work fail-closed with no promotable command chain. It records architectural disposition, implementation status, qualification status, and priority independently. Performance/thermal/soak now exposes bounded observation commands at `testing-unconfirmed`; those commands do not create a product-performance, thermal-capacity, leak-free or production-stability claim.
 
 On Windows, `npm run hardware:probe:hyperv` performs a read-only sanitized Hyper-V inventory. It reports only OS class/version and counts; it never records VM names or GPU identifiers and never changes a VM, GPU assignment, partition, or device state. A readiness result is not virtualized CUDA support.
 

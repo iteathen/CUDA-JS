@@ -17,4 +17,6 @@ Required benchmark families:
 
 Every report includes exact Node/build/flags, OS/ABI, Driver/toolkit/GPU, schema/artifact/profile, workload, warmup, synchronization, sample count, distributions, raw results, correctness guard, and checks not run.
 
+The first exact performance/thermal/soak methodology is owned by [`performance-soak/`](performance-soak/README.md). It uses public-package Device-JS, independent output parity, read-only telemetry, explicit invalid-run criteria and bounded short/long profiles without making a product-performance or production-stability claim.
+
 Do not infer Fast-JIT use from speed alone. A strict JIT claim requires direct exact-profile mechanism evidence accepted by EXP-004.

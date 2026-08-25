@@ -466,6 +466,7 @@ for (const relative of files) {
       && !relative.startsWith('conformance/f9/')
       && !relative.startsWith('conformance/hardware/')
       && !relative.startsWith('conformance/node/')
+      && !relative.startsWith('benchmarks/performance-soak/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {

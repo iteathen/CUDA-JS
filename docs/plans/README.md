@@ -6,6 +6,7 @@ Active plans contain **unfinished work only**. Completed or mixed historical pla
 
 ## Active forward plans
 
+- [`2026-08-25-performance-soak-qualification.md`](2026-08-25-performance-soak-qualification.md) — issue #28 public-package short/soak methodology, exact native observations, invalidation and cleanup without a product-performance claim.
 - [`2026-08-24-cuda-mcgs-p0-p1-execution.md`](2026-08-24-cuda-mcgs-p0-p1-execution.md) — active project-owner-directed integration spine for CUDA-MCGS-priority compiler, Device-JS, operation, transfer, sideband, and exact compatible-pair work.
 - [`2026-08-12-native-and-platform-qualification-continuation.md`](2026-08-12-native-and-platform-qualification-continuation.md) — exact native promotion for implemented capabilities plus independent Linux/hardware/Node profile qualification.
 - [`2026-08-12-execution-capability-continuation.md`](2026-08-12-execution-capability-continuation.md) — retained execution-continuation plan for sideband/multi-stream follow-up against the accepted SPEC-0016 baseline.

@@ -51,7 +51,10 @@ test('an incomplete profile cannot expose a promotable command chain', async () 
 test('every omitted qualification axis remains fail-closed and publicly coordinated', async () => {
   const { registry, profiles, extensions } = await fixtures();
   assert.equal(extensions.axes.length, 9);
-  assert(extensions.axes.every((entry) => entry.qualificationStatus === 'not-qualified' && entry.commands.length === 0));
+  const performance = extensions.axes.find((entry) => entry.id === 'performance-thermal-soak');
+  assert.equal(performance.qualificationStatus, 'testing-unconfirmed');
+  assert.deepEqual(performance.commands.map((entry) => entry[1]), ['check', 'short', 'soak']);
+  assert(extensions.axes.filter((entry) => entry !== performance).every((entry) => entry.qualificationStatus === 'not-qualified' && entry.commands.length === 0));
   assert(extensions.axes.every((entry) => entry.architecturalDisposition && entry.implementationStatus && entry.priority));
   assert(extensions.axes.every((entry) => !Object.hasOwn(entry, 'status') && !Object.hasOwn(entry, 'publicDisposition')));
   extensions.axes.find((entry) => entry.id === 'concurrent-launch').commands.push(['scripts/run-f5.mjs', 'all']);

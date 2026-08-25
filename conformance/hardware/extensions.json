@@ -105,16 +105,20 @@
     },
     {
       "id": "performance-thermal-soak",
-      "architecturalDisposition": "deferred",
-      "implementationStatus": "partial",
-      "qualificationStatus": "not-qualified",
-      "priority": "deferred",
+      "architecturalDisposition": "planned",
+      "implementationStatus": "implemented",
+      "qualificationStatus": "testing-unconfirmed",
+      "priority": "active-evidence",
       "coordinationIssue": 28,
-      "currentBoundary": "F7 elapsed time and process memory are broad regression observations only",
+      "currentBoundary": "versioned public-package short and bounded-soak observation profiles exist; exact native evidence remains observational and cannot promote product performance or production stability",
       "requiredEnvironment": ["controlled resettable host", "read-only GPU telemetry", "declared idle/workload/cooldown phases"],
       "requiredEvidence": ["raw-sample digests", "latency/throughput distributions", "temperature, power, clocks, throttle reasons, CPU/GPU memory", "correctness and terminal cleanup before and after soak"],
       "safetyRules": ["never change clocks, power, fans, persistence, or thermal policy", "never convert regression ceilings into product performance claims"],
-      "commands": []
+      "commands": [
+        ["scripts/run-performance-soak.mjs", "check"],
+        ["scripts/run-performance-soak.mjs", "short"],
+        ["scripts/run-performance-soak.mjs", "soak"]
+      ]
     },
     {
       "id": "ecc",

@@ -129,7 +129,13 @@ export function validateRegistry(registry, profiles, extensions) {
     invariant(Array.isArray(entry.requiredEnvironment) && entry.requiredEnvironment.length > 0, `${entry.id} needs an exact environment contract.`);
     invariant(Array.isArray(entry.requiredEvidence) && entry.requiredEvidence.length > 0, `${entry.id} needs evidence requirements.`);
     invariant(Array.isArray(entry.safetyRules) && entry.safetyRules.length > 0, `${entry.id} needs safety rules.`);
-    invariant(Array.isArray(entry.commands) && entry.commands.length === 0, `${entry.id} must not expose a promotable command chain before an accepted runner-ready qualification packet exists.`);
+    invariant(Array.isArray(entry.commands), `${entry.id} needs a commands array.`);
+    if (entry.id === 'performance-thermal-soak') {
+      invariant(entry.commands.length === 3, 'The performance/soak axis must expose check, short and soak entry points.');
+      invariant(entry.commands.every((command) => Array.isArray(command) && command[0] === 'scripts/run-performance-soak.mjs' && ['check', 'short', 'soak'].includes(command[1])), 'The performance/soak command chain is invalid.');
+    } else {
+      invariant(entry.commands.length === 0, `${entry.id} must not expose a promotable command chain before an accepted runner-ready qualification packet exists.`);
+    }
   }
   unique(extensions.upstreamSources.map((source) => source.id), 'Extended-profile upstream source IDs');
   for (const source of extensions.upstreamSources) {
@@ -207,7 +213,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     '## Extended qualification axes',
     '',
-    'Every axis below records architecture, implementation, qualification, and priority independently. All listed axes remain not-qualified; empty command chains are intentional because no axis yet has an accepted runner-ready qualification packet.',
+    'Every axis below records architecture, implementation, qualification, and priority independently. The performance/thermal/soak axis exposes bounded observation commands at testing-unconfirmed status; every other axis remains not-qualified with an intentionally empty command chain.',
     '',
     '| Axis | Architecture | Implementation | Qualification | Priority | Current boundary | Work issue |',
     '|---|---|---|---|---|---|---|',
@@ -247,7 +253,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '- Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.',
     '- Successful operation on unconfirmed hardware is test evidence, not a support claim.',
     '- A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.',
-    '- CUDA-JS currently selects device zero and admits one pending GPU operation. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified; their architectural and implementation dispositions are recorded separately.',
+    '- CUDA-JS currently selects device zero and admits one pending GPU operation. Performance/thermal/soak has testing-unconfirmed bounded observation profiles without a performance or stability claim; multi-GPU, MIG, virtualization, concurrent launch, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified.',
     '- Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.',
     '',
     'The operational build-out and dedicated test-host design are in [`docs/plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md). The Node matrix, verified-negative profiles, and extended qualification contracts are maintained in [`docs/plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md).',
