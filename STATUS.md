@@ -42,6 +42,8 @@ The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through
 
 Portable/software/package implementation and native qualification remain independent.
 
+SPEC-0012 typed Device LTO is implemented and qualified on the exact recorded Windows x64 profile. PR #116 integrated the NQ-LTO independent-oracle capsule on protected `main@9f13785e4d1d8d887099571a7a41be0b5b42f749`; a current-head rerun from `main@2135216b1a9fd88066a1c82b61ae533645eac9c2` again passed byte-identical two-unit LTO-IR/cubin/output parity, fail-closed negative controls and terminal zero-live-resource cleanup. Linux, other devices/providers and LTO performance remain separately unqualified.
+
 ## 2026-08-14 open-issue sweep
 
 The project owner requested every open issue be processed through investigate, assess, primary-source research, reassess, plan, authorized implementation and test. The durable per-issue result is `docs/plans/2026-08-14-open-issue-development-sweep.md`.
