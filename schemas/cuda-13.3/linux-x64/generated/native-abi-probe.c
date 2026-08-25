@@ -61,9 +61,14 @@ int main(void) {
   printf("FUNCTION\tcuLaunchKernelEx\tcuLaunchKernelEx\t%zu\n", sizeof(&cuLaunchKernelEx));
   printf("FUNCTION\tcuMemAlloc\tcuMemAlloc_v2\t%zu\n", sizeof(&cuMemAlloc_v2));
   printf("FUNCTION\tcuMemFree\tcuMemFree_v2\t%zu\n", sizeof(&cuMemFree_v2));
+  printf("FUNCTION\tcuMemFreeHost\tcuMemFreeHost\t%zu\n", sizeof(&cuMemFreeHost));
   printf("FUNCTION\tcuMemGetInfo\tcuMemGetInfo_v2\t%zu\n", sizeof(&cuMemGetInfo_v2));
+  printf("FUNCTION\tcuMemHostAlloc\tcuMemHostAlloc\t%zu\n", sizeof(&cuMemHostAlloc));
+  printf("FUNCTION\tcuMemcpyDtoDAsync\tcuMemcpyDtoDAsync_v2\t%zu\n", sizeof(&cuMemcpyDtoDAsync_v2));
   printf("FUNCTION\tcuMemcpyDtoH\tcuMemcpyDtoH_v2\t%zu\n", sizeof(&cuMemcpyDtoH_v2));
+  printf("FUNCTION\tcuMemcpyDtoHAsync\tcuMemcpyDtoHAsync_v2\t%zu\n", sizeof(&cuMemcpyDtoHAsync_v2));
   printf("FUNCTION\tcuMemcpyHtoD\tcuMemcpyHtoD_v2\t%zu\n", sizeof(&cuMemcpyHtoD_v2));
+  printf("FUNCTION\tcuMemcpyHtoDAsync\tcuMemcpyHtoDAsync_v2\t%zu\n", sizeof(&cuMemcpyHtoDAsync_v2));
   printf("FUNCTION\tcuModuleGetFunction\tcuModuleGetFunction\t%zu\n", sizeof(&cuModuleGetFunction));
   printf("FUNCTION\tcuModuleLoadData\tcuModuleLoadData\t%zu\n", sizeof(&cuModuleLoadData));
   printf("FUNCTION\tcuModuleUnload\tcuModuleUnload\t%zu\n", sizeof(&cuModuleUnload));
