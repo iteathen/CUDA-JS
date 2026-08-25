@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFile as execFileCallback } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
+import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
@@ -137,6 +138,7 @@ async function runProfile(profile) {
   let maximumLatencyMilliseconds = 0;
   let deviceProgram;
   let compilerArtifact;
+  let runtimeProfile;
   const cold = {};
 
   async function verifyOutput(label) {
@@ -155,6 +157,12 @@ async function runProfile(profile) {
     let mark = performance.now();
     runtime = await openCudaRuntime({ compiler: true, driver: { memory: { maxDeviceBytes: profile.workload.elementCount * 8 + 4096, maxAllocationBytes: profile.workload.elementCount * 4, maxTransferBytes: profile.workload.elementCount * 4 }, execution: { maxModuleBytes: 2_097_152, maxArguments: 4, maxCompletionMilliseconds: 60_000 } } });
     cold.runtimeOpenMilliseconds = performance.now() - mark;
+    const description = await runtime.describe();
+    assert.equal(description.profile.cudaApiVersion, profile.host.cuda.apiVersion, 'CUDA API version differs from the profile.');
+    assert.equal(description.device.attributes.computeCapabilityMajor, profile.host.cuda.computeCapabilityMajor, 'Compute-capability major differs from the profile.');
+    assert.equal(description.device.attributes.computeCapabilityMinor, profile.host.cuda.computeCapabilityMinor, 'Compute-capability minor differs from the profile.');
+    assert.equal(description.compiler.provider.profile, profile.host.cuda.compilerProviderProfile, 'Compiler provider differs from the profile.');
+    runtimeProfile = { profile: description.profile, driver: description.driver, device: description.device, compiler: { provider: description.compiler.provider } };
     mark = performance.now();
     const compiled = await compileDeviceProgram(runtime, { source, functions });
     cold.compileMilliseconds = performance.now() - mark;
@@ -217,6 +225,8 @@ async function runProfile(profile) {
   if (failure) invalidReasons.push('execution-failure');
   const sourceCommit = await git(['rev-parse', 'HEAD']);
   const sourceTree = await git(['show', '-s', '--format=%T', 'HEAD']);
+  const telemetrySample = sampler.samples.find((sample) => !sample.error);
+  const telemetryIdentity = telemetrySample ? { gpuName: telemetrySample.gpuName, driverVersion: telemetrySample.driverVersion, persistenceMode: telemetrySample.persistenceMode, computeMode: telemetrySample.computeMode, memoryTotalMiB: telemetrySample.memoryTotalMiB, powerLimitWatts: telemetrySample.powerLimitWatts } : null;
   const rawSamples = `${sampler.samples.map((sample) => canonicalJson(sample)).join('\n')}\n`;
   const latencySummary = sampledLatenciesMilliseconds.length > 0 ? summarizeNumbers(sampledLatenciesMilliseconds) : null;
   const result = {
@@ -225,7 +235,7 @@ async function runProfile(profile) {
     status: invalidReasons.length === 0 ? 'pass' : 'invalid',
     startedAt,
     completedAt: new Date().toISOString(),
-    subject: { sourceCommit, sourceTree, package: JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8')).version, node: { version: process.version, executableSha256: await sha256File(process.execPath) }, platform: process.platform, architecture: process.arch },
+    subject: { sourceCommit, sourceTree, package: JSON.parse(await readFile(path.join(repositoryRoot, 'package.json'), 'utf8')).version, node: { version: process.version, executableSha256: await sha256File(process.execPath) }, platform: process.platform, architecture: process.arch, operatingSystem: { release: os.release(), version: os.version() }, runtime: runtimeProfile, telemetryGpu: telemetryIdentity },
     methodology: {
       profileSha256: sha256Canonical(profile),
       profile,

@@ -3,7 +3,12 @@
   "profiles": [
     {
       "id": "windows-sm75-presubmit-v1",
-      "host": { "platform": "win32", "architecture": "x64", "node": "v26.7.0" },
+      "host": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v26.7.0",
+        "cuda": { "apiVersion": 13030, "computeCapabilityMajor": 7, "computeCapabilityMinor": 5, "compilerProviderProfile": "cuda-13.3-windows-x64-compiler" }
+      },
       "workload": { "elementCount": 262144, "rounds": 128, "blockX": 256 },
       "phases": { "idleMilliseconds": 10000, "warmupLaunches": 4, "workloadMilliseconds": 60000, "cooldownMilliseconds": 15000 },
       "sampling": { "telemetryIntervalMilliseconds": 1000, "correctnessEveryLaunches": 50, "latencySampleStride": 1 },
@@ -19,7 +24,12 @@
     },
     {
       "id": "windows-sm75-bounded-soak-15m-v1",
-      "host": { "platform": "win32", "architecture": "x64", "node": "v26.7.0" },
+      "host": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v26.7.0",
+        "cuda": { "apiVersion": 13030, "computeCapabilityMajor": 7, "computeCapabilityMinor": 5, "compilerProviderProfile": "cuda-13.3-windows-x64-compiler" }
+      },
       "workload": { "elementCount": 1048576, "rounds": 256, "blockX": 256 },
       "phases": { "idleMilliseconds": 30000, "warmupLaunches": 8, "workloadMilliseconds": 900000, "cooldownMilliseconds": 60000 },
       "sampling": { "telemetryIntervalMilliseconds": 1000, "correctnessEveryLaunches": 250, "latencySampleStride": 10 },

@@ -19,6 +19,11 @@ function positiveInteger(value, name) {
   return value;
 }
 
+function nonnegativeInteger(value, name) {
+  invariant(Number.isSafeInteger(value) && value >= 0, `${name} must be a nonnegative safe integer.`);
+  return value;
+}
+
 function parseNumber(value, field) {
   const trimmed = value.trim();
   if (trimmed === '[N/A]' || trimmed === 'N/A') return null;
@@ -114,6 +119,10 @@ export function validateProfiles(record) {
     invariant(!ids.has(profile.id), `Duplicate profile ID: ${profile.id}`);
     ids.add(profile.id);
     invariant(profile.host?.platform === 'win32' && profile.host?.architecture === 'x64' && profile.host?.node === 'v26.7.0', `${profile.id} must pin the exact first host profile.`);
+    positiveInteger(profile.host.cuda?.apiVersion, `${profile.id}.host.cuda.apiVersion`);
+    positiveInteger(profile.host.cuda?.computeCapabilityMajor, `${profile.id}.host.cuda.computeCapabilityMajor`);
+    nonnegativeInteger(profile.host.cuda?.computeCapabilityMinor, `${profile.id}.host.cuda.computeCapabilityMinor`);
+    invariant(typeof profile.host.cuda?.compilerProviderProfile === 'string' && /^[a-z0-9][a-z0-9.-]+$/u.test(profile.host.cuda.compilerProviderProfile), `${profile.id} must pin a canonical compiler provider profile.`);
     positiveInteger(profile.workload?.elementCount, `${profile.id}.workload.elementCount`);
     positiveInteger(profile.workload?.rounds, `${profile.id}.workload.rounds`);
     positiveInteger(profile.workload?.blockX, `${profile.id}.workload.blockX`);
@@ -149,6 +158,9 @@ export function evaluateRun({ profile, samples, correctnessChecks, terminal, lau
   if (workload.length < expectedSamples(profile.phases.workloadMilliseconds, interval, fraction)) reasons.push('insufficient-workload-telemetry');
   if (cooldown.length < expectedSamples(profile.phases.cooldownMilliseconds, interval, fraction)) reasons.push('insufficient-cooldown-telemetry');
   if (samples.some((sample) => sample.error)) reasons.push('telemetry-sample-error');
+  const telemetryIdentity = goodSamples.map((sample) => ({ gpuName: sample.gpuName, driverVersion: sample.driverVersion, persistenceMode: sample.persistenceMode, computeMode: sample.computeMode, memoryTotalMiB: sample.memoryTotalMiB, powerLimitWatts: sample.powerLimitWatts }));
+  if (telemetryIdentity.some((identity) => typeof identity.gpuName !== 'string' || typeof identity.driverVersion !== 'string' || typeof identity.persistenceMode !== 'string' || typeof identity.computeMode !== 'string' || !Number.isFinite(identity.memoryTotalMiB) || !Number.isFinite(identity.powerLimitWatts))) reasons.push('telemetry-identity-missing');
+  else if (new Set(telemetryIdentity.map(canonicalJson)).size !== 1) reasons.push('telemetry-identity-changed');
   const timestamps = goodSamples.map((sample) => Date.parse(sample.recordedAt)).filter(Number.isFinite).sort((left, right) => left - right);
   for (let index = 1; index < timestamps.length; index += 1) {
     if (timestamps[index] - timestamps[index - 1] > profile.invalidRun.maximumTelemetryGapMilliseconds) { reasons.push('telemetry-gap'); break; }
