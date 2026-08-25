@@ -1,10 +1,10 @@
 {
-  "schema_version": 38,
+  "schema_version": 39,
   "updated": "2026-08-24",
-  "status": "active_cuda_mcgs_p0_p1_execution",
+  "status": "cuda_mcgs_p0_p1_prerequisites_complete",
   "objective": "Complete the CUDA-MCGS P0/P1 CUDA-JS prerequisites as dependency-ready LEGO ownership packets with exact native evidence, clean integration, and no consumer-domain leakage.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d",
+    "protected_main_authority_baseline": "ed35718ea15ce7a878f67580e271aee5820948ee",
     "package": "cuda-js@0.1.0-alpha.6",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -16,7 +16,8 @@
       "MCGS-P0-ATOMIC-0022 integrated: accepted scoped atomic-observation child, alpha.6 implementation, and exact installed-package Windows oracle pass",
       "MCGS-P0 evidence PR #116 integrated and issues #35/#43/#51/#87 closed",
       "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed",
-      "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed"
+      "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed",
+      "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
@@ -47,11 +48,11 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "MCGS-P1-SIDEBAND-0014",
-    "issues": [38],
+    "id": "MCGS-P0-PAIR-0009C",
+    "issues": [32],
     "plan": "docs/plans/2026-08-24-cuda-mcgs-p0-p1-execution.md",
-    "next_action": "Complete full-repository validation, commit and push the exact SPEC-0014 implementation head, reconcile protected checks and author review under the sole-maintainer exception, then merge with an expected-head guard and read back protected main.",
-    "exit": "Accepted exact SPEC-0014 first profile, deterministic portable implementation, independent native and public installed-package publication oracles, full validation, protected-main integration/read-back, issue closure, and clean branch/worktree disposition."
+    "next_action": "Create and freeze the smallest bounded CUDA-MCGS artifact that consumes only integrated CUDA-JS public contracts, then execute the exact compatible-pair identity, semantic-oracle, post-ignition progress, and terminal cleanup proof required by issue #32.",
+    "exit": "One exact frozen CUDA-JS/CUDA-MCGS pair passes compatibility identity, semantic-oracle parity, device-owned post-ignition progress, and terminal cross-repository cleanup without private coupling."
   },
   "parallel_or_external_next": [
     {
@@ -72,8 +73,13 @@
       "reason": "Requires exact merged-head Windows x64 Node 26.7.0 F5 execution on the qualified NVIDIA profile."
     },
     {
+      "id": "MCGS-P0-PAIR-0009C",
+      "issues": [32],
+      "reason": "CUDA-JS implementation prerequisites are complete, but exact pair qualification necessarily awaits the first frozen bounded CUDA-MCGS artifact. This does not block starting that artifact."
+    },
+    {
       "id": "CJS-NATIVE-QUALIFICATION",
-      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 32, 39, 42, 88],
+      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
       "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence not supplied by the current single-GPU Windows profile. Portable preparation/implementation may continue where authorized, but no broader native/support claim is inferred."
     },
     {
@@ -114,6 +120,6 @@
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116, PR #118, and PR #119 are integrated protected-main prerequisites for the active SPEC-0014 branch"
+    "PR #116, PR #118, PR #119, and PR #120 are integrated protected-main CUDA-MCGS prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact"
   ]
 }

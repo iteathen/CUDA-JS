@@ -7,9 +7,9 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d
-completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019
-active P1:          #120 SPEC-0014 publication mailbox
+protected main:     ed35718ea15ce7a878f67580e271aee5820948ee
+completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014
+cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
 execution package:  cuda-js@0.1.0-alpha.6
 ```
 
@@ -65,27 +65,27 @@ The same specification implements a generic contiguous 1D `device-view` componen
 
 The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed `verify` and `node-compatibility`, including F4/F5/F6 and the F8 public package/facade path. The fully reconciled implementation/documentation head must pass the same protected checks before merge. Native scalar ABI/launch and native view-consumer qualification remain open.
 
-### Implemented and qualified first profiles: SPEC-0018 / #40 and SPEC-0019 / #86
+### Implemented and qualified first profiles: SPEC-0018 / #40, SPEC-0019 / #86, and SPEC-0014 / #38
 
 ```text
 architectural disposition: selected
-implementation status:       SPEC-0018 and SPEC-0019 merged
+implementation status:       SPEC-0018, SPEC-0019, and SPEC-0014 merged
 qualification status:        exact recorded Windows profile plus installed-package evidence
-priority:                    implement accepted dependent SPEC-0014/#38
+priority:                    consume from a bounded CUDA-MCGS artifact, then qualify exact pair #32
 ```
 
 PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 merged SPEC-0019 at protected-main `3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d` with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Issue #86 is closed. Caller registration outside the accepted publication-mailbox specialization, chunk queues, and overlap claims remain excluded.
 
-### Implemented qualification candidate: SPEC-0014 / #38
+### Integrated and qualified first profile: SPEC-0014 / #38
 
 ```text
 architectural disposition: accepted exact first profile
-implementation status:       complete candidate on PR #120; exact-head integration pending
+implementation status:       merged on PR #120 at protected-main ed35718ea15ce7a878f67580e271aee5820948ee
 qualification status:        portable, independent native, public native, and installed-package evidence pass
-priority:                    exact-head review, CI, protected-main integration, and cleanup
+priority:                    preserve the exact profile while CUDA-MCGS supplies the #32 pair artifact
 ```
 
-The accepted profile owns an opaque `runtime.publication-mailbox` component with at most 64 named naturally aligned u32 lanes over one internally allocated and strongly retained `SharedArrayBuffer`. Every lane has one immutable host-to-device or device-to-host direction. Each kernel argument binds one named lane through a direction-specific parameter kind; Device-JS supplies only system-scope acquire-load and release-store helpers. The backing store and mapped alias remain private, one live GPU operation may lease a mailbox, and reset/unregister is forbidden before terminality. The current candidate proves generation/stale handling, mapping rollback, unregister-failure orphan retention, lease backpressure, independent MSVC/Driver publication, public Device-JS/native publication from `41` to `42`, installed-package use, and zero-resource terminal cleanup on the exact recorded Windows profile.
+The accepted profile owns an opaque `runtime.publication-mailbox` component with at most 64 named naturally aligned u32 lanes over one internally allocated and strongly retained `SharedArrayBuffer`. Every lane has one immutable host-to-device or device-to-host direction. Each kernel argument binds one named lane through a direction-specific parameter kind; Device-JS supplies only system-scope acquire-load and release-store helpers. The backing store and mapped alias remain private, one live GPU operation may lease a mailbox, and reset/unregister is forbidden before terminality. The integrated implementation proves generation/stale handling, mapping rollback, unregister-failure orphan retention, lease backpressure, independent MSVC/Driver publication, public Device-JS/native publication from `41` to `42`, installed-package use, and zero-resource terminal cleanup on the exact recorded Windows profile.
 
 ## Execution baseline
 
@@ -159,10 +159,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. complete exact-head review and protected-main integration for SPEC-0014/#38
-2. read back protected main and close #38 only after required checks pass
-3. run the final integrated P0/P1 exact-head verification and cleanup
-4. leave the exact CUDA-MCGS compatible-pair gate (#32) open until its frozen CUDA-MCGS artifact exists
+1. keep CUDA-JS P0/P1 implementation prerequisites frozen at the integrated qualified profiles
+2. begin a bounded CUDA-MCGS artifact that consumes only public CUDA-JS contracts
+3. freeze the CUDA-MCGS artifact and execute exact compatible-pair gate #32
+4. keep broader CUDA-JS native/platform lanes independent of the CUDA-MCGS start gate
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

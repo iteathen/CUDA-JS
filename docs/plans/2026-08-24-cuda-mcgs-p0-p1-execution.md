@@ -2,9 +2,11 @@
 
 **Status:** Informational
 
-**Operational state:** Active
+**Operational state:** Complete
 
 **Started:** 2026-08-24T17:17:50.395-07:00 (`2026-08-25T00:17:50.395Z`)
+
+**Ended:** 2026-08-24T20:40:43.5381267-07:00 (`2026-08-25T03:40:43.5381267Z`); elapsed `03:22:53.1431267`
 
 **Integration owner:** CUDA-JS maintainer executing `agent/cuda-mcgs-p0-p1`
 
@@ -20,6 +22,7 @@
 - `2026-08-24T19:52:32.7684588-07:00` (`2026-08-25T02:52:32.7684588Z`): protected `main` includes merged SPEC-0018 PR #118 at `5653d5dffdb8b763232e8d6c6a0c1353d8678151`; issue #40 is closed. On PR #119, SPEC-0019's exact first profile now passes 106 portable tests, an independent MSVC pinned H2D/D2D/D2H oracle, public-facade H2D→kernel→D2H device ordering with snapshot ingress and terminal-only egress, installed-package transfer use, and exact Windows cleanup with zero live/orphaned resources. Documentation and full-repository verification remain before #86 integration.
 - `2026-08-24T20:05:11.7983026-07:00` (`2026-08-25T03:05:11.7983026Z`): protected `main` includes merged SPEC-0019 PR #119 at `3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d`; issue #86 is closed after exact-head CI, F5 native capability, F8 installed-package, author-review, merge-head guard, and protected-main read-back. SPEC-0014/#38 execution began from that exact merge with a direction-specific named-u32-lane profile so wrong-direction device use is rejectable before compilation and each launch binds only one private mapped lane address.
 - `2026-08-24T20:25:05.6209192-07:00` (`2026-08-25T03:25:05.6209192Z`): the SPEC-0014 implementation candidate passes focused ownership tests, 45 F8 portable/package tests, an independent MSVC/Driver registered-and-mapped mailbox oracle, the public Device-JS/native runtime path, and the installed-package native consumer. The public operation is pending before host publication, reset/close reject while leased, host value `41` becomes device-published value `42`, and all tested native/runtime/compiler resources terminate with zero live/orphaned residue. Full repository verification and exact-head integration remain.
+- `2026-08-24T20:40:43.5381267-07:00` (`2026-08-25T03:40:43.5381267Z`): protected `main` includes merged SPEC-0014 PR #120 at `ed35718ea15ce7a878f67580e271aee5820948ee`; issue #38 is closed after all 16 exact-head checks, author-side exact-head review, expected-head merge guard, and protected-main read-back. The integrated tree is identical to reviewed head `b003f3216074016f4735baaab7e23d25a1ff0da2` and passes the complete Windows verification chain, including independent/public/installed-package mailbox publication and terminal cleanup. The owner-authorized sole-maintainer exception waived only independent approval; no check, evidence, cleanup, or merge guard was waived. All CUDA-JS implementation prerequisites labeled `cuda-mcgs:p0` or `cuda-mcgs:p1` are complete. Exact compatible-pair issue #32 intentionally remains open because its acceptance requires a frozen CUDA-MCGS artifact that does not yet exist.
 
 ## Objective and authority
 
@@ -139,11 +142,11 @@ Only one focus branch is active at a time. Each coherent operation is inspected 
 
 ## Final closure
 
-Completion requires:
+Closure result:
 
-- every P0/P1 issue closed with its implementation and qualification dimensions stated honestly;
-- exact integrated head and remote read-back;
-- complete portable and selected Windows native validation;
-- no abandoned Worker, Driver/compiler resource, build artifact, cache, package, worktree, branch, PR, or temporary evidence;
-- protected pre-existing work remains untouched or has an explicit retained disposition;
-- this record contains the end timestamp and final evidence summary.
+- all CUDA-JS-owned P0/P1 implementation issues are closed with their implementation and qualification dimensions stated honestly;
+- exact integrated implementation head `ed35718ea15ce7a878f67580e271aee5820948ee` was read back from protected `main` and fully revalidated;
+- exact-pair issue #32 is not misreported as a CUDA-JS implementation defect: it remains open for the first frozen bounded CUDA-MCGS artifact;
+- complete portable and selected Windows native validation passed on Node 26.7.0, CUDA 13.3, Driver API 13030, and GTX 1660 Ti;
+- task-created branches, the clean execution worktree, and ignored validation artifacts are assigned removal after this closure record integrates; protected pre-existing worktrees, processes, and user changes remain untouched;
+- the closure PR receives exact-head author review and required CI; the sole-maintainer exception may waive only independent approval.
