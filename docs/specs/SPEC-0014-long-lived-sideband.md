@@ -1,18 +1,18 @@
 # SPEC-0014: Publication Mailboxes for Long-Lived Operations
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-12
 
-**Reconciled:** 2026-08-12 against accepted SPEC-0016
+**Accepted:** 2026-08-24 after SPEC-0018/SPEC-0019 integration and an exact Windows mapping prerequisite probe
 
 ## Outcome
 
 Define the smallest consumer-neutral CUDA-JS contract for bounded host↔device control and observation while an accepted SPEC-0016 GPU operation remains pending.
 
-SPEC-0014 **does not define a second operation lifecycle**. SPEC-0016 exclusively owns submission, status, wait, logical close, operation states, terminalization, execution leases, legacy `launch()` compatibility, pending-command gating, and runtime-close behavior. This proposal adds only a bounded **publication mailbox** capability that a SPEC-0016 operation may lease and use.
+SPEC-0014 **does not define a second operation lifecycle**. SPEC-0016 exclusively owns submission, status, wait, logical close, operation states, terminalization, execution leases, legacy `launch()` compatibility, pending-command gating, and runtime-close behavior. This specification adds only a bounded **publication mailbox** capability that a SPEC-0016 operation may lease and use.
 
-The selected first mailbox design is backed by a `SharedArrayBuffer` registered/mapped privately by CUDA-JS on qualified native profiles. It exposes no public CUDA stream, event, context, pointer, registration handle, or general concurrent-kernel API.
+The selected first mailbox design is backed by one internally allocated `SharedArrayBuffer` registered/mapped privately by CUDA-JS on qualified native profiles. Public callers receive only an opaque mailbox capability with bounded synchronous `store`/`load` methods. It exposes no backing store, CUDA stream, event, context, pointer, registration handle, or general concurrent-kernel API.
 
 ## Ownership
 
@@ -33,9 +33,9 @@ CudaOperation.wait()
 CudaOperation.close()
 ```
 
-A future accepted mailbox integration may allow a launch request to bind one or more opaque mailbox capabilities. Those mailbox dependencies are acquired before submission returns and remain leased until SPEC-0016 terminalization proves the operation completed or failed.
+The accepted mailbox integration allows a launch request to bind one or more named lanes from opaque mailbox capabilities. Those mailbox dependencies are acquired before native submission and remain leased until SPEC-0016 terminalization proves the operation completed or failed.
 
-A second submission while the first operation is pending remains blocked under SPEC-0016. Mailbox commands are a specifically proposed future widening of the pending-operation allowlist; they do not imply general Driver/memory interleaving.
+Host publication is local JavaScript `Atomics` work and does not enqueue a DriverActor command. Operation status/wait/release and runtime close remain admitted while long-lived work is pending. Mailbox status/reset/release commands are also admitted so status can be observed and reset/close can return the mailbox owner's typed busy result instead of being masked by the generic pending-operation gate. SPEC-0018 capacity-two scheduling remains independently available but does not weaken mailbox single-device-writer ownership.
 
 ## Cancellation truth
 
@@ -48,7 +48,7 @@ SPEC-0016 remains authoritative:
 
 ## Publication mailbox
 
-A mailbox is a bounded set of naturally aligned publication lanes over a caller-visible `SharedArrayBuffer` retained strongly by CUDA-JS for the registration lifetime.
+A mailbox is a bounded nonempty set of at most 64 naturally aligned four-byte publication lanes over an internal `SharedArrayBuffer` retained strongly by both the facade and DriverActor for the registration lifetime. Lane names are unique bounded ASCII identifiers.
 
 First candidate lane type:
 
@@ -72,7 +72,7 @@ Cross-host/device read-modify-write is unavailable in v1.
 
 The host side uses JavaScript `Atomics.load/store` on an `Int32Array` view while values are surfaced as unsigned 32-bit integers.
 
-On a qualified native CUDA profile, CUDA-JS would privately:
+On the qualified native CUDA profile, CUDA-JS privately:
 
 - obtain the stable SAB backing pointer through Node FFI;
 - page-lock/register the backing range with `cuMemHostRegister`;
@@ -81,21 +81,50 @@ On a qualified native CUDA profile, CUDA-JS would privately:
 - bind only an opaque mailbox capability through the owned launch-packing path;
 - unregister with `cuMemHostUnregister` only after all operation leases terminate.
 
-The SAB is ordinary public JavaScript data. The CUDA device pointer never crosses the DriverActor boundary.
+The SAB is not public API. The facade retains the backing store only to perform local `Atomics`; the mapped CUDA device pointer never crosses the DriverActor boundary.
+
+## Public and launch surface
+
+```text
+runtime.createPublicationMailbox({ lanes }) -> CudaPublicationMailbox
+mailbox.store(laneName, u32)                 // host-to-device only
+mailbox.load(laneName) -> u32                // device-to-host only
+mailbox.status()
+mailbox.reset()
+mailbox.close()
+```
+
+Every kernel mailbox parameter binds exactly one named lane. Function parameter kinds are direction-specific:
+
+```text
+publication-mailbox-host-to-device-u32
+publication-mailbox-device-to-host-u32
+```
+
+The public launch argument is `{ kind: "publication-mailbox", mailbox, lane }`. CUDA-JS validates the mailbox generation, lane existence, and exact direction before submission. A mailbox may be leased by only one live GPU operation in the first profile, even when the scheduler capacity is two.
+
+Device-JS represents these as distinct opaque types:
+
+```text
+mailbox<host-to-device,u32>
+mailbox<device-to-host,u32>
+```
+
+They cannot be indexed, dereferenced, assigned, converted to `ptr<u32>`, or passed to ordinary atomic helpers. The only accepted operations are `gpu.mailbox.loadAcquireSystem(lane)` for host-to-device lanes and `gpu.mailbox.storeReleaseSystem(lane, value)` for device-to-host lanes. Both require the manifest-owned `cuda-cccl` header profile.
 
 ## Device publication semantics
 
-Device code must use CUDA system-scope atomic load/store semantics for mailbox lanes. V1 does not permit GPU RMW against host-visible mailbox lanes.
+Device code must use `cuda::atomic_ref<unsigned int, cuda::thread_scope_system>` acquire loads and release stores for mailbox lanes. V1 does not permit GPU RMW against host-visible mailbox lanes. Ordinary device-scope or relaxed helpers are not substitutes.
 
 Native qualification must explicitly check the selected device's mapped-host-memory capability and every hardware/driver prerequisite required by the chosen publication semantics. Unsupported profiles fail closed rather than silently substituting weaker ordering.
 
 ## Generation and stale publication
 
-Every mailbox resource has a monotonically increasing logical generation owned by CUDA-JS. Operation bindings capture that generation.
+Every mailbox resource begins at generation one and has a monotonically increasing safe-integer logical generation owned by CUDA-JS. Operation bindings capture that generation.
 
 A mailbox reset/rebind is legal only with no live operation lease. Any command carrying an older captured generation fails before publication/read.
 
-Production generation width and exhaustion behavior must be explicit and fail closed; silent wrap is forbidden.
+`reset()` is legal only with no live lease, atomically zeroes every lane, then increments the generation. Safe-integer exhaustion rejects terminally; silent wrap is forbidden. `close()` is also busy while leased.
 
 Consumers that need multi-field coherent snapshots may reserve ordinary lane values for their own sequence protocol. CUDA-JS does not interpret those fields.
 
@@ -129,23 +158,29 @@ The experiment must prove:
 
 Those operation-lifecycle observations are corroborating evidence for mailbox composition with SPEC-0016, not competing lifecycle authority.
 
-## Native promotion evidence
+## Native qualification evidence
 
-Before mailbox integration is accepted/supported on Windows:
+The Windows support claim requires all of the following on the exact promoted revision:
 
 - exact generated Driver ABI for host registration/mapping/unregistration is reviewed;
 - current context/device mapping prerequisites are verified;
 - a live long-running CUDA kernel reads host-published lanes and publishes device-to-host lanes using system-scope load/store;
 - host `Atomics.store/load` and GPU system-scope operations agree on exact publication values/generations;
-- only specifically accepted mailbox commands execute while the SPEC-0016 operation remains pending;
+- host publication remains responsive without operation polling because it uses local JavaScript `Atomics`;
 - terminal event completion releases operation/mailbox/resource leases in SPEC-0016 order;
 - close, device loss, mapping failure, stale generation, and restart-required paths are exercised;
 - zero live/unproved resources remain after graceful completion;
 - exact Node/Driver/toolkit/GPU/profile evidence is recorded.
 
+## Capability prerequisites and failure truth
+
+The first Windows profile requires `canMapHostMemory == 1`, unified addressing, Node/FFI stable `SharedArrayBuffer` backing-store access, naturally aligned u32 lanes, and the reviewed CUDA system-scope mapped-memory load/store guarantee. `hostNativeAtomicSupported == 0` is acceptable only because v1 has one writer per lane and no host/device RMW.
+
+Registration or mapping failure is immediate and rolls back any acquired native state. Unregister failure leaves the mailbox orphaned/cleanup-unproved and prevents a graceful runtime-close claim. Unexpected Worker/context/device loss never fabricates unregister success. Watchdog safety is a conformance-fixture constraint, not a cancellation promise.
+
 ## Relationship to broader concurrency
 
-This capability does not authorize public streams or multiple independent kernels in flight. It consumes SPEC-0016's one-operation lifecycle. Issue #40's bounded multiple-in-flight/private-stream work remains separate and is not a prerequisite for a one-operation mailbox profile.
+This capability does not authorize public streams or broaden the number of independent kernels in flight. It consumes SPEC-0016's operation lifecycle and composes with the already accepted SPEC-0018 scheduler without changing that scheduler's capacity, hazard, dependency, or no-queue contracts.
 
 ## Non-goals
 
@@ -154,7 +189,7 @@ This capability does not authorize public streams or multiple independent kernel
 - public raw pointers/streams/events;
 - general mapped-memory replacement for device memory;
 - host/device RMW atomics in v1;
-- arbitrary shared-memory objects;
+- public or caller-provided shared-memory objects;
 - forced per-kernel cancellation claims;
 - multi-GPU/MIG;
 - performance claims.

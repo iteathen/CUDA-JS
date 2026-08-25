@@ -1,0 +1,3 @@
+extern "C" __device__ unsigned int cuda_js_rdc_transform(unsigned int value) {
+  return (value * 17u) ^ 0xa5a5a5a5u;
+}

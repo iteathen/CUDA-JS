@@ -29,7 +29,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | Discoverable capability summary and current-vs-future classification | [`CAPABILITIES.md`](CAPABILITIES.md) — informational summary only; accepted ADRs/specifications remain authority |
 | Mission and product boundary | [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md) |
 | CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
-| Host-binding baseline | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) |
+| Host-binding and production-source architecture | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) and [`decisions/ADR-0005-javascript-authored-jit-native-realized.md`](decisions/ADR-0005-javascript-authored-jit-native-realized.md) |
 | Generated ABI facts versus reviewed semantics | [`decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md`](decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md) |
 | Optional NN product and core-package isolation | [`decisions/ADR-0004-nn-extension-package-boundary.md`](decisions/ADR-0004-nn-extension-package-boundary.md), [`specs/SPEC-0027-nn-extension-foundation.md`](specs/SPEC-0027-nn-extension-foundation.md), and [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md) |
 | Foundation assessment | [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md) |

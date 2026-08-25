@@ -6,6 +6,8 @@ const REQUEST_FIELDS = Object.freeze(['schemaVersion', 'requestId', 'operation',
 const BASE_OPERATIONS = new Set([
   'runtime.describe', 'context.status', 'runtime.close',
   'memory.allocate', 'memory.status', 'memory.write', 'memory.read', 'memory.release',
+  'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d',
+  'mailbox.create', 'mailbox.status', 'mailbox.reset', 'mailbox.release',
   'execution.module.load', 'execution.module.status', 'execution.module.release',
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
@@ -36,6 +38,7 @@ function tokenPayload(payload) {
 function positiveSafeInteger(value) { return Number.isSafeInteger(value) && value > 0; }
 function nonnegativeSafeInteger(value) { return Number.isSafeInteger(value) && value >= 0; }
 function ordinaryBytes(value) { return value instanceof Uint8Array && !Buffer.isBuffer(value); }
+function optionalOperationToken(value) { return value === null || isResourceToken(value); }
 
 function dimensions(value) {
   return plainObject(value) && exactFields(value, ['x', 'y', 'z'])
@@ -53,13 +56,27 @@ function scalarArgument(entry) {
 
 function launchArguments(value, maximum) {
   return Array.isArray(value) && value.length > 0 && value.length <= maximum && value.every((entry) => {
-    if (!plainObject(entry) || !isParameterKind(entry.kind)) return false;
+    if (!plainObject(entry)) return false;
+    if (entry.kind === 'publication-mailbox') {
+      return exactFields(entry, ['kind', 'mailbox', 'generation', 'lane'])
+        && isResourceToken(entry.mailbox) && positiveSafeInteger(entry.generation)
+        && typeof entry.lane === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(entry.lane);
+    }
+    if (!isParameterKind(entry.kind)) return false;
     if (entry.kind !== 'device-memory') return scalarArgument(entry);
     const fields = Object.keys(entry);
     return fields.every((key) => ['kind', 'memory', 'byteOffset'].includes(key))
       && Object.hasOwn(entry, 'memory') && isResourceToken(entry.memory)
       && (!Object.hasOwn(entry, 'byteOffset') || nonnegativeSafeInteger(entry.byteOffset));
   });
+}
+
+function launchAccesses(value, maximum) {
+  return value === undefined || (Array.isArray(value) && value.length <= maximum && value.every((entry) => plainObject(entry)
+    && Object.keys(entry).every((key) => ['argumentIndex', 'byteOffset', 'byteLength', 'mode', 'dtype'].includes(key))
+    && nonnegativeSafeInteger(entry.argumentIndex) && nonnegativeSafeInteger(entry.byteOffset) && positiveSafeInteger(entry.byteLength)
+    && ['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device'].includes(entry.mode)
+    && (!Object.hasOwn(entry, 'dtype') || ['u32', 'u64'].includes(entry.dtype))));
 }
 
 export function validateRequest(message, { testHooks = false, memoryPolicy = { maxTransferBytes: 16 * 1_048_576 }, executionPolicy = { maxModuleBytes: 4 * 1_048_576, maxArguments: 32 } } = {}) {
@@ -78,6 +95,18 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(message.payload) || !exactFields(message.payload, ['byteLength']) || !positiveSafeInteger(message.payload.byteLength)) throw validationError('MEMORY_RANGE_INVALID', 'Memory allocation requires one positive safe-integer byteLength.', {}, message.requestId);
   } else if (message.operation === 'memory.status' || message.operation === 'memory.release') {
     if (!tokenPayload(message.payload)) throw validationError('DRIVER_MEMORY_TOKEN', 'Memory operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.create') {
+    const payload = message.payload;
+    const lanes = payload?.lanes;
+    if (!plainObject(payload) || !exactFields(payload, ['buffer', 'lanes']) || !(payload.buffer instanceof SharedArrayBuffer)
+        || !Array.isArray(lanes) || lanes.length < 1 || lanes.length > 64 || payload.buffer.byteLength !== lanes.length * 4
+        || !lanes.every((lane) => plainObject(lane) && exactFields(lane, ['name', 'direction'])
+          && typeof lane.name === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(lane.name)
+          && ['host-to-device', 'device-to-host'].includes(lane.direction))) throw validationError('MEMORY_MAILBOX_OPTIONS_INVALID', 'Mailbox create payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.status' || message.operation === 'mailbox.release') {
+    if (!tokenPayload(message.payload)) throw validationError('MEMORY_MAILBOX_TOKEN', 'Mailbox operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'mailbox.reset') {
+    if (!plainObject(message.payload) || !exactFields(message.payload, ['token', 'generation']) || !isResourceToken(message.payload.token) || !positiveSafeInteger(message.payload.generation)) throw validationError('MEMORY_MAILBOX_RESET', 'Mailbox reset payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'memory.write') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['token', 'bytes', 'deviceOffset']) || !isResourceToken(payload.token)
@@ -88,6 +117,23 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(payload) || !exactFields(payload, ['token', 'deviceOffset', 'byteLength']) || !isResourceToken(payload.token)
         || !nonnegativeSafeInteger(payload.deviceOffset) || !positiveSafeInteger(payload.byteLength)) throw validationError('DRIVER_MEMORY_READ', 'Memory read payload is invalid.', {}, message.requestId);
     if (payload.byteLength > memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'Memory read exceeds the configured transfer limit.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.h2d') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'bytes', 'deviceOffset', 'after']) || !isResourceToken(payload.token)
+        || !ordinaryBytes(payload.bytes) || payload.bytes.byteLength < 1 || payload.bytes.byteLength > memoryPolicy.maxTransferBytes
+        || !nonnegativeSafeInteger(payload.deviceOffset) || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous H2D payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.d2h') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'deviceOffset', 'byteLength', 'after']) || !isResourceToken(payload.token)
+        || !nonnegativeSafeInteger(payload.deviceOffset) || !positiveSafeInteger(payload.byteLength) || payload.byteLength > memoryPolicy.maxTransferBytes
+        || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous D2H payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'memory.transfer.d2d') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['destinationToken', 'sourceToken', 'destinationOffset', 'sourceOffset', 'byteLength', 'after'])
+        || !isResourceToken(payload.destinationToken) || !isResourceToken(payload.sourceToken)
+        || !nonnegativeSafeInteger(payload.destinationOffset) || !nonnegativeSafeInteger(payload.sourceOffset)
+        || !positiveSafeInteger(payload.byteLength) || payload.byteLength > memoryPolicy.maxTransferBytes
+        || !optionalOperationToken(payload.after)) throw validationError('DRIVER_MEMORY_TRANSFER', 'Asynchronous D2D payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.module.load') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['format', 'bytes']) || !['ptx', 'cubin'].includes(payload.format) || !ordinaryBytes(payload.bytes)
@@ -100,8 +146,10 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
         || typeof payload.name !== 'string' || !parameterSchema(payload.parameters, executionPolicy.maxArguments)) throw validationError('DRIVER_FUNCTION_OPTIONS', 'Function lookup payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.submit') {
     const payload = message.payload;
-    if (!plainObject(payload) || !exactFields(payload, ['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments'])
+    if (!plainObject(payload) || Object.keys(payload).some((key) => !['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'after', 'accesses'].includes(key))
+        || !['functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments'].every((key) => Object.hasOwn(payload, key))
         || !isResourceToken(payload.functionToken) || !dimensions(payload.grid) || !dimensions(payload.block)
+        || (payload.after !== undefined && payload.after !== null && !isResourceToken(payload.after)) || !launchAccesses(payload.accesses, executionPolicy.maxArguments)
         || !nonnegativeSafeInteger(payload.sharedMemoryBytes) || !launchArguments(payload.arguments, executionPolicy.maxArguments)) throw validationError('DRIVER_LAUNCH_OPTIONS', 'Submission payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'testing.block') {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['milliseconds']) || !Number.isSafeInteger(message.payload.milliseconds) || message.payload.milliseconds < 1 || message.payload.milliseconds > 2_000) throw validationError('DRIVER_TEST_BLOCK', 'Mock block duration must be an integer from 1 through 2000.', {}, message.requestId);

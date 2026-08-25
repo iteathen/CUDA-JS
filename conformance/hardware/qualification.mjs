@@ -321,10 +321,14 @@ async function summarizeProfileEvidence(profile, device) {
   if (profile.id !== 'windows-native-x64') return null;
   const exp012Build = await loadJson(path.join(repositoryRoot, 'build', 'exp-012', 'windows-x64', 'evidence', 'build.json'));
   const exp012Smoke = await loadJson(path.join(repositoryRoot, 'build', 'exp-012', 'windows-x64', 'evidence', 'smoke.json'));
+  const f5CapabilityOracle = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'evidence', 'capability-oracle-build.json'));
+  const f5Capabilities = await loadJson(path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'evidence', 'native-windows-capabilities.json'));
   const f6 = await loadJson(path.join(repositoryRoot, 'build', 'f6', 'win32-x64', 'evidence', 'native-windows.json'));
+  const f6CapabilityOracle = await loadJson(path.join(repositoryRoot, 'build', 'f6', 'win32-x64', 'evidence', 'capability-oracle-build.json'));
+  const f6Capabilities = await loadJson(path.join(repositoryRoot, 'build', 'f6', 'win32-x64', 'evidence', 'native-windows-capabilities.json'));
   const f7 = await loadJson(path.join(repositoryRoot, 'build', 'f7', 'win32-x64', 'evidence', 'native-windows.json'));
   const f8 = await loadJson(path.join(repositoryRoot, 'build', 'f8', 'win32-x64', 'evidence', 'native-windows-package.json'));
-  for (const [name, record] of Object.entries({ exp012Build, exp012Smoke, f6, f7, f8 })) {
+  for (const [name, record] of Object.entries({ exp012Build, exp012Smoke, f5CapabilityOracle, f5Capabilities, f6, f6CapabilityOracle, f6Capabilities, f7, f8 })) {
     invariant(record.status === 'pass', `${name} evidence is not passing.`);
   }
   const diagnostic = f7.observations.driverCycles[0];
@@ -333,6 +337,17 @@ async function summarizeProfileEvidence(profile, device) {
   invariant(exp012Smoke.result.cuda.driverVersion.value === diagnostic.assessment.cuda.driverApiVersion, 'EXP-012 and F7 disagree on the Driver API version.');
   invariant(f8.observation.checksum === 15_600_773, 'Installed-package vector checksum is not the accepted oracle value.');
   invariant(f8.observation.graceful === true && f8.observation.workerExitCode === 0, 'Installed-package cleanup is not terminal.');
+  invariant(f5CapabilityOracle.oracle.DELAY_FIRST_QUERY?.[0] === 600, 'Independent operation oracle did not observe CUDA_ERROR_NOT_READY.');
+  invariant(f5Capabilities.observations.scalarCases?.length === 3, 'Native scalar boundary evidence is incomplete.');
+  invariant(f5Capabilities.observations.operation?.first?.status === 'pending' && f5Capabilities.observations.operation?.completed?.status === 'completed', 'Native opaque-operation lifecycle evidence is incomplete.');
+  invariant(f5Capabilities.observations.deferredFailure?.failure?.nativeStatus === 719 && f5Capabilities.observations.deferredFailure?.failure?.observedAt?.driverCall === 'cuEventQuery', 'Deferred native failure provenance is incomplete.');
+  invariant(f5Capabilities.observations.terminal?.graceful === true && f5Capabilities.observations.pendingRuntimeClose?.graceful === true && f5Capabilities.observations.postFaultTerminal?.graceful === true, 'Native operation cleanup evidence is incomplete.');
+  invariant(f6CapabilityOracle.oracle.PROGRAMS_CREATED === f6CapabilityOracle.oracle.PROGRAMS_DESTROYED && f6CapabilityOracle.oracle.LINKS_CREATED === f6CapabilityOracle.oracle.LINKS_DESTROYED && f6CapabilityOracle.oracle.DRIVER_CLEANUP === 'proved', 'Independent RDC/LTO oracle cleanup is incomplete.');
+  invariant(f6Capabilities.observations.launches?.length === 2 && f6Capabilities.observations.launches.every((entry) => entry.exactIndependentOracleParity === true), 'Native RDC/LTO output parity is incomplete.');
+  invariant(f6Capabilities.observations.terminal?.graceful === true && f6Capabilities.observations.terminal?.driver?.resourceCounts?.live === 0, 'Native RDC/LTO terminal cleanup is incomplete.');
+  invariant(f8.deviceJsObservation?.sourceOnly === true && f8.deviceJsObservation?.structuredIntegerBitwise === true && f8.deviceJsObservation?.dataDependentWhile === true && f8.deviceJsObservation?.globalIndex === true, 'Installed-package Device-JS semantic evidence is incomplete.');
+  invariant(f8.deviceJsObservation?.exactU64 === 'ffffffffffffffff' && f8.deviceJsObservation?.atomicCasUniqueFlags === true && f8.deviceJsObservation?.rejectionBeforeCompilerResources === true, 'Installed-package Device-JS typed/atomic/rejection evidence is incomplete.');
+  invariant(f8.deviceJsObservation?.graceful === true && f8.deviceJsObservation?.driverResourceCounts?.live === 0, 'Installed-package Device-JS cleanup is incomplete.');
 
   return {
     cuda: {
@@ -356,6 +371,16 @@ async function summarizeProfileEvidence(profile, device) {
       installedPackageSha256: f8.package.sha256,
       vectorChecksum: f8.observation.checksum,
       compilerArtifacts: f6.oracle,
+      nativeCapabilities: {
+        scalarBoundaryCases: f5Capabilities.observations.scalarCases.length,
+        operationFirstStatus: f5Capabilities.observations.operation.first.status,
+        operationTerminalStatus: f5Capabilities.observations.operation.completed.status,
+        deferredFailureNativeStatus: f5Capabilities.observations.deferredFailure.failure.nativeStatus,
+        rdcExactOracleParity: f6Capabilities.observations.launches.find((entry) => entry.capability === 'rdc').exactIndependentOracleParity,
+        ltoExactOracleParity: f6Capabilities.observations.launches.find((entry) => entry.capability === 'lto').exactIndependentOracleParity,
+        deviceJsSourceOnly: f8.deviceJsObservation.sourceOnly,
+        deviceJsProgram: f8.deviceJsObservation.deviceProgram,
+      },
       permissionControls: 'DriverActor and CompilerActor denial/allow passed',
       terminalCleanup: true,
     },

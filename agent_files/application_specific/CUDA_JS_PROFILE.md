@@ -2,7 +2,7 @@
 
 ## Mission
 
-Provide a generic, no-project-addon Node runtime for CUDA host APIs using trusted generated schemas, Node 26 built-in FFI, thread-affine actors, opaque resources, explicit memory/lifecycle/error contracts, and independent conformance.
+Provide a generic, JavaScript-authored and JIT/native-realized, no-project-addon Node runtime for CUDA host APIs using trusted generated schemas, Node 26 built-in FFI, thread-affine actors, opaque resources, explicit memory/lifecycle/error contracts, and independent conformance. Native CUDA providers and generated device artifacts realize execution; C/C++ probes/oracles are evidence rather than shipped runtime implementation.
 
 This mission describes the published `cuda-js` core package. Accepted ADR-0004/SPEC-0027 also permit an optional application-neutral NN product only as a separate future publish unit. Core remains independently installable and gains no NN exports, dependencies, NN-shaped/eager provider discovery, or tensor/training semantics. Each `nn.*` production boundary requires its own accepted child specification; no NN implementation or native-provider qualification currently exists.
 

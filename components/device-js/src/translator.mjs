@@ -3,9 +3,9 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
+import { DEVICE_JS_CONTRACT as CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
-const CONTRACT = 'SPEC-0013-v1';
 const SOURCE_LIMIT = 1_048_576;
 const FUNCTION_LIMIT = 64;
 const PARAMETER_LIMIT = 64;
@@ -52,6 +52,8 @@ function parseType(value, { allowVoid = false, allowPointer = true } = {}) {
   if (SCALARS.has(value)) return Object.freeze({ kind: 'scalar', scalar: value, text: value });
   const match = allowPointer && typeof value === 'string' ? /^ptr<(bool|u32|i32|u64|f32)>$/.exec(value) : null;
   if (match) return Object.freeze({ kind: 'pointer', scalar: match[1], text: value });
+  const mailbox = typeof value === 'string' ? /^mailbox<(host-to-device|device-to-host),u32>$/.exec(value) : null;
+  if (mailbox) return Object.freeze({ kind: 'mailbox', direction: mailbox[1], scalar: 'u32', text: value });
   throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Device-JS type is unsupported.', { type: typeof value === 'string' ? value : null });
 }
 
@@ -62,11 +64,13 @@ function sameType(left, right) {
 function cppType(type) {
   if (type.kind === 'void') return 'void';
   if (type.kind === 'pointer') return `${CUDA_TYPES[type.scalar]}*`;
+  if (type.kind === 'mailbox') return 'unsigned int*';
   return CUDA_TYPES[type.scalar];
 }
 
 function abiKind(type) {
   if (type.kind === 'pointer') return 'device-memory';
+  if (type.kind === 'mailbox') return `publication-mailbox-${type.direction}-u32`;
   if (type.kind === 'scalar' && KERNEL_SCALARS.has(type.scalar)) return type.scalar;
   return null;
 }
@@ -270,14 +274,16 @@ function isIntegerType(type) { return type.kind === 'scalar' && INTEGER.has(type
 function boolType() { return parseType('bool'); }
 
 class FunctionEmitter {
-  constructor(fn, ast, functions, generatedNames) {
+  constructor(fn, ast, functions, generatedNames, compile) {
     this.fn = fn;
     this.ast = ast;
     this.functions = functions;
     this.generatedNames = generatedNames;
+    this.compile = compile;
     this.localCounter = 0;
     this.loopDepth = 0;
     this.calls = new Set();
+    this.usesScopedAtomic = false;
     this.root = new Scope();
     fn.parameters.forEach((parameter, index) => {
       this.root.declare(parameter.name, { type: parameter.type, mutable: true, code: `p${index}`, parameter: true }, ast.params[index]);
@@ -448,6 +454,46 @@ class FunctionEmitter {
       return { code, type: pointee };
     }
 
+    if (path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem') {
+      const store = path === 'gpu.mailbox.storeReleaseSystem';
+      if (args.length !== (store ? 2 : 1)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
+      if (this.compile.headerProfile !== 'cuda-cccl') {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      }
+      const lane = this.expression(args[0], scope);
+      const expectedDirection = store ? 'device-to-host' : 'host-to-device';
+      if (lane.type.kind !== 'mailbox' || lane.type.direction !== expectedDirection) {
+        fail('DEVICE_JS_MAILBOX_DIRECTION', 'Mailbox helper requires the exact direction-specific opaque u32 lane type.', node, { expectedDirection, actualType: lane.type.text });
+      }
+      const reference = `cuda::atomic_ref<unsigned int, cuda::thread_scope_system>(*${lane.code})`;
+      this.usesScopedAtomic = true;
+      if (!store) return { code: `${reference}.load(cuda::memory_order_acquire)`, type: parseType('u32') };
+      const value = this.expression(args[1], scope);
+      if (value.type.text !== 'u32') fail('DEVICE_JS_ATOMIC_TYPE', 'Mailbox release store value must be u32.', args[1]);
+      return { code: `${reference}.store(${value.code}, cuda::memory_order_release)`, type: parseType('void', { allowVoid: true }) };
+    }
+
+    const pointerAtomic = devicePointerAtomicHelper(path);
+    if (pointerAtomic) {
+      const store = pointerAtomic.operation === 'store';
+      if (args.length !== (store ? 3 : 2)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
+      if (this.compile.headerProfile !== 'cuda-cccl') {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      }
+      const pointer = this.expression(args[0], scope);
+      const index = this.expression(args[1], scope);
+      if (pointer.type.kind !== 'pointer' || !isIntegerType(index.type)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic helper requires a pointer and integer index.', node);
+      if (!['u32', 'u64'].includes(pointer.type.scalar)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic helper supports only ptr<u32> and ptr<u64>.', node, { type: pointer.type.text });
+      const pointee = parseType(pointer.type.scalar);
+      const address = `${pointer.code}[${index.code}]`;
+      const reference = `cuda::atomic_ref<${CUDA_TYPES[pointer.type.scalar]}, cuda::thread_scope_device>(${address})`;
+      this.usesScopedAtomic = true;
+      if (!store) return { code: `${reference}.load(cuda::memory_order_${pointerAtomic.order})`, type: pointee };
+      const value = this.expression(args[2], scope);
+      if (!sameType(value.type, pointee)) fail('DEVICE_JS_ATOMIC_TYPE', 'Scoped atomic store value type must match pointer pointee.', args[2]);
+      return { code: `${reference}.store(${value.code}, cuda::memory_order_${pointerAtomic.order})`, type: parseType('void', { allowVoid: true }) };
+    }
+
     if (path === 'gpu.barrier.block' || path === 'gpu.fence.device') {
       if (args.length !== 0) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} takes no arguments.`, node);
       return { code: path === 'gpu.barrier.block' ? '__syncthreads()' : '__threadfence()', type: parseType('void', { allowVoid: true }) };
@@ -590,7 +636,7 @@ class FunctionEmitter {
     const lines = [header];
     for (const statement of this.ast.body.body) lines.push(...this.statementLines(statement, this.root, 1));
     lines.push('}');
-    return { code: lines.join('\n'), calls: this.calls };
+    return { code: lines.join('\n'), calls: this.calls, usesScopedAtomic: this.usesScopedAtomic };
   }
 }
 
@@ -665,15 +711,18 @@ export function translateDeviceProgram(request) {
   });
   const definitions = [];
   const calls = new Map();
+  let usesScopedAtomic = false;
   for (const fn of functions) {
-    const emitted = new FunctionEmitter(fn, sourceFunctions.get(fn.name), functionMap, generatedNames).emit();
+    const emitted = new FunctionEmitter(fn, sourceFunctions.get(fn.name), functionMap, generatedNames, compile).emit();
     definitions.push(emitted.code);
     calls.set(fn.name, emitted.calls);
+    usesScopedAtomic ||= emitted.usesScopedAtomic;
   }
   rejectRecursion(calls);
 
   const generatedSource = [
     `/* cuda-js Device-JS ${CONTRACT}; generated; do not edit */`,
+    ...(usesScopedAtomic ? ['#include <cuda/atomic>', ''] : []),
     ...prototypes,
     ...(prototypes.length ? [''] : []),
     ...definitions.flatMap((definition, index) => index === definitions.length - 1 ? [definition] : [definition, '']),

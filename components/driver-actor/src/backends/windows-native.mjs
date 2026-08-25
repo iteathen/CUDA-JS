@@ -4,7 +4,9 @@ import path from 'node:path';
 import ffi from 'node:ffi';
 
 import { ExecutionManager } from '../../../execution/index.mjs';
+import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { MemoryManager } from '../../../memory/index.mjs';
+import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
 import { createDefaultCuCtxCreateParams, cudaTier0Layouts } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
@@ -17,7 +19,9 @@ const DRIVER_ACTOR_SYMBOLS = Object.freeze([
   'cuInit', 'cuDriverGetVersion', 'cuDeviceGetCount', 'cuDeviceGet', 'cuDeviceGetAttribute',
   'cuGetErrorName', 'cuGetErrorString', 'cuCtxCreate_v4', 'cuCtxDestroy_v2',
   'cuCtxSetCurrent', 'cuCtxGetCurrent',
-  'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2',
+  'cuMemGetInfo_v2', 'cuMemAlloc_v2', 'cuMemFree_v2', 'cuMemHostAlloc', 'cuMemFreeHost',
+  'cuMemHostRegister_v2', 'cuMemHostGetDevicePointer_v2', 'cuMemHostUnregister',
+  'cuMemcpyHtoD_v2', 'cuMemcpyDtoH_v2', 'cuMemcpyHtoDAsync_v2', 'cuMemcpyDtoHAsync_v2', 'cuMemcpyDtoDAsync_v2',
   'cuModuleLoadData', 'cuModuleGetFunction', 'cuModuleUnload',
   'cuStreamCreate', 'cuStreamDestroy_v2',
   'cuEventCreate', 'cuEventRecord', 'cuEventQuery', 'cuEventDestroy_v2',
@@ -38,10 +42,13 @@ const ATTRIBUTES = Object.freeze({
   multiprocessorCount: 16,
   kernelExecTimeout: 17,
   integrated: 18,
+  canMapHostMemory: 19,
   computeMode: 20,
   tccDriver: 35,
+  unifiedAddressing: 41,
   computeCapabilityMajor: 75,
   computeCapabilityMinor: 76,
+  hostNativeAtomicSupported: 86,
 });
 
 function readPointer(storage) { return storage.readBigUInt64LE(0); }
@@ -74,7 +81,9 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
   let rawContext = null;
   let contextToken;
   let memory;
+  let mailboxes;
   let execution;
+  let transfer;
 
   function errorText(functionName, status) {
     try {
@@ -295,6 +304,34 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
     });
 
+    mailboxes = new PublicationMailboxManager({
+      registry,
+      contextToken,
+      operations: {
+        async register({ view, byteLength, operationId }) {
+          requireCurrent(operationId);
+          if (attributes.canMapHostMemory !== 1 || attributes.unifiedAddressing !== 1) {
+            throw new DriverRuntimeError('MEMORY_MAILBOX_PROFILE_UNSUPPORTED', 'unsupported', 'The selected device does not support the accepted mapped-mailbox profile.', { canMapHostMemory: attributes.canMapHostMemory, unifiedAddressing: attributes.unifiedAddressing }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          }
+          requireSuccess('cuMemHostRegister_v2', functions.cuMemHostRegister_v2(view, BigInt(byteLength), 2), operationId);
+          return ffi.getRawPointer(view);
+        },
+        async map({ view, operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          requireSuccess('cuMemHostGetDevicePointer_v2', functions.cuMemHostGetDevicePointer_v2(output, view, 0), operationId);
+          const pointer = readPointer(output);
+          if (pointer === 0n) throw new DriverRuntimeError('MEMORY_MAILBOX_MAPPING_NULL', 'immediate-driver', 'CUDA mailbox mapping returned a null device alias.', {}, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return pointer;
+        },
+        async unregister({ view, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemHostUnregister', functions.cuMemHostUnregister(view), operationId, 'poisoned');
+          return { nativeUnregistered: true };
+        },
+      },
+    });
+
     const launchLayout = cudaTier0Layouts.CUlaunchConfig;
     if (!launchLayout || launchLayout.size !== 56) throw new DriverRuntimeError('DRIVER_LAUNCH_LAYOUT_UNSUPPORTED', 'unsupported', 'Generated CUlaunchConfig layout is unavailable for the Windows F5 profile.');
     const launchOffsets = Object.freeze(Object.fromEntries(launchLayout.fields.map((field) => [field.name, field.offset])));
@@ -306,6 +343,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       registry,
       contextToken,
       memory,
+      mailboxes,
       policy: executionPolicy,
       deviceLimits: attributes,
       operations: {
@@ -409,6 +447,46 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
     });
 
+    transfer = new HostMemoryTransferManager({
+      registry,
+      contextToken,
+      memory,
+      execution,
+      maxTransferBytes: memoryPolicy.maxTransferBytes,
+      operations: {
+        async allocateStaging({ byteLength, operationId }) {
+          requireCurrent(operationId);
+          const output = pointerOut();
+          const status = functions.cuMemHostAlloc(output, BigInt(byteLength), 0);
+          if (status === 2) {
+            throw new DriverRuntimeError('CUDA_OUT_OF_MEMORY', 'pressure', 'CUDA pinned host allocation reported out of memory.', { nativeStatus: status, byteLength }, { operation: 'cuMemHostAlloc', operationId, healthBefore: health.current, healthAfter: health.current });
+          }
+          requireSuccess('cuMemHostAlloc', status, operationId);
+          const native = readPointer(output);
+          if (native === 0n) throw new DriverRuntimeError('DRIVER_HOST_MEMORY_NULL', 'immediate-driver', 'CUDA pinned host allocation succeeded but returned a null address.', { byteLength }, { operationId, healthBefore: health.current, healthAfter: health.current });
+          return native;
+        },
+        async freeStaging({ native, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemFreeHost', functions.cuMemFreeHost(native), operationId, 'poisoned');
+          return { nativeFreed: true };
+        },
+        stagingView({ native, byteLength }) { return ffi.toBuffer(native, byteLength, false); },
+        async copyHtoDAsync({ destinationNative, destinationOffset, stagingNative, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyHtoDAsync_v2', functions.cuMemcpyHtoDAsync_v2(destinationNative + BigInt(destinationOffset), stagingNative, BigInt(byteLength), streamNative), operationId);
+        },
+        async copyDtoHAsync({ stagingNative, sourceNative, sourceOffset, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyDtoHAsync_v2', functions.cuMemcpyDtoHAsync_v2(stagingNative, sourceNative + BigInt(sourceOffset), BigInt(byteLength), streamNative), operationId);
+        },
+        async copyDtoDAsync({ destinationNative, destinationOffset, sourceNative, sourceOffset, byteLength, streamNative, operationId }) {
+          requireCurrent(operationId);
+          requireSuccess('cuMemcpyDtoDAsync_v2', functions.cuMemcpyDtoDAsync_v2(destinationNative + BigInt(destinationOffset), sourceNative + BigInt(sourceOffset), BigInt(byteLength), streamNative), operationId);
+        },
+      },
+    });
+
     async function description(operationSequence = 0) {
       const executionSummary = execution.summary();
       return {
@@ -419,6 +497,8 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         device: { ordinal: 0, attributes },
         context: contextToken,
         memory: await memory.usage(operationSequence),
+        transfer: transfer.summary(),
+        mailbox: mailboxes.summary(),
         execution: executionSummary,
         health: health.snapshot(),
         inventory: registry.inventory(),
@@ -435,7 +515,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         const cleanupOrRead = new Set([
           'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
           'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
-          'execution.operation.status', 'execution.operation.release',
+          'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
         ]);
         if (health.current === 'restart-required') {
           throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
@@ -493,6 +573,8 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         };
       },
       memory,
+      mailboxes,
+      transfer,
       execution,
     };
   } catch (error) {

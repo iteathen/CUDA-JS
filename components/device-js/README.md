@@ -24,6 +24,12 @@ Ambient locale is not part of Device-JS semantics. Public function ordering and 
 
 Device-JS accepts only the closed SPEC-0013 subset and typed metadata. It never exposes generated CUDA source through the public package result, raw CUDA options, native handles, pointers, ASTs, or arbitrary C/C++ syntax authority. Generated CUDA is passed to the existing CompilerActor owner with typed compile options.
 
+The accepted SPEC-0022 atomic-observation child adds `gpu.atomic.loadRelaxedDevice` and `gpu.atomic.storeRelaxedDevice` for naturally aligned `ptr<u32>`/`ptr<u64>` device locations. Their names fix relaxed order and device scope; use requires the accepted `cuda-cccl` compile profile. Each load observes one atomic location only—never a multi-location snapshot, freshness guarantee, or ordering of unrelated memory.
+
+The accepted SPEC-0022 device-publication child adds `gpu.atomic.loadAcquireDevice` and `gpu.atomic.storeReleaseDevice` for the same exact pointer types, alignment boundary and compile profile. When acquire observes the matching release, payload writes before release are ordered before payload reads after acquire at device scope. CUDA-JS does not own readiness values, generations, progress, queues or compound-payload policy.
+
+Accepted SPEC-0014 adds the separate opaque types `mailbox<host-to-device,u32>` and `mailbox<device-to-host,u32>`. They support only `gpu.mailbox.loadAcquireSystem` and `gpu.mailbox.storeReleaseSystem` respectively, lowering through `cuda::atomic_ref<unsigned int, cuda::thread_scope_system>` with acquire/release order. They cannot be indexed, converted to ordinary pointers, used with device-scope helpers, or used for RMW.
+
 Portable tests prove translation/contract behavior only. Native support requires the exact SPEC-0013 compiler/launch/oracle/lifecycle promotion evidence.
 
 Run the component tests through the F5/F8 portable chains; direct package consumers should use `compileDeviceProgram` from `cuda-js`.

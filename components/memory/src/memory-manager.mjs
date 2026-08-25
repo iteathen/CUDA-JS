@@ -436,6 +436,23 @@ export class MemoryManager {
     });
   }
 
+  acquireRangeForTransfer(token, deviceOffset, transferLength) {
+    const lease = this.#registry.acquire(token, { kind: 'device-memory' });
+    try {
+      checkedRange(lease.value.byteLength, deviceOffset, transferLength);
+      return Object.freeze({
+        native: lease.value.native,
+        byteLength: lease.value.byteLength,
+        deviceOffset,
+        transferLength,
+        release: lease.release,
+      });
+    } catch (error) {
+      lease.release();
+      throw error;
+    }
+  }
+
   async #descriptor(token, allocationLength, operationId) {
     return Object.freeze({
       schemaVersion: 1,

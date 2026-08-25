@@ -6,11 +6,14 @@ import {
 } from './numeric-abi.mjs';
 
 const MIB = 1_048_576;
-const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds']);
+const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds', 'maxPendingGpuOperations']);
 const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
   'execution.operation.timeout',
+  'mailbox.status',
+  'mailbox.reset',
+  'mailbox.release',
   'runtime.close',
 ]);
 const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
@@ -34,6 +37,7 @@ export const DEFAULT_EXECUTION_POLICY = Object.freeze({
   maxModuleBytes: 4 * MIB,
   maxArguments: 32,
   maxCompletionMilliseconds: 30_000,
+  maxPendingGpuOperations: 1,
 });
 
 export class ExecutionError extends Error {
@@ -261,6 +265,7 @@ export function normalizeExecutionPolicy(value = {}) {
     maxModuleBytes: boundedPositive(value.maxModuleBytes ?? DEFAULT_EXECUTION_POLICY.maxModuleBytes, 'maxModuleBytes', 64 * MIB),
     maxArguments: boundedPositive(value.maxArguments ?? DEFAULT_EXECUTION_POLICY.maxArguments, 'maxArguments', 64),
     maxCompletionMilliseconds: boundedPositive(value.maxCompletionMilliseconds ?? DEFAULT_EXECUTION_POLICY.maxCompletionMilliseconds, 'maxCompletionMilliseconds', 300_000),
+    maxPendingGpuOperations: boundedPositive(value.maxPendingGpuOperations ?? DEFAULT_EXECUTION_POLICY.maxPendingGpuOperations, 'maxPendingGpuOperations', 2),
   });
 }
 
@@ -306,6 +311,38 @@ function assertOperations(operations) {
 
 function delay(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
 
+function tokenIdentity(token) { return `${token.slot}:${token.generation}`; }
+
+const ACCESS_MODES = new Set(['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device']);
+
+function normalizeAccesses(value, argumentValues, memoryLeases, widened) {
+  if (value === undefined && !widened) return Object.freeze([]);
+  if (!Array.isArray(value)) fail('EXECUTION_ACCESSES_REQUIRED', 'validation', 'Widened scheduling requires an explicit bounded access set.');
+  const deviceIndexes = argumentValues.flatMap((entry, index) => entry?.kind === 'device-memory' ? [index] : []);
+  if (value.length !== deviceIndexes.length) fail('EXECUTION_ACCESSES_INVALID', 'validation', 'The access set must contain exactly one entry for each device-memory argument.', { expected: deviceIndexes.length, actual: value.length });
+  return Object.freeze(value.map((entry, accessIndex) => {
+    if (!plainObject(entry) || Object.keys(entry).some((key) => !['argumentIndex', 'byteOffset', 'byteLength', 'mode', 'dtype'].includes(key))) fail('EXECUTION_ACCESS_INVALID', 'Access declaration contains unknown fields.', { accessIndex });
+    const argumentIndex = entry.argumentIndex;
+    if (!deviceIndexes.includes(argumentIndex) || value.some((other, index) => index < accessIndex && other?.argumentIndex === argumentIndex)) fail('EXECUTION_ACCESS_INVALID', 'Access argumentIndex must uniquely select a device-memory argument.', { accessIndex, argumentIndex });
+    if (!Number.isSafeInteger(entry.byteOffset) || entry.byteOffset < 0 || !Number.isSafeInteger(entry.byteLength) || entry.byteLength < 1 || !ACCESS_MODES.has(entry.mode)) fail('EXECUTION_ACCESS_INVALID', 'Access range or mode is invalid.', { accessIndex });
+    const leaseIndex = deviceIndexes.indexOf(argumentIndex);
+    const lease = memoryLeases[leaseIndex];
+    const start = lease.byteOffset + entry.byteOffset;
+    const end = start + entry.byteLength;
+    if (!Number.isSafeInteger(end) || end > lease.byteLength) fail('EXECUTION_ACCESS_RANGE', 'Access range exceeds its allocation.', { accessIndex });
+    const atomic = entry.mode.startsWith('atomic-');
+    if (atomic && !['u32', 'u64'].includes(entry.dtype)) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'Atomic access requires exact u32 or u64 dtype.', { accessIndex });
+    if (!atomic && Object.hasOwn(entry, 'dtype')) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'Ordinary access must not declare an atomic dtype.', { accessIndex });
+    const width = entry.dtype === 'u64' ? 8 : 4;
+    if (atomic && (start % width !== 0 || entry.byteLength % width !== 0)) fail('EXECUTION_ACCESS_ATOMIC_ALIGNMENT', 'Atomic access range must be naturally aligned and whole-element sized.', { accessIndex });
+    return Object.freeze({ native: lease.native, start, end, mode: entry.mode, ...(atomic ? { dtype: entry.dtype } : {}) });
+  }));
+}
+
+function rangesOverlap(left, right) { return left.native === right.native && left.start < right.end && right.start < left.end; }
+function atomicCompatible(left, right) { return left.mode.startsWith('atomic-') && right.mode.startsWith('atomic-') && left.dtype === right.dtype; }
+function ordinaryConflict(left, right) { return rangesOverlap(left, right) && !atomicCompatible(left, right) && !(left.mode === 'read' && right.mode === 'read'); }
+
 function failureRecord(error, { includeDetails = false, trustedDetails = false } = {}) {
   return Object.freeze({
     code: typeof error?.code === 'string' ? error.code : 'EXECUTION_ASYNC_FAILURE',
@@ -323,13 +360,14 @@ export class ExecutionManager {
   #registry;
   #contextToken;
   #memory;
+  #mailboxes;
   #policy;
   #limits;
   #operations;
   #clock;
   #sleep;
-  #streamToken = null;
-  #pendingOperationToken = null;
+  #streamTokens = [];
+  #pendingOperations = new Map();
   #moduleCount = 0;
   #functionCount = 0;
   #completionCount = 0;
@@ -337,7 +375,7 @@ export class ExecutionManager {
   #functionDescriptors = new Map();
   #rollbackFailure = null;
 
-  constructor({ registry, contextToken, memory, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
+  constructor({ registry, contextToken, memory, mailboxes = null, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
     if (!registry || typeof registry.allocate !== 'function' || typeof registry.acquire !== 'function') fail('EXECUTION_REGISTRY_INVALID', 'internal', 'Execution manager requires a resource registry.');
     if (!memory || typeof memory.acquireForExecution !== 'function') fail('EXECUTION_MEMORY_INVALID', 'internal', 'Execution manager requires the internal memory lease port.');
     if (!plainObject(deviceLimits)) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Execution manager requires device launch limits.');
@@ -346,6 +384,7 @@ export class ExecutionManager {
     this.#registry = registry;
     this.#contextToken = contextToken;
     this.#memory = memory;
+    this.#mailboxes = mailboxes;
     this.#policy = normalizeExecutionPolicy(policy);
     this.#limits = Object.freeze({ ...deviceLimits });
     this.#operations = operations;
@@ -357,35 +396,38 @@ export class ExecutionManager {
 
   async initialize(operationId = 0) {
     this.#assertAdmission();
-    if (this.#streamToken) fail('EXECUTION_ALREADY_INITIALIZED', 'internal', 'Execution manager is already initialized.');
-    const native = await this.#operations.createStream({ operationId });
-    try {
-      this.#streamToken = this.#registry.allocate({
-        kind: 'stream', value: Object.freeze({ native }), parent: this.#contextToken,
-        dispose: async (record) => Object.freeze({ kind: 'stream', destroyed: true, backend: await this.#operations.destroyStream({ native: record.native, operationId: null }) ?? null }),
-      });
-    } catch (primaryError) {
+    if (this.#streamTokens.length > 0) fail('EXECUTION_ALREADY_INITIALIZED', 'internal', 'Execution manager is already initialized.');
+    for (let index = 0; index < this.#policy.maxPendingGpuOperations; index += 1) {
+      const native = await this.#operations.createStream({ operationId });
       try {
-        await this.#operations.destroyStream({ native, operationId });
-      } catch (cleanupError) {
-        this.#rollbackFailure ??= combinedRollbackError({
-          code: 'EXECUTION_STREAM_ROLLBACK_FAILED',
-          message: 'Stream registration failed and native stream rollback cleanup was unproved.',
-          operation: 'execution.initialize',
-          operationId,
-          primaryError,
-          primaryFallbackCode: 'EXECUTION_STREAM_REGISTRATION_FAILED',
-          primaryFallbackOperation: 'execution.stream.register',
-          cleanupErrors: [cleanupError],
-          cleanupFallbackCode: 'EXECUTION_STREAM_CLEANUP_UNPROVED',
-          cleanupFallbackOperation: 'execution.stream.destroy',
-          registry: this.#registry,
-          unprovedResources: [{ kind: 'stream', registered: false }],
-          restartRequired: this.#operations.restartRequired,
+        const token = this.#registry.allocate({
+          kind: 'stream', value: Object.freeze({ native, index }), parent: this.#contextToken,
+          dispose: async (record) => Object.freeze({ kind: 'stream', destroyed: true, backend: await this.#operations.destroyStream({ native: record.native, operationId: null }) ?? null }),
         });
-        throw this.#rollbackFailure;
+        this.#streamTokens.push(token);
+      } catch (primaryError) {
+        try {
+          await this.#operations.destroyStream({ native, operationId });
+        } catch (cleanupError) {
+          this.#rollbackFailure ??= combinedRollbackError({
+            code: 'EXECUTION_STREAM_ROLLBACK_FAILED',
+            message: 'Stream registration failed and native stream rollback cleanup was unproved.',
+            operation: 'execution.initialize',
+            operationId,
+            primaryError,
+            primaryFallbackCode: 'EXECUTION_STREAM_REGISTRATION_FAILED',
+            primaryFallbackOperation: 'execution.stream.register',
+            cleanupErrors: [cleanupError],
+            cleanupFallbackCode: 'EXECUTION_STREAM_CLEANUP_UNPROVED',
+            cleanupFallbackOperation: 'execution.stream.destroy',
+            registry: this.#registry,
+            unprovedResources: [{ kind: 'stream', registered: false }],
+            restartRequired: this.#operations.restartRequired,
+          });
+          throw this.#rollbackFailure;
+        }
+        throw primaryError;
       }
-      throw primaryError;
     }
     return this.summary();
   }
@@ -397,9 +439,11 @@ export class ExecutionManager {
       moduleCount: this.#moduleCount,
       functionCount: this.#functionCount,
       completionCount: this.#completionCount,
-      inFlight: this.#pendingOperationToken !== null,
-      pendingOperation: this.#pendingOperationToken !== null,
-      privateStream: this.#streamToken !== null,
+      inFlight: this.#pendingOperations.size > 0,
+      pendingOperation: this.#pendingOperations.size > 0,
+      pendingOperationCount: this.#pendingOperations.size,
+      privateStream: this.#streamTokens.length > 0,
+      privateStreamCount: this.#streamTokens.length,
       ...(rollbackFailure ? {
         unprovedRollbackCount: 1,
         rollbackFailure: failureRecord(rollbackFailure, { includeDetails: true, trustedDetails: true }),
@@ -408,8 +452,12 @@ export class ExecutionManager {
   }
 
   assertCommandAllowed(command, operationId = null) {
-    if (this.#pendingOperationToken === null) return;
+    if (this.#pendingOperations.size === 0) return;
     if (PENDING_OPERATION_COMMANDS.has(command)) return;
+    if (['execution.submit', 'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d'].includes(command)) {
+      if (this.#pendingOperations.size < this.#policy.maxPendingGpuOperations) return;
+      if (this.#policy.maxPendingGpuOperations > 1) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    }
     fail('EXECUTION_COMMAND_BLOCKED', 'backpressure', 'DriverActor command is unavailable while a GPU operation is pending.', { command }, { operationId });
   }
 
@@ -417,7 +465,7 @@ export class ExecutionManager {
     this.#assertAdmission();
     if (!['ptx', 'cubin'].includes(format)) fail('EXECUTION_MODULE_FORMAT', 'unsupported', 'Module format must be PTX or cubin.', { format });
     const owned = moduleBytes(format, bytes, this.#policy.maxModuleBytes);
-    if (this.#streamToken === null) await this.initialize(operationId);
+    if (this.#streamTokens.length === 0) await this.initialize(operationId);
     const sha256 = createHash('sha256').update(owned).digest('hex');
     const native = await this.#operations.loadModule({ format, bytes: owned, operationId });
     let token;
@@ -472,21 +520,24 @@ export class ExecutionManager {
 
   functionStatus(token, operationId = null) { return this.#functionDescriptor(token, this.#registry.get(token, { kind: 'function' }), operationId); }
 
-  async submit(functionToken, { grid: gridValue, block: blockValue, sharedMemoryBytes = 0, arguments: argumentValues, operationId = null }) {
+  async submit(functionToken, { grid: gridValue, block: blockValue, sharedMemoryBytes = 0, arguments: argumentValues, after = null, accesses: accessValues, operationId = null }) {
     this.#assertAdmission();
-    if (this.#pendingOperationToken !== null) fail('EXECUTION_BUSY', 'backpressure', 'Exactly one GPU operation may be pending.', { operationId });
+    if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
     const grid = dimensions(gridValue, 'grid');
     const block = dimensions(blockValue, 'block');
     this.#validateLaunchBounds(grid, block, sharedMemoryBytes);
     if (!Array.isArray(argumentValues)) fail('EXECUTION_ARGUMENTS_INVALID', 'validation', 'Launch arguments must be an array.');
     const functionLease = this.#registry.acquire(functionToken, { kind: 'function' });
     const memoryLeases = [];
+    const mailboxLeases = [];
+    let dependencyLease = null;
     let eventToken = null;
     let eventNative = null;
     let submitted = false;
     let ownershipTransferred = false;
     try {
       const values = [];
+      const mailboxGroups = new Map();
       if (argumentValues.length !== functionLease.value.parameters.length) fail('EXECUTION_ARGUMENT_COUNT', 'validation', 'Launch argument count must exactly match the declared parameter count.', { expected: functionLease.value.parameters.length, actual: argumentValues.length });
       for (let index = 0; index < functionLease.value.parameters.length; index += 1) {
         const parameter = functionLease.value.parameters[index];
@@ -496,22 +547,54 @@ export class ExecutionManager {
           const lease = this.#memory.acquireForExecution(argument.memory, argument.byteOffset ?? 0);
           memoryLeases.push(lease);
           values.push(await this.#operations.devicePointer({ native: lease.native, byteOffset: lease.byteOffset, operationId }));
+        } else if (parameter.kind.startsWith('publication-mailbox-')) {
+          if (!exactFields(argument, ['kind', 'mailbox', 'generation', 'lane']) || argument.kind !== 'publication-mailbox' || typeof argument.lane !== 'string') fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Mailbox argument does not match its declared kind.', { index });
+          if (!this.#mailboxes || typeof this.#mailboxes.acquireForExecution !== 'function') fail('EXECUTION_MAILBOX_UNAVAILABLE', 'unsupported', 'Publication mailbox launch support is unavailable.');
+          const key = tokenIdentity(argument.mailbox);
+          const direction = parameter.kind === 'publication-mailbox-host-to-device-u32' ? 'host-to-device' : 'device-to-host';
+          const group = mailboxGroups.get(key) ?? { token: argument.mailbox, generation: argument.generation, bindings: [], indexes: [] };
+          if (group.generation !== argument.generation) fail('EXECUTION_MAILBOX_GENERATION_MISMATCH', 'validation', 'One mailbox cannot carry multiple generations in one launch.', { index });
+          group.bindings.push({ lane: argument.lane, direction });
+          group.indexes.push(index);
+          mailboxGroups.set(key, group);
+          values.push(null);
         } else {
           if (!exactFields(argument, ['kind', 'value']) || argument.kind !== parameter.kind) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Scalar argument does not match its declared kind.', { index, expectedKind: parameter.kind });
           values.push(argument.value);
         }
       }
+      for (const group of mailboxGroups.values()) {
+        const lease = this.#mailboxes.acquireForExecution(group.token, group.generation, group.bindings);
+        mailboxLeases.push(lease);
+        group.indexes.forEach((argumentIndex, pointerIndex) => { values[argumentIndex] = lease.pointers[pointerIndex]; });
+      }
+      let dependency = null;
+      if (after !== null) {
+        dependencyLease = this.#registry.acquire(after, { kind: 'operation' });
+        if (dependencyLease.value.submissionSequence >= operationId) fail('EXECUTION_DEPENDENCY_ORDER', 'validation', 'Dependency must be an earlier operation from this runtime epoch.', { operationId });
+        if (dependencyLease.value.state === 'failed' || dependencyLease.value.state === 'orphaned') fail('EXECUTION_DEPENDENCY_TERMINAL', 'validation', 'Failed or orphaned work cannot be used as a dependency.', { state: dependencyLease.value.state });
+        dependency = dependencyLease.value.state === 'pending' ? dependencyLease.value : null;
+      }
+      const accesses = normalizeAccesses(accessValues, argumentValues, memoryLeases, this.#policy.maxPendingGpuOperations > 1);
+      for (const pending of this.#pendingOperations.values()) {
+        if (dependency === pending.record) continue;
+        for (const currentAccess of accesses) for (const priorAccess of pending.record.accesses) {
+          if (ordinaryConflict(currentAccess, priorAccess)) fail('EXECUTION_RESOURCE_HAZARD', 'backpressure', 'Overlapping ordinary access requires an explicit dependency on the pending operation.');
+        }
+      }
       const packed = packParameterValues(functionLease.value.parameters, values);
-      const stream = this.#registry.get(this.#streamToken, { kind: 'stream' });
+      const streamToken = dependency?.streamToken ?? this.#streamTokens.find((candidate) => ![...this.#pendingOperations.values()].some((entry) => tokenIdentity(entry.streamToken) === tokenIdentity(candidate)));
+      if (!streamToken) fail('EXECUTION_BUSY', 'backpressure', 'No private execution stream is available.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+      const stream = this.#registry.get(streamToken, { kind: 'stream' });
       eventNative = await this.#operations.createEvent({ operationId });
-      eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: this.#streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
+      eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
       await this.#operations.submitLaunch({ functionNative: functionLease.value.native, streamNative: stream.native, config: Object.freeze({ grid, block, sharedMemoryBytes }), parameterBuffer: packed.buffer, operationId });
       submitted = true;
       try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }
       catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Launch was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
 
       const record = {
-        state: 'pending', eventToken, functionToken, functionLease, memoryLeases, module: functionLease.value.module, grid, block, sharedMemoryBytes,
+        kind: 'kernel', state: 'pending', eventToken, streamToken, functionToken, functionLease, memoryLeases, mailboxLeases, dependencyLease, accesses, module: functionLease.value.module, grid, block, sharedMemoryBytes,
         argumentKinds: Object.freeze(functionLease.value.parameters.map((entry) => entry.kind)), submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
       };
       let operationToken;
@@ -528,7 +611,7 @@ export class ExecutionManager {
         throw this.#operations.restartRequired({ code: 'EXECUTION_OPERATION_REGISTRATION_LOST', message: 'Launch provenance exists but logical operation ownership could not be registered.', details: { causeCode: error?.code ?? null }, operationId });
       }
       ownershipTransferred = true;
-      this.#pendingOperationToken = operationToken;
+      this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
       return this.#operationDescriptor(operationToken, record, operationId);
     } catch (error) {
       if (submitted && error?.category === 'restart-required') { ownershipTransferred = true; throw error; }
@@ -560,7 +643,97 @@ export class ExecutionManager {
     } finally {
       if (!ownershipTransferred) {
         for (let index = memoryLeases.length - 1; index >= 0; index -= 1) memoryLeases[index].release();
+        for (let index = mailboxLeases.length - 1; index >= 0; index -= 1) mailboxLeases[index].release();
+        dependencyLease?.release();
         functionLease.release();
+      }
+    }
+  }
+
+  async submitTransfer({ kind, after = null, accesses, leases, enqueue, complete = null, operationId = null }) {
+    this.#assertAdmission();
+    if (!['host-to-device', 'device-to-host', 'device-to-device'].includes(kind) || !Array.isArray(accesses) || !Array.isArray(leases) || typeof enqueue !== 'function' || (complete !== null && typeof complete !== 'function')) fail('EXECUTION_TRANSFER_INVALID', 'internal', 'Transfer operation adapter request is invalid.');
+    if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    let dependencyLease = null;
+    let eventToken = null;
+    let eventNative = null;
+    let submitted = false;
+    let ownershipTransferred = false;
+    try {
+      if (this.#streamTokens.length === 0) await this.initialize(operationId);
+      let dependency = null;
+      if (after !== null) {
+        dependencyLease = this.#registry.acquire(after, { kind: 'operation' });
+        if (dependencyLease.value.submissionSequence >= operationId) fail('EXECUTION_DEPENDENCY_ORDER', 'validation', 'Dependency must be an earlier operation from this runtime epoch.', { operationId });
+        if (dependencyLease.value.state === 'failed' || dependencyLease.value.state === 'orphaned') fail('EXECUTION_DEPENDENCY_TERMINAL', 'validation', 'Failed or orphaned work cannot be used as a dependency.', { state: dependencyLease.value.state });
+        dependency = dependencyLease.value.state === 'pending' ? dependencyLease.value : null;
+      }
+      for (const pending of this.#pendingOperations.values()) {
+        if (dependency === pending.record) continue;
+        for (const currentAccess of accesses) for (const priorAccess of pending.record.accesses) {
+          if (ordinaryConflict(currentAccess, priorAccess)) fail('EXECUTION_RESOURCE_HAZARD', 'backpressure', 'Overlapping ordinary access requires an explicit dependency on the pending operation.');
+        }
+      }
+      const streamToken = dependency?.streamToken ?? this.#streamTokens.find((candidate) => ![...this.#pendingOperations.values()].some((entry) => tokenIdentity(entry.streamToken) === tokenIdentity(candidate)));
+      if (!streamToken) fail('EXECUTION_BUSY', 'backpressure', 'No private execution stream is available.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+      const stream = this.#registry.get(streamToken, { kind: 'stream' });
+      eventNative = await this.#operations.createEvent({ operationId });
+      eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
+      await enqueue(stream.native);
+      submitted = true;
+      try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }
+      catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Transfer was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
+      const record = {
+        kind, state: 'pending', eventToken, streamToken, dependencyLease, accesses: Object.freeze(accesses), externalLeases: leases, complete,
+        submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
+      };
+      let operationToken;
+      try {
+        operationToken = this.#registry.allocate({
+          kind: 'operation', value: record, parent: this.#contextToken,
+          dispose: async (value) => {
+            if (value.state === 'pending') fail('EXECUTION_OPERATION_BUSY', 'backpressure', 'Pending GPU operation cannot be closed.', { operationId: value.submissionSequence });
+            if (value.state === 'orphaned') fail('EXECUTION_OPERATION_ORPHANED', 'restart-required', 'Orphaned GPU operation cannot claim logical cleanup.', { operationId: value.submissionSequence });
+            return Object.freeze({ kind: 'operation', logicalClosed: true, terminalState: value.state });
+          },
+        });
+      } catch (error) {
+        throw this.#operations.restartRequired({ code: 'EXECUTION_OPERATION_REGISTRATION_LOST', message: 'Transfer provenance exists but logical operation ownership could not be registered.', details: { causeCode: error?.code ?? null }, operationId });
+      }
+      ownershipTransferred = true;
+      this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
+      return this.#operationDescriptor(operationToken, record, operationId);
+    } catch (error) {
+      if (submitted && error?.category === 'restart-required') { ownershipTransferred = true; throw error; }
+      if (eventNative !== null) {
+        try {
+          if (eventToken !== null) await this.#registry.close(eventToken);
+          else await this.#operations.destroyEvent({ native: eventNative, operationId });
+        } catch (cleanupError) {
+          const combined = combinedRollbackError({
+            code: 'EXECUTION_TRANSFER_ROLLBACK_FAILED',
+            message: 'Transfer submission failed and completion-event rollback cleanup was unproved.',
+            operation: 'memory.transfer',
+            operationId,
+            primaryError: error,
+            primaryFallbackCode: 'EXECUTION_TRANSFER_FAILED',
+            primaryFallbackOperation: 'memory.transfer',
+            cleanupErrors: [cleanupError],
+            cleanupFallbackCode: 'EXECUTION_EVENT_CLEANUP_UNPROVED',
+            cleanupFallbackOperation: eventToken === null ? 'execution.event.destroy' : 'resource.close',
+            registry: this.#registry,
+            unprovedResources: [{ kind: 'event', registered: eventToken !== null }],
+            restartRequired: this.#operations.restartRequired,
+          });
+          if (eventToken === null) this.#rollbackFailure ??= combined;
+          throw eventToken === null ? this.#rollbackFailure : combined;
+        }
+      }
+      throw error;
+    } finally {
+      if (!ownershipTransferred) {
+        dependencyLease?.release();
+        for (let index = leases.length - 1; index >= 0; index -= 1) leases[index].release();
       }
     }
   }
@@ -576,6 +749,16 @@ export class ExecutionManager {
     } catch (error) {
       record.pollCount += 1;
       if (error?.category === 'restart-required') { this.#markOrphaned(record, error); throw error; }
+      if (this.#pendingOperations.size > 1) {
+        const unattributed = this.#operations.restartRequired({
+          code: 'EXECUTION_DEFERRED_FAILURE_UNATTRIBUTED',
+          message: 'A deferred failure was observed while multiple operations were pending; affected work cannot be attributed safely.',
+          details: { causeCode: error?.code ?? null, pendingOperationCount: this.#pendingOperations.size },
+          operationId,
+        });
+        for (const pending of this.#pendingOperations.values()) this.#markOrphaned(pending.record, unattributed);
+        throw unattributed;
+      }
       await this.#terminalizeFailure(token, record, error, operationId);
       return this.#operationDescriptor(token, record, operationId);
     }
@@ -605,15 +788,22 @@ export class ExecutionManager {
   async prepareClose(operationId = null) {
     const rollbackFailure = this.#admissionFailure();
     if (rollbackFailure) throw rollbackFailure;
-    if (this.#pendingOperationToken === null) return this.summary();
-    const token = this.#pendingOperationToken;
+    if (this.#pendingOperations.size === 0) return this.summary();
     const started = this.#clock();
     let pollDelay = 1;
     for (;;) {
-      const status = await this.operationStatus(token, operationId);
-      if (status.status !== 'pending') return this.summary();
+      let hasPending = false;
+      for (const { operationToken } of [...this.#pendingOperations.values()]) {
+        const status = await this.operationStatus(operationToken, operationId);
+        if (status.status === 'pending') hasPending = true;
+      }
+      if (this.#pendingOperations.size === 0) return this.summary();
+      if (!hasPending) return this.summary();
       const elapsed = Math.max(0, Math.trunc(this.#clock() - started));
-      if (elapsed >= this.#policy.maxCompletionMilliseconds) await this.legacyTimeout(token, operationId, 'EXECUTION_CLOSE_TIMEOUT', 'Runtime close could not prove GPU operation terminality before the completion deadline.');
+      if (elapsed >= this.#policy.maxCompletionMilliseconds) {
+        const { operationToken } = this.#pendingOperations.values().next().value;
+        await this.legacyTimeout(operationToken, operationId, 'EXECUTION_CLOSE_TIMEOUT', 'Runtime close could not prove GPU operation terminality before the completion deadline.');
+      }
       await this.#sleep(Math.min(pollDelay, this.#policy.maxCompletionMilliseconds - elapsed));
       pollDelay = Math.min(pollDelay * 2, 16);
     }
@@ -669,11 +859,15 @@ export class ExecutionManager {
 
   #operationDescriptor(token, record, observationSequence) {
     const elapsed = Math.max(0, Math.trunc(this.#clock() - record.startedAt));
-    const base = {
-      schemaVersion: 1, operation: token, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
+    const base = record.kind === 'kernel' ? {
+      schemaVersion: 1, operation: token, kind: record.kind, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
       sharedMemoryBytes: record.sharedMemoryBytes, argumentKinds: record.argumentKinds, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
+    } : {
+      schemaVersion: 1, operation: token, kind: record.kind, status: record.state, pollCount: record.pollCount,
+      elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
     };
+    if (record.result) base.result = record.result;
     if (record.failure) base.failure = record.failure;
     if (record.orphanReason) base.orphanReason = record.orphanReason;
     return Object.freeze(base);
@@ -684,6 +878,16 @@ export class ExecutionManager {
   }
 
   async #terminalizeCompleted(token, record, operationId) {
+    if (record.complete !== null && record.complete !== undefined) {
+      try { record.result = Object.freeze(await record.complete()); }
+      catch (error) {
+        const completionError = typeof error?.code === 'string' && typeof error?.category === 'string'
+          ? error
+          : new ExecutionError('EXECUTION_TRANSFER_RESULT_FAILED', 'internal', 'Transfer result materialization failed after GPU completion.', {});
+        await this.#terminalizeFailure(token, record, completionError, operationId);
+        return;
+      }
+    }
     try { await this.#registry.close(record.eventToken); }
     catch (cleanupError) {
       const combined = combinedRollbackError({
@@ -710,7 +914,7 @@ export class ExecutionManager {
     record.state = 'completed';
     record.terminal = true;
     this.#completionCount += 1;
-    if (this.#pendingOperationToken && token.slot === this.#pendingOperationToken.slot && token.generation === this.#pendingOperationToken.generation) this.#pendingOperationToken = null;
+    this.#pendingOperations.delete(tokenIdentity(token));
   }
 
   async #terminalizeFailure(token, record, error, operationId) {
@@ -740,7 +944,7 @@ export class ExecutionManager {
     record.state = 'failed';
     record.failure = failureRecord(error, { includeDetails: true });
     record.terminal = true;
-    if (this.#pendingOperationToken && token.slot === this.#pendingOperationToken.slot && token.generation === this.#pendingOperationToken.generation) this.#pendingOperationToken = null;
+    this.#pendingOperations.delete(tokenIdentity(token));
   }
 
   #markOrphaned(record, error, { includeDetails = false } = {}) {
@@ -752,8 +956,11 @@ export class ExecutionManager {
   #releaseExecutionLeases(record) {
     if (record.leasesReleased) return;
     record.leasesReleased = true;
-    for (let index = record.memoryLeases.length - 1; index >= 0; index -= 1) record.memoryLeases[index].release();
-    record.functionLease.release();
+    for (let index = (record.memoryLeases ?? []).length - 1; index >= 0; index -= 1) record.memoryLeases[index].release();
+    for (let index = (record.mailboxLeases ?? []).length - 1; index >= 0; index -= 1) record.mailboxLeases[index].release();
+    for (let index = (record.externalLeases ?? []).length - 1; index >= 0; index -= 1) record.externalLeases[index].release();
+    record.dependencyLease?.release();
+    record.functionLease?.release();
   }
 
   #admissionFailure() {

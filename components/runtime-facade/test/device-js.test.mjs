@@ -41,9 +41,16 @@ function kernel(out, input, n) {
 test('public Device-JS bridge translates privately then reuses CompilerActor', { timeout: 10_000 }, async () => {
   const runtime = await openCudaRuntimeForTesting({ compiler: true });
   try {
+    const compilerResourcesBefore = (await runtime.describe()).compiler.resources;
+    await assert.rejects(compileDeviceProgram(runtime, {
+      source: 'function publish(ready) { gpu.atomic.storeReleaseDevice(ready, gpu.u32(0), gpu.u32(1)); }',
+      functions: [{ name: 'publish', kind: 'kernel', parameters: [{ name: 'ready', type: 'ptr<u32>' }], returns: 'void' }],
+    }), (error) => error.code === 'DEVICE_JS_ATOMIC_PROFILE_REQUIRED');
+    assert.deepEqual((await runtime.describe()).compiler.resources, compilerResourcesBefore);
+
     const result = await compileDeviceProgram(runtime, request);
     assert.equal(result.schemaVersion, 1);
-    assert.equal(result.deviceProgram.contract, 'SPEC-0013-v1');
+    assert.equal(result.deviceProgram.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1');
     assert.equal(result.deviceProgram.parser.name, 'acorn');
     assert.equal(result.deviceProgram.kernels.length, 1);
     assert.deepEqual(result.deviceProgram.kernels[0].parameters, [

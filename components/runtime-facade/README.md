@@ -24,4 +24,23 @@ try {
 }
 ```
 
+The opt-in capacity-two profile also provides operation-producing transfers without public streams or native buffers:
+
+```js
+const runtime = await openCudaRuntime({ driver: { execution: { maxPendingGpuOperations: 2 } } });
+const memory = await runtime.allocateDevice({ byteLength: 4096 });
+const upload = await memory.writeAsync(new Uint8Array(4096));
+const download = await memory.readAsync({ byteLength: 4096, after: upload });
+const terminal = await download.wait();
+console.log(terminal.result.bytes.byteLength);
+await upload.wait();
+await download.close();
+await upload.close();
+await runtime.close();
+```
+
+`writeAsync()` snapshots ingress before native ownership, `readAsync()` exposes bytes only in a completed operation result, and `copyFromAsync()` performs a bounded contiguous D2D copy. Each consumes the same SPEC-0016 operation capacity, dependency, hazard, and cleanup lifecycle as kernels.
+
+Accepted SPEC-0014 adds `runtime.createPublicationMailbox({ lanes })`. The returned opaque mailbox exposes direction-checked synchronous `store(name, u32)` and `load(name)` plus status/reset/close; its private `SharedArrayBuffer` and CUDA mapping never become public. Kernel arguments bind one named lane through `{ kind: 'publication-mailbox', mailbox, lane }`, and the mailbox remains exclusively leased through operation terminality.
+
 `cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux and WSL imports fail with stable backend-unavailable errors while their retained runbooks remain independently completable.

@@ -1,0 +1,4 @@
+extern "C" __device__ unsigned int cuda_js_lto_transform(unsigned int value) {
+  const unsigned int rotated = (value << 7) | (value >> 25);
+  return rotated + 0x13579bdfu;
+}

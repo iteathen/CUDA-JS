@@ -9,6 +9,9 @@ export const evidenceRoot = path.join(repositoryRoot, 'build', 'f5', profileName
 export const nativeRoot = path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'native');
 export const oraclePath = path.join(nativeRoot, 'windows-launch-oracle.exe');
 export const ptxPath = path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt');
+export const capabilityOraclePath = path.join(nativeRoot, 'windows-capability-oracle.exe');
+export const capabilityPtxPath = path.join(nativeRoot, 'native-capabilities.ptx');
+export const capabilitySourcePath = path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'native-capabilities.cu.txt');
 export const elementCount = 1_024;
 
 export async function sha256(filePath) {

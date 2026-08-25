@@ -1,0 +1,6 @@
+extern "C" __device__ unsigned int cuda_js_rdc_transform(unsigned int value);
+
+extern "C" __global__ void cuda_js_rdc_kernel(const unsigned int* input, unsigned int* output, unsigned int count) {
+  const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < count) output[index] = cuda_js_rdc_transform(input[index]);
+}

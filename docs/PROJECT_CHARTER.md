@@ -34,6 +34,12 @@ The public contract describes the widest truthful CUDA runtime invariants. It do
 
 The version-zero baseline uses Node's built-in FFI and ships no CUDA-JS-specific compiled addon. It reuses Node's Fast API JIT path where an exact profile is qualified; strict JIT support is not claimed before that evidence. Direct custom JIT work requires a measured gap and separate accepted decision.
 
+## Production-source rule
+
+CUDA-JS is **JavaScript-authored and JIT/native-realized** under [`ADR-0005`](decisions/ADR-0005-javascript-authored-jit-native-realized.md). The maintained core runtime shipped by CUDA-JS is JavaScript/ESM. Node/V8, native CUDA provider libraries, private generated CUDA C++ and produced device artifacts realize execution without becoming a CUDA-JS-maintained C/C++ host runtime.
+
+C/C++ ABI probes, conformance oracles and generated fixtures may exist as independently owned evidence but are not shipped runtime implementation. A future maintained native host backend requires a measured gap and a separate accepted architecture/package/lifecycle decision; it may not arrive as an incidental optimization or consumer workaround.
+
 ## Safety rule
 
 JavaScript does not receive an unconstrained pointer capability. Native resources use opaque IDs with ownership, generation, bounds, actor/context identity, and lifecycle validation. Unsafe raw-memory operations are isolated and excluded from ordinary compatibility guarantees.

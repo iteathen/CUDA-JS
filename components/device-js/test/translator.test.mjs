@@ -63,7 +63,7 @@ test('Device-JS translates structured control flow, pointer access, helpers and 
   const first = translateDeviceProgram({ source, functions });
   const second = translateDeviceProgram({ source, functions });
 
-  assert.equal(first.contract, 'SPEC-0013-v1');
+  assert.equal(first.contract, 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1');
   assert.equal(first.sha256, second.sha256);
   assert.equal(first.generatedSource, second.generatedSource);
   assert.equal(first.parser.name, 'acorn');
@@ -91,6 +91,7 @@ test('Device-JS translates structured control flow, pointer access, helpers and 
   assert.match(first.generatedSource, /__threadfence\(\)/);
   assert.match(first.generatedSource, /sqrtf\(/);
   assert.match(first.generatedSource, /fmaxf\(/);
+  assert.doesNotMatch(first.generatedSource, /#include <cuda\/atomic>/);
   assert.doesNotMatch(first.generatedSource, /searchKernel/);
   assert.doesNotMatch(first.generatedSource, /rotate\(/);
 });
@@ -110,6 +111,106 @@ test('program identity changes with semantic source, type metadata and compile i
   assert.notEqual(typeChange.sha256, baseline.sha256);
   assert.notEqual(compileChange.sha256, baseline.sha256);
   assert.match(baseline.generatedName, /^device-js-[a-f0-9]{16}\.cu$/);
+});
+
+test('scoped atomic observation fails closed outside its exact profile, dtype and void context', () => {
+  const metadata = [{
+    name: 'k',
+    kind: 'kernel',
+    parameters: [{ name: 'words', type: 'ptr<u32>' }, { name: 'floats', type: 'ptr<f32>' }],
+    returns: 'void',
+  }];
+  const compile = { headerProfile: 'cuda-cccl' };
+  const accepted = translateDeviceProgram({
+    source: 'function k(words, floats) { gpu.atomic.storeRelaxedDevice(words, gpu.u32(0), gpu.u32(1)); let x = gpu.atomic.loadRelaxedDevice(words, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  });
+  assert.match(accepted.generatedSource, /#include <cuda\/atomic>/);
+  assert.match(accepted.generatedSource, /cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\(p0\[/);
+  assert.match(accepted.generatedSource, /\.store\([^;]*, cuda::memory_order_relaxed\);/);
+  assert.match(accepted.generatedSource, /\.load\(cuda::memory_order_relaxed\)/);
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { let x = gpu.atomic.loadRelaxedDevice(words, gpu.u32(0)); }',
+    functions: metadata,
+  }), expectDeviceCode('DEVICE_JS_ATOMIC_PROFILE_REQUIRED'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { let x = gpu.atomic.loadRelaxedDevice(floats, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  }), expectDeviceCode('DEVICE_JS_ATOMIC_TYPE'));
+  assert.throws(() => translateDeviceProgram({
+    source: 'function k(words, floats) { for (gpu.atomic.storeRelaxedDevice(words, gpu.u32(0), gpu.u32(1)); false; ) {} }',
+    functions: metadata,
+    compile,
+  }), expectDeviceCode('DEVICE_JS_VOID_HELPER_CONTEXT'));
+});
+
+test('device publication helpers lower exact u32/u64 acquire and release operations and fail closed', () => {
+  const metadata = [{
+    name: 'k',
+    kind: 'kernel',
+    parameters: [
+      { name: 'words', type: 'ptr<u32>' },
+      { name: 'wide', type: 'ptr<u64>' },
+      { name: 'floats', type: 'ptr<f32>' },
+    ],
+    returns: 'void',
+  }];
+  const compile = { headerProfile: 'cuda-cccl' };
+  const accepted = translateDeviceProgram({
+    source: 'function k(words, wide, floats) { gpu.atomic.storeReleaseDevice(words, gpu.u32(0), gpu.u32(7)); let x = gpu.atomic.loadAcquireDevice(words, gpu.u32(0)); gpu.atomic.storeReleaseDevice(wide, gpu.u64(0n), gpu.u64(9n)); let y = gpu.atomic.loadAcquireDevice(wide, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  });
+  const acceptedAgain = translateDeviceProgram({
+    source: 'function k(words, wide, floats) { gpu.atomic.storeReleaseDevice(words, gpu.u32(0), gpu.u32(7)); let x = gpu.atomic.loadAcquireDevice(words, gpu.u32(0)); gpu.atomic.storeReleaseDevice(wide, gpu.u64(0n), gpu.u64(9n)); let y = gpu.atomic.loadAcquireDevice(wide, gpu.u32(0)); }',
+    functions: metadata,
+    compile,
+  });
+  assert.equal(accepted.sha256, acceptedAgain.sha256);
+  assert.equal(accepted.generatedSource, acceptedAgain.generatedSource);
+  assert.match(accepted.generatedSource, /#include <cuda\/atomic>/);
+  assert.match(accepted.generatedSource, /cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\(p0\[/);
+  assert.match(accepted.generatedSource, /cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>\(p1\[/);
+  assert.match(accepted.generatedSource, /\.store\([^;]*, cuda::memory_order_release\);/);
+  assert.match(accepted.generatedSource, /\.load\(cuda::memory_order_acquire\)/);
+  assert.equal([...accepted.generatedSource.matchAll(/cuda::memory_order_release/g)].length, 2);
+  assert.equal([...accepted.generatedSource.matchAll(/cuda::memory_order_acquire/g)].length, 2);
+
+  for (const request of [
+    { source: 'function k(words, wide, floats) { let x = gpu.atomic.loadAcquireDevice(words, gpu.u32(0)); }', code: 'DEVICE_JS_ATOMIC_PROFILE_REQUIRED' },
+    { source: 'function k(words, wide, floats) { let x = gpu.atomic.loadAcquireDevice(floats, gpu.u32(0)); }', compile, code: 'DEVICE_JS_ATOMIC_TYPE' },
+    { source: 'function k(words, wide, floats) { let x = gpu.atomic.loadAcquireDevice(words, gpu.f32(0.0)); }', compile, code: 'DEVICE_JS_ATOMIC_TYPE' },
+    { source: 'function k(words, wide, floats) { gpu.atomic.storeReleaseDevice(words, gpu.u32(0), gpu.u64(1n)); }', compile, code: 'DEVICE_JS_ATOMIC_TYPE' },
+    { source: 'function k(words, wide, floats) { let x = gpu.atomic.loadAcquireDevice(words); }', compile, code: 'DEVICE_JS_HELPER_ARGUMENTS' },
+    { source: 'function k(words, wide, floats) { for (gpu.atomic.storeReleaseDevice(words, gpu.u32(0), gpu.u32(1)); false; ) {} }', compile, code: 'DEVICE_JS_VOID_HELPER_CONTEXT' },
+    { source: 'function k(words, wide, floats) { let x = gpu.atomic.loadAcquireSystem(words, gpu.u32(0)); }', compile, code: 'DEVICE_JS_HELPER_UNKNOWN' },
+  ]) {
+    assert.throws(() => translateDeviceProgram({ source: request.source, functions: metadata, compile: request.compile }), expectDeviceCode(request.code));
+  }
+});
+
+test('publication mailbox helpers lower only direction-specific opaque u32 lanes at system scope', () => {
+  const request = {
+    source: 'function k(control, observation) { let value = gpu.mailbox.loadAcquireSystem(control); gpu.mailbox.storeReleaseSystem(observation, value); }',
+    functions: [{ name: 'k', kind: 'kernel', parameters: [
+      { name: 'control', type: 'mailbox<host-to-device,u32>' },
+      { name: 'observation', type: 'mailbox<device-to-host,u32>' },
+    ], returns: 'void' }],
+    compile: { headerProfile: 'cuda-cccl' },
+  };
+  const translated = translateDeviceProgram(request);
+  assert.deepEqual(translated.kernels[0].parameters, [
+    { kind: 'publication-mailbox-host-to-device-u32' },
+    { kind: 'publication-mailbox-device-to-host-u32' },
+  ]);
+  assert.match(translated.generatedSource, /thread_scope_system/);
+  assert.match(translated.generatedSource, /memory_order_acquire/);
+  assert.match(translated.generatedSource, /memory_order_release/);
+  assert.throws(() => translateDeviceProgram({ ...request, source: 'function k(control, observation) { gpu.mailbox.storeReleaseSystem(control, gpu.u32(1)); }' }), expectDeviceCode('DEVICE_JS_MAILBOX_DIRECTION'));
+  assert.throws(() => translateDeviceProgram({ ...request, compile: { headerProfile: 'none' } }), expectDeviceCode('DEVICE_JS_ATOMIC_PROFILE_REQUIRED'));
+  assert.throws(() => translateDeviceProgram({ ...request, source: 'function k(control, observation) { control[gpu.u32(0)] = gpu.u32(1); }' }), expectDeviceCode('DEVICE_JS_POINTER_ACCESS_INVALID'));
 });
 
 test('Device-JS uses canonical CUDA target policy and preserves validation ownership', () => {

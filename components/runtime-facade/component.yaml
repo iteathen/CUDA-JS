@@ -8,7 +8,7 @@
     "path": "components/runtime-facade",
     "purpose": "Expose one safe asynchronous package API over accepted DriverActor, CompilerActor, Device-JS, resource, execution, and diagnostic contracts without leaking private actor, generated CUDA, or native capabilities.",
     "public_contracts": ["index.mjs", "compatibility.mjs", "testing.mjs", "index.d.ts", "testing.d.ts"],
-    "allowed_dependencies": ["node-standard-library", "runtime.driver-actor", "runtime.compiler-actor", "runtime.device-js", "runtime.platform-diagnostics", "packaging.compatibility"],
+    "allowed_dependencies": ["node-standard-library", "runtime.driver-actor", "runtime.compiler-actor", "runtime.device-js", "runtime.publication-mailbox", "runtime.platform-diagnostics", "packaging.compatibility"],
     "forbidden_dependencies": ["node-ffi", "raw-public-pointer", "actor-token", "context-token", "provider-path", "generated-cuda-source", "arbitrary-schema", "arbitrary-library", "consumer-semantics"],
     "validation": ["npm run f8:unit", "npm run f8:portable", "npm run f8:native"],
     "owner": "runtime.facade",

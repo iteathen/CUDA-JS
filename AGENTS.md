@@ -46,6 +46,7 @@ Correctness, safety, lifecycle truth, recoverability and compatibility are gates
 - **ADR-0004 and SPEC-0027** authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon. Custom AsmJit/register stubs remain a deferred measured-gap option.
+- The canonical source-architecture description is **JavaScript-authored and JIT/native-realized**. Maintained core runtime source is JavaScript; Node/native CUDA libraries and generated device artifacts realize execution; C/C++ probes/oracles remain independent evidence rather than package runtime. Do not use unqualified “pure JavaScript” as normative wording or introduce a maintained native host backend without an accepted measured-gap decision under ADR-0005.
 - A `fast-jit-required` claim requires exact-profile qualification evidence; generic fallback is allowed only in a declared cold/bootstrap profile.
 - Generated header/ABI facts and curated semantic/lifecycle overlays are separate owners. Unknown public semantics fail closed.
 - Node FFI and raw native/device memory remain private. JavaScript receives opaque capabilities and bounded data.
@@ -62,12 +63,14 @@ Correctness, safety, lifecycle truth, recoverability and compatibility are gates
 
 ## Current accepted implementation baseline
 
-Protected `main` before the 2026-08-14 open-issue sweep is:
+Protected `main` immediately before issue #123 is:
 
 ```text
-334b903be827dedb5345608a34a6df444912fe1b
-cuda-js@0.1.0-alpha.5
+2135216b1a9fd88066a1c82b61ae533645eac9c2
+cuda-js@0.1.0-alpha.6
 ```
+
+Issue #123's accepted device-publication branch advances the additive prerelease identity to `cuda-js@0.1.0-alpha.7` without changing public API schema version 1.
 
 The repository is in an **active implementation phase**. Accepted and implemented portable/software/package paths include the historical Windows foundation plus current generic capabilities.
 
@@ -86,6 +89,7 @@ SPEC-0010 typed relocatable device code
 SPEC-0011 u64 / i32 / finite-only f32 scalar arguments
 SPEC-0012 typed Device LTO
 SPEC-0013 restricted Device-JS
+SPEC-0022 bounded scoped-atomic-observation and device-publication children
 SPEC-0016 opaque one-pending-operation lifecycle
 SPEC-0006 target-syntax correction
 SPEC-0003 disposal-failure correction
@@ -101,7 +105,7 @@ The open-issue sweep reviewed the first dependency-ready expansion contracts aga
 - `SPEC-0021` is **Accepted**: new `f64`/`f16`/`bf16` packed scalar kinds plus contiguous one-dimensional generic typed device views. Accepted SPEC-0011 finite-only `f32` behavior is preserved. Production portable/software implementation is authorized; native promotion remains open.
 - `SPEC-0018` remains **Proposal**. Its own gate requires trustworthy published native SPEC-0016 lifecycle evidence. Issue #51 records a passing Windows candidate, but the exact candidate commits/evidence were not integrated on protected main; do not widen to multi-operation/multi-stream production code until that gap is repaired.
 
-`SPEC-0014`, `SPEC-0019`, `SPEC-0020`, and `SPEC-0022` through `SPEC-0026` remain proposal-only. Their presence or roadmap position is not implementation permission.
+`SPEC-0020`, the unaccepted remainder of `SPEC-0022`, and `SPEC-0023` through `SPEC-0026` remain proposal-only. Their presence or roadmap position is not implementation permission.
 
 ## Execution and Device-JS gates
 
@@ -109,7 +113,7 @@ The open-issue sweep reviewed the first dependency-ready expansion contracts aga
 
 Current execution profile remains one DriverActor/context, one private stream and at most one pending GPU operation until an accepted successor changes it.
 
-`SPEC-0013` owns the restricted trusted-source Device-JS authoring boundary. `acorn@8.15.0` is syntax parsing only; CUDA-JS owns accepted grammar, typing, helper semantics, deterministic lowering/identity/diagnostics and compiler handoff. Generated CUDA remains private.
+`SPEC-0013` owns the restricted trusted-source Device-JS authoring boundary. `acorn@8.15.0` is syntax parsing only; CUDA-JS owns accepted grammar, typing, helper semantics, deterministic lowering/identity/diagnostics and compiler handoff. The accepted SPEC-0022 children expose only fixed `u32`/`u64` relaxed-observation and device-scope release/acquire publication helpers; consumer generation, progress, payload and queue policy stay outside CUDA-JS. Generated CUDA remains private.
 
 EXP-013 is bounded publication-mailbox experiment evidence only. EXP-014 is retained JavaScript orchestration evidence only. Neither creates native support or production sideband/scheduler authority.
 

@@ -42,9 +42,16 @@ const steps = {
   portable: [{ args: ['--test', ...unitFiles] }, { args: ['conformance/f6/run-portable.mjs'] }],
   'linux-readiness': [{ linuxOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-linux-readiness.mjs'] }],
   experiment: [{ windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] }],
+  'capabilities-build': [{ windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] }],
+  capabilities: [
+    { windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] },
+    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-capabilities-native-windows.mjs'] },
+  ],
   native: [
     { windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-native-windows.mjs'] },
+    { windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] },
+    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-capabilities-native-windows.mjs'] },
   ],
   verify: [{ args: ['conformance/f6/verify.mjs'] }],
   all: [
@@ -52,6 +59,8 @@ const steps = {
     { args: ['conformance/f6/run-portable.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-native-windows.mjs'] },
+    { windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] },
+    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-capabilities-native-windows.mjs'] },
     { args: ['conformance/f6/verify.mjs'] },
   ],
 };

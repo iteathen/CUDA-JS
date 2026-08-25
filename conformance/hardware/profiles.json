@@ -18,10 +18,10 @@
         "EXP-012 Windows Driver and C-oracle parity",
         "F3 native actor/context lifecycle",
         "F4 native memory and C-oracle parity",
-        "F5 native execution and C-oracle parity",
-        "F6 native compiler/linker/cache and C-oracle parity",
+        "F5 native execution, scalar ABI, opaque-operation lifecycle, exact capacity-two atomic producer/observer scheduling, deferred-failure provenance, and C-oracle parity",
+        "F6 native compiler/linker/cache, RDC, Device LTO, and C-oracle parity",
         "F7 native diagnostics/permissions/stress",
-        "F8 installed-package native consumer"
+        "F8 installed-package native vector, source-only Device-JS, and capacity-two atomic producer/observer consumers"
       ],
       "commands": [
         ["scripts/run-exp-000.mjs", "all"],
@@ -44,7 +44,11 @@
         "build/f3/win32-x64/evidence/native-windows.json",
         "build/f4/win32-x64/evidence/native-windows.json",
         "build/f5/win32-x64/evidence/native-windows.json",
+        "build/f5/win32-x64/evidence/capability-oracle-build.json",
+        "build/f5/win32-x64/evidence/native-windows-capabilities.json",
         "build/f6/win32-x64/evidence/native-windows.json",
+        "build/f6/win32-x64/evidence/capability-oracle-build.json",
+        "build/f6/win32-x64/evidence/native-windows-capabilities.json",
         "build/f7/win32-x64/evidence/native-windows.json",
         "build/f8/win32-x64/evidence/native-windows-package.json"
       ],

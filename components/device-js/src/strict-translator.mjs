@@ -3,12 +3,11 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 
+import { DEVICE_JS_CONTRACT as CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
 import { deviceJsError } from './errors.mjs';
 import { translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
 
-const CONTRACT = 'SPEC-0013-v1';
 const encoder = new TextEncoder();
-const SYNC_HELPERS = new Set(['gpu.barrier.block', 'gpu.fence.device']);
 
 function codeUnitCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -84,6 +83,7 @@ function memberPath(node) {
 }
 
 function validateAdditionalContract(ast, functions) {
+  let usesScopedAtomic = false;
   const declarations = new Map();
   for (const statement of ast.body) {
     if (statement?.type === 'FunctionDeclaration' && statement.id?.type === 'Identifier') {
@@ -107,10 +107,11 @@ function validateAdditionalContract(ast, functions) {
     if (!node || typeof node !== 'object') return;
     if (node.type === 'CallExpression') {
       const path = memberPath(node.callee);
-      if (SYNC_HELPERS.has(path) && !(parent?.type === 'ExpressionStatement' && parent.expression === node)) {
+      usesScopedAtomic ||= isScopedAtomicHelper(path);
+      if (isVoidHelper(path) && !(parent?.type === 'ExpressionStatement' && parent.expression === node)) {
         throw deviceJsError(
           'DEVICE_JS_VOID_HELPER_CONTEXT',
-          'Void synchronization helpers are allowed only as standalone expression statements.',
+          'Void Device-JS helpers are allowed only as standalone expression statements.',
           { helper: path, line: node.loc?.start?.line ?? null, column: node.loc?.start?.column ?? null },
         );
       }
@@ -125,6 +126,7 @@ function validateAdditionalContract(ast, functions) {
     }
   }
   visit(ast);
+  return { usesScopedAtomic };
 }
 
 function cppType(type) {
@@ -138,8 +140,9 @@ function cppType(type) {
   ]);
   if (scalar.has(type)) return scalar.get(type);
   const pointer = /^ptr<(bool|u32|i32|u64|f32)>$/.exec(type);
-  if (!pointer) throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Canonical Device-JS function type is invalid.', { type });
-  return `${cppType(pointer[1])}*`;
+  if (pointer) return `${cppType(pointer[1])}*`;
+  if (/^mailbox<(?:host-to-device|device-to-host),u32>$/.test(type)) return 'unsigned int*';
+  throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Canonical Device-JS function type is invalid.', { type });
 }
 
 function generatedNameMap(functions) {
@@ -191,7 +194,7 @@ function replaceGeneratedNames(text, replacements) {
   return text;
 }
 
-function canonicalizeGeneratedSource(raw, sortedFunctions) {
+function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic }) {
   const rawNames = generatedNameMap(raw.functions);
   const canonicalNames = generatedNameMap(sortedFunctions);
   const replacements = new Map();
@@ -209,6 +212,7 @@ function canonicalizeGeneratedSource(raw, sortedFunctions) {
   }
 
   const lines = [`/* cuda-js Device-JS ${CONTRACT}; generated; do not edit */`];
+  if (usesScopedAtomic) lines.push('#include <cuda/atomic>', '');
   for (const fn of sortedFunctions) {
     if (fn.kind !== 'device') continue;
     const parameters = fn.parameters
@@ -236,7 +240,7 @@ function deepFreeze(value) {
 export function translateDeviceProgram(request) {
   const raw = translateRawDeviceProgram(request);
   const ast = parseAcceptedSource(request.source);
-  validateAdditionalContract(ast, raw.functions);
+  const requirements = validateAdditionalContract(ast, raw.functions);
 
   const sortedFunctions = raw.functions
     .map((fn) => ({
@@ -256,7 +260,7 @@ export function translateDeviceProgram(request) {
   }
 
   const sha256 = programIdentity(request.source, sortedFunctions, raw.compile);
-  const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions);
+  const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements);
   const kernels = sortedFunctions
     .filter((fn) => fn.kind === 'kernel')
     .map((fn) => ({

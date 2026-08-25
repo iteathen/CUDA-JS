@@ -504,9 +504,17 @@
       "cuInit",
       "cuLaunchKernelEx",
       "cuMemAlloc_v2",
+      "cuMemFreeHost",
       "cuMemFree_v2",
       "cuMemGetInfo_v2",
+      "cuMemHostAlloc",
+      "cuMemHostGetDevicePointer_v2",
+      "cuMemHostRegister_v2",
+      "cuMemHostUnregister",
+      "cuMemcpyDtoDAsync_v2",
+      "cuMemcpyDtoHAsync_v2",
       "cuMemcpyDtoH_v2",
+      "cuMemcpyHtoDAsync_v2",
       "cuMemcpyHtoD_v2",
       "cuModuleGetFunction",
       "cuModuleLoadData",
@@ -782,7 +790,6 @@
       "cuMemDiscardBatchAsync",
       "cuMemExportToShareableHandle",
       "cuMemFreeAsync",
-      "cuMemFreeHost",
       "cuMemGetAccess",
       "cuMemGetAddressRange_v2",
       "cuMemGetAllocationGranularity",
@@ -790,11 +797,7 @@
       "cuMemGetDefaultMemPool",
       "cuMemGetHandleForAddressRange",
       "cuMemGetMemPool",
-      "cuMemHostAlloc",
-      "cuMemHostGetDevicePointer_v2",
       "cuMemHostGetFlags",
-      "cuMemHostRegister_v2",
-      "cuMemHostUnregister",
       "cuMemImportFromShareableHandle",
       "cuMemMap",
       "cuMemMapArrayAsync",
@@ -835,12 +838,9 @@
       "cuMemcpyAtoH_v2",
       "cuMemcpyBatchAsync_v2",
       "cuMemcpyDtoA_v2",
-      "cuMemcpyDtoDAsync_v2",
       "cuMemcpyDtoD_v2",
-      "cuMemcpyDtoHAsync_v2",
       "cuMemcpyHtoAAsync_v2",
       "cuMemcpyHtoA_v2",
-      "cuMemcpyHtoDAsync_v2",
       "cuMemcpyPeer",
       "cuMemcpyPeerAsync",
       "cuMemcpyWithAttributesAsync",
@@ -1312,6 +1312,20 @@
       "sourceLine": null,
       "stableId": "cuda.driver.function.cuMemFree"
     },
+    "cuMemFreeHost": {
+      "nativeSymbol": "cuMemFreeHost",
+      "parameters": [
+        {
+          "name": "p",
+          "sourceType": "void *"
+        }
+      ],
+      "publicName": "cuMemFreeHost",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "ae09e74e33663203879aff83523e834bb89aee9188d76313468cdc2df1329317",
+      "sourceLine": 9053,
+      "stableId": "cuda.driver.function.cuMemFreeHost"
+    },
     "cuMemGetInfo": {
       "nativeSymbol": "cuMemGetInfo_v2",
       "parameters": [
@@ -1329,6 +1343,112 @@
       "signatureSha256": "3197b213bb09d1354c6a12ad6ecaef305cebed0eceeeaa00b953aacbd8d33836",
       "sourceLine": null,
       "stableId": "cuda.driver.function.cuMemGetInfo"
+    },
+    "cuMemHostAlloc": {
+      "nativeSymbol": "cuMemHostAlloc",
+      "parameters": [
+        {
+          "name": "pp",
+          "sourceType": "void **"
+        },
+        {
+          "name": "bytesize",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuMemHostAlloc",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "72bc1ef19a318a1541fc2c0d7f5df21c29b4b57ed89e22d51cacc2f74ce5560b",
+      "sourceLine": 9137,
+      "stableId": "cuda.driver.function.cuMemHostAlloc"
+    },
+    "cuMemHostGetDevicePointer": {
+      "nativeSymbol": "cuMemHostGetDevicePointer_v2",
+      "parameters": [
+        {
+          "name": "pdptr",
+          "sourceType": "CUdeviceptr *"
+        },
+        {
+          "name": "p",
+          "sourceType": "void *"
+        },
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuMemHostGetDevicePointer",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "2bc107e949a61a07ce5376c5bc96b799471a5007ba5e4892291480e9b5446c19",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuMemHostGetDevicePointer"
+    },
+    "cuMemHostRegister": {
+      "nativeSymbol": "cuMemHostRegister_v2",
+      "parameters": [
+        {
+          "name": "p",
+          "sourceType": "void *"
+        },
+        {
+          "name": "bytesize",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "Flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "publicName": "cuMemHostRegister",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "0dfdc6e10168cda55d1be70963650119e4833275089058dd8a9256fbb21389d8",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuMemHostRegister"
+    },
+    "cuMemHostUnregister": {
+      "nativeSymbol": "cuMemHostUnregister",
+      "parameters": [
+        {
+          "name": "p",
+          "sourceType": "void *"
+        }
+      ],
+      "publicName": "cuMemHostUnregister",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "ae09e74e33663203879aff83523e834bb89aee9188d76313468cdc2df1329317",
+      "sourceLine": 9799,
+      "stableId": "cuda.driver.function.cuMemHostUnregister"
+    },
+    "cuMemcpyDtoDAsync": {
+      "nativeSymbol": "cuMemcpyDtoDAsync_v2",
+      "parameters": [
+        {
+          "name": "dstDevice",
+          "sourceType": "CUdeviceptr"
+        },
+        {
+          "name": "srcDevice",
+          "sourceType": "CUdeviceptr"
+        },
+        {
+          "name": "ByteCount",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuMemcpyDtoDAsync",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "15df15946ef57d5e313a58b34ebce55c1bc3301930e71f4fda70cbddda19e555",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuMemcpyDtoDAsync"
     },
     "cuMemcpyDtoH": {
       "nativeSymbol": "cuMemcpyDtoH_v2",
@@ -1352,6 +1472,32 @@
       "sourceLine": null,
       "stableId": "cuda.driver.function.cuMemcpyDtoH"
     },
+    "cuMemcpyDtoHAsync": {
+      "nativeSymbol": "cuMemcpyDtoHAsync_v2",
+      "parameters": [
+        {
+          "name": "dstHost",
+          "sourceType": "void *"
+        },
+        {
+          "name": "srcDevice",
+          "sourceType": "CUdeviceptr"
+        },
+        {
+          "name": "ByteCount",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuMemcpyDtoHAsync",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "ab2adef3f2acb8249582aae9c9c7e50e6caedf6229164ab06f57b2879a1c71ea",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuMemcpyDtoHAsync"
+    },
     "cuMemcpyHtoD": {
       "nativeSymbol": "cuMemcpyHtoD_v2",
       "parameters": [
@@ -1373,6 +1519,32 @@
       "signatureSha256": "57e12cbcef45239cde1f5d129d0057bf7c90a0d0d8715e31a86a737c3b81ca6a",
       "sourceLine": null,
       "stableId": "cuda.driver.function.cuMemcpyHtoD"
+    },
+    "cuMemcpyHtoDAsync": {
+      "nativeSymbol": "cuMemcpyHtoDAsync_v2",
+      "parameters": [
+        {
+          "name": "dstDevice",
+          "sourceType": "CUdeviceptr"
+        },
+        {
+          "name": "srcHost",
+          "sourceType": "const void *"
+        },
+        {
+          "name": "ByteCount",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "publicName": "cuMemcpyHtoDAsync",
+      "returnSourceType": "CUresult",
+      "signatureSha256": "40e4ce9a6036cb12bd1ac31abab58bb27284a972edb2c0d2f642822708bea4f7",
+      "sourceLine": null,
+      "stableId": "cuda.driver.function.cuMemcpyHtoDAsync"
     },
     "cuModuleGetFunction": {
       "nativeSymbol": "cuModuleGetFunction",

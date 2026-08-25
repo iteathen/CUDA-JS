@@ -55,18 +55,23 @@ function orphanInventory(lastInventory) {
 
 function launchPayload(functionToken, options, operationName) {
   if (!isResourceToken(functionToken)) throw validationError('DRIVER_FUNCTION_TOKEN', `${operationName} requires an exact opaque function token.`);
-  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments'].includes(key))
+  if (!plainObject(options) || Object.keys(options).some((key) => !['grid', 'block', 'sharedMemoryBytes', 'arguments', 'after', 'accesses'].includes(key))
       || !Object.hasOwn(options, 'grid') || !Object.hasOwn(options, 'block') || !Object.hasOwn(options, 'arguments') || !Array.isArray(options.arguments)) {
     throw validationError('DRIVER_LAUNCH_OPTIONS', `${operationName} options are invalid.`);
   }
+  if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', `${operationName} after must be an exact opaque operation token.`);
+  if (options.accesses !== undefined && !Array.isArray(options.accesses)) throw validationError('DRIVER_LAUNCH_OPTIONS', `${operationName} accesses must be an array when supplied.`);
   const copyDimensions = (value) => plainObject(value) ? { ...value } : value;
   const argumentCopies = options.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry);
+  const accessCopies = options.accesses === undefined ? undefined : options.accesses.map((entry) => plainObject(entry) ? { ...entry } : entry);
   return {
     functionToken,
     grid: copyDimensions(options.grid),
     block: copyDimensions(options.block),
     sharedMemoryBytes: options.sharedMemoryBytes ?? 0,
     arguments: argumentCopies,
+    after: options.after ?? null,
+    accesses: accessCopies,
   };
 }
 
@@ -181,9 +186,55 @@ class DriverRuntime {
     return this.#request('memory.read', { token, deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength });
   }
 
+  async writeDeviceAsync(token, bytes, options = {}) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'writeDeviceAsync requires an exact opaque memory token.');
+    if (!(bytes instanceof Uint8Array) || Buffer.isBuffer(bytes) || bytes.byteLength < 1) throw validationError('MEMORY_BYTES_INVALID', 'writeDeviceAsync requires a nonempty ordinary Uint8Array.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'writeDeviceAsync options contain unknown fields.');
+    if (bytes.byteLength > this.#memoryPolicy.maxTransferBytes) throw validationError('MEMORY_TRANSFER_LIMIT', 'writeDeviceAsync bytes exceed the configured transfer limit.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'writeDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.h2d', { token, bytes: Uint8Array.from(bytes), deviceOffset: options.deviceOffset ?? 0, after: options.after ?? null });
+  }
+
+  async readDeviceAsync(token, options) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'readDeviceAsync requires an exact opaque memory token.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['deviceOffset', 'byteLength', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'readDeviceAsync options are invalid.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'readDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.d2h', { token, deviceOffset: options.deviceOffset ?? 0, byteLength: options.byteLength, after: options.after ?? null });
+  }
+
+  async copyDeviceAsync(destinationToken, sourceToken, options) {
+    if (!isResourceToken(destinationToken) || !isResourceToken(sourceToken)) throw validationError('DRIVER_MEMORY_TOKEN', 'copyDeviceAsync requires exact opaque destination and source memory tokens.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['destinationOffset', 'sourceOffset', 'byteLength', 'after'].includes(key))) throw validationError('DRIVER_MEMORY_OPTIONS', 'copyDeviceAsync options are invalid.');
+    if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'copyDeviceAsync after must be an exact opaque operation token.');
+    return this.#request('memory.transfer.d2d', { destinationToken, sourceToken, destinationOffset: options.destinationOffset ?? 0, sourceOffset: options.sourceOffset ?? 0, byteLength: options.byteLength, after: options.after ?? null });
+  }
+
   async releaseMemory(token) {
     if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'releaseMemory requires an exact opaque memory token.');
     return this.#request('memory.release', { token });
+  }
+
+  async createPublicationMailbox(options) {
+    if (!plainObject(options) || Object.keys(options).length !== 1 || !Object.hasOwn(options, 'lanes') || !Array.isArray(options.lanes) || options.lanes.length < 1 || options.lanes.length > 64) throw validationError('MEMORY_MAILBOX_OPTIONS_INVALID', 'createPublicationMailbox requires exactly one bounded lanes array.');
+    const lanes = options.lanes.map((lane) => plainObject(lane) ? { ...lane } : lane);
+    const buffer = new SharedArrayBuffer(lanes.length * 4);
+    const result = await this.#request('mailbox.create', { buffer, lanes });
+    return { ...result, buffer };
+  }
+
+  async publicationMailboxStatus(token) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'publicationMailboxStatus requires an exact opaque mailbox token.');
+    return this.#request('mailbox.status', { token });
+  }
+
+  async resetPublicationMailbox(token, generation) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'resetPublicationMailbox requires an exact opaque mailbox token.');
+    return this.#request('mailbox.reset', { token, generation });
+  }
+
+  async releasePublicationMailbox(token) {
+    if (!isResourceToken(token)) throw validationError('MEMORY_MAILBOX_TOKEN', 'releasePublicationMailbox requires an exact opaque mailbox token.');
+    return this.#request('mailbox.release', { token });
   }
 
   async loadModule(options) {

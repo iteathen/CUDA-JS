@@ -19,9 +19,17 @@ export const cudaTier0SymbolAliases = Object.freeze({
   "cuLaunchKernelEx": "cuLaunchKernelEx",
   "cuMemAlloc": "cuMemAlloc_v2",
   "cuMemFree": "cuMemFree_v2",
+  "cuMemFreeHost": "cuMemFreeHost",
   "cuMemGetInfo": "cuMemGetInfo_v2",
+  "cuMemHostAlloc": "cuMemHostAlloc",
+  "cuMemHostGetDevicePointer": "cuMemHostGetDevicePointer_v2",
+  "cuMemHostRegister": "cuMemHostRegister_v2",
+  "cuMemHostUnregister": "cuMemHostUnregister",
+  "cuMemcpyDtoDAsync": "cuMemcpyDtoDAsync_v2",
   "cuMemcpyDtoH": "cuMemcpyDtoH_v2",
+  "cuMemcpyDtoHAsync": "cuMemcpyDtoHAsync_v2",
   "cuMemcpyHtoD": "cuMemcpyHtoD_v2",
+  "cuMemcpyHtoDAsync": "cuMemcpyHtoDAsync_v2",
   "cuModuleGetFunction": "cuModuleGetFunction",
   "cuModuleLoadData": "cuModuleLoadData",
   "cuModuleUnload": "cuModuleUnload",
@@ -156,6 +164,12 @@ export const cudaTier0FfiDefinitions = Object.freeze({
     ],
     "return": "i32"
   },
+  "cuMemFreeHost": {
+    "arguments": [
+      "pointer"
+    ],
+    "return": "i32"
+  },
   "cuMemFree_v2": {
     "arguments": [
       "u64"
@@ -169,11 +183,68 @@ export const cudaTier0FfiDefinitions = Object.freeze({
     ],
     "return": "i32"
   },
+  "cuMemHostAlloc": {
+    "arguments": [
+      "pointer",
+      "u64",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostGetDevicePointer_v2": {
+    "arguments": [
+      "pointer",
+      "pointer",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostRegister_v2": {
+    "arguments": [
+      "pointer",
+      "u64",
+      "u32"
+    ],
+    "return": "i32"
+  },
+  "cuMemHostUnregister": {
+    "arguments": [
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuMemcpyDtoDAsync_v2": {
+    "arguments": [
+      "u64",
+      "u64",
+      "u64",
+      "pointer"
+    ],
+    "return": "i32"
+  },
+  "cuMemcpyDtoHAsync_v2": {
+    "arguments": [
+      "pointer",
+      "u64",
+      "u64",
+      "pointer"
+    ],
+    "return": "i32"
+  },
   "cuMemcpyDtoH_v2": {
     "arguments": [
       "pointer",
       "u64",
       "u64"
+    ],
+    "return": "i32"
+  },
+  "cuMemcpyHtoDAsync_v2": {
+    "arguments": [
+      "u64",
+      "pointer",
+      "u64",
+      "pointer"
     ],
     "return": "i32"
   },

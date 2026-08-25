@@ -76,16 +76,48 @@
       "nativeSymbol": "cuMemFree_v2",
       "pointerSize": 8
     },
+    "cuMemFreeHost": {
+      "nativeSymbol": "cuMemFreeHost",
+      "pointerSize": 8
+    },
     "cuMemGetInfo": {
       "nativeSymbol": "cuMemGetInfo_v2",
+      "pointerSize": 8
+    },
+    "cuMemHostAlloc": {
+      "nativeSymbol": "cuMemHostAlloc",
+      "pointerSize": 8
+    },
+    "cuMemHostGetDevicePointer": {
+      "nativeSymbol": "cuMemHostGetDevicePointer_v2",
+      "pointerSize": 8
+    },
+    "cuMemHostRegister": {
+      "nativeSymbol": "cuMemHostRegister_v2",
+      "pointerSize": 8
+    },
+    "cuMemHostUnregister": {
+      "nativeSymbol": "cuMemHostUnregister",
+      "pointerSize": 8
+    },
+    "cuMemcpyDtoDAsync": {
+      "nativeSymbol": "cuMemcpyDtoDAsync_v2",
       "pointerSize": 8
     },
     "cuMemcpyDtoH": {
       "nativeSymbol": "cuMemcpyDtoH_v2",
       "pointerSize": 8
     },
+    "cuMemcpyDtoHAsync": {
+      "nativeSymbol": "cuMemcpyDtoHAsync_v2",
+      "pointerSize": 8
+    },
     "cuMemcpyHtoD": {
       "nativeSymbol": "cuMemcpyHtoD_v2",
+      "pointerSize": 8
+    },
+    "cuMemcpyHtoDAsync": {
+      "nativeSymbol": "cuMemcpyHtoDAsync_v2",
       "pointerSize": 8
     },
     "cuModuleGetFunction": {

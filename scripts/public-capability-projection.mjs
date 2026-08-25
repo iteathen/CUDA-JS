@@ -179,7 +179,7 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
 
 export function validatePublicCapabilityProjection({ packageJson, compatibility, extensions, documents }) {
   const errors = [];
-  const expectedParameters = ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16'];
+  const expectedParameters = ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32'];
 
   if (compatibility.package?.name !== packageJson.name || compatibility.package?.version !== packageJson.version) {
     errors.push('package.json and packaging compatibility package identity differ');
@@ -196,7 +196,16 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.gpuOperationLifecycle !== 'opaque-submit-status-wait-close-one-pending') {
     errors.push('packaging compatibility operation lifecycle is stale');
   }
-  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1') {
+  if (compatibility.capabilities?.boundedMultiOperationScheduling !== 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue') {
+    errors.push('packaging compatibility bounded scheduler projection is stale');
+  }
+  if (compatibility.capabilities?.asyncTransfers !== 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d') {
+    errors.push('packaging compatibility asynchronous transfer projection is stale');
+  }
+  if (compatibility.capabilities?.publicationMailboxes !== 'private-mapped-named-u32-one-operation-lease-system-acquire-release') {
+    errors.push('packaging compatibility publication mailbox projection is stale');
+  }
+  if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
 
@@ -215,6 +224,8 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     '`u64`/`i32`/`f32`',
     'typed `lto-ir`',
     'one pending GPU operation',
+    'SPEC-0019',
+    'SPEC-0014',
   ]);
   requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, [
     'SPEC-0010',
@@ -234,6 +245,8 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     '`bf16`',
     '`lto-ir`',
     'contiguous 1D typed device views',
+    'Internal pinned host staging and async transfer',
+    'Publication mailbox',
     '| Capability | Architecture | Implementation | Qualification | Priority |',
   ]);
   requireMarkers(errors, 'docs/INTEROP_WITH_CUDA_MCGS.md', documents.interop, [
