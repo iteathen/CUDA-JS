@@ -422,7 +422,11 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         async allocateStaging({ byteLength, operationId }) {
           requireCurrent(operationId);
           const output = pointerOut();
-          requireSuccess('cuMemHostAlloc', functions.cuMemHostAlloc(output, BigInt(byteLength), 0), operationId);
+          const status = functions.cuMemHostAlloc(output, BigInt(byteLength), 0);
+          if (status === 2) {
+            throw new DriverRuntimeError('CUDA_OUT_OF_MEMORY', 'pressure', 'CUDA pinned host allocation reported out of memory.', { nativeStatus: status, byteLength }, { operation: 'cuMemHostAlloc', operationId, healthBefore: health.current, healthAfter: health.current });
+          }
+          requireSuccess('cuMemHostAlloc', status, operationId);
           const native = readPointer(output);
           if (native === 0n) throw new DriverRuntimeError('DRIVER_HOST_MEMORY_NULL', 'immediate-driver', 'CUDA pinned host allocation succeeded but returned a null address.', { byteLength }, { operationId, healthBefore: health.current, healthAfter: health.current });
           return native;
