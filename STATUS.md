@@ -68,12 +68,23 @@ The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` pa
 
 ```text
 architectural disposition: selected
-implementation status:       SPEC-0018 merged; SPEC-0019 implemented on PR #119
+implementation status:       SPEC-0018 and SPEC-0019 merged
 qualification status:        exact recorded Windows profile plus installed-package evidence
-priority:                    integrate #86, then advance dependent SPEC-0014/#38
+priority:                    implement accepted dependent SPEC-0014/#38
 ```
 
-PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 implements SPEC-0019 with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Caller registration, mapped memory, chunk queues, and overlap claims remain excluded.
+PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 merged SPEC-0019 at protected-main `3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d` with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Issue #86 is closed. Caller registration outside the accepted publication-mailbox specialization, chunk queues, and overlap claims remain excluded.
+
+### Active accepted profile: SPEC-0014 / #38
+
+```text
+architectural disposition: accepted exact first profile
+implementation status:       in progress on agent/cuda-mcgs-p1-mailbox
+qualification status:        mapping prerequisite probe only; production evidence pending
+priority:                    current CUDA-MCGS P1 dependency
+```
+
+The accepted profile owns an opaque `runtime.publication-mailbox` component with at most 64 named naturally aligned u32 lanes over one internally allocated and strongly retained `SharedArrayBuffer`. Every lane has one immutable host-to-device or device-to-host direction. Each kernel argument binds one named lane through a direction-specific parameter kind; Device-JS supplies only system-scope acquire-load and release-store helpers. The backing store and mapped alias remain private, one live GPU operation may lease a mailbox, and reset/unregister is forbidden before terminality.
 
 ## Execution baseline
 
@@ -98,7 +109,6 @@ SPEC-0013 and the accepted bounded SPEC-0022 scoped-atomic-observation child are
 The following remain proposal authority only and do not authorize production code:
 
 ```text
-SPEC-0014 long-lived sideband
 SPEC-0020 prepared batches / CUDA Graph execution
 SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation child accepted)
 SPEC-0023 context-bound CUDA library adapters
@@ -148,10 +158,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. complete exact-head verification and integrate/read back SPEC-0019 PR #119 (#86)
-2. advance SPEC-0014 publication mailboxes (#38) against accepted scheduler/host-memory ownership
+1. implement and qualify accepted SPEC-0014 publication mailboxes (#38)
+2. integrate/read back the exact #38 head
 3. run the final integrated P0/P1 exact-head verification and cleanup
-4. close the exact CUDA-MCGS compatible pair only against frozen reviewed artifacts (#32)
+4. leave the exact CUDA-MCGS compatible-pair gate (#32) open until its frozen CUDA-MCGS artifact exists
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.
