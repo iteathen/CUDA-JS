@@ -38,7 +38,7 @@ Important current limits are equally explicit:
 - public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
 - contiguous 1D typed device views are implemented as a reusable component/lifecycle foundation, but no public `cuda-js` facade API for creating views has been selected or qualified;
-- typed Device LTO is implemented in portable/software and package paths but remains natively unqualified;
+- typed Device LTO is implemented and qualified on the exact recorded Windows x64 Node 26.7.0/CUDA 13.3/`sm_75` profile; Linux, other devices/providers and LTO performance remain separately unqualified;
 - the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
 Those limits describe the applicable **implementation and qualification dimensions**, not an assumption that the underlying CUDA capability is impossible to add. New capability families require explicit contracts, ownership, compatibility rules, conformance, and exact native evidence before promotion.
@@ -208,7 +208,7 @@ Current compiler/toolchain behavior includes:
 
 **CUDA-JS does not require recompilation on every kernel launch.** Compilation can occur during setup, artifacts can be cached, and PTX/cubin can be loaded later. The compiler is a toolchain capability, not a mandatory hot-loop stage.
 
-The base PTX/cubin F6 path is qualified on the recorded Windows profile. Typed RDC and Device LTO are implemented public/package capabilities but remain natively unqualified until their SPEC-0010/SPEC-0012 promotion evidence passes.
+The base PTX/cubin F6 path, typed RDC and typed Device LTO are qualified on the recorded Windows profile. The SPEC-0012 lane proves two independently compiled LTO-IR units, homogeneous link-to-cubin execution, exact native-oracle artifact/output parity, fail-closed controls and terminal cleanup. Every other OS/device/provider profile and LTO performance remain separate gates.
 
 See [`SPEC-0006`](specs/SPEC-0006-compiler-linker-cache.md), [`SPEC-0010`](specs/SPEC-0010-relocatable-device-code.md), and [`SPEC-0012`](specs/SPEC-0012-device-lto.md).
 
@@ -325,8 +325,8 @@ Device LTO has independent status dimensions:
 ```text
 architectural disposition: planned
 implementation status:    implemented in portable/software/package paths
-qualification status:     not-qualified for native CUDA execution
-priority:                 active native-evidence lane
+qualification status:     qualified on the exact recorded Windows profile
+priority:                 active maintenance; other profiles independently gated
 ```
 
 Accepted SPEC-0012 keeps PTX as the default compile path and adds a typed `lto-ir` artifact plus homogeneous typed LTO-IR-to-cubin linking under the existing CompilerActor/cache owner. The implementation excludes raw untyped LTO-IR, mixed PTX/LTO-IR first-slice linking, staged partial linking, arbitrary nvJitLink controls, and cross-major compatibility claims.
@@ -352,7 +352,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Multiple CUDA-JS runtime instances | `planned` | `implemented` | `qualified` | `active` | Isolation behavior only; not a GPU-overlap performance claim. |
 | NVRTC source compilation / nvJitLink PTX linking / cache | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; optional bounded typed compiler/linker owner. |
 | Typed relocatable PTX | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows two-unit RDC compile/link/load/execute/cleanup profile. |
-| Typed Device LTO | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0012 gate remains open; typed `lto-ir` and homogeneous LTO linking only. |
+| Typed Device LTO | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows two-unit LTO-IR/link/cubin/execute/cleanup profile; typed `lto-ir` and homogeneous LTO linking only. |
 | Restricted Device-JS + scoped atomic observation | `planned` | `implemented` | `qualified` | `active` | Exact recorded Windows source-only profile; private CUDA lowering and relaxed device-scope `u32`/`u64` observation through `compileDeviceProgram()`. |
 | Trusted CCCL `cuda/` + `nv/` profile | `planned` | `implemented` | `qualified` | `active` | Exact Windows CUDA 13.3 profile; path-free verified virtual headers. |
 | `<cuda/atomic>` device-scope publication | `planned` | `implemented` | `qualified` | `active` | Exact generic fixture/profile only; not a scheduler/search/performance claim. |

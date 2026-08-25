@@ -36,9 +36,7 @@ Remaining evidence: exact native boundary values, packing parity, launch result/
 
 ### NQ-LTO — SPEC-0012 / issue #42
 
-Current state: typed `lto-ir` compile output and homogeneous Device-LTO linking are implemented.
-
-Remaining evidence: exact native LTO-IR/oracle parity, multi-unit link-to-cubin execution, compatibility negatives, cache identity, logs, actor responsiveness, and terminal compiler/Driver cleanup.
+Completed for the exact Windows x64 profile through PR #116 at protected `main@9f13785e4d1d8d887099571a7a41be0b5b42f749`. The integrated capsule proves exact native LTO-IR/oracle parity, two-unit link-to-cubin execution, output parity, compatibility negatives, cache identity, actor responsiveness and terminal compiler/Driver cleanup. A current-head rerun from `main@2135216b1a9fd88066a1c82b61ae533645eac9c2` reproduced the pass; all other OS/device/provider profiles and performance claims remain independent lanes.
 
 ### NQ-DEVICE-JS — SPEC-0013 / issue #43 DJS-2
 
