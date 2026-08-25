@@ -1,10 +1,12 @@
 # SPEC-0018: Bounded Multi-Operation Scheduling
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-08-13
 
 **Reconciled:** 2026-08-22 for concurrent atomic observation
+
+**Accepted:** 2026-08-24 after protected-main SPEC-0016 native qualification
 
 **Issue owner:** #40
 
@@ -19,10 +21,10 @@ SPEC-0016 remains the sole operation lifecycle authority. This specification may
 ## Status dimensions
 
 ```text
-architectural disposition: planned
+architectural disposition: accepted
 implementation status:       not-implemented
 qualification status:        not-qualified
-priority:                    after trustworthy SPEC-0016 integration/evidence
+priority:                    P1 implementation for CUDA-MCGS readiness
 ```
 
 ## Dependencies
@@ -32,6 +34,15 @@ This proposal consumes SPEC-0003, SPEC-0004, SPEC-0005, SPEC-0015 and SPEC-0016.
 Concurrent atomic observation may consume accepted Device-JS atomic load/store semantics from SPEC-0022 when a Device-JS consumer is used. The scheduler itself remains language-neutral and does not own atomic helper syntax.
 
 Downstream proposals include SPEC-0019 asynchronous transfer, SPEC-0020 prepared batches/graphs, SPEC-0023 CUDA library adapters, SPEC-0024 multi-GPU orchestration, SPEC-0025 graphics interop and application-layer execution plans.
+
+The acceptance gate is satisfied by protected `main` revision
+`9f13785e4d1d8d887099571a7a41be0b5b42f749`: its exact-revision F5 evidence proves
+the SPEC-0016 pending/terminal lifecycle, delayed `CUDA_ERROR_NOT_READY`,
+conservative deferred-failure containment, terminal event cleanup, and installed
+public-facade execution. The first accepted widened profile is exactly two pending
+operations on two private nonblocking streams, no admitted queue, at most one
+explicit earlier-operation dependency per submission, and fail-closed ordinary
+hazards. A caller may select the compatibility profile of one pending operation.
 
 ## Design invariants
 
