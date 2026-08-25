@@ -368,7 +368,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
 | Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
-| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Shared native Driver/compiler engines, thin Linux profiles and exact F3L/F6L source runners exist; diagnostics/facade/package source plus exact F2L–F8L Driver/compiler/GPU evidence remain open. |
+| Native Linux x64 CUDA execution | `planned` | `partial` | `not-qualified` | `active` | Shared native Driver/compiler engines, diagnostics, alpha.8 facade admission, compatibility metadata and F3L/F6L source runners exist; F4/F5/F7/F8 native runners plus exact F2L–F8L evidence remain open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors
@@ -427,7 +427,7 @@ At the time of this document:
 - public contracts and shared runtime owners are OS-neutral; native Linux x86-64 is the reference implementation and primary forward qualification path, beginning with exact Ubuntu 24.04 LTS;
 - Windows x64 on the recorded CUDA 13.3/Driver/GPU profile carries the current retained secondary native qualification evidence;
 - other FFI-capable Node 26.1.0-or-later and structurally admissible Windows CUDA profiles may operate as `testing-unconfirmed` without inheriting support;
-- the native Linux Driver/compiler profiles and F3L/F6L source runners are implemented, while exact native evidence and the facade/GPU/package chain remain incomplete;
+- native Linux x64 Driver/compiler profiles, diagnostics, facade admission, compatibility metadata and F3L/F6L source runners are implemented, while F4/F5/F7/F8 native runners and exact GPU/package evidence remain incomplete;
 - portable Linux controls do not imply native Linux CUDA support;
 - performance claims require separate representative measurement and are not inferred from functional correctness.
 

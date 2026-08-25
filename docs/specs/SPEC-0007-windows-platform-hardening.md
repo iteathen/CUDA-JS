@@ -6,6 +6,8 @@
 
 **Amended:** 2026-08-11 — owner-authorized public testing permits unconfirmed operational profiles while retaining exact-evidence support claims and known-incompatible safety failures.
 
+**Amended:** 2026-08-25 — ADR-0006 and owner direction extend the same copied-record assessment contract to the implemented native Linux x86-64 Driver profile. Linux uses a platform-owned driver-model label and remains `testing-unconfirmed`/`not-qualified`; Linux ARM64 and WSL remain backend-incomplete.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation and self-integration after CJS-F6W merged into protected `main`. This specification authorizes the bounded CJS-F7W slice below and portable preparation for WSL2 and native Linux qualification.
@@ -22,10 +24,10 @@ The diagnostic record answers four bounded questions:
 
 1. Is the host native Windows x64, native Linux x64, native Linux ARM64, WSL1/WSL2 x64, or unsupported?
 2. Is the minimum Node/FFI/permission substrate present, and is its evidence qualified or unconfirmed?
-3. On qualified Windows, does CUDA report TCC mode, kernel execution timeout, integration, and compute mode for device zero?
+3. On a source-admitted native platform, what bounded platform-specific Driver model, kernel-timeout, integration, and compute-mode facts does CUDA report for device zero?
 4. Is the combination testing-unconfirmed, diagnostic-only, backend-incomplete, or known-incompatible?
 
-No heuristic or successful test run may promote support. Unconfirmed profiles may operate to generate evidence, but only reviewed native evidence may change the support matrix. WSL markers can classify an environment for a human; the missing WSL/Linux backends remain operational blockers rather than evidence judgments.
+No heuristic or successful test run may promote support. Unconfirmed profiles may operate to generate evidence, but only reviewed native evidence may change the support matrix. WSL markers can classify an environment for a human. Native Linux x86-64 is source-admitted through its canonical Driver profile; Linux ARM64 and WSL remain operationally blocked rather than rejected architecturally.
 
 ## Host contract
 
@@ -37,7 +39,7 @@ No heuristic or successful test run may promote support. Unconfirmed profiles ma
 - FFI launch state and permission state;
 - a support disposition and human action.
 
-Supported host kinds are `windows-native-x64`, `linux-native-x64`, `linux-native-arm64`, `wsl1-x64`, `wsl2-x64`, and `unsupported`. Linux ARM64 is an SBSA qualification candidate only. WSL is diagnostics-only. Native Linux x64 remains qualification-required until the retained F2L through F6L gates pass.
+Supported host kinds are `windows-native-x64`, `linux-native-x64`, `linux-native-arm64`, `wsl1-x64`, `wsl2-x64`, and `unsupported`. Linux ARM64 is an SBSA qualification candidate only. WSL is diagnostics-only. Native Linux x64 remains qualification-required until the retained F2L through F8L gates pass.
 
 The permission state is one of:
 
@@ -60,7 +62,7 @@ Binary attributes must be zero or one. Compute mode must be an integer from zero
 
 On Windows, `tccDriver: 1` reports `tcc`; `tccDriver: 0` with `kernelExecTimeout: 1` reports `wddm-watchdog`; and `tccDriver: 0` with no timeout reports `wddm-no-watchdog`. These labels describe CUDA-reported device-zero facts only. F7 does not infer other adapters, sessions, display attachment, scheduling policy, or safe maximum kernel duration.
 
-The public testing execution path requires native Windows x64, Node 26.1.0 or later, experimental FFI enabled, explicit FFI authority when the permission model is active, an operational DriverActor description, and non-prohibited compute mode. Unconfirmed Node, Driver, or GPU identities may operate and report `testing-unconfirmed` without an opt-in. Missing required substrate, an unavailable backend/provider surface, malformed or contradictory safety facts, and prohibited compute mode fail with stable incompatibility reason codes. Exact Node 26.7.0 and accepted hardware evidence remain the qualification baseline; operation alone does not inherit that evidence.
+The public testing execution path requires a source-admitted native Windows x64 or Linux x64 profile, Node 26.1.0 or later, experimental FFI enabled, explicit FFI authority when the permission model is active, an operational DriverActor description, and non-prohibited compute mode. Unconfirmed Node, Driver, GPU, or Linux identities may operate and report `testing-unconfirmed` without an opt-in. Missing required substrate, an unavailable backend/provider surface, malformed or contradictory safety facts, and prohibited compute mode fail with stable incompatibility reason codes. Exact evidence remains profile-specific; operation alone does not inherit it.
 
 ## Security and result containment
 

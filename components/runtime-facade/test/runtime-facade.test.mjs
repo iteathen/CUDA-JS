@@ -14,7 +14,7 @@ function expectCode(code) {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.7');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.8');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
@@ -30,6 +30,9 @@ test('compatibility and host inspection are immutable and reconcile the current 
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.deviceJsParser, { name: 'acorn', version: '8.15.0', role: 'syntax-only-replaceable-adapter' });
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY), true);
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.nativeProfiles), true);
+  const linux = CUDA_JS_COMPATIBILITY.nativeProfiles.find((profile) => profile.host === 'linux-native-x64');
+  assert.equal(linux.status, 'testing-unconfirmed-by-default');
+  assert.equal(linux.qualification, 'not-qualified');
   const inspection = inspectCudaHost();
   assert.equal(inspection.host.node.version, process.version);
   assert.equal(inspection.compatibility, CUDA_JS_COMPATIBILITY);
@@ -70,7 +73,7 @@ test('public error details bound hostile traversal and redact identity and capab
 });
 
 test('native entry fails before provider work when its launch profile is absent', async () => {
-  if (process.platform === 'win32' && !process.execArgv.includes('--experimental-ffi')) await assert.rejects(openCudaRuntime(), expectCode('CUDA_JS_FFI_FLAG_REQUIRED'));
+  if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64' && !process.execArgv.includes('--experimental-ffi')) await assert.rejects(openCudaRuntime(), expectCode('CUDA_JS_FFI_FLAG_REQUIRED'));
 });
 
 test('facade owns copied memory and hides private actor capabilities', async () => {

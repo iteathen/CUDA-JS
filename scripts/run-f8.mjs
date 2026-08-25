@@ -53,7 +53,7 @@ const unit = { args: ['--test',
 ] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
 const native = { windowsOnly: true, args: ['conformance/f8/run-native-windows.mjs'] };
-const linux = { linuxOnly: true, args: ['conformance/f8/run-linux-readiness.mjs'] };
+const linux = { linuxOnly: true, args: ['--experimental-ffi', 'conformance/f8/run-linux-readiness.mjs'] };
 const verify = { args: ['conformance/f8/verify.mjs'] };
 const steps = {
   unit: [unit],

@@ -17,7 +17,7 @@
       "owned_invariant": "Every public operation is bounded, asynchronous where native work occurs, capability-checked, and free of raw native, generated CUDA, or private actor representations.",
       "public_ports": ["openCudaRuntime", "compileDeviceProgram", "inspectCudaHost", "CUDA_JS_COMPATIBILITY", "CudaJsError", "openCudaRuntimeForTesting"],
       "injected_dependencies": ["accepted actor constructors", "runtime.device-js translator", "copied support assessment", "compatibility manifest"],
-      "adapter_boundaries": ["native Windows actors", "mock-only testing actors", "restricted Device-JS frontend", "package compatibility metadata"],
+      "adapter_boundaries": ["native platform actors", "mock-only testing actors", "restricted Device-JS frontend", "package compatibility metadata"],
       "simplest_sufficient_total_system": "One runtime facade, private resource/operation capability classes, one optional standalone Device-JS helper, one public error class, and one immutable compatibility record."
     }
   }

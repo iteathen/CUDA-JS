@@ -16,15 +16,15 @@ The package is experimental and registry publication is guarded. Applications cu
 
 ## Native Linux x64 and ARM64 handoff
 
-CI already proves tarball contents, install/import/uninstall, compatibility inspection, mock-only public orchestration, independent consumers, multiple instances, and a stable backend-unavailable native-open error. Those controls should remain unchanged when the native adapter is completed.
+CI already proves tarball contents, install/import/uninstall, compatibility inspection, mock-only public orchestration, independent consumers, multiple instances, and native Linux x86-64 facade admission. On GPU-less hosted Ubuntu the canonical Driver lookup remains an expected environment blocker; the old facade-level backend-unavailable result is now a regression. These controls prove source readiness only, not native Linux support.
 
 A Linux engineer should:
 
 1. Complete the retained F2L through F8L runbooks on a native glibc host with an NVIDIA Driver and GPU. WSL evidence is separate.
-2. Add a canonical `libcuda.so.1` DriverActor backend using the accepted generated ABI facts, named-symbol/version rules, permission profile, context ownership, and cleanup contract.
-3. Add canonical NVRTC and nvJitLink providers. Preserve `--modify-stack-limit=false`, exact provider identity, copied artifacts, and the accepted cache boundary.
-4. Run the same installed-package vector consumer and an independently compiled C oracle. Do not replace the oracle with package self-comparison.
+2. Use the existing canonical `libcuda.so.1`, NVRTC, and nvJitLink profiles without changing the public facade. Preserve `--modify-stack-limit=false`, exact provider identity, copied artifacts, and the accepted cache boundary.
+3. Complete the independent Linux F4/F5 oracle/runners and F7 permission/lifecycle runner.
+4. Run the same installed-package vector, Device-JS, multi-operation, transfer, and mailbox consumers against their independent oracles. Do not replace an oracle with package self-comparison.
 5. Prove permission denial/allow behavior, repeated actor lifecycle balance, provider unload, context/resource teardown, Worker exit, and restart-required behavior after unproved loss.
-6. Add exact Linux profile evidence to `packaging/compatibility-manifest.json`, update the support matrix and public issue, and submit all claim changes with the native logs and environment identity.
+6. Promote the Linux compatibility qualification field, support matrix, and public issue only after the complete exact chain passes; source admission remains `not-qualified` until then.
 
 Linux promotion must not change the public facade solely to accommodate provider layout. Platform discovery and FFI calls belong behind the existing actors. Portable success is never a native CUDA claim.

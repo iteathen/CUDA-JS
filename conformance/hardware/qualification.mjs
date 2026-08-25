@@ -13,7 +13,7 @@ export const profilesPath = path.join(repositoryRoot, 'conformance', 'hardware',
 export const extensionsPath = path.join(repositoryRoot, 'conformance', 'hardware', 'extensions.json');
 
 const requiredCoverage = ['CJS-F2W', 'CJS-F3W', 'CJS-F4W', 'CJS-F5W', 'CJS-F6W', 'CJS-F7W', 'CJS-F8W'];
-const profileStatuses = new Set(['runner-ready', 'driver-compiler-source-ready', 'adapter-incomplete', 'schema-and-adapter-incomplete', 'contract-required']);
+const profileStatuses = new Set(['runner-ready', 'facade-source-ready', 'driver-compiler-source-ready', 'adapter-incomplete', 'schema-and-adapter-incomplete', 'contract-required']);
 const architectureStatuses = new Set(['qualified-one-model', 'seeking-evidence']);
 const architecturalDispositions = new Set(['planned', 'deferred', 'unselected', 'rejected', 'not-applicable']);
 const implementationStatuses = new Set(['not-implemented', 'experimental', 'partial', 'implemented']);
@@ -152,7 +152,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     'This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.',
     '',
-    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, and exact F3L/F6L runner source are implemented, but the native and installed-package chain remains incomplete, so this priority is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.',
+    'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. Shared Driver/compiler engines, thin Linux profiles, diagnostics, testing-only public-facade admission, compatibility metadata, and exact F3L/F6L runner source are implemented, but F4/F5/F7/F8 native runners and the exact installed-package chain remain incomplete. Source admission is not a support claim. The accepted Windows x64 result remains valid as a maintained peer profile.',
     '',
     'CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate without a compatibility opt-in when the required runtime substrate and safety checks pass. Operation is reported as `testing-unconfirmed` and never promotes support automatically.',
     '',
