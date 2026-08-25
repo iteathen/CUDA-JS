@@ -73,7 +73,7 @@ Remaining evidence:
 
 ### Native Linux
 
-ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference-platform workstream. Ubuntu 24.04 LTS x86-64 is the first exact cell. Implement the canonical Linux DriverActor adapter and NVRTC/nvJitLink providers through existing public/component contracts, then promote only on a qualified native Linux NVIDIA environment. Windows, WSL, portable mocks, schema generation, or successful import cannot substitute for native Driver/compiler/GPU evidence.
+ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference-platform workstream. Ubuntu 24.04 LTS x86-64 is the first exact cell. The canonical DriverActor and CompilerActor Linux profiles now exist behind shared OS-neutral native engines, including an official-package-pinned compiler manifest and exact F3L/F6L runner source. Next reconcile the diagnostics/facade/package path, then promote only on a qualified native Linux NVIDIA environment. Windows, WSL, portable mocks, schema generation, source review, or successful import cannot substitute for native Driver/compiler/GPU evidence.
 
 Capability-specific Linux RDC/LTO/Device-JS/operation qualification follows only after the owning Linux baseline and capability dependencies exist.
 

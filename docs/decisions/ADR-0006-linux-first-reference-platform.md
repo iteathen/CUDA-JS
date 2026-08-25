@@ -46,7 +46,7 @@ Performance issue #28 remains open after any Windows seed observation. Its first
 
 - `runtime.facade` selects an injected platform adapter without changing public lifecycle semantics or exposing operating-system identity as consumer policy.
 - `runtime.driver-actor` gains a canonical `libcuda.so.1` Linux adapter behind the existing Worker/context/resource contract.
-- `runtime.compiler-actor` gains canonical Linux NVRTC/nvJitLink discovery behind the existing provider contract.
+- `runtime.compiler-actor` uses one native compile/link engine with canonical Windows/Linux provider profiles behind the existing provider contract.
 - Shared owners do not branch on distribution identity and branch on operating system only at the private adapter-selection seam.
 - Linux-specific library discovery, permissions and loader behavior remain adapter-owned.
 - Exact device, provider and platform identity remains evidence/compatibility data; no raw native identity crosses the public boundary.

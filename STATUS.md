@@ -7,7 +7,7 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     2135216b1a9fd88066a1c82b61ae533645eac9c2
+protected main:     9ca5dc0d8035e637f1608aa56206c0910c4acd95
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
 execution package:  cuda-js@0.1.0-alpha.7
@@ -23,9 +23,9 @@ This wording does not claim that every host call or device artifact is JIT-produ
 
 ## Reference-platform direction
 
-ADR-0006 keeps the public/component architecture OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell. The accepted Windows x64 evidence below remains valid as a peer exact profile, but it no longer determines forward platform priority. The shared native Driver backend now has thin Windows/Linux discovery profiles and an F3L runner; Linux Driver evidence, compiler providers and the complete installed-package chain remain open, so this direction is not yet a Linux support claim.
+ADR-0006 keeps the public/component architecture OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell. The accepted Windows x64 evidence below remains valid as a peer exact profile, but it no longer determines forward platform priority. DriverActor and CompilerActor now each use one shared native engine with thin Windows/Linux profiles. The Linux compiler profile is pinned to exact official Ubuntu packages and installed-file identities, and exact F3L/F6L runners exist. Native Linux execution evidence and the complete installed-package chain remain open, so source completion is not a Linux support claim.
 
-The active dependency path is issue #4: canonical Linux Driver/context ownership, then NVRTC/nvJitLink providers, native F3–F8/package evidence and exact compatibility promotion. Issue #17 expands Linux distributions only after that baseline. SPEC-0017 remains the next platform-neutral capability foundation and will use Linux for its first native selection promotion. Multi-GPU and topology-aware performance require a controlled 2+ physical-GPU Linux host.
+The active dependency path is issue #4: reconcile platform diagnostics/public-facade admission with the implemented Linux Driver/compiler profiles, complete native F3–F8/package evidence, and promote only the exact passing compatibility cell. Issue #17 expands Linux distributions only after that baseline. SPEC-0017 remains the next platform-neutral capability foundation and will use Linux for its first native selection promotion. Multi-GPU and topology-aware performance require a controlled 2+ physical-GPU Linux host.
 
 The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), active reference **Linux x86-64** implementation/qualification path, and portable/software/package implementations include:
 
@@ -174,10 +174,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. keep CUDA-JS P0/P1 implementation prerequisites frozen at the integrated qualified profiles
-2. begin a bounded CUDA-MCGS artifact that consumes only public CUDA-JS contracts
-3. freeze the CUDA-MCGS artifact and execute exact compatible-pair gate #32
-4. keep broader CUDA-JS native/platform lanes independent of the CUDA-MCGS start gate
+1. preserve OS-neutral contracts and the accepted Windows peer evidence
+2. complete the native Linux x86-64 facade/diagnostics/package source chain
+3. run exact Ubuntu 24.04 F2L-F8L and installed-package evidence on a controlled NVIDIA host
+4. resume SPEC-0017 native selection, then qualify 2+ GPU behavior without forcing cross-device coupling
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

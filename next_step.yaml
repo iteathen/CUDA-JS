@@ -1,10 +1,10 @@
 {
-  "schema_version": 42,
+  "schema_version": 43,
   "updated": "2026-08-25",
   "status": "os_neutral_architecture_linux_reference_active",
   "objective": "Preserve OS-neutral public/component architecture while completing the native Linux x86-64 reference path from canonical platform adapters through installed-package qualification, with Windows retained as a qualified peer adapter.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "05008fb988558e909cb3802fa12a73d612e70bf0",
+    "protected_main_authority_baseline": "9ca5dc0d8035e637f1608aa56206c0910c4acd95",
     "package": "cuda-js@0.1.0-alpha.7",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -20,7 +20,8 @@
       "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed",
       "CJS-DEVICE-PUBLICATION-123 integrated on PR #125: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence",
       "CJS-OS-NEUTRAL-LINUX-REFERENCE-ADR-0006 selected: OS-neutral architecture, native Linux x86-64 reference implementation, exact Ubuntu 24.04 first cell, Windows retained as a qualified peer adapter/profile",
-      "CJS-LINUX-DRIVER-ADAPTER: shared native Driver backend, thin canonical Windows/Linux discovery profiles, and exact F3L runner implemented without promoting Linux support"
+      "CJS-LINUX-DRIVER-ADAPTER: shared native Driver backend, thin canonical Windows/Linux discovery profiles, and exact F3L runner implemented without promoting Linux support",
+      "CJS-LINUX-COMPILER-ADAPTER: shared native CompilerActor engine, exact official-package-pinned Ubuntu profile, and exact F6L readiness/oracle/Driver-handoff runner source implemented without native qualification"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
@@ -57,14 +58,14 @@
     "id": "CJS-OS-NEUTRAL-LINUX-REFERENCE-F2L-F8L",
     "issues": [4],
     "plan": "docs/plans/2026-08-12-native-and-platform-qualification-continuation.md",
-    "next_action": "Add canonical Linux NVRTC/nvJitLink providers behind the existing OS-neutral CompilerActor contract, then complete the exact Ubuntu 24.04 F2L-F8L package chain without promoting support from source-only evidence.",
+    "next_action": "Reconcile platform diagnostics and the public facade/package path with the implemented Linux Driver/compiler profiles, then run the exact Ubuntu 24.04 F2L-F8L chain without promoting support from source-only evidence.",
     "exit": "One exact Ubuntu 24.04 x86-64 Node 26.7.0/Driver/GPU/CUDA 13.3 profile passes independent Driver, memory, execution, compiler, permission, installed-package and terminal-cleanup evidence, and compatibility/support projections promote only that profile."
   },
   "parallel_or_external_next": [
     {
       "id": "CJS-DEVICE-SELECTION-0017",
       "issues": [20],
-      "action": "Continue the accepted OS-neutral selector/target foundation without adding platform-specific public semantics; use Linux as the first native promotion target after the reference Driver/compiler ports exist."
+      "action": "Continue the accepted OS-neutral selector/target foundation without adding platform-specific public semantics; use Linux as the first native promotion target after the reference installed-package chain passes."
     },
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
@@ -91,7 +92,7 @@
     {
       "id": "CJS-NATIVE-QUALIFICATION",
       "issues": [12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence. The shared Driver backend, canonical Linux discovery profile and F3L runner are implemented, but support promotion still requires an external Ubuntu 24.04 NVIDIA host plus compiler/package completion. OS-neutral source preparation may continue where authorized; no broader native/support claim is inferred."
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence. Shared Driver/compiler native engines, exact Linux profiles and F3L/F6L runner source are implemented, but support promotion still requires an external Ubuntu 24.04 NVIDIA host plus facade/package completion and the exact evidence chain. No broader native/support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",

@@ -3,7 +3,7 @@
   "component": {
     "id": "runtime.compiler-actor",
     "name": "CUDA CompilerActor",
-    "status": "accepted-f9-windows-internal-experimental",
+    "status": "accepted-f9-windows-linux-source-unqualified",
     "product_area": "components",
     "path": "components/compiler-actor",
     "purpose": "Provide bounded typed NVRTC compilation, nvJitLink composition, validated artifact caching, and copied PTX/cubin handoff from a separate Worker.",
@@ -17,7 +17,7 @@
       "owned_invariant": "Only canonical verified providers and normalized typed inputs enter native compilation, and no native capability crosses the Worker boundary.",
       "public_ports": ["openCompilerRuntime", "CompilerRuntimeError"],
       "injected_dependencies": ["private backend profile", "cache directory", "cache mode"],
-      "adapter_boundaries": ["Windows Node FFI compiler backend", "platform-neutral compiler mock", "validated filesystem cache"],
+      "adapter_boundaries": ["shared native compiler engine", "canonical Windows provider profile", "canonical Linux x86-64 provider profile", "platform-neutral compiler mock", "validated filesystem cache"],
       "simplest_sufficient_total_system": "One facade, one serialized Worker, two verified provider libraries, local program/link lifetimes, and one validated content-addressed cache."
     }
   }

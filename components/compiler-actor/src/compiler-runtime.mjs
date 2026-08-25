@@ -12,6 +12,13 @@ const TERMINAL_CLEANUP_FAILURE_LIMIT = 8;
 const TERMINAL_HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
 export const COMPILER_RUNTIME_TEST = Symbol('cuda-js.compiler-runtime.test');
 
+function isNativeBackend(backend) { return backend === 'windows-native' || backend === 'linux-native'; }
+function backendPlatform(backend) {
+  if (backend === 'windows-native') return 'win32';
+  if (backend === 'linux-native') return 'linux';
+  return process.platform;
+}
+
 function workerExecArgv() {
   return process.execArgv.filter((argument) => argument === '--experimental-ffi'
     || argument === '--permission'
@@ -80,7 +87,7 @@ class CompilerRuntime {
   async status() { return this.#request('runtime.status', {}); }
 
   async compile(request) {
-    const normalized = normalizeCompileRequest(request, this.#backend === 'windows-native' ? 'win32' : process.platform);
+    const normalized = normalizeCompileRequest(request, backendPlatform(this.#backend));
     return this.#request('compiler.compile', {
       source: normalized.source,
       name: normalized.name,
@@ -157,10 +164,10 @@ class CompilerRuntime {
   }
 
   async #start() {
-    if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) {
+    if (isNativeBackend(this.#backend) && !process.execArgv.includes('--experimental-ffi')) {
       throw new CompilerRuntimeError('COMPILER_FFI_FLAG_REQUIRED', 'unsupported', 'The native CompilerActor requires Node to be launched with experimental FFI enabled.');
     }
-    if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) {
+    if (isNativeBackend(this.#backend) && process.permission !== undefined && !process.execArgv.includes('--permission')) {
       throw new CompilerRuntimeError('COMPILER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native CompilerActor requires permission flags to be explicit process arguments.');
     }
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
@@ -279,5 +286,11 @@ function runtimeOptions(options, backend, testHooks) {
   return { backend, testHooks, cacheDirectory, cacheMode };
 }
 
-export async function openCompilerRuntime(options = {}) { return CompilerRuntime.open(runtimeOptions(options, 'windows-native', false)); }
+export function selectNativeBackend(platform = process.platform, architecture = process.arch) {
+  if (platform === 'win32' && architecture === 'x64') return 'windows-native';
+  if (platform === 'linux' && architecture === 'x64') return 'linux-native';
+  throw new CompilerRuntimeError('COMPILER_PROFILE_UNSUPPORTED', 'unsupported', 'The native CompilerActor requires Windows x64 or native Linux x86-64.', { platform, architecture });
+}
+
+export async function openCompilerRuntime(options = {}) { return CompilerRuntime.open(runtimeOptions(options, selectNativeBackend(), false)); }
 export async function openCompilerRuntimeForTesting(options = {}) { return CompilerRuntime.open(runtimeOptions(options, 'mock', true)); }
