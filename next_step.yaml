@@ -1,10 +1,10 @@
 {
-  "schema_version": 46,
+  "schema_version": 47,
   "updated": "2026-08-25",
-  "status": "os_neutral_architecture_linux_reference_active",
-  "objective": "Preserve OS-neutral public/component architecture while completing the native Linux x86-64 reference path from canonical platform adapters through installed-package qualification, with Windows retained as a qualified peer adapter.",
+  "status": "spec0017_portable_active_linux_external_evidence",
+  "objective": "Integrate accepted OS-neutral SPEC-0017 portable/software device selection and target resolution while retaining native Linux x86-64 qualification as a contributor-operated physical-hardware evidence lane and Windows as a qualified peer adapter.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "f08e4538d96d9a9d04d8094733f34442a0b286f1",
+    "protected_main_authority_baseline": "118dec1574d650557ffa65f1bbb1d89e0970ceff",
     "package": "cuda-js@0.1.0-alpha.8",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -23,7 +23,7 @@
       "CJS-LINUX-DRIVER-ADAPTER: shared native Driver backend, thin canonical Windows/Linux discovery profiles, and exact F3L runner implemented without promoting Linux support",
       "CJS-LINUX-COMPILER-ADAPTER: shared native CompilerActor engine, exact official-package-pinned Ubuntu profile, and exact F6L readiness/oracle/Driver-handoff runner source implemented without native qualification",
       "CJS-LINUX-FACADE-SOURCE: platform diagnostics, public facade admission, compatibility projection, and F7L/F8L readiness now accept native Linux x86-64 only as testing-unconfirmed; alpha.8 changes no qualification state",
-      "CJS-LINUX-RUNNER-CHAIN: OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile are source-complete; no Linux qualification state changed"
+      "CJS-LINUX-RUNNER-CHAIN: PR #132 merged the OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile at protected main 118dec1574d650557ffa65f1bbb1d89e0970ceff; no Linux qualification state changed"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
     "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
@@ -57,17 +57,17 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-OS-NEUTRAL-LINUX-REFERENCE-F2L-F8L",
-    "issues": [4],
-    "plan": "docs/plans/2026-08-12-native-and-platform-qualification-continuation.md",
-    "next_action": "Run the runner-ready exact Ubuntu 24.04 F2L-F8L chain from a clean tested commit on a controlled native NVIDIA host, review the generated public evidence, and promote only the exact passing compatibility cell.",
-    "exit": "One exact Ubuntu 24.04 x86-64 Node 26.7.0/Driver/GPU/CUDA 13.3 profile passes independent Driver, memory, execution, compiler, permission, installed-package and terminal-cleanup evidence, and compatibility/support projections promote only that profile."
+    "id": "CJS-DEVICE-SELECTION-0017",
+    "issues": [20],
+    "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
+    "next_action": "Integrate the accepted OS-neutral portable/software selector and target-resolution foundation: finite sanitized snapshots, opaque selector validation, exactly one selected device per runtime, selected-device target/cache identity, cross-owner rejection, and bounded lifecycle behavior. Do not claim native or multi-GPU qualification.",
+    "exit": "The portable/software and package paths implement accepted SPEC-0017 through public owners, pass ownership-focused and repository validation, preserve exactly-one-device runtime semantics, and make no physical-device or topology claim."
   },
   "parallel_or_external_next": [
     {
-      "id": "CJS-DEVICE-SELECTION-0017",
-      "issues": [20],
-      "action": "Continue the accepted OS-neutral selector/target foundation without adding platform-specific public semantics; use Linux as the first native promotion target after the reference installed-package chain passes."
+      "id": "CJS-OS-NEUTRAL-LINUX-REFERENCE-F2L-F8L",
+      "issues": [4],
+      "action": "A contributor may run the unchanged runner-ready Ubuntu 24.04 F2L-F8L chain on a native host with a directly exposed physical NVIDIA GPU, retain the full local bundle, submit the sanitized public summary, and fix only evidence-backed failures through their owning boundaries. VM, emulated, WSL, container, hosted-CI, portable, or mock results are not native qualification evidence."
     },
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
@@ -79,7 +79,7 @@
     "map": "docs/plans/2026-08-25-long-horizon-capability-map.md",
     "issue": 129,
     "status": "candidate_inventory_not_execution_authority",
-    "activation_gate": "Does not displace issue #4 or accepted SPEC-0017; each candidate requires its own accepted owner, dependencies, lifecycle, and evidence before implementation."
+    "activation_gate": "Does not displace active accepted SPEC-0017 or the external issue #4 evidence lane; each candidate requires its own accepted owner, dependencies, lifecycle, and evidence before implementation."
   },
   "blocked_or_deferred_lanes": [
     {
@@ -100,7 +100,7 @@
     {
       "id": "CJS-NATIVE-QUALIFICATION",
       "issues": [12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider and independent native evidence. The repository-side Ubuntu x64 EXP-001/F1B/F3L-F8L runner/evidence chain is complete, but support promotion still requires that chain to pass on a clean controlled NVIDIA host. No broader native/support claim is inferred."
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider and independent native evidence. The repository-side Ubuntu x64 EXP-001/F1B/F3L-F8L runner/evidence chain is complete, but available VM hosts cannot currently provide an accepted CUDA qualification environment. Support promotion therefore waits for contributor-run evidence from a clean native host with directly exposed physical NVIDIA hardware. VM, emulated, WSL, container, hosted-CI, portable, or mock evidence does not qualify the native cell, and no broader support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",

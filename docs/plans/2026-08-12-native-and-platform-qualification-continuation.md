@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-12
 
-**Input baseline:** protected `main` `f08e4538d96d9a9d04d8094733f34442a0b286f1`, package `cuda-js@0.1.0-alpha.8`.
+**Input baseline:** protected `main` `118dec1574d650557ffa65f1bbb1d89e0970ceff`, package `cuda-js@0.1.0-alpha.8`.
 
 ## Purpose
 
@@ -73,7 +73,9 @@ Remaining evidence:
 
 ### Native Linux
 
-ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference-platform workstream. Ubuntu 24.04 LTS x86-64 is the first exact cell. The canonical shared DriverActor/CompilerActor engines, thin Linux profiles, independent F4/F5 native oracles, F3L-F8L native runners, installed-package consumer, and exact-profile evidence validator are implemented. The profile is runner-ready, not qualified. Next run the unchanged `EXP-001`, F1B, and F3L-F8L chain on a clean exact Ubuntu/NVIDIA host, review the resulting evidence, and promote only the exact accepted profile. Windows, WSL, portable mocks, schema generation, source review, or successful import cannot substitute for native Driver/compiler/GPU evidence.
+ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference qualification platform. Ubuntu 24.04 LTS x86-64 is the first exact cell. The canonical shared DriverActor/CompilerActor engines, thin Linux profiles, independent F4/F5 native oracles, F3L-F8L native runners, installed-package consumer, and exact-profile evidence validator are implemented. The profile is runner-ready, not qualified.
+
+The available VM hosts cannot currently provide an accepted CUDA qualification environment, so issue #4 is now an external contributor-evidence lane. A contributor must run the unchanged `EXP-001`, F1B, and F3L-F8L chain on a clean native Ubuntu host with a directly exposed physical NVIDIA GPU, review and retain the resulting evidence, and propose promotion only for the exact accepted profile. VM, emulated, WSL, container, hosted-CI, portable, mock, schema-generation, source-review, or import results cannot substitute for native Driver/compiler/GPU evidence. This unavailable environment does not block accepted OS-neutral portable/software work such as SPEC-0017.
 
 Capability-specific Linux RDC/LTO/Device-JS/operation qualification follows only after the owning Linux baseline and capability dependencies exist.
 

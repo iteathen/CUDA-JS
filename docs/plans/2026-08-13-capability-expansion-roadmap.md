@@ -6,7 +6,7 @@
 
 **Originally:** 2026-08-13
 
-**Reconciled:** 2026-08-25 against protected `main@f08e4538d96d9a9d04d8094733f34442a0b286f1`
+**Reconciled:** 2026-08-25 against protected `main@118dec1574d650557ffa65f1bbb1d89e0970ceff`
 
 ## Purpose
 
@@ -15,18 +15,17 @@ Sequence accepted or proposal-backed generic CUDA-JS work without confusing arch
 ## Current dependency spine
 
 ```text
-P0 active: OS-neutral native Linux reference path (#4)
-  shared Driver/compiler source complete
-  -> diagnostics/public facade/package testing-only source admission complete
-  -> native F4/F5 oracle/runners and F7/F8 installed-package runners complete
-  -> exact Ubuntu 24.04 x86-64 F2L-F8L evidence
-
-P1 next: accepted SPEC-0017 explicit device selection (#20)
+P0 active: accepted SPEC-0017 explicit device selection (#20)
   portable selector/target integration
   -> exact one-device default/explicit selection evidence
-  -> controlled 2+ physical-GPU selection evidence
+  -> native selected-device promotion when direct physical-host evidence exists
 
-P2 after accepted bounds: smallest necessary SPEC-0024 multi-GPU subset
+External evidence lane: native Linux reference qualification (#4)
+  repository-side EXP-001/F1B/F3L-F8L chain complete
+  -> contributor-run exact Ubuntu 24.04 x86-64 physical-NVIDIA evidence
+  -> exact-cell review and promotion only after the unchanged chain passes
+
+P1 after accepted bounds: smallest necessary SPEC-0024 multi-GPU subset
   finite selected runtimes and device-scoped ownership
   -> cross-device misuse rejection and terminal aggregate status
   -> topology/P2P/collectives only for independently justified profiles
@@ -80,9 +79,9 @@ SPEC-0026 process-isolated execution
 
 SPEC-0027 is accepted authority only for a separate future NN publish unit. It does not authorize NN code or dependencies in `cuda-js` core.
 
-## P0 — complete the reference-platform chain
+## External lane — qualify the reference-platform chain
 
-Issue #4 is the only active implementation path in this roadmap.
+Issue #4 no longer owns repository-side adapter or runner implementation. It is a contributor-operated evidence lane that may advance whenever a suitable native physical-NVIDIA host is available; it does not block accepted OS-neutral portable/software work.
 
 1. Keep the completed platform diagnostics, compatibility admission, public facade, F3L-F8L source runners, and installed-package behavior aligned with the shared Linux Driver/compiler profiles.
 2. Preserve `not-qualified` truth and fail closed outside the exact Linux x86-64 profile.
@@ -90,11 +89,11 @@ Issue #4 is the only active implementation path in this roadmap.
 4. Compare Driver, memory, execution, compiler/linker, package output, permissions, and teardown against independent native oracles.
 5. Promote only the exact compatibility cell after the entire chain passes.
 
-Hosted portable Ubuntu readiness evidence cannot substitute for a native NVIDIA Driver/GPU run.
+The currently available VM hosts cannot provide an accepted CUDA qualification environment. VM, emulated, WSL, container, hosted-CI, portable, or mock evidence cannot substitute for a native Ubuntu NVIDIA Driver/GPU run on directly exposed physical hardware.
 
-## P1 — integrate accepted device selection
+## P0 — integrate accepted device selection
 
-After the Linux source/package path is coherent, resume accepted SPEC-0017/#20:
+The Linux source/package runner path is coherent, so accepted SPEC-0017/#20 is the active dependency-ready packet:
 
 - finite sanitized discovery snapshots and opaque selectors;
 - exactly one selected device bound before context/resource creation;
@@ -104,9 +103,9 @@ After the Linux source/package path is coherent, resume accepted SPEC-0017/#20:
 - native identifiers remain private;
 - multi-device orchestration remains outside SPEC-0017.
 
-Portable implementation does not prove distinct physical-device behavior. Exact multi-device promotion needs a controlled native Linux host with at least two independently visible GPUs.
+Portable implementation does not prove distinct physical-device behavior. Native selected-device promotion waits for a controlled physical-GPU host; exact multi-device promotion needs at least two independently visible physical GPUs.
 
-## P2 — accept only the needed multi-GPU subset
+## P1 — accept only the needed multi-GPU subset
 
 The first demonstrated consumer need is finite independent device-resident replicas with pre-ignition assignment and final aggregation after every per-device operation is terminal. Reassess SPEC-0024 around that subset before implementation.
 
@@ -134,7 +133,7 @@ benchmark passes                 -> only the named measured claim may advance
 ## Do not
 
 - implement from this roadmap, a candidate row, or an issue body without accepted governing authority;
-- let the long-horizon inventory displace issue #4 or SPEC-0017;
+- let the long-horizon inventory displace active SPEC-0017 or the external issue #4 evidence lane;
 - duplicate SPEC-0016 lifecycle;
 - expose native device or provider identity;
 - infer support across OS, GPU, Driver, toolkit, topology, or library profiles;
