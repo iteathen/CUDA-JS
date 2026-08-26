@@ -56,6 +56,7 @@ for (const required of [
   'components/cuda-target/index.mjs',
   'components/cuda-target/component.yaml',
   'components/execution/src/numeric-abi.mjs',
+  'components/prepared-execution/index.mjs',
   'components/publication-mailbox/index.mjs',
   'components/memory/src/device-view-manager.mjs',
   'components/runtime-facade/index.mjs',
@@ -72,7 +73,7 @@ const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
 const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
-const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name === 'packaging/compatibility-manifest.json');
+const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name.startsWith('components/prepared-execution/') || name.startsWith('components/execution/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
   for (const needle of deletionNeedles) assert(!text.includes(needle), `${relative} contains first-consumer coupling: ${needle}`);
@@ -103,6 +104,7 @@ assert(memoryObservation);
 assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
 assert.equal(memoryObservation.publicationMailboxLifecycle, true);
+assert.equal(memoryObservation.preparedOperationDagLifecycle, true);
 assert.equal(memoryObservation.deviceSelectionLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
@@ -125,11 +127,14 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
+    'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
     'packaging/compatibility-manifest.json',
     'components/execution/src/numeric-abi.mjs',
+    'components/execution/src/execution-manager.mjs',
+    'components/prepared-execution/src/prepared-operation-dag.mjs',
     'components/memory/src/device-view-manager.mjs',
     'components/publication-mailbox/src/publication-mailbox-manager.mjs',
     'components/device-js/src/strict-translator.mjs',
@@ -143,8 +148,8 @@ const target = await writeEvidence('portable-package.json', {
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0021 scalar ABI, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
-    'The contiguous 1D typed device-view component is packaged for internal/downstream use but has no selected public cuda-js facade entry yet.',
+    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
+    'Prepared operation DAG evidence covers immutable kernel-only semantic single-stream replay, not CUDA Graph realization or performance.',
     'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, SPEC-0017 native selection, and typed device-view native consumers remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',
   ],

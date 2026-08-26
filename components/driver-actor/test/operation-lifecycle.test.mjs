@@ -17,6 +17,15 @@ function launchRequest(memory) {
   return { grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'device-memory', memory: memory.memory }, { kind: 'u32', value: 4 }] };
 }
 
+function preparedNode(fn, { id, after = [] }) {
+  return {
+    id, kind: 'kernel', after, functionToken: fn.function,
+    grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, sharedMemoryBytes: 0,
+    arguments: [{ binding: 'data' }, { kind: 'u32', value: 4 }],
+    accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 16, mode: 'read-write' }],
+  };
+}
+
 test('DriverRuntime submission and completion use separate short actor turns', { timeout: 10_000 }, async () => {
   const { runtime, module, fn, memory } = await prepared();
   try {
@@ -71,4 +80,39 @@ test('runtime close terminalizes a pending operation before dependency teardown'
   assert.equal(terminal.graceful, true);
   assert.equal(terminal.teardown.inventory.counts.live, 0);
   assert.equal(terminal.teardown.inventory.counts.orphaned, 0);
+});
+
+test('DriverRuntime prepares and replays one semantic DAG through one operation boundary', { timeout: 10_000 }, async () => {
+  const { runtime, module, fn, memory } = await prepared();
+  let dag;
+  try {
+    dag = await runtime.prepareOperationDag({ nodes: [
+      preparedNode(fn, { id: 'second', after: ['first'] }),
+      preparedNode(fn, { id: 'first' }),
+    ] });
+    assert.equal(dag.kind, 'prepared-operation-dag');
+    assert.equal(dag.nodeCount, 2);
+    assert.equal((await runtime.preparedOperationDagStatus(dag.prepared)).sha256, dag.sha256);
+    const submit = () => runtime.submitPreparedOperationDag(dag.prepared, {
+      bindings: [{ name: 'data', kind: 'device-memory', memory: memory.memory, byteOffset: 0 }],
+    });
+    const first = await submit();
+    assert.equal(first.kind, 'prepared-batch');
+    assert.equal((await runtime.waitOperation(first.operation)).status, 'completed');
+    await runtime.releaseOperation(first.operation);
+    const replay = await submit();
+    assert.equal((await runtime.waitOperation(replay.operation)).preparedSha256, dag.sha256);
+    await runtime.releaseOperation(replay.operation);
+    assert.equal((await runtime.releasePreparedOperationDag(dag.prepared)).released.sha256, dag.sha256);
+    dag = null;
+  } finally {
+    if (runtime.state === 'open') {
+      if (dag) await runtime.releasePreparedOperationDag(dag.prepared).catch(() => {});
+      await runtime.releaseMemory(memory.memory).catch(() => {});
+      await runtime.releaseFunction(fn.function).catch(() => {});
+      await runtime.releaseModule(module.module).catch(() => {});
+    }
+    const terminal = await runtime.close();
+    assert.equal(terminal.graceful, true);
+  }
 });

@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.10');
+assert.equal(packageJson.version, '0.1.0-alpha.11');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -25,6 +25,7 @@ assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-st
 assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(compatibility.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(compatibility.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
+assert.equal(compatibility.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
@@ -47,6 +48,7 @@ assert.equal(memoryConsumer.asyncTransferLifecycle, true);
 assert.equal(memoryConsumer.publicationMailboxLifecycle, true);
 assert.equal(memoryConsumer.deviceSelectionLifecycle, true);
 assert.equal(memoryConsumer.typedViewLifecycle, true);
+assert.equal(memoryConsumer.preparedOperationDagLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
@@ -101,4 +103,4 @@ if (process.platform === 'linux' && !existsSync(nativePath)) {
     assert.equal(readiness.observations.admission.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
   }
 }
-console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${existsSync(nativePath) ? `native ${nativeProfile} facade plus source-only Device-JS execution` : 'retained native Linux qualification gates'}.`);
+console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS, SPEC-0016 operations, and SPEC-0020 semantic prepared DAGs, install/uninstall, independent consumers, instance isolation, and ${existsSync(nativePath) ? `native ${nativeProfile} facade plus source-only Device-JS execution` : 'retained native Linux qualification gates'}.`);

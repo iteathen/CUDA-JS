@@ -11,6 +11,7 @@ assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-s
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
@@ -86,6 +87,21 @@ assert.equal(operation.state, 'pending');
 assert.equal((await operation.status()).status, 'pending');
 assert.equal((await operation.wait()).status, 'completed');
 assert.equal((await operation.close()).state, 'closed');
+const preparedDag = await first.prepareOperationDag([{
+  id: 'step',
+  function: fn,
+  grid: { x: 1, y: 1, z: 1 },
+  block: { x: 1, y: 1, z: 1 },
+  arguments: [{ binding: 'data' }, 4],
+  accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 8, mode: 'read-write' }],
+}]);
+assert.equal(JSON.stringify(preparedDag), '{}');
+const preparedOperation = await preparedDag.submit({ data: firstView });
+const preparedTerminal = await preparedOperation.wait();
+assert.equal(preparedTerminal.kind, 'prepared-batch');
+assert.equal(preparedTerminal.preparedSha256, preparedDag.sha256);
+await preparedOperation.close();
+await preparedDag.close();
 const scalarCompletion = await scalarFn.launch({
   grid: { x: 1, y: 1, z: 1 },
   block: { x: 1, y: 1, z: 1 },
@@ -133,6 +149,7 @@ console.log(JSON.stringify({
   operationLifecycle: true,
   asyncTransferLifecycle: true,
   publicationMailboxLifecycle: true,
+  preparedOperationDagLifecycle: true,
   deviceSelectionLifecycle: true,
   typedViewLifecycle: true,
   graceful: true,

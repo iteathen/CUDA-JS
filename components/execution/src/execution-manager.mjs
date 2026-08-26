@@ -4,6 +4,7 @@ import {
   packParameterValues as packNumericParameterValues,
   parameterLayout as numericParameterLayout,
 } from './numeric-abi.mjs';
+import { normalizePreparedOperationDag } from '../../prepared-execution/index.mjs';
 
 const MIB = 1_048_576;
 const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds', 'maxPendingGpuOperations']);
@@ -11,6 +12,8 @@ const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
   'execution.operation.timeout',
+  'execution.prepared.status',
+  'execution.prepared.release',
   'memory.view.status',
   'memory.view.release',
   'mailbox.status',
@@ -29,8 +32,9 @@ const APPROVED_FAILURE_DETAIL_FIELDS = new Set([
   'causeByteLength', 'causeDisposalCallCount', 'causeNativeDescription', 'causeNativeMessage', 'causeNativeName',
   'causeNativeStatus', 'causeObservedOperationId', 'causeOriginOperationId', 'causeReason',
   'currentEpoch', 'disposition', 'epoch', 'expected', 'field', 'generation', 'kind',
-  'leases', 'maximum', 'nativeDescription', 'nativeName', 'nativeStatus', 'operationId',
+  'leases', 'maximum', 'nativeDescription', 'nativeName', 'nativeStatus', 'nodeCount', 'operationId',
   'originOperationId', 'reason', 'resourceKind', 'resourceState', 'slot', 'state', 'status',
+  'submittedNodeCount',
 ]);
 const FAILURE_STRING_LIMIT = 160;
 const CLEANUP_FAILURE_LIMIT = 8;
@@ -388,6 +392,7 @@ export class ExecutionManager {
   #moduleCount = 0;
   #functionCount = 0;
   #completionCount = 0;
+  #preparedDagCount = 0;
   #moduleDescriptors = new Map();
   #functionDescriptors = new Map();
   #rollbackFailure = null;
@@ -457,6 +462,7 @@ export class ExecutionManager {
       moduleCount: this.#moduleCount,
       functionCount: this.#functionCount,
       completionCount: this.#completionCount,
+      preparedDagCount: this.#preparedDagCount,
       inFlight: this.#pendingOperations.size > 0,
       pendingOperation: this.#pendingOperations.size > 0,
       pendingOperationCount: this.#pendingOperations.size,
@@ -472,7 +478,7 @@ export class ExecutionManager {
   assertCommandAllowed(command, operationId = null) {
     if (this.#pendingOperations.size === 0) return;
     if (PENDING_OPERATION_COMMANDS.has(command)) return;
-    if (['execution.submit', 'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d'].includes(command)) {
+    if (['execution.submit', 'execution.prepared.submit', 'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d'].includes(command)) {
       if (this.#pendingOperations.size < this.#policy.maxPendingGpuOperations) return;
       if (this.#policy.maxPendingGpuOperations > 1) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
     }
@@ -537,6 +543,350 @@ export class ExecutionManager {
   }
 
   functionStatus(token, operationId = null) { return this.#functionDescriptor(token, this.#registry.get(token, { kind: 'function' }), operationId); }
+
+  async prepareOperationDag({ nodes: nodeValues, operationId = null }) {
+    this.#assertAdmission();
+    if (!Array.isArray(nodeValues)) fail('PREPARED_DAG_REQUEST_INVALID', 'validation', 'Prepared operation DAG nodes must be an array.');
+    const functionLeases = new Map();
+    try {
+      const privateById = new Map();
+      const semanticNodes = nodeValues.map((node, inputIndex) => {
+        if (!plainObject(node) || Object.keys(node).some((key) => !['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].includes(key))
+            || !['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].every((key) => Object.hasOwn(node, key))) {
+          fail('PREPARED_DAG_NODE_INVALID', 'validation', 'Prepared operation DAG node fields are invalid.', { inputIndex });
+        }
+        const acquiredFunctionLease = this.#registry.acquire(node.functionToken, { kind: 'function' });
+        const functionKey = tokenIdentity(node.functionToken);
+        let functionLease = functionLeases.get(functionKey);
+        if (!functionLease) {
+          functionLease = acquiredFunctionLease;
+          functionLeases.set(functionKey, functionLease);
+        } else {
+          acquiredFunctionLease.release();
+        }
+        const parameters = functionLease.value.parameters;
+        if (parameters.some((parameter) => parameter.kind.startsWith('publication-mailbox-'))) {
+          fail('PREPARED_DAG_PARAMETER_UNSUPPORTED', 'unsupported', 'The first prepared DAG profile does not accept publication-mailbox parameters.', { inputIndex });
+        }
+        if (!Array.isArray(node.arguments) || node.arguments.length !== parameters.length) fail('PREPARED_DAG_ARGUMENTS_INVALID', 'validation', 'Prepared node argument count must match its function schema.', { inputIndex });
+        const privateArguments = [];
+        const semanticArguments = node.arguments.map((entry, argumentIndex) => {
+          const parameter = parameters[argumentIndex];
+          if (exactFields(entry, ['binding'])) {
+            privateArguments.push(Object.freeze({ binding: entry.binding, kind: parameter.kind }));
+            return { binding: entry.binding, kind: parameter.kind };
+          }
+          if (!exactFields(entry, ['kind', 'value']) || entry.kind !== parameter.kind || parameter.kind === 'device-memory') {
+            fail('PREPARED_DAG_ARGUMENT_INVALID', 'validation', 'Prepared arguments must be exact named bindings or fixed scalar values.', { inputIndex, argumentIndex });
+          }
+          const packed = packParameterValues([parameter], [entry.value]).buffer;
+          privateArguments.push(Object.freeze({ kind: entry.kind, value: entry.value }));
+          return { kind: entry.kind, packedHex: Buffer.from(packed).toString('hex') };
+        });
+        const grid = dimensions(node.grid, 'grid');
+        const block = dimensions(node.block, 'block');
+        this.#validateLaunchBounds(grid, block, node.sharedMemoryBytes);
+        const moduleRecord = this.#registry.get(functionLease.value.module, { kind: 'module' });
+        const semantic = {
+          id: node.id,
+          kind: node.kind,
+          after: Array.isArray(node.after) ? [...node.after] : node.after,
+          executable: {
+            moduleSha256: moduleRecord.sha256,
+            name: functionLease.value.name,
+            parameters: parameters.map((parameter) => ({ kind: parameter.kind })),
+          },
+          grid,
+          block,
+          sharedMemoryBytes: node.sharedMemoryBytes,
+          arguments: semanticArguments,
+          accesses: Array.isArray(node.accesses) ? node.accesses.map((entry) => plainObject(entry) ? { ...entry } : entry) : node.accesses,
+        };
+        privateById.set(node.id, Object.freeze({
+          id: node.id,
+          functionToken: node.functionToken,
+          functionValue: functionLease.value,
+          parameters,
+          grid,
+          block,
+          sharedMemoryBytes: node.sharedMemoryBytes,
+          arguments: Object.freeze(privateArguments),
+          accesses: semantic.accesses,
+        }));
+        return semantic;
+      });
+      const normalized = normalizePreparedOperationDag({
+        nodes: semanticNodes,
+        executionProfile: { maxPendingGpuOperations: this.#policy.maxPendingGpuOperations, deviceLimits: this.#limits },
+      });
+      const record = {
+        contract: normalized.contract,
+        sha256: normalized.sha256,
+        nodeCount: normalized.nodeCount,
+        edgeCount: normalized.edgeCount,
+        bindings: normalized.bindings,
+        semanticNodes: normalized.nodes,
+        submissionOrder: normalized.submissionOrder,
+        nodes: Object.freeze(normalized.submissionOrder.map((id) => privateById.get(id))),
+        functionLeases: Object.freeze([...functionLeases.values()]),
+        functionLeasesReleased: false,
+      };
+      const token = this.#registry.allocate({
+        kind: 'prepared-dag',
+        value: record,
+        parent: this.#contextToken,
+        dispose: async (value) => {
+          if (!value.functionLeasesReleased) {
+            value.functionLeasesReleased = true;
+            for (let index = value.functionLeases.length - 1; index >= 0; index -= 1) value.functionLeases[index].release();
+          }
+          return Object.freeze({ kind: 'prepared-dag', logicalClosed: true, sha256: value.sha256 });
+        },
+      });
+      this.#preparedDagCount += 1;
+      return this.#preparedDagDescriptor(token, record, operationId);
+    } catch (error) {
+      for (const lease of [...functionLeases.values()].reverse()) lease.release();
+      throw error;
+    }
+  }
+
+  preparedOperationDagStatus(token, operationId = null) {
+    return this.#preparedDagDescriptor(token, this.#registry.get(token, { kind: 'prepared-dag' }), operationId);
+  }
+
+  async releasePreparedOperationDag(token, operationId = null) {
+    const record = this.#registry.get(token, { kind: 'prepared-dag' });
+    const closed = await this.#registry.close(token);
+    this.#preparedDagCount -= 1;
+    return Object.freeze({
+      schemaVersion: 1,
+      released: Object.freeze({ kind: 'prepared-operation-dag', contract: record.contract, sha256: record.sha256, nodeCount: record.nodeCount, edgeCount: record.edgeCount }),
+      disposition: closed.disposition,
+      operationSequence: operationId,
+    });
+  }
+
+  async submitPreparedOperationDag(preparedToken, { bindings: bindingValues, after = null, operationId = null }) {
+    this.#assertAdmission();
+    if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    const preparedLease = this.#registry.acquire(preparedToken, { kind: 'prepared-dag' });
+    const memoryLeases = [];
+    let dependencyLease = null;
+    let eventToken = null;
+    let eventNative = null;
+    let submittedNodeCount = 0;
+    let ownershipTransferred = false;
+    try {
+      if (!Array.isArray(bindingValues) || bindingValues.length !== preparedLease.value.bindings.length) fail('PREPARED_DAG_BINDINGS_INVALID', 'validation', 'Prepared DAG submission must supply every binding exactly once.');
+      const supplied = new Map();
+      for (const entry of bindingValues) {
+        if (!plainObject(entry) || typeof entry.name !== 'string' || supplied.has(entry.name)) fail('PREPARED_DAG_BINDING_INVALID', 'validation', 'Prepared DAG binding records must have unique names.');
+        supplied.set(entry.name, entry);
+      }
+      const resolved = new Map();
+      for (const binding of preparedLease.value.bindings) {
+        const entry = supplied.get(binding.name);
+        if (!entry) fail('PREPARED_DAG_BINDING_MISSING', 'validation', 'Prepared DAG submission is missing a required binding.', { binding: binding.name });
+        if (binding.kind !== 'device-memory') {
+          if (!exactFields(entry, ['name', 'kind', 'value']) || entry.kind !== binding.kind) fail('PREPARED_DAG_BINDING_KIND', 'validation', 'Prepared scalar binding kind is invalid.', { binding: binding.name });
+          packParameterValues([{ kind: binding.kind }], [entry.value]);
+          resolved.set(binding.name, Object.freeze({ kind: binding.kind, value: entry.value, argument: Object.freeze({ kind: binding.kind, value: entry.value }) }));
+          continue;
+        }
+        let lease;
+        let argument;
+        if (exactFields(entry, ['name', 'kind', 'memory', 'byteOffset']) && entry.kind === 'device-memory') {
+          lease = this.#memory.acquireForExecution(entry.memory, entry.byteOffset);
+          argument = Object.freeze({ kind: 'device-memory', memory: entry.memory, byteOffset: entry.byteOffset });
+        } else if (exactFields(entry, ['name', 'kind', 'view']) && entry.kind === 'device-view') {
+          if (!this.#views || typeof this.#views.acquire !== 'function') fail('EXECUTION_VIEW_UNAVAILABLE', 'unsupported', 'Device-view prepared binding support is unavailable.');
+          const viewLease = this.#views.acquire(entry.view);
+          let memoryLease;
+          try { memoryLease = this.#memory.acquireForExecution(viewLease.memory, viewLease.byteOffset); }
+          catch (error) { viewLease.release(); throw error; }
+          let released = false;
+          lease = Object.freeze({
+            native: memoryLease.native,
+            byteOffset: viewLease.byteOffset,
+            byteLength: memoryLease.byteLength,
+            rangeEnd: viewLease.byteOffset + viewLease.byteLength,
+            viewAccess: viewLease.access,
+            release() {
+              if (released) return;
+              released = true;
+              memoryLease.release();
+              viewLease.release();
+            },
+          });
+          argument = Object.freeze({ kind: 'device-view', view: entry.view });
+        } else {
+          fail('PREPARED_DAG_BINDING_KIND', 'validation', 'Prepared device binding must be an exact device-memory or device-view record.', { binding: binding.name });
+        }
+        memoryLeases.push(lease);
+        resolved.set(binding.name, Object.freeze({ kind: 'device-memory', argument, lease }));
+      }
+      if (supplied.size !== resolved.size) fail('PREPARED_DAG_BINDING_EXTRA', 'validation', 'Prepared DAG submission contains an unknown binding.');
+
+      let dependency = null;
+      if (after !== null) {
+        dependencyLease = this.#registry.acquire(after, { kind: 'operation' });
+        if (dependencyLease.value.submissionSequence >= operationId) fail('EXECUTION_DEPENDENCY_ORDER', 'validation', 'Dependency must be an earlier operation from this runtime epoch.', { operationId });
+        if (dependencyLease.value.state === 'failed' || dependencyLease.value.state === 'orphaned') fail('EXECUTION_DEPENDENCY_TERMINAL', 'validation', 'Failed or orphaned work cannot be used as a dependency.', { state: dependencyLease.value.state });
+        dependency = dependencyLease.value.state === 'pending' ? dependencyLease.value : null;
+      }
+
+      const accessesByNode = new Map();
+      for (const node of preparedLease.value.nodes) {
+        const argumentValues = [];
+        const accessLeases = [];
+        node.arguments.forEach((argument) => {
+          if (Object.hasOwn(argument, 'binding')) {
+            const value = resolved.get(argument.binding);
+            argumentValues.push(value.argument);
+            if (argument.kind === 'device-memory') accessLeases.push(value.lease);
+          } else {
+            argumentValues.push({ kind: argument.kind, value: argument.value });
+          }
+        });
+        const accesses = normalizeAccesses(node.accesses, argumentValues, accessLeases, true);
+        accessesByNode.set(node.id, accesses);
+      }
+      const ancestors = new Map();
+      const semanticById = new Map(preparedLease.value.semanticNodes.map((node) => [node.id, node]));
+      for (const nodeId of preparedLease.value.submissionOrder) {
+        const node = semanticById.get(nodeId);
+        const values = new Set();
+        for (const predecessor of node.after) {
+          values.add(predecessor);
+          for (const ancestor of ancestors.get(predecessor) ?? []) values.add(ancestor);
+        }
+        ancestors.set(node.id, values);
+      }
+      for (let leftIndex = 0; leftIndex < preparedLease.value.semanticNodes.length; leftIndex += 1) {
+        const left = preparedLease.value.semanticNodes[leftIndex];
+        for (let rightIndex = leftIndex + 1; rightIndex < preparedLease.value.semanticNodes.length; rightIndex += 1) {
+          const right = preparedLease.value.semanticNodes[rightIndex];
+          if (ancestors.get(left.id)?.has(right.id) || ancestors.get(right.id)?.has(left.id)) continue;
+          for (const leftAccess of accessesByNode.get(left.id)) for (const rightAccess of accessesByNode.get(right.id)) {
+            if (ordinaryConflict(leftAccess, rightAccess)) fail('PREPARED_DAG_RESOURCE_HAZARD', 'validation', 'Unordered prepared nodes have an overlapping ordinary resource conflict.', { nodeCount: preparedLease.value.nodeCount });
+          }
+        }
+      }
+      const aggregateAccesses = Object.freeze([...accessesByNode.values()].flat());
+      for (const pending of this.#pendingOperations.values()) {
+        if (dependency === pending.record) continue;
+        for (const currentAccess of aggregateAccesses) for (const priorAccess of pending.record.accesses) {
+          if (ordinaryConflict(currentAccess, priorAccess)) fail('EXECUTION_RESOURCE_HAZARD', 'backpressure', 'Overlapping ordinary access requires an explicit dependency on the pending operation.');
+        }
+      }
+
+      const pointers = new Map();
+      const launches = [];
+      for (const node of preparedLease.value.nodes) {
+        const values = [];
+        for (const argument of node.arguments) {
+          if (!Object.hasOwn(argument, 'binding')) {
+            values.push(argument.value);
+            continue;
+          }
+          const value = resolved.get(argument.binding);
+          if (argument.kind !== 'device-memory') {
+            values.push(value.value);
+            continue;
+          }
+          let pointer = pointers.get(argument.binding);
+          if (pointer === undefined) {
+            pointer = await this.#operations.devicePointer({ native: value.lease.native, byteOffset: value.lease.byteOffset, operationId });
+            pointers.set(argument.binding, pointer);
+          }
+          values.push(pointer);
+        }
+        launches.push(Object.freeze({ node, parameterBuffer: packParameterValues(node.parameters, values).buffer }));
+      }
+
+      if (this.#streamTokens.length === 0) await this.initialize(operationId);
+      const streamToken = dependency?.streamToken ?? this.#streamTokens.find((candidate) => ![...this.#pendingOperations.values()].some((entry) => tokenIdentity(entry.streamToken) === tokenIdentity(candidate)));
+      if (!streamToken) fail('EXECUTION_BUSY', 'backpressure', 'No private execution stream is available.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+      const stream = this.#registry.get(streamToken, { kind: 'stream' });
+      eventNative = await this.#operations.createEvent({ operationId });
+      eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
+      for (const launch of launches) {
+        await this.#operations.submitLaunch({
+          functionNative: launch.node.functionValue.native,
+          streamNative: stream.native,
+          config: Object.freeze({ grid: launch.node.grid, block: launch.node.block, sharedMemoryBytes: launch.node.sharedMemoryBytes }),
+          parameterBuffer: launch.parameterBuffer,
+          operationId,
+        });
+        submittedNodeCount += 1;
+      }
+      try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }
+      catch (error) { throw this.#operations.restartRequired({ code: 'PREPARED_DAG_EVENT_PROVENANCE_LOST', message: 'Prepared DAG nodes were submitted but final completion provenance could not be established.', details: { nodeCount: preparedLease.value.nodeCount, submittedNodeCount }, operationId }); }
+
+      const record = {
+        kind: 'prepared-batch', state: 'pending', eventToken, streamToken, preparedToken, preparedLease, memoryLeases, dependencyLease,
+        accesses: aggregateAccesses, preparedSha256: preparedLease.value.sha256, nodeCount: preparedLease.value.nodeCount, edgeCount: preparedLease.value.edgeCount,
+        submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
+      };
+      let operationToken;
+      try {
+        operationToken = this.#registry.allocate({
+          kind: 'operation', value: record, parent: this.#contextToken,
+          dispose: async (value) => {
+            if (value.state === 'pending') fail('EXECUTION_OPERATION_BUSY', 'backpressure', 'Pending GPU operation cannot be closed.', { operationId: value.submissionSequence });
+            if (value.state === 'orphaned') fail('EXECUTION_OPERATION_ORPHANED', 'restart-required', 'Orphaned GPU operation cannot claim logical cleanup.', { operationId: value.submissionSequence });
+            return Object.freeze({ kind: 'operation', logicalClosed: true, terminalState: value.state });
+          },
+        });
+      } catch (error) {
+        throw this.#operations.restartRequired({ code: 'PREPARED_DAG_OPERATION_REGISTRATION_LOST', message: 'Prepared DAG completion provenance exists but logical operation ownership could not be registered.', details: { nodeCount: preparedLease.value.nodeCount, submittedNodeCount }, operationId });
+      }
+      ownershipTransferred = true;
+      this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
+      return this.#operationDescriptor(operationToken, record, operationId);
+    } catch (error) {
+      if (submittedNodeCount > 0) {
+        ownershipTransferred = true;
+        if (error?.category === 'restart-required') throw error;
+        throw this.#operations.restartRequired({
+          code: 'PREPARED_DAG_PARTIAL_SUBMISSION',
+          message: 'Prepared DAG submission failed after earlier nodes may have entered the private stream; process restart is required.',
+          details: { nodeCount: preparedLease.value.nodeCount, submittedNodeCount, causeCode: error?.code ?? null },
+          operationId,
+        });
+      }
+      if (eventNative !== null) {
+        try {
+          if (eventToken !== null) await this.#registry.close(eventToken);
+          else await this.#operations.destroyEvent({ native: eventNative, operationId });
+        } catch (cleanupError) {
+          throw combinedRollbackError({
+            code: 'PREPARED_DAG_SUBMIT_ROLLBACK_FAILED',
+            message: 'Prepared DAG submission failed and completion-event rollback cleanup was unproved.',
+            operation: 'execution.prepared.submit',
+            operationId,
+            primaryError: error,
+            primaryFallbackCode: 'PREPARED_DAG_SUBMIT_FAILED',
+            primaryFallbackOperation: 'execution.prepared.submit',
+            cleanupErrors: [cleanupError],
+            cleanupFallbackCode: 'EXECUTION_EVENT_CLEANUP_UNPROVED',
+            cleanupFallbackOperation: eventToken === null ? 'execution.event.destroy' : 'resource.close',
+            registry: this.#registry,
+            unprovedResources: [{ kind: 'event', registered: eventToken !== null }],
+            restartRequired: this.#operations.restartRequired,
+          });
+        }
+      }
+      throw error;
+    } finally {
+      if (!ownershipTransferred) {
+        for (let index = memoryLeases.length - 1; index >= 0; index -= 1) memoryLeases[index].release();
+        dependencyLease?.release();
+        preparedLease.release();
+      }
+    }
+  }
 
   async submit(functionToken, { grid: gridValue, block: blockValue, sharedMemoryBytes = 0, arguments: argumentValues, after = null, accesses: accessValues, operationId = null }) {
     this.#assertAdmission();
@@ -906,6 +1256,10 @@ export class ExecutionManager {
       schemaVersion: 1, operation: token, kind: record.kind, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
       sharedMemoryBytes: record.sharedMemoryBytes, argumentKinds: record.argumentKinds, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
+    } : record.kind === 'prepared-batch' ? {
+      schemaVersion: 1, operation: token, kind: record.kind, status: record.state, prepared: record.preparedToken,
+      preparedSha256: record.preparedSha256, nodeCount: record.nodeCount, edgeCount: record.edgeCount, pollCount: record.pollCount,
+      elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
     } : {
       schemaVersion: 1, operation: token, kind: record.kind, status: record.state, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
@@ -1004,6 +1358,7 @@ export class ExecutionManager {
     for (let index = (record.externalLeases ?? []).length - 1; index >= 0; index -= 1) record.externalLeases[index].release();
     record.dependencyLease?.release();
     record.functionLease?.release();
+    record.preparedLease?.release();
   }
 
   #admissionFailure() {
@@ -1017,6 +1372,21 @@ export class ExecutionManager {
 
   #moduleDescriptor(token, record, operationId) { return Object.freeze({ schemaVersion: 1, module: token, format: record.format, byteLength: record.byteLength, sha256: record.sha256, operationSequence: operationId }); }
   #functionDescriptor(token, record, operationId) { return Object.freeze({ schemaVersion: 1, function: token, module: record.module, name: record.name, parameters: record.parameters, operationSequence: operationId }); }
+
+  #preparedDagDescriptor(token, record, operationId) {
+    return Object.freeze({
+      schemaVersion: 1,
+      prepared: token,
+      kind: 'prepared-operation-dag',
+      contract: record.contract,
+      sha256: record.sha256,
+      nodeCount: record.nodeCount,
+      edgeCount: record.edgeCount,
+      bindings: record.bindings,
+      realization: 'semantic-single-stream',
+      operationSequence: operationId,
+    });
+  }
 
   #validateLaunchBounds(grid, block, sharedMemoryBytes) {
     const limits = this.#limits;

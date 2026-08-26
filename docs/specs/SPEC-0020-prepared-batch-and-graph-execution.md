@@ -1,8 +1,12 @@
 # SPEC-0020: Prepared Batch and CUDA Graph Execution
 
-**Status:** Proposal
+**Status:** Accepted
+
+**Accepted scope:** Semantic prepared-kernel DAG baseline defined below; CUDA Graph realization remains proposal-only.
 
 **Date:** 2026-08-13
+
+**Accepted baseline:** 2026-08-26
 
 **Issue owner:** #85
 
@@ -15,17 +19,37 @@ Prepared execution reuses SPEC-0016/SPEC-0018 operation lifecycle and dependency
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented
-qualification status:        not-qualified
+architectural disposition: accepted for the semantic prepared-kernel DAG baseline
+implementation status:       implemented in public portable/package path
+qualification status:        portable/package conformance only; native not-qualified
 priority:                    after accepted SPEC-0018
 ```
 
 ## Dependencies
 
-This proposal consumes accepted SPEC-0016 and proposed SPEC-0018. Transfer nodes additionally consume SPEC-0019; library nodes consume SPEC-0023; typed view/resource bindings consume their own accepted contracts.
+The accepted baseline consumes accepted SPEC-0016, SPEC-0018, and SPEC-0021. Transfer nodes additionally consume SPEC-0019; library nodes consume SPEC-0023; each remains outside the first baseline until a bounded child profile is accepted.
 
 CUDA Graphs are an implementation profile over a validated semantic prepared batch, not the definition of batch semantics.
+
+## Accepted first profile
+
+The first production profile is an immutable finite DAG of kernel nodes only. It is deliberately useful without CUDA Graphs and remains coherent if every tensor, NN, search, and first-consumer repository is deleted.
+
+The public runtime prepares a DAG from one through 32 kernel nodes, at most 64 dependency edges, and at most 64 named bindings. Each node contains one exact function capability, fixed grid/block/shared-memory configuration, fixed scalar arguments or named binding references, an explicit access declaration for every device-memory/view argument, and zero or more predecessor node IDs. Publication mailboxes, host transfers, device copies, library calls, mutable topology, dynamic node families, and arbitrary native controls are excluded from this profile.
+
+Named bindings are inferred from declared function parameter kinds. One name has one exact kind across the DAG. A submission supplies every named binding exactly once using accepted scalar values or opaque device-memory/view capabilities from the same runtime. Grid/block/shared-memory fields and fixed scalar arguments are immutable; later update or specialization profiles require separate acceptance.
+
+Preparation validates the complete topology, function schemas, binding-kind consistency, launch bounds, access structure, finite ceilings, and deterministic semantic identity without native submission. Submission then validates concrete binding ownership/ranges/access roles and all ordinary hazards before native work. Unordered overlapping ordinary conflicts reject; an explicit path in either direction orders the conflict. Compatible accepted atomic-observation/update overlaps may remain unordered under SPEC-0018 semantics.
+
+One `submit()` call crosses the public/DriverActor boundary once. The semantic fallback enqueues the canonical topological order on one private stream, records one completion event after the final node, and returns one ordinary opaque SPEC-0016 operation for the whole DAG. It creates no public or hidden per-node operation objects. The prepared resource leases its function dependencies; each submitted operation leases the prepared resource and concrete bindings through terminal completion. Repeated replay is allowed after capacity admission. One optional earlier external operation may order the whole DAG through the existing SPEC-0018 predecessor contract.
+
+The semantic identity binds the accepted contract, canonical nodes/edges, module/function identities and parameter schemas, fixed launch/scalar/access facts, binding schema, execution policy, and device launch-limit profile. Process-local resource tokens, native addresses, streams, events, generated source, and caller-selected native symbols are excluded.
+
+Partial native submission is conservative: if any earlier node may have been enqueued and later-node or final-event provenance fails, the runtime becomes restart-required and retains unproved leases/resources rather than reporting clean rejection. No portable mock, single-stream semantic fallback, or reduced host round-trip count qualifies CUDA Graph support or a performance benefit.
+
+This accepted baseline authorizes one pure `runtime.prepared-execution` topology/identity component, bounded integration into the existing `runtime.execution` lifecycle owner, exact DriverActor protocol commands for prepare/status/submit/release, one opaque public prepared-DAG capability, package declarations/compatibility updates, and portable/package evidence. It does not authorize new Driver exports or native CUDA Graph calls.
+
+The public facade accepts either `runtime.prepareOperationDag({ nodes })` or the equivalent node-array overload. `kind`, `after`, and `sharedMemoryBytes` default only to `kernel`, `[]`, and `0`; function, grid, block, arguments, and accesses remain explicit. A prepared capability accepts canonical `submit({ bindings, after? })` and the equivalent convenience overload `submit(bindings, { after? })`. Both forms normalize to the same exact DriverActor command and identity/lifecycle contract; overloads do not create separate execution semantics.
 
 ## Prepared batch product
 
@@ -131,7 +155,7 @@ Submission resolves only after:
 
 One logical operation terminalizes only after the entire batch execution reaches a proved terminal state.
 
-## CUDA Graph realization
+## CUDA Graph realization (proposal-only successor profile)
 
 A qualified profile may lower an accepted prepared batch to private CUDA graph resources using explicit Driver Graph APIs or another separately justified mechanism.
 

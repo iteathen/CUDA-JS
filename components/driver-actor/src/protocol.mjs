@@ -1,5 +1,6 @@
 import { isParameterKind, isScalarParameterValue } from '../../execution/index.mjs';
 import { deviceViewDtypeWidth } from '../../memory/index.mjs';
+import { PREPARED_OPERATION_DAG_LIMITS } from '../../prepared-execution/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { validationError } from './errors.mjs';
 
@@ -13,6 +14,7 @@ const BASE_OPERATIONS = new Set([
   'execution.module.load', 'execution.module.status', 'execution.module.release',
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
+  'execution.prepared.create', 'execution.prepared.status', 'execution.prepared.submit', 'execution.prepared.release',
 ]);
 const TEST_OPERATIONS = new Set([
   'testing.block', 'testing.inject-health', 'testing.execution-mode',
@@ -41,6 +43,7 @@ function positiveSafeInteger(value) { return Number.isSafeInteger(value) && valu
 function nonnegativeSafeInteger(value) { return Number.isSafeInteger(value) && value >= 0; }
 function ordinaryBytes(value) { return value instanceof Uint8Array && !Buffer.isBuffer(value); }
 function optionalOperationToken(value) { return value === null || isResourceToken(value); }
+function identifier(value) { return typeof value === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(value); }
 
 function dimensions(value) {
   return plainObject(value) && exactFields(value, ['x', 'y', 'z'])
@@ -80,6 +83,32 @@ function launchAccesses(value, maximum) {
     && nonnegativeSafeInteger(entry.argumentIndex) && nonnegativeSafeInteger(entry.byteOffset) && positiveSafeInteger(entry.byteLength)
     && ['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device'].includes(entry.mode)
     && (!Object.hasOwn(entry, 'dtype') || ['u32', 'u64'].includes(entry.dtype))));
+}
+
+function preparedArguments(value, maximum) {
+  return Array.isArray(value) && value.length > 0 && value.length <= maximum && value.every((entry) => plainObject(entry)
+    && ((exactFields(entry, ['binding']) && identifier(entry.binding)) || scalarArgument(entry)));
+}
+
+function preparedNodes(value, maximumArguments) {
+  return Array.isArray(value) && value.length > 0 && value.length <= PREPARED_OPERATION_DAG_LIMITS.nodes && value.every((entry) => plainObject(entry)
+    && exactFields(entry, ['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'])
+    && identifier(entry.id) && entry.kind === 'kernel' && isResourceToken(entry.functionToken)
+    && Array.isArray(entry.after) && entry.after.length <= PREPARED_OPERATION_DAG_LIMITS.predecessorsPerNode && entry.after.every(identifier)
+    && dimensions(entry.grid) && dimensions(entry.block) && nonnegativeSafeInteger(entry.sharedMemoryBytes)
+    && preparedArguments(entry.arguments, maximumArguments) && Array.isArray(entry.accesses) && launchAccesses(entry.accesses, maximumArguments));
+}
+
+function preparedBindings(value) {
+  if (!Array.isArray(value) || value.length > PREPARED_OPERATION_DAG_LIMITS.bindings) return false;
+  const names = new Set();
+  return value.every((entry) => {
+    if (!plainObject(entry) || !identifier(entry.name) || names.has(entry.name)) return false;
+    names.add(entry.name);
+    if (entry.kind === 'device-memory') return exactFields(entry, ['name', 'kind', 'memory', 'byteOffset']) && isResourceToken(entry.memory) && nonnegativeSafeInteger(entry.byteOffset);
+    if (entry.kind === 'device-view') return exactFields(entry, ['name', 'kind', 'view']) && isResourceToken(entry.view);
+    return exactFields(entry, ['name', 'kind', 'value']) && scalarArgument({ kind: entry.kind, value: entry.value });
+  });
 }
 
 export function validateRequest(message, { testHooks = false, memoryPolicy = { maxTransferBytes: 16 * 1_048_576 }, executionPolicy = { maxModuleBytes: 4 * 1_048_576, maxArguments: 32 } } = {}) {
@@ -151,7 +180,7 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['format', 'bytes']) || !['ptx', 'cubin'].includes(payload.format) || !ordinaryBytes(payload.bytes)
         || payload.bytes.byteLength < 1 || payload.bytes.byteLength > executionPolicy.maxModuleBytes) throw validationError('EXECUTION_MODULE_BYTES', 'Module load payload is invalid.', {}, message.requestId);
-  } else if (['execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout'].includes(message.operation)) {
+  } else if (['execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout', 'execution.prepared.status', 'execution.prepared.release'].includes(message.operation)) {
     if (!tokenPayload(message.payload)) throw validationError('DRIVER_EXECUTION_TOKEN', 'Execution resource operation requires one exact token.', {}, message.requestId);
   } else if (message.operation === 'execution.function.get') {
     const payload = message.payload;
@@ -164,6 +193,13 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
         || !isResourceToken(payload.functionToken) || !dimensions(payload.grid) || !dimensions(payload.block)
         || (payload.after !== undefined && payload.after !== null && !isResourceToken(payload.after)) || !launchAccesses(payload.accesses, executionPolicy.maxArguments)
         || !nonnegativeSafeInteger(payload.sharedMemoryBytes) || !launchArguments(payload.arguments, executionPolicy.maxArguments)) throw validationError('DRIVER_LAUNCH_OPTIONS', 'Submission payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'execution.prepared.create') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['nodes']) || !preparedNodes(payload.nodes, executionPolicy.maxArguments)) throw validationError('DRIVER_PREPARED_OPTIONS', 'Prepared DAG creation payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'execution.prepared.submit') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'bindings', 'after']) || !isResourceToken(payload.token)
+        || !preparedBindings(payload.bindings) || !optionalOperationToken(payload.after)) throw validationError('DRIVER_PREPARED_BINDINGS', 'Prepared DAG submission payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'testing.block') {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['milliseconds']) || !Number.isSafeInteger(message.payload.milliseconds) || message.payload.milliseconds < 1 || message.payload.milliseconds > 2_000) throw validationError('DRIVER_TEST_BLOCK', 'Mock block duration must be an integer from 1 through 2000.', {}, message.requestId);
   } else if (message.operation === 'testing.inject-health') {

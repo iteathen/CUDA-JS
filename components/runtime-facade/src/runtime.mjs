@@ -19,6 +19,7 @@ const POISONED_ALLOWED_OPERATIONS = new Set([
   'mailbox.status', 'mailbox.close',
   'module.status', 'module.close',
   'function.status', 'function.close',
+  'prepared.status', 'prepared.close',
   'operation.status', 'operation.wait', 'operation.close',
 ]);
 
@@ -271,9 +272,83 @@ function translateLaunch(entry, options, operation) {
   return { grid: options.grid, block: options.block, sharedMemoryBytes: options.sharedMemoryBytes ?? 0, arguments: argumentsForActor, after, accesses };
 }
 
+function preparedOptions(value, operation) {
+  if (Array.isArray(value)) return value;
+  if (!plainObject(value) || Object.keys(value).sort().join('\0') !== 'nodes' || !Array.isArray(value.nodes)) throw facadeError('CUDA_JS_PREPARED_OPTIONS_INVALID', 'validation', 'Prepared DAG creation requires a nodes array or exactly one nodes field.', {}, operation);
+  return value.nodes;
+}
+
+function translatePreparedDag(runtime, value, operation) {
+  const nodes = preparedOptions(value, operation);
+  if (nodes.length < 1 || nodes.length > 32) throw facadeError('CUDA_JS_PREPARED_NODE_LIMIT', 'validation', 'Prepared DAG requires from one through 32 nodes.', { actual: nodes.length, maximum: 32 }, operation);
+  return { nodes: nodes.map((node, nodeIndex) => {
+    if (!plainObject(node) || Object.keys(node).some((key) => !['id', 'kind', 'after', 'function', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].includes(key))
+        || !['id', 'function', 'grid', 'block', 'arguments', 'accesses'].every((key) => Object.hasOwn(node, key)) || !Array.isArray(node.arguments) || !Array.isArray(node.accesses)) {
+      throw facadeError('CUDA_JS_PREPARED_NODE_INVALID', 'validation', 'Prepared DAG node fields are invalid.', { nodeIndex }, operation);
+    }
+    const fn = resourceFor(node.function, runtime, 'function', operation);
+    if (node.arguments.length !== fn.parameters.length) throw facadeError('CUDA_JS_ARGUMENT_COUNT', 'validation', 'Prepared node argument count must match its function declaration.', { nodeIndex, expected: fn.parameters.length, actual: node.arguments.length }, operation);
+    const argumentsForActor = fn.parameters.map((parameter, argumentIndex) => {
+      const valueAtIndex = node.arguments[argumentIndex];
+      if (plainObject(valueAtIndex) && Object.keys(valueAtIndex).length === 1 && Object.hasOwn(valueAtIndex, 'binding')) return { binding: valueAtIndex.binding };
+      if (parameter.kind === 'device-memory') throw facadeError('CUDA_JS_PREPARED_DEVICE_BINDING_REQUIRED', 'validation', 'Prepared device arguments must use named bindings.', { nodeIndex, argumentIndex }, operation);
+      if (parameter.kind.startsWith('publication-mailbox-')) throw facadeError('CUDA_JS_PREPARED_PARAMETER_UNSUPPORTED', 'unsupported', 'The first prepared DAG profile does not accept publication mailboxes.', { nodeIndex, argumentIndex }, operation);
+      return { kind: parameter.kind, value: valueAtIndex };
+    });
+    return {
+      id: node.id,
+      kind: node.kind ?? 'kernel',
+      after: node.after === undefined ? [] : Array.isArray(node.after) ? [...node.after] : node.after,
+      functionToken: fn.token,
+      grid: plainObject(node.grid) ? { ...node.grid } : node.grid,
+      block: plainObject(node.block) ? { ...node.block } : node.block,
+      sharedMemoryBytes: node.sharedMemoryBytes ?? 0,
+      arguments: argumentsForActor,
+      accesses: node.accesses.map((access) => plainObject(access) ? { ...access } : access),
+    };
+  }) };
+}
+
+function preparedSubmissionOptions(bindingsOrRequest, options, operation) {
+  if (plainObject(bindingsOrRequest) && Object.hasOwn(bindingsOrRequest, 'bindings') && plainObject(bindingsOrRequest.bindings)) {
+    if (options !== undefined || Object.keys(bindingsOrRequest).some((key) => !['bindings', 'after'].includes(key))) throw facadeError('CUDA_JS_PREPARED_SUBMIT_INVALID', 'validation', 'Canonical prepared submission accepts exactly bindings and optional after.', {}, operation);
+    return { bindings: bindingsOrRequest.bindings, after: bindingsOrRequest.after ?? null };
+  }
+  if (options !== undefined && (!plainObject(options) || Object.keys(options).some((key) => key !== 'after'))) throw facadeError('CUDA_JS_PREPARED_SUBMIT_INVALID', 'validation', 'Prepared submission options may contain only after.', {}, operation);
+  return { bindings: bindingsOrRequest, after: options?.after ?? null };
+}
+
+function translatePreparedSubmission(entry, bindingsOrRequest, options, operation) {
+  const request = preparedSubmissionOptions(bindingsOrRequest, options, operation);
+  if (!plainObject(request.bindings)) throw facadeError('CUDA_JS_PREPARED_BINDINGS_INVALID', 'validation', 'Prepared bindings must be a plain name-to-value record.', {}, operation);
+  const suppliedNames = Object.keys(request.bindings);
+  if (suppliedNames.length !== entry.bindings.length) throw facadeError('CUDA_JS_PREPARED_BINDINGS_INVALID', 'validation', 'Prepared submission must supply every named binding exactly once.', { expected: entry.bindings.length, actual: suppliedNames.length }, operation);
+  const bindings = entry.bindings.map((binding) => {
+    if (!Object.hasOwn(request.bindings, binding.name)) throw facadeError('CUDA_JS_PREPARED_BINDING_MISSING', 'validation', 'Prepared submission is missing a named binding.', { binding: binding.name }, operation);
+    const value = request.bindings[binding.name];
+    if (binding.kind !== 'device-memory') return { name: binding.name, kind: binding.kind, value };
+    const capability = resourceData.get(value);
+    if (capability?.kind === 'device-view') {
+      const view = resourceFor(value, entry.runtime, 'device-view', operation);
+      return { name: binding.name, kind: 'device-view', view: view.token };
+    }
+    const memory = resourceFor(value, entry.runtime, 'device-memory', operation);
+    return { name: binding.name, kind: 'device-memory', memory: memory.token, byteOffset: 0 };
+  });
+  const known = new Set(entry.bindings.map((binding) => binding.name));
+  if (suppliedNames.some((name) => !known.has(name))) throw facadeError('CUDA_JS_PREPARED_BINDING_EXTRA', 'validation', 'Prepared submission contains an unknown binding.', {}, operation);
+  const after = request.after === null ? null : resourceFor(request.after, entry.runtime, 'operation', operation).token;
+  return { bindings, after };
+}
+
 function publicOperationStatus(result) {
   const output = { schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health };
   if (result.kind && result.kind !== 'kernel') output.kind = result.kind;
+  if (result.kind === 'prepared-batch') {
+    output.preparedSha256 = result.preparedSha256;
+    output.nodeCount = result.nodeCount;
+    output.edgeCount = result.edgeCount;
+  }
   if (result.result) output.result = result.result.bytes instanceof Uint8Array
     ? { bytes: Uint8Array.from(result.result.bytes) }
     : { ...result.result };
@@ -425,6 +500,29 @@ class CudaFunction {
   async close() { return closeResource(this, 'function.close', (entry) => runtimeData.get(entry.runtime).driver.releaseFunction(entry.token)); }
 }
 
+class CudaPreparedOperationDag {
+  get kind() { return 'prepared-operation-dag'; }
+  get contract() { return resourceData.get(this)?.contract ?? null; }
+  get sha256() { return resourceData.get(this)?.sha256 ?? null; }
+  get nodeCount() { return resourceData.get(this)?.nodeCount ?? null; }
+  get edgeCount() { return resourceData.get(this)?.edgeCount ?? null; }
+  get bindings() { return resourceData.get(this)?.bindings ?? null; }
+  get realization() { return resourceData.get(this)?.realization ?? null; }
+  get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  async status() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'prepared-operation-dag', 'prepared.status');
+    const result = await invoke('prepared.status', () => runtimeData.get(entry.runtime).driver.preparedOperationDagStatus(entry.token));
+    return freezePublic({ schemaVersion: 1, kind: 'prepared-operation-dag', state: entry.state, contract: result.contract, sha256: result.sha256, nodeCount: result.nodeCount, edgeCount: result.edgeCount, bindings: result.bindings, realization: result.realization });
+  }
+  async submit(bindingsOrRequest, options) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'prepared-operation-dag', 'prepared.submit');
+    const request = translatePreparedSubmission(entry, bindingsOrRequest, options, 'prepared.submit');
+    const result = await invoke('prepared.submit', () => runtimeData.get(entry.runtime).driver.submitPreparedOperationDag(entry.token, request));
+    return registerResource(entry.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
+  }
+  async close() { return closeResource(this, 'prepared.close', (entry) => runtimeData.get(entry.runtime).driver.releasePreparedOperationDag(entry.token)); }
+}
+
 class CudaRuntime {
   get state() {
     const data = runtimeData.get(this);
@@ -451,6 +549,15 @@ class CudaRuntime {
     return registerResource(this, 'publication-mailbox', result.mailbox, { generation: result.generation, buffer: result.buffer, view: new Int32Array(result.buffer), publicLanes, laneMap }, CudaPublicationMailbox);
   }
   async loadModule(options) { const data = dataFor(this, 'module.load'); const result = await invoke('module.load', () => data.driver.loadModule(options)); return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule); }
+  async prepareOperationDag(options) {
+    const data = dataFor(this, 'prepared.create');
+    const request = translatePreparedDag(this, options, 'prepared.create');
+    const result = await invoke('prepared.create', () => data.driver.prepareOperationDag(request));
+    const bindings = Object.freeze(result.bindings.map((binding) => Object.freeze({ name: binding.name, kind: binding.kind })));
+    return registerResource(this, 'prepared-operation-dag', result.prepared, {
+      contract: result.contract, sha256: result.sha256, nodeCount: result.nodeCount, edgeCount: result.edgeCount, bindings, realization: result.realization,
+    }, CudaPreparedOperationDag);
+  }
   async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(withCompileTarget(request, data.targets.compileTarget)))); }
   async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(withLinkTarget(request, data.targets.linkTarget)))); }
   async invalidateCache(key) { const data = dataFor(this, 'compiler.cache.invalidate'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.cache.invalidate'); return freezePublic(await invoke('compiler.cache.invalidate', () => data.compiler.invalidate(key))); }

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.prepared-execution",
+    "name": "Prepared operation DAG semantics",
+    "status": "accepted-spec0020-semantic-baseline-portable-only",
+    "product_area": "components",
+    "path": "components/prepared-execution",
+    "purpose": "Own finite prepared-operation topology, canonical ordering, binding schemas, bounds, and deterministic identity without owning native submission or operation lifecycle.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library"],
+    "forbidden_dependencies": ["node-ffi", "cuda-driver", "runtime-resource-token", "native-handle", "stream", "event", "consumer-semantics"],
+    "validation": ["node --test components/prepared-execution/test/prepared-operation-dag.test.mjs", "npm run f8:portable"],
+    "owner": "runtime.prepared-execution",
+    "lifecycle": "Pure immutable JavaScript value normalization only; runtime.execution owns prepared resources, leases, submission, completion, and cleanup.",
+    "design": {
+      "owned_invariant": "One bounded semantic kernel DAG has one canonical topology, binding schema, and identity independent of input order or native realization.",
+      "public_ports": ["PREPARED_OPERATION_DAG_CONTRACT", "PREPARED_OPERATION_DAG_LIMITS", "normalizePreparedOperationDag"],
+      "injected_dependencies": ["semantic executable identities", "fixed launch facts", "fixed scalar ABI identities", "binding references", "execution profile"],
+      "adapter_boundaries": ["runtime.execution prepared-resource adapter", "future private CUDA Graph realization"],
+      "simplest_sufficient_total_system": "One pure normalizer/hash owner; no runtime registry, scheduler, backend, provider, or native resource ownership."
+    }
+  }
+}

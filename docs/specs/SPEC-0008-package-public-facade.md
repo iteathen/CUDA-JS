@@ -16,6 +16,8 @@
 
 **Amended:** 2026-08-26 — accepted SPEC-0028 adds standalone typed Device-JS library compilation and explicit composed-program imports through existing compiler/linker ownership. Package identity advances additively to `0.1.0-alpha.10`; public API schema remains 1, and native composition remains unqualified.
 
+**Amended:** 2026-08-26 — accepted SPEC-0020 adds the opaque kernel-only prepared-operation-DAG public capability and semantic single-stream replay through the existing operation owner. Package identity advances additively to `0.1.0-alpha.11`; public API schema remains 1. CUDA Graph realization, native qualification, and performance benefit remain outside the claim.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.

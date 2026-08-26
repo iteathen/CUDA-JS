@@ -10,6 +10,8 @@ The native entry requires Node 26.1.0 or later on Windows x64 and Node's experim
 
 SPEC-0028 adds `compileDeviceLibrary(runtime, request)` and explicit aliased imports to `compileDeviceProgram()`. Library artifacts are copied typed values, imports are validated and snapshotted before program compilation, and the existing compiler/linker ports own RDC/LTO realization and final cubin production. The facade does not own a library registry, native symbol API, or tensor semantics.
 
+SPEC-0020 adds `runtime.prepareOperationDag({ nodes })`, with the node-array overload as a concise equivalent. The returned opaque prepared capability exposes immutable identity/binding facts, status, replay, and close. Kernel nodes may omit `kind`, `after`, and `sharedMemoryBytes` for the safe defaults `kernel`, `[]`, and `0`; device arguments remain explicit named bindings and every device argument requires an access declaration. `prepared.submit({ bindings, after? })` is canonical, while `prepared.submit(bindings, { after? })` is the equivalent convenience overload. Each replay returns one ordinary operation for the whole DAG. The current realization is semantic single-stream replay, not CUDA Graph support or a performance claim.
+
 Resource close failures retain the accepted bounded disposal category, native observation name, and health transition. A resource whose disposer ran and failed becomes orphaned/unusable, and repeated `close()` returns the stored failure without retrying native disposal. Poisoned or restart-required outcomes immediately constrain subsequent admission. Runtime-open rollback and aggregate close reports retain sanitized primary/cleanup divergence without exposing actor tokens, provider paths, or native capabilities.
 
 ```js
