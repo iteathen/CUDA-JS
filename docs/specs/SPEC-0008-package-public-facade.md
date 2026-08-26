@@ -22,6 +22,8 @@
 
 **Amended:** 2026-08-26 — accepted SPEC-0030 adds the dense numeric Device-JS contract and exact trusted `cuda-numeric`/`cuda-device` compiler profiles without adding an export. Package identity advances additively to `0.1.0-alpha.13`; public API schema remains 1. Legacy Device-JS identity/bytes remain exact, and tensor semantics/cores, fast math, other native profiles, and performance remain outside the claim.
 
+**Amended:** 2026-08-26 — the accepted SPEC-0020 facade is unchanged, but its execution owner now projects native discovery data to the exact eight-field launch-limit identity before prepared-DAG normalization. Package identity advances to `0.1.0-alpha.14`; public API schema remains 1. Exact installed-package native prepared-DAG result and cleanup evidence qualifies only the recorded Windows profile and does not imply CUDA Graph realization or performance benefit.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.

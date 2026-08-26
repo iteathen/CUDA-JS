@@ -8,6 +8,16 @@ import { normalizePreparedOperationDag } from '../../prepared-execution/index.mj
 
 const MIB = 1_048_576;
 const POLICY_FIELDS = Object.freeze(['maxModuleBytes', 'maxArguments', 'maxCompletionMilliseconds', 'maxPendingGpuOperations']);
+const DEVICE_LIMIT_FIELDS = Object.freeze([
+  'maxThreadsPerBlock',
+  'maxBlockDimX',
+  'maxBlockDimY',
+  'maxBlockDimZ',
+  'maxGridDimX',
+  'maxGridDimY',
+  'maxGridDimZ',
+  'maxSharedMemoryPerBlock',
+]);
 const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
@@ -405,7 +415,7 @@ export class ExecutionManager {
     if (!registry || typeof registry.allocate !== 'function' || typeof registry.acquire !== 'function') fail('EXECUTION_REGISTRY_INVALID', 'internal', 'Execution manager requires a resource registry.');
     if (!memory || typeof memory.acquireForExecution !== 'function') fail('EXECUTION_MEMORY_INVALID', 'internal', 'Execution manager requires the internal memory lease port.');
     if (!plainObject(deviceLimits)) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Execution manager requires device launch limits.');
-    for (const field of ['maxThreadsPerBlock', 'maxBlockDimX', 'maxBlockDimY', 'maxBlockDimZ', 'maxGridDimX', 'maxGridDimY', 'maxGridDimZ', 'maxSharedMemoryPerBlock']) if (!Number.isSafeInteger(deviceLimits[field]) || deviceLimits[field] < 1) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Device launch limit is invalid.', { field });
+    for (const field of DEVICE_LIMIT_FIELDS) if (!Number.isSafeInteger(deviceLimits[field]) || deviceLimits[field] < 1) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Device launch limit is invalid.', { field });
     assertOperations(operations);
     this.#registry = registry;
     this.#contextToken = contextToken;
@@ -413,7 +423,7 @@ export class ExecutionManager {
     this.#views = views;
     this.#mailboxes = mailboxes;
     this.#policy = normalizeExecutionPolicy(policy);
-    this.#limits = Object.freeze({ ...deviceLimits });
+    this.#limits = Object.freeze(Object.fromEntries(DEVICE_LIMIT_FIELDS.map((field) => [field, deviceLimits[field]])));
     this.#operations = operations;
     this.#clock = clock;
     this.#sleep = sleep;

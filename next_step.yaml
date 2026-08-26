@@ -1,11 +1,11 @@
 {
-  "schema_version": 53,
+  "schema_version": 54,
   "updated": "2026-08-26",
-  "status": "device_js_dense_numeric_profile_integrated_downstream_simt_next",
-  "objective": "Preserve the integrated bounded SPEC-0030 dense numeric Device-JS profile and hand the exact public pair to the CUDA-JS-Tensor SIMT executor without importing tensor or application policy into core.",
+  "status": "native_prepared_dag_limit_projection_candidate",
+  "objective": "Correct the generic prepared-DAG native discovery-profile projection through its execution owner, prove installed-package native result and cleanup parity, then hand the exact public pair back to CUDA-JS-Tensor without importing tensor policy into core.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "b78f3fc37e20381d950d3297861c877b71f15390",
-    "package": "cuda-js@0.1.0-alpha.13 integrated",
+    "protected_main_authority_baseline": "640f1be6392e7af22b1aa0b851d7a20293d684fb",
+    "package": "cuda-js@0.1.0-alpha.14 candidate",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
@@ -68,11 +68,11 @@
     ,"docs/specs/SPEC-0030-device-js-dense-numeric-profile.md"
   ],
   "current_focus": {
-    "id": "CUDA-JS-TENSOR-SIMT-HANDOFF",
-    "issues": [],
+    "id": "CJS-NATIVE-PREPARED-LIMIT-PROJECTION-142",
+    "issues": [142],
     "plan": "docs/plans/2026-08-26-cuda-js-tensor-prerequisites.md",
-    "next_action": "Consume protected CUDA-JS main b78f3fc37e20381d950d3297861c877b71f15390 / alpha.13 from CUDA-JS-Tensor at its accepted TENSOR-SIMT-012 boundary while retaining the deferred the_restaurant plan and leaving CUDA-JS core free of tensor policy.",
-    "exit": "CUDA-JS-Tensor records and validates the exact alpha.13 compatible pair through public package exports; no CUDA-JS core change is required unless consumer-neutral evidence exposes a new generic gap."
+    "next_action": "Validate the alpha.14 execution-owner projection with focused regression, full portable/package gates, and an exact installed-package Windows native prepared-DAG submission/result/cleanup fixture; integrate through protected main, then update CUDA-JS-Tensor to the exact merged revision.",
+    "exit": "Issue #142 is closed by a protected-main alpha.14 revision with exact native installed-package evidence, and CUDA-JS-Tensor consumes that revision through public exports while the_restaurant remains deferred."
   },
   "parallel_or_external_next": [
     {

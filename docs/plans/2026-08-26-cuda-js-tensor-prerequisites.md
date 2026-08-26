@@ -6,7 +6,7 @@
 
 **Date:** 2026-08-26
 
-**Exact input:** protected `main@b78f3fc37e20381d950d3297861c877b71f15390`, `cuda-js@0.1.0-alpha.13`
+**Exact input:** protected `main@640f1be6392e7af22b1aa0b851d7a20293d684fb`, `cuda-js@0.1.0-alpha.13`
 
 ## Objective and authority
 
@@ -42,7 +42,7 @@ Disposition: **proceed as four serial focus branches**, accepting and implementi
 |---|---|---|---|---|
 | `CJS-TENSOR-VIEW-001` | Public opaque contiguous typed-view capability | Integrated on PR #134 / `main@991330ffda926e052c857cd6a3f5bdcc37f47034` | Accepted SPEC-0021 component | Installed consumer can create, inspect, use and close a view through package exports; parent/view/operation leases and range/access failures are exact. Falsified by pointer/token escape, unbounded launch use, or cleanup ambiguity. |
 | `CJS-DEVICE-LIB-002` | Typed device-callable module/library composition | Integrated on PR #136 / `main@9726898d728fc6e1f1baabb5a1ddc67808549e84`; native qualification remains on #135 | SPEC-0010/SPEC-0012/SPEC-0013/SPEC-0028 | Two unrelated consumers compose declared device functions without CUDA source or private imports; exact header/module/compiler/cache identity and lifecycle fail closed. |
-| `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Integrated on PR #137 / `main@1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3`; native CUDA Graph realization remains on #85 | Accepted SPEC-0020 semantic baseline over SPEC-0016/SPEC-0018/SPEC-0021 | Canonical bounded kernel DAGs cross the DriverActor boundary once, preserve ordinary-operation meaning, return one opaque operation per submit, and retain exact dependency/binding/lifecycle truth. CUDA Graph realization remains proposal-only. |
+| `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Integrated on PR #137 / `main@1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3`; issue #142 owns the native discovery-profile projection defect; native CUDA Graph realization remains on #85 | Accepted SPEC-0020 semantic baseline over SPEC-0016/SPEC-0018/SPEC-0021 | Canonical bounded kernel DAGs cross the DriverActor boundary once, preserve ordinary-operation meaning, return one opaque operation per submit, and retain exact dependency/binding/lifecycle truth. The alpha.14 correction projects native discovery data to the exact identity profile and adds installed-package native parity; CUDA Graph realization remains proposal-only. |
 | `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Integrated on PR #138 / `main@2da65ff2e4287450171c477031dd380a21fa095f`; issue #90 closed | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
 | `CJS-DEVICE-NUMERIC-005` | Additive dense numeric Device-JS profile | Integrated on PR #140 / `main@b78f3fc37e20381d950d3297861c877b71f15390`; issue #139 closed | SPEC-0013, SPEC-0021, SPEC-0028 and exact compiler header ownership | Legacy Device-JS bytes/identity remain exact; `f64`/`f16`/`bf16` pointers, locals, functions, kernel scalars, exact casts and special-value math compile through public contracts; two unrelated installed consumers and an independent native oracle pass. |
 
