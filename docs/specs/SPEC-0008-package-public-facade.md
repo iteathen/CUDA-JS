@@ -12,6 +12,8 @@
 
 **Amended:** 2026-08-25 — ADR-0006 and owner direction admit the implemented native Linux x86-64 Driver/compiler profiles through the unchanged OS-neutral facade as `testing-unconfirmed`. Package identity advances to `0.1.0-alpha.8`; API schema remains 1, and Linux support remains unqualified until exact F2L-F8L installed-package evidence passes.
 
+**Amended:** 2026-08-26 — accepted SPEC-0021 exposes allocation-owned opaque contiguous device views through the existing memory capability. Package identity advances additively to `0.1.0-alpha.9`; public API schema remains 1, and native view consumption remains unqualified.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.

@@ -1,5 +1,5 @@
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
-import { MemoryManager } from '../../../memory/index.mjs';
+import { DeviceViewManager, MemoryManager } from '../../../memory/index.mjs';
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
@@ -68,6 +68,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       async read({ native, deviceOffset, byteLength }) { return Uint8Array.from(native.subarray(deviceOffset, deviceOffset + byteLength)); },
     },
   });
+  const views = new DeviceViewManager({ registry });
   const deviceLimits = Object.freeze({
     maxThreadsPerBlock: 1024, maxBlockDimX: 1024, maxBlockDimY: 1024, maxBlockDimZ: 64,
     maxGridDimX: 2_147_483_647, maxGridDimY: 65_535, maxGridDimZ: 65_535, maxSharedMemoryPerBlock: 49_152,
@@ -87,7 +88,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
   let executionMode = 'complete';
   let nextNative = 1;
   const execution = new ExecutionManager({
-    registry, contextToken, memory, mailboxes, policy: executionPolicy, deviceLimits,
+    registry, contextToken, memory, views, mailboxes, policy: executionPolicy, deviceLimits,
     operations: {
       async createStream() { return Object.freeze({ kind: 'stream', id: nextNative++ }); },
       async destroyStream() { recordDisposal('stream'); return { mockStreamReleased: true }; },
@@ -188,7 +189,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     observeError,
     assertAccepting(operation, operationId) {
       const cleanupOrRead = new Set([
-        'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
+        'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'memory.view.status', 'memory.view.release',
         'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
         'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
         'testing.disposal-status',
@@ -226,6 +227,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       };
     },
     memory,
+    views,
     mailboxes,
     transfer,
     execution,

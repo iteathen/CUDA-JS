@@ -2,15 +2,15 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-25
+**Updated:** 2026-08-26
 
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     22a4e71f285e9349e725be8025ff0c1aeef71580
+protected main:     0a7cf198dd3d4f07768133d167fc37f2e30cdcd3
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.8
+execution package:  cuda-js@0.1.0-alpha.9 candidate (public typed-view packet)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -27,7 +27,7 @@ ADR-0006 keeps the public/component architecture OS-neutral while making native 
 
 Issue #4 is now an external contributor-evidence lane rather than an active repository implementation blocker. Platform diagnostics, public-facade admission, and compatibility metadata admit native Linux x86-64 only as `testing-unconfirmed`, and the OS-neutral F4/F5 oracles plus F3–F8 runners are source-complete. The available VM hosts cannot currently expose an accepted CUDA qualification environment; VM, emulated, WSL, container, hosted-CI, portable, or mock results do not substitute for the unchanged chain on a native Ubuntu 24.04 host with a directly exposed physical NVIDIA GPU. Only that exact passing compatibility cell may be promoted, and issue #17 expands distributions only after it.
 
-Accepted SPEC-0017 portable/software integration is the active repository dependency path. It remains OS-neutral and will establish finite sanitized device snapshots, opaque selectors, exactly one selected device per runtime, and selected-device-driven target/cache identity without requiring native qualification to complete the portable contract. Native selected-device promotion follows contributed physical-host evidence. Multi-GPU orchestration remains proposal-only under SPEC-0024, and topology or overlap qualification requires a controlled host with at least two independently visible physical GPUs; it is pursued only where it fits naturally.
+Accepted SPEC-0017 portable/software integration is complete on protected `main`. It establishes finite sanitized device snapshots, opaque selectors, exactly one selected device per runtime, and selected-device-driven target/cache identity without using native qualification as a portable-contract gate. Native selected-device promotion follows contributed physical-host evidence. Multi-GPU orchestration remains proposal-only under SPEC-0024, and topology or overlap qualification requires a controlled host with at least two independently visible physical GPUs; it is pursued only where it fits naturally.
 
 The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), active reference **Linux x86-64** implementation/qualification path, and portable/software/package implementations include:
 
@@ -43,7 +43,7 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - SPEC-0014 exact private mapped named-u32 publication mailbox profile;
 - SPEC-0017 finite sanitized discovery, opaque explicit selection, one selected device per runtime, and selected-device compile/link target defaults;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
-- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
+- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with an active additive allocation-owned public facade packet;
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
@@ -74,12 +74,12 @@ SPEC-0017 implements `discoverCudaDevices()`, opaque process-local selectors, ex
 architectural disposition: selected
 implementation status:       implemented in portable/software/package scalar path; contiguous 1D view component implemented
 qualification status:        not-qualified
-priority:                    native evidence / downstream public-view consumer decision
+priority:                    integrate the public typed-view facade, then native/library evidence
 ```
 
 SPEC-0021 preserves accepted finite-only `f32` and implements new `f64`, `f16`, and `bf16` scalar packing with deterministic width/alignment, round-to-nearest-even half/bfloat conversion, signed-zero/infinity behavior and canonical new-kind NaNs. Execution packing and DriverActor protocol admission share one execution-owned scalar-kind/value authority, preventing duplicate Worker/execution whitelists from drifting.
 
-The same specification implements a generic contiguous 1D `device-view` component over opaque device allocations. Views use ResourceRegistry parent/child/generation/lease behavior, exact dtype/range/access semantics and half-open overlap classification without exposing native addresses. No root `cuda-js` view method/export has been invented because SPEC-0021 did not select public facade spelling; that remains a later accepted public-surface decision when a consumer requires it.
+The same specification implements a generic contiguous 1D `device-view` component over opaque device allocations. Views use ResourceRegistry parent/child/generation/lease behavior, exact dtype/range/access semantics and half-open overlap classification without exposing native addresses. The active public packet adds only `CudaDeviceMemory.view(...) -> CudaDeviceView`: an allocation-owned opaque child usable wherever a `device-memory` kernel argument is accepted, with explicit per-launch access declarations constrained by the view range and access role. It does not add tensor shape, stride, algebra, host-array, pointer, conversion, or hardware-bound semantics.
 
 The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed `verify` and `node-compatibility`, including F4/F5/F6 and the F8 public package/facade path. The fully reconciled implementation/documentation head must pass the same protected checks before merge. Native scalar ABI/launch and native view-consumer qualification remain open.
 
@@ -177,9 +177,9 @@ Not-qualified is not architectural rejection.
 
 ```text
 1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. integrate and validate the accepted portable/software SPEC-0017 device-selection contract
-3. accept exact Ubuntu 24.04 F2L-F8L installed-package evidence when a contributor can run the unchanged chain on a native physical-NVIDIA host
-4. qualify native selected-device and 2+ physical-GPU behavior only when suitable hosts exist, without forcing cross-device coupling
+2. integrate the bounded public SPEC-0021 typed-view facade packet
+3. advance the serial generic CUDA-JS prerequisites selected by the CUDA-JS-Tensor plan: device-callable library composition, prepared dependency batches, then generic library adapters
+4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

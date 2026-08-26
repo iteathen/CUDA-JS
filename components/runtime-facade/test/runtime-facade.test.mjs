@@ -22,12 +22,13 @@ function driverDescription(claim = 'stub') {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.8');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.9');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
   assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32']);
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
@@ -134,6 +135,40 @@ test('facade owns copied memory and hides private actor capabilities', async () 
   assert.equal((await memory.close()).state, 'closed');
   assert.equal((await memory.close()).alreadyTerminal, true);
   await assert.rejects(memory.read({ byteLength: 1 }), expectCode('CUDA_JS_RESOURCE_CLOSED'));
+  assert.equal((await runtime.close()).graceful, true);
+});
+
+test('public typed views preserve bounded ranges, access roles, operation leases and opaque ownership', async (context) => {
+  const runtime = await openCudaRuntimeForTesting();
+  context.after(async () => { await runtime.close(); });
+  const memory = await runtime.allocateDevice({ byteLength: 32 });
+  const view = await memory.view({ dtype: 'f32', byteOffset: 8, elementCount: 4, access: 'read' });
+  assert.deepEqual(Object.keys(view), []);
+  assert.equal(JSON.stringify(view), '{}');
+  assert.equal(view.kind, 'device-view');
+  assert.equal(view.dtype, 'f32');
+  assert.equal(view.byteOffset, 8);
+  assert.equal(view.elementCount, 4);
+  assert.equal(view.byteLength, 16);
+  assert.equal(view.access, 'read');
+  assert.deepEqual(await view.status(), { schemaVersion: 1, kind: 'device-view', state: 'open', dtype: 'f32', byteOffset: 8, elementCount: 4, byteLength: 16, access: 'read' });
+
+  const module = await runtime.loadModule({ format: 'ptx', bytes: MOCK_PTX });
+  const fn = await module.getFunction({ name: 'unrelated_kernel', parameters: [{ kind: 'device-memory' }] });
+  const launch = { grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [view] };
+  await assert.rejects(fn.submit(launch), expectCode('EXECUTION_ACCESSES_REQUIRED'));
+  await assert.rejects(fn.submit({ ...launch, accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 4, mode: 'write' }] }), expectCode('MEMORY_VIEW_ACCESS_DENIED'));
+  await assert.rejects(fn.submit({ ...launch, accesses: [{ argumentIndex: 0, byteOffset: 12, byteLength: 8, mode: 'read' }] }), expectCode('EXECUTION_ACCESS_RANGE'));
+
+  const operation = await fn.submit({ ...launch, accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 16, mode: 'read' }] });
+  await assert.rejects(view.close(), expectCode('RESOURCE_BUSY'));
+  assert.equal((await operation.wait()).status, 'completed');
+  await operation.close();
+  await assert.rejects(memory.close(), expectCode('RESOURCE_HAS_CHILDREN'));
+  assert.equal((await view.close()).state, 'closed');
+  assert.equal((await memory.close()).state, 'closed');
+  await fn.close();
+  await module.close();
   assert.equal((await runtime.close()).graceful, true);
 });
 

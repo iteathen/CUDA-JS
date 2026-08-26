@@ -6,7 +6,7 @@
     "status": "accepted-f4w-internal-experimental",
     "product_area": "components",
     "path": "components/memory",
-    "purpose": "Own bounded device-memory policy, quota accounting, exact byte ranges, copied host transfers, opaque descriptors, leases, and cleanup without exposing native addresses.",
+    "purpose": "Own bounded device-memory policy, quota accounting, exact byte ranges, contiguous typed logical views, copied host transfers, opaque descriptors, leases, and cleanup without exposing native addresses.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["runtime.resource-registry", "injected-memory-backend", "runtime.execution-internal-lease-consumer"],
     "forbidden_dependencies": ["node-ffi", "cuda-driver", "worker-threads", "raw-public-pointer", "foreign-host-view", "asynchronous-copy"],
@@ -15,7 +15,7 @@
     "lifecycle": "Every device allocation is a context child, remains quota-reserved until free is proved, and is explicitly released or disposed before its context.",
     "design": {
       "owned_invariant": "No accepted transfer exceeds its allocation or policy bounds, and no capacity is reported recovered until backend release succeeds.",
-      "public_ports": ["MemoryManager", "normalizeMemoryPolicy", "MemoryError", "internal acquireForExecution lease port"],
+      "public_ports": ["MemoryManager", "DeviceViewManager", "deviceViewDtypeWidth", "deviceViewRangesOverlap", "normalizeMemoryPolicy", "MemoryError", "internal acquireForExecution lease ports"],
       "injected_dependencies": ["resource registry", "context token", "memory policy", "backend operations"],
       "adapter_boundaries": ["Windows DriverActor memory backend", "platform-neutral byte-array mock"],
       "simplest_sufficient_total_system": "One policy owner, one quota ledger, registry-backed allocation records, and synchronous copied transfers."

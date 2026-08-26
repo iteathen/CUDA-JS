@@ -6,6 +6,7 @@ Active plans contain **unfinished work only**. Completed or mixed historical pla
 
 ## Active forward plans
 
+- [`2026-08-26-cuda-js-tensor-prerequisites.md`](2026-08-26-cuda-js-tensor-prerequisites.md) — serial parent plan for public typed views, device-callable library composition, prepared operation DAGs, and context-bound CUDA library adapters without tensor or consumer semantics in core.
 - [`2026-08-25-qualification-gap-completion.md`](2026-08-25-qualification-gap-completion.md) — exact disposition spine for compatible-pair, native Linux, performance/soak and stale Device-LTO qualification issues; externally unavailable evidence remains explicitly blocked.
 - [`2026-08-24-cuda-mcgs-p0-p1-execution.md`](2026-08-24-cuda-mcgs-p0-p1-execution.md) — active project-owner-directed integration spine for CUDA-MCGS-priority compiler, Device-JS, operation, transfer, sideband, and exact compatible-pair work.
 - [`2026-08-12-native-and-platform-qualification-continuation.md`](2026-08-12-native-and-platform-qualification-continuation.md) — exact native promotion for implemented capabilities plus independent Linux/hardware/Node profile qualification.

@@ -14,7 +14,9 @@ function tokens() {
   const module = registry.allocate({ kind: 'module', value: {}, parent: context, dispose: async () => ({}) });
   const fn = registry.allocate({ kind: 'function', value: {}, parent: module, dispose: async () => ({}) });
   const mailbox = registry.allocate({ kind: 'publication-mailbox', value: {}, parent: context, dispose: async () => ({}) });
-  return { module, fn, mailbox };
+  const memory = registry.allocate({ kind: 'device-memory', value: {}, parent: context, dispose: async () => ({}) });
+  const view = registry.allocate({ kind: 'device-view', value: {}, parent: memory, dispose: async () => ({}) });
+  return { module, fn, mailbox, memory, view };
 }
 
 const OPTIONS = Object.freeze({ executionPolicy: Object.freeze({ maxModuleBytes: 4 * 1_048_576, maxArguments: 32 }) });
@@ -86,5 +88,37 @@ test('Driver protocol admits only opaque publication-mailbox bindings for mailbo
   assert.throws(() => validateRequest(requestRecord(8, 'execution.submit', {
     ...submission.payload,
     arguments: [{ kind: 'publication-mailbox', mailbox, generation: 1, lane: 'control', pointer: 1n }],
+  }), OPTIONS), { code: 'DRIVER_LAUNCH_OPTIONS' });
+});
+
+test('Driver protocol admits only bounded opaque device-view records', () => {
+  const { fn, memory, view } = tokens();
+  const create = requestRecord(9, 'memory.view.create', {
+    memory,
+    options: { dtype: 'f16', byteOffset: 2, elementCount: 4, access: 'read' },
+  });
+  assert.equal(validateRequest(create, OPTIONS), create);
+  for (const operation of ['memory.view.status', 'memory.view.release']) {
+    const request = requestRecord(10, operation, { token: view });
+    assert.equal(validateRequest(request, OPTIONS), request);
+  }
+
+  const submission = requestRecord(11, 'execution.submit', {
+    functionToken: fn,
+    grid: { x: 1, y: 1, z: 1 },
+    block: { x: 1, y: 1, z: 1 },
+    sharedMemoryBytes: 0,
+    arguments: [{ kind: 'device-view', view }],
+    accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 2, mode: 'read' }],
+  });
+  assert.equal(validateRequest(submission, OPTIONS), submission);
+
+  assert.throws(() => validateRequest(requestRecord(12, 'memory.view.create', {
+    memory,
+    options: { dtype: 'f16', elementCount: 4, access: 'execute' },
+  }), OPTIONS), { code: 'MEMORY_VIEW_OPTIONS_INVALID' });
+  assert.throws(() => validateRequest(requestRecord(13, 'execution.submit', {
+    ...submission.payload,
+    arguments: [{ kind: 'device-view', view, pointer: 1n }],
   }), OPTIONS), { code: 'DRIVER_LAUNCH_OPTIONS' });
 });

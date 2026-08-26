@@ -1,4 +1,5 @@
 import { isParameterKind, isScalarParameterValue } from '../../execution/index.mjs';
+import { deviceViewDtypeWidth } from '../../memory/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { validationError } from './errors.mjs';
 
@@ -6,6 +7,7 @@ const REQUEST_FIELDS = Object.freeze(['schemaVersion', 'requestId', 'operation',
 const BASE_OPERATIONS = new Set([
   'runtime.describe', 'context.status', 'runtime.close',
   'memory.allocate', 'memory.status', 'memory.write', 'memory.read', 'memory.release',
+  'memory.view.create', 'memory.view.status', 'memory.view.release',
   'memory.transfer.h2d', 'memory.transfer.d2h', 'memory.transfer.d2d',
   'mailbox.create', 'mailbox.status', 'mailbox.reset', 'mailbox.release',
   'execution.module.load', 'execution.module.status', 'execution.module.release',
@@ -62,6 +64,7 @@ function launchArguments(value, maximum) {
         && isResourceToken(entry.mailbox) && positiveSafeInteger(entry.generation)
         && typeof entry.lane === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(entry.lane);
     }
+    if (entry.kind === 'device-view') return exactFields(entry, ['kind', 'view']) && isResourceToken(entry.view);
     if (!isParameterKind(entry.kind)) return false;
     if (entry.kind !== 'device-memory') return scalarArgument(entry);
     const fields = Object.keys(entry);
@@ -95,6 +98,16 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!plainObject(message.payload) || !exactFields(message.payload, ['byteLength']) || !positiveSafeInteger(message.payload.byteLength)) throw validationError('MEMORY_RANGE_INVALID', 'Memory allocation requires one positive safe-integer byteLength.', {}, message.requestId);
   } else if (message.operation === 'memory.status' || message.operation === 'memory.release') {
     if (!tokenPayload(message.payload)) throw validationError('DRIVER_MEMORY_TOKEN', 'Memory operation requires one exact resource token.', {}, message.requestId);
+  } else if (message.operation === 'memory.view.create') {
+    const payload = message.payload;
+    const options = payload?.options;
+    if (!plainObject(payload) || !exactFields(payload, ['memory', 'options']) || !isResourceToken(payload.memory)
+        || !plainObject(options) || Object.keys(options).some((key) => !['dtype', 'byteOffset', 'elementCount', 'access'].includes(key))
+        || !Object.hasOwn(options, 'dtype') || !Object.hasOwn(options, 'elementCount') || deviceViewDtypeWidth(options.dtype) === null
+        || (Object.hasOwn(options, 'byteOffset') && !nonnegativeSafeInteger(options.byteOffset)) || !nonnegativeSafeInteger(options.elementCount)
+        || (Object.hasOwn(options, 'access') && !['read', 'write', 'read-write'].includes(options.access))) throw validationError('MEMORY_VIEW_OPTIONS_INVALID', 'Device view create payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'memory.view.status' || message.operation === 'memory.view.release') {
+    if (!tokenPayload(message.payload)) throw validationError('DRIVER_MEMORY_VIEW_TOKEN', 'Device view operation requires one exact resource token.', {}, message.requestId);
   } else if (message.operation === 'mailbox.create') {
     const payload = message.payload;
     const lanes = payload?.lanes;

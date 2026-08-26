@@ -35,6 +35,9 @@ try {
         else if (request.operation === 'context.status') result = await backend.contextStatus({ token: request.payload.token, operationId: request.requestId });
         else if (request.operation === 'memory.allocate') result = await backend.memory.allocate({ byteLength: request.payload.byteLength, operationId: request.requestId });
         else if (request.operation === 'memory.status') result = await backend.memory.status(request.payload.token, request.requestId);
+        else if (request.operation === 'memory.view.create') result = backend.views.create(request.payload.memory, request.payload.options);
+        else if (request.operation === 'memory.view.status') result = backend.views.status(request.payload.token);
+        else if (request.operation === 'memory.view.release') result = await backend.views.release(request.payload.token);
         else if (request.operation === 'memory.write') result = await backend.memory.write(request.payload.token, request.payload.bytes, { deviceOffset: request.payload.deviceOffset, operationId: request.requestId });
         else if (request.operation === 'memory.read') result = await backend.memory.read(request.payload.token, { deviceOffset: request.payload.deviceOffset, byteLength: request.payload.byteLength, operationId: request.requestId });
         else if (request.operation === 'memory.transfer.h2d') result = await backend.transfer.hostToDevice(request.payload.token, request.payload.bytes, { deviceOffset: request.payload.deviceOffset, after: request.payload.after, operationId: request.requestId });
