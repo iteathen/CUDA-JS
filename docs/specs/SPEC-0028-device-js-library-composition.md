@@ -41,6 +41,7 @@ imports: [{ library, name, as }]
 - Library units cannot import other libraries in the first profile. The resulting graph is one finite program root with leaf libraries, so import cycles and recursive library resolution do not exist.
 - Imported signatures are exact Device-JS signatures. Calls retain SPEC-0013 count/type checking and recursion prohibitions.
 - All libraries in one composed program use one homogeneous artifact format and the exact program target architecture.
+- The facade resolves the selected runtime's SPEC-0017 compile target before translating a library or program. Device-JS semantic identity, library metadata, compiler artifacts, import validation, and final link target therefore describe one device-compatible target; a caller-supplied conflicting target rejects before compiler work.
 - PTX composition forces relocatable-device-code compilation for the library and program units. LTO-IR composition uses typed Device-LTO. The caller may select the library output family but may not also set `relocatableDeviceCode`; composition owns that derived choice.
 - Before compiling the program unit, CUDA-JS snapshots and validates every library artifact, digest, target, format, semantic identity, export record, generated symbol, alias, and duplicate-library relationship. Mutated or contradictory inputs fail before new compiler work.
 - The facade compiles the program unit, then invokes the existing public linker with the program artifact followed by one canonical copy of each referenced library artifact. The final composed artifact is cubin.
@@ -65,7 +66,7 @@ Library artifacts are copied values, not live native resources. They may be reus
 
 ## Required evidence
 
-Portable/package evidence must prove deterministic library/export/import identity, two unrelated consumers of one library, PTX and LTO orchestration, alias/signature/format/target/digest/collision negatives, unchanged single-unit Device-JS, copied input snapshots, cache separation, installed-package use, and graceful terminal cleanup.
+Portable/package evidence must prove deterministic library/export/import identity, two unrelated consumers of one library, PTX and LTO orchestration, selected non-default target propagation through library/program/artifact/link identity, conflicting-target rejection before compiler work, alias/signature/format/target/digest/collision negatives, unchanged default-target single-unit Device-JS, copied input snapshots, cache separation, installed-package use, and graceful terminal cleanup.
 
 Native promotion requires exact independent source-to-artifact/link/cubin/output parity for at least two library units and two unrelated consumers, controlled negative artifacts, balanced CompilerActor/DriverActor cleanup, and a reproducible performance methodology before any composition-speed claim.
 

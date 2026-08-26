@@ -7,10 +7,10 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     20f831cc51766aee726313f7f78819b576d56307
+protected main input: af29b95e0707b36b88ee4e234c25a9e7f7ed3a1d
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries / #137 prepared DAG / #138 cuBLASLt adapter / #140 dense numeric Device-JS / #143 native prepared-DAG projection / #146 prepared cuBLASLt DAG nodes
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.15 (SPEC-0031 prepared cuBLASLt composition integrated on PR #146; issue #145 closed)
+candidate package:  cuda-js@0.1.0-alpha.16 (selected-runtime Device-JS target propagation correction; issue #148)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -132,6 +132,8 @@ SPEC-0030 is integrated on protected main through PR #140 and issue #139 is clos
 
 Accepted SPEC-0028 is integrated on protected main. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
 
+The alpha.16 candidate corrects the SPEC-0017/SPEC-0028 boundary: `compileDeviceProgram()` and `compileDeviceLibrary()` now bind Device-JS translation and semantic identity to the selected runtime's compile target before compiler work. Portable `compute_89` evidence covers PTX and LTO libraries, composed cubin linking, kernel-only identity separation, and fail-closed conflicting-target rejection. This is target/identity correctness, not qualification of another physical GPU.
+
 Accepted SPEC-0020 is integrated on protected main through PR #137. Its baseline owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. PR #143 corrected native launch-limit identity projection and qualified kernel-only semantic replay on the recorded Windows profile. PR #146 integrated accepted SPEC-0031 and closed issue #145: fixed SPEC-0029 plans add exact cuBLASLt f32 nodes whose owner derives typed-view/workspace accesses and enqueues within the same one-stream, one-event, one-operation lifecycle. Kernel-only identity remains exact. Exact installed-package Windows evidence covers a three-node kernel → cuBLASLt → kernel batch with numerical parity and zero live/orphaned resources. CUDA Graph realization, transfer/mailbox/other-library nodes, broader native profiles, tensor semantics/cores, multi-GPU, and performance remain separate.
 
 Accepted SPEC-0023 plus SPEC-0029 is integrated on protected main through PR #138. It adds one lazy context-owned cuBLASLt adapter, immutable f32 row-major contiguous matmul plans, typed-view access/range enforcement, explicit bounded workspace, and submission through the existing operation scheduler. Exact Windows CUDA 13.3/cuBLASLt 13.5.1 provider identity, independent ABI/numerical oracle, public native parity, installed-package consumer, and cleanup evidence qualify only that recorded profile; Linux, other providers/dtypes/layouts, tensor semantics, and performance remain excluded.
@@ -189,7 +191,7 @@ Not-qualified is not architectural rejection.
 
 ```text
 1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. consume protected `main@20f831cc51766aee726313f7f78819b576d56307` / `cuda-js@0.1.0-alpha.15` from CUDA-JS-Tensor issue #8 without adding tensor policy to CUDA-JS
+2. integrate the issue #148 selected-runtime Device-JS target correction, then consume the exact protected `cuda-js@0.1.0-alpha.16` revision from CUDA-JS-Tensor without adding tensor policy to CUDA-JS
 3. keep CUDA Graph realization, broader provider/node families, tensor-core claims, and performance behind their own accepted contracts and evidence
 4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
 ```

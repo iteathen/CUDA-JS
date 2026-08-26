@@ -1,11 +1,11 @@
 {
-  "schema_version": 57,
+  "schema_version": 58,
   "updated": "2026-08-26",
-  "status": "prepared_cublaslt_integrated_downstream_handoff",
-  "objective": "Preserve integrated SPEC-0031 as the consumer-neutral CUDA-JS prerequisite while CUDA-JS-Tensor issue #8 consumes the exact protected package; do not import tensor policy or create another CUDA-JS scheduler.",
+  "status": "device_library_selected_target_correction_active",
+  "objective": "Correct the generic SPEC-0017/SPEC-0028 boundary so Device-JS programs and libraries use one selected-runtime target across translation, identity, artifacts, imports, and linking; preserve Tensor/search neutrality and the existing runtime lifecycle.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "20f831cc51766aee726313f7f78819b576d56307",
-    "package": "cuda-js@0.1.0-alpha.15",
+    "protected_main_authority_baseline": "af29b95e0707b36b88ee4e234c25a9e7f7ed3a1d",
+    "package_candidate": "cuda-js@0.1.0-alpha.16",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
@@ -71,11 +71,11 @@
     ,"docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md"
   ],
   "current_focus": {
-    "id": "CJS-TENSOR-DOWNSTREAM-HANDOFF-008",
-    "issues": [145],
-    "plan": "docs/plans/2026-08-26-cuda-js-tensor-prerequisites.md",
-    "next_action": "Record protected main@20f831cc51766aee726313f7f78819b576d56307 and cuda-js@0.1.0-alpha.15 on downstream CUDA-JS-Tensor issue #8, then let the consumer own tensor lowering, shape, scheduling, fallback, and policy through public contracts only.",
-    "exit": "Downstream Tensor #8 consumes the exact integrated dependency without reopening CUDA-JS ownership; CUDA-JS remains clean and starts no tensor-specific implementation."
+    "id": "CJS-DEVICE-LIBRARY-TARGET-148",
+    "issues": [148],
+    "plan": "issue #148 bounded correction under accepted SPEC-0017 and SPEC-0028",
+    "next_action": "Validate alpha.16 selected-compute_89 PTX/LTO library and program composition, integrate through protected main, then hand the exact package revision back to CUDA-JS-Tensor without adding tensor policy.",
+    "exit": "One exact protected alpha.16 revision preserves compute_75 behavior, binds non-default Device-JS identities/artifacts/composition to the selected runtime target, passes package controls, and leaves issue/branch/worktree state disposed."
   },
   "parallel_or_external_next": [
     {

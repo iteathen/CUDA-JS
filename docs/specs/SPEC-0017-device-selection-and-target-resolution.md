@@ -8,6 +8,8 @@
 
 **Amended:** 2026-08-25 — the portable/software/package implementation selects `discoverCudaDevices()`, opaque `CudaDeviceSelector` capabilities, and `openCudaRuntime({ device })`; package identity advances to `cuda-js@0.1.0-alpha.8` while public API schema 1 remains additive. Native qualification remains separate.
 
+**Amended:** 2026-08-26 — Device-JS program and leaf-library translation now consumes the runtime-owned selected compile target before semantic identity, artifact validation, or compiler work. A conflicting explicit Device-JS target fails closed instead of producing contradictory semantic/artifact identities. Package identity advances to `cuda-js@0.1.0-alpha.16`; public API schema remains 1.
+
 **Issue owner:** #20
 
 ## Outcome
@@ -98,6 +100,7 @@ Rules:
 
 - explicit accepted targets remain governed by SPEC-0006 and its target-syntax addendum;
 - default targets must be compatible with the selected device plus provider/toolkit policy;
+- runtime-bound Device-JS compilation uses the runtime-selected target as authoritative; an explicit conflicting Device-JS target rejects before compiler work;
 - changing device architecture or target policy changes compiler/link/cache compatibility identity;
 - incompatible cached artifacts reject before load/launch;
 - syntactic target admission is not toolkit/provider/device qualification.

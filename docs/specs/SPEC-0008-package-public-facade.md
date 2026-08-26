@@ -26,6 +26,8 @@
 
 **Amended:** 2026-08-26 — accepted SPEC-0031 adds one `cublaslt-f32-matmul` public prepared-node schema over existing opaque plan/view capabilities. Package identity advances to `0.1.0-alpha.15`; public API schema remains 1. Kernel-only contract/identity remains exact. Mixed replay adds no native exports, tensor semantics, public provider controls, CUDA Graph, or performance claim.
 
+**Amended:** 2026-08-26 — the SPEC-0017/SPEC-0028 integration now binds Device-JS translation, library/import identity, and produced artifacts to the selected runtime target before compiler work. Package identity advances to `0.1.0-alpha.16`; public API schema remains 1, and the default `compute_75` profile retains its exact earlier identity.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.
