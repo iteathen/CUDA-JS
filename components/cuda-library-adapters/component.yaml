@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.cuda-library-adapters",
+    "name": "Context-bound CUDA library adapters",
+    "status": "accepted-qualified-first-profile",
+    "product_area": "components",
+    "path": "components/cuda-library-adapters",
+    "purpose": "Own optional finite semantic CUDA-library handles, plans, typed-view leases, workspaces, and operation submission inside DriverActor.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["runtime.resource-registry", "runtime.memory", "runtime.device-view", "runtime.execution", "injected-provider-backend"],
+    "forbidden_dependencies": ["public-native-handle", "public-provider-path", "public-stream", "public-event", "tensor-semantics", "arbitrary-ffi", "hidden-unbounded-workspace"],
+    "validation": ["node --test components/cuda-library-adapters/test/*.test.mjs", "npm run f8:portable"],
+    "owner": "runtime.cuda-library-adapters",
+    "lifecycle": "One lazy context child owns the provider handle; plans are children; operations lease plans, typed views, backing memory, and workspace through terminality.",
+    "design": {
+      "owned_invariant": "Every admitted library call remains finite, context-owned, resource-leased, and scheduled through the ordinary CUDA-JS operation lifecycle without exposing native control values.",
+      "public_ports": ["CudaLibraryAdapterManager"],
+      "injected_dependencies": ["resource registry", "context token", "memory/view lease ports", "execution adapter-operation port", "finite provider backend"],
+      "adapter_boundaries": ["cuBLASLt 13.3 selected native profile", "platform-neutral semantic mock"],
+      "simplest_sufficient_total_system": "One optional cuBLASLt adapter, one immutable f32 row-major matmul plan profile, explicit workspace, and no second scheduler."
+    }
+  }
+}

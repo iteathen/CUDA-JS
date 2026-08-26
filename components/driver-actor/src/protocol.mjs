@@ -15,6 +15,8 @@ const BASE_OPERATIONS = new Set([
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
   'execution.prepared.create', 'execution.prepared.status', 'execution.prepared.submit', 'execution.prepared.release',
+  'library.cublaslt.open', 'library.cublaslt.status', 'library.cublaslt.release',
+  'library.cublaslt.plan.create', 'library.cublaslt.plan.status', 'library.cublaslt.plan.submit', 'library.cublaslt.plan.release',
 ]);
 const TEST_OPERATIONS = new Set([
   'testing.block', 'testing.inject-health', 'testing.execution-mode',
@@ -200,6 +202,24 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['token', 'bindings', 'after']) || !isResourceToken(payload.token)
         || !preparedBindings(payload.bindings) || !optionalOperationToken(payload.after)) throw validationError('DRIVER_PREPARED_BINDINGS', 'Prepared DAG submission payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'library.cublaslt.open') {
+    if (!emptyPayload(message.payload)) throw validationError('CUBLASLT_ADAPTER_OPEN_INVALID', 'cuBLASLt open payload must be empty.', {}, message.requestId);
+  } else if (['library.cublaslt.status', 'library.cublaslt.release', 'library.cublaslt.plan.status', 'library.cublaslt.plan.release'].includes(message.operation)) {
+    if (!tokenPayload(message.payload)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'cuBLASLt resource operation requires one exact token.', {}, message.requestId);
+  } else if (message.operation === 'library.cublaslt.plan.create') {
+    const payload = message.payload;
+    const options = payload?.options;
+    if (!plainObject(payload) || !exactFields(payload, ['adapter', 'options']) || !isResourceToken(payload.adapter)
+        || !plainObject(options) || Object.keys(options).some((key) => !['m', 'n', 'k', 'transposeA', 'transposeB', 'maxWorkspaceBytes'].includes(key))
+        || !['m', 'n', 'k'].every((key) => Object.hasOwn(options, key))) throw validationError('CUBLASLT_MATMUL_PLAN_INVALID', 'cuBLASLt plan payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'library.cublaslt.plan.submit') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['token', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace', 'after'])
+        || !['token', 'a', 'b', 'c', 'd'].every((key) => isResourceToken(payload[key]))
+        || (payload.workspace !== null && !isResourceToken(payload.workspace)) || !optionalOperationToken(payload.after)
+        || typeof payload.alpha !== 'number' || !Number.isFinite(payload.alpha) || typeof payload.beta !== 'number' || !Number.isFinite(payload.beta)) {
+      throw validationError('CUBLASLT_MATMUL_SUBMIT_INVALID', 'cuBLASLt matmul submission payload is invalid.', {}, message.requestId);
+    }
   } else if (message.operation === 'testing.block') {
     if (!plainObject(message.payload) || !exactFields(message.payload, ['milliseconds']) || !Number.isSafeInteger(message.payload.milliseconds) || message.payload.milliseconds < 1 || message.payload.milliseconds > 2_000) throw validationError('DRIVER_TEST_BLOCK', 'Mock block duration must be an integer from 1 through 2000.', {}, message.requestId);
   } else if (message.operation === 'testing.inject-health') {

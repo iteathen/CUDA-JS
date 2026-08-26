@@ -12,16 +12,15 @@
 
 This map preserves credible future CUDA-JS capability ideas without turning them into the current implementation queue. It is not an accepted specification, release promise, priority commitment, or support claim. An entry can be architecturally plausible while still being unselected, unimplemented, unqualified, and intentionally deferred.
 
-The active dependency path remains:
+The current dependency path is owned by `next_step.yaml`. As of 2026-08-26 it is:
 
 ```text
-#4 OS-neutral Linux facade/package source completion
-  -> exact Ubuntu 24.04 x86-64 F2L-F8L qualification
-  -> accepted SPEC-0017 explicit device selection and target resolution (#20)
-  -> the smallest accepted SPEC-0024 multi-GPU subset needed by real consumers
+integrate the accepted SPEC-0023/SPEC-0029 cuBLASLt first profile (#90)
+  -> implement the first separately owned dense CUDA-JS-Tensor slice
+  -> retain broader providers, CUDA Graph realization, and multi-GPU as independently activated later packets
 ```
 
-This document cannot reorder that path. The machine-readable current action remains [`next_step.yaml`](../../next_step.yaml), and current public truth remains [`CAPABILITIES.md`](../CAPABILITIES.md).
+Native Ubuntu qualification remains an independent contributor-evidence lane on #4; unavailable physical-host evidence does not block OS-neutral framework work. This document cannot reorder either lane. The machine-readable current action remains [`next_step.yaml`](../../next_step.yaml), and current public truth remains [`CAPABILITIES.md`](../CAPABILITIES.md).
 
 ## Status key
 
@@ -84,7 +83,7 @@ Dynamic parallelism and recursion are intentionally absent because they conflict
 
 | ID | Candidate | State | Natural owner / constraint |
 |---|---|---|---|
-| `LH-LIB-01` | cuBLAS/cuBLASLt adapter | `unselected / not-implemented / not-qualified / horizon` | Optional context-bound library adapter under proposed SPEC-0023. |
+| `LH-LIB-01` | cuBLAS/cuBLASLt adapter | `planned / implemented / qualified / retained` | Accepted SPEC-0023 framework and exact-Windows-qualified SPEC-0029 contiguous row-major `f32` cuBLASLt profile; wider operations remain separately gated horizon work. |
 | `LH-LIB-02` | cuDNN adapter | `unselected / not-implemented / not-qualified / horizon` | Optional adapter; no tensor/training semantics in core. |
 | `LH-LIB-03` | cuFFT adapter | `planned / not-implemented / not-qualified / horizon` | Optional SPEC-0023 provider profile. |
 | `LH-LIB-04` | cuRAND adapter | `planned / not-implemented / not-qualified / horizon` | Optional provider; consumer reproducibility policy remains outside. |

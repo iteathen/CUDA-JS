@@ -59,6 +59,13 @@ try {
         else if (request.operation === 'execution.prepared.status') result = backend.execution.preparedOperationDagStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.prepared.submit') result = await backend.execution.submitPreparedOperationDag(request.payload.token, { bindings: request.payload.bindings, after: request.payload.after, operationId: request.requestId });
         else if (request.operation === 'execution.prepared.release') result = await backend.execution.releasePreparedOperationDag(request.payload.token, request.requestId);
+        else if (request.operation === 'library.cublaslt.open') result = await backend.libraryAdapters.openCublasLt(request.requestId);
+        else if (request.operation === 'library.cublaslt.status') result = backend.libraryAdapters.adapterStatus(request.payload.token, request.requestId);
+        else if (request.operation === 'library.cublaslt.release') result = await backend.libraryAdapters.releaseAdapter(request.payload.token, request.requestId);
+        else if (request.operation === 'library.cublaslt.plan.create') result = await backend.libraryAdapters.createF32MatmulPlan(request.payload.adapter, request.payload.options, request.requestId);
+        else if (request.operation === 'library.cublaslt.plan.status') result = backend.libraryAdapters.planStatus(request.payload.token, request.requestId);
+        else if (request.operation === 'library.cublaslt.plan.submit') result = await backend.libraryAdapters.submitF32Matmul(request.payload.token, { a: request.payload.a, b: request.payload.b, c: request.payload.c, d: request.payload.d, alpha: request.payload.alpha, beta: request.payload.beta, workspace: request.payload.workspace, after: request.payload.after }, request.requestId);
+        else if (request.operation === 'library.cublaslt.plan.release') result = await backend.libraryAdapters.releasePlan(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.status') result = await backend.execution.operationStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.release') result = await backend.execution.releaseOperation(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.timeout') result = await backend.execution.legacyTimeout(request.payload.token, request.requestId);
@@ -74,7 +81,7 @@ try {
         else if (request.operation === 'testing.disposal-mode') result = await backend.testingSetDisposalMode({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'testing.disposal-status') result = await backend.testingDisposalStatus({ operationId: request.requestId });
         else throw Object.assign(new Error('Validated command has no handler.'), { code: 'DRIVER_COMMAND_HANDLER', category: 'internal' });
-        const state = request.operation.startsWith('memory.') || request.operation.startsWith('mailbox.')
+        const state = request.operation.startsWith('memory.') || request.operation.startsWith('mailbox.') || request.operation.startsWith('library.')
           ? { inventory: backend.inventory(), memory: result.usage ?? null, execution: backend.execution.summary() }
           : request.operation.startsWith('execution.')
             ? { inventory: backend.inventory(), execution: backend.execution.summary() }

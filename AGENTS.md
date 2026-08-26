@@ -105,7 +105,7 @@ The open-issue sweep reviewed the first dependency-ready expansion contracts aga
 - `SPEC-0021` is **Accepted**: new `f64`/`f16`/`bf16` packed scalar kinds plus contiguous one-dimensional generic typed device views. Accepted SPEC-0011 finite-only `f32` behavior is preserved. Production portable/software implementation is authorized; native promotion remains open.
 - `SPEC-0018` remains **Proposal**. Its own gate requires trustworthy published native SPEC-0016 lifecycle evidence. Issue #51 records a passing Windows candidate, but the exact candidate commits/evidence were not integrated on protected main; do not widen to multi-operation/multi-stream production code until that gap is repaired.
 
-`SPEC-0020`, the unaccepted remainder of `SPEC-0022`, and `SPEC-0023` through `SPEC-0026` remain proposal-only. Their presence or roadmap position is not implementation permission.
+CUDA Graph/additional-node portions of `SPEC-0020`, the unaccepted remainder of `SPEC-0022`, unaccepted `SPEC-0023` provider children beyond accepted `SPEC-0029`, and `SPEC-0024` through `SPEC-0026` remain proposal-only. Their presence or roadmap position is not implementation permission.
 
 ## Execution and Device-JS gates
 

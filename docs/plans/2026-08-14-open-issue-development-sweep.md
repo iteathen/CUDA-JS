@@ -4,6 +4,8 @@
 
 **Frozen input:** protected `main` `334b903be827dedb5345608a34a6df444912fe1b`, `cuda-js@0.1.0-alpha.5`
 
+**Current-state note (2026-08-26):** This remains a frozen historical sweep. Later accepted authority supersedes proposal-era rows: SPEC-0020's semantic DAG, SPEC-0019, and SPEC-0023 are accepted and implemented, while SPEC-0029 supplies the exact-Windows-qualified first cuBLASLt profile. Use `next_step.yaml` and `docs/CAPABILITIES.md` for current execution and support truth.
+
 **Owner instruction:** process every open issue through investigate → assess → research → reassess → plan → authorized implementation → test.
 
 ## Governing interpretation

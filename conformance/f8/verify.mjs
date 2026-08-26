@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.11');
+assert.equal(packageJson.version, '0.1.0-alpha.12');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -26,6 +26,7 @@ assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in
 assert.equal(compatibility.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(compatibility.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
 assert.equal(compatibility.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
+assert.equal(compatibility.capabilities.cublasLtF32Matmul, 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace');
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
@@ -90,6 +91,14 @@ if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64' && e
   assert.equal(native.deviceJsObservation.driverResourceCounts.orphaned, 0);
   assert.deepEqual(native.multiOperationObservation.transferBytes, [3, 5, 7, 11]);
   assert.equal(native.multiOperationObservation.graceful, true);
+  if (nativeProfile === 'windows') {
+    assert.deepEqual(native.cublasLtObservation.output, [58, 64, 139, 154]);
+    assert.equal(native.cublasLtObservation.status, 'completed');
+    assert.deepEqual(native.cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' });
+    assert.equal(native.cublasLtObservation.graceful, true);
+  } else {
+    assert.equal(native.cublasLtObservation, null);
+  }
 }
 if (process.platform === 'linux' && !existsSync(nativePath)) {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));

@@ -385,7 +385,7 @@
       "id": "NVIDIA-CUBLAS-13.3-NN-BOUNDARY",
       "kind": "primary",
       "project": "NVIDIA cuBLAS",
-      "revision": "CUDA Toolkit 13.3 cuBLAS documentation inspected 2026-08-13",
+      "revision": "CUDA Toolkit 13.3/current cuBLAS documentation and exact installed headers inspected 2026-08-26",
       "license": "NVIDIA documentation terms",
       "locations": [
         "https://docs.nvidia.com/cuda/archive/13.3.0/cublas/index.html"
@@ -394,7 +394,11 @@
         "cuBLAS section 2.1.2 and cublasCreate section 2.4.1 bind cuBLAS handles to the current CUDA device/context",
         "cuBLASLt section 3.3.3 says its handle is generally not tied to a particular CUDA context",
         "cublasLtCreate section 3.4.1 requires the appropriate current device, while calls consume execution-context-affine streams, memory, and workspaces",
-        "provider calls against DriverActor-owned execution resources must remain under the accepted owner"
+        "provider calls against DriverActor-owned execution resources must remain under the accepted owner",
+        "cublasLtMatmul enqueues D = alpha*op(A)*op(B)+beta*C on a supplied CUDA stream",
+        "heuristic results contain an opaque algorithm, exact workspace requirement, state, and waves observation",
+        "the default maximum workspace is zero and supplied workspace requires 256-byte alignment",
+        "reproducibility and algorithm choice are provider/toolkit/stream dependent rather than universal"
       ],
       "reuse_disposition": "normative external provider-ownership source; no bundled provider"
     },

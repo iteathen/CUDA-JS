@@ -457,6 +457,7 @@ for (const relative of files) {
   }
   if (['.cc', '.cpp', '.cxx', '.hh', '.hpp', '.ts', '.tsx', '.rs'].includes(extension)
       && relative !== 'schemas/cuda-13.3/linux-x64/generated/types.d.ts'
+      && !relative.startsWith('conformance/cublaslt/')
       && !relative.startsWith('components/runtime-facade/')) {
     errors.push(`source type is outside a currently registered implementation boundary: ${relative}`);
   }
@@ -480,6 +481,8 @@ for (const relative of files) {
       && !relative.startsWith('components/device-js/')
       && !relative.startsWith('components/platform-diagnostics/')
       && !relative.startsWith('components/runtime-facade/')
+      && !relative.startsWith('components/cuda-library-adapters/')
+      && !relative.startsWith('conformance/cublaslt/')
       && !relative.startsWith('conformance/f3/')
       && !relative.startsWith('conformance/f4/')
       && !relative.startsWith('conformance/f5/')
@@ -491,7 +494,8 @@ for (const relative of files) {
       && !relative.startsWith('conformance/node/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
-      && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')) {
+      && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')
+      && !relative.startsWith('schemas/cuda-13.3/win-x64/generated/')) {
     errors.push(`JavaScript source is outside an authorized accepted-or-named-experiment boundary: ${relative}`);
   }
 }

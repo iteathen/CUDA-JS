@@ -187,6 +187,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (!(packageJson.files ?? []).includes('components/prepared-execution/')) {
     errors.push('package.json omits the prepared-execution runtime dependency from the package');
   }
+  if (!(packageJson.files ?? []).includes('components/cuda-library-adapters/')) {
+    errors.push('package.json omits the CUDA library-adapter runtime dependency from the package');
+  }
   if (JSON.stringify(compatibility.capabilities?.functionParameters) !== JSON.stringify(expectedParameters)) {
     errors.push('packaging compatibility scalar parameter projection is stale');
   }
@@ -213,6 +216,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   }
   if (compatibility.capabilities?.preparedOperationDags !== 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay') {
     errors.push('packaging compatibility prepared operation DAG projection is stale');
+  }
+  if (compatibility.capabilities?.cublasLtF32Matmul !== 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace') {
+    errors.push('packaging compatibility cuBLASLt f32 matmul projection is stale');
   }
   if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');

@@ -401,6 +401,41 @@ test('submit rollback retains a stronger registered-event cleanup failure and re
   assert.equal(registry.inventory().resources.find((entry) => entry.kind === 'function').leases, 0);
 });
 
+test('internal adapter operations release rejected leases and retain adapter-specific rollback truth', async () => {
+  const first = fixture();
+  let firstReleased = 0;
+  const pending = await first.execution.submitAdapterOperation({
+    kind: 'test-adapter', accesses: [], leases: [{ release() { firstReleased += 1; } }],
+    enqueue() {}, operationId: 1,
+  });
+  let rejectedReleased = 0;
+  await assert.rejects(first.execution.submitAdapterOperation({
+    kind: 'test-adapter', accesses: [], leases: [{ release() { rejectedReleased += 1; } }],
+    enqueue() {}, operationId: 2,
+  }), (error) => error.code === 'EXECUTION_BUSY');
+  assert.equal(rejectedReleased, 1);
+  assert.equal(firstReleased, 0);
+  assert.equal((await first.execution.operationStatus(pending.operation, 3)).status, 'completed');
+  assert.equal(firstReleased, 1);
+
+  const cleanupFailure = new ExecutionError(
+    'RESOURCE_DISPOSE_FAILED', 'deferred-driver', 'adapter event cleanup failed', { resourceKind: 'event' },
+    { operation: 'cuEventDestroy', operationId: 11, healthBefore: 'healthy', healthAfter: 'poisoned' },
+  );
+  const second = fixture({ eventCloseFailure: cleanupFailure });
+  let rollbackReleased = 0;
+  await assert.rejects(second.execution.submitAdapterOperation({
+    kind: 'test-adapter', accesses: [], leases: [{ release() { rollbackReleased += 1; } }],
+    enqueue() { throw new ExecutionError('TEST_ADAPTER_SUBMIT_FAILED', 'immediate-driver', 'adapter rejected'); }, operationId: 11,
+  }), (error) => {
+    assert.equal(error.code, 'EXECUTION_ADAPTER_ROLLBACK_FAILED');
+    assert.equal(error.details.primaryFailure.code, 'TEST_ADAPTER_SUBMIT_FAILED');
+    assert.equal(error.details.cleanupFailures[0].code, 'RESOURCE_DISPOSE_FAILED');
+    return true;
+  });
+  assert.equal(rollbackReleased, 1);
+});
+
 test('module release reaches the registry stored failure on repeated close without a descriptor preflight', async () => {
   const unloadFailure = new ExecutionError(
     'CUDA_MODULE_UNLOAD_FAILED',

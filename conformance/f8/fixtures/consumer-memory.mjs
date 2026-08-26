@@ -12,6 +12,7 @@ assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling,
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.cublasLtF32Matmul, 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
@@ -140,6 +141,25 @@ await transferDestination.close();
 await transferSource.close();
 assert.equal((await transferRuntime.close()).graceful, true);
 
+const libraryRuntime = await openCudaRuntimeForTesting();
+const matrixValues = [[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], [0, 0, 0, 0], [0, 0, 0, 0]];
+const matrices = [];
+for (let index = 0; index < matrixValues.length; index += 1) {
+  const memory = await libraryRuntime.allocateDevice({ byteLength: matrixValues[index].length * 4 });
+  await memory.write(new Uint8Array(new Float32Array(matrixValues[index]).buffer));
+  const view = await memory.view({ dtype: 'f32', elementCount: matrixValues[index].length, access: index < 3 ? 'read' : 'write' });
+  matrices.push({ memory, view });
+}
+const cublasLt = await libraryRuntime.openCublasLt();
+const matmulPlan = await cublasLt.createF32MatmulPlan({ m: 2, n: 2, k: 3 });
+const matmul = await matmulPlan.submit({ a: matrices[0].view, b: matrices[1].view, c: matrices[2].view, d: matrices[3].view });
+assert.equal((await matmul.wait()).kind, 'cublaslt-f32-matmul');
+const matmulOutput = (await matrices[3].memory.read({ byteLength: 16 })).bytes;
+assert.deepEqual([...new Float32Array(matmulOutput.buffer, matmulOutput.byteOffset, 4)], [58, 64, 139, 154]);
+await matmul.close(); await matmulPlan.close(); await cublasLt.close();
+for (const matrix of matrices) { await matrix.view.close(); await matrix.memory.close(); }
+assert.equal((await libraryRuntime.close()).graceful, true);
+
 console.log(JSON.stringify({
   consumer: 'portable-memory',
   packageVersion: CUDA_JS_COMPATIBILITY.package.version,
@@ -150,6 +170,7 @@ console.log(JSON.stringify({
   asyncTransferLifecycle: true,
   publicationMailboxLifecycle: true,
   preparedOperationDagLifecycle: true,
+  cublasLtLifecycle: true,
   deviceSelectionLifecycle: true,
   typedViewLifecycle: true,
   graceful: true,
