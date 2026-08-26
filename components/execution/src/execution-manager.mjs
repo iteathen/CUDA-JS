@@ -399,6 +399,7 @@ export class ExecutionManager {
   #policy;
   #limits;
   #operations;
+  #preparedNodeFamilies = new Map();
   #clock;
   #sleep;
   #streamTokens = [];
@@ -430,6 +431,16 @@ export class ExecutionManager {
   }
 
   get policy() { return this.#policy; }
+
+  registerPreparedNodeFamily(family) {
+    if (!exactFields(family, ['kind', 'prepare', 'resolve']) || typeof family.kind !== 'string' || !/^[a-z][a-z0-9-]{0,63}$/.test(family.kind)
+        || family.kind === 'kernel' || typeof family.prepare !== 'function' || typeof family.resolve !== 'function') {
+      fail('PREPARED_DAG_NODE_FAMILY_INVALID', 'internal', 'Prepared node family port is invalid.');
+    }
+    if (this.#streamTokens.length !== 0 || this.#preparedDagCount !== 0 || this.#pendingOperations.size !== 0) fail('PREPARED_DAG_NODE_FAMILY_LATE', 'internal', 'Prepared node families must be installed before execution initialization.');
+    if (this.#preparedNodeFamilies.has(family.kind)) fail('PREPARED_DAG_NODE_FAMILY_DUPLICATE', 'internal', 'Prepared node family is already installed.', { kind: family.kind });
+    this.#preparedNodeFamilies.set(family.kind, family);
+  }
 
   async initialize(operationId = 0) {
     this.#assertAdmission();
@@ -561,20 +572,33 @@ export class ExecutionManager {
   async prepareOperationDag({ nodes: nodeValues, operationId = null }) {
     this.#assertAdmission();
     if (!Array.isArray(nodeValues)) fail('PREPARED_DAG_REQUEST_INVALID', 'validation', 'Prepared operation DAG nodes must be an array.');
-    const functionLeases = new Map();
+    const dependencyLeases = new Map();
     try {
       const privateById = new Map();
       const semanticNodes = nodeValues.map((node, inputIndex) => {
+        if (plainObject(node) && node.kind !== 'kernel') {
+          const family = this.#preparedNodeFamilies.get(node.kind);
+          if (!family) fail('PREPARED_DAG_NODE_KIND', 'unsupported', 'Prepared DAG node kind is unavailable in this runtime.', { inputIndex, kind: node.kind ?? null });
+          const prepared = family.prepare(node, { operationId });
+          if (!plainObject(prepared) || !plainObject(prepared.semantic) || !plainObject(prepared.privateNode) || !Array.isArray(prepared.dependencies)) fail('PREPARED_DAG_NODE_FAMILY_RESULT_INVALID', 'internal', 'Prepared node family returned an invalid preparation record.', { inputIndex, kind: node.kind });
+          for (const dependency of prepared.dependencies) {
+            if (!plainObject(dependency) || typeof dependency.key !== 'string' || typeof dependency.lease?.release !== 'function') fail('PREPARED_DAG_NODE_FAMILY_RESULT_INVALID', 'internal', 'Prepared node family returned an invalid dependency lease.', { inputIndex, kind: node.kind });
+            if (dependencyLeases.has(dependency.key)) dependency.lease.release();
+            else dependencyLeases.set(dependency.key, dependency.lease);
+          }
+          privateById.set(node.id, Object.freeze({ ...prepared.privateNode, family }));
+          return prepared.semantic;
+        }
         if (!plainObject(node) || Object.keys(node).some((key) => !['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].includes(key))
             || !['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].every((key) => Object.hasOwn(node, key))) {
           fail('PREPARED_DAG_NODE_INVALID', 'validation', 'Prepared operation DAG node fields are invalid.', { inputIndex });
         }
         const acquiredFunctionLease = this.#registry.acquire(node.functionToken, { kind: 'function' });
         const functionKey = tokenIdentity(node.functionToken);
-        let functionLease = functionLeases.get(functionKey);
+        let functionLease = dependencyLeases.get(`function:${functionKey}`);
         if (!functionLease) {
           functionLease = acquiredFunctionLease;
-          functionLeases.set(functionKey, functionLease);
+          dependencyLeases.set(`function:${functionKey}`, functionLease);
         } else {
           acquiredFunctionLease.release();
         }
@@ -618,6 +642,7 @@ export class ExecutionManager {
         };
         privateById.set(node.id, Object.freeze({
           id: node.id,
+          kind: 'kernel',
           functionToken: node.functionToken,
           functionValue: functionLease.value,
           parameters,
@@ -642,17 +667,17 @@ export class ExecutionManager {
         semanticNodes: normalized.nodes,
         submissionOrder: normalized.submissionOrder,
         nodes: Object.freeze(normalized.submissionOrder.map((id) => privateById.get(id))),
-        functionLeases: Object.freeze([...functionLeases.values()]),
-        functionLeasesReleased: false,
+        dependencyLeases: Object.freeze([...dependencyLeases.values()]),
+        dependencyLeasesReleased: false,
       };
       const token = this.#registry.allocate({
         kind: 'prepared-dag',
         value: record,
         parent: this.#contextToken,
         dispose: async (value) => {
-          if (!value.functionLeasesReleased) {
-            value.functionLeasesReleased = true;
-            for (let index = value.functionLeases.length - 1; index >= 0; index -= 1) value.functionLeases[index].release();
+          if (!value.dependencyLeasesReleased) {
+            value.dependencyLeasesReleased = true;
+            for (let index = value.dependencyLeases.length - 1; index >= 0; index -= 1) value.dependencyLeases[index].release();
           }
           return Object.freeze({ kind: 'prepared-dag', logicalClosed: true, sha256: value.sha256 });
         },
@@ -660,7 +685,7 @@ export class ExecutionManager {
       this.#preparedDagCount += 1;
       return this.#preparedDagDescriptor(token, record, operationId);
     } catch (error) {
-      for (const lease of [...functionLeases.values()].reverse()) lease.release();
+      for (const lease of [...dependencyLeases.values()].reverse()) lease.release();
       throw error;
     }
   }
@@ -726,6 +751,9 @@ export class ExecutionManager {
             byteLength: memoryLease.byteLength,
             rangeEnd: viewLease.byteOffset + viewLease.byteLength,
             viewAccess: viewLease.access,
+            viewDtype: viewLease.dtype,
+            viewElementCount: viewLease.elementCount,
+            viewByteLength: viewLease.byteLength,
             release() {
               if (released) return;
               released = true;
@@ -751,7 +779,19 @@ export class ExecutionManager {
       }
 
       const accessesByNode = new Map();
+      const familySubmissions = new Map();
       for (const node of preparedLease.value.nodes) {
+        if (node.kind !== 'kernel') {
+          const submission = node.family.resolve(node, resolved, { operationId });
+          if (!plainObject(submission) || !Array.isArray(submission.accesses) || typeof submission.enqueue !== 'function'
+              || !submission.accesses.every((access) => plainObject(access) && access.native !== undefined && Number.isSafeInteger(access.start) && Number.isSafeInteger(access.end) && access.start >= 0 && access.end > access.start && ['read', 'write', 'read-write'].includes(access.mode))) {
+            fail('PREPARED_DAG_NODE_FAMILY_RESULT_INVALID', 'internal', 'Prepared node family returned an invalid submission record.', { kind: node.kind });
+          }
+          const accesses = Object.freeze(submission.accesses.map((access) => Object.freeze({ native: access.native, start: access.start, end: access.end, mode: access.mode })));
+          accessesByNode.set(node.id, accesses);
+          familySubmissions.set(node.id, submission);
+          continue;
+        }
         const argumentValues = [];
         const accessLeases = [];
         node.arguments.forEach((argument) => {
@@ -798,6 +838,7 @@ export class ExecutionManager {
       const pointers = new Map();
       const launches = [];
       for (const node of preparedLease.value.nodes) {
+        if (node.kind !== 'kernel') continue;
         const values = [];
         for (const argument of node.arguments) {
           if (!Object.hasOwn(argument, 'binding')) {
@@ -825,14 +866,20 @@ export class ExecutionManager {
       const stream = this.#registry.get(streamToken, { kind: 'stream' });
       eventNative = await this.#operations.createEvent({ operationId });
       eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
-      for (const launch of launches) {
-        await this.#operations.submitLaunch({
-          functionNative: launch.node.functionValue.native,
-          streamNative: stream.native,
-          config: Object.freeze({ grid: launch.node.grid, block: launch.node.block, sharedMemoryBytes: launch.node.sharedMemoryBytes }),
-          parameterBuffer: launch.parameterBuffer,
-          operationId,
-        });
+      const launchesById = new Map(launches.map((launch) => [launch.node.id, launch]));
+      for (const node of preparedLease.value.nodes) {
+        if (node.kind === 'kernel') {
+          const launch = launchesById.get(node.id);
+          await this.#operations.submitLaunch({
+            functionNative: launch.node.functionValue.native,
+            streamNative: stream.native,
+            config: Object.freeze({ grid: launch.node.grid, block: launch.node.block, sharedMemoryBytes: launch.node.sharedMemoryBytes }),
+            parameterBuffer: launch.parameterBuffer,
+            operationId,
+          });
+        } else {
+          await familySubmissions.get(node.id).enqueue(stream.native);
+        }
         submittedNodeCount += 1;
       }
       try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }

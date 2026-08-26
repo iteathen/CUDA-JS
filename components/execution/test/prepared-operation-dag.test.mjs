@@ -177,6 +177,14 @@ test('prepared DAG validates every function capability before retained-lease ded
   assert.equal(execution.summary().preparedDagCount, 0);
 });
 
+test('prepared DAG reports an unavailable private node family as unsupported', async () => {
+  const { execution } = await preparedFixture();
+  await assert.rejects(
+    execution.prepareOperationDag({ nodes: [{ id: 'provider', kind: 'unavailable-provider', after: [] }], operationId: 3 }),
+    (error) => error.code === 'PREPARED_DAG_NODE_KIND' && error.category === 'unsupported',
+  );
+});
+
 test('prepared DAG validates complete binding sets and transitive ordering', async () => {
   const { execution, fn, allocation, calls } = await preparedFixture();
   const prepared = await execution.prepareOperationDag({
@@ -216,4 +224,49 @@ test('prepared DAG later-node submission failure retains ownership and requires 
   assert.equal(resources.find((entry) => entry.kind === 'device-memory').leases, 1);
   assert.equal(resources.find((entry) => entry.kind === 'event').state, 'live');
   assert.equal(resources.some((entry) => entry.kind === 'operation'), false);
+});
+
+test('prepared library-node failure after a kernel is conservatively restart-required', async () => {
+  const fx = fixture();
+  const { execution, memory, calls } = fx;
+  execution.registerPreparedNodeFamily({
+    kind: 'cublaslt-f32-matmul',
+    prepare(node) {
+      const reference = { binding: 'data', kind: 'device-memory' };
+      return {
+        semantic: {
+          id: node.id, kind: node.kind, after: node.after,
+          plan: {
+            contract: 'SPEC-0029-cublaslt-f32-row-major-matmul-v1', m: 1, n: 1, k: 1, transposeA: false, transposeB: false,
+            maxWorkspaceBytes: 0, workspaceBytes: 0, requirements: { a: 1, b: 1, c: 1, d: 1 },
+            provider: { name: 'test-provider', version: '1', qualification: 'test-only' },
+          },
+          a: reference, b: reference, c: reference, d: reference,
+          alpha: { kind: 'f32', packedHex: '0000803f' }, beta: { kind: 'f32', packedHex: '00000000' }, workspace: null,
+        },
+        privateNode: { id: node.id, kind: node.kind },
+        dependencies: [],
+      };
+    },
+    resolve(_node, resolved) {
+      const lease = resolved.get('data').lease;
+      return {
+        accesses: [{ native: lease.native, start: lease.byteOffset, end: lease.byteOffset + 4, mode: 'read-write' }],
+        async enqueue() { throw Object.assign(new Error('Injected library submission failure.'), { code: 'TEST_LIBRARY_SUBMIT' }); },
+      };
+    },
+  });
+  await execution.initialize();
+  const module = await execution.loadModule({ format: 'ptx', bytes: PTX, operationId: 1 });
+  const fn = await execution.getFunction(module.module, { name: 'step', parameters: [{ kind: 'device-memory' }, { kind: 'u32' }], operationId: 2 });
+  const allocation = await memory.allocate({ byteLength: 64 });
+  const prepared = await execution.prepareOperationDag({
+    nodes: [
+      node({ id: 'kernel', functionToken: fn.function }),
+      { id: 'library', kind: 'cublaslt-f32-matmul', after: ['kernel'] },
+    ],
+    operationId: 3,
+  });
+  await assert.rejects(execution.submitPreparedOperationDag(prepared.prepared, { bindings: bindings(allocation), operationId: 4 }), (error) => error.code === 'PREPARED_DAG_PARTIAL_SUBMISSION' && error.category === 'restart-required');
+  assert.equal(calls.submitLaunch, 1);
 });

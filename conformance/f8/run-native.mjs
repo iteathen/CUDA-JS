@@ -118,6 +118,14 @@ if (nativeProfile === 'windows') {
   cublasLtObservation = JSON.parse(cublasLtOutput.split(/\r?\n/).at(-1));
   assert.deepEqual(cublasLtObservation.output, [58, 64, 139, 154]);
   assert.equal(cublasLtObservation.status, 'completed');
+  assert.equal(cublasLtObservation.operationKind, 'prepared-batch');
+  assert.deepEqual(cublasLtObservation.prepared, {
+    contract: 'SPEC-0020-prepared-kernel-dag-v1+SPEC-0031-prepared-cublaslt-f32-matmul-node-v1',
+    nodeCount: 3,
+    edgeCount: 2,
+    realization: 'semantic-single-stream',
+  });
+  assert.deepEqual(cublasLtObservation.finalWords, [1114112003, 1115684867, 1124794371, 1125777411]);
   assert.equal(cublasLtObservation.workspaceBytes, 0);
   assert.deepEqual(cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' });
   assert.equal(cublasLtObservation.graceful, true);
@@ -141,6 +149,7 @@ const target = await writeEvidence(nativePackageEvidenceName, {
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
     'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
+    'docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
     'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
     'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',

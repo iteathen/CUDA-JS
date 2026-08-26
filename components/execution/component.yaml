@@ -6,7 +6,7 @@
     "status": "accepted-f5w-internal-experimental",
     "product_area": "components",
     "path": "components/execution",
-    "purpose": "Own bounded PTX identity, declared function schemas, packed launch parameters, finite operation scheduling, prepared-DAG resources and replay, access hazards, memory leases, private completion events, adaptive polling, and terminal records without exposing native state.",
+    "purpose": "Own bounded PTX identity, declared function schemas, packed launch parameters, finite operation scheduling, prepared-DAG resources and mixed selected-family replay, access hazards, memory leases, private completion events, adaptive polling, and terminal records without exposing native state.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "runtime.resource-registry", "runtime.memory", "runtime.publication-mailbox", "runtime.prepared-execution", "injected-execution-backend"],
     "forbidden_dependencies": ["node-ffi", "cuda-driver", "public-native-handle", "public-stream", "public-event", "compiler"],
@@ -16,9 +16,9 @@
     "design": {
       "owned_invariant": "A launch cannot resolve before terminal event completion and cannot release any argument capability while device use may continue.",
       "public_ports": ["ExecutionManager", "normalizeExecutionPolicy", "parameterLayout", "packParameterValues", "ExecutionError", "prepared operation DAG lifecycle"],
-      "injected_dependencies": ["resource registry", "context token", "memory lease port", "device limits", "backend operations"],
+      "injected_dependencies": ["resource registry", "context token", "memory lease port", "device limits", "backend operations", "initialization-time prepared node-family ports"],
       "adapter_boundaries": ["Windows DriverActor execution backend", "platform-neutral orchestration mock"],
-      "simplest_sufficient_total_system": "One bounded PTX/cubin policy owner, a fixed one- or two-stream pool, no queue, at most two operations, explicit access declarations, one optional predecessor, one event per pending operation, and kernel-only prepared DAG replay through the same lifecycle."
+      "simplest_sufficient_total_system": "One bounded PTX/cubin policy owner, a fixed one- or two-stream pool, no queue, at most two operations, explicit or family-derived access declarations, one optional external predecessor, one event per pending operation, and prepared kernel/SPEC-0031 replay through the same lifecycle."
     }
   }
 }

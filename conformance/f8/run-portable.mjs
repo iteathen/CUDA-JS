@@ -109,6 +109,7 @@ assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f1
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
 assert.equal(memoryObservation.publicationMailboxLifecycle, true);
 assert.equal(memoryObservation.preparedOperationDagLifecycle, true);
+assert.equal(memoryObservation.preparedCublasLtLifecycle, true);
 assert.equal(memoryObservation.cublasLtLifecycle, true);
 assert.equal(memoryObservation.deviceSelectionLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
@@ -137,6 +138,7 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
     'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
     'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
+    'docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',

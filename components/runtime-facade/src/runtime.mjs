@@ -284,6 +284,39 @@ function translatePreparedDag(runtime, value, operation) {
   const nodes = preparedOptions(value, operation);
   if (nodes.length < 1 || nodes.length > 32) throw facadeError('CUDA_JS_PREPARED_NODE_LIMIT', 'validation', 'Prepared DAG requires from one through 32 nodes.', { actual: nodes.length, maximum: 32 }, operation);
   return { nodes: nodes.map((node, nodeIndex) => {
+    if (plainObject(node) && node.kind === 'cublaslt-f32-matmul') {
+      const fields = ['id', 'kind', 'after', 'plan', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace'];
+      if (Object.keys(node).some((key) => !fields.includes(key)) || !['id', 'kind', 'plan', 'a', 'b', 'c', 'd'].every((key) => Object.hasOwn(node, key))) {
+        throw facadeError('CUDA_JS_PREPARED_CUBLASLT_NODE_INVALID', 'validation', 'Prepared cuBLASLt node fields are invalid.', { nodeIndex }, operation);
+      }
+      const plan = resourceFor(node.plan, runtime, 'cublaslt-matmul-plan', operation);
+      const binding = (valueAtField, field) => {
+        if (!plainObject(valueAtField) || Object.keys(valueAtField).length !== 1 || !Object.hasOwn(valueAtField, 'binding')) throw facadeError('CUDA_JS_PREPARED_CUBLASLT_BINDING_INVALID', 'validation', `Prepared cuBLASLt ${field} must use a named binding.`, { nodeIndex, field }, operation);
+        return { binding: valueAtField.binding };
+      };
+      const scalar = (valueAtField, field, defaultValue) => {
+        const selected = valueAtField ?? defaultValue;
+        return plainObject(selected) && Object.keys(selected).length === 1 && Object.hasOwn(selected, 'binding')
+          ? { binding: selected.binding }
+          : { kind: 'f32', value: selected };
+      };
+      let workspace = null;
+      if (plan.workspaceBytes > 0) workspace = binding(node.workspace, 'workspace');
+      else if (node.workspace !== undefined && node.workspace !== null) throw facadeError('CUDA_JS_PREPARED_CUBLASLT_WORKSPACE_INVALID', 'validation', 'A zero-workspace cuBLASLt plan does not accept a prepared workspace binding.', { nodeIndex }, operation);
+      return {
+        id: node.id,
+        kind: node.kind,
+        after: node.after === undefined ? [] : Array.isArray(node.after) ? [...node.after] : node.after,
+        planToken: plan.token,
+        a: binding(node.a, 'a'),
+        b: binding(node.b, 'b'),
+        c: binding(node.c, 'c'),
+        d: binding(node.d, 'd'),
+        alpha: scalar(node.alpha, 'alpha', 1),
+        beta: scalar(node.beta, 'beta', 0),
+        workspace,
+      };
+    }
     if (!plainObject(node) || Object.keys(node).some((key) => !['id', 'kind', 'after', 'function', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].includes(key))
         || !['id', 'function', 'grid', 'block', 'arguments', 'accesses'].every((key) => Object.hasOwn(node, key)) || !Array.isArray(node.arguments) || !Array.isArray(node.accesses)) {
       throw facadeError('CUDA_JS_PREPARED_NODE_INVALID', 'validation', 'Prepared DAG node fields are invalid.', { nodeIndex }, operation);

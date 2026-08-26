@@ -115,6 +115,11 @@ test('Driver error transport preserves a bounded observation operation', () => {
   assert.equal(serializeError(Object.assign(new Error('unsafe'), {
     code: 'CUDA_DRIVER_FAILURE', category: 'immediate-driver', operation: 'C:\\private\\call',
   })).operation, null);
+  const prepared = serializeError(Object.assign(new Error('Unordered prepared nodes conflict.'), {
+    code: 'PREPARED_DAG_RESOURCE_HAZARD', category: 'validation', details: { nodeCount: 2 },
+  }));
+  assert.equal(prepared.code, 'PREPARED_DAG_RESOURCE_HAZARD');
+  assert.equal(prepared.category, 'validation');
 });
 
 test('native startup rollback product retains bounded primary and cleanup semantics', () => {

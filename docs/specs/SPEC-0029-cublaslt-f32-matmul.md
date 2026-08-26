@@ -2,6 +2,8 @@
 
 **Status:** Accepted
 
+**Amended:** 2026-08-26 — SPEC-0031 permits this exact immutable plan as one prepared-DAG node family. The adapter continues to own typed-view/workspace validation, derived access roles, native enqueue, and provider semantics; `runtime.execution` continues to own topology, hazards, the private stream, whole-DAG operation, completion, and rollback. No other provider operation, tensor policy, CUDA Graph, or performance profile is admitted.
+
 **Date:** 2026-08-26
 
 **Parent:** accepted SPEC-0023 context-bound CUDA library adapter framework

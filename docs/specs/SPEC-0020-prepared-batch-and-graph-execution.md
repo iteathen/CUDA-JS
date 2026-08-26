@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 
-**Accepted scope:** Semantic prepared-kernel DAG baseline defined below; CUDA Graph realization remains proposal-only.
+**Accepted scope:** Semantic prepared-kernel DAG baseline plus the bounded SPEC-0031 cuBLASLt f32 matmul child; CUDA Graph realization remains proposal-only.
 
 **Date:** 2026-08-13
 
@@ -27,7 +27,7 @@ priority:                    after accepted SPEC-0018
 
 ## Dependencies
 
-The accepted baseline consumes accepted SPEC-0016, SPEC-0018, and SPEC-0021. Transfer nodes additionally consume SPEC-0019; library nodes consume SPEC-0023; each remains outside the first baseline until a bounded child profile is accepted.
+The accepted baseline consumes accepted SPEC-0016, SPEC-0018, and SPEC-0021. Transfer nodes additionally consume SPEC-0019 and remain outside the accepted profiles. Library nodes consume SPEC-0023; SPEC-0031 accepts exactly the SPEC-0029 cuBLASLt f32 matmul child without admitting other library families.
 
 CUDA Graphs are an implementation profile over a validated semantic prepared batch, not the definition of batch semantics.
 
@@ -50,6 +50,10 @@ Partial native submission is conservative: if any earlier node may have been enq
 This accepted baseline authorizes one pure `runtime.prepared-execution` topology/identity component, bounded integration into the existing `runtime.execution` lifecycle owner, exact DriverActor protocol commands for prepare/status/submit/release, one opaque public prepared-DAG capability, package declarations/compatibility updates, and portable/package evidence. It does not authorize new Driver exports or native CUDA Graph calls.
 
 The public facade accepts either `runtime.prepareOperationDag({ nodes })` or the equivalent node-array overload. `kind`, `after`, and `sharedMemoryBytes` default only to `kernel`, `[]`, and `0`; function, grid, block, arguments, and accesses remain explicit. A prepared capability accepts canonical `submit({ bindings, after? })` and the equivalent convenience overload `submit(bindings, { after? })`. Both forms normalize to the same exact DriverActor command and identity/lifecycle contract; overloads do not create separate execution semantics.
+
+## Accepted cuBLASLt child
+
+SPEC-0031 additively admits a fixed SPEC-0029 cuBLASLt f32 matmul plan as one node family. The library owner derives typed-view/workspace accesses and enqueues on the execution owner's supplied private stream. Kernel-only identity remains exact. Mixed DAGs keep all original ceilings and one whole-DAG operation; they add no tensor policy, arbitrary provider registry, second scheduler, CUDA Graph claim, or performance claim.
 
 ## Prepared batch product
 

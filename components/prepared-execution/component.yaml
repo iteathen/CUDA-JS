@@ -3,7 +3,7 @@
   "component": {
     "id": "runtime.prepared-execution",
     "name": "Prepared operation DAG semantics",
-    "status": "accepted-spec0020-semantic-baseline-portable-only",
+    "status": "accepted-spec0020-spec0031-semantic-baseline",
     "product_area": "components",
     "path": "components/prepared-execution",
     "purpose": "Own finite prepared-operation topology, canonical ordering, binding schemas, bounds, and deterministic identity without owning native submission or operation lifecycle.",
@@ -14,9 +14,9 @@
     "owner": "runtime.prepared-execution",
     "lifecycle": "Pure immutable JavaScript value normalization only; runtime.execution owns prepared resources, leases, submission, completion, and cleanup.",
     "design": {
-      "owned_invariant": "One bounded semantic kernel DAG has one canonical topology, binding schema, and identity independent of input order or native realization.",
-      "public_ports": ["PREPARED_OPERATION_DAG_CONTRACT", "PREPARED_OPERATION_DAG_LIMITS", "normalizePreparedOperationDag"],
-      "injected_dependencies": ["semantic executable identities", "fixed launch facts", "fixed scalar ABI identities", "binding references", "execution profile"],
+      "owned_invariant": "One bounded semantic kernel/SPEC-0031 DAG has one canonical topology, binding schema, and identity independent of input order or native realization; kernel-only identity remains exact.",
+      "public_ports": ["PREPARED_OPERATION_DAG_CONTRACT", "PREPARED_CUBLASLT_OPERATION_DAG_CONTRACT", "PREPARED_OPERATION_DAG_LIMITS", "normalizePreparedOperationDag"],
+      "injected_dependencies": ["semantic executable or fixed plan identities", "fixed launch facts", "fixed scalar ABI identities", "binding references", "execution profile"],
       "adapter_boundaries": ["runtime.execution prepared-resource adapter", "future private CUDA Graph realization"],
       "simplest_sufficient_total_system": "One pure normalizer/hash owner; no runtime registry, scheduler, backend, provider, or native resource ownership."
     }

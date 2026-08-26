@@ -23,7 +23,7 @@ export class DriverRuntimeError extends Error {
 }
 
 export function serializeError(error) {
-  const domainCode = typeof error?.code === 'string' && /^(?:CUDA|CUBLASLT|DRIVER|EXECUTION|MEMORY|RESOURCE)_[A-Z0-9_]+$/.test(error.code);
+  const domainCode = typeof error?.code === 'string' && /^(?:CUDA|CUBLASLT|DRIVER|EXECUTION|MEMORY|PREPARED|RESOURCE)_[A-Z0-9_]+$/.test(error.code);
   const structured = error instanceof DriverRuntimeError || (domainCode
     && (error?.category === undefined || (typeof error.category === 'string' && /^[a-z][a-z-]{0,63}$/.test(error.category)))
     && typeof error?.message === 'string'

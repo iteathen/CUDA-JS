@@ -1,5 +1,6 @@
 export {
   PREPARED_OPERATION_DAG_CONTRACT,
+  PREPARED_CUBLASLT_OPERATION_DAG_CONTRACT,
   PREPARED_OPERATION_DAG_LIMITS,
   PreparedOperationDagError,
   normalizePreparedOperationDag,
