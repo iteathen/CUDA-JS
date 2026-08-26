@@ -1,11 +1,11 @@
 {
-  "schema_version": 56,
+  "schema_version": 57,
   "updated": "2026-08-26",
-  "status": "prepared_cublaslt_node_candidate_validation",
-  "objective": "Validate and integrate accepted SPEC-0031 so fixed cuBLASLt f32 plans compose with prepared kernel DAGs under one existing CUDA-JS operation, without importing tensor policy or creating a second scheduler.",
+  "status": "prepared_cublaslt_integrated_downstream_handoff",
+  "objective": "Preserve integrated SPEC-0031 as the consumer-neutral CUDA-JS prerequisite while CUDA-JS-Tensor issue #8 consumes the exact protected package; do not import tensor policy or create another CUDA-JS scheduler.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "fb27296cffd7191180b0e3cd609224ed2ded182e",
-    "package": "cuda-js@0.1.0-alpha.15 candidate",
+    "protected_main_authority_baseline": "20f831cc51766aee726313f7f78819b576d56307",
+    "package": "cuda-js@0.1.0-alpha.15",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
@@ -30,10 +30,11 @@
       "CJS-PREPARED-DAG-003 integrated on PR #137 at protected main 1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3: immutable bounded semantic kernel DAGs, one-actor replay request, one whole-DAG operation, exact binding/hazard/lifecycle truth, alpha.11 package evidence; native CUDA Graph realization remains on issue #85",
       "CJS-LIB-ADAPTER-004 integrated on PR #138 at protected main 2da65ff2e4287450171c477031dd380a21fa095f: bounded context-owned library-adapter framework, cuBLASLt f32 row-major matmul first child, alpha.12 package projection, independent Windows ABI/numerical oracle, public lifecycle, and cleanup; other providers/dtypes/layouts/performance remain excluded",
       "CJS-DEVICE-NUMERIC-005 integrated on PR #140 at protected main b78f3fc37e20381d950d3297861c877b71f15390: additive dense numeric Device-JS contract, alpha.13 package projection, exact trusted header profiles, legacy-byte compatibility, unrelated installed consumers, independent Windows numerical oracle, and cleanup; tensors, fast math, tensor cores, performance, and broader profiles remain excluded",
-      "CJS-NATIVE-PREPARED-LIMIT-PROJECTION-142 integrated on PR #143 at protected main 3a29b65a4ae736923dbde432356a7aad31059fc0: alpha.14 projects native discovery data to the exact eight-field prepared-DAG launch identity and adds installed-package Windows semantic replay, independent result parity, and zero-live/orphaned cleanup evidence; CUDA Graphs, broader profiles, and performance remain excluded"
+      "CJS-NATIVE-PREPARED-LIMIT-PROJECTION-142 integrated on PR #143 at protected main 3a29b65a4ae736923dbde432356a7aad31059fc0: alpha.14 projects native discovery data to the exact eight-field prepared-DAG launch identity and adds installed-package Windows semantic replay, independent result parity, and zero-live/orphaned cleanup evidence; CUDA Graphs, broader profiles, and performance remain excluded",
+      "CJS-PREPARED-CUBLASLT-006 integrated on PR #146 at protected main 20f831cc51766aee726313f7f78819b576d56307: SPEC-0031 and alpha.15 compose fixed cuBLASLt f32 plans with prepared kernels under one private stream/event/operation, preserve exact kernel-only identity, derive typed-view/workspace accesses, retain bounded leases/failure truth, and pass exact installed-package Windows mixed numerical/cleanup evidence; tensors, CUDA Graphs, broader providers, multi-GPU, tensor cores, and performance remain excluded"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0020 semantic prepared-kernel DAG", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child", "SPEC-0023 framework", "SPEC-0028", "SPEC-0029 cuBLASLt f32 matmul", "SPEC-0030 dense numeric Device-JS"],
-    "accepted_pending_implementation": ["SPEC-0031 prepared cuBLASLt f32 node candidate under exact validation"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0020 semantic prepared-kernel DAG", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child", "SPEC-0023 framework", "SPEC-0028", "SPEC-0029 cuBLASLt f32 matmul", "SPEC-0030 dense numeric Device-JS", "SPEC-0031 prepared cuBLASLt f32 node"],
+    "accepted_pending_implementation": [],
     "still_proposal_only": ["SPEC-0020 CUDA Graph realization and node families other than accepted kernels/SPEC-0031", "SPEC-0022 except accepted scoped-atomic-observation and device-publication children", "unaccepted SPEC-0023 provider children", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
@@ -70,11 +71,11 @@
     ,"docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md"
   ],
   "current_focus": {
-    "id": "CJS-PREPARED-CUBLASLT-145",
+    "id": "CJS-TENSOR-DOWNSTREAM-HANDOFF-008",
     "issues": [145],
     "plan": "docs/plans/2026-08-26-cuda-js-tensor-prerequisites.md",
-    "next_action": "Run exact Node 26.7.0 full/package/native validation of the alpha.15 candidate, review one frozen head, and integrate through protected main only if mixed kernel/library semantics, legacy identity, failure truth, and cleanup all pass.",
-    "exit": "Protected main contains the exact reviewed SPEC-0031 implementation and alpha.15 package projection with portable installed-package and exact-profile Windows mixed-replay evidence; issue #145 and downstream Tensor #8 record the integrated dependency."
+    "next_action": "Record protected main@20f831cc51766aee726313f7f78819b576d56307 and cuda-js@0.1.0-alpha.15 on downstream CUDA-JS-Tensor issue #8, then let the consumer own tensor lowering, shape, scheduling, fallback, and policy through public contracts only.",
+    "exit": "Downstream Tensor #8 consumes the exact integrated dependency without reopening CUDA-JS ownership; CUDA-JS remains clean and starts no tensor-specific implementation."
   },
   "parallel_or_external_next": [
     {
