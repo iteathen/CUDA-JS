@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Worker } from 'node:worker_threads';
 
 import { normalizeExecutionPolicy } from '../../execution/index.mjs';
-import { normalizeMemoryPolicy } from '../../memory/index.mjs';
+import { deviceViewDtypeWidth, normalizeMemoryPolicy } from '../../memory/index.mjs';
 import { isResourceToken } from '../../resource-registry/index.mjs';
 import { deserializeError, DriverRuntimeError, validationError } from './errors.mjs';
 import { requestRecord } from './protocol.mjs';
@@ -185,6 +185,23 @@ class DriverRuntime {
   async memoryStatus(token) {
     if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_TOKEN', 'memoryStatus requires an exact opaque memory token.');
     return this.#request('memory.status', { token });
+  }
+
+  async createDeviceView(memoryToken, options) {
+    if (!isResourceToken(memoryToken)) throw validationError('DRIVER_MEMORY_TOKEN', 'createDeviceView requires an exact opaque memory token.');
+    if (!plainObject(options) || Object.keys(options).some((key) => !['dtype', 'byteOffset', 'elementCount', 'access'].includes(key))
+        || !Object.hasOwn(options, 'dtype') || !Object.hasOwn(options, 'elementCount') || deviceViewDtypeWidth(options.dtype) === null) throw validationError('MEMORY_VIEW_OPTIONS_INVALID', 'createDeviceView requires an exact typed range record.');
+    return this.#request('memory.view.create', { memory: memoryToken, options: { ...options } });
+  }
+
+  async deviceViewStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_VIEW_TOKEN', 'deviceViewStatus requires an exact opaque view token.');
+    return this.#request('memory.view.status', { token });
+  }
+
+  async releaseDeviceView(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_MEMORY_VIEW_TOKEN', 'releaseDeviceView requires an exact opaque view token.');
+    return this.#request('memory.view.release', { token });
   }
 
   async writeDevice(token, bytes, options = {}) {

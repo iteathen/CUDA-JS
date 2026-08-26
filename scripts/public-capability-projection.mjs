@@ -190,7 +190,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.deviceSelection !== 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets') {
     errors.push('packaging compatibility device-selection projection is stale');
   }
-  if (compatibility.capabilities?.typedDeviceViews !== 'contiguous-1d-component-foundation-no-public-facade-yet') {
+  if (compatibility.capabilities?.typedDeviceViews !== 'allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access') {
     errors.push('packaging compatibility typed device-view projection is stale');
   }
   if (!compatibility.capabilities?.compilerOutputFormats?.includes('lto-ir')) {

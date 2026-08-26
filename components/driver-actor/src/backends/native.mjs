@@ -2,7 +2,7 @@ import ffi from 'node:ffi';
 
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
-import { MemoryManager } from '../../../memory/index.mjs';
+import { DeviceViewManager, MemoryManager } from '../../../memory/index.mjs';
 import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
@@ -356,6 +356,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
         },
       },
     });
+    const views = new DeviceViewManager({ registry });
 
     mailboxes = new PublicationMailboxManager({
       registry,
@@ -396,6 +397,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
       registry,
       contextToken,
       memory,
+      views,
       mailboxes,
       policy: executionPolicy,
       deviceLimits: attributes,
@@ -566,7 +568,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
       observeError,
       assertAccepting(operation, operationId) {
         const cleanupOrRead = new Set([
-          'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release',
+          'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'memory.view.status', 'memory.view.release',
           'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
           'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
         ]);
@@ -626,6 +628,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
         };
       },
       memory,
+      views,
       mailboxes,
       transfer,
       execution,

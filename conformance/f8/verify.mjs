@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.8');
+assert.equal(packageJson.version, '0.1.0-alpha.9');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -19,6 +19,7 @@ assert.equal(compatibility.package.commercialLicensing, 'available-separately');
 assert.equal(compatibility.node.minimumVersion, 'v26.1.0');
 assert.equal(compatibility.node.version, 'v26.7.0');
 assert.deepEqual(compatibility.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32']);
+assert.equal(compatibility.capabilities.typedDeviceViews, 'allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access');
 assert.equal(compatibility.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
@@ -44,6 +45,7 @@ assert.equal(memoryConsumer.operationLifecycle, true);
 assert.equal(memoryConsumer.asyncTransferLifecycle, true);
 assert.equal(memoryConsumer.publicationMailboxLifecycle, true);
 assert.equal(memoryConsumer.deviceSelectionLifecycle, true);
+assert.equal(memoryConsumer.typedViewLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);

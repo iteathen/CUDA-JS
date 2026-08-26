@@ -137,6 +137,15 @@ export interface FunctionParameter { readonly kind: FunctionParameterKind; }
 
 export interface LaunchDimensions { x: number; y: number; z: number; }
 
+export type CudaDeviceViewDtype = 'u32' | 'u64' | 'i32' | 'f32' | 'f64' | 'f16' | 'bf16';
+export type CudaDeviceViewAccess = 'read' | 'write' | 'read-write';
+export interface CudaDeviceViewOptions {
+  dtype: CudaDeviceViewDtype;
+  elementCount: number;
+  byteOffset?: number;
+  access?: CudaDeviceViewAccess;
+}
+
 export interface CudaDeviceMemory {
   readonly kind: 'device-memory';
   readonly byteLength: number;
@@ -147,6 +156,19 @@ export interface CudaDeviceMemory {
   writeAsync(bytes: Uint8Array, options?: { deviceOffset?: number; after?: CudaOperation | null }): Promise<CudaOperation>;
   readAsync(options: { deviceOffset?: number; byteLength: number; after?: CudaOperation | null }): Promise<CudaOperation>;
   copyFromAsync(source: CudaDeviceMemory, options: { destinationOffset?: number; sourceOffset?: number; byteLength: number; after?: CudaOperation | null }): Promise<CudaOperation>;
+  view(options: CudaDeviceViewOptions): Promise<CudaDeviceView>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
+
+export interface CudaDeviceView {
+  readonly kind: 'device-view';
+  readonly dtype: CudaDeviceViewDtype;
+  readonly byteOffset: number;
+  readonly elementCount: number;
+  readonly byteLength: number;
+  readonly access: CudaDeviceViewAccess;
+  readonly state: string;
+  status(): Promise<Readonly<Record<string, unknown>>>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
@@ -162,7 +184,7 @@ export interface CudaPublicationMailbox {
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
-export type CudaLaunchArgument = CudaDeviceMemory | Readonly<{ kind: 'publication-mailbox'; mailbox: CudaPublicationMailbox; lane: string }> | number | bigint;
+export type CudaLaunchArgument = CudaDeviceMemory | CudaDeviceView | Readonly<{ kind: 'publication-mailbox'; mailbox: CudaPublicationMailbox; lane: string }> | number | bigint;
 export interface CudaLaunchOptions {
   grid: LaunchDimensions;
   block: LaunchDimensions;

@@ -11,6 +11,8 @@ const PENDING_OPERATION_COMMANDS = new Set([
   'execution.operation.status',
   'execution.operation.release',
   'execution.operation.timeout',
+  'memory.view.status',
+  'memory.view.release',
   'mailbox.status',
   'mailbox.reset',
   'mailbox.release',
@@ -315,26 +317,40 @@ function tokenIdentity(token) { return `${token.slot}:${token.generation}`; }
 
 const ACCESS_MODES = new Set(['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device']);
 
+function requestedViewAccess(mode) {
+  if (mode === 'read' || mode === 'atomic-observe-relaxed-device') return 'read';
+  if (mode === 'write') return 'write';
+  return 'read-write';
+}
+
+function viewAllows(actual, requested) {
+  return actual === 'read-write' || actual === requested;
+}
+
 function normalizeAccesses(value, argumentValues, memoryLeases, widened) {
-  if (value === undefined && !widened) return Object.freeze([]);
-  if (!Array.isArray(value)) fail('EXECUTION_ACCESSES_REQUIRED', 'validation', 'Widened scheduling requires an explicit bounded access set.');
-  const deviceIndexes = argumentValues.flatMap((entry, index) => entry?.kind === 'device-memory' ? [index] : []);
-  if (value.length !== deviceIndexes.length) fail('EXECUTION_ACCESSES_INVALID', 'validation', 'The access set must contain exactly one entry for each device-memory argument.', { expected: deviceIndexes.length, actual: value.length });
+  const hasView = argumentValues.some((entry) => entry?.kind === 'device-view');
+  if (value === undefined && !widened && !hasView) return Object.freeze([]);
+  if (!Array.isArray(value)) fail('EXECUTION_ACCESSES_REQUIRED', 'validation', 'Widened scheduling or device-view use requires an explicit bounded access set.');
+  const deviceIndexes = argumentValues.flatMap((entry, index) => ['device-memory', 'device-view'].includes(entry?.kind) ? [index] : []);
+  if (value.length !== deviceIndexes.length) fail('EXECUTION_ACCESSES_INVALID', 'validation', 'The access set must contain exactly one entry for each device-memory or device-view argument.', { expected: deviceIndexes.length, actual: value.length });
   return Object.freeze(value.map((entry, accessIndex) => {
-    if (!plainObject(entry) || Object.keys(entry).some((key) => !['argumentIndex', 'byteOffset', 'byteLength', 'mode', 'dtype'].includes(key))) fail('EXECUTION_ACCESS_INVALID', 'Access declaration contains unknown fields.', { accessIndex });
+    if (!plainObject(entry) || Object.keys(entry).some((key) => !['argumentIndex', 'byteOffset', 'byteLength', 'mode', 'dtype'].includes(key))) fail('EXECUTION_ACCESS_INVALID', 'validation', 'Access declaration contains unknown fields.', { accessIndex });
     const argumentIndex = entry.argumentIndex;
-    if (!deviceIndexes.includes(argumentIndex) || value.some((other, index) => index < accessIndex && other?.argumentIndex === argumentIndex)) fail('EXECUTION_ACCESS_INVALID', 'Access argumentIndex must uniquely select a device-memory argument.', { accessIndex, argumentIndex });
-    if (!Number.isSafeInteger(entry.byteOffset) || entry.byteOffset < 0 || !Number.isSafeInteger(entry.byteLength) || entry.byteLength < 1 || !ACCESS_MODES.has(entry.mode)) fail('EXECUTION_ACCESS_INVALID', 'Access range or mode is invalid.', { accessIndex });
+    if (!deviceIndexes.includes(argumentIndex) || value.some((other, index) => index < accessIndex && other?.argumentIndex === argumentIndex)) fail('EXECUTION_ACCESS_INVALID', 'validation', 'Access argumentIndex must uniquely select a device-memory or device-view argument.', { accessIndex, argumentIndex });
+    if (!Number.isSafeInteger(entry.byteOffset) || entry.byteOffset < 0 || !Number.isSafeInteger(entry.byteLength) || entry.byteLength < 1 || !ACCESS_MODES.has(entry.mode)) fail('EXECUTION_ACCESS_INVALID', 'validation', 'Access range or mode is invalid.', { accessIndex });
     const leaseIndex = deviceIndexes.indexOf(argumentIndex);
     const lease = memoryLeases[leaseIndex];
     const start = lease.byteOffset + entry.byteOffset;
     const end = start + entry.byteLength;
-    if (!Number.isSafeInteger(end) || end > lease.byteLength) fail('EXECUTION_ACCESS_RANGE', 'Access range exceeds its allocation.', { accessIndex });
+    const rangeEnd = lease.rangeEnd ?? lease.byteLength;
+    if (!Number.isSafeInteger(end) || end > rangeEnd) fail('EXECUTION_ACCESS_RANGE', 'validation', 'Access range exceeds its declared memory capability.', { accessIndex });
+    const requested = requestedViewAccess(entry.mode);
+    if (lease.viewAccess && !viewAllows(lease.viewAccess, requested)) fail('MEMORY_VIEW_ACCESS_DENIED', 'validation', 'Execution access exceeds the device view access role.', { accessIndex, declared: lease.viewAccess, requested });
     const atomic = entry.mode.startsWith('atomic-');
-    if (atomic && !['u32', 'u64'].includes(entry.dtype)) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'Atomic access requires exact u32 or u64 dtype.', { accessIndex });
-    if (!atomic && Object.hasOwn(entry, 'dtype')) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'Ordinary access must not declare an atomic dtype.', { accessIndex });
+    if (atomic && !['u32', 'u64'].includes(entry.dtype)) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'validation', 'Atomic access requires exact u32 or u64 dtype.', { accessIndex });
+    if (!atomic && Object.hasOwn(entry, 'dtype')) fail('EXECUTION_ACCESS_ATOMIC_TYPE', 'validation', 'Ordinary access must not declare an atomic dtype.', { accessIndex });
     const width = entry.dtype === 'u64' ? 8 : 4;
-    if (atomic && (start % width !== 0 || entry.byteLength % width !== 0)) fail('EXECUTION_ACCESS_ATOMIC_ALIGNMENT', 'Atomic access range must be naturally aligned and whole-element sized.', { accessIndex });
+    if (atomic && (start % width !== 0 || entry.byteLength % width !== 0)) fail('EXECUTION_ACCESS_ATOMIC_ALIGNMENT', 'validation', 'Atomic access range must be naturally aligned and whole-element sized.', { accessIndex });
     return Object.freeze({ native: lease.native, start, end, mode: entry.mode, ...(atomic ? { dtype: entry.dtype } : {}) });
   }));
 }
@@ -360,6 +376,7 @@ export class ExecutionManager {
   #registry;
   #contextToken;
   #memory;
+  #views;
   #mailboxes;
   #policy;
   #limits;
@@ -375,7 +392,7 @@ export class ExecutionManager {
   #functionDescriptors = new Map();
   #rollbackFailure = null;
 
-  constructor({ registry, contextToken, memory, mailboxes = null, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
+  constructor({ registry, contextToken, memory, views = null, mailboxes = null, policy = {}, deviceLimits, operations, clock = () => Date.now(), sleep = delay }) {
     if (!registry || typeof registry.allocate !== 'function' || typeof registry.acquire !== 'function') fail('EXECUTION_REGISTRY_INVALID', 'internal', 'Execution manager requires a resource registry.');
     if (!memory || typeof memory.acquireForExecution !== 'function') fail('EXECUTION_MEMORY_INVALID', 'internal', 'Execution manager requires the internal memory lease port.');
     if (!plainObject(deviceLimits)) fail('EXECUTION_LIMITS_INVALID', 'internal', 'Execution manager requires device launch limits.');
@@ -384,6 +401,7 @@ export class ExecutionManager {
     this.#registry = registry;
     this.#contextToken = contextToken;
     this.#memory = memory;
+    this.#views = views;
     this.#mailboxes = mailboxes;
     this.#policy = normalizeExecutionPolicy(policy);
     this.#limits = Object.freeze({ ...deviceLimits });
@@ -543,8 +561,33 @@ export class ExecutionManager {
         const parameter = functionLease.value.parameters[index];
         const argument = argumentValues[index];
         if (parameter.kind === 'device-memory') {
-          if (!plainObject(argument) || Object.keys(argument).some((key) => !['kind', 'memory', 'byteOffset'].includes(key)) || !Object.hasOwn(argument, 'kind') || !Object.hasOwn(argument, 'memory') || argument.kind !== 'device-memory') fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Device argument does not match its declared kind.', { index });
-          const lease = this.#memory.acquireForExecution(argument.memory, argument.byteOffset ?? 0);
+          if (!plainObject(argument) || !['device-memory', 'device-view'].includes(argument.kind)) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Device argument does not match its declared kind.', { index });
+          let lease;
+          if (argument.kind === 'device-memory') {
+            if (Object.keys(argument).some((key) => !['kind', 'memory', 'byteOffset'].includes(key)) || !Object.hasOwn(argument, 'memory')) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Device-memory argument is invalid.', { index });
+            lease = this.#memory.acquireForExecution(argument.memory, argument.byteOffset ?? 0);
+          } else {
+            if (Object.keys(argument).some((key) => !['kind', 'view'].includes(key)) || !Object.hasOwn(argument, 'view')) fail('EXECUTION_ARGUMENT_KIND', 'validation', 'Device-view argument is invalid.', { index });
+            if (!this.#views || typeof this.#views.acquire !== 'function') fail('EXECUTION_VIEW_UNAVAILABLE', 'unsupported', 'Device-view launch support is unavailable.', { index });
+            const viewLease = this.#views.acquire(argument.view);
+            let memoryLease;
+            try { memoryLease = this.#memory.acquireForExecution(viewLease.memory, viewLease.byteOffset); }
+            catch (error) { viewLease.release(); throw error; }
+            let released = false;
+            lease = Object.freeze({
+              native: memoryLease.native,
+              byteOffset: viewLease.byteOffset,
+              byteLength: memoryLease.byteLength,
+              rangeEnd: viewLease.byteOffset + viewLease.byteLength,
+              viewAccess: viewLease.access,
+              release() {
+                if (released) return;
+                released = true;
+                memoryLease.release();
+                viewLease.release();
+              },
+            });
+          }
           memoryLeases.push(lease);
           values.push(await this.#operations.devicePointer({ native: lease.native, byteOffset: lease.byteOffset, operationId }));
         } else if (parameter.kind.startsWith('publication-mailbox-')) {

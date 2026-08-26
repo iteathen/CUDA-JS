@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-25
+**Updated:** 2026-08-26
 
 This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
 
@@ -27,7 +27,7 @@ CUDA-JS currently provides an OS-neutral public/component architecture with an e
 - multiple simultaneous CUDA-JS runtime instances with ownership isolation and cross-runtime capability rejection;
 - an asynchronous public ESM facade that keeps potentially blocking native Driver/compiler work off the Node.js application event loop;
 - portable/software/package implementations of typed relocatable PTX, SPEC-0011 `u64`/`i32`/`f32` scalar launch arguments, SPEC-0021 `f64`/`f16`/`bf16` scalar launch arguments, typed Device LTO, restricted Device-JS with scoped atomic observation, device-scope release/acquire publication and direction-specific mailbox publication, and one opaque pending-operation lifecycle, with exact native status tracked per capability/profile;
-- a portable/software contiguous 1D typed device-view component foundation with exact dtype/range/access/parent-lifetime semantics and no selected public facade entry yet;
+- a public portable/software contiguous 1D typed device-view capability with exact dtype/range/access/parent/operation-lifetime semantics and no pointer exposure;
 - exact support/qualification metadata that distinguishes proven profiles from testing-unconfirmed and known-incompatible exact profiles.
 
 Important current limits are equally explicit:
@@ -37,7 +37,7 @@ Important current limits are equally explicit:
 - the SPEC-0014 publication mailbox is implemented and qualified only for private mapped storage, named directional u32 lanes, one live operation lease, and system-scope acquire/release on the recorded exact Windows profile;
 - public caller-controlled raw streams/events are not part of the current public contract;
 - multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
-- contiguous 1D typed device views are implemented as a reusable component/lifecycle foundation, but no public `cuda-js` facade API for creating views has been selected or qualified;
+- contiguous 1D typed device views have an additive public portable/software facade through `CudaDeviceMemory.view(...)`; native view use and performance remain unqualified;
 - typed Device LTO is implemented and qualified on the exact recorded Windows x64 Node 26.7.0/CUDA 13.3/`sm_75` profile; Linux, other devices/providers and LTO performance remain separately unqualified;
 - the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
 
@@ -129,7 +129,7 @@ Current behavior includes:
 
 **Device memory persists across kernel launches until explicitly released or disposed during runtime teardown.** CUDA-JS does not require intermediate device data to be copied back to the CPU between launches. A consumer may keep weights, activations, gradients, search state, replay state, work queues, or other application-defined bytes resident in device memory and pass the same opaque allocations to later kernels.
 
-SPEC-0021 also implements a generic **contiguous 1D typed device-view component foundation** over opaque allocations. A view records one accepted dtype, aligned byte offset, element count/byte span, access role, parent generation and registry child/lease lifetime without exposing a native address. Exact half-open overlap classification, safe-integer arithmetic, stale/closed/wrong-parent rejection, and parent-close blocking are covered by portable conformance. This component is not yet a public facade capability; public API spelling and package exposure require a separate accepted public-surface decision.
+SPEC-0021 also implements generic **contiguous 1D typed device-view capabilities** over opaque allocations. `memory.view(options)` creates one allocation-owned opaque child that records an accepted dtype, aligned byte offset, element count/byte span, access role, parent generation and registry child/lease lifetime without exposing a native address. Exact half-open overlap classification, safe-integer arithmetic, stale/closed/wrong-parent rejection, parent-close blocking, explicit launch-access enforcement and operation-held view/parent leases are covered by portable/package conformance. Native view consumption remains independently unqualified.
 
 The ordinary memory contract deliberately does **not** market managed, unified, pinned, mapped, pooled, imported/exported, peer, or zero-copy memory as aliases for device memory. SPEC-0019 adds a distinct internal-pinned profile with exactly two lazy `maxTransferBytes` staging blocks, snapshot H2D, terminal-result D2H, and contiguous D2D through the existing opaque operation lifecycle. Caller-owned registration, mapped memory, 2D/3D copies, and unbounded chunk queues remain excluded.
 
@@ -342,7 +342,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Node FFI CUDA host binding | `planned` | `implemented` | `qualified` | `active` | Exact recorded Node/host profiles only; private generated FFI over approved named exports. |
 | DriverActor Worker/context ownership | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; one private context per runtime by default. |
 | Device memory and GPU-resident state | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded ordinary allocations and copied transfers. |
-| Contiguous 1D typed device views | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0021 component/range/lifecycle foundation; no public facade entry selected yet. |
+| Contiguous 1D typed device views | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0021 allocation-owned public facade, exact range/access/lifecycle and installed-consumer path; native consumption remains open. |
 | PTX/cubin module execution | `planned` | `implemented` | `qualified` | `active` | Recorded Windows profile; bounded copied module/function/terminal-launch path. |
 | `u64`/`i32`/`f32` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | Native SPEC-0011 gate remains open; portable/package ABI coverage exists. |
 | `f64`/`f16`/`bf16` scalar arguments | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0021 public portable/software/package path; exact native ABI/launch gate remains open. |
@@ -368,7 +368,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
 | Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
-| Native Linux x64 CUDA execution | `planned` | `implemented` | `not-qualified` | `blocked:physical-contributor-host` | Shared native engines, diagnostics, alpha.8 facade admission, compatibility metadata, OS-neutral C oracles and an EXP-001/F1B/F3L–F8L command/evidence chain are source-complete; contributor-run exact native Ubuntu/physical-NVIDIA evidence remains open. |
+| Native Linux x64 CUDA execution | `planned` | `implemented` | `not-qualified` | `blocked:physical-contributor-host` | Shared native engines, diagnostics, current facade admission, compatibility metadata, OS-neutral C oracles and an EXP-001/F1B/F3L–F8L command/evidence chain are source-complete; contributor-run exact native Ubuntu/physical-NVIDIA evidence remains open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
 ## Common classification errors

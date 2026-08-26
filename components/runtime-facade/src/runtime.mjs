@@ -15,6 +15,7 @@ const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restar
 const POISONED_ALLOWED_OPERATIONS = new Set([
   'runtime.describe', 'runtime.close',
   'memory.status', 'memory.close',
+  'memory.view.status', 'memory.view.close',
   'mailbox.status', 'mailbox.close',
   'module.status', 'module.close',
   'function.status', 'function.close',
@@ -256,6 +257,11 @@ function translateLaunch(entry, options, operation) {
       return { kind: 'publication-mailbox', mailbox: mailbox.token, generation: mailbox.generation, lane: value.lane };
     }
     if (parameter.kind !== 'device-memory') return { kind: parameter.kind, value };
+    const capability = resourceData.get(value);
+    if (capability?.kind === 'device-view') {
+      const view = resourceFor(value, entry.runtime, 'device-view', operation);
+      return { kind: 'device-view', view: view.token };
+    }
     const memory = resourceFor(value, entry.runtime, 'device-memory', operation);
     return { kind: 'device-memory', memory: memory.token };
   });
@@ -311,7 +317,35 @@ class CudaDeviceMemory {
     const result = await invoke('memory.copyFromAsync', () => runtimeData.get(destination.runtime).driver.copyDeviceAsync(destination.token, sourceEntry.token, { destinationOffset: options.destinationOffset ?? 0, sourceOffset: options.sourceOffset ?? 0, byteLength: options.byteLength, after }));
     return registerResource(destination.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
   }
+  async view(options) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-memory', 'memory.view.create');
+    const result = await invoke('memory.view.create', () => runtimeData.get(entry.runtime).driver.createDeviceView(entry.token, options));
+    return registerResource(entry.runtime, 'device-view', result.view, {
+      memory: this,
+      dtype: result.dtype,
+      byteOffset: result.byteOffset,
+      elementCount: result.elementCount,
+      byteLength: result.byteLength,
+      access: result.access,
+    }, CudaDeviceView);
+  }
   async close() { return closeResource(this, 'memory.close', (entry) => runtimeData.get(entry.runtime).driver.releaseMemory(entry.token)); }
+}
+
+class CudaDeviceView {
+  get kind() { return 'device-view'; }
+  get dtype() { return resourceData.get(this)?.dtype ?? null; }
+  get byteOffset() { return resourceData.get(this)?.byteOffset ?? null; }
+  get elementCount() { return resourceData.get(this)?.elementCount ?? null; }
+  get byteLength() { return resourceData.get(this)?.byteLength ?? null; }
+  get access() { return resourceData.get(this)?.access ?? null; }
+  get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  async status() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'device-view', 'memory.view.status');
+    const result = await invoke('memory.view.status', () => runtimeData.get(entry.runtime).driver.deviceViewStatus(entry.token));
+    return freezePublic({ schemaVersion: 1, kind: 'device-view', state: entry.state, dtype: result.dtype, byteOffset: result.byteOffset, elementCount: result.elementCount, byteLength: result.byteLength, access: result.access });
+  }
+  async close() { return closeResource(this, 'memory.view.close', (entry) => runtimeData.get(entry.runtime).driver.releaseDeviceView(entry.token)); }
 }
 
 class CudaPublicationMailbox {

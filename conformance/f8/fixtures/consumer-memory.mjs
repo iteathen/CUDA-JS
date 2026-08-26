@@ -6,7 +6,7 @@ import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from 'cuda-j
 const ptx = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
 assert.equal(CUDA_JS_COMPATIBILITY.publicApi.schemaVersion, 1);
 assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32']);
-assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'contiguous-1d-component-foundation-no-public-facade-yet');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.typedDeviceViews, 'allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
@@ -61,6 +61,9 @@ await mailbox.close();
 await mailboxFn.close();
 const firstMemory = await first.allocateDevice({ byteLength: 8 });
 const secondMemory = await second.allocateDevice({ byteLength: 8 });
+const firstView = await firstMemory.view({ dtype: 'u32', elementCount: 2 });
+assert.equal(firstView.kind, 'device-view');
+assert.equal(firstView.byteLength, 8);
 await firstMemory.write(Uint8Array.of(1, 3, 5, 7));
 assert.deepEqual([...(await firstMemory.read({ byteLength: 4 })).bytes], [1, 3, 5, 7]);
 await assert.rejects(fn.launch({
@@ -70,6 +73,11 @@ const completion = await fn.launch({
   grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [firstMemory, 4],
 });
 assert.equal(completion.status, 'completed');
+const viewCompletion = await fn.launch({
+  grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [firstView, 4],
+  accesses: [{ argumentIndex: 0, byteOffset: 0, byteLength: 8, mode: 'read-write' }],
+});
+assert.equal(viewCompletion.status, 'completed');
 const operation = await fn.submit({
   grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [firstMemory, 4],
 });
@@ -93,6 +101,7 @@ await assert.rejects(scalarFn.launch({
 await scalarFn.close();
 await fn.close();
 await module.close();
+await firstView.close();
 await firstMemory.close();
 assert.equal((await first.close()).graceful, true);
 await secondMemory.write(Uint8Array.of(9));
@@ -125,5 +134,6 @@ console.log(JSON.stringify({
   asyncTransferLifecycle: true,
   publicationMailboxLifecycle: true,
   deviceSelectionLifecycle: true,
+  typedViewLifecycle: true,
   graceful: true,
 }));

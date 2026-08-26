@@ -23,12 +23,37 @@ This contract does not create tensor algebra, broadcasting, model semantics or a
 
 ```text
 architectural disposition: selected
-implementation status:       implemented in portable/software/package paths for scalar ABI; contiguous 1D view component implemented without a selected public facade
+implementation status:       implemented in portable/software/package paths for scalar ABI and contiguous 1D views; public facade addendum accepted below
 qualification status:        not-qualified
-priority:                    native evidence plus downstream consumers
+priority:                    public facade integration, then native evidence
 ```
 
-Portable/software/package implementation does not promote native support. Public view-facade naming remains unselected because this specification defines view semantics/lifecycle but does not choose facade spelling.
+Portable/software/package implementation does not promote native support.
+
+## 2026-08-26 public-view facade addendum
+
+A concrete independent consumer now requires the already implemented generic view component. This addendum selects the smallest public surface that preserves its owner and does not import tensor semantics.
+
+```text
+CudaDeviceMemory.view({ dtype, elementCount, byteOffset?, access? })
+  -> Promise<CudaDeviceView>
+```
+
+The allocation owns child creation because the view interprets one exact parent allocation. `CudaDeviceView` is an opaque capability with immutable `kind`, `dtype`, `byteOffset`, `elementCount`, `byteLength`, `access`, and current logical `state`, plus asynchronous `status()` and `close()`. It exposes no parent token, runtime identity, native address, pointer conversion, provider object, or arbitrary descriptor constructor.
+
+The canonical options record is exact and retains the accepted SPEC-0021 defaults: `byteOffset: 0` and `access: "read-write"`. Convenience overloads, shapes, strides, layouts, typed host arrays, and implicit dtype conversion are excluded from this low-level slice.
+
+An open view may be supplied wherever an existing `device-memory` kernel parameter is declared. The private DriverActor translates the view to its parent allocation plus validated byte offset. This does not make a kernel bounds-safe or infer its dereferences. Therefore every launch containing a view requires one explicit accepted access record for each device-memory/view argument. The view-relative range must fit wholly inside the view, and the requested mode must not exceed the declared view access role:
+
+- `read` and atomic observation require read authority;
+- `write` requires write authority;
+- `read-write` and atomic update require read-write authority.
+
+The operation retains the view lease and parent allocation lease until terminalization. Closing a leased view fails with ordinary backpressure and remains retryable; closing the parent while a live view exists remains blocked by child ownership. A zero-element view remains valid for composition and close but cannot satisfy the positive access range required by kernel submission.
+
+Raw device-memory launch behavior remains byte-for-byte compatible. Device-JS pointer metadata continues to lower to the existing generic device-memory ABI; the view adds validated range/lifecycle facts but does not claim hardware-enforced pointer bounds or static pointer-dtype matching.
+
+The public package compatibility identity adds the exact contiguous-view profile and advances the additive prerelease version. Native promotion remains gated by the independent fixture already required by this specification.
 
 ## 2026-08-14 implementation result
 
@@ -39,7 +64,7 @@ The accepted first slice is implemented without widening operation, native-point
 - `ExecutionManager` consumes the same numeric ABI owner while preserving SPEC-0016 submission/completion, stream/event and lease behavior;
 - the public runtime facade and TypeScript declarations admit `f64`/`f16`/`bf16` scalar launch kinds, while legacy finite-only `f32` remains unchanged;
 - `components/memory/src/device-view-manager.mjs` implements contiguous 1D view dtype/range/access semantics as ResourceRegistry `device-view` children of opaque device allocations, including generation, child-before-parent close, leases, exact half-open overlap and no native address exposure;
-- no new root `cuda-js` view export or runtime method was invented. A later accepted public-surface decision may expose the implemented component when a consumer boundary requires it.
+- no new root constructor or standalone view manager is exported; the accepted addendum exposes view creation only as an allocation-owned child capability.
 
 Portable conformance covers exact new-kind bytes, canonical NaNs, signed zero/infinity, f16/bf16 normal/subnormal/overflow/underflow/ties-to-even, deterministic padding, unchanged legacy `f32`, Worker-protocol admission, real `ExecutionManager` packing, public-facade launch behavior, view range/alignment/safe-integer partitions, access roles, leases, overlap and parent/view close ordering.
 

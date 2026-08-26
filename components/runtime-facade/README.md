@@ -43,6 +43,8 @@ await runtime.close();
 
 `writeAsync()` snapshots ingress before native ownership, `readAsync()` exposes bytes only in a completed operation result, and `copyFromAsync()` performs a bounded contiguous D2D copy. Each consumes the same SPEC-0016 operation capacity, dependency, hazard, and cleanup lifecycle as kernels.
 
+SPEC-0021 adds `memory.view({ dtype, elementCount, byteOffset?, access? })`. The returned opaque view is a logical child of that allocation and exposes only immutable dtype/range/access facts plus status/close. It may replace a raw allocation for a `device-memory` kernel argument only when the launch supplies explicit bounded access records; the DriverActor retains the view and parent leases through terminality. The capability is not a tensor, typed host array, pointer escape, or hardware bounds guarantee.
+
 Accepted SPEC-0014 adds `runtime.createPublicationMailbox({ lanes })`. The returned opaque mailbox exposes direction-checked synchronous `store(name, u32)` and `load(name)` plus status/reset/close; its private `SharedArrayBuffer` and CUDA mapping never become public. Kernel arguments bind one named lane through `{ kind: 'publication-mailbox', mailbox, lane }`, and the mailbox remains exclusively leased through operation terminality.
 
 `cuda-js/testing` exposes `openCudaRuntimeForTesting()` for portable consumer orchestration only. It never proves native CUDA behavior. Native Linux x86-64 uses the same facade as Windows and may operate only as `testing-unconfirmed`; exact Ubuntu qualification remains open. Linux ARM64 and WSL native opens retain stable backend-unavailable errors.
