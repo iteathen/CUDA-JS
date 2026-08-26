@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.11",
+    "version": "0.1.0-alpha.12",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -34,7 +34,8 @@
       "cudaHeader": "13.3.29",
       "cudaHeaderSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
       "driverApi": 13030,
-      "compilerProviders": "optional-exact-cuda-13.3"
+      "compilerProviders": "optional-exact-cuda-13.3",
+      "cublasLtProvider": "optional-exact-cuda-13.3-cublaslt-13.5.1-f32-row-major-matmul"
     },
     {
       "host": "linux-native-x64",
@@ -43,7 +44,8 @@
       "qualifiedEvidence": "none",
       "abi": "sysv-x86-64",
       "driverProvider": "canonical-libcuda-so.1",
-      "compilerProviders": "optional-exact-cuda-13.3"
+      "compilerProviders": "optional-exact-cuda-13.3",
+      "cublasLtProvider": "profile-not-yet-admitted"
     },
     { "host": "linux-native-arm64", "status": "backend-unavailable" },
     { "host": "wsl2-x64", "status": "backend-unavailable" }
@@ -60,6 +62,8 @@
     "asyncTransfers": "opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d",
     "publicationMailboxes": "private-mapped-named-u32-one-operation-lease-system-acquire-release",
     "preparedOperationDags": "bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay",
+    "contextBoundLibraryAdapters": "optional-finite-driver-owned-provider-plans-existing-operation-lifecycle",
+    "cublasLtF32Matmul": "optional-row-major-contiguous-typed-views-explicit-bounded-workspace",
     "compiler": "optional-nvrtc-13.3",
     "compilerHeaderProfiles": {
       "none": "default",
@@ -107,6 +111,7 @@
     "SPEC-0022 device publication has exact Windows installed-package evidence only for naturally aligned u32/u64 device-scope release/acquire readiness and one immutable multiword payload on the recorded profile; freshness, progress, generation policy and queue correctness remain excluded.",
     "SPEC-0017 device selection is implemented in the portable/software/package path. Default-device compatibility and explicit selector orchestration are mock-qualified only; native default/explicit selection and distinct-device behavior remain unqualified until exact independent evidence exists.",
     "SPEC-0020 immutable kernel-only prepared operation DAGs are implemented through the public portable/package path with canonical identity, replay, whole-DAG operation lifecycle, and a single-stream semantic realization. CUDA Graph realization, native qualification, and performance benefit remain unimplemented or unqualified.",
+    "SPEC-0023 and SPEC-0029 implement one optional context-owned cuBLASLt f32 row-major matmul profile over typed views and the ordinary operation lifecycle. Exact Windows CUDA 13.3 / cuBLASLt 13.5.1 ABI, numerical, public lifecycle, provider identity, and cleanup evidence does not qualify Linux, other provider versions, other dtypes/layouts, or performance.",
     "Linux package import, source admission, readiness, and portable testing are not native CUDA support; WSL remains backend-unavailable.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",

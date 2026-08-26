@@ -113,6 +113,8 @@ cuBLAS and cuDNN handles are tied to the current CUDA device/context. A cuBLASLt
 
 SPEC-0023 remains proposal-only at acceptance of this specification. Provider implementation is blocked until the needed generic adapter authority is accepted.
 
+**2026-08-26 authority update:** SPEC-0023 is now accepted, and SPEC-0029 implements and qualifies the generic core's first bounded cuBLASLt profile. This changes the prerequisite state only; it does not authorize any `nn.*` implementation without that boundary's own accepted child specification.
+
 ## Compatibility identity
 
 The NN product has an independent finite contract version and provider-capability identity. Its future compatibility record must include at least:

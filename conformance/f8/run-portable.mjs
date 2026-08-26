@@ -55,6 +55,8 @@ for (const required of [
   'components/device-js/src/strict-translator.mjs',
   'components/cuda-target/index.mjs',
   'components/cuda-target/component.yaml',
+  'components/cuda-library-adapters/index.mjs',
+  'components/cuda-library-adapters/src/cuda-library-adapter-manager.mjs',
   'components/execution/src/numeric-abi.mjs',
   'components/prepared-execution/index.mjs',
   'components/publication-mailbox/index.mjs',
@@ -67,13 +69,15 @@ for (const required of [
   'schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs',
   'schemas/cuda-13.3/linux-x64/generated/packers.mjs',
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
+  'schemas/cuda-13.3/win-x64/cublaslt-provider-manifest.json',
+  'schemas/cuda-13.3/win-x64/generated/cublaslt-ffi-definitions.mjs',
 ]) assert(fileNames.includes(required), `Package is missing ${required}`);
 
 const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf8');
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
 const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
-const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name.startsWith('components/prepared-execution/') || name.startsWith('components/execution/') || name === 'packaging/compatibility-manifest.json');
+const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name.startsWith('components/prepared-execution/') || name.startsWith('components/execution/') || name.startsWith('components/cuda-library-adapters/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
   for (const needle of deletionNeedles) assert(!text.includes(needle), `${relative} contains first-consumer coupling: ${needle}`);
@@ -105,6 +109,7 @@ assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f1
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
 assert.equal(memoryObservation.publicationMailboxLifecycle, true);
 assert.equal(memoryObservation.preparedOperationDagLifecycle, true);
+assert.equal(memoryObservation.cublasLtLifecycle, true);
 assert.equal(memoryObservation.deviceSelectionLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
@@ -128,6 +133,8 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
     'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
+    'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
+    'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
@@ -136,6 +143,7 @@ const target = await writeEvidence('portable-package.json', {
     'components/execution/src/execution-manager.mjs',
     'components/prepared-execution/src/prepared-operation-dag.mjs',
     'components/memory/src/device-view-manager.mjs',
+    'components/cuda-library-adapters/src/cuda-library-adapter-manager.mjs',
     'components/publication-mailbox/src/publication-mailbox-manager.mjs',
     'components/device-js/src/strict-translator.mjs',
     'components/device-selection/src/device-selection.mjs',

@@ -38,6 +38,7 @@ await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-na
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-mailbox.mjs'), path.join(directory, 'mailbox-consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-cublaslt.mjs'), path.join(directory, 'cublaslt-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
 await cp(path.join(repositoryRoot, 'build', 'f5', `${process.platform}-${process.arch}`, 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
@@ -86,13 +87,23 @@ assert.equal(mailboxObservation.published, 41);
 assert.equal(mailboxObservation.observed, 42);
 assert.equal(mailboxObservation.opaque, true);
 assert.equal(mailboxObservation.graceful, true);
+let cublasLtObservation = null;
+if (nativeProfile === 'windows') {
+  const cublasLtOutput = runNode(['--experimental-ffi', 'cublaslt-consumer.mjs'], directory);
+  cublasLtObservation = JSON.parse(cublasLtOutput.split(/\r?\n/).at(-1));
+  assert.deepEqual(cublasLtObservation.output, [58, 64, 139, 154]);
+  assert.equal(cublasLtObservation.status, 'completed');
+  assert.equal(cublasLtObservation.workspaceBytes, 0);
+  assert.deepEqual(cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' });
+  assert.equal(cublasLtObservation.graceful, true);
+}
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
 
 const target = await writeEvidence(nativePackageEvidenceName, {
   schemaVersion: 1,
   workPackage: `CJS-F8${nativeProfile === 'windows' ? 'W' : 'L'}`,
-  capsule: 'installed-package-native-vector-device-js-device-publication-operation-transfer-mailbox-consumers',
+  capsule: `installed-package-native-vector-device-js-device-publication-operation-transfer-mailbox${nativeProfile === 'windows' ? '-cublaslt' : ''}-consumers`,
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version() },
@@ -104,11 +115,14 @@ const target = await writeEvidence(nativePackageEvidenceName, {
     'docs/specs/SPEC-0022-device-publication-addendum.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
+    'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
+    'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-vector.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
     'conformance/f8/fixtures/consumer-native-multi-operation.mjs',
     'conformance/f8/fixtures/consumer-native-mailbox.mjs',
+    'conformance/f8/fixtures/consumer-native-cublaslt.mjs',
     'conformance/f5/fixtures/vector-add.ptx.txt',
   ]),
   prerequisite: { path: path.relative(repositoryRoot, prerequisitePath), sha256: await sha256(prerequisitePath) },
@@ -117,6 +131,7 @@ const target = await writeEvidence(nativePackageEvidenceName, {
   deviceJsObservation,
   multiOperationObservation,
   mailboxObservation,
+  cublasLtObservation,
   claimLimits: [`Exact installed ${nativeProfile} x64 Node 26.7.0 package and recorded Driver/GPU input profile only.`, 'The vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'Linux evidence remains unqualified until the complete exact Ubuntu chain is reviewed and promoted; no cross-platform, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8${nativeProfile === 'windows' ? 'W' : 'L'} installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, and mailbox publication evidence; evidence: ${target}`);
+console.log(`F8${nativeProfile === 'windows' ? 'W' : 'L'} installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, mailbox publication${nativeProfile === 'windows' ? ', and cuBLASLt matmul' : ''} evidence; evidence: ${target}`);

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "profile": "cuda-13.3-win-x64-cublaslt-13.5.1",
+  "provider": {
+    "file": "cublasLt64_13.dll",
+    "version": "130501",
+    "byteLength": 460301424,
+    "sha256": "b592cd016d7673e9cb97716a22b27c4010ee635377a3ba28f37070a9bdb76a68"
+  },
+  "headers": {
+    "cublasLt.h": {
+      "byteLength": 121778,
+      "sha256": "aee7e744d5971a0a260ba402b5366d82188097ec31536229d5d8037a97ef5f4e"
+    }
+  },
+  "exports": [
+    "cublasLtCreate",
+    "cublasLtDestroy",
+    "cublasLtGetVersion",
+    "cublasLtMatrixLayoutCreate",
+    "cublasLtMatrixLayoutDestroy",
+    "cublasLtMatrixLayoutSetAttribute",
+    "cublasLtMatmulDescCreate",
+    "cublasLtMatmulDescDestroy",
+    "cublasLtMatmulDescSetAttribute",
+    "cublasLtMatmulPreferenceCreate",
+    "cublasLtMatmulPreferenceDestroy",
+    "cublasLtMatmulPreferenceSetAttribute",
+    "cublasLtMatmulAlgoGetHeuristic",
+    "cublasLtMatmul"
+  ]
+}

@@ -7,10 +7,10 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     9726898d728fc6e1f1baabb5a1ddc67808549e84
+protected main:     1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.11 candidate (semantic prepared-DAG packet)
+execution package:  cuda-js@0.1.0-alpha.12 candidate (context-bound cuBLASLt first profile)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -45,7 +45,8 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component and allocation-owned public facade, integrated on PR #134;
 - SPEC-0028 typed Device-JS leaf-library composition, integrated on PR #136; native qualification remains open on issue #135;
-- SPEC-0020 immutable kernel-only prepared DAGs, active on issue #85 with semantic single-stream replay and no CUDA Graph claim;
+- SPEC-0020 immutable kernel-only prepared DAGs, integrated on PR #137 with semantic single-stream replay and no CUDA Graph claim;
+- SPEC-0023/SPEC-0029 optional context-owned cuBLASLt f32 row-major matmul candidate over typed views and the ordinary operation lifecycle;
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
@@ -128,7 +129,9 @@ SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation and device-p
 
 Accepted SPEC-0028 is integrated on protected main. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
 
-Accepted SPEC-0020 is the active portable packet. Its implemented first profile owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. Each replay validates concrete aliases before backend work, submits canonical topological order on one private stream, and returns one existing SPEC-0016 operation with one final event. CUDA Graph realization, transfer/library/mailbox nodes, native qualification, and performance remain separate.
+Accepted SPEC-0020 is integrated on protected main through PR #137. Its first profile owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. Each replay validates concrete aliases before backend work, submits canonical topological order on one private stream, and returns one existing SPEC-0016 operation with one final event. CUDA Graph realization, transfer/library/mailbox nodes, native qualification, and performance remain separate.
+
+Accepted SPEC-0023 plus SPEC-0029 is the active implementation/evidence packet. It adds one lazy context-owned cuBLASLt adapter, immutable f32 row-major contiguous matmul plans, typed-view access/range enforcement, explicit bounded workspace, and submission through the existing operation scheduler. The exact Windows CUDA 13.3/cuBLASLt 13.5.1 provider identity, independent ABI/numerical oracle, public native parity, installed-package consumer, cleanup, and full exact-Node repository validation pass locally. Protected integration remains pending; Linux, other providers/dtypes/layouts, tensor semantics, and performance are excluded.
 
 ## Proposal-only successor capabilities
 
@@ -136,7 +139,7 @@ The following remain proposal authority only and do not authorize production cod
 
 ```text
 SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation and device-publication children accepted)
-SPEC-0023 context-bound CUDA library adapters
+unaccepted SPEC-0023 provider/operation children beyond SPEC-0029
 SPEC-0024 multi-GPU orchestration
 SPEC-0025 graphics interop
 SPEC-0026 process-isolated execution

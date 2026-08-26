@@ -230,7 +230,7 @@ export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned'
 export interface CudaOperationStatus {
   readonly schemaVersion: 1;
   readonly status: 'pending' | 'completed' | 'failed' | 'orphaned';
-  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device' | 'prepared-batch';
+  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device' | 'prepared-batch' | 'cublaslt-f32-matmul';
   readonly grid?: LaunchDimensions;
   readonly block?: LaunchDimensions;
   readonly sharedMemoryBytes?: number;
@@ -292,6 +292,53 @@ export interface CudaModule {
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
+export interface CudaCublasLtF32MatmulPlanOptions {
+  m: number;
+  n: number;
+  k: number;
+  transposeA?: boolean;
+  transposeB?: boolean;
+  maxWorkspaceBytes?: number;
+}
+
+export interface CudaCublasLtF32MatmulSubmitOptions {
+  a: CudaDeviceView;
+  b: CudaDeviceView;
+  c: CudaDeviceView;
+  d: CudaDeviceView;
+  alpha?: number;
+  beta?: number;
+  workspace?: CudaDeviceView | null;
+  after?: CudaOperation | null;
+}
+
+export interface CudaCublasLtMatmulPlan {
+  readonly kind: 'cublaslt-matmul-plan';
+  readonly contract: 'SPEC-0029-cublaslt-f32-row-major-matmul-v1';
+  readonly m: number;
+  readonly n: number;
+  readonly k: number;
+  readonly transposeA: boolean;
+  readonly transposeB: boolean;
+  readonly maxWorkspaceBytes: number;
+  readonly workspaceBytes: number;
+  readonly requirements: Readonly<{ a: number; b: number; c: number; d: number }>;
+  readonly state: string;
+  status(): Promise<Readonly<Record<string, unknown>>>;
+  submit(options: CudaCublasLtF32MatmulSubmitOptions): Promise<CudaOperation>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
+
+export interface CudaCublasLt {
+  readonly kind: 'cublaslt-adapter';
+  readonly profile: 'cublaslt-f32-row-major-matmul-v1';
+  readonly provider: Readonly<{ name: string; version: string; qualification: string }>;
+  readonly state: string;
+  status(): Promise<Readonly<Record<string, unknown>>>;
+  createF32MatmulPlan(options: CudaCublasLtF32MatmulPlanOptions): Promise<CudaCublasLtMatmulPlan>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
+
 export interface CudaRuntime {
   readonly state: string;
   readonly health: string;
@@ -303,6 +350,7 @@ export interface CudaRuntime {
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
   prepareOperationDag(nodes: readonly CudaPreparedKernelNode[]): Promise<CudaPreparedOperationDag>;
   prepareOperationDag(options: { nodes: readonly CudaPreparedKernelNode[] }): Promise<CudaPreparedOperationDag>;
+  openCublasLt(): Promise<CudaCublasLt>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
   link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
   invalidateCache(key: string): Promise<Readonly<Record<string, unknown>>>;

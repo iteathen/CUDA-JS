@@ -1,10 +1,12 @@
 # SPEC-0023: Context-Bound CUDA Library Adapters
 
-**Status:** Proposal
+**Status:** Accepted
+
+**Scope:** Framework accepted; every provider profile requires an accepted child specification
 
 **Date:** 2026-08-13
 
-**Issue owners:** #90 with first consumers #91, #92 and #93
+**Issue owner:** #90; accepted first child SPEC-0029; future consumers #91, #92 and #93 remain proposals
 
 ## Outcome
 
@@ -15,10 +17,10 @@ The framework keeps native library resources inside DriverActor and exposes only
 ## Status dimensions
 
 ```text
-architectural disposition: planned
-implementation status:       not-implemented
-qualification status:        not-qualified
-priority:                    after accepted SPEC-0018 and SPEC-0021 views
+architectural disposition: accepted
+implementation status:       implemented for SPEC-0029 first child
+qualification status:        child/profile-specific
+priority:                    active first-profile maintenance; later children independently gated
 ```
 
 ## Dependencies
@@ -154,9 +156,15 @@ Every provider/library resource has one terminal disposition.
 - close failure preserves the original structured health/provenance under the resource-disposal contract;
 - unexpected Worker/process loss records inaccessible/orphaned provider resources without fabricated destroy claims.
 
-## First library profiles
+## Provider profiles
+
+### cuBLASLt f32 row-major matmul
+
+Accepted SPEC-0029 supplies the first concrete falsifier for this framework: one lazy context-owned provider/handle, immutable finite plans, typed-view and explicit-workspace leases, and ordinary operation submission. Its exact native support is limited to the provider/device/Node profile named by its evidence.
 
 ### cuRAND
+
+Proposal only.
 
 Two separately qualified profiles may be admitted:
 
@@ -167,11 +175,15 @@ A host generator profile defines RNG family, seed/order/offset/subsequence, outp
 
 ### cuFFT
 
+Proposal only.
+
 An FFT profile defines opaque plan semantics including rank/dimensions/batch, input/output dtype, strides/layout, transform type/direction, in-place legality, workspace and normalization expectations.
 
 Forward/inverse scaling is application-visible and must be explicit.
 
 ### cuSPARSE
+
+Proposal only.
 
 A sparse profile defines a finite set of sparse formats and operations with exact dimensions, index width/base, value/compute dtype, dense companion views, pointer/scalar mode policy, algorithm policy and workspace.
 

@@ -337,6 +337,40 @@ class DriverRuntime {
     return this.#request('execution.prepared.release', { token });
   }
 
+  async openCublasLt() { return this.#request('library.cublaslt.open', {}); }
+
+  async cublasLtStatus(token) {
+    if (!isResourceToken(token)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'cublasLtStatus requires an exact opaque adapter token.');
+    return this.#request('library.cublaslt.status', { token });
+  }
+
+  async releaseCublasLt(token) {
+    if (!isResourceToken(token)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'releaseCublasLt requires an exact opaque adapter token.');
+    return this.#request('library.cublaslt.release', { token });
+  }
+
+  async createCublasLtF32MatmulPlan(adapter, options) {
+    if (!isResourceToken(adapter) || !plainObject(options)) throw validationError('CUBLASLT_MATMUL_PLAN_INVALID', 'createCublasLtF32MatmulPlan requires an adapter token and plan record.');
+    return this.#request('library.cublaslt.plan.create', { adapter, options: { ...options } });
+  }
+
+  async cublasLtF32MatmulPlanStatus(token) {
+    if (!isResourceToken(token)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'cublasLtF32MatmulPlanStatus requires an exact opaque plan token.');
+    return this.#request('library.cublaslt.plan.status', { token });
+  }
+
+  async submitCublasLtF32Matmul(token, request) {
+    if (!isResourceToken(token) || !plainObject(request) || !['a', 'b', 'c', 'd'].every((key) => isResourceToken(request[key]))) throw validationError('CUBLASLT_MATMUL_SUBMIT_INVALID', 'submitCublasLtF32Matmul requires exact plan and view capabilities.');
+    if (request.workspace !== undefined && request.workspace !== null && !isResourceToken(request.workspace)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'cuBLASLt workspace must be an exact opaque view token.');
+    if (request.after !== undefined && request.after !== null && !isResourceToken(request.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'cuBLASLt predecessor must be an exact opaque operation token.');
+    return this.#request('library.cublaslt.plan.submit', { token, a: request.a, b: request.b, c: request.c, d: request.d, alpha: request.alpha ?? 1, beta: request.beta ?? 0, workspace: request.workspace ?? null, after: request.after ?? null });
+  }
+
+  async releaseCublasLtF32MatmulPlan(token) {
+    if (!isResourceToken(token)) throw validationError('CUBLASLT_RESOURCE_TOKEN', 'releaseCublasLtF32MatmulPlan requires an exact opaque plan token.');
+    return this.#request('library.cublaslt.plan.release', { token });
+  }
+
   async operationStatus(token) {
     if (!isResourceToken(token)) throw validationError('DRIVER_OPERATION_TOKEN', 'operationStatus requires an exact opaque operation token.');
     return this.#request('execution.operation.status', { token });

@@ -1,6 +1,6 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.11",
+  "version": "0.1.0-alpha.12",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
   "license": "AGPL-3.0-or-later",
@@ -27,6 +27,7 @@
     "LICENSE",
     "LICENSING.md",
     "components/compiler-actor/",
+    "components/cuda-library-adapters/",
     "components/cuda-target/",
     "components/device-selection/",
     "components/device-js/",
@@ -43,7 +44,9 @@
     "schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs",
     "schemas/cuda-13.3/linux-x64/generated/packers.mjs",
     "schemas/cuda-13.3/linux-x64/compiler-provider-manifest.json",
-    "schemas/cuda-13.3/win-x64/compiler-provider-manifest.json"
+    "schemas/cuda-13.3/win-x64/compiler-provider-manifest.json",
+    "schemas/cuda-13.3/win-x64/cublaslt-provider-manifest.json",
+    "schemas/cuda-13.3/win-x64/generated/cublaslt-ffi-definitions.mjs"
   ],
   "dependencies": {
     "acorn": "8.15.0"
@@ -131,8 +134,10 @@
     "node:check": "node scripts/run-node-qualification.mjs check",
     "node:render": "node scripts/run-node-qualification.mjs render",
     "node:probe": "node scripts/run-node-qualification.mjs probe",
+    "library:portable": "node scripts/run-cublaslt.mjs portable",
+    "library:native": "node scripts/run-cublaslt.mjs native",
     "verify:windows": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-exp-012.mjs verify && node scripts/run-f3.mjs all && node scripts/run-f4.mjs all && node scripts/run-f5.mjs all && node scripts/run-f6.mjs all && node scripts/run-f7.mjs all && node scripts/run-f8.mjs all && node scripts/run-f9.mjs all",
     "test": "node scripts/run-exp-000.mjs test && node scripts/run-f7.mjs unit && node scripts/run-f8.mjs unit",
-    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run node:check && npm run hardware:check"
+    "verify": "node scripts/run-exp-000.mjs verify && node scripts/run-f1b.mjs check && node scripts/run-cublaslt.mjs portable && node scripts/run-f6.mjs portable && node scripts/run-f7.mjs portable && node scripts/run-f8.mjs portable && node scripts/run-f9.mjs portable && npm run node:check && npm run hardware:check"
   }
 }

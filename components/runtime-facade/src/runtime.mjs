@@ -20,6 +20,8 @@ const POISONED_ALLOWED_OPERATIONS = new Set([
   'module.status', 'module.close',
   'function.status', 'function.close',
   'prepared.status', 'prepared.close',
+  'library.cublaslt.status', 'library.cublaslt.close',
+  'library.cublaslt.plan.status', 'library.cublaslt.plan.close',
   'operation.status', 'operation.wait', 'operation.close',
 ]);
 
@@ -523,6 +525,60 @@ class CudaPreparedOperationDag {
   async close() { return closeResource(this, 'prepared.close', (entry) => runtimeData.get(entry.runtime).driver.releasePreparedOperationDag(entry.token)); }
 }
 
+class CudaCublasLtMatmulPlan {
+  get kind() { return 'cublaslt-matmul-plan'; }
+  get contract() { return resourceData.get(this)?.contract ?? null; }
+  get m() { return resourceData.get(this)?.m ?? null; }
+  get n() { return resourceData.get(this)?.n ?? null; }
+  get k() { return resourceData.get(this)?.k ?? null; }
+  get transposeA() { return resourceData.get(this)?.transposeA ?? null; }
+  get transposeB() { return resourceData.get(this)?.transposeB ?? null; }
+  get maxWorkspaceBytes() { return resourceData.get(this)?.maxWorkspaceBytes ?? null; }
+  get workspaceBytes() { return resourceData.get(this)?.workspaceBytes ?? null; }
+  get requirements() { return resourceData.get(this)?.requirements ?? null; }
+  get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  async status() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'cublaslt-matmul-plan', 'library.cublaslt.plan.status');
+    const result = await invoke('library.cublaslt.plan.status', () => runtimeData.get(entry.runtime).driver.cublasLtF32MatmulPlanStatus(entry.token));
+    return freezePublic({ schemaVersion: 1, kind: 'cublaslt-matmul-plan', state: entry.state, contract: result.contract, m: result.m, n: result.n, k: result.k, transposeA: result.transposeA, transposeB: result.transposeB, maxWorkspaceBytes: result.maxWorkspaceBytes, workspaceBytes: result.workspaceBytes, requirements: result.requirements });
+  }
+  async submit(request) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'cublaslt-matmul-plan', 'library.cublaslt.plan.submit');
+    if (!plainObject(request) || Object.keys(request).some((key) => !['a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace', 'after'].includes(key)) || !['a', 'b', 'c', 'd'].every((key) => Object.hasOwn(request, key))) throw facadeError('CUDA_JS_CUBLASLT_SUBMIT_INVALID', 'validation', 'cuBLASLt matmul submission contains unknown or missing fields.', {}, 'library.cublaslt.plan.submit');
+    const translated = {};
+    for (const name of ['a', 'b', 'c', 'd']) translated[name] = resourceFor(request[name], entry.runtime, 'device-view', 'library.cublaslt.plan.submit').token;
+    translated.workspace = request.workspace === undefined || request.workspace === null ? null : resourceFor(request.workspace, entry.runtime, 'device-view', 'library.cublaslt.plan.submit').token;
+    translated.after = request.after === undefined || request.after === null ? null : resourceFor(request.after, entry.runtime, 'operation', 'library.cublaslt.plan.submit').token;
+    translated.alpha = request.alpha ?? 1;
+    translated.beta = request.beta ?? 0;
+    const result = await invoke('library.cublaslt.plan.submit', () => runtimeData.get(entry.runtime).driver.submitCublasLtF32Matmul(entry.token, translated));
+    return registerResource(entry.runtime, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
+  }
+  async close() { return closeResource(this, 'library.cublaslt.plan.close', (entry) => runtimeData.get(entry.runtime).driver.releaseCublasLtF32MatmulPlan(entry.token)); }
+}
+
+class CudaCublasLt {
+  get kind() { return 'cublaslt-adapter'; }
+  get profile() { return resourceData.get(this)?.profile ?? null; }
+  get provider() { return resourceData.get(this)?.provider ?? null; }
+  get state() { return resourceData.get(this)?.state ?? 'invalid'; }
+  async status() {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'cublaslt-adapter', 'library.cublaslt.status');
+    const result = await invoke('library.cublaslt.status', () => runtimeData.get(entry.runtime).driver.cublasLtStatus(entry.token));
+    return freezePublic({ schemaVersion: 1, kind: 'cublaslt-adapter', state: entry.state, profile: result.profile, provider: result.provider });
+  }
+  async createF32MatmulPlan(options) {
+    const entry = resourceFor(this, resourceData.get(this)?.runtime, 'cublaslt-adapter', 'library.cublaslt.plan.create');
+    if (!plainObject(options)) throw facadeError('CUDA_JS_CUBLASLT_PLAN_INVALID', 'validation', 'cuBLASLt plan options must be a plain record.', {}, 'library.cublaslt.plan.create');
+    const result = await invoke('library.cublaslt.plan.create', () => runtimeData.get(entry.runtime).driver.createCublasLtF32MatmulPlan(entry.token, options));
+    return registerResource(entry.runtime, 'cublaslt-matmul-plan', result.plan, {
+      adapter: this, contract: result.contract, m: result.m, n: result.n, k: result.k, transposeA: result.transposeA, transposeB: result.transposeB,
+      maxWorkspaceBytes: result.maxWorkspaceBytes, workspaceBytes: result.workspaceBytes, requirements: freezePublic({ ...result.requirements }),
+    }, CudaCublasLtMatmulPlan);
+  }
+  async close() { return closeResource(this, 'library.cublaslt.close', (entry) => runtimeData.get(entry.runtime).driver.releaseCublasLt(entry.token)); }
+}
+
 class CudaRuntime {
   get state() {
     const data = runtimeData.get(this);
@@ -539,7 +595,7 @@ class CudaRuntime {
   }
   get compilerEnabled() { return runtimeData.get(this)?.compiler !== null; }
   get terminalReport() { return runtimeData.get(this)?.terminalReport ?? null; }
-  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: data.device, memory: driver.memory, transfer: driver.transfer, mailbox: driver.mailbox, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
+  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: data.device, memory: driver.memory, transfer: driver.transfer, mailbox: driver.mailbox, libraries: driver.libraries, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
   async allocateDevice(options) { const data = dataFor(this, 'memory.allocate'); const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options)); return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory); }
   async createPublicationMailbox(options) {
     const data = dataFor(this, 'mailbox.create');
@@ -557,6 +613,12 @@ class CudaRuntime {
     return registerResource(this, 'prepared-operation-dag', result.prepared, {
       contract: result.contract, sha256: result.sha256, nodeCount: result.nodeCount, edgeCount: result.edgeCount, bindings, realization: result.realization,
     }, CudaPreparedOperationDag);
+  }
+  async openCublasLt(options) {
+    if (options !== undefined) throw facadeError('CUDA_JS_CUBLASLT_OPTIONS_UNSUPPORTED', 'validation', 'The first cuBLASLt adapter profile does not accept open options.', {}, 'library.cublaslt.open');
+    const data = dataFor(this, 'library.cublaslt.open');
+    const result = await invoke('library.cublaslt.open', () => data.driver.openCublasLt());
+    return registerResource(this, 'cublaslt-adapter', result.adapter, { profile: result.profile, provider: freezePublic({ ...result.provider }) }, CudaCublasLt);
   }
   async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(withCompileTarget(request, data.targets.compileTarget)))); }
   async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(withLinkTarget(request, data.targets.linkTarget)))); }

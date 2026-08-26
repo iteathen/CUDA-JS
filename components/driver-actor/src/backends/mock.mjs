@@ -3,6 +3,7 @@ import { DeviceViewManager, MemoryManager } from '../../../memory/index.mjs';
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
+import { CudaLibraryAdapterManager } from '../../../cuda-library-adapters/index.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, healthForErrorCategory, observeErrorHealth } from '../health.mjs';
 
@@ -143,6 +144,36 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       async copyDtoDAsync({ destinationNative, destinationOffset, sourceNative, sourceOffset, byteLength }) { destinationNative.set(sourceNative.subarray(sourceOffset, sourceOffset + byteLength), destinationOffset); },
     },
   });
+  const libraryAdapters = new CudaLibraryAdapterManager({
+    registry,
+    contextToken,
+    memory,
+    views,
+    execution,
+    operations: {
+      async openCublasLt() {
+        return { native: Object.freeze({ kind: 'mock-cublaslt', id: nextNative++ }), provider: Object.freeze({ name: 'cuBLASLt', version: 'mock-13.3', qualification: 'mock-only' }) };
+      },
+      async closeCublasLt() { recordDisposal('cublaslt-adapter'); return { mockProviderReleased: true }; },
+      async createF32MatmulPlan({ plan }) { return { native: Object.freeze({ kind: 'mock-cublaslt-plan', id: nextNative++, plan }), workspaceBytes: plan.maxWorkspaceBytes >= 256 ? 256 : 0 }; },
+      async destroyF32MatmulPlan() { recordDisposal('cublaslt-matmul-plan'); return { mockPlanReleased: true }; },
+      async submitF32Matmul({ planNative, alpha, beta, a, b, c, d }) {
+        const { m, n, k, transposeA, transposeB } = planNative.plan;
+        const read = (operand, index) => new DataView(operand.native.buffer, operand.native.byteOffset + operand.byteOffset, operand.byteLength).getFloat32(index * 4, true);
+        const output = new DataView(d.native.buffer, d.native.byteOffset + d.byteOffset, d.byteLength);
+        for (let row = 0; row < m; row += 1) for (let column = 0; column < n; column += 1) {
+          let sum = 0;
+          for (let inner = 0; inner < k; inner += 1) {
+            const aIndex = transposeA ? inner * m + row : row * k + inner;
+            const bIndex = transposeB ? column * k + inner : inner * n + column;
+            sum += read(a, aIndex) * read(b, bIndex);
+          }
+          const index = row * n + column;
+          output.setFloat32(index * 4, alpha * sum + beta * read(c, index), true);
+        }
+      },
+    },
+  });
 
   async function description(operationSequence = 0) {
     return {
@@ -155,6 +186,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       memory: await memory.usage(operationSequence),
       transfer: transfer.summary(),
       mailbox: mailboxes.summary(),
+      libraries: libraryAdapters.summary(),
       execution: execution.summary(),
       health: health.snapshot(),
       inventory: registry.inventory(),
@@ -192,6 +224,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
         'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'memory.view.status', 'memory.view.release',
         'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
         'execution.prepared.status', 'execution.prepared.release', 'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
+        'library.cublaslt.status', 'library.cublaslt.release', 'library.cublaslt.plan.status', 'library.cublaslt.plan.release',
         'testing.disposal-status',
       ]);
       if (health.current === 'restart-required') throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
@@ -230,6 +263,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     views,
     mailboxes,
     transfer,
+    libraryAdapters,
     execution,
     async testingBlock({ milliseconds, operationId }) {
       const storage = new Int32Array(new SharedArrayBuffer(4)); Atomics.wait(storage, 0, 0, milliseconds);

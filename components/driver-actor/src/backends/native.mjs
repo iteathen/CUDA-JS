@@ -4,9 +4,11 @@ import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
 import { DeviceViewManager, MemoryManager } from '../../../memory/index.mjs';
 import { PublicationMailboxManager } from '../../../publication-mailbox/index.mjs';
+import { CudaLibraryAdapterManager } from '../../../cuda-library-adapters/index.mjs';
 import { ResourceRegistry } from '../../../resource-registry/index.mjs';
 import { cudaTier0FfiDefinitions } from '../../../../schemas/cuda-13.3/linux-x64/generated/ffi-definitions.mjs';
 import { createDefaultCuCtxCreateParams, cudaTier0Layouts } from '../../../../schemas/cuda-13.3/linux-x64/generated/packers.mjs';
+import { cublasLtF32MatmulAbi, cublasLtF32MatmulFfiDefinitions } from '../../../../schemas/cuda-13.3/win-x64/generated/cublaslt-ffi-definitions.mjs';
 import { DriverRuntimeError } from '../errors.mjs';
 import { HealthState, observeErrorHealth } from '../health.mjs';
 import { startupRollbackFailure } from '../startup-rollback.mjs';
@@ -129,6 +131,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
   let mailboxes;
   let execution;
   let transfer;
+  let libraryAdapters;
 
   function errorText(functionName, status) {
     try {
@@ -542,6 +545,158 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
       },
     });
 
+    libraryAdapters = new CudaLibraryAdapterManager({
+      registry,
+      contextToken,
+      memory,
+      views,
+      execution,
+      operations: {
+        async openCublasLt({ operationId }) {
+          requireCurrent(operationId);
+          const profile = await nativeProfile.resolveCublasLtProfile();
+          let providerLibrary = null;
+          let providerFunctions = null;
+          let handle = 0n;
+          try {
+            try {
+              providerLibrary = new ffi.DynamicLibrary(profile.providerPath);
+              providerFunctions = providerLibrary.getFunctions(cublasLtF32MatmulFfiDefinitions);
+            } catch {
+              throw new DriverRuntimeError('CUBLASLT_PROVIDER_EXPORTS', 'unsupported', 'The admitted cuBLASLt provider could not supply the selected export/signature profile.');
+            }
+            const version = providerFunctions.cublasLtGetVersion().toString();
+            if (version !== profile.manifest.provider.version) throw new DriverRuntimeError('CUBLASLT_PROVIDER_VERSION', 'unsupported', 'The cuBLASLt runtime version differs from the admitted provider profile.', { expected: profile.manifest.provider.version, actual: version });
+            const output = pointerOut();
+            const status = providerFunctions.cublasLtCreate(output);
+            handle = readPointer(output);
+            if (status !== 0) throw new DriverRuntimeError('CUBLASLT_CREATE_FAILED', 'provider', 'cuBLASLt handle creation failed.', { nativeStatus: status }, { operation: 'cublasLtCreate', operationId, healthBefore: health.current, healthAfter: health.current });
+            if (handle === 0n) throw new DriverRuntimeError('CUBLASLT_HANDLE_NULL', 'provider', 'cuBLASLt handle creation returned null.', {}, { operation: 'cublasLtCreate', operationId, healthBefore: health.current, healthAfter: health.current });
+            return {
+              native: Object.freeze({ library: providerLibrary, functions: providerFunctions, handle, profile: profile.manifest.profile }),
+              provider: Object.freeze({ name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' }),
+            };
+          } catch (error) {
+            const cleanupFailures = [];
+            if (handle !== 0n) {
+              try {
+                const status = providerFunctions.cublasLtDestroy(handle);
+                if (status !== 0) cleanupFailures.push(`cublasLtDestroy:${status}`);
+              } catch (cleanupError) { cleanupFailures.push(cleanupError?.code ?? 'cublasLtDestroy-threw'); }
+            }
+            if (providerLibrary) {
+              try { providerLibrary.close(); }
+              catch (cleanupError) { cleanupFailures.push(cleanupError?.code ?? 'library-close-threw'); }
+            }
+            if (cleanupFailures.length > 0) {
+              throw new DriverRuntimeError('CUBLASLT_OPEN_ROLLBACK_FAILED', 'restart-required', 'cuBLASLt opening failed and acquired provider ownership did not close terminally.', {
+                causeCode: error?.code ?? 'CUBLASLT_OPEN_FAILED', causeReason: String(cleanupFailures[0]),
+              }, { operation: 'cublasLt.open', operationId, healthBefore: health.current, healthAfter: 'restart-required' });
+            }
+            throw error;
+          }
+        },
+        async closeCublasLt({ native, operationId }) {
+          requireCurrent(operationId);
+          const status = native.functions.cublasLtDestroy(native.handle);
+          if (status !== 0) throw new DriverRuntimeError('CUBLASLT_DESTROY_FAILED', 'restart-required', 'cuBLASLt handle cleanup failed.', { nativeStatus: status }, { operation: 'cublasLtDestroy', operationId, healthBefore: health.current, healthAfter: 'restart-required' });
+          const stale = native.functions.cublasLtGetVersion;
+          native.library.close();
+          let staleRejected = false;
+          try { stale(); } catch { staleRejected = true; }
+          if (!staleRejected) throw new DriverRuntimeError('CUBLASLT_LIBRARY_STALE_WRAPPER', 'restart-required', 'Closed cuBLASLt library left a callable wrapper.', {}, { operation: 'cublasLt.library.close', operationId, healthBefore: health.current, healthAfter: 'restart-required' });
+          return { handleDestroyed: true, libraryClosed: true, staleWrapperRejected: true };
+        },
+        async createF32MatmulPlan({ adapterNative, plan, operationId }) {
+          requireCurrent(operationId);
+          const f = adapterNative.functions;
+          const handles = [];
+          const createHandle = (operation, invoke, destroy) => {
+            const output = pointerOut();
+            const status = invoke(output);
+            if (status !== 0) throw new DriverRuntimeError('CUBLASLT_PLAN_CREATE_FAILED', status === 3 ? 'pressure' : 'provider', `${operation} failed.`, { nativeStatus: status }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
+            const value = readPointer(output);
+            if (value === 0n) throw new DriverRuntimeError('CUBLASLT_PLAN_HANDLE_NULL', 'provider', `${operation} returned null.`, {}, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
+            handles.push({ value, destroy });
+            return value;
+          };
+          const requireProvider = (operation, status) => {
+            if (status !== 0) throw new DriverRuntimeError('CUBLASLT_PLAN_CREATE_FAILED', [7, 8, 15].includes(status) ? 'unsupported' : status === 3 ? 'pressure' : 'provider', `${operation} failed.`, { nativeStatus: status }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
+          };
+          try {
+            const desc = createHandle('cublasLtMatmulDescCreate', (out) => f.cublasLtMatmulDescCreate(out, cublasLtF32MatmulAbi.constants.compute32F, cublasLtF32MatmulAbi.constants.cudaR32F), f.cublasLtMatmulDescDestroy);
+            const transpose = (attribute, enabled) => {
+              const value = Buffer.alloc(4); value.writeInt32LE(enabled ? cublasLtF32MatmulAbi.constants.operationT : cublasLtF32MatmulAbi.constants.operationN);
+              requireProvider('cublasLtMatmulDescSetAttribute', f.cublasLtMatmulDescSetAttribute(desc, attribute, value, 4n));
+            };
+            transpose(cublasLtF32MatmulAbi.constants.matmulTransAAttribute, plan.transposeA);
+            transpose(cublasLtF32MatmulAbi.constants.matmulTransBAttribute, plan.transposeB);
+            const layout = (rows, columns, leadingDimension) => {
+              const value = createHandle('cublasLtMatrixLayoutCreate', (out) => f.cublasLtMatrixLayoutCreate(out, cublasLtF32MatmulAbi.constants.cudaR32F, BigInt(rows), BigInt(columns), BigInt(leadingDimension)), f.cublasLtMatrixLayoutDestroy);
+              const order = Buffer.alloc(4); order.writeInt32LE(cublasLtF32MatmulAbi.constants.orderRow);
+              requireProvider('cublasLtMatrixLayoutSetAttribute', f.cublasLtMatrixLayoutSetAttribute(value, cublasLtF32MatmulAbi.constants.layoutOrderAttribute, order, 4n));
+              return value;
+            };
+            const a = layout(plan.transposeA ? plan.k : plan.m, plan.transposeA ? plan.m : plan.k, plan.transposeA ? plan.m : plan.k);
+            const b = layout(plan.transposeB ? plan.n : plan.k, plan.transposeB ? plan.k : plan.n, plan.transposeB ? plan.k : plan.n);
+            const c = layout(plan.m, plan.n, plan.n);
+            const d = layout(plan.m, plan.n, plan.n);
+            const preference = createHandle('cublasLtMatmulPreferenceCreate', (out) => f.cublasLtMatmulPreferenceCreate(out), f.cublasLtMatmulPreferenceDestroy);
+            const workspaceLimit = Buffer.alloc(8); workspaceLimit.writeBigUInt64LE(BigInt(plan.maxWorkspaceBytes));
+            requireProvider('cublasLtMatmulPreferenceSetAttribute', f.cublasLtMatmulPreferenceSetAttribute(preference, cublasLtF32MatmulAbi.constants.preferenceMaxWorkspaceBytesAttribute, workspaceLimit, 8n));
+            const result = Buffer.alloc(cublasLtF32MatmulAbi.heuristicResult.size);
+            const count = Buffer.alloc(4);
+            requireProvider('cublasLtMatmulAlgoGetHeuristic', f.cublasLtMatmulAlgoGetHeuristic(adapterNative.handle, desc, a, b, c, d, preference, 1, result, count));
+            if (count.readInt32LE(0) !== 1 || result.readInt32LE(cublasLtF32MatmulAbi.heuristicResult.stateOffset) !== 0) throw new DriverRuntimeError('CUBLASLT_ALGORITHM_UNAVAILABLE', 'unsupported', 'No cuBLASLt algorithm satisfies the bounded f32 matmul plan.');
+            const workspaceBytesBig = result.readBigUInt64LE(cublasLtF32MatmulAbi.heuristicResult.workspaceSizeOffset);
+            if (workspaceBytesBig > BigInt(Number.MAX_SAFE_INTEGER)) throw new DriverRuntimeError('CUBLASLT_WORKSPACE_REQUIREMENT_INVALID', 'provider', 'cuBLASLt returned an unsafe workspace size.');
+            return {
+              native: Object.freeze({ handle: adapterNative.handle, functions: f, desc, a, b, c, d, preference, algorithm: Buffer.from(result.subarray(0, cublasLtF32MatmulAbi.heuristicResult.algorithmSize)) }),
+              workspaceBytes: Number(workspaceBytesBig),
+            };
+          } catch (error) {
+            const cleanupFailures = [];
+            for (let index = handles.length - 1; index >= 0; index -= 1) {
+              try {
+                const status = handles[index].destroy(handles[index].value);
+                if (status !== 0) cleanupFailures.push(status);
+              } catch (cleanupError) { cleanupFailures.push(cleanupError?.code ?? 'destroy-threw'); }
+            }
+            if (cleanupFailures.length > 0) {
+              throw new DriverRuntimeError('CUBLASLT_PLAN_CREATE_ROLLBACK_FAILED', 'restart-required', 'cuBLASLt plan creation failed and descriptor rollback cleanup was unproved.', {
+                causeCode: error?.code ?? 'CUBLASLT_PLAN_CREATE_FAILED', causeReason: String(cleanupFailures[0]),
+              }, { operation: 'cublasLt.plan.create', operationId, healthBefore: health.current, healthAfter: 'restart-required' });
+            }
+            throw error;
+          }
+        },
+        async destroyF32MatmulPlan({ native, operationId }) {
+          requireCurrent(operationId);
+          const failures = [];
+          for (const [operation, handle] of [['cublasLtMatmulPreferenceDestroy', native.preference], ['cublasLtMatrixLayoutDestroy', native.d], ['cublasLtMatrixLayoutDestroy', native.c], ['cublasLtMatrixLayoutDestroy', native.b], ['cublasLtMatrixLayoutDestroy', native.a], ['cublasLtMatmulDescDestroy', native.desc]]) {
+            try {
+              const status = native.functions[operation](handle);
+              if (status !== 0) failures.push(`${operation}:${status}`);
+            } catch (error) { failures.push(`${operation}:${error?.code ?? 'threw'}`); }
+          }
+          if (failures.length > 0) throw new DriverRuntimeError('CUBLASLT_PLAN_DESTROY_FAILED', 'restart-required', 'One or more cuBLASLt plan descriptors failed cleanup.', { causeCode: failures[0] }, { operation: 'cublasLt.plan.destroy', operationId, healthBefore: health.current, healthAfter: 'restart-required' });
+          return { descriptorCount: 6, descriptorsDestroyed: true };
+        },
+        async submitF32Matmul({ planNative, alpha, beta, a, b, c, d, workspace, workspaceBytes, streamNative, operationId }) {
+          requireCurrent(operationId);
+          const alphaStorage = Buffer.alloc(4); alphaStorage.writeFloatLE(alpha);
+          const betaStorage = Buffer.alloc(4); betaStorage.writeFloatLE(beta);
+          const pointer = (operand) => operand.native + BigInt(operand.byteOffset);
+          const status = planNative.functions.cublasLtMatmul(
+            planNative.handle, planNative.desc, alphaStorage, pointer(a), planNative.a, pointer(b), planNative.b,
+            betaStorage, pointer(c), planNative.c, pointer(d), planNative.d, planNative.algorithm,
+            workspace ? pointer(workspace) : 0n, BigInt(workspaceBytes), streamNative,
+          );
+          if (status !== 0) throw new DriverRuntimeError('CUBLASLT_MATMUL_FAILED', [7, 8, 15].includes(status) ? 'unsupported' : 'immediate-driver', 'cuBLASLt matrix multiplication submission failed.', { nativeStatus: status }, { operation: 'cublasLtMatmul', operationId, healthBefore: health.current, healthAfter: [7, 8, 15].includes(status) ? health.current : 'suspect' });
+        },
+      },
+    });
+
     async function description(operationSequence = 0) {
       const executionSummary = execution.summary();
       return {
@@ -554,6 +709,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
         memory: await memory.usage(operationSequence),
         transfer: transfer.summary(),
         mailbox: mailboxes.summary(),
+        libraries: libraryAdapters.summary(),
         execution: executionSummary,
         health: health.snapshot(),
         inventory: registry.inventory(),
@@ -571,6 +727,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
           'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'memory.view.status', 'memory.view.release',
           'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
           'execution.prepared.status', 'execution.prepared.release', 'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
+          'library.cublaslt.status', 'library.cublaslt.release', 'library.cublaslt.plan.status', 'library.cublaslt.plan.release',
         ]);
         if (health.current === 'restart-required') {
           throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });
@@ -631,6 +788,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
       views,
       mailboxes,
       transfer,
+      libraryAdapters,
       execution,
     };
   } catch (error) {

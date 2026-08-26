@@ -19,6 +19,10 @@ const PENDING_OPERATION_COMMANDS = new Set([
   'mailbox.status',
   'mailbox.reset',
   'mailbox.release',
+  'library.cublaslt.status',
+  'library.cublaslt.release',
+  'library.cublaslt.plan.status',
+  'library.cublaslt.plan.release',
   'runtime.close',
 ]);
 const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
@@ -1044,15 +1048,20 @@ export class ExecutionManager {
   }
 
   async submitTransfer({ kind, after = null, accesses, leases, enqueue, complete = null, operationId = null }) {
-    this.#assertAdmission();
-    if (!['host-to-device', 'device-to-host', 'device-to-device'].includes(kind) || !Array.isArray(accesses) || !Array.isArray(leases) || typeof enqueue !== 'function' || (complete !== null && typeof complete !== 'function')) fail('EXECUTION_TRANSFER_INVALID', 'internal', 'Transfer operation adapter request is invalid.');
-    if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
+    if (!['host-to-device', 'device-to-host', 'device-to-device'].includes(kind)) fail('EXECUTION_TRANSFER_INVALID', 'internal', 'Transfer operation adapter request is invalid.');
+    return this.submitAdapterOperation({ kind, after, accesses, leases, enqueue, complete, operationId, failureProfile: 'transfer' });
+  }
+
+  async submitAdapterOperation({ kind, after = null, accesses, leases, enqueue, complete = null, operationId = null, failureProfile = 'adapter' }) {
     let dependencyLease = null;
     let eventToken = null;
     let eventNative = null;
     let submitted = false;
     let ownershipTransferred = false;
     try {
+      this.#assertAdmission();
+      if (typeof kind !== 'string' || !/^[a-z][a-z0-9-]{0,63}$/.test(kind) || !Array.isArray(accesses) || !Array.isArray(leases) || typeof enqueue !== 'function' || (complete !== null && typeof complete !== 'function') || !['adapter', 'transfer'].includes(failureProfile)) fail('EXECUTION_ADAPTER_INVALID', 'internal', 'Internal operation adapter request is invalid.');
+      if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
       if (this.#streamTokens.length === 0) await this.initialize(operationId);
       let dependency = null;
       if (after !== null) {
@@ -1075,7 +1084,7 @@ export class ExecutionManager {
       await enqueue(stream.native);
       submitted = true;
       try { await this.#operations.recordEvent({ eventNative, streamNative: stream.native, operationId }); }
-      catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: 'Transfer was submitted but completion provenance could not be established.', details: { causeCode: error?.code ?? null }, operationId }); }
+      catch (error) { throw this.#operations.restartRequired({ code: 'EXECUTION_EVENT_PROVENANCE_LOST', message: `${failureProfile === 'transfer' ? 'Transfer' : 'Adapter operation'} was submitted but completion provenance could not be established.`, details: { causeCode: error?.code ?? null }, operationId }); }
       const record = {
         kind, state: 'pending', eventToken, streamToken, dependencyLease, accesses: Object.freeze(accesses), externalLeases: leases, complete,
         submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
@@ -1091,7 +1100,7 @@ export class ExecutionManager {
           },
         });
       } catch (error) {
-        throw this.#operations.restartRequired({ code: 'EXECUTION_OPERATION_REGISTRATION_LOST', message: 'Transfer provenance exists but logical operation ownership could not be registered.', details: { causeCode: error?.code ?? null }, operationId });
+        throw this.#operations.restartRequired({ code: 'EXECUTION_OPERATION_REGISTRATION_LOST', message: `${failureProfile === 'transfer' ? 'Transfer' : 'Adapter operation'} provenance exists but logical operation ownership could not be registered.`, details: { causeCode: error?.code ?? null }, operationId });
       }
       ownershipTransferred = true;
       this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
@@ -1104,13 +1113,13 @@ export class ExecutionManager {
           else await this.#operations.destroyEvent({ native: eventNative, operationId });
         } catch (cleanupError) {
           const combined = combinedRollbackError({
-            code: 'EXECUTION_TRANSFER_ROLLBACK_FAILED',
-            message: 'Transfer submission failed and completion-event rollback cleanup was unproved.',
-            operation: 'memory.transfer',
+            code: failureProfile === 'transfer' ? 'EXECUTION_TRANSFER_ROLLBACK_FAILED' : 'EXECUTION_ADAPTER_ROLLBACK_FAILED',
+            message: `${failureProfile === 'transfer' ? 'Transfer' : 'Adapter operation'} submission failed and completion-event rollback cleanup was unproved.`,
+            operation: kind,
             operationId,
             primaryError: error,
-            primaryFallbackCode: 'EXECUTION_TRANSFER_FAILED',
-            primaryFallbackOperation: 'memory.transfer',
+            primaryFallbackCode: failureProfile === 'transfer' ? 'EXECUTION_TRANSFER_FAILED' : 'EXECUTION_ADAPTER_FAILED',
+            primaryFallbackOperation: kind,
             cleanupErrors: [cleanupError],
             cleanupFallbackCode: 'EXECUTION_EVENT_CLEANUP_UNPROVED',
             cleanupFallbackOperation: eventToken === null ? 'execution.event.destroy' : 'resource.close',
@@ -1126,7 +1135,7 @@ export class ExecutionManager {
     } finally {
       if (!ownershipTransferred) {
         dependencyLease?.release();
-        for (let index = leases.length - 1; index >= 0; index -= 1) leases[index].release();
+        if (Array.isArray(leases)) for (let index = leases.length - 1; index >= 0; index -= 1) leases[index].release();
       }
     }
   }
