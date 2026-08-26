@@ -1,11 +1,11 @@
 {
-  "schema_version": 49,
+  "schema_version": 50,
   "updated": "2026-08-26",
-  "status": "tensor_prerequisite_view_facade_active",
-  "objective": "Integrate the bounded OS-neutral public SPEC-0021 typed-view facade, then advance the serial generic CUDA-JS prerequisites required by CUDA-JS-Tensor without importing tensor or application policy into core.",
+  "status": "device_js_library_composition_active",
+  "objective": "Integrate bounded OS-neutral SPEC-0028 typed Device-JS leaf-library composition, then advance the remaining serial generic CUDA-JS prerequisites required by CUDA-JS-Tensor without importing tensor or application policy into core.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "0a7cf198dd3d4f07768133d167fc37f2e30cdcd3",
-    "package": "cuda-js@0.1.0-alpha.9 candidate",
+    "protected_main_authority_baseline": "991330ffda926e052c857cd6a3f5bdcc37f47034",
+    "package": "cuda-js@0.1.0-alpha.10 candidate",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
       "#69 immutable GitHub Actions provenance integrated",
@@ -24,9 +24,10 @@
       "CJS-LINUX-COMPILER-ADAPTER: shared native CompilerActor engine, exact official-package-pinned Ubuntu profile, and exact F6L readiness/oracle/Driver-handoff runner source implemented without native qualification",
       "CJS-LINUX-FACADE-SOURCE: platform diagnostics, public facade admission, compatibility projection, and F7L/F8L readiness now accept native Linux x86-64 only as testing-unconfirmed; alpha.8 changes no qualification state",
       "CJS-LINUX-RUNNER-CHAIN: PR #132 merged the OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile at protected main 118dec1574d650557ffa65f1bbb1d89e0970ceff; no Linux qualification state changed",
-      "CJS-DEVICE-SELECTION-0017 integrated on PR #111 at protected main 0a7cf198dd3d4f07768133d167fc37f2e30cdcd3: OS-neutral finite sanitized discovery, opaque selector capabilities, pre-context DriverActor binding, selected-target defaults/cache separation, alpha.8 package projection, and portable installed-package evidence"
+      "CJS-DEVICE-SELECTION-0017 integrated on PR #111 at protected main 0a7cf198dd3d4f07768133d167fc37f2e30cdcd3: OS-neutral finite sanitized discovery, opaque selector capabilities, pre-context DriverActor binding, selected-target defaults/cache separation, alpha.8 package projection, and portable installed-package evidence",
+      "CJS-TENSOR-VIEW-001 integrated on PR #134 at protected main 991330ffda926e052c857cd6a3f5bdcc37f47034: allocation-owned public typed views, explicit bounded launch access, alpha.9 package projection, installed consumer, and portable lifecycle evidence"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child", "SPEC-0028 candidate"],
     "accepted_pending_implementation": [],
     "still_proposal_only": ["SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation and device-publication children", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
@@ -55,14 +56,15 @@
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
     "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md",
     "docs/specs/SPEC-0022-device-publication-addendum.md",
-    "docs/specs/SPEC-0027-nn-extension-foundation.md"
+    "docs/specs/SPEC-0027-nn-extension-foundation.md",
+    "docs/specs/SPEC-0028-device-js-library-composition.md"
   ],
   "current_focus": {
-    "id": "CJS-TENSOR-VIEW-001",
-    "issues": [88],
+    "id": "CJS-DEVICE-LIB-002",
+    "issues": [135],
     "plan": "docs/plans/2026-08-26-cuda-js-tensor-prerequisites.md",
-    "next_action": "Finish documentation reconciliation and protocol coverage, run exact Node 26.7.0 focused and full validation, review one exact head, integrate through protected main with an expected-head guard, update issue #88, and verify branch/worktree disposition.",
-    "exit": "The exact reviewed alpha.9 typed-view head is integrated on protected main; package, facade, declarations, compatibility projection, installed consumer, lifecycle, issue state, and cleanup agree; native qualification remains explicitly open."
+    "next_action": "Finish SPEC-0028 semantic/facade/package coverage, run exact Node 26.7.0 focused and full validation, review one exact head, integrate through protected main with an expected-head guard, update issue #135, and verify branch/worktree disposition.",
+    "exit": "The exact reviewed alpha.10 Device-JS library head is integrated on protected main; package, declarations, compatibility projection, one installed-package consumer exercising two unrelated composed programs, RDC/LTO orchestration, issue state, and cleanup agree; native qualification remains explicitly open."
   },
   "parallel_or_external_next": [
     {
@@ -130,6 +132,7 @@
     "treat an open issue, roadmap, proposal, or experiment as production implementation authority",
     "widen accepted SPEC-0011 finite-only f32 semantics implicitly while adding new floating kinds",
     "widen the accepted SPEC-0021 public view facade beyond allocation-owned contiguous one-dimensional views and explicit bounded launch access",
+    "widen SPEC-0028 beyond finite leaf libraries, explicit typed exports/import aliases, deterministic symbols, and existing RDC/LTO ownership",
     "infer native support from portable/mock/neighboring-profile evidence",
     "duplicate SPEC-0016 operation lifecycle in scheduler, transfer, graph, library, graphics, sideband, multi-GPU, or NN work",
     "add NN exports/dependencies/provider discovery/tensor/autodiff/training semantics to the cuda-js core package",

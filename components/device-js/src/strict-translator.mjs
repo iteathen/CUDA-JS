@@ -5,9 +5,10 @@ import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 
 import { DEVICE_JS_CONTRACT as CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
 import { deviceJsError } from './errors.mjs';
-import { translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
+import { translateDeviceLibrary as translateRawDeviceLibrary, translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
 
 const encoder = new TextEncoder();
+export const DEVICE_JS_LIBRARY_CONTRACT = `${CONTRACT}+SPEC-0028-device-library-v1`;
 
 function codeUnitCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -46,6 +47,19 @@ function programIdentity(source, functions, compile) {
   hashField(hash, 'source', encoder.encode(source));
   hashField(hash, 'functions', encoder.encode(canonicalJson(canonicalMetadata(functions))));
   hashField(hash, 'compile', encoder.encode(canonicalJson(compile)));
+  return hash.digest('hex');
+}
+
+function compositionIdentity(mode, source, functions, compile, facts) {
+  const hash = createHash('sha256');
+  hashField(hash, 'contract', encoder.encode(DEVICE_JS_LIBRARY_CONTRACT));
+  hashField(hash, 'mode', encoder.encode(mode));
+  hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
+  hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
+  hashField(hash, 'source', encoder.encode(source));
+  hashField(hash, 'functions', encoder.encode(canonicalJson(canonicalMetadata(functions))));
+  hashField(hash, 'compile', encoder.encode(canonicalJson(compile)));
+  hashField(hash, 'composition', encoder.encode(canonicalJson(facts)));
   return hash.digest('hex');
 }
 
@@ -194,9 +208,8 @@ function replaceGeneratedNames(text, replacements) {
   return text;
 }
 
-function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic }) {
+function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic }, { canonicalNames = generatedNameMap(sortedFunctions), imports = [], exportSymbols = new Map(), contract = CONTRACT } = {}) {
   const rawNames = generatedNameMap(raw.functions);
-  const canonicalNames = generatedNameMap(sortedFunctions);
   const replacements = new Map();
   for (const fn of raw.functions) replacements.set(rawNames.get(fn.name), canonicalNames.get(fn.name));
 
@@ -211,18 +224,27 @@ function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic })
     blocks.set(fn.name, replaceGeneratedNames(block, replacements));
   }
 
-  const lines = [`/* cuda-js Device-JS ${CONTRACT}; generated; do not edit */`];
+  const lines = [`/* cuda-js Device-JS ${contract}; generated; do not edit */`];
   if (usesScopedAtomic) lines.push('#include <cuda/atomic>', '');
+  for (const entry of imports) {
+    const parameters = entry.parameters
+      .map((parameter, parameterIndex) => `${cppType(parameter.type)} p${parameterIndex}`)
+      .join(', ');
+    lines.push(`extern "C" __device__ ${cppType(entry.returns)} ${entry.symbol}(${parameters});`);
+  }
   for (const fn of sortedFunctions) {
     if (fn.kind !== 'device') continue;
     const parameters = fn.parameters
       .map((parameter, parameterIndex) => `${cppType(parameter.type)} p${parameterIndex}`)
       .join(', ');
-    lines.push(`__device__ ${cppType(fn.returns)} ${canonicalNames.get(fn.name)}(${parameters});`);
+    lines.push(`${exportSymbols.has(fn.name) ? 'extern "C" ' : ''}__device__ ${cppType(fn.returns)} ${canonicalNames.get(fn.name)}(${parameters});`);
   }
-  if (sortedFunctions.some((fn) => fn.kind === 'device')) lines.push('');
+  if (imports.length || sortedFunctions.some((fn) => fn.kind === 'device')) lines.push('');
   sortedFunctions.forEach((fn, index) => {
-    lines.push(blocks.get(fn.name));
+    const block = exportSymbols.has(fn.name)
+      ? blocks.get(fn.name).replace(/^__device__ /, 'extern "C" __device__ ')
+      : blocks.get(fn.name);
+    lines.push(block);
     if (index !== sortedFunctions.length - 1) lines.push('');
   });
   lines.push('');
@@ -254,13 +276,28 @@ export function translateDeviceProgram(request) {
     }))
     .sort((left, right) => codeUnitCompare(left.name, right.name));
 
+  const imports = (raw.imports ?? []).map((entry) => ({
+    name: entry.name,
+    symbol: entry.symbol,
+    parameters: entry.parameters.map((parameter) => ({ name: parameter.name, type: parameter.type })),
+    returns: entry.returns,
+    librarySha256: entry.librarySha256,
+    exportName: entry.exportName,
+    artifactSha256: entry.artifactSha256,
+    format: entry.format,
+    architecture: entry.architecture,
+  })).sort((left, right) => codeUnitCompare(left.name, right.name));
+
   const canonicalNames = generatedNameMap(sortedFunctions);
   for (const fn of sortedFunctions) {
     if (fn.kind === 'kernel') fn.functionName = canonicalNames.get(fn.name);
   }
 
-  const sha256 = programIdentity(request.source, sortedFunctions, raw.compile);
-  const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements);
+  const sha256 = imports.length
+    ? compositionIdentity('program', request.source, sortedFunctions, raw.compile, { imports })
+    : programIdentity(request.source, sortedFunctions, raw.compile);
+  const contract = imports.length ? DEVICE_JS_LIBRARY_CONTRACT : CONTRACT;
+  const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements, { imports, contract });
   const kernels = sortedFunctions
     .filter((fn) => fn.kind === 'kernel')
     .map((fn) => ({
@@ -271,13 +308,62 @@ export function translateDeviceProgram(request) {
 
   return deepFreeze({
     schemaVersion: 1,
-    contract: CONTRACT,
+    contract,
     sha256,
     parser: { name: 'acorn', version: acornVersion },
     functions: sortedFunctions,
     kernels,
+    ...(imports.length ? { imports } : {}),
     compile: { ...raw.compile },
     generatedName: `device-js-${sha256.slice(0, 16)}.cu`,
+    generatedSource,
+  });
+}
+
+export function translateDeviceLibrary(request) {
+  const raw = translateRawDeviceLibrary(request);
+  const ast = parseAcceptedSource(request.source);
+  const requirements = validateAdditionalContract(ast, raw.functions);
+  const sortedFunctions = raw.functions
+    .map((fn) => ({
+      name: fn.name,
+      kind: fn.kind,
+      parameters: fn.parameters.map((parameter) => ({ name: parameter.name, type: parameter.type })),
+      returns: fn.returns,
+    }))
+    .sort((left, right) => codeUnitCompare(left.name, right.name));
+  const exportNames = [...raw.exports].sort(codeUnitCompare);
+  const sha256 = compositionIdentity('library', request.source, sortedFunctions, raw.compile, { exports: exportNames });
+  const exportIndexes = new Map(exportNames.map((name, index) => [name, index]));
+  const canonicalNames = new Map(sortedFunctions.map((fn, index) => [
+    fn.name,
+    exportIndexes.has(fn.name) ? `djs_lib_${sha256}_${exportIndexes.get(fn.name)}` : `djs_local_${sha256}_${index}`,
+  ]));
+  const exportSymbols = new Map(exportNames.map((name) => [name, canonicalNames.get(name)]));
+  const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements, {
+    canonicalNames,
+    exportSymbols,
+    contract: DEVICE_JS_LIBRARY_CONTRACT,
+  });
+  const functionsByName = new Map(sortedFunctions.map((fn) => [fn.name, fn]));
+  const exports = exportNames.map((name) => {
+    const fn = functionsByName.get(name);
+    return {
+      name,
+      symbol: exportSymbols.get(name),
+      parameters: fn.parameters.map((parameter) => ({ name: parameter.name, type: parameter.type })),
+      returns: fn.returns,
+    };
+  });
+  return deepFreeze({
+    schemaVersion: 1,
+    contract: DEVICE_JS_LIBRARY_CONTRACT,
+    sha256,
+    parser: { name: 'acorn', version: acornVersion },
+    functions: sortedFunctions,
+    exports,
+    compile: { ...raw.compile },
+    generatedName: `device-js-library-${sha256.slice(0, 16)}.cu`,
     generatedSource,
   });
 }

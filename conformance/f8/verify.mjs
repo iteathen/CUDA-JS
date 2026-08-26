@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.9');
+assert.equal(packageJson.version, '0.1.0-alpha.10');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -29,6 +29,7 @@ assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibility.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
 assert.equal(compatibility.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
+assert.equal(compatibility.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin');
 assert.deepEqual(compatibility.capabilities.deviceJsParser, { name: 'acorn', version: '8.15.0', role: 'syntax-only-replaceable-adapter' });
 assert.deepEqual(Object.keys(packageJson.exports).sort(), ['.', './compatibility', './testing']);
 const portable = JSON.parse(await readFile(path.join(evidenceRoot, 'portable-package.json'), 'utf8'));
@@ -49,7 +50,7 @@ assert.equal(memoryConsumer.typedViewLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
-for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication']) {
+for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication', 'deviceLibrary', 'composedFirst', 'composedSecond']) {
   assert.match(compilerConsumer[field], /^[a-f0-9]{64}$/);
 }
 assert.deepEqual(compilerConsumer.deviceJsParser, { name: 'acorn', version: '8.15.0' });

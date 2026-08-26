@@ -8,6 +8,7 @@ import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 1_048_576;
 const FUNCTION_LIMIT = 64;
+const IMPORT_LIMIT = 64;
 const PARAMETER_LIMIT = 64;
 const AST_NODE_LIMIT = 20_000;
 const AST_DEPTH_LIMIT = 128;
@@ -91,7 +92,7 @@ function normalizeCompile(value = {}) {
   return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, headerProfile, relocatableDeviceCode });
 }
 
-function normalizeFunctions(value) {
+function normalizeFunctions(value, { requireKernel = true, onlyDevice = false } = {}) {
   if (!Array.isArray(value) || value.length < 1 || value.length > FUNCTION_LIMIT) throw deviceJsError('DEVICE_JS_FUNCTIONS_INVALID', 'functions must be a nonempty bounded array.');
   const names = new Set();
   const functions = value.map((entry) => {
@@ -101,7 +102,7 @@ function normalizeFunctions(value) {
     const name = assertIdentifier(entry.name, 'Function name');
     if (names.has(name)) throw deviceJsError('DEVICE_JS_FUNCTION_DUPLICATE', 'Device-JS function names must be unique.', { name });
     names.add(name);
-    if (!['kernel', 'device'].includes(entry.kind)) throw deviceJsError('DEVICE_JS_FUNCTION_KIND_INVALID', 'Function kind must be kernel or device.', { name });
+    if (!['kernel', 'device'].includes(entry.kind) || (onlyDevice && entry.kind !== 'device')) throw deviceJsError('DEVICE_JS_FUNCTION_KIND_INVALID', onlyDevice ? 'Device-JS libraries may contain only device functions.' : 'Function kind must be kernel or device.', { name });
     if (!Array.isArray(entry.parameters) || entry.parameters.length > PARAMETER_LIMIT) throw deviceJsError('DEVICE_JS_PARAMETERS_INVALID', 'Function parameters must be a bounded array.', { name });
     const parameterNames = new Set();
     const parameters = entry.parameters.map((parameter) => {
@@ -117,8 +118,64 @@ function normalizeFunctions(value) {
     if (entry.kind === 'kernel' && returns.kind !== 'void') throw deviceJsError('DEVICE_JS_KERNEL_RETURN_INVALID', 'Device-JS kernels must return void.', { function: name });
     return Object.freeze({ name, kind: entry.kind, parameters: Object.freeze(parameters), returns });
   });
-  if (!functions.some((entry) => entry.kind === 'kernel')) throw deviceJsError('DEVICE_JS_KERNEL_REQUIRED', 'A Device-JS module requires at least one kernel.');
+  if (requireKernel && !functions.some((entry) => entry.kind === 'kernel')) throw deviceJsError('DEVICE_JS_KERNEL_REQUIRED', 'A Device-JS module requires at least one kernel.');
   return Object.freeze([...functions].sort((a, b) => a.name.localeCompare(b.name)));
+}
+
+function normalizeImports(value = [], localFunctions = []) {
+  if (!Array.isArray(value) || value.length > IMPORT_LIMIT) throw deviceJsError('DEVICE_JS_IMPORTS_INVALID', 'Device-JS imports must be a bounded array.');
+  const localNames = new Set(localFunctions.map((entry) => entry.name));
+  const names = new Set();
+  return Object.freeze(value.map((entry) => {
+    const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
+    if (!plainObject(entry) || Object.keys(entry).sort().join('\0') !== fields.sort().join('\0')) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Each Device-JS import requires one exact typed semantic record.');
+    const name = assertIdentifier(entry.name, 'Import alias');
+    if (names.has(name) || localNames.has(name)) throw deviceJsError('DEVICE_JS_IMPORT_DUPLICATE', 'Device-JS import aliases must be unique and distinct from local functions.', { name });
+    names.add(name);
+    if (typeof entry.librarySha256 !== 'string' || !/^[a-f0-9]{64}$/.test(entry.librarySha256)
+        || typeof entry.artifactSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(entry.artifactSha256)
+        || typeof entry.exportName !== 'string' || !IDENTIFIER.test(entry.exportName)
+        || typeof entry.symbol !== 'string' || !new RegExp(`^djs_lib_${entry.librarySha256}_[0-9]+$`).test(entry.symbol)
+        || !['ptx', 'lto-ir'].includes(entry.format)) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import identity or symbol metadata is invalid.', { name });
+    const target = inspectCudaTarget(entry.architecture, { expectedPrefix: 'compute' });
+    if (!target.ok) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import architecture is invalid.', { name, reason: target.reason });
+    if (!Array.isArray(entry.parameters) || entry.parameters.length > PARAMETER_LIMIT) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import parameters must be bounded.', { name });
+    const parameterNames = new Set();
+    const parameters = entry.parameters.map((parameter) => {
+      if (!plainObject(parameter) || Object.keys(parameter).sort().join('\0') !== 'name\0type') throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import parameters require exactly name and type.', { name });
+      const parameterName = assertIdentifier(parameter.name, 'Import parameter name');
+      if (parameterNames.has(parameterName)) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import parameter names must be unique.', { name, parameter: parameterName });
+      parameterNames.add(parameterName);
+      return Object.freeze({ name: parameterName, type: parseType(parameter.type) });
+    });
+    const returns = parseType(entry.returns, { allowVoid: true, allowPointer: false });
+    return Object.freeze({
+      name,
+      kind: 'device',
+      parameters: Object.freeze(parameters),
+      returns,
+      external: true,
+      symbol: entry.symbol,
+      librarySha256: entry.librarySha256,
+      exportName: entry.exportName,
+      artifactSha256: entry.artifactSha256,
+      format: entry.format,
+      architecture: target.target.name,
+    });
+  }).sort((left, right) => left.name.localeCompare(right.name)));
+}
+
+function normalizeExports(value, functions) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > FUNCTION_LIMIT) throw deviceJsError('DEVICE_JS_EXPORTS_INVALID', 'Device-JS library exports must be a nonempty bounded array.');
+  const available = new Set(functions.map((entry) => entry.name));
+  const names = new Set();
+  for (const entry of value) {
+    const name = assertIdentifier(entry, 'Export name');
+    if (!available.has(name)) throw deviceJsError('DEVICE_JS_EXPORT_UNKNOWN', 'Device-JS library export has no local device function.', { name });
+    if (names.has(name)) throw deviceJsError('DEVICE_JS_EXPORT_DUPLICATE', 'Device-JS library exports must be unique.', { name });
+    names.add(name);
+  }
+  return Object.freeze([...names].sort());
 }
 
 function canonicalMetadata(functions) {
@@ -689,25 +746,29 @@ function freezeFunctionPublic(fn, generatedName) {
   });
 }
 
-export function translateDeviceProgram(request) {
-  if (!plainObject(request) || Object.keys(request).some((key) => !['source', 'functions', 'compile'].includes(key)) || !Object.hasOwn(request, 'source') || !Object.hasOwn(request, 'functions')) throw deviceJsError('DEVICE_JS_REQUEST_INVALID', 'Device-JS request requires source/functions and optional compile.');
+function translateDeviceUnit(request, mode) {
+  const allowed = mode === 'library' ? ['source', 'functions', 'exports', 'compile'] : ['source', 'functions', 'compile', 'imports'];
+  if (!plainObject(request) || Object.keys(request).some((key) => !allowed.includes(key)) || !Object.hasOwn(request, 'source') || !Object.hasOwn(request, 'functions') || (mode === 'library' && !Object.hasOwn(request, 'exports'))) throw deviceJsError('DEVICE_JS_REQUEST_INVALID', mode === 'library' ? 'Device-JS library request requires source/functions/exports and optional compile.' : 'Device-JS request requires source/functions and optional compile/imports.');
   if (typeof request.source !== 'string' || request.source.length < 1 || request.source.includes('\0')) throw deviceJsError('DEVICE_JS_SOURCE_INVALID', 'Device-JS source must be nonempty and NUL-free.');
   const sourceBytes = encoder.encode(request.source);
   if (sourceBytes.byteLength > SOURCE_LIMIT) throw deviceJsError('DEVICE_JS_SOURCE_LIMIT', 'Device-JS source exceeds the UTF-8 limit.', { byteLength: sourceBytes.byteLength, maximum: SOURCE_LIMIT });
-  const functions = normalizeFunctions(request.functions);
+  const functions = normalizeFunctions(request.functions, { requireKernel: mode === 'program', onlyDevice: mode === 'library' });
+  const imports = mode === 'program' ? normalizeImports(request.imports ?? [], functions) : Object.freeze([]);
+  const exports = mode === 'library' ? normalizeExports(request.exports, functions) : Object.freeze([]);
   const compile = normalizeCompile(request.compile ?? {});
   const identity = programIdentity(request.source, functions, compile);
   const ast = parseSource(request.source);
   const sourceFunctions = matchSourceFunctions(ast, functions);
-  const functionMap = new Map(functions.map((fn) => [fn.name, fn]));
+  const functionMap = new Map([...functions, ...imports].map((fn) => [fn.name, fn]));
   const generatedNames = new Map();
   let deviceIndex = 0;
   let kernelIndex = 0;
   for (const fn of functions) generatedNames.set(fn.name, fn.kind === 'device' ? `djs_device_${deviceIndex++}` : `djs_kernel_${kernelIndex++}`);
+  for (const entry of imports) generatedNames.set(entry.name, entry.symbol);
 
-  const prototypes = functions.filter((fn) => fn.kind === 'device').map((fn) => {
+  const prototypes = [...functions.filter((fn) => fn.kind === 'device'), ...imports].map((fn) => {
     const args = fn.parameters.map((parameter, index) => `${cppType(parameter.type)} p${index}`).join(', ');
-    return `__device__ ${cppType(fn.returns)} ${generatedNames.get(fn.name)}(${args});`;
+    return `${fn.external ? 'extern "C" ' : ''}__device__ ${cppType(fn.returns)} ${generatedNames.get(fn.name)}(${args});`;
   });
   const definitions = [];
   const calls = new Map();
@@ -731,6 +792,17 @@ export function translateDeviceProgram(request) {
 
   const publicFunctions = Object.freeze(functions.map((fn) => freezeFunctionPublic(fn, generatedNames.get(fn.name))));
   const kernels = Object.freeze(publicFunctions.filter((fn) => fn.kind === 'kernel').map((fn) => Object.freeze({ name: fn.name, functionName: fn.functionName, parameters: fn.launchParameters })));
+  const publicImports = Object.freeze(imports.map((entry) => Object.freeze({
+    name: entry.name,
+    symbol: entry.symbol,
+    parameters: Object.freeze(entry.parameters.map((parameter) => Object.freeze({ name: parameter.name, type: parameter.type.text }))),
+    returns: entry.returns.text,
+    librarySha256: entry.librarySha256,
+    exportName: entry.exportName,
+    artifactSha256: entry.artifactSha256,
+    format: entry.format,
+    architecture: entry.architecture,
+  })));
   return Object.freeze({
     schemaVersion: 1,
     contract: CONTRACT,
@@ -738,10 +810,16 @@ export function translateDeviceProgram(request) {
     parser: Object.freeze({ name: 'acorn', version: acornVersion }),
     functions: publicFunctions,
     kernels,
+    ...(publicImports.length ? { imports: publicImports } : {}),
+    ...(mode === 'library' ? { exports } : {}),
     compile,
-    generatedName: `device-js-${identity.slice(0, 16)}.cu`,
+    generatedName: `${mode === 'library' ? 'device-js-library' : 'device-js'}-${identity.slice(0, 16)}.cu`,
     generatedSource,
   });
 }
+
+export function translateDeviceProgram(request) { return translateDeviceUnit(request, 'program'); }
+
+export function translateDeviceLibrary(request) { return translateDeviceUnit(request, 'library'); }
 
 export { DeviceJsError };

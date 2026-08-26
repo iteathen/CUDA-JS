@@ -211,6 +211,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
+  if (compatibility.capabilities?.deviceJsLibraries !== 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin') {
+    errors.push('packaging compatibility Device-JS library projection is stale');
+  }
 
   // README is a concise overview, not the exhaustive capability registry. Exact additive
   // SPEC-0021 projection is owned by docs/CAPABILITIES.md plus the compatibility manifest.
@@ -222,9 +225,11 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0013',
     'SPEC-0016',
     'SPEC-0017',
+    'SPEC-0028',
     'SPEC-0027',
     'separate future publish unit',
     'compileDeviceProgram()',
+    'compileDeviceLibrary()',
     'discoverCudaDevices()',
     '`u64`/`i32`/`f32`',
     'typed `lto-ir`',

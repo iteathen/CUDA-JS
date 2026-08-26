@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { compileDeviceProgram } from 'cuda-js';
+import { compileDeviceLibrary, compileDeviceProgram } from 'cuda-js';
 import { CUDA_JS_COMPATIBILITY as compatibilitySubpath } from 'cuda-js/compatibility';
 import { openCudaRuntimeForTesting } from 'cuda-js/testing';
 
@@ -8,6 +8,7 @@ assert.deepEqual(compatibilitySubpath.capabilities.compilerOutputFormats, ['ptx'
 assert.equal(compatibilitySubpath.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
+assert.equal(compatibilitySubpath.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin');
 
 const runtime = await openCudaRuntimeForTesting({ compiler: true });
 const source = 'extern "C" __global__ void portable_consumer() {}\n';
@@ -31,6 +32,24 @@ const devicePublication = await compileDeviceProgram(runtime, {
   ], returns: 'void' }],
   compile: { architecture: 'compute_120', headerProfile: 'cuda-cccl' },
 });
+const deviceLibrary = await compileDeviceLibrary(runtime, {
+  source: 'function combine(x, y) { return x + y; }',
+  functions: [{ name: 'combine', kind: 'device', parameters: [{ name: 'x', type: 'u32' }, { name: 'y', type: 'u32' }], returns: 'u32' }],
+  exports: ['combine'],
+  compile: { architecture: 'compute_120' },
+});
+const composedFirst = await compileDeviceProgram(runtime, {
+  source: 'function first(out) { out[gpu.u32(0)] = add(gpu.u32(2), gpu.u32(3)); }',
+  functions: [{ name: 'first', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
+  imports: [{ library: deviceLibrary.library, name: 'combine', as: 'add' }],
+  compile: { architecture: 'compute_120' },
+});
+const composedSecond = await compileDeviceProgram(runtime, {
+  source: 'function second(out) { out[gpu.u32(0)] = merge(gpu.u32(5), gpu.u32(8)); }',
+  functions: [{ name: 'second', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
+  imports: [{ library: deviceLibrary.library, name: 'combine', as: 'merge' }],
+  compile: { architecture: 'compute_120' },
+});
 
 assert.equal(compiled.artifact.format, 'ptx');
 assert.equal(relocatable.artifact.format, 'ptx');
@@ -46,7 +65,11 @@ assert.equal(deviceJs.compiler.artifact.format, 'ptx');
 assert.equal(deviceJs.compiler.artifact.architecture, 'compute_120');
 assert.equal(devicePublication.deviceProgram.contract, deviceJs.deviceProgram.contract);
 assert.equal(devicePublication.compiler.artifact.format, 'ptx');
-for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact]) {
+assert.equal(deviceLibrary.library.artifact.relocatableDeviceCode, true);
+assert.equal(composedFirst.linker.artifact.format, 'cubin');
+assert.equal(composedSecond.linker.artifact.format, 'cubin');
+assert.notEqual(composedFirst.deviceProgram.sha256, composedSecond.deviceProgram.sha256);
+for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact, deviceLibrary.library.artifact, composedFirst.linker.artifact, composedSecond.linker.artifact]) {
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/);
 }
 assert.notEqual(compiled.cache.key, relocatable.cache.key);
@@ -70,6 +93,9 @@ console.log(JSON.stringify({
   deviceJs: deviceJs.compiler.artifact.sha256,
   deviceJsProgram: deviceJs.deviceProgram.sha256,
   devicePublication: devicePublication.deviceProgram.sha256,
+  deviceLibrary: deviceLibrary.library.sha256,
+  composedFirst: composedFirst.deviceProgram.sha256,
+  composedSecond: composedSecond.deviceProgram.sha256,
   deviceJsParser: deviceJs.deviceProgram.parser,
   graceful: terminal.graceful,
 }));

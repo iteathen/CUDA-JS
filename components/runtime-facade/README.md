@@ -8,6 +8,8 @@ The native entry requires Node 26.1.0 or later on Windows x64 and Node's experim
 
 `compileDeviceProgram(runtime, request)` is the optional SPEC-0013 authoring bridge. It consumes the separate `runtime.device-js` translator, passes only private generated CUDA source into the runtime's existing `compile()` port, and returns the bounded Device-JS descriptor plus the ordinary compiler result. It does not add Device-JS state to every runtime instance, expose generated CUDA/AST data, or create a second compiler/resource owner.
 
+SPEC-0028 adds `compileDeviceLibrary(runtime, request)` and explicit aliased imports to `compileDeviceProgram()`. Library artifacts are copied typed values, imports are validated and snapshotted before program compilation, and the existing compiler/linker ports own RDC/LTO realization and final cubin production. The facade does not own a library registry, native symbol API, or tensor semantics.
+
 Resource close failures retain the accepted bounded disposal category, native observation name, and health transition. A resource whose disposer ran and failed becomes orphaned/unusable, and repeated `close()` returns the stored failure without retrying native disposal. Poisoned or restart-required outcomes immediately constrain subsequent admission. Runtime-open rollback and aggregate close reports retain sanitized primary/cleanup divergence without exposing actor tokens, provider paths, or native capabilities.
 
 ```js

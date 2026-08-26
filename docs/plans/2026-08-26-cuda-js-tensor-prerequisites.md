@@ -39,31 +39,31 @@ Disposition: **proceed as four serial focus branches**, accepting and implementi
 
 | ID | Output | Status | Dependency | Acceptance / falsifier |
 |---|---|---|---|---|
-| `CJS-TENSOR-VIEW-001` | Public opaque contiguous typed-view capability | Active | Accepted SPEC-0021 component | Installed consumer can create, inspect, use and close a view through package exports; parent/view/operation leases and range/access failures are exact. Falsified by pointer/token escape, unbounded launch use, or cleanup ambiguity. |
-| `CJS-DEVICE-LIB-002` | Typed device-callable module/library composition | Planned | SPEC-0010/SPEC-0012/SPEC-0013 | Two unrelated consumers compose declared device functions without CUDA source or private imports; exact header/module/compiler/cache identity and lifecycle fail closed. |
+| `CJS-TENSOR-VIEW-001` | Public opaque contiguous typed-view capability | Integrated on PR #134 / `main@991330ffda926e052c857cd6a3f5bdcc37f47034` | Accepted SPEC-0021 component | Installed consumer can create, inspect, use and close a view through package exports; parent/view/operation leases and range/access failures are exact. Falsified by pointer/token escape, unbounded launch use, or cleanup ambiguity. |
+| `CJS-DEVICE-LIB-002` | Typed device-callable module/library composition | Active / issue #135 | SPEC-0010/SPEC-0012/SPEC-0013/SPEC-0028 | Two unrelated consumers compose declared device functions without CUDA source or private imports; exact header/module/compiler/cache identity and lifecycle fail closed. |
 | `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Planned | SPEC-0016/SPEC-0018/SPEC-0019 | Ordinary-operation semantic parity, bounded nodes/edges/bindings/resources, one opaque operation per submit, and terminal invalidation/cleanup. CUDA Graph realization remains a qualified adapter. |
 | `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Planned | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
 
 Only one shared contract changes at a time. A head, accepted contract, provider identity, or public package revision change invalidates affected downstream evidence.
 
-## Current execution packet: `CJS-TENSOR-VIEW-001`
+## Current execution packet: `CJS-DEVICE-LIB-002`
 
-Owned operation: accept the SPEC-0021 public-surface addendum and wire the existing `DeviceViewManager` through DriverActor and `runtime.facade`.
+Owned operation: implement accepted SPEC-0028 as a pure Device-JS semantic/library layer orchestrated through the existing CompilerActor compile/link facade.
 
 Expected effects:
 
-- `CudaDeviceMemory.view({ dtype, elementCount, byteOffset?, access? })` creates one opaque logical child;
-- a `CudaDeviceView` exposes only immutable dtype/range/access facts plus status/close;
-- existing `device-memory` pointer parameters accept a view through a private actor translation;
-- view launch use requires an explicit access record, is bounded to the view range, and cannot exceed its declared access role;
-- operation terminality retains both view and allocation leases;
+- `compileDeviceLibrary()` compiles device-only Device-JS source to one copied typed RDC or LTO library record;
+- export symbols derive deterministically from semantic identity and cannot be supplied by callers;
+- `compileDeviceProgram()` accepts bounded explicit aliased imports, snapshots and validates libraries before compiling the program unit, and returns the final cubin linker result;
+- existing CompilerActor artifact/provider/cache/failure/cleanup ownership is reused unchanged;
+- the no-import Device-JS path remains byte-for-byte compatible;
 - package/compatibility identity advances additively.
 
-Non-goals: multidimensional layout, typed host arrays, tensor algebra, implicit kernel bounds, automatic access inference, native qualification, or library-provider implementation.
+Non-goals: tensors, NN/search policy, arbitrary CUDA/native symbols or flags, nested libraries, dynamic loading, overloads, native qualification, or performance claims.
 
-Rollback: retain the already implemented internal SPEC-0021 component without a public facade, package change, or execution binding.
+Rollback: retain existing direct CUDA artifact linking and single-unit Device-JS without the new library/import facade.
 
-Validation: component boundary/property/lifecycle tests, DriverActor protocol tests, execution rollback/terminality tests, facade/TypeScript/package consumers, docs validation, full portable verification, exact-head review, protected PR integration, and cleanup.
+Validation: Device-JS semantic/identity/mutation tests, CompilerActor PTX/LTO orchestration, facade/TypeScript and two unrelated package consumers, docs validation, full portable verification, exact-head review, protected PR integration, and cleanup.
 
 ## Cleanup and continuation
 

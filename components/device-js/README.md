@@ -10,6 +10,8 @@ translateDeviceProgram(request) -> translated program
 
 The public package consumes that translator through standalone `compileDeviceProgram(runtime, request)`, keeping Device-JS optional and removable instead of widening every runtime instance.
 
+SPEC-0028 adds standalone `compileDeviceLibrary(runtime, request)` and explicit `imports` on composed programs. A library is a device-function-only leaf unit with explicit exports, deterministic identity-derived external symbols, and one copied typed RDC or LTO artifact. Program imports use explicit local aliases and exact signatures; the facade snapshots and validates every library before new compiler work, compiles the program in the same artifact family, and reuses the existing linker to produce cubin. No registry, ambient lookup, generated CUDA, native symbol choice, tensor semantics, or second compiler owner is introduced.
+
 ## Ownership split
 
 Pinned `acorn@8.15.0` is a syntax-only parser adapter. CUDA-JS owns the accepted syntax subset, metadata/type/ABI rules, helper contract, recursion policy, definite-return rules, deterministic ordering, generated names, CUDA C++ lowering, diagnostics, and program identity. Parser plugins, recovery, semantic inference, and code generation are unavailable.

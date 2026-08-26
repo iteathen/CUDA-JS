@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.9",
+    "version": "0.1.0-alpha.10",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -69,6 +69,7 @@
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
     "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1",
+    "deviceJsLibraries": "typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin",
     "deviceJsParser": {
       "name": "acorn",
       "version": "8.15.0",

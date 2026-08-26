@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { compileDeviceProgram } from '../index.mjs';
+import { compileDeviceLibrary, compileDeviceProgram } from '../index.mjs';
 import { openCudaRuntimeForTesting } from '../testing.mjs';
 
 const request = {
@@ -62,6 +62,140 @@ test('public Device-JS bridge translates privately then reuses CompilerActor', {
     assert.equal(Object.hasOwn(result, 'generatedSource'), false);
     assert.equal(JSON.stringify(result).includes('__global__'), false);
     assert.equal(JSON.stringify(result).includes('threadIdx'), false);
+  } finally {
+    assert.equal((await runtime.close()).graceful, true);
+  }
+});
+
+const libraryRequest = {
+  source: 'function affine(x, scale, bias) { return (x * scale) + bias; }',
+  functions: [{
+    name: 'affine',
+    kind: 'device',
+    parameters: [{ name: 'x', type: 'u32' }, { name: 'scale', type: 'u32' }, { name: 'bias', type: 'u32' }],
+    returns: 'u32',
+  }],
+  exports: ['affine'],
+};
+
+function consumer(alias, kernel) {
+  return {
+    source: `function ${kernel}(out) { out[gpu.u32(0)] = ${alias}(gpu.u32(2), gpu.u32(3), gpu.u32(4)); }`,
+    functions: [{ name: kernel, kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
+  };
+}
+
+test('public Device-JS libraries compose through typed RDC/LTO without CUDA source or hidden compiler work', { timeout: 10_000 }, async () => {
+  const runtime = await openCudaRuntimeForTesting({ compiler: true });
+  try {
+    const compiled = await compileDeviceLibrary(runtime, libraryRequest);
+    assert.equal(compiled.compiler.operationSequence, 1);
+    assert.equal(compiled.library.format, 'ptx');
+    assert.equal(compiled.library.artifact.relocatableDeviceCode, true);
+    assert.equal(compiled.library.exports[0].name, 'affine');
+    assert.equal(compiled.library.exports[0].symbol, `djs_lib_${compiled.library.sha256}_0`);
+    assert.equal(JSON.stringify(compiled).includes('__device__'), false);
+    assert.equal(JSON.stringify(compiled).includes(libraryRequest.source), false);
+
+    const original = compiled.library.artifact.bytes[0];
+    compiled.library.artifact.bytes[0] ^= 0xff;
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('apply', 'invalidKernel'),
+      imports: [{ library: compiled.library, name: 'affine', as: 'apply' }],
+    }), (error) => error.code === 'LINKER_INPUT_INVALID');
+    compiled.library.artifact.bytes[0] = original;
+
+    const first = await compileDeviceProgram(runtime, {
+      ...consumer('apply', 'firstKernel'),
+      imports: [{ library: compiled.library, name: 'affine', as: 'apply' }],
+    });
+    assert.equal(first.compiler.operationSequence, 2);
+    assert.equal(first.linker.operationSequence, 3);
+    assert.equal(first.linker.artifact.format, 'cubin');
+    assert.equal(first.deviceProgram.imports[0].exportName, 'affine');
+
+    const second = await compileDeviceProgram(runtime, {
+      ...consumer('transform', 'secondKernel'),
+      imports: [{ library: compiled.library, name: 'affine', as: 'transform' }],
+    });
+    assert.equal(second.compiler.operationSequence, 4);
+    assert.equal(second.linker.operationSequence, 5);
+    assert.notEqual(second.deviceProgram.sha256, first.deviceProgram.sha256);
+
+    const lto = await compileDeviceLibrary(runtime, {
+      ...libraryRequest,
+      source: 'function affine(x, scale, bias) { return ((x * scale) + bias) + gpu.u32(0); }',
+      output: 'lto-ir',
+    });
+    assert.equal(lto.compiler.operationSequence, 6);
+    assert.equal(lto.library.format, 'lto-ir');
+    const ltoProgram = await compileDeviceProgram(runtime, {
+      ...consumer('applyLto', 'ltoKernel'),
+      imports: [{ library: lto.library, name: 'affine', as: 'applyLto' }],
+    });
+    assert.equal(ltoProgram.compiler.operationSequence, 7);
+    assert.equal(ltoProgram.compiler.artifact.format, 'lto-ir');
+    assert.equal(ltoProgram.linker.operationSequence, 8);
+    assert.equal(ltoProgram.linker.artifact.format, 'cubin');
+
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('missing', 'missingKernel'),
+      imports: [{ library: compiled.library, name: 'missing', as: 'missing' }],
+    }), (error) => error.code === 'DEVICE_JS_IMPORT_UNKNOWN');
+
+    await assert.rejects(compileDeviceLibrary(runtime, {
+      ...libraryRequest,
+      compile: { relocatableDeviceCode: true },
+    }), (error) => error.code === 'DEVICE_JS_LIBRARY_COMPILE_CONFLICT');
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('conflict', 'rdcConflictKernel'),
+      compile: { relocatableDeviceCode: true },
+      imports: [{ library: compiled.library, name: 'affine', as: 'conflict' }],
+    }), (error) => error.code === 'DEVICE_JS_LIBRARY_COMPILE_CONFLICT');
+
+    const mismatched = {
+      ...compiled.library,
+      architecture: 'compute_80',
+      artifact: { ...compiled.library.artifact, architecture: 'compute_80' },
+    };
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('wrongTarget', 'targetMismatchKernel'),
+      imports: [{ library: mismatched, name: 'affine', as: 'wrongTarget' }],
+    }), (error) => error.code === 'LINKER_ARCHITECTURE_MISMATCH');
+
+    const contradictory = {
+      ...compiled.library,
+      exports: [{
+        ...compiled.library.exports[0],
+        parameters: [
+          { ...compiled.library.exports[0].parameters[0], type: 'u64' },
+          ...compiled.library.exports[0].parameters.slice(1),
+        ],
+      }],
+    };
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('apply', 'contradictoryKernel'),
+      imports: [
+        { library: compiled.library, name: 'affine', as: 'apply' },
+        { library: contradictory, name: 'affine', as: 'contradictory' },
+      ],
+    }), (error) => error.code === 'DEVICE_JS_LIBRARY_CONFLICT');
+
+    await assert.rejects(compileDeviceProgram(runtime, {
+      source: 'function useBoth(out) { out[gpu.u32(0)] = applyPtx(gpu.u32(1), gpu.u32(2), gpu.u32(3)) + applyLto(gpu.u32(4), gpu.u32(5), gpu.u32(6)); }',
+      functions: [{ name: 'useBoth', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
+      imports: [
+        { library: compiled.library, name: 'affine', as: 'applyPtx' },
+        { library: lto.library, name: 'affine', as: 'applyLto' },
+      ],
+    }), (error) => error.code === 'LINKER_INPUT_FORMAT_MIXED');
+
+    const probe = await compileDeviceProgram(runtime, {
+      ...consumer('stillValid', 'postNegativeKernel'),
+      imports: [{ library: compiled.library, name: 'affine', as: 'stillValid' }],
+    });
+    assert.equal(probe.compiler.operationSequence, 9);
+    assert.equal(probe.linker.operationSequence, 10);
   } finally {
     assert.equal((await runtime.close()).graceful, true);
   }
