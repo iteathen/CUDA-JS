@@ -7,10 +7,10 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     0a7cf198dd3d4f07768133d167fc37f2e30cdcd3
+protected main:     991330ffda926e052c857cd6a3f5bdcc37f47034
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.9 candidate (public typed-view packet)
+execution package:  cuda-js@0.1.0-alpha.10 candidate (typed Device-JS library packet)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -43,7 +43,8 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - SPEC-0014 exact private mapped named-u32 publication mailbox profile;
 - SPEC-0017 finite sanitized discovery, opaque explicit selection, one selected device per runtime, and selected-device compile/link target defaults;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
-- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with an active additive allocation-owned public facade packet;
+- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component and allocation-owned public facade, integrated on PR #134;
+- SPEC-0028 typed Device-JS leaf-library composition, active on issue #135;
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
@@ -123,6 +124,8 @@ SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph
 
 SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation and device-publication children, and the SPEC-0014 mailbox child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. `loadAcquireDevice` / `storeReleaseDevice` provide device-scope publication ordering when acquire observes the matching release; consumer generation, progress, payload and queue policy remain separate. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
 
+Accepted SPEC-0028 is the active portable packet. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
+
 ## Proposal-only successor capabilities
 
 The following remain proposal authority only and do not authorize production code:
@@ -177,8 +180,8 @@ Not-qualified is not architectural rejection.
 
 ```text
 1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. integrate the bounded public SPEC-0021 typed-view facade packet
-3. advance the serial generic CUDA-JS prerequisites selected by the CUDA-JS-Tensor plan: device-callable library composition, prepared dependency batches, then generic library adapters
+2. integrate the bounded SPEC-0028 typed Device-JS library-composition packet
+3. advance the remaining serial generic CUDA-JS prerequisites selected by the CUDA-JS-Tensor plan: prepared dependency batches, then generic library adapters
 4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
 ```
 

@@ -281,28 +281,75 @@ export interface DeviceJsFunction {
   returns: DeviceJsScalarType | 'void';
 }
 
+export interface DeviceJsDeviceFunction extends Omit<DeviceJsFunction, 'kind'> {
+  kind: 'device';
+}
+
+export type DeviceJsLibraryCompileOptions = Omit<DeviceCompileOptions, 'relocatableDeviceCode'>;
+
 export interface DeviceJsCompileRequest {
   source: string;
   functions: readonly DeviceJsFunction[];
   compile?: DeviceCompileOptions;
+  imports?: readonly DeviceJsImport[];
+}
+
+export interface DeviceJsLibraryExport {
+  readonly name: string;
+  readonly symbol: string;
+  readonly parameters: readonly DeviceJsParameter[];
+  readonly returns: DeviceJsScalarType | 'void';
+}
+
+export interface DeviceJsLibrary {
+  readonly schemaVersion: 1;
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1';
+  readonly sha256: string;
+  readonly format: 'ptx' | 'lto-ir';
+  readonly architecture: string;
+  readonly exports: readonly DeviceJsLibraryExport[];
+  readonly artifact: PtxArtifact | LtoIrArtifact;
+}
+
+export interface DeviceJsLibraryCompileRequest {
+  source: string;
+  functions: readonly DeviceJsDeviceFunction[];
+  exports: readonly string[];
+  compile?: DeviceJsLibraryCompileOptions;
+  output?: 'ptx' | 'lto-ir';
+}
+
+export interface DeviceJsLibraryCompileResult {
+  readonly schemaVersion: 1;
+  readonly library: DeviceJsLibrary;
+  readonly compiler: CompilerResult;
+}
+
+export interface DeviceJsImport {
+  readonly library: DeviceJsLibrary;
+  readonly name: string;
+  readonly as: string;
 }
 
 export interface DeviceJsProgramDescriptor {
-  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1';
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1';
   readonly sha256: string;
   readonly parser: Readonly<{ name: 'acorn'; version: string }>;
   readonly functions: readonly Readonly<Record<string, unknown>>[];
   readonly kernels: readonly Readonly<{ name: string; functionName: string; parameters: readonly FunctionParameter[] }>[];
+  readonly imports?: readonly Readonly<Record<string, unknown>>[];
 }
 
 export interface DeviceJsCompileResult {
   readonly schemaVersion: 1;
   readonly deviceProgram: DeviceJsProgramDescriptor;
   readonly compiler: CompilerResult;
+  readonly linker?: CompilerResult;
 }
 
 export const CUDA_JS_COMPATIBILITY: Readonly<Record<string, unknown>>;
 export function inspectCudaHost(): Readonly<{ schemaVersion: 1; host: Readonly<Record<string, unknown>>; compatibility: typeof CUDA_JS_COMPATIBILITY }>;
 export function discoverCudaDevices(): Promise<CudaDeviceSnapshot>;
 export function openCudaRuntime(options?: OpenCudaRuntimeOptions): Promise<CudaRuntime>;
+export function compileDeviceLibrary(runtime: CudaRuntime, request: DeviceJsLibraryCompileRequest): Promise<DeviceJsLibraryCompileResult>;
 export function compileDeviceProgram(runtime: CudaRuntime, request: DeviceJsCompileRequest): Promise<DeviceJsCompileResult>;

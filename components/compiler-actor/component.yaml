@@ -15,7 +15,7 @@
     "lifecycle": "One Worker serially owns provider libraries and all temporary program/link handles. Every operation destroys native resources before resolving; graceful close unloads providers; unexpected loss requires a new runtime.",
     "design": {
       "owned_invariant": "Only canonical verified providers and normalized typed inputs enter native compilation, and no native capability crosses the Worker boundary.",
-      "public_ports": ["openCompilerRuntime", "CompilerRuntimeError"],
+      "public_ports": ["openCompilerRuntime", "CompilerRuntimeError", "normalizeLinkRequest"],
       "injected_dependencies": ["private backend profile", "cache directory", "cache mode"],
       "adapter_boundaries": ["shared native compiler engine", "canonical Windows provider profile", "canonical Linux x86-64 provider profile", "platform-neutral compiler mock", "validated filesystem cache"],
       "simplest_sufficient_total_system": "One facade, one serialized Worker, two verified provider libraries, local program/link lifetimes, and one validated content-addressed cache."
