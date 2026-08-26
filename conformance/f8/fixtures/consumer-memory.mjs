@@ -30,7 +30,7 @@ const selectedDenseNumeric = await compileDeviceProgram(selectedRuntime, {
   source: 'function selectedDense(out, x) { out[gpu.u32(0)] = gpu.math.maximum(gpu.math.sqrt(x), gpu.f64.negativeInfinity()); }',
   functions: [{ name: 'selectedDense', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f64>' }, { name: 'x', type: 'f64' }], returns: 'void' }],
 });
-assert.equal(selectedDenseNumeric.compiler.artifact.architecture, 'compute_75');
+assert.equal(selectedDenseNumeric.compiler.artifact.architecture, 'compute_89');
 assert.equal(selectedDenseNumeric.compiler.headerProfile, 'cuda-numeric');
 assert.match(selectedDenseNumeric.deviceProgram.contract, /SPEC-0030-dense-numeric-v1$/u);
 assert.equal(JSON.stringify(selectedDescription).includes('ordinal'), false);

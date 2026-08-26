@@ -190,6 +190,10 @@ function dataFor(runtime, operation, allowTerminal = false) {
   return data;
 }
 
+export function inspectRuntimeCompileTarget(runtime, operation) {
+  return dataFor(runtime, operation).targets.compileTarget;
+}
+
 function resourceFor(resource, runtime, kind, operation) {
   const entry = resourceData.get(resource);
   if (!entry) throw facadeError('CUDA_JS_RESOURCE_INVALID', 'validation', 'Resource capability is invalid.', { kind }, operation);

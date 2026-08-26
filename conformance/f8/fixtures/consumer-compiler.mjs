@@ -2,16 +2,19 @@ import assert from 'node:assert/strict';
 
 import { compileDeviceLibrary, compileDeviceProgram } from 'cuda-js';
 import { CUDA_JS_COMPATIBILITY as compatibilitySubpath } from 'cuda-js/compatibility';
-import { openCudaRuntimeForTesting } from 'cuda-js/testing';
+import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from 'cuda-js/testing';
 
 assert.deepEqual(compatibilitySubpath.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
 assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
-assert.equal(compatibilitySubpath.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin');
+assert.equal(compatibilitySubpath.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-selected-runtime-target-rdc-or-lto-final-cubin');
 assert.equal(compatibilitySubpath.capabilities.deviceJsDenseNumeric, 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers');
 
-const runtime = await openCudaRuntimeForTesting({ compiler: true });
+const snapshot = await discoverCudaDevicesForTesting([
+  { nativeDevice: 5, computeCapabilityMajor: 12, computeCapabilityMinor: 0 },
+]);
+const runtime = await openCudaRuntimeForTesting({ device: snapshot.devices[0].selector, compiler: true });
 const source = 'extern "C" __global__ void portable_consumer() {}\n';
 const compiled = await runtime.compile({ source, name: 'portable-consumer.cu' });
 const relocatable = await runtime.compile({ source, name: 'portable-consumer-rdc.cu', options: { relocatableDeviceCode: true } });

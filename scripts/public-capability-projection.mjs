@@ -226,7 +226,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.deviceJsDenseNumeric !== 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers') {
     errors.push('packaging compatibility Device-JS dense-numeric projection is stale');
   }
-  if (compatibility.capabilities?.deviceJsLibraries !== 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin') {
+  if (compatibility.capabilities?.deviceJsLibraries !== 'typed-leaf-libraries-explicit-aliased-imports-selected-runtime-target-rdc-or-lto-final-cubin') {
     errors.push('packaging compatibility Device-JS library projection is stale');
   }
 

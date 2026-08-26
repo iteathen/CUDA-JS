@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { compileDeviceLibrary, compileDeviceProgram } from '../index.mjs';
-import { openCudaRuntimeForTesting } from '../testing.mjs';
+import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from '../testing.mjs';
 
 const request = {
   source: `
@@ -226,5 +226,47 @@ test('public Device-JS libraries compose through typed RDC/LTO without CUDA sour
     assert.equal(hiddenDenseProgram.compiler.headerProfile, 'cuda-numeric');
   } finally {
     assert.equal((await runtime.close()).graceful, true);
+  }
+});
+
+test('Device-JS translation, libraries, imports and artifacts share the selected runtime target', { timeout: 10_000 }, async () => {
+  const snapshot = await discoverCudaDevicesForTesting([
+    { nativeDevice: 0, computeCapabilityMajor: 7, computeCapabilityMinor: 5 },
+    { nativeDevice: 7, computeCapabilityMajor: 8, computeCapabilityMinor: 9 },
+  ]);
+  const selected = await openCudaRuntimeForTesting({ device: snapshot.devices[1].selector, compiler: true });
+  const baseline = await openCudaRuntimeForTesting({ compiler: true });
+  try {
+    const library = await compileDeviceLibrary(selected, libraryRequest);
+    assert.equal(library.library.architecture, 'compute_89');
+    assert.equal(library.library.artifact.architecture, 'compute_89');
+    assert.equal(library.compiler.artifact.architecture, 'compute_89');
+
+    const composed = await compileDeviceProgram(selected, {
+      ...consumer('selectedAffine', 'selectedKernel'),
+      imports: [{ library: library.library, name: 'affine', as: 'selectedAffine' }],
+    });
+    assert.equal(composed.compiler.artifact.architecture, 'compute_89');
+    assert.equal(composed.linker.artifact.architecture, 'sm_89');
+
+    const lto = await compileDeviceLibrary(selected, { ...libraryRequest, output: 'lto-ir' });
+    assert.equal(lto.library.architecture, 'compute_89');
+    assert.equal(lto.library.artifact.architecture, 'compute_89');
+
+    const selectedKernel = await compileDeviceProgram(selected, request);
+    const baselineKernel = await compileDeviceProgram(baseline, request);
+    assert.equal(selectedKernel.compiler.artifact.architecture, 'compute_89');
+    assert.equal(baselineKernel.compiler.artifact.architecture, 'compute_75');
+    assert.notEqual(selectedKernel.deviceProgram.sha256, baselineKernel.deviceProgram.sha256);
+
+    const resourcesBeforeConflict = (await selected.describe()).compiler.resources;
+    await assert.rejects(compileDeviceLibrary(selected, {
+      ...libraryRequest,
+      compile: { architecture: 'compute_75' },
+    }), (error) => error.code === 'DEVICE_JS_COMPILE_TARGET_CONFLICT');
+    assert.deepEqual((await selected.describe()).compiler.resources, resourcesBeforeConflict);
+  } finally {
+    assert.equal((await selected.close()).graceful, true);
+    assert.equal((await baseline.close()).graceful, true);
   }
 });
