@@ -6,7 +6,7 @@
 
 **Date:** 2026-08-26
 
-**Exact input:** protected `main@2da65ff2e4287450171c477031dd380a21fa095f`, `cuda-js@0.1.0-alpha.12`
+**Exact input:** protected `main@b78f3fc37e20381d950d3297861c877b71f15390`, `cuda-js@0.1.0-alpha.13`
 
 ## Objective and authority
 
@@ -44,7 +44,7 @@ Disposition: **proceed as four serial focus branches**, accepting and implementi
 | `CJS-DEVICE-LIB-002` | Typed device-callable module/library composition | Integrated on PR #136 / `main@9726898d728fc6e1f1baabb5a1ddc67808549e84`; native qualification remains on #135 | SPEC-0010/SPEC-0012/SPEC-0013/SPEC-0028 | Two unrelated consumers compose declared device functions without CUDA source or private imports; exact header/module/compiler/cache identity and lifecycle fail closed. |
 | `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Integrated on PR #137 / `main@1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3`; native CUDA Graph realization remains on #85 | Accepted SPEC-0020 semantic baseline over SPEC-0016/SPEC-0018/SPEC-0021 | Canonical bounded kernel DAGs cross the DriverActor boundary once, preserve ordinary-operation meaning, return one opaque operation per submit, and retain exact dependency/binding/lifecycle truth. CUDA Graph realization remains proposal-only. |
 | `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Integrated on PR #138 / `main@2da65ff2e4287450171c477031dd380a21fa095f`; issue #90 closed | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
-| `CJS-DEVICE-NUMERIC-005` | Additive dense numeric Device-JS profile | Active on issue #139 under accepted SPEC-0030 | SPEC-0013, SPEC-0021, SPEC-0028 and exact compiler header ownership | Legacy Device-JS bytes/identity remain exact; `f64`/`f16`/`bf16` pointers, locals, functions, kernel scalars, exact casts and special-value math compile through public contracts; two unrelated installed consumers and an independent native oracle pass. |
+| `CJS-DEVICE-NUMERIC-005` | Additive dense numeric Device-JS profile | Integrated on PR #140 / `main@b78f3fc37e20381d950d3297861c877b71f15390`; issue #139 closed | SPEC-0013, SPEC-0021, SPEC-0028 and exact compiler header ownership | Legacy Device-JS bytes/identity remain exact; `f64`/`f16`/`bf16` pointers, locals, functions, kernel scalars, exact casts and special-value math compile through public contracts; two unrelated installed consumers and an independent native oracle pass. |
 
 Only one shared contract changes at a time. A head, accepted contract, provider identity, or public package revision change invalidates affected downstream evidence.
 
@@ -92,7 +92,7 @@ Validation: exact Node 26.7.0 portable contract/negative/package tests; selected
 
 Integrated on protected main through PR #138. Issue #90 is closed. The exact reviewed tree remains preserved by the protected squash merge; Linux, other providers/dtypes/layouts, tensor semantics and performance remain separately gated.
 
-## Current execution packet: `CJS-DEVICE-NUMERIC-005`
+## Completed execution packet: `CJS-DEVICE-NUMERIC-005`
 
 Owned operation: implement accepted SPEC-0030 as one additive Device-JS/compiler-profile change without importing tensor operations or application policy.
 
@@ -105,7 +105,7 @@ Expected effects:
 - package declarations/compatibility and installed consumers expose the generic mechanism only;
 - native qualification uses one exact public-path fixture, an independent oracle and terminal cleanup on the recorded Windows profile, without promoting Linux or performance.
 
-Current evidence: focused compiler/translator tests, both unrelated installed portable consumers, documentation validation, the full exact-Node repository gate, F8 package verification, and complete non-independent author review pass on the frozen candidate tree. The installed-package Windows CUDA 13.3/compute_75/GTX 1660 Ti fixture matches a separately compiled CUDA C++ oracle for mixed `f64`/`f16`/`bf16` values, casts, arithmetic, signed zero, NaN propagation and math, with graceful CompilerActor/DriverActor teardown and zero live/orphaned resources. The oracle exposed and caused correction of operand-order-dependent signed-zero lowering before acceptance. Independent review is waived under the documented sole-maintainer exception; protected integration and issue closure remain pending.
+Current evidence: focused compiler/translator tests, both unrelated installed portable consumers, documentation validation, the full exact-Node repository gate, F8 package verification, and complete non-independent author review pass on the frozen candidate tree. The installed-package Windows CUDA 13.3/compute_75/GTX 1660 Ti fixture matches a separately compiled CUDA C++ oracle for mixed `f64`/`f16`/`bf16` values, casts, arithmetic, signed zero, NaN propagation and math, with graceful CompilerActor/DriverActor teardown and zero live/orphaned resources. The oracle exposed and caused correction of operand-order-dependent signed-zero lowering before acceptance. Independent review was waived under the documented sole-maintainer exception. Protected PR #140 integrated the exact reviewed tree and closed issue #139.
 
 Non-goals: tensor shapes/operations, executor generation, NN/training/search policy, new atomics, vectors, fast math, FP8, CUDA Graphs, arbitrary headers/options or broader support claims.
 
