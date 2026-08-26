@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.14');
+assert.equal(packageJson.version, '0.1.0-alpha.15');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -25,7 +25,7 @@ assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-st
 assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(compatibility.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(compatibility.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
-assert.equal(compatibility.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
+assert.equal(compatibility.capabilities.preparedOperationDags, 'bounded-kernel-cublaslt-f32-dag-immutable-bindings-derived-library-access-single-stream-semantic-replay');
 assert.equal(compatibility.capabilities.cublasLtF32Matmul, 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace');
 assert.deepEqual(compatibility.capabilities.compilerOutputFormats, ['ptx', 'lto-ir']);
 assert.equal(compatibility.capabilities.ptxRelocatableDeviceCode, 'typed-boolean-default-false');
@@ -51,6 +51,7 @@ assert.equal(memoryConsumer.publicationMailboxLifecycle, true);
 assert.equal(memoryConsumer.deviceSelectionLifecycle, true);
 assert.equal(memoryConsumer.typedViewLifecycle, true);
 assert.equal(memoryConsumer.preparedOperationDagLifecycle, true);
+assert.equal(memoryConsumer.preparedCublasLtLifecycle, true);
 assert.match(memoryConsumer.denseNumeric, /^[a-f0-9]{64}$/);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);

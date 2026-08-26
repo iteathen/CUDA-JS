@@ -12,8 +12,9 @@ function tokens() {
   const memory = registry.allocate({ kind: 'device-memory', value: {}, parent: context, dispose: async () => ({}) });
   const view = registry.allocate({ kind: 'device-view', value: {}, parent: memory, dispose: async () => ({}) });
   const prepared = registry.allocate({ kind: 'prepared-dag', value: {}, parent: context, dispose: async () => ({}) });
+  const plan = registry.allocate({ kind: 'cublaslt-matmul-plan', value: {}, parent: context, dispose: async () => ({}) });
   const operation = registry.allocate({ kind: 'operation', value: {}, parent: context, dispose: async () => ({}) });
-  return { fn, memory, view, prepared, operation };
+  return { fn, memory, view, prepared, plan, operation };
 }
 
 const OPTIONS = Object.freeze({ executionPolicy: Object.freeze({ maxModuleBytes: 4 * 1_048_576, maxArguments: 32 }) });
@@ -28,9 +29,15 @@ function kernel(functionToken) {
 }
 
 test('Driver protocol admits exact prepared create, resource, and submission commands', () => {
-  const { fn, memory, view, prepared, operation } = tokens();
+  const { fn, memory, view, prepared, plan, operation } = tokens();
   const create = requestRecord(1, 'execution.prepared.create', { nodes: [kernel(fn)] });
   assert.equal(validateRequest(create, OPTIONS), create);
+  const libraryCreate = requestRecord(5, 'execution.prepared.create', { nodes: [{
+    id: 'matmul', kind: 'cublaslt-f32-matmul', after: [], planToken: plan,
+    a: { binding: 'a' }, b: { binding: 'b' }, c: { binding: 'c' }, d: { binding: 'd' },
+    alpha: { binding: 'alpha' }, beta: { kind: 'f32', value: 0 }, workspace: null,
+  }] });
+  assert.equal(validateRequest(libraryCreate, OPTIONS), libraryCreate);
   for (const name of ['execution.prepared.status', 'execution.prepared.release']) {
     const request = requestRecord(2, name, { token: prepared });
     assert.equal(validateRequest(request, OPTIONS), request);

@@ -93,12 +93,20 @@ function preparedArguments(value, maximum) {
 }
 
 function preparedNodes(value, maximumArguments) {
-  return Array.isArray(value) && value.length > 0 && value.length <= PREPARED_OPERATION_DAG_LIMITS.nodes && value.every((entry) => plainObject(entry)
-    && exactFields(entry, ['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'])
-    && identifier(entry.id) && entry.kind === 'kernel' && isResourceToken(entry.functionToken)
-    && Array.isArray(entry.after) && entry.after.length <= PREPARED_OPERATION_DAG_LIMITS.predecessorsPerNode && entry.after.every(identifier)
-    && dimensions(entry.grid) && dimensions(entry.block) && nonnegativeSafeInteger(entry.sharedMemoryBytes)
-    && preparedArguments(entry.arguments, maximumArguments) && Array.isArray(entry.accesses) && launchAccesses(entry.accesses, maximumArguments));
+  return Array.isArray(value) && value.length > 0 && value.length <= PREPARED_OPERATION_DAG_LIMITS.nodes && value.every((entry) => {
+    if (!plainObject(entry) || !identifier(entry.id) || !Array.isArray(entry.after) || entry.after.length > PREPARED_OPERATION_DAG_LIMITS.predecessorsPerNode || !entry.after.every(identifier)) return false;
+    if (entry.kind === 'cublaslt-f32-matmul') {
+      const binding = (candidate) => exactFields(candidate, ['binding']) && identifier(candidate.binding);
+      const scalar = (candidate) => binding(candidate) || (scalarArgument(candidate) && candidate.kind === 'f32');
+      return exactFields(entry, ['id', 'kind', 'after', 'planToken', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace'])
+        && isResourceToken(entry.planToken) && ['a', 'b', 'c', 'd'].every((field) => binding(entry[field]))
+        && scalar(entry.alpha) && scalar(entry.beta) && (entry.workspace === null || binding(entry.workspace));
+    }
+    return exactFields(entry, ['id', 'kind', 'after', 'functionToken', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'])
+      && entry.kind === 'kernel' && isResourceToken(entry.functionToken)
+      && dimensions(entry.grid) && dimensions(entry.block) && nonnegativeSafeInteger(entry.sharedMemoryBytes)
+      && preparedArguments(entry.arguments, maximumArguments) && Array.isArray(entry.accesses) && launchAccesses(entry.accesses, maximumArguments);
+  });
 }
 
 function preparedBindings(value) {

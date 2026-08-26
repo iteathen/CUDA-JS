@@ -1,5 +1,6 @@
 const PLAN_FIELDS = new Set(['m', 'n', 'k', 'transposeA', 'transposeB', 'maxWorkspaceBytes']);
 const SUBMIT_FIELDS = new Set(['a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace', 'after']);
+const PREPARED_NODE_FIELDS = new Set(['id', 'kind', 'after', 'planToken', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace']);
 const MAX_DIMENSION = 0x7fff_ffff;
 const MAX_WORKSPACE_BYTES = 256 * 1_048_576;
 
@@ -76,6 +77,30 @@ function rollbackFailure(code, message, primaryError, cleanupError, operationId)
 
 function tokenKey(token) { return `${token.slot}:${token.generation}`; }
 
+function exactFields(value, fields) {
+  return plainObject(value) && Object.keys(value).sort().join('\0') === [...fields].sort().join('\0');
+}
+
+function packedF32(value) {
+  const bytes = Buffer.allocUnsafe(4);
+  bytes.writeFloatLE(value);
+  return bytes.toString('hex');
+}
+
+function preparedBinding(value, field) {
+  if (!exactFields(value, ['binding']) || typeof value.binding !== 'string') fail('CUBLASLT_PREPARED_BINDING_INVALID', 'validation', `${field} must be an exact named binding reference.`, { field });
+  return Object.freeze({ binding: value.binding, kind: 'device-memory' });
+}
+
+function preparedScalar(value, field) {
+  if (exactFields(value, ['binding'])) return Object.freeze({ semantic: Object.freeze({ binding: value.binding, kind: 'f32' }), privateValue: Object.freeze({ binding: value.binding }) });
+  if (!exactFields(value, ['kind', 'value']) || value.kind !== 'f32') fail('CUBLASLT_PREPARED_SCALAR_INVALID', 'validation', `${field} must be an exact f32 value or named binding.`, { field });
+  const normalized = finiteScalar(value.value, field);
+  return Object.freeze({ semantic: Object.freeze({ kind: 'f32', packedHex: packedF32(normalized) }), privateValue: Object.freeze({ value: normalized }) });
+}
+
+function viewAllows(actual, requested) { return actual === 'read-write' || actual === requested; }
+
 export class CudaLibraryAdapterManager {
   #registry;
   #contextToken;
@@ -103,6 +128,14 @@ export class CudaLibraryAdapterManager {
 
   summary() {
     return Object.freeze({ schemaVersion: 1, profile: 'cublaslt-f32-row-major-matmul-v1', state: this.#adapterToken === null ? 'unopened' : 'open', planCount: this.#planCount, optional: true });
+  }
+
+  preparedNodeFamily() {
+    return Object.freeze({
+      kind: 'cublaslt-f32-matmul',
+      prepare: (node, context) => this.#prepareNode(node, context),
+      resolve: (node, bindings, context) => this.#resolveNode(node, bindings, context),
+    });
   }
 
   async openCublasLt(operationId = null) {
@@ -210,6 +243,103 @@ export class CudaLibraryAdapterManager {
       if (!handedOff) for (let index = leases.length - 1; index >= 0; index -= 1) leases[index].release();
       throw error;
     }
+  }
+
+  #prepareNode(node, { operationId = null } = {}) {
+    if (!plainObject(node) || Object.keys(node).some((key) => !PREPARED_NODE_FIELDS.has(key)) || ![...PREPARED_NODE_FIELDS].every((key) => Object.hasOwn(node, key)) || node.kind !== 'cublaslt-f32-matmul') {
+      fail('CUBLASLT_PREPARED_NODE_INVALID', 'validation', 'Prepared cuBLASLt node contains unknown or missing fields.');
+    }
+    const planLease = this.#registry.acquire(node.planToken, { kind: 'cublaslt-matmul-plan' });
+    try {
+      const plan = planLease.value;
+      const adapter = this.#registry.get(plan.adapter, { kind: 'cublaslt-adapter' });
+      const matrices = Object.fromEntries(['a', 'b', 'c', 'd'].map((field) => [field, preparedBinding(node[field], field)]));
+      const alpha = preparedScalar(node.alpha, 'alpha');
+      const beta = preparedScalar(node.beta, 'beta');
+      const workspace = node.workspace === null ? null : preparedBinding(node.workspace, 'workspace');
+      if ((plan.workspaceBytes > 0) !== (workspace !== null)) fail('CUBLASLT_PREPARED_WORKSPACE_INVALID', 'validation', 'Prepared workspace binding must match the selected plan requirement.', { byteLength: plan.workspaceBytes });
+      return Object.freeze({
+        semantic: Object.freeze({
+          id: node.id,
+          kind: node.kind,
+          after: Array.isArray(node.after) ? [...node.after] : node.after,
+          plan: Object.freeze({
+            contract: plan.contract,
+            m: plan.m,
+            n: plan.n,
+            k: plan.k,
+            transposeA: plan.transposeA,
+            transposeB: plan.transposeB,
+            maxWorkspaceBytes: plan.maxWorkspaceBytes,
+            workspaceBytes: plan.workspaceBytes,
+            requirements: Object.freeze({ ...plan.requirements }),
+            provider: Object.freeze({ ...adapter.provider }),
+          }),
+          ...matrices,
+          alpha: alpha.semantic,
+          beta: beta.semantic,
+          workspace,
+        }),
+        privateNode: Object.freeze({
+          id: node.id,
+          kind: node.kind,
+          planValue: plan,
+          matrices,
+          alpha: alpha.privateValue,
+          beta: beta.privateValue,
+          workspace,
+        }),
+        dependencies: Object.freeze([Object.freeze({ key: `cublaslt-matmul-plan:${tokenKey(node.planToken)}`, lease: planLease })]),
+      });
+    } catch (error) {
+      planLease.release();
+      throw error;
+    }
+  }
+
+  #resolveNode(node, bindings, { operationId = null } = {}) {
+    const matrices = {};
+    for (const [field, requestedAccess] of [['a', 'read'], ['b', 'read'], ['c', 'read'], ['d', 'write']]) {
+      const value = bindings.get(node.matrices[field].binding);
+      if (!value || value.argument?.kind !== 'device-view') fail('CUBLASLT_PREPARED_VIEW_REQUIRED', 'validation', `Prepared ${field} must resolve to a device view.`, { field });
+      if (value.lease.viewDtype !== 'f32') fail('CUBLASLT_MATMUL_DTYPE_INVALID', 'validation', 'The first cuBLASLt profile accepts only f32 matrix views.', { field });
+      const requiredElements = node.planValue.requirements[field];
+      if (value.lease.viewElementCount < requiredElements) fail('CUBLASLT_MATMUL_VIEW_TOO_SMALL', 'validation', 'A matrix view is smaller than the plan requirement.', { field, expected: requiredElements, actual: value.lease.viewElementCount });
+      if (!viewAllows(value.lease.viewAccess, requestedAccess)) fail('MEMORY_VIEW_ACCESS_DENIED', 'validation', 'Prepared cuBLASLt access exceeds the device view access role.', { field, declared: value.lease.viewAccess, requested: requestedAccess });
+      matrices[field] = Object.freeze({ native: value.lease.native, byteOffset: value.lease.byteOffset, byteLength: requiredElements * 4, elementCount: requiredElements });
+    }
+    let workspace = null;
+    if (node.workspace !== null) {
+      const value = bindings.get(node.workspace.binding);
+      if (!value || value.argument?.kind !== 'device-view') fail('CUBLASLT_PREPARED_VIEW_REQUIRED', 'validation', 'Prepared workspace must resolve to a device view.', { field: 'workspace' });
+      if (value.lease.viewByteLength < node.planValue.workspaceBytes) fail('CUBLASLT_WORKSPACE_TOO_SMALL', 'validation', 'The workspace view is smaller than the plan requirement.', { expected: node.planValue.workspaceBytes, actual: value.lease.viewByteLength });
+      if (value.lease.byteOffset % 256 !== 0) fail('CUBLASLT_WORKSPACE_ALIGNMENT', 'validation', 'The workspace view must begin at a 256-byte-aligned offset.');
+      if (!viewAllows(value.lease.viewAccess, 'read-write')) fail('MEMORY_VIEW_ACCESS_DENIED', 'validation', 'Prepared workspace requires read-write view access.', { field: 'workspace', declared: value.lease.viewAccess, requested: 'read-write' });
+      workspace = Object.freeze({ native: value.lease.native, byteOffset: value.lease.byteOffset, byteLength: node.planValue.workspaceBytes });
+    }
+    const scalar = (value) => Object.hasOwn(value, 'binding') ? bindings.get(value.binding)?.value : value.value;
+    const alpha = finiteScalar(scalar(node.alpha), 'alpha');
+    const beta = finiteScalar(scalar(node.beta), 'beta');
+    const accesses = [
+      this.#access(matrices.a, 'read'), this.#access(matrices.b, 'read'), this.#access(matrices.c, 'read'), this.#access(matrices.d, 'write'),
+    ];
+    if (workspace) accesses.push(this.#access(workspace, 'read-write'));
+    return Object.freeze({
+      accesses: Object.freeze(accesses),
+      enqueue: (streamNative) => this.#operations.submitF32Matmul({
+        planNative: node.planValue.native,
+        alpha,
+        beta,
+        a: matrices.a,
+        b: matrices.b,
+        c: matrices.c,
+        d: matrices.d,
+        workspace,
+        workspaceBytes: node.planValue.workspaceBytes,
+        streamNative,
+        operationId,
+      }),
+    });
   }
 
   #acquireView(token, access, requiredElements, field) {

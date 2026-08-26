@@ -6,7 +6,7 @@
 
 **Date:** 2026-08-26
 
-**Exact input:** protected `main@3a29b65a4ae736923dbde432356a7aad31059fc0`, `cuda-js@0.1.0-alpha.14`
+**Exact input:** protected `main@fb27296cffd7191180b0e3cd609224ed2ded182e`, `cuda-js@0.1.0-alpha.14`; SPEC-0031/alpha.15 is the active additive child candidate.
 
 ## Objective and authority
 
@@ -45,6 +45,15 @@ Disposition: **proceed as four serial focus branches**, accepting and implementi
 | `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Integrated on PR #137; PR #143 / `main@3a29b65a4ae736923dbde432356a7aad31059fc0` closed #142 with native discovery-profile projection and exact installed-package parity; native CUDA Graph realization remains on #85 | Accepted SPEC-0020 semantic baseline over SPEC-0016/SPEC-0018/SPEC-0021 | Canonical bounded kernel DAGs cross the DriverActor boundary once, preserve ordinary-operation meaning, return one opaque operation per submit, and retain exact dependency/binding/lifecycle truth. Alpha.14 projects native discovery data to the exact identity profile and adds exact recorded-profile native parity; CUDA Graph realization remains proposal-only. |
 | `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Integrated on PR #138 / `main@2da65ff2e4287450171c477031dd380a21fa095f`; issue #90 closed | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
 | `CJS-DEVICE-NUMERIC-005` | Additive dense numeric Device-JS profile | Integrated on PR #140 / `main@b78f3fc37e20381d950d3297861c877b71f15390`; issue #139 closed | SPEC-0013, SPEC-0021, SPEC-0028 and exact compiler header ownership | Legacy Device-JS bytes/identity remain exact; `f64`/`f16`/`bf16` pointers, locals, functions, kernel scalars, exact casts and special-value math compile through public contracts; two unrelated installed consumers and an independent native oracle pass. |
+| `CJS-PREPARED-CUBLASLT-006` | Bounded fixed-plan cuBLASLt f32 node in semantic prepared DAGs | Active accepted SPEC-0031 candidate on issue #145 | SPEC-0020, SPEC-0023, SPEC-0029 | Installed public consumer composes kernel → cuBLASLt → kernel in one request/stream/event/operation, with derived library accesses, exact legacy kernel identity, plan/view/workspace leases, conservative partial failure, and zero cleanup residue. |
+
+## Active execution packet: `CJS-PREPARED-CUBLASLT-006`
+
+Owned operation: compose one fixed SPEC-0029 plan node with accepted prepared kernel nodes while preserving the existing execution lifecycle and leaving tensor scheduling/policy in CUDA-JS-Tensor.
+
+The execution owner retains topology, binding resolution, concrete hazards, the private stream, final event, whole-DAG operation, terminality, and restart-required partial-submission truth. The library owner retains plan/provider identity, f32 view and workspace validation, derived A/B/C-read/D-write/workspace-read-write ranges, and native enqueue. Their connection is a private initialization-time port for one accepted node family, not a public provider registry. Kernel-only contract and identity remain byte-for-byte unchanged.
+
+Acceptance requires focused negative/lifecycle tests, clean installed-package portable replay, the exact Windows CUDA 13.3/cuBLASLt 13.5.1 mixed kernel/library fixture with independent SPEC-0029 numerical evidence, exact Node 26.7.0 full verification, author review of one frozen head, protected integration, and cleanup. No Linux, broader provider, CUDA Graph, tensor-core, batching, multi-GPU, or performance claim is inferred.
 
 Only one shared contract changes at a time. A head, accepted contract, provider identity, or public package revision change invalidates affected downstream evidence.
 

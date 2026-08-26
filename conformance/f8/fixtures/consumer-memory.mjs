@@ -11,7 +11,7 @@ assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-s
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
-assert.equal(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDags, 'bounded-kernel-cublaslt-f32-dag-immutable-bindings-derived-library-access-single-stream-semantic-replay');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.cublasLtF32Matmul, 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceJsDenseNumeric, 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers');
@@ -155,7 +155,7 @@ const matrices = [];
 for (let index = 0; index < matrixValues.length; index += 1) {
   const memory = await libraryRuntime.allocateDevice({ byteLength: matrixValues[index].length * 4 });
   await memory.write(new Uint8Array(new Float32Array(matrixValues[index]).buffer));
-  const view = await memory.view({ dtype: 'f32', elementCount: matrixValues[index].length, access: index < 3 ? 'read' : 'write' });
+  const view = await memory.view({ dtype: 'f32', elementCount: matrixValues[index].length, access: index < 3 ? 'read' : 'read-write' });
   matrices.push({ memory, view });
 }
 const cublasLt = await libraryRuntime.openCublasLt();
@@ -164,7 +164,15 @@ const matmul = await matmulPlan.submit({ a: matrices[0].view, b: matrices[1].vie
 assert.equal((await matmul.wait()).kind, 'cublaslt-f32-matmul');
 const matmulOutput = (await matrices[3].memory.read({ byteLength: 16 })).bytes;
 assert.deepEqual([...new Float32Array(matmulOutput.buffer, matmulOutput.byteOffset, 4)], [58, 64, 139, 154]);
-await matmul.close(); await matmulPlan.close(); await cublasLt.close();
+await matmul.close();
+const preparedMatmul = await libraryRuntime.prepareOperationDag([{
+  id: 'matmul', kind: 'cublaslt-f32-matmul', plan: matmulPlan,
+  a: { binding: 'a' }, b: { binding: 'b' }, c: { binding: 'c' }, d: { binding: 'd' }, alpha: { binding: 'alpha' },
+}]);
+assert.equal(preparedMatmul.contract, 'SPEC-0020-prepared-kernel-dag-v1+SPEC-0031-prepared-cublaslt-f32-matmul-node-v1');
+const preparedMatmulOperation = await preparedMatmul.submit({ a: matrices[0].view, b: matrices[1].view, c: matrices[2].view, d: matrices[3].view, alpha: 1 });
+assert.equal((await preparedMatmulOperation.wait()).kind, 'prepared-batch');
+await preparedMatmulOperation.close(); await preparedMatmul.close(); await matmulPlan.close(); await cublasLt.close();
 for (const matrix of matrices) { await matrix.view.close(); await matrix.memory.close(); }
 assert.equal((await libraryRuntime.close()).graceful, true);
 
@@ -178,6 +186,7 @@ console.log(JSON.stringify({
   asyncTransferLifecycle: true,
   publicationMailboxLifecycle: true,
   preparedOperationDagLifecycle: true,
+  preparedCublasLtLifecycle: true,
   cublasLtLifecycle: true,
   deviceSelectionLifecycle: true,
   denseNumeric: selectedDenseNumeric.deviceProgram.sha256,

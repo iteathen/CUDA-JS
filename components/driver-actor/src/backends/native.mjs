@@ -696,6 +696,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
         },
       },
     });
+    execution.registerPreparedNodeFamily(libraryAdapters.preparedNodeFamily());
 
     async function description(operationSequence = 0) {
       const executionSummary = execution.summary();

@@ -174,6 +174,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       },
     },
   });
+  execution.registerPreparedNodeFamily(libraryAdapters.preparedNodeFamily());
 
   async function description(operationSequence = 0) {
     return {

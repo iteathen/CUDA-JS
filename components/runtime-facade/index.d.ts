@@ -220,6 +220,22 @@ export interface CudaPreparedKernelNode {
   }>[];
 }
 
+export interface CudaPreparedCublasLtF32MatmulNode {
+  id: string;
+  kind: 'cublaslt-f32-matmul';
+  after?: readonly string[];
+  plan: CudaCublasLtMatmulPlan;
+  a: CudaPreparedBindingReference;
+  b: CudaPreparedBindingReference;
+  c: CudaPreparedBindingReference;
+  d: CudaPreparedBindingReference;
+  alpha?: number | CudaPreparedBindingReference;
+  beta?: number | CudaPreparedBindingReference;
+  workspace?: CudaPreparedBindingReference | null;
+}
+
+export type CudaPreparedOperationNode = CudaPreparedKernelNode | CudaPreparedCublasLtF32MatmulNode;
+
 export type CudaPreparedBindingValue = CudaDeviceMemory | CudaDeviceView | number | bigint;
 export interface CudaPreparedBindingDescriptor { readonly name: string; readonly kind: FunctionParameterKind; }
 export interface CudaPreparedSubmitOptions { after?: CudaOperation | null; }
@@ -268,7 +284,7 @@ export interface CudaFunction {
 
 export interface CudaPreparedOperationDag {
   readonly kind: 'prepared-operation-dag';
-  readonly contract: 'SPEC-0020-prepared-kernel-dag-v1';
+  readonly contract: 'SPEC-0020-prepared-kernel-dag-v1' | 'SPEC-0020-prepared-kernel-dag-v1+SPEC-0031-prepared-cublaslt-f32-matmul-node-v1';
   readonly sha256: string;
   readonly nodeCount: number;
   readonly edgeCount: number;
@@ -348,8 +364,8 @@ export interface CudaRuntime {
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
   createPublicationMailbox(options: { lanes: readonly Readonly<{ name: string; direction: 'host-to-device' | 'device-to-host' }>[] }): Promise<CudaPublicationMailbox>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
-  prepareOperationDag(nodes: readonly CudaPreparedKernelNode[]): Promise<CudaPreparedOperationDag>;
-  prepareOperationDag(options: { nodes: readonly CudaPreparedKernelNode[] }): Promise<CudaPreparedOperationDag>;
+  prepareOperationDag(nodes: readonly CudaPreparedOperationNode[]): Promise<CudaPreparedOperationDag>;
+  prepareOperationDag(options: { nodes: readonly CudaPreparedOperationNode[] }): Promise<CudaPreparedOperationDag>;
   openCublasLt(): Promise<CudaCublasLt>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
   link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;

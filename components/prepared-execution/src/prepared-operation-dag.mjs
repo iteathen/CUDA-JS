@@ -1,11 +1,13 @@
 import { createHash } from 'node:crypto';
 
 export const PREPARED_OPERATION_DAG_CONTRACT = 'SPEC-0020-prepared-kernel-dag-v1';
+export const PREPARED_CUBLASLT_OPERATION_DAG_CONTRACT = `${PREPARED_OPERATION_DAG_CONTRACT}+SPEC-0031-prepared-cublaslt-f32-matmul-node-v1`;
 export const PREPARED_OPERATION_DAG_LIMITS = Object.freeze({ nodes: 32, edges: 64, bindings: 64, predecessorsPerNode: 8 });
 
 const IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const PACKED_SCALAR = /^(?:[a-f0-9]{2}){1,16}$/;
+const PACKED_F32 = /^[a-f0-9]{8}$/;
 const ACCESS_MODES = new Set(['read', 'write', 'read-write', 'atomic-observe-relaxed-device', 'atomic-update-relaxed-device']);
 const PROFILE_LIMIT_FIELDS = Object.freeze([
   'maxThreadsPerBlock', 'maxBlockDimX', 'maxBlockDimY', 'maxBlockDimZ',
@@ -129,6 +131,75 @@ function normalizeAccesses(value, parameters, node) {
   }).sort((left, right) => left.argumentIndex - right.argumentIndex);
 }
 
+function preparedBinding(value, kind, node, field, bindingKinds) {
+  if (!exactFields(value, ['binding', 'kind']) || value.kind !== kind) fail('PREPARED_DAG_ARGUMENT_INVALID', `${field} must be an exact named ${kind} binding.`, { node, field });
+  const name = identifier(value.binding, 'Binding name', { node, field });
+  const prior = bindingKinds.get(name);
+  if (prior !== undefined && prior !== kind) fail('PREPARED_DAG_BINDING_CONFLICT', 'One binding name cannot have multiple kinds.', { binding: name });
+  bindingKinds.set(name, kind);
+  return { binding: name, kind };
+}
+
+function preparedScalar(value, node, field, bindingKinds) {
+  if (exactFields(value, ['binding', 'kind'])) return preparedBinding(value, 'f32', node, field, bindingKinds);
+  if (!exactFields(value, ['kind', 'packedHex']) || value.kind !== 'f32' || typeof value.packedHex !== 'string' || !PACKED_F32.test(value.packedHex)) {
+    fail('PREPARED_DAG_ARGUMENT_INVALID', `${field} must be an exact named f32 binding or fixed packed f32 identity.`, { node, field });
+  }
+  return { kind: 'f32', packedHex: value.packedHex };
+}
+
+function normalizeCublasLtPlan(value, node) {
+  const fields = ['contract', 'm', 'n', 'k', 'transposeA', 'transposeB', 'maxWorkspaceBytes', 'workspaceBytes', 'requirements', 'provider'];
+  if (!exactFields(value, fields) || value.contract !== 'SPEC-0029-cublaslt-f32-row-major-matmul-v1'
+      || !['m', 'n', 'k'].every((field) => Number.isSafeInteger(value[field]) && value[field] >= 1 && value[field] <= 0x7fff_ffff)
+      || typeof value.transposeA !== 'boolean' || typeof value.transposeB !== 'boolean'
+      || !Number.isSafeInteger(value.maxWorkspaceBytes) || value.maxWorkspaceBytes < 0 || value.maxWorkspaceBytes > 256 * 1_048_576
+      || !Number.isSafeInteger(value.workspaceBytes) || value.workspaceBytes < 0 || value.workspaceBytes > value.maxWorkspaceBytes
+      || !exactFields(value.requirements, ['a', 'b', 'c', 'd'])
+      || !['a', 'b', 'c', 'd'].every((field) => Number.isSafeInteger(value.requirements[field]) && value.requirements[field] >= 1)
+      || !exactFields(value.provider, ['name', 'version', 'qualification'])
+      || !['name', 'version', 'qualification'].every((field) => typeof value.provider[field] === 'string' && value.provider[field].length >= 1 && value.provider[field].length <= 128 && /^[\x20-\x7e]+$/.test(value.provider[field]) && !/[\\/]/.test(value.provider[field]))) {
+    fail('PREPARED_DAG_CUBLASLT_PLAN_INVALID', 'Prepared cuBLASLt plan identity is invalid.', { node });
+  }
+  const expectedRequirements = { a: value.m * value.k, b: value.k * value.n, c: value.m * value.n, d: value.m * value.n };
+  if (!Object.values(expectedRequirements).every(Number.isSafeInteger) || !['a', 'b', 'c', 'd'].every((field) => value.requirements[field] === expectedRequirements[field])) {
+    fail('PREPARED_DAG_CUBLASLT_PLAN_INVALID', 'Prepared cuBLASLt plan requirements do not match its dimensions.', { node });
+  }
+  return {
+    contract: value.contract,
+    m: value.m,
+    n: value.n,
+    k: value.k,
+    transposeA: value.transposeA,
+    transposeB: value.transposeB,
+    maxWorkspaceBytes: value.maxWorkspaceBytes,
+    workspaceBytes: value.workspaceBytes,
+    requirements: { a: value.requirements.a, b: value.requirements.b, c: value.requirements.c, d: value.requirements.d },
+    provider: { name: value.provider.name, version: value.provider.version, qualification: value.provider.qualification },
+  };
+}
+
+function normalizeCublasLtNode(entry, id, after, bindingKinds) {
+  const fields = ['id', 'kind', 'after', 'plan', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace'];
+  if (!exactFields(entry, fields)) fail('PREPARED_DAG_NODE_INVALID', 'Prepared cuBLASLt node fields are invalid.', { node: id });
+  const plan = normalizeCublasLtPlan(entry.plan, id);
+  const matrices = Object.fromEntries(['a', 'b', 'c', 'd'].map((field) => [field, preparedBinding(entry[field], 'device-memory', id, field, bindingKinds)]));
+  const workspace = entry.workspace === null
+    ? null
+    : preparedBinding(entry.workspace, 'device-memory', id, 'workspace', bindingKinds);
+  if ((plan.workspaceBytes > 0) !== (workspace !== null)) fail('PREPARED_DAG_CUBLASLT_WORKSPACE_INVALID', 'Prepared cuBLASLt workspace binding must match the fixed plan requirement.', { node: id, byteLength: plan.workspaceBytes });
+  return {
+    id,
+    kind: 'cublaslt-f32-matmul',
+    after,
+    plan,
+    ...matrices,
+    alpha: preparedScalar(entry.alpha, id, 'alpha', bindingKinds),
+    beta: preparedScalar(entry.beta, id, 'beta', bindingKinds),
+    workspace,
+  };
+}
+
 function canonicalTopology(nodes) {
   const byId = new Map(nodes.map((node) => [node.id, node]));
   const successors = new Map(nodes.map((node) => [node.id, []]));
@@ -167,17 +238,16 @@ export function normalizePreparedOperationDag(request) {
   const ids = new Set();
   const bindingKinds = new Map();
   const nodes = request.nodes.map((entry, inputIndex) => {
-    if (!plainObject(entry) || Object.keys(entry).some((key) => !['id', 'kind', 'after', 'executable', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].includes(key))
-        || !['id', 'kind', 'after', 'executable', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'].every((key) => Object.hasOwn(entry, key))) {
-      fail('PREPARED_DAG_NODE_INVALID', 'Prepared DAG node fields are invalid.', { inputIndex });
-    }
+    if (!plainObject(entry) || !Object.hasOwn(entry, 'id') || !Object.hasOwn(entry, 'kind') || !Object.hasOwn(entry, 'after')) fail('PREPARED_DAG_NODE_INVALID', 'Prepared DAG node fields are invalid.', { inputIndex });
     const id = identifier(entry.id, 'Node id', { inputIndex });
     if (ids.has(id)) fail('PREPARED_DAG_NODE_DUPLICATE', 'Prepared DAG node IDs must be unique.', { node: id });
     ids.add(id);
-    if (entry.kind !== 'kernel') fail('PREPARED_DAG_NODE_KIND', 'The first prepared DAG profile accepts kernel nodes only.', { node: id });
+    if (!['kernel', 'cublaslt-f32-matmul'].includes(entry.kind)) fail('PREPARED_DAG_NODE_KIND', 'Prepared DAG node kind is not accepted by this profile.', { node: id });
     if (!Array.isArray(entry.after) || entry.after.length > PREPARED_OPERATION_DAG_LIMITS.predecessorsPerNode) fail('PREPARED_DAG_DEPENDENCIES_INVALID', 'Prepared node predecessors must be a bounded array.', { node: id });
     const after = entry.after.map((value) => identifier(value, 'Predecessor id', { node: id })).sort(codeUnitCompare);
     if (after.some((value, index) => index > 0 && value === after[index - 1])) fail('PREPARED_DAG_DEPENDENCY_DUPLICATE', 'Prepared node predecessors must be unique.', { node: id });
+    if (entry.kind === 'cublaslt-f32-matmul') return normalizeCublasLtNode(entry, id, after, bindingKinds);
+    if (!exactFields(entry, ['id', 'kind', 'after', 'executable', 'grid', 'block', 'sharedMemoryBytes', 'arguments', 'accesses'])) fail('PREPARED_DAG_NODE_INVALID', 'Prepared kernel node fields are invalid.', { node: id });
     const executable = normalizeExecutable(entry.executable, id);
     const grid = dimensions(entry.grid, 'grid', id);
     const block = dimensions(entry.block, 'block', id);
@@ -189,11 +259,12 @@ export function normalizePreparedOperationDag(request) {
   if (bindingKinds.size > PREPARED_OPERATION_DAG_LIMITS.bindings) fail('PREPARED_DAG_BINDING_LIMIT', 'Prepared DAG exceeds the named-binding limit.', { count: bindingKinds.size, maximum: PREPARED_OPERATION_DAG_LIMITS.bindings });
   const topology = canonicalTopology(nodes);
   const bindings = [...bindingKinds.entries()].sort((left, right) => codeUnitCompare(left[0], right[0])).map(([name, kind]) => ({ name, kind }));
-  const semantic = { contract: PREPARED_OPERATION_DAG_CONTRACT, nodes, bindings, executionProfile };
+  const contract = nodes.some((node) => node.kind === 'cublaslt-f32-matmul') ? PREPARED_CUBLASLT_OPERATION_DAG_CONTRACT : PREPARED_OPERATION_DAG_CONTRACT;
+  const semantic = { contract, nodes, bindings, executionProfile };
   const sha256 = createHash('sha256').update(canonicalJson(semantic)).digest('hex');
   return deepFreeze({
     schemaVersion: 1,
-    contract: PREPARED_OPERATION_DAG_CONTRACT,
+    contract,
     sha256,
     nodeCount: nodes.length,
     edgeCount: topology.edgeCount,

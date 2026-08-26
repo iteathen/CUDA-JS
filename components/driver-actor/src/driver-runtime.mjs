@@ -92,6 +92,20 @@ function preparedDagPayload(options) {
   if (!plainObject(options) || Object.keys(options).length !== 1 || !Array.isArray(options.nodes)) throw validationError('DRIVER_PREPARED_OPTIONS', 'prepareOperationDag requires exactly one nodes array.');
   return {
     nodes: options.nodes.map((node) => {
+      if (plainObject(node) && node.kind === 'cublaslt-f32-matmul') {
+        if (!isResourceToken(node.planToken) || !Array.isArray(node.after)) throw validationError('DRIVER_PREPARED_OPTIONS', 'Prepared cuBLASLt node is invalid.');
+        return {
+          ...node,
+          after: [...node.after],
+          a: plainObject(node.a) ? { ...node.a } : node.a,
+          b: plainObject(node.b) ? { ...node.b } : node.b,
+          c: plainObject(node.c) ? { ...node.c } : node.c,
+          d: plainObject(node.d) ? { ...node.d } : node.d,
+          alpha: plainObject(node.alpha) ? { ...node.alpha } : node.alpha,
+          beta: plainObject(node.beta) ? { ...node.beta } : node.beta,
+          workspace: plainObject(node.workspace) ? { ...node.workspace } : node.workspace,
+        };
+      }
       if (!plainObject(node) || !isResourceToken(node.functionToken) || !Array.isArray(node.after) || !Array.isArray(node.arguments) || !Array.isArray(node.accesses)) throw validationError('DRIVER_PREPARED_OPTIONS', 'Prepared DAG nodes are invalid.');
       return {
         ...node,

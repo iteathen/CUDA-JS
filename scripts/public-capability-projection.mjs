@@ -214,7 +214,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.publicationMailboxes !== 'private-mapped-named-u32-one-operation-lease-system-acquire-release') {
     errors.push('packaging compatibility publication mailbox projection is stale');
   }
-  if (compatibility.capabilities?.preparedOperationDags !== 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay') {
+  if (compatibility.capabilities?.preparedOperationDags !== 'bounded-kernel-cublaslt-f32-dag-immutable-bindings-derived-library-access-single-stream-semantic-replay') {
     errors.push('packaging compatibility prepared operation DAG projection is stale');
   }
   if (compatibility.capabilities?.cublasLtF32Matmul !== 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace') {
@@ -243,6 +243,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0020',
     'SPEC-0028',
     'SPEC-0030',
+    'SPEC-0031',
     'SPEC-0027',
     'SPEC-0030',
     'separate future publish unit',
