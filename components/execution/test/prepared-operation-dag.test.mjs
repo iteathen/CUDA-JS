@@ -11,7 +11,7 @@ const LIMITS = Object.freeze({
   maxGridDimX: 2_147_483_647, maxGridDimY: 65_535, maxGridDimZ: 65_535, maxSharedMemoryPerBlock: 49_152,
 });
 
-function fixture({ query = () => 'complete', submit = () => {} } = {}) {
+function fixture({ query = () => 'complete', submit = () => {}, deviceLimits = LIMITS } = {}) {
   const registry = new ResourceRegistry({ runtimeId: 'prepared-execution-test', epoch: 1, nonce: (() => { let value = 0; return () => (++value).toString(16).padStart(32, '0'); })() });
   const library = registry.allocate({ kind: 'library', value: {}, dispose() {} });
   const context = registry.allocate({ kind: 'context', value: {}, parent: library, dispose() {} });
@@ -38,7 +38,7 @@ function fixture({ query = () => 'complete', submit = () => {} } = {}) {
     health() { return { current: 'healthy', history: [] }; },
     restartRequired({ code, message, details, operationId }) { return new ExecutionError(code, 'restart-required', message, details, { operationId, healthBefore: 'healthy', healthAfter: 'restart-required' }); },
   };
-  const execution = new ExecutionManager({ registry, contextToken: context, memory, policy: {}, deviceLimits: LIMITS, operations });
+  const execution = new ExecutionManager({ registry, contextToken: context, memory, policy: {}, deviceLimits, operations });
   return { registry, memory, execution, calls, submissions };
 }
 
@@ -66,6 +66,29 @@ function bindings(allocation, entries = ['data']) {
     ...entries.map((name) => ({ name, kind: 'device-memory', memory: allocation.memory, byteOffset: 0 })),
   ];
 }
+
+test('prepared DAG identity projects native-like discovery facts to the exact launch-limit profile', async () => {
+  const nativeLike = await preparedFixture({
+    deviceLimits: Object.freeze({
+      ...LIMITS,
+      warpSize: 32,
+      multiprocessorCount: 30,
+      computeCapabilityMajor: 7,
+      computeCapabilityMinor: 5,
+    }),
+  });
+  const projected = await preparedFixture();
+  const nativePrepared = await nativeLike.execution.prepareOperationDag({
+    nodes: [node({ id: 'step', functionToken: nativeLike.fn.function })],
+    operationId: 3,
+  });
+  const projectedPrepared = await projected.execution.prepareOperationDag({
+    nodes: [node({ id: 'step', functionToken: projected.fn.function })],
+    operationId: 3,
+  });
+  assert.equal(nativePrepared.sha256, projectedPrepared.sha256);
+  assert.deepEqual(nativePrepared.bindings, projectedPrepared.bindings);
+});
 
 test('prepared DAG owns function identity, submits one operation, replays, and releases leases exactly once', async () => {
   const { registry, execution, fn, allocation, calls, submissions } = await preparedFixture();
