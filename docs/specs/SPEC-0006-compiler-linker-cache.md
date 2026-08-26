@@ -203,18 +203,17 @@ GPU-free compiler/linker evidence is reported separately from Driver module-load
 
 ## Linux preparation boundary
 
-F6 retains a human-engineer Linux runbook and platform-neutral fixtures for:
+F6 now retains implemented, non-promoting Linux source for:
 
-- canonical `libnvrtc.so` and `libnvJitLink.so` discovery without ambient loader fallback;
-- exact SONAME, version, export, architecture, and digest evidence;
-- SysV x86-64 pointer-table construction using the shared FFI schema;
+- one shared native compile/link/lifecycle engine with thin Windows and Linux provider profiles;
+- canonical `/usr/local/cuda-13.3/targets/x86_64-linux` discovery without ambient loader fallback;
+- an exact official Ubuntu 24.04 package and installed-file manifest covering provider/header/CCCL identity;
 - the mandatory `--modify-stack-limit=false` normalized option;
-- native compiler/linker oracle build and Node parity commands;
+- an exact readiness probe, independent native C oracle build, public CompilerActor parity runner, Driver handoff, and terminal cleanup assertions;
 - cache filesystem semantics, corruption controls, and same-volume atomic publication;
-- GPU-free compiler/linker promotion separated from Driver/GPU launch promotion;
-- exact evidence files and a contribution checklist for the public Linux qualification issue.
+- GPU-free compiler/linker evidence separated from Driver/GPU launch evidence.
 
-Windows-generated fixtures validate request normalization, key vectors, manifest validation, corruption partitions, logs, protocol, lifecycle, and loss controls. They do not load Linux providers, prove Linux loader behavior, compile through a Linux provider, or establish native Linux support.
+Portable and Windows evidence validates the shared semantics and guards the accepted peer profile. It does not load Linux providers, prove Linux loader behavior, compile through a Linux provider, or establish native Linux support. The Linux source must run unchanged on the exact Ubuntu cell before any F6L qualification claim.
 
 ## Exit and downstream authorization
 

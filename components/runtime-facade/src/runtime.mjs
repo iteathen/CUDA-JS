@@ -76,9 +76,9 @@ function withLinkTarget(request, linkTarget) {
 }
 
 function preflight(host) {
-  if (host.hostKind === 'linux-native-x64' || host.hostKind === 'linux-native-arm64') throw facadeError('CUDA_JS_LINUX_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a native Linux CUDA backend.', { hostKind: host.hostKind }, 'open');
+  if (host.hostKind === 'linux-native-arm64') throw facadeError('CUDA_JS_LINUX_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a native Linux ARM64 CUDA backend.', { hostKind: host.hostKind }, 'open');
   if (host.hostKind.startsWith('wsl')) throw facadeError('CUDA_JS_WSL_BACKEND_UNAVAILABLE', 'unsupported', 'This package does not yet contain a WSL CUDA backend.', { hostKind: host.hostKind }, 'open');
-  if (host.hostKind !== 'windows-native-x64') throw facadeError('CUDA_JS_HOST_BACKEND_UNAVAILABLE', 'unsupported', 'This package has no native backend for the detected host.', { hostKind: host.hostKind }, 'open');
+  if (!['windows-native-x64', 'linux-native-x64'].includes(host.hostKind)) throw facadeError('CUDA_JS_HOST_BACKEND_UNAVAILABLE', 'unsupported', 'This package has no native backend for the detected host.', { hostKind: host.hostKind }, 'open');
   if (host.node.disposition === 'known-incompatible') throw facadeError('CUDA_JS_NODE_INCOMPATIBLE', 'unsupported', 'This Node release lacks the minimum runtime substrate required by CUDA-JS.', { actualVersion: host.node.version, minimumVersion: host.node.minimumVersion, reason: host.node.reason }, 'open');
   if (!host.ffi.experimental) throw facadeError('CUDA_JS_FFI_FLAG_REQUIRED', 'unsupported', 'CUDA-JS requires Node experimental FFI.', {}, 'open');
   if (host.ffi.permission === 'ffi-denied') throw facadeError('CUDA_JS_FFI_PERMISSION_REQUIRED', 'permission', 'CUDA-JS requires FFI authority when the Node permission model is active.', {}, 'open');

@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const profileName = `${process.platform}-${process.arch}`;
 export const evidenceRoot = path.join(repositoryRoot, 'build', 'f7', profileName, 'evidence');
+export const nativeProfile = process.platform === 'win32' ? 'windows' : process.platform === 'linux' ? 'linux' : 'unsupported';
+export const nativeEvidenceName = `native-${nativeProfile}.json`;
 
 export function digestBytes(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 export async function sha256(file) { return digestBytes(await readFile(file)); }

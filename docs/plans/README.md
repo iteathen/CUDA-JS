@@ -12,6 +12,7 @@ Active plans contain **unfinished work only**. Completed or mixed historical pla
 - [`2026-08-12-execution-capability-continuation.md`](2026-08-12-execution-capability-continuation.md) — retained execution-continuation plan for sideband/multi-stream follow-up against the accepted SPEC-0016 baseline.
 - [`2026-08-12-compatible-pair-continuation.md`](2026-08-12-compatible-pair-continuation.md) — neutral Device-JS native proof, CUDA-MCGS external deletion, and exact F9-C compatible-pair completion.
 - [`2026-08-13-capability-expansion-roadmap.md`](2026-08-13-capability-expansion-roadmap.md) — parent dependency/focus-packet map for proposed SPEC-0017 through SPEC-0026 and the wider open capability tracker. Proposal presence does not authorize implementation.
+- [`2026-08-25-long-horizon-capability-map.md`](2026-08-25-long-horizon-capability-map.md) — non-committed candidate inventory beyond the active Linux/SPEC-0017 path, with independent status and ownership dimensions.
 
 The machine-readable current focus is [`../../next_step.yaml`](../../next_step.yaml).
 

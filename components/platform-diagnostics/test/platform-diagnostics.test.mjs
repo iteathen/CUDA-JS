@@ -21,6 +21,16 @@ function driver(overrides = {}) {
   };
 }
 
+function linuxDriver(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    runtime: { backend: 'linux-native' },
+    profile: { nativeOperational: true, nativeQualified: false, node: 'v26.7.0', platform: 'linux', architecture: 'x64' },
+    driver: { apiVersion: 13030, deviceCount: 2 },
+    device: { ordinal: 0, attributes: { kernelExecTimeout: 0, integrated: 0, computeMode: 0, tccDriver: 0, computeCapabilityMajor: 8, computeCapabilityMinor: 9, ...overrides } },
+  };
+}
+
 test('host classifier keeps Windows, native Linux, SBSA candidates, and WSL distinct', () => {
   const base = { nodeVersion: 'v26.7.0', nodeAbi: '141', osRelease: '6.8.0', osVersion: 'Linux', procVersion: '' };
   assert.equal(classifyHost({ ...base, platform: 'win32', architecture: 'x64' }).hostKind, 'windows-native-x64');
@@ -46,7 +56,21 @@ test('permission and launch diagnostics fail closed', () => {
   const candidateDriver = driver();
   candidateDriver.profile.node = 'v26.6.0';
   assert.equal(assessCudaSupport(host({ nodeVersion: 'v26.6.0' }), candidateDriver).status, 'testing-unconfirmed');
-  assert.equal(assessCudaSupport(host({ platform: 'linux', osVersion: 'Linux' }), driver()).reason, 'LINUX_BACKEND_UNAVAILABLE');
+  assert.equal(assessCudaSupport(host({ platform: 'linux', osVersion: 'Linux' }), driver()).reason, 'LINUX_DRIVER_BACKEND_INCOMPATIBLE');
+  assert.equal(assessCudaSupport(host({ platform: 'linux', architecture: 'arm64', osVersion: 'Linux' }), linuxDriver()).reason, 'LINUX_BACKEND_UNAVAILABLE');
+});
+
+test('native Linux x64 uses the same unconfirmed assessment contract without Windows driver-model semantics', () => {
+  const linuxHost = host({ platform: 'linux', architecture: 'x64', osVersion: 'Linux' });
+  const assessment = assessCudaSupport(linuxHost, linuxDriver());
+  assert.equal(assessment.status, 'testing-unconfirmed');
+  assert.equal(assessment.claim, 'testing-only-unconfirmed-profile');
+  assert.equal(assessment.cuda.driverModel, 'linux-native');
+  assert.equal(assessment.cuda.watchdog, 'disabled');
+  assert.equal(assessment.cuda.computeMode, 'default');
+  assert.equal(Object.isFrozen(assessment.cuda), true);
+  assert.equal(assessCudaSupport(linuxHost, linuxDriver({ computeMode: 2 })).reason, 'CUDA_COMPUTE_MODE_PROHIBITED');
+  assert.equal(assessCudaSupport(linuxHost, linuxDriver({ kernelExecTimeout: 7 })).reason, 'CUDA_DEVICE_ATTRIBUTES_INVALID');
 });
 
 test('Windows CUDA diagnostics distinguish WDDM watchdog and TCC without changing device state', () => {

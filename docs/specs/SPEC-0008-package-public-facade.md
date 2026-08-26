@@ -10,13 +10,15 @@
 
 **Amended:** 2026-08-12 — accepted SPEC-0016 adds the opaque one-pending-operation `submit/status/wait/close` lifecycle through the existing execution/DriverActor/facade owners. Package identity advances to `0.1.0-alpha.4`; SPEC-0016 remains natively unqualified until its exact Windows promotion evidence passes.
 
+**Amended:** 2026-08-25 — ADR-0006 and owner direction admit the implemented native Linux x86-64 Driver/compiler profiles through the unchanged OS-neutral facade as `testing-unconfirmed`. Package identity advances to `0.1.0-alpha.8`; API schema remains 1, and Linux support remains unqualified until exact F2L-F8L installed-package evidence passes.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.
 
-F8 consumes the accepted F3 through F7 components without widening their native CUDA support claims. Later accepted additive specifications may widen the packaged public surface while preserving this ownership boundary. The implemented native runtime remains Windows x64. Node 26.1.0 or later and unconfirmed Windows CUDA hardware may operate for testing; only exact capability/profile combinations with their required evidence carry qualified support. Native Linux x64, Linux ARM64 SBSA, and WSL2 retain their incomplete backend paths. Their absence does not block Windows packaging, and Windows evidence never promotes them.
+F8 consumes the accepted F3 through F7 components without widening their native CUDA support claims. Later accepted additive specifications may widen the packaged public surface while preserving this ownership boundary. The native runtime has shared engines with source-admitted Windows x64 and Linux x64 profiles. Node 26.1.0 or later and structurally admitted native profiles may operate for testing; only exact capability/profile combinations with required evidence carry qualified support. Linux x64 remains not-qualified, while Linux ARM64 SBSA and WSL2 retain incomplete backend paths. Windows evidence never promotes Linux.
 
-F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, multiple pending GPU operations, public raw streams/events, compilation concurrency, broader memory kinds, callbacks, forced cancellation, crash recovery, performance claims, CUDA-MCGS integration, or native Linux CUDA support.
+F8 does not authorize a registry release, a production-stability claim, a project-specific native addon, arbitrary native calls, raw pointers, unchecked schemas, caller-selected libraries or provider paths, public raw streams/events, unbounded concurrency, broader memory kinds, callbacks, forced cancellation, crash recovery, performance claims, CUDA-MCGS integration, or a native Linux CUDA support claim from source admission.
 
 ## Package boundary
 

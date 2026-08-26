@@ -6,7 +6,7 @@
     "status": "accepted-f7w-internal-experimental",
     "product_area": "components",
     "path": "components/platform-diagnostics",
-    "purpose": "Classify bounded host profiles and assess copied Windows DriverActor device facts without native calls, commands, paths, or state mutation.",
+    "purpose": "Classify bounded host profiles and assess copied native DriverActor device facts without native calls, commands, paths, or state mutation.",
     "public_contracts": ["index.mjs"],
     "allowed_dependencies": ["node-standard-library", "copied-driver-description"],
     "forbidden_dependencies": ["node-ffi", "native-provider", "filesystem-path", "system-command", "raw-public-pointer", "device-state-mutation", "consumer-semantics"],
@@ -17,7 +17,7 @@
       "owned_invariant": "No heuristic, portable record, or successful unconfirmed operation promotes native support; only known-incompatible or contradictory safety facts block testing operation.",
       "public_ports": ["classifyHost", "classifyNodeRuntime", "inspectHostProfile", "assessCudaSupport", "permissionState"],
       "injected_dependencies": ["bounded host facts", "sanitized DriverActor description"],
-      "adapter_boundaries": ["operating-system facts", "DriverActor public description"],
+      "adapter_boundaries": ["Windows/Linux host facts", "DriverActor public description"],
       "simplest_sufficient_total_system": "One pure classifier and one fail-closed CUDA-device assessment over copied ordinary records."
     }
   }

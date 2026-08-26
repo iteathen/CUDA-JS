@@ -20,8 +20,9 @@ This mission describes the published `cuda-js` core package. Accepted ADR-0004/S
 
 ## Current support sequence
 
-- Windows x86-64, exact Node 26, CUDA 13.3/current Driver profile.
-- Linux x86-64, retained but deferred until qualified native GPU access.
+- OS-neutral public/component architecture with platform details confined to injected adapters.
+- Linux x86-64 reference implementation, with Ubuntu 24.04 LTS as the first exact Node 26/CUDA 13.3/Driver qualification cell.
+- Windows x86-64 maintained peer adapter, retaining its accepted exact-profile evidence.
 - Linux ARM64 SBSA.
 - WSL2 diagnostics.
 
@@ -29,4 +30,4 @@ Node 22/24, macOS, 32-bit hosts, project addons, arbitrary pfn calls, shared con
 
 ## Current authorization
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, memory, execution, compiler/linker/cache, package, consumer, install, and cleanup evidence. The F3 through F8 control/package path also passes in native Linux CI without establishing Linux Driver support. Exact consumer interop remains pending the independently owned CUDA-MCGS package/adapter in `iteathen/UMCGS` and frozen-pair evidence; Linux `CJS-F2L / EXP-001` through F8L remain present, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, Windows CJS-F3W through CJS-F8W, and the CUDA-JS-owned CJS-F9 trusted-header/atomic-publication prerequisite are accepted on exact host, ABI, Driver, GPU, permission, oracle, actor-affinity, resource, memory, execution, compiler/linker/cache, package, consumer, install, and cleanup evidence. The F3 through F8 control/package path also passes in native Linux CI without establishing Linux Driver support. ADR-0006 makes completing Linux `CJS-F2L / EXP-001` through F8L the primary native workstream; their current state remains incomplete, not supported. Exact consumer interop remains pending the independently owned CUDA-MCGS package/adapter in `iteathen/UMCGS` and frozen-pair evidence.

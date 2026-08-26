@@ -23,8 +23,8 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 
 | Platform | Architecture / ABI | Planned status | Required evidence |
 |---|---|---|---|
-| Windows 11 | x86-64 Win64 | public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
-| Linux glibc | x86-64 SysV | GPU-free schema plus F3–F8 portable/package path complete; native Driver/compiler qualification deferred | run retained F2L through F8L Driver/provider/context/permission/stress/package/teardown gates on a qualified native NVIDIA host |
+| Linux glibc | x86-64 SysV | OS-neutral architecture with ADR-0006 Linux reference platform; complete EXP-001/F1B/F3L-F8L command and evidence-validation source chain implemented; exact native evidence waits for a contributor physical-GPU host | execute the unchanged runner on native Ubuntu 24.04 with a directly exposed physical NVIDIA GPU and review exact Driver/provider/context/memory/execution/permission/stress/package/teardown evidence before promotion; VM/emulated/WSL/container/hosted-CI evidence is non-qualifying |
+| Windows 11 | x86-64 Win64 | maintained secondary public testing package; unconfirmed hardware may operate | F2W through F8W exact evidence retained; broader hardware collects separate evidence without inheriting support |
 | Linux glibc | ARM64 AAPCS64/SBSA | independently classified, unqualified | independent Node/header/ABI/loader/Driver/compiler/cache/permission/execution/cleanup capsules in the F7 handoff |
 | WSL2 | x86-64 | diagnostics-only, unqualified | separate WSL2 classification plus Driver bridge/provider/permission/execution/compiler/cleanup evidence; never native Linux evidence |
 | Linux musl | x86-64/ARM64 | deferred | separate Node/libffi/loader/package decision |
@@ -32,7 +32,7 @@ Node must be launched with `--experimental-ffi` and, when using the permission m
 | macOS | any | unsupported | no current CUDA deployment target |
 | 32-bit hosts | any | unsupported | outside foundational data model |
 
-Cross-compilation can prove artifact shape, but native execution is required for support.
+Cross-compilation, VM/emulated CUDA, WSL, containers, hosted CI, portable controls, and mocks can prove only their named properties; direct native physical-GPU execution is required for this support cell.
 
 ## CUDA profiles
 
@@ -86,9 +86,9 @@ The public API does not expose a supported callable-from-arbitrary-pointer const
 
 | Capability | V0 disposition |
 |---|---|
-| device-local allocation and synchronous copied JS bytes | accepted Windows F4W; portable policy/control plane passes Linux CI; native Linux Driver memory remains incomplete |
-| bounded PTX module, declared function, one private stream, packed launch, event completion | accepted Windows F5W; portable orchestration passes Linux CI; native Linux Driver launch remains incomplete |
-| bounded cubin module handoff from CompilerActor | accepted Windows F6W; exact PTX/cubin output parity and execution pass; native Linux providers and Driver launch remain incomplete |
+| device-local allocation and synchronous copied JS bytes | accepted Windows F4W; Linux native C-oracle/runner source complete, exact evidence unrun |
+| bounded PTX module, declared function, one private stream, packed launch, event completion | accepted Windows F5W; Linux native launch/capability oracle and runner source complete, exact evidence unrun |
+| bounded cubin module handoff from CompilerActor | accepted Windows F6W; Linux exact runner source complete, native provider/artifact/Driver evidence unrun |
 | manifest-verified CUDA CCCL virtual headers | accepted exact Windows F9 prerequisite for `cuda/` and `nv/`; other toolkit versions/platforms/header roots require independent profiles |
 | device-scope release/acquire publication through public facade | accepted exact Windows F9 generic fixture; no CUDA-MCGS, arbitrary-atomic, performance, or cross-platform inference |
 | pinned host staging | after bounded lifetime/pressure experiment |
@@ -127,7 +127,7 @@ Graphs are not a prerequisite for the first real-kernel slice. They become a per
 | Windows device-zero WDDM/TCC/watchdog/compute-mode diagnostics | accepted F7W on exact Node 26.7.0 and Driver 13030; diagnostic only and never mutates device state |
 | Node permission-model inheritance into DriverActor and CompilerActor | accepted F7W; denial without FFI authority and explicit-allow success are mandatory |
 | deterministic failure/property and repeated lifecycle stress | accepted portable F7 and native Windows F7W; broad elapsed/RSS ceilings are regression checks, not performance claims |
-| native Linux x86-64 hardening | retained F7L handoff; blocked on native F2L through F6L qualification |
+| native Linux x86-64 hardening | F7L permission/lifecycle runner source complete; contributor-run unchanged exact Ubuntu F2L through F8L execution on directly exposed physical NVIDIA hardware and promotion remain open |
 | Linux ARM64 SBSA | independently classified; no ABI, Driver, compiler, GPU, or cleanup support claim |
 | WSL2 CUDA | diagnostics-only until an independent compatibility profile passes |
 
@@ -139,7 +139,7 @@ A Worker isolates JavaScript execution and blocking from the main event loop, bu
 |---|---|
 | load precompiled PTX/cubin | accepted Windows F6W; fatbin remains outside the bounded module contract |
 | NVRTC source to PTX | accepted optional Windows F6W provider; other platforms require independent qualification |
-| nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; LTO remains deferred |
+| nvJitLink PTX composition to cubin | accepted optional Windows F6W provider; typed Device LTO is separately accepted and qualified on the exact Windows profile, while Linux provider/artifact evidence remains pending |
 | runtime host-code compilation | out of scope; NVRTC is device-only |
 
 ## Product/package profiles

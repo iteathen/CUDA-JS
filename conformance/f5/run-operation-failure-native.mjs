@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { openCudaRuntime } from '../../components/runtime-facade/index.mjs';
 import { capabilityPtxPath } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32');
+assert(['win32', 'linux'].includes(process.platform));
 assert.equal(process.arch, 'x64');
 assert.equal(process.version, 'v26.7.0');
 

@@ -127,6 +127,8 @@ const sources = [
   'docs/specs/SPEC-0010-relocatable-device-code.md',
   'docs/specs/SPEC-0012-device-lto.md',
   'components/compiler-actor/src/contract.mjs',
+  'components/compiler-actor/src/backends/native.mjs',
+  'components/compiler-actor/src/backends/native-profiles.mjs',
   'components/compiler-actor/src/backends/windows-native.mjs',
   'components/runtime-facade/src/runtime.mjs',
   'conformance/f6/run-capabilities-native-windows.mjs',

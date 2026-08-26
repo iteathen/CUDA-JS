@@ -1,26 +1,27 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
 import { openCompilerRuntime } from '../../components/compiler-actor/index.mjs';
 import { openDriverRuntime } from '../../components/driver-actor/index.mjs';
 import { assessCudaSupport, inspectHostProfile } from '../../components/platform-diagnostics/index.mjs';
-import { repositoryRoot, sourceIdentity, writeEvidence } from './evidence.mjs';
+import { nativeEvidenceName, nativeProfile, repositoryRoot, sha256, sourceIdentity, writeEvidence } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32', 'F7W native conformance requires Windows.');
-assert.equal(process.arch, 'x64', 'F7W native conformance requires Windows x64.');
-assert.equal(process.version, 'v26.7.0', 'F7W native conformance requires exact Node v26.7.0.');
-assert(process.execArgv.includes('--experimental-ffi'), 'F7W native conformance requires experimental FFI.');
+assert(['win32', 'linux'].includes(process.platform), 'F7 native conformance requires Windows or native Linux.');
+assert.equal(process.arch, 'x64', 'F7 native conformance requires x86-64.');
+assert.equal(process.version, 'v26.7.0', 'F7 native conformance requires exact Node v26.7.0.');
+assert(process.execArgv.includes('--experimental-ffi'), 'F7 native conformance requires experimental FFI.');
+if (process.platform === 'linux') assert.doesNotMatch(os.release(), /microsoft/i, 'F7 native Linux conformance does not accept WSL.');
 
 function permissionProbe(target, allowFfi) {
-  const toolkitRoot = path.resolve(process.env.CUDA_PATH_V13_3 ?? process.env.CUDA_PATH ?? 'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3');
-  const systemRoot = path.resolve(process.env.SystemRoot);
+  const allowRead = process.platform === 'win32'
+    ? [repositoryRoot, path.resolve(process.env.SystemRoot), path.resolve(process.env.CUDA_PATH_V13_3 ?? process.env.CUDA_PATH ?? 'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.3')]
+    : [repositoryRoot, '/usr/lib/x86_64-linux-gnu', '/usr/lib64', '/usr/local/cuda-13.3'];
   const args = [
     '--permission',
-    `--allow-fs-read=${repositoryRoot}`,
-    `--allow-fs-read=${systemRoot}`,
-    `--allow-fs-read=${toolkitRoot}`,
+    ...allowRead.map((entry) => `--allow-fs-read=${entry}`),
     '--allow-worker',
     ...(allowFfi ? ['--allow-ffi'] : []),
     '--experimental-ffi',
@@ -37,6 +38,17 @@ function permissionProbe(target, allowFfi) {
 const started = Date.now();
 const rssBefore = process.memoryUsage().rss;
 const host = inspectHostProfile();
+assert.equal(host.hostKind, `${nativeProfile === 'windows' ? 'windows' : 'linux'}-native-x64`);
+const prerequisites = [];
+if (process.platform === 'linux') {
+  for (const relative of ['build/f5/linux-x64/evidence/native-linux-capabilities.json', 'build/f6/linux-x64/evidence/native-linux.json']) {
+    const target = path.join(repositoryRoot, relative);
+    const record = JSON.parse(await readFile(target, 'utf8'));
+    assert.equal(record.status, 'pass', `F7L requires passing ${relative} evidence from the same workspace.`);
+    assert.equal(record.environment.kernel ?? record.environment.osRelease, os.release(), `F7L requires the same native Linux kernel for ${relative}.`);
+    prerequisites.push({ path: relative, sha256: await sha256(target) });
+  }
+}
 const source = 'extern "C" __global__ void f7_native() {}\n';
 const driverCycles = [];
 const compilerCycles = [];
@@ -75,7 +87,7 @@ for (const [target, result] of Object.entries(permissions)) {
   assert.equal(result.denied.record.ok, false, `${target} must fail without FFI permission.`);
   assert.equal(result.denied.record.code, 'ERR_ACCESS_DENIED', `${target} denial must be attributable to FFI permission.`);
   assert.equal(result.allowed.processStatus, 0, `${target} allow probe process failed.`);
-  assert.deepEqual(result.allowed.record, { ok: true, target, backend: target === 'driver' ? 'windows-native' : 'windows-native', graceful: true, workerExitCode: 0 });
+  assert.deepEqual(result.allowed.record, { ok: true, target, backend: `${nativeProfile}-native`, graceful: true, workerExitCode: 0 });
 }
 
 const elapsedMilliseconds = Date.now() - started;
@@ -84,22 +96,24 @@ const rssGrowthBytes = Math.max(0, rssAfter - rssBefore);
 assert(elapsedMilliseconds < 180_000, `Native F7 hardening exceeded its broad three minute regression ceiling: ${elapsedMilliseconds}ms.`);
 assert(rssGrowthBytes < 512 * 1_048_576, `Native F7 stress exceeded its broad 512 MiB process-memory ceiling: ${rssGrowthBytes}.`);
 
-await writeEvidence('native-windows.json', {
+await writeEvidence(nativeEvidenceName, {
   schemaVersion: 1,
-  workPackage: 'CJS-F7W',
-  capsule: 'windows-platform-permission-native-lifecycle-hardening',
+  workPackage: `CJS-F7${nativeProfile === 'windows' ? 'W' : 'L'}`,
+  capsule: 'native-platform-permission-lifecycle-hardening',
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { host, osVersion: os.version() },
   sources: await sourceIdentity([
     'docs/specs/SPEC-0007-windows-platform-hardening.md',
     'components/platform-diagnostics/src/platform-diagnostics.mjs',
-    'components/driver-actor/src/backends/windows-native.mjs',
+    `components/driver-actor/src/backends/${nativeProfile}-native.mjs`,
+    `components/compiler-actor/src/backends/${nativeProfile}-native.mjs`,
     'components/compiler-actor/src/actor-worker.mjs',
     'conformance/f7/permission-probe.mjs',
   ]),
+  prerequisites,
   observations: { driverCycles, compilerCycles, permissions, elapsedMilliseconds, rssBefore, rssAfter, rssGrowthBytes },
-  claimLimits: ['Execution is a testing-phase operation and does not promote support.', 'Exact Windows x64 Node 26.7.0 CUDA 13.3 evidence identity only.', 'Elapsed time and process memory are broad regression observations, not performance claims.', 'No device state is changed.', 'No WSL or native Linux CUDA support claim.'],
+  claimLimits: ['Execution is a testing-phase operation and does not promote support.', `Exact ${nativeProfile} x64 Node 26.7.0 CUDA 13.3 input identity only.`, 'Elapsed time and process memory are broad regression observations, not performance claims.', 'No device state is changed.', 'No WSL, ARM64, or cross-platform support inference.'],
 });
 
-console.log(`F7W native conformance passed: ${driverCycles[0].assessment.cuda.driverModel}, watchdog ${driverCycles[0].assessment.cuda.watchdog}, 16 graceful native actor cycles, and explicit permission denial/allow.`);
+console.log(`F7${nativeProfile === 'windows' ? 'W' : 'L'} native conformance passed: ${driverCycles[0].assessment.cuda.driverModel}, watchdog ${driverCycles[0].assessment.cuda.watchdog}, 16 graceful native actor cycles, and explicit permission denial/allow.`);

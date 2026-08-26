@@ -4,6 +4,10 @@ const MINIMUM_NODE_VERSION = 'v26.1.0';
 const QUALIFIED_NODE_VERSION = 'v26.7.0';
 const HOST_FIELDS = Object.freeze(['architecture', 'nodeAbi', 'nodeVersion', 'osRelease', 'osVersion', 'platform', 'procVersion']);
 const BINARY_ATTRIBUTES = Object.freeze(['integrated', 'kernelExecTimeout', 'tccDriver']);
+const NATIVE_PROFILES = Object.freeze({
+  'windows-native-x64': Object.freeze({ backend: 'windows-native', platform: 'win32', architecture: 'x64', backendReason: 'WINDOWS_DRIVER_BACKEND_INCOMPATIBLE', descriptionReason: 'WINDOWS_DRIVER_DESCRIPTION_INVALID' }),
+  'linux-native-x64': Object.freeze({ backend: 'linux-native', platform: 'linux', architecture: 'x64', backendReason: 'LINUX_DRIVER_BACKEND_INCOMPATIBLE', descriptionReason: 'LINUX_DRIVER_DESCRIPTION_INVALID' }),
+});
 
 function plainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -71,7 +75,7 @@ export function classifyHost(input) {
       : hostKind.startsWith('linux-native') ? 'qualification-required'
         : 'unsupported';
   const action = hostKind === 'windows-native-x64' ? 'run-windows-native-f7'
-    : hostKind === 'linux-native-x64' ? 'complete-f2l-through-f7l'
+    : hostKind === 'linux-native-x64' ? 'run-linux-native-f2l-through-f8l'
       : hostKind === 'linux-native-arm64' ? 'complete-independent-sbsa-qualification'
         : hostKind.startsWith('wsl') ? 'run-separate-wsl2-qualification'
           : 'use-a-documented-host-profile';
@@ -105,17 +109,18 @@ function fail(reason, host, details = {}) {
 export function assessCudaSupport(host, driverDescription) {
   if (!plainObject(host) || host.schemaVersion !== 1 || !plainObject(host.node) || !plainObject(host.ffi)) return fail('HOST_PROFILE_INVALID', null);
   if (!['unrestricted-process', 'explicit-ffi', 'ffi-denied'].includes(host.ffi.permission) || typeof host.ffi.experimental !== 'boolean') return fail('HOST_PROFILE_INVALID', null);
-  if (host.hostKind !== 'windows-native-x64') return fail(host.hostKind?.startsWith('wsl') ? 'WSL_BACKEND_UNAVAILABLE' : host.hostKind?.startsWith('linux-native') ? 'LINUX_BACKEND_UNAVAILABLE' : 'HOST_BACKEND_UNAVAILABLE', host);
+  const nativeProfile = NATIVE_PROFILES[host.hostKind];
+  if (!nativeProfile) return fail(host.hostKind?.startsWith('wsl') ? 'WSL_BACKEND_UNAVAILABLE' : host.hostKind?.startsWith('linux-native') ? 'LINUX_BACKEND_UNAVAILABLE' : 'HOST_BACKEND_UNAVAILABLE', host);
   const nodeRuntime = classifyNodeRuntime(host.node.version);
   if (nodeRuntime.disposition === 'known-incompatible') return fail('NODE_SUBSTRATE_INCOMPATIBLE', host, { minimum: nodeRuntime.minimumVersion, actual: host.node.version, reason: nodeRuntime.reason });
   if (host.ffi.experimental !== true) return fail('EXPERIMENTAL_FFI_REQUIRED', host);
   if (host.ffi.permission === 'ffi-denied') return fail('FFI_PERMISSION_REQUIRED', host);
-  if (!plainObject(driverDescription) || driverDescription.schemaVersion !== 1 || driverDescription.profile?.nativeOperational !== true || driverDescription.runtime?.backend !== 'windows-native'
-      || driverDescription.profile?.platform !== 'win32' || driverDescription.profile?.architecture !== 'x64' || driverDescription.profile?.node !== host.node.version) return fail('WINDOWS_DRIVER_BACKEND_INCOMPATIBLE', host);
+  if (!plainObject(driverDescription) || driverDescription.schemaVersion !== 1 || driverDescription.profile?.nativeOperational !== true || driverDescription.runtime?.backend !== nativeProfile.backend
+      || driverDescription.profile?.platform !== nativeProfile.platform || driverDescription.profile?.architecture !== nativeProfile.architecture || driverDescription.profile?.node !== host.node.version) return fail(nativeProfile.backendReason, host);
   if (!Number.isSafeInteger(driverDescription.driver?.apiVersion) || driverDescription.driver.apiVersion < 1
       || !Number.isSafeInteger(driverDescription.driver?.deviceCount) || driverDescription.driver.deviceCount < 1
       || !Number.isSafeInteger(driverDescription.device?.ordinal) || driverDescription.device.ordinal < 0
-      || driverDescription.device.ordinal >= driverDescription.driver.deviceCount) return fail('WINDOWS_DRIVER_DESCRIPTION_INVALID', host);
+      || driverDescription.device.ordinal >= driverDescription.driver.deviceCount) return fail(nativeProfile.descriptionReason, host);
   const attributes = driverDescription.device?.attributes;
   if (!plainObject(attributes)) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host);
   for (const name of BINARY_ATTRIBUTES) if (![0, 1].includes(attributes[name])) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host, { field: name });
@@ -123,7 +128,9 @@ export function assessCudaSupport(host, driverDescription) {
   if (!Number.isSafeInteger(attributes.computeCapabilityMajor) || attributes.computeCapabilityMajor < 1 || attributes.computeCapabilityMajor > 99
       || !Number.isSafeInteger(attributes.computeCapabilityMinor) || attributes.computeCapabilityMinor < 0 || attributes.computeCapabilityMinor > 99) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host, { field: 'computeCapability' });
   const computeModes = ['default', 'exclusive-thread', 'prohibited', 'exclusive-process'];
-  const driverModel = attributes.tccDriver === 1 ? 'tcc' : attributes.kernelExecTimeout === 1 ? 'wddm-watchdog' : 'wddm-no-watchdog';
+  const driverModel = host.hostKind === 'linux-native-x64'
+    ? 'linux-native'
+    : attributes.tccDriver === 1 ? 'tcc' : attributes.kernelExecTimeout === 1 ? 'wddm-watchdog' : 'wddm-no-watchdog';
   if (attributes.computeMode === 2) return fail('CUDA_COMPUTE_MODE_PROHIBITED', host, { driverModel, computeMode: computeModes[attributes.computeMode] });
   return frozen({
     schemaVersion: 1,

@@ -32,10 +32,16 @@ if (version.status !== 0 || version.stdout.trim() !== requestedVersion) {
   process.exit(2);
 }
 
+const nativeEntrypoint = process.platform === 'win32' && process.arch === 'x64'
+  ? 'conformance/f3/run-native-windows.mjs'
+  : process.platform === 'linux' && process.arch === 'x64'
+    ? 'conformance/f3/run-native-linux.mjs'
+    : null;
+
 const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   mock: [{ args: ['conformance/f3/run-mock.mjs'] }],
-  native: [{ windowsOnly: true, args: ['--experimental-ffi', 'conformance/f3/run-native-windows.mjs'] }],
+  native: nativeEntrypoint ? [{ args: ['--experimental-ffi', nativeEntrypoint] }] : [],
   verify: [{ args: ['conformance/f3/verify.mjs'] }],
   portable: [
     { args: ['--test', ...unitFiles] },
@@ -45,7 +51,7 @@ const steps = {
   all: [
     { args: ['--test', ...unitFiles] },
     { args: ['conformance/f3/run-mock.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f3/run-native-windows.mjs'] },
+    ...(nativeEntrypoint ? [{ args: ['--experimental-ffi', nativeEntrypoint] }] : []),
     { args: ['conformance/f3/verify.mjs'] },
   ],
 };
@@ -53,15 +59,12 @@ if (!(action in steps)) {
   console.error(`Unknown CJS-F3 action: ${action}`);
   process.exit(2);
 }
+if (action === 'native' && !nativeEntrypoint) {
+  console.error('CJS-F3 native conformance requires Windows x64 or native Linux x86-64.');
+  process.exit(2);
+}
 
 for (const step of steps[action]) {
-  if (step.windowsOnly && process.platform !== 'win32') {
-    if (action === 'native') {
-      console.error('CJS-F3 native conformance requires the exact qualified Windows x64 Driver/GPU profile.');
-      process.exit(2);
-    }
-    continue;
-  }
   const result = spawnSync(node, step.args, {
     cwd: repositoryRoot,
     env: { ...process.env, CUDA_JS_F3_NODE: node },

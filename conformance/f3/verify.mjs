@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -13,8 +14,12 @@ assert.equal(mock.observations.unexpectedLoss.restartRequired, true);
 assert.equal(mock.observations.unexpectedLoss.cleanupClaim, 'unproved-worker-loss');
 assert(mock.observations.unexpectedLoss.inventory.counts.orphaned > 0);
 
-if (process.platform === 'win32') {
-  const native = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows.json'), 'utf8'));
+const platformKey = process.platform === 'win32' ? 'windows' : process.platform === 'linux' ? 'linux' : null;
+const nativePath = platformKey ? path.join(evidenceRoot, `native-${platformKey}.json`) : null;
+if (process.platform === 'win32' && process.arch === 'x64') assert(nativePath && existsSync(nativePath), 'F3W verification requires exact native Windows evidence.');
+const nativeEvidencePresent = process.arch === 'x64' && nativePath !== null && existsSync(nativePath);
+if (nativeEvidencePresent) {
+  const native = JSON.parse(await readFile(nativePath, 'utf8'));
   assert.equal(native.status, 'pass');
   assert.equal(native.observations.description.health.current, 'healthy');
   assert.equal(native.observations.turns.length, 8);
@@ -26,4 +31,4 @@ if (process.platform === 'win32') {
   assert.equal(native.observations.terminal.workerExitCode, 0);
 }
 
-console.log(`F3 verification passed for ${process.platform}-${process.arch}: opaque resources, health, responsiveness, graceful teardown, honest Worker-loss state${process.platform === 'win32' ? ', and native Windows context affinity' : ''}.`);
+console.log(`F3 verification passed for ${process.platform}-${process.arch}: opaque resources, health, responsiveness, graceful teardown, honest Worker-loss state${nativeEvidencePresent ? ', and native context affinity' : ''}.`);

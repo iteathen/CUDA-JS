@@ -6,8 +6,10 @@ import { fileURLToPath } from 'node:url';
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const profileName = `${process.platform}-${process.arch}`;
 export const evidenceRoot = path.join(repositoryRoot, 'build', 'f4', profileName, 'evidence');
-export const nativeRoot = path.join(repositoryRoot, 'build', 'f4', 'win32-x64', 'native');
-export const oraclePath = path.join(nativeRoot, 'windows-memory-oracle.exe');
+export const nativeRoot = path.join(repositoryRoot, 'build', 'f4', profileName, 'native');
+export const nativeProfile = process.platform === 'win32' ? 'windows' : process.platform === 'linux' ? 'linux' : 'unsupported';
+export const oraclePath = path.join(nativeRoot, `memory-oracle${process.platform === 'win32' ? '.exe' : ''}`);
+export const nativeEvidenceName = `native-${nativeProfile}.json`;
 
 export async function sha256(filePath) {
   const hash = createHash('sha256');

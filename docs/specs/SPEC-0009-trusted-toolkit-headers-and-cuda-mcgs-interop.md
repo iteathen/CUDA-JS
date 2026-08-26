@@ -122,7 +122,7 @@ The fixture proves only generic publication capability through the exact public 
 
 The shared request, identity, inventory, mutation, link/reparse, and non-regular-entry controls are portable and run in Linux CI. A separate non-promoting Linux readiness probe may inventory only canonical CUDA 13.3 CCCL roots and record an observed aggregate. It must not reuse the Windows digest as Linux authority.
 
-Native Linux NVRTC `<cuda/atomic>` compilation, a Linux compiler provider manifest, public-facade Driver execution, device publication, resource cleanup, and the CUDA-MCGS compatible pair remain unqualified until an exact native Linux provider and GPU environment runs their independent evidence chain. Windows evidence does not satisfy those gates.
+An exact Linux compiler-provider/header manifest and the shared native compiler source now exist. Native Linux NVRTC `<cuda/atomic>` compilation, public-facade Driver execution, device publication, resource cleanup, and the CUDA-MCGS compatible pair remain unqualified until an exact native Linux provider and GPU environment runs their independent evidence chain. Windows or source-only evidence does not satisfy those gates.
 
 The existing F6 through F8 regressions remain green. Final evidence must use the exact final binary/source revision; an earlier probe cannot qualify a later change.
 

@@ -1,8 +1,8 @@
 {
-  "schema_version": 41,
-  "updated": "2026-08-25",
+  "schema_version": 48,
+  "updated": "2026-08-26",
   "status": "spec0017_device_selection_complete_awaiting_integration",
-  "objective": "Review and integrate the completed SPEC-0017 portable/software/package device-selection packet, then begin the separately governed CUDA-JS-Tensor prerequisite sequence.",
+  "objective": "Review and integrate the completed OS-neutral SPEC-0017 portable/software/package device-selection packet while retaining native Linux qualification as a contributor-operated physical-hardware evidence lane, then begin the separately governed CUDA-JS-Tensor prerequisite sequence.",
   "exact_input_revisions": {
     "protected_main_authority_baseline": "22a4e71f285e9349e725be8025ff0c1aeef71580",
     "package": "cuda-js@0.1.0-alpha.8",
@@ -18,8 +18,13 @@
       "MCGS-P1-SCHED-0018 PR #118 integrated at protected main 5653d5dffdb8b763232e8d6c6a0c1353d8678151 and issue #40 closed",
       "MCGS-P1-TRANSFER-0019 PR #119 integrated at protected main 3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d and issue #86 closed",
       "MCGS-P1-SIDEBAND-0014 PR #120 integrated at protected main ed35718ea15ce7a878f67580e271aee5820948ee and issue #38 closed",
-      "CJS-DEVICE-PUBLICATION-123 completed on remote branch codex/issue-123-device-publication: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence",
-      "CJS-DEVICE-SELECTION-0017 completed on agent/spec0017-device-selection: finite sanitized discovery, opaque selector capabilities, pre-context DriverActor binding, selected-target defaults/cache separation, alpha.8 package projection, and portable installed-package evidence"
+      "CJS-DEVICE-PUBLICATION-123 integrated on PR #125: accepted SPEC-0022 child, alpha.7 implementation, CUDA-free protocol oracle, and exact installed-package Windows u32/u64 multiword evidence",
+      "CJS-OS-NEUTRAL-LINUX-REFERENCE-ADR-0006 selected: OS-neutral architecture, native Linux x86-64 reference implementation, exact Ubuntu 24.04 first cell, Windows retained as a qualified peer adapter/profile",
+      "CJS-LINUX-DRIVER-ADAPTER: shared native Driver backend, thin canonical Windows/Linux discovery profiles, and exact F3L runner implemented without promoting Linux support",
+      "CJS-LINUX-COMPILER-ADAPTER: shared native CompilerActor engine, exact official-package-pinned Ubuntu profile, and exact F6L readiness/oracle/Driver-handoff runner source implemented without native qualification",
+      "CJS-LINUX-FACADE-SOURCE: platform diagnostics, public facade admission, compatibility projection, and F7L/F8L readiness now accept native Linux x86-64 only as testing-unconfirmed; alpha.8 changes no qualification state",
+      "CJS-LINUX-RUNNER-CHAIN: PR #132 merged the OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile at protected main 118dec1574d650557ffa65f1bbb1d89e0970ceff; no Linux qualification state changed",
+      "CJS-DEVICE-SELECTION-0017 completed on agent/spec0017-device-selection: OS-neutral finite sanitized discovery, opaque selector capabilities, pre-context DriverActor binding, selected-target defaults/cache separation, alpha.8 package projection, and portable installed-package evidence"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
     "accepted_pending_implementation": [],
@@ -42,6 +47,7 @@
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
     "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md",
+    "docs/decisions/ADR-0006-linux-first-reference-platform.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md",
     "docs/specs/SPEC-0019-host-memory-and-async-transfer.md",
@@ -55,16 +61,27 @@
     "id": "CJS-DEVICE-SELECTION-0017-INTEGRATION",
     "issues": [20],
     "plan": "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
-    "next_action": "Run exact-head author review and portable/package validation, push and integrate PR #111 with an expected-head guard, update issue #20 to retain only exact native evidence, and verify branch/worktree disposition.",
+    "next_action": "Run exact-head author review and portable/package validation after OS-neutral reconciliation, push and integrate PR #111 with an expected-head guard, retain issue #20 only for contributor-run exact native evidence, and verify branch/worktree disposition.",
     "exit": "The exact reviewed alpha.8 head is integrated on protected main, issue #20 accurately retains only native evidence work, public/package identity agrees, and no task-created residue remains."
   },
   "parallel_or_external_next": [
+    {
+      "id": "CJS-OS-NEUTRAL-LINUX-REFERENCE-F2L-F8L",
+      "issues": [4],
+      "action": "A contributor may run the unchanged runner-ready Ubuntu 24.04 F2L-F8L chain on a native host with a directly exposed physical NVIDIA GPU, retain the full local bundle, submit the sanitized public summary, and fix only evidence-backed failures through their owning boundaries. VM, emulated, WSL, container, hosted-CI, portable, or mock results are not native qualification evidence."
+    },
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
       "issues": [39, 88],
       "action": "Run the independent native mixed-signature scalar ABI/launch oracle and at least one native/library view-range consumer fixture on an exact qualified profile. A public view-facade API remains unselected and requires separate accepted surface authority if needed."
     }
   ],
+  "long_horizon": {
+    "map": "docs/plans/2026-08-25-long-horizon-capability-map.md",
+    "issue": 129,
+    "status": "candidate_inventory_not_execution_authority",
+    "activation_gate": "Does not displace active accepted SPEC-0017 or the external issue #4 evidence lane; each candidate requires its own accepted owner, dependencies, lifecycle, and evidence before implementation."
+  },
   "blocked_or_deferred_lanes": [
     {
       "id": "CJS-EXTERNAL-SECURITY-68",
@@ -83,8 +100,8 @@
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
-      "issues": [4, 12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
-      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider/topology or independent native evidence not supplied by the current single-GPU Windows profile. Portable preparation/implementation may continue where authorized, but no broader native/support claim is inferred."
+      "issues": [12, 13, 14, 15, 17, 21, 22, 24, 26, 27, 28, 39, 42, 88],
+      "reason": "Requires exact external OS/GPU/Driver/toolkit/provider and independent native evidence. The repository-side Ubuntu x64 EXP-001/F1B/F3L-F8L runner/evidence chain is complete, but available VM hosts cannot currently provide an accepted CUDA qualification environment. Support promotion therefore waits for contributor-run evidence from a clean native host with directly exposed physical NVIDIA hardware. VM, emulated, WSL, container, hosted-CI, portable, or mock evidence does not qualify the native cell, and no broader support claim is inferred."
     },
     {
       "id": "CJS-INFRASTRUCTURE",
@@ -120,12 +137,14 @@
     "expose raw native pointers, streams, events, device ordinals/UUIDs, providers, generated CUDA, or machine-specific identifiers through ordinary public products",
     "use unqualified pure-JavaScript wording that hides native providers, generated device code, or independent C/C++ evidence",
     "introduce a CUDA-JS-maintained native host backend or compiled addon without an accepted measured-gap architecture/package/lifecycle decision",
-    "weaken tests or claim completion around missing hardware/external controls"
+    "weaken tests or claim completion around missing hardware/external controls",
+    "let the Linux reference implementation introduce operating-system, distribution, loader, path, or deployment assumptions into public contracts or shared runtime owners"
   ],
   "historical_baseline": [
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116, PR #118, PR #119, and PR #120 are integrated protected-main CUDA-MCGS prerequisites; issue #123 is complete on its remote integration branch; exact pair issue #32 awaits integration and the frozen CUDA-MCGS artifact"
+    "PR #116, PR #118, PR #119, PR #120, PR #124, and PR #125 are integrated protected-main CUDA-MCGS prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact",
+    "Windows F2W-F9 remains accepted secondary exact-profile evidence after ADR-0006; it is not deleted or used as Linux proof"
   ]
 }

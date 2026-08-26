@@ -37,10 +37,10 @@ if (version.status !== 0 || version.stdout.trim() !== requestedVersion) {
 const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   mock: [{ args: ['conformance/f4/run-mock.mjs'] }],
-  build: [{ windowsOnly: true, args: ['conformance/f4/build-native-windows.mjs'] }],
+  build: [{ nativeX64Only: true, args: ['conformance/f4/build-native.mjs'] }],
   native: [
-    { windowsOnly: true, args: ['conformance/f4/build-native-windows.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f4/run-native-windows.mjs'] },
+    { nativeX64Only: true, args: ['conformance/f4/build-native.mjs'] },
+    { nativeX64Only: true, args: ['--experimental-ffi', 'conformance/f4/run-native.mjs'] },
   ],
   verify: [{ args: ['conformance/f4/verify.mjs'] }],
   portable: [
@@ -51,8 +51,8 @@ const steps = {
   all: [
     { args: ['--test', ...unitFiles] },
     { args: ['conformance/f4/run-mock.mjs'] },
-    { windowsOnly: true, args: ['conformance/f4/build-native-windows.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f4/run-native-windows.mjs'] },
+    { nativeX64Only: true, args: ['conformance/f4/build-native.mjs'] },
+    { nativeX64Only: true, args: ['--experimental-ffi', 'conformance/f4/run-native.mjs'] },
     { args: ['conformance/f4/verify.mjs'] },
   ],
 };
@@ -62,9 +62,9 @@ if (!(action in steps)) {
 }
 
 for (const step of steps[action]) {
-  if (step.windowsOnly && process.platform !== 'win32') {
+  if (step.nativeX64Only && !(['win32', 'linux'].includes(process.platform) && process.arch === 'x64')) {
     if (['build', 'native'].includes(action)) {
-      console.error('CJS-F4 native conformance requires the exact qualified Windows x64 Driver/GPU profile.');
+      console.error('CJS-F4 native conformance requires a native Windows or Linux x64 Driver/GPU profile.');
       process.exit(2);
     }
     continue;

@@ -12,6 +12,7 @@ function publicProvider(provider) { return { profile: provider.identity.profile,
 
 async function loadBackend() {
   if (workerData.backend === 'windows-native') return (await import('./backends/windows-native.mjs')).createBackend();
+  if (workerData.backend === 'linux-native') return (await import('./backends/linux-native.mjs')).createBackend();
   if (workerData.backend === 'mock' && workerData.testHooks === true) return (await import('./backends/mock.mjs')).createBackend();
   throw new CompilerRuntimeError('COMPILER_BACKEND_UNSUPPORTED', 'unsupported', 'CompilerActor backend is not allowlisted.');
 }
@@ -42,7 +43,7 @@ try {
     resources: { ...backend.resources },
     health: { current: health },
     operationSequence,
-    claim: workerData.backend === 'windows-native' ? 'exact-windows-f6w-profile' : 'platform-neutral-compiler-mock-only',
+    claim: backend.claim ?? 'platform-neutral-compiler-mock-only',
   });
 
   parentPort.postMessage({ kind: 'ready', result: assertCompilerPublicRecord(status()) });
@@ -154,7 +155,7 @@ try {
           closed = true;
           health = 'closed';
           const clean = backend.resources.programsCreated === backend.resources.programsDestroyed && backend.resources.linksCreated === backend.resources.linksDestroyed;
-          result = { schemaVersion: 1, graceful: clean, cleanupClaim: clean ? (workerData.backend === 'windows-native' ? 'proved-native-resources-and-libraries' : 'proved-mock-lifecycle-only') : 'unproved', resources: { ...backend.resources }, health: { current: health }, operationSequence };
+          result = { schemaVersion: 1, graceful: clean, cleanupClaim: clean ? (backend.cleanupClaim ?? 'proved-mock-lifecycle-only') : 'unproved', resources: { ...backend.resources }, health: { current: health }, operationSequence };
         }
         parentPort.postMessage({ kind: 'response', requestId, ok: true, result: assertCompilerPublicRecord(result) });
         if (request.operation === 'runtime.close') parentPort.close();

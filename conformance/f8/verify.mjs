@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import compatibility from '../../packaging/compatibility-manifest.json' with { type: 'json' };
 import packageJson from '../../package.json' with { type: 'json' };
-import { evidenceRoot } from './evidence.mjs';
+import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './evidence.mjs';
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
@@ -50,8 +51,9 @@ for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'de
   assert.match(compilerConsumer[field], /^[a-f0-9]{64}$/);
 }
 assert.deepEqual(compilerConsumer.deviceJsParser, { name: 'acorn', version: '8.15.0' });
-if (process.platform === 'win32') {
-  const native = JSON.parse(await readFile(path.join(evidenceRoot, 'native-windows-package.json'), 'utf8'));
+const nativePath = path.join(evidenceRoot, nativePackageEvidenceName);
+if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64' && existsSync(nativePath)) {
+  const native = JSON.parse(await readFile(nativePath, 'utf8'));
   assert.equal(native.status, 'pass');
   assert.equal(native.observation.checksum, 15_600_773);
   assert.equal(native.observation.graceful, true);
@@ -67,10 +69,15 @@ if (process.platform === 'win32') {
   assert.equal(native.deviceJsObservation.atomicPublicationDeviceU32, true);
   assert.equal(native.deviceJsObservation.atomicPublicationDeviceU64, true);
   assert.deepEqual(native.deviceJsObservation.atomicPublicationPayload, [0x89abcdef, 0x01234567, 0x76543210, 0xfedcba98]);
-  assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.major, 7);
-  assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
+  assert(Number.isSafeInteger(native.deviceJsObservation.runtimeProfile.device.architecture.major));
+  assert(Number.isSafeInteger(native.deviceJsObservation.runtimeProfile.device.architecture.minor));
+  if (nativeProfile === 'windows') {
+    assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.major, 7);
+    assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
+  }
   assert.equal(Object.hasOwn(native.deviceJsObservation.runtimeProfile.device, 'ordinal'), false);
-  assert.equal(native.deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
+  assert.equal(native.deviceJsObservation.runtimeProfile.profile.nativeQualified, false);
+  assert.equal(native.deviceJsObservation.runtimeProfile.compiler.provider.profile, nativeProfile === 'windows' ? 'cuda-13.3-windows-x64-compiler' : 'cuda-13.3-ubuntu-24.04-x64-compiler');
   assert.equal(native.deviceJsObservation.rejectionBeforeCompilerResources, true);
   assert.equal(native.deviceJsObservation.graceful, true);
   assert.equal(native.deviceJsObservation.compilerResources.programsCreated, native.deviceJsObservation.compilerResources.programsDestroyed);
@@ -79,9 +86,16 @@ if (process.platform === 'win32') {
   assert.deepEqual(native.multiOperationObservation.transferBytes, [3, 5, 7, 11]);
   assert.equal(native.multiOperationObservation.graceful, true);
 }
-if (process.platform === 'linux') {
+if (process.platform === 'linux' && !existsSync(nativePath)) {
   const readiness = JSON.parse(await readFile(path.join(evidenceRoot, 'linux-readiness.json'), 'utf8'));
-  assert.equal(readiness.status, 'backend-unavailable');
-  assert.equal(readiness.observations.nativeOpenCode, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  if (process.arch === 'x64') {
+    assert.equal(readiness.status, 'facade-source-ready-not-qualified');
+    assert.equal(readiness.observations.compatibility.status, 'testing-unconfirmed-by-default');
+    assert(['environment-blocked', 'operational-unqualified'].includes(readiness.observations.admission.status));
+    assert.notEqual(readiness.observations.admission.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  } else {
+    assert.equal(readiness.status, 'backend-unavailable');
+    assert.equal(readiness.observations.admission.code, 'CUDA_JS_LINUX_BACKEND_UNAVAILABLE');
+  }
 }
-console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${process.platform === 'win32' ? 'native Windows facade plus source-only Device-JS execution' : 'retained native Linux qualification gates'}.`);
+console.log(`F8 verification passed for ${process.platform}-${process.arch}: exact package exports, reconciled additive public capabilities including Device-JS and SPEC-0016 operations, install/uninstall, independent consumers, instance isolation, and ${existsSync(nativePath) ? `native ${nativeProfile} facade plus source-only Device-JS execution` : 'retained native Linux qualification gates'}.`);

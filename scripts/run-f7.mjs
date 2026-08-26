@@ -38,12 +38,12 @@ const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   portable: [{ args: ['--test', ...unitFiles] }, { args: ['conformance/f7/run-portable.mjs'] }],
   'linux-readiness': [{ linuxOnly: true, args: ['conformance/f7/run-linux-readiness.mjs'] }],
-  native: [{ windowsOnly: true, args: ['--experimental-ffi', 'conformance/f7/run-native-windows.mjs'] }],
+  native: [{ nativeX64Only: true, args: ['--experimental-ffi', 'conformance/f7/run-native.mjs'] }],
   verify: [{ args: ['conformance/f7/verify.mjs'] }],
   all: [
     { args: ['--test', ...unitFiles] },
     { args: ['conformance/f7/run-portable.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f7/run-native-windows.mjs'] },
+    { nativeX64Only: true, args: ['--experimental-ffi', 'conformance/f7/run-native.mjs'] },
     { linuxOnly: true, args: ['conformance/f7/run-linux-readiness.mjs'] },
     { args: ['conformance/f7/verify.mjs'] },
   ],
@@ -53,9 +53,9 @@ if (!(action in steps)) {
   process.exit(2);
 }
 for (const step of steps[action]) {
-  if (step.windowsOnly && process.platform !== 'win32') {
+  if (step.nativeX64Only && !(['win32', 'linux'].includes(process.platform) && process.arch === 'x64')) {
     if (action === 'native') {
-      console.error('CJS-F7 native conformance currently requires the exact qualified Windows x64 profile.');
+      console.error('CJS-F7 native conformance requires a native Windows or Linux x64 profile.');
       process.exit(2);
     }
     continue;

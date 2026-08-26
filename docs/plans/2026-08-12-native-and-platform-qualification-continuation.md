@@ -4,7 +4,7 @@
 
 **Date:** 2026-08-12
 
-**Input baseline:** protected `main` `fe9ed78939d3876790291421cec367fde58a8310`, package `cuda-js@0.1.0-alpha.5`.
+**Input baseline:** protected `main` `118dec1574d650557ffa65f1bbb1d89e0970ceff`, package `cuda-js@0.1.0-alpha.8`.
 
 ## Purpose
 
@@ -73,13 +73,15 @@ Remaining evidence:
 
 ### Native Linux
 
-Linux F2L through the public/package equivalents remain independently incomplete. Resume only on a qualified native Linux NVIDIA environment. Windows, WSL, portable mocks, schema generation, or successful import cannot substitute for native Driver/compiler/GPU evidence.
+ADR-0006 promotes Linux F2L through the public/package equivalents from a retained lane to the primary reference qualification platform. Ubuntu 24.04 LTS x86-64 is the first exact cell. The canonical shared DriverActor/CompilerActor engines, thin Linux profiles, independent F4/F5 native oracles, F3L-F8L native runners, installed-package consumer, and exact-profile evidence validator are implemented. The profile is runner-ready, not qualified.
+
+The available VM hosts cannot currently provide an accepted CUDA qualification environment, so issue #4 is now an external contributor-evidence lane. A contributor must run the unchanged `EXP-001`, F1B, and F3L-F8L chain on a clean native Ubuntu host with a directly exposed physical NVIDIA GPU, review and retain the resulting evidence, and propose promotion only for the exact accepted profile. VM, emulated, WSL, container, hosted-CI, portable, mock, schema-generation, source-review, or import results cannot substitute for native Driver/compiler/GPU evidence. This unavailable environment does not block accepted OS-neutral portable/software work such as SPEC-0017.
 
 Capability-specific Linux RDC/LTO/Device-JS/operation qualification follows only after the owning Linux baseline and capability dependencies exist.
 
-### Additional Windows/architecture profiles
+### Secondary Windows and additional architecture profiles
 
-Continue exact-profile evidence for additional Turing, Ampere, Ada, Hopper, Blackwell, WDDM/TCC, Server, ARM64/SBSA, WSL, Jetson, and other selected profiles according to the hardware registry. One successful model never promotes a family.
+Retain the accepted Windows x64 exact evidence and continue additional Windows profiles only when a concrete consumer or available host justifies them. Continue exact-profile evidence for Turing, Ampere, Ada, Hopper, Blackwell, Server, ARM64/SBSA, WSL, Jetson, and other selected profiles according to the hardware registry. One successful model never promotes a family.
 
 ### Extended axes
 

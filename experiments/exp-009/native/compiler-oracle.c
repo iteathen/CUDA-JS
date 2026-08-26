@@ -40,7 +40,10 @@ int main(int argc, char **argv) {
     "--std=c++17",
     "--fmad=false",
     "--frandom-seed=0",
-    "--no-cache"
+    "--no-cache",
+#if defined(__linux__)
+    "--modify-stack-limit=false"
+#endif
   };
   const char *link_options[] = { "-arch=sm_75" };
   size_t source_size = 0;
@@ -64,7 +67,7 @@ int main(int argc, char **argv) {
   nvJitLinkResult destroy_link_status;
 
   if (argc != 4) {
-    fprintf(stderr, "usage: windows-compiler-oracle source ptx-output cubin-output\n");
+    fprintf(stderr, "usage: compiler-oracle source ptx-output cubin-output\n");
     return 64;
   }
   source = read_all(argv[1], &source_size);

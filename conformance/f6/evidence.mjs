@@ -8,7 +8,7 @@ export const profileName = `${process.platform}-${process.arch}`;
 export const evidenceRoot = path.join(repositoryRoot, 'build', 'f6', profileName, 'evidence');
 export const cacheRoot = path.join(repositoryRoot, 'build', 'f6', profileName, 'cache');
 export const sourcePath = path.join(repositoryRoot, 'experiments', 'exp-009', 'fixtures', 'vector-add.cu.txt');
-export const oracleRoot = path.join(repositoryRoot, 'build', 'exp-009', 'windows-x64');
+export const oracleRoot = path.join(repositoryRoot, 'build', 'exp-009', process.platform === 'win32' ? 'windows-x64' : 'linux-x64');
 export const oraclePtxPath = path.join(oracleRoot, 'oracle.ptx');
 export const oracleCubinPath = path.join(oracleRoot, 'oracle.cubin');
 export const capabilityRoot = path.join(repositoryRoot, 'build', 'f6', profileName, 'capabilities');

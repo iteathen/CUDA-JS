@@ -8,9 +8,11 @@ import { openDriverRuntime } from '../../components/driver-actor/index.mjs';
 import { checksumBytes, elementCount, u32Bytes, vectorInputs } from '../f5/evidence.mjs';
 import { cacheRoot, digestBytes, oracleCubinPath, oraclePtxPath, repositoryRoot, sha256, sourceIdentity, sourcePath, writeEvidence } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32', 'F6W native conformance requires Windows.');
-assert.equal(process.arch, 'x64', 'F6W native conformance requires Windows x64.');
-assert.equal(process.version, 'v26.7.0', 'F6W native conformance requires official Node v26.7.0.');
+assert(['win32', 'linux'].includes(process.platform), 'F6 native conformance requires Windows or native Linux.');
+assert.equal(process.arch, 'x64', 'F6 native conformance requires x86-64.');
+assert.equal(process.version, 'v26.7.0', 'F6 native conformance requires official Node v26.7.0.');
+const platformKey = process.platform === 'win32' ? 'windows' : 'linux';
+const workPackage = process.platform === 'win32' ? 'CJS-F6W' : 'CJS-F6L';
 
 const source = await readFile(sourcePath, 'utf8');
 const oraclePtx = Uint8Array.from(await readFile(oraclePtxPath));
@@ -116,20 +118,25 @@ assert.equal(launchObservations[0].checksum, launchObservations[1].checksum);
 
 const sources = [
   'docs/specs/SPEC-0006-compiler-linker-cache.md',
-  'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
-  'components/compiler-actor/src/backends/windows-native.mjs',
+  `schemas/cuda-13.3/${process.platform === 'win32' ? 'win-x64' : 'linux-x64'}/compiler-provider-manifest.json`,
+  'components/compiler-actor/src/backends/native.mjs',
+  'components/compiler-actor/src/backends/native-profiles.mjs',
+  `components/compiler-actor/src/backends/${platformKey}-native.mjs`,
+  'components/driver-actor/src/backends/native.mjs',
+  'components/driver-actor/src/backends/native-profiles.mjs',
+  `components/driver-actor/src/backends/${platformKey}-native.mjs`,
   'components/compiler-actor/src/cache.mjs',
   'components/execution/src/execution-manager.mjs',
-  'experiments/exp-009/native/windows-compiler-oracle.c',
+  'experiments/exp-009/native/compiler-oracle.c',
   'experiments/exp-009/fixtures/vector-add.cu.txt',
 ];
-const target = await writeEvidence('native-windows.json', {
+const target = await writeEvidence(`native-${platformKey}.json`, {
   schemaVersion: 1,
-  workPackage: 'CJS-F6W',
-  capsule: 'windows-compiler-linker-cache-driver-handoff',
+  workPackage,
+  capsule: `${platformKey}-compiler-linker-cache-driver-handoff`,
   status: 'pass',
   generatedAt: new Date().toISOString(),
-  environment: { node: { version: process.version, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, osVersion: os.version(), processEnvironmentUnchanged: true },
+  environment: { node: { version: process.version, executableSha256: await sha256(process.execPath) }, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version(), processEnvironmentUnchanged: true },
   sources: await sourceIdentity(sources),
   oracle: { ptx: { byteLength: oraclePtx.byteLength, sha256: digestBytes(oraclePtx) }, cubin: { byteLength: oracleCubin.byteLength, sha256: digestBytes(oracleCubin) } },
   observations: {
@@ -141,7 +148,7 @@ const target = await writeEvidence('native-windows.json', {
     driverTerminal,
   },
   capabilityBoundary: 'Evidence contains copied artifact identities and terminal records only; no source, artifact bytes, toolkit path, native handle, address, program, link, module, stream, or event capability is recorded.',
-  claimLimits: ['Exact accepted Windows x64 Node 26.7.0, CUDA 13.3 provider, Driver, and GPU profile only.', 'No native Linux provider or Driver support, crash recovery, performance, packaging, or stable API claim.'],
+  claimLimits: [`Exact ${platformKey} x64 Node 26.7.0, CUDA 13.3 provider, Driver, and GPU profile only.`, 'No cross-platform inference, crash recovery, performance, packaging, or stable API claim.'],
 });
-console.log(`F6W native conformance passed: exact C parity for PTX ${compileMiss.artifact.sha256} and cubin ${linkMiss.artifact.sha256}; both executed with checksum ${launchObservations[0].checksum}.`);
+console.log(`${workPackage} native conformance passed: exact C parity for PTX ${compileMiss.artifact.sha256} and cubin ${linkMiss.artifact.sha256}; both executed with checksum ${launchObservations[0].checksum}.`);
 console.log(`Evidence: ${path.relative(repositoryRoot, target)}`);

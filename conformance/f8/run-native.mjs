@@ -2,16 +2,18 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
-import { consumersRoot, evidenceRoot, packageRoot, repositoryRoot, sourceIdentity, writeEvidence } from './evidence.mjs';
+import { consumersRoot, evidenceRoot, nativePackageEvidenceName, nativeProfile, packageRoot, repositoryRoot, sha256, sourceIdentity, writeEvidence } from './evidence.mjs';
 
-assert.equal(process.platform, 'win32', 'F8W native package conformance requires Windows.');
-assert.equal(process.arch, 'x64', 'F8W native package conformance requires Windows x64.');
-assert.equal(process.version, 'v26.7.0', 'F8W native package conformance requires exact Node v26.7.0.');
+assert(['win32', 'linux'].includes(process.platform), 'F8 native package conformance requires Windows or native Linux.');
+assert.equal(process.arch, 'x64', 'F8 native package conformance requires x86-64.');
+assert.equal(process.version, 'v26.7.0', 'F8 native package conformance requires exact Node v26.7.0.');
+if (process.platform === 'linux') assert.doesNotMatch(os.release(), /microsoft/i, 'F8 native Linux package conformance does not accept WSL.');
 const node = process.env.CUDA_JS_F8_NODE ?? process.execPath;
 const npmCli = process.env.CUDA_JS_F8_NPM_CLI;
-assert(npmCli && existsSync(npmCli), 'F8W native package conformance requires the selected npm CLI.');
+assert(npmCli && existsSync(npmCli), 'F8 native package conformance requires the selected npm CLI.');
 
 function runNode(args, cwd) {
   const result = spawnSync(node, args, { cwd, encoding: 'utf8', env: { ...process.env, CUDA_JS_F8_NODE: node, CUDA_JS_F8_NPM_CLI: npmCli } });
@@ -24,16 +26,20 @@ const portable = JSON.parse(await readFile(path.join(evidenceRoot, 'portable-pac
 assert.equal(portable.status, 'pass');
 const tarball = path.join(packageRoot, portable.package.filename);
 assert(existsSync(tarball), 'Run F8 portable packaging before native package conformance.');
-const directory = path.join(consumersRoot, 'consumer-native-windows');
+const prerequisitePath = path.join(repositoryRoot, 'build', 'f7', `${process.platform}-${process.arch}`, 'evidence', `native-${nativeProfile}.json`);
+const prerequisite = JSON.parse(await readFile(prerequisitePath, 'utf8'));
+assert.equal(prerequisite.status, 'pass', 'F8 native package conformance requires passing F7 native evidence from the same workspace.');
+if (process.platform === 'linux') assert.equal(prerequisite.environment.host.osRelease, os.release(), 'F8L requires the same native Linux kernel as F7L.');
+const directory = path.join(consumersRoot, `consumer-native-${nativeProfile}`);
 await rm(directory, { recursive: true, force: true });
 await mkdir(directory, { recursive: true });
-await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: 'cuda-js-native-windows-consumer', version: '1.0.0', private: true, type: 'module' }, null, 2)}\n`);
-await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-windows.mjs'), path.join(directory, 'consumer.mjs'));
+await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: `cuda-js-native-${nativeProfile}-consumer`, version: '1.0.0', private: true, type: 'module' }, null, 2)}\n`);
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-vector.mjs'), path.join(directory, 'consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-mailbox.mjs'), path.join(directory, 'mailbox-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
-await cp(path.join(repositoryRoot, 'build', 'f5', 'win32-x64', 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
+await cp(path.join(repositoryRoot, 'build', 'f5', `${process.platform}-${process.arch}`, 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
 const installed = path.join(directory, 'node_modules', 'cuda-js');
 assert(existsSync(installed));
@@ -55,10 +61,15 @@ assert.equal(deviceJsObservation.atomicRelaxedDeviceU64, true);
 assert.equal(deviceJsObservation.atomicPublicationDeviceU32, true);
 assert.equal(deviceJsObservation.atomicPublicationDeviceU64, true);
 assert.deepEqual(deviceJsObservation.atomicPublicationPayload, [0x89abcdef, 0x01234567, 0x76543210, 0xfedcba98]);
-assert.equal(deviceJsObservation.runtimeProfile.device.architecture.major, 7);
-assert.equal(deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
+assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.architecture.major));
+assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.architecture.minor));
+if (nativeProfile === 'windows') {
+  assert.equal(deviceJsObservation.runtimeProfile.device.architecture.major, 7);
+  assert.equal(deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
+}
 assert.equal(Object.hasOwn(deviceJsObservation.runtimeProfile.device, 'ordinal'), false);
-assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
+assert.equal(deviceJsObservation.runtimeProfile.profile.nativeQualified, false);
+assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, nativeProfile === 'windows' ? 'cuda-13.3-windows-x64-compiler' : 'cuda-13.3-ubuntu-24.04-x64-compiler');
 assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);
 assert.equal(deviceJsObservation.graceful, true);
 const multiOperationOutput = runNode(['--experimental-ffi', 'multi-operation-consumer.mjs'], directory);
@@ -78,13 +89,13 @@ assert.equal(mailboxObservation.graceful, true);
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);
 assert(!existsSync(installed));
 
-const target = await writeEvidence('native-windows-package.json', {
+const target = await writeEvidence(nativePackageEvidenceName, {
   schemaVersion: 1,
-  workPackage: 'CJS-F8W',
-  capsule: 'installed-package-native-windows-vector-device-js-device-publication-operation-transfer-mailbox-consumers',
+  workPackage: `CJS-F8${nativeProfile === 'windows' ? 'W' : 'L'}`,
+  capsule: 'installed-package-native-vector-device-js-device-publication-operation-transfer-mailbox-consumers',
   status: 'pass',
   generatedAt: new Date().toISOString(),
-  environment: { node: process.version, platform: process.platform, architecture: process.arch },
+  environment: { node: process.version, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version() },
   sources: await sourceIdentity([
     'docs/specs/SPEC-0008-package-public-facade.md',
     'docs/specs/SPEC-0013-restricted-device-js.md',
@@ -94,17 +105,18 @@ const target = await writeEvidence('native-windows-package.json', {
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
     'components/runtime-facade/src/runtime.mjs',
-    'conformance/f8/fixtures/consumer-native-windows.mjs',
+    'conformance/f8/fixtures/consumer-native-vector.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
     'conformance/f8/fixtures/consumer-native-multi-operation.mjs',
     'conformance/f8/fixtures/consumer-native-mailbox.mjs',
     'conformance/f5/fixtures/vector-add.ptx.txt',
   ]),
+  prerequisite: { path: path.relative(repositoryRoot, prerequisitePath), sha256: await sha256(prerequisitePath) },
   package: portable.package,
   observation,
   deviceJsObservation,
   multiOperationObservation,
   mailboxObservation,
-  claimLimits: ['Exact installed Windows x64 Node 26.7.0 package and accepted Driver/GPU profile only.', 'The legacy vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'No Linux, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  claimLimits: [`Exact installed ${nativeProfile} x64 Node 26.7.0 package and recorded Driver/GPU input profile only.`, 'The vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'Linux evidence remains unqualified until the complete exact Ubuntu chain is reviewed and promoted; no cross-platform, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8W installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, and mailbox publication qualification; evidence: ${target}`);
+console.log(`F8${nativeProfile === 'windows' ? 'W' : 'L'} installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, and mailbox publication evidence; evidence: ${target}`);

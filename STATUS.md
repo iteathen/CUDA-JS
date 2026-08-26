@@ -21,7 +21,15 @@ ADR-0005 records the canonical split: **CUDA-JS is JavaScript-authored and JIT/n
 
 This wording does not claim that every host call or device artifact is JIT-produced. Precompiled artifacts remain valid, and host JIT claims remain exact-profile gated under ADR-0002. A future maintained native host backend requires an accepted measured-gap decision rather than entering as incidental drift.
 
-The accepted **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), retained **Linux x86-64** preparation/qualification paths, and portable/software/package implementations include:
+## Reference-platform direction
+
+ADR-0006 keeps the public/component architecture OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell. The accepted Windows x64 evidence below remains valid as a peer exact profile, but it no longer determines forward platform priority. DriverActor and CompilerActor use shared native engines with thin Windows/Linux profiles. The Linux compiler profile is pinned to exact official Ubuntu packages and installed-file identities, and the repository now has one runner-ready EXP-001/F1B/F3L–F8L command/evidence chain. That chain has not run on a controlled native Linux NVIDIA host, so source completion is not a Linux support claim.
+
+Issue #4 is now an external contributor-evidence lane rather than an active repository implementation blocker. Platform diagnostics, public-facade admission, and compatibility metadata admit native Linux x86-64 only as `testing-unconfirmed`, and the OS-neutral F4/F5 oracles plus F3–F8 runners are source-complete. The available VM hosts cannot currently expose an accepted CUDA qualification environment; VM, emulated, WSL, container, hosted-CI, portable, or mock results do not substitute for the unchanged chain on a native Ubuntu 24.04 host with a directly exposed physical NVIDIA GPU. Only that exact passing compatibility cell may be promoted, and issue #17 expands distributions only after it.
+
+Accepted SPEC-0017 portable/software integration is the active repository dependency path. It remains OS-neutral and will establish finite sanitized device snapshots, opaque selectors, exactly one selected device per runtime, and selected-device-driven target/cache identity without requiring native qualification to complete the portable contract. Native selected-device promotion follows contributed physical-host evidence. Multi-GPU orchestration remains proposal-only under SPEC-0024, and topology or overlap qualification requires a controlled host with at least two independently visible physical GPUs; it is pursued only where it fits naturally.
+
+The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), active reference **Linux x86-64** implementation/qualification path, and portable/software/package implementations include:
 
 - SPEC-0010 typed relocatable device code;
 - SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
@@ -55,7 +63,7 @@ The project owner requested every open issue be processed through investigate, a
 architectural disposition: selected
 implementation status:       implemented in portable/software/package path
 qualification status:        not-qualified
-priority:                    integration, then exact native evidence
+priority:                    integration, then contributor-run exact native evidence
 ```
 
 SPEC-0017 implements `discoverCudaDevices()`, opaque process-local selectors, explicit/default `openCudaRuntime()` selection before context creation, selected-architecture compile/link defaults and cache separation, and public ordinal sanitization. It exposes no ordinal/UUID/serial/PCI/native handle. Portable mocks prove orchestration only; exact native default/explicit selection and distinct physical-device behavior remain unqualified. Multi-device orchestration remains SPEC-0024 and proposal-only.
@@ -144,7 +152,7 @@ Issues #70 and #72-#84 contain useful research, but portions of their original t
 
 ## Open native/platform/external gates
 
-These remain independently open because the exact environment/control is unavailable here, not because the architecture is rejected:
+These remain independently open because the exact environment/control is unavailable here, not because the architecture is rejected. Issue #4 is specifically a contributor-operated physical-hardware evidence lane and does not block accepted portable/software work:
 
 - native Linux x64 #4 and distro expansion #17;
 - additional GPU models #12;
@@ -159,7 +167,6 @@ These remain independently open because the exact environment/control is unavail
 - MIG #27;
 - performance/soak #28;
 - exact CUDA-MCGS pair #32;
-- native LTO qualification #42;
 - native SPEC-0021 scalar/view-consumer qualification #39/#88;
 - exact merged-head Windows F5 oracle revalidation #64;
 - GitHub private vulnerability reporting end-to-end external control #68.
@@ -169,10 +176,10 @@ Not-qualified is not architectural rejection.
 ## Current forward order
 
 ```text
-1. keep CUDA-JS P0/P1 implementation prerequisites frozen at the integrated qualified profiles
-2. begin a bounded CUDA-MCGS artifact that consumes only public CUDA-JS contracts
-3. freeze the CUDA-MCGS artifact and execute exact compatible-pair gate #32
-4. keep broader CUDA-JS native/platform lanes independent of the CUDA-MCGS start gate
+1. preserve OS-neutral contracts and the accepted Windows peer evidence
+2. integrate and validate the accepted portable/software SPEC-0017 device-selection contract
+3. accept exact Ubuntu 24.04 F2L-F8L installed-package evidence when a contributor can run the unchanged chain on a native physical-NVIDIA host
+4. qualify native selected-device and 2+ physical-GPU behavior only when suitable hosts exist, without forcing cross-device coupling
 ```
 
 Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.

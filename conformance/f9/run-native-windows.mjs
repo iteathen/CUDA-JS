@@ -68,6 +68,8 @@ const sources = [
   'schemas/cuda-13.3/win-x64/compiler-provider-manifest.json',
   'components/compiler-actor/src/contract.mjs',
   'components/compiler-actor/src/header-profile.mjs',
+  'components/compiler-actor/src/backends/native.mjs',
+  'components/compiler-actor/src/backends/native-profiles.mjs',
   'components/compiler-actor/src/backends/windows-native.mjs',
   'components/runtime-facade/src/runtime.mjs',
   'conformance/f9/fixtures/atomic-publication.cu.txt',

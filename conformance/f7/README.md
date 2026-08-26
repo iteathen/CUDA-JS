@@ -1,6 +1,6 @@
 # CJS-F7 platform hardening conformance
 
-**Status:** Accepted Windows F7W; portable Linux/WSL preparation; native Linux and WSL CUDA qualification incomplete
+**Status:** Accepted Windows F7W; native Linux x64 runner source complete; Linux/WSL qualification incomplete
 
 This capsule implements SPEC-0007 without changing the CUDA execution surface. The portable partition validates host classification, malformed device facts, deterministic generated requests, injected failures, sanitized result/error boundaries, repeated actor lifecycles, responsiveness, and broad regression ceilings. The Windows partition queries device zero through DriverActor, reports CUDA's WDDM/TCC and kernel-timeout attributes, exercises both native actors repeatedly, and proves Node permission denial and explicit allow behavior.
 
@@ -21,15 +21,15 @@ A `wddm-watchdog` result means CUDA reports a kernel execution timeout for devic
 
 ## Native Linux x86-64 handoff
 
+Platform diagnostics assess copied native Linux x86-64 DriverActor descriptions through the same testing-unconfirmed contract as Windows, using a Linux-specific driver-model label. `run-native.mjs` now owns both thin platform profiles and preserves the same repeated Driver/compiler cycles, permission denial/allow controls, resource balance, Worker exit, and broad regression ceilings. This is runner readiness, not qualification.
+
 Linux support remains present and incomplete. Work on a native glibc x86-64 machine with a real NVIDIA Driver and supported GPU; WSL cannot supply native Linux evidence. Start with the public issue and complete the retained F2L through F6L runbooks in order. Then:
 
 1. Use exact Node 26.7.0 and run `npm run f7:unit`, `npm run f7:portable`, and `npm run f7:linux-readiness` unchanged.
 2. Confirm the readiness record classifies the host as `linux-native-x64`, never WSL.
-3. Add a Linux native F7 runner beside the Windows runner. Reuse the same property seed, cycle counts, resource-balance assertions, permission denial/allow structure, and broad ceilings.
-4. Exercise the canonical `libcuda.so.1`, NVRTC, builtins, and nvJitLink providers already required by F2L through F6L. Do not load stubs as a real Driver.
-5. Repeat DriverActor and CompilerActor open/use/close cycles. Record exact provider/Driver/device identity, balanced program/link resources, zero live/closing/orphaned graceful inventory, and Worker exit zero.
-6. Run the permission model with explicit FFI, Worker, provider-read, repository-read, and cache-read/write authorities. Preserve a denial control without FFI authority. Do not record allowed paths in public evidence.
-7. Update the support matrix and Linux issue only after the entire native dependency chain passes on the same profile.
+3. Complete F2L–F6L on the same workspace, then run `npm run f7:native` and `npm run f7:verify` unchanged. The runner exercises canonical `libcuda.so.1`, NVRTC, builtins, and nvJitLink providers; it does not accept stubs as a real Driver.
+4. Record exact provider/Driver/device identity, balanced program/link resources, zero live/closing/orphaned graceful inventory, Worker exit zero, and permission denial/allow results without publishing allowed filesystem paths.
+5. Continue through F8 and `npm run hardware:qualify`; update support only after the entire exact chain passes on the same profile.
 
 Expected blockers are a missing device node, stub-only Driver, unsupported Node/provider identity, permission denial, ABI mismatch, context/currentness failure, compile/link mismatch, unproved destruction, nonzero resource inventory, Worker loss, or an unqualified virtualized environment. Report the exact blocker; do not turn a native gate into a mock pass.
 

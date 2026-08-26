@@ -41,6 +41,7 @@ const steps = {
   unit: [{ args: ['--test', ...unitFiles] }],
   portable: [{ args: ['--test', ...unitFiles] }, { args: ['conformance/f6/run-portable.mjs'] }],
   'linux-readiness': [{ linuxOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-linux-readiness.mjs'] }],
+  'linux-build': [{ linuxOnly: true, args: ['conformance/f6/build-native-linux.mjs'] }],
   experiment: [{ windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] }],
   'capabilities-build': [{ windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] }],
   capabilities: [
@@ -49,7 +50,8 @@ const steps = {
   ],
   native: [
     { windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-native-windows.mjs'] },
+    { linuxOnly: true, args: ['conformance/f6/build-native-linux.mjs'] },
+    { args: ['--experimental-ffi', 'conformance/f6/run-native.mjs'] },
     { windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-capabilities-native-windows.mjs'] },
   ],
@@ -58,7 +60,8 @@ const steps = {
     { args: ['--test', ...unitFiles] },
     { args: ['conformance/f6/run-portable.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'experiments/exp-009/src/run-native-windows.mjs'] },
-    { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-native-windows.mjs'] },
+    { linuxOnly: true, args: ['conformance/f6/build-native-linux.mjs'] },
+    { nativeX64Only: true, args: ['--experimental-ffi', 'conformance/f6/run-native.mjs'] },
     { windowsOnly: true, args: ['conformance/f6/build-capabilities-native-windows.mjs'] },
     { windowsOnly: true, args: ['--experimental-ffi', 'conformance/f6/run-capabilities-native-windows.mjs'] },
     { args: ['conformance/f6/verify.mjs'] },
@@ -69,16 +72,26 @@ if (!(action in steps)) {
   process.exit(2);
 }
 for (const step of steps[action]) {
+  if (step.nativeX64Only && !(['win32', 'linux'].includes(process.platform) && process.arch === 'x64')) {
+    if (action === 'native') {
+      console.error('CJS-F6 native conformance requires a native Windows or Linux x64 provider profile.');
+      process.exit(2);
+    }
+    continue;
+  }
   if (step.windowsOnly && process.platform !== 'win32') {
-    if (['experiment', 'native'].includes(action)) {
+    if (['experiment', 'capabilities-build', 'capabilities'].includes(action)) {
       console.error('CJS-F6 native conformance requires the exact qualified Windows x64 provider profile.');
       process.exit(2);
     }
     continue;
   }
   if (step.linuxOnly && process.platform !== 'linux') {
-    console.error('CJS-F6 Linux readiness requires native Linux x86-64.');
-    process.exit(2);
+    if (['linux-readiness', 'linux-build'].includes(action)) {
+      console.error('CJS-F6 Linux provider work requires native Linux x86-64.');
+      process.exit(2);
+    }
+    continue;
   }
   const result = spawnSync(node, step.args, { cwd: root, env: { ...process.env, CUDA_JS_F6_NODE: node }, stdio: 'inherit' });
   if (result.error) throw result.error;
