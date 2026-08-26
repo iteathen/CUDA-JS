@@ -88,6 +88,30 @@ function launchPayload(functionToken, options, operationName) {
   };
 }
 
+function preparedDagPayload(options) {
+  if (!plainObject(options) || Object.keys(options).length !== 1 || !Array.isArray(options.nodes)) throw validationError('DRIVER_PREPARED_OPTIONS', 'prepareOperationDag requires exactly one nodes array.');
+  return {
+    nodes: options.nodes.map((node) => {
+      if (!plainObject(node) || !isResourceToken(node.functionToken) || !Array.isArray(node.after) || !Array.isArray(node.arguments) || !Array.isArray(node.accesses)) throw validationError('DRIVER_PREPARED_OPTIONS', 'Prepared DAG nodes are invalid.');
+      return {
+        ...node,
+        after: [...node.after],
+        grid: plainObject(node.grid) ? { ...node.grid } : node.grid,
+        block: plainObject(node.block) ? { ...node.block } : node.block,
+        arguments: node.arguments.map((entry) => plainObject(entry) ? { ...entry } : entry),
+        accesses: node.accesses.map((entry) => plainObject(entry) ? { ...entry } : entry),
+      };
+    }),
+  };
+}
+
+function preparedSubmissionPayload(token, options) {
+  if (!isResourceToken(token)) throw validationError('DRIVER_PREPARED_TOKEN', 'submitPreparedOperationDag requires an exact opaque prepared token.');
+  if (!plainObject(options) || Object.keys(options).some((key) => !['bindings', 'after'].includes(key)) || !Array.isArray(options.bindings)) throw validationError('DRIVER_PREPARED_BINDINGS', 'Prepared DAG submission requires a bindings array and optional predecessor.');
+  if (options.after !== undefined && options.after !== null && !isResourceToken(options.after)) throw validationError('DRIVER_OPERATION_TOKEN', 'Prepared DAG predecessor must be an exact opaque operation token.');
+  return { token, bindings: options.bindings.map((entry) => plainObject(entry) ? { ...entry } : entry), after: options.after ?? null };
+}
+
 function operationFailure(status) {
   if (status?.status === 'orphaned') {
     return new DriverRuntimeError('EXECUTION_OPERATION_ORPHANED', 'restart-required', 'GPU operation terminality is unproved; process restart is required.', { orphanReason: status.orphanReason ?? null }, { healthBefore: status.health?.current ?? null, healthAfter: 'restart-required' });
@@ -293,6 +317,24 @@ class DriverRuntime {
 
   async submit(functionToken, options) {
     return this.#request('execution.submit', launchPayload(functionToken, options, 'submit'));
+  }
+
+  async prepareOperationDag(options) {
+    return this.#request('execution.prepared.create', preparedDagPayload(options));
+  }
+
+  async preparedOperationDagStatus(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_PREPARED_TOKEN', 'preparedOperationDagStatus requires an exact opaque prepared token.');
+    return this.#request('execution.prepared.status', { token });
+  }
+
+  async submitPreparedOperationDag(token, options) {
+    return this.#request('execution.prepared.submit', preparedSubmissionPayload(token, options));
+  }
+
+  async releasePreparedOperationDag(token) {
+    if (!isResourceToken(token)) throw validationError('DRIVER_PREPARED_TOKEN', 'releasePreparedOperationDag requires an exact opaque prepared token.');
+    return this.#request('execution.prepared.release', { token });
   }
 
   async operationStatus(token) {

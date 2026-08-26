@@ -7,10 +7,10 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     991330ffda926e052c857cd6a3f5bdcc37f47034
-completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
+protected main:     9726898d728fc6e1f1baabb5a1ddc67808549e84
+completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.10 candidate (typed Device-JS library packet)
+execution package:  cuda-js@0.1.0-alpha.11 candidate (semantic prepared-DAG packet)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -44,7 +44,8 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - SPEC-0017 finite sanitized discovery, opaque explicit selection, one selected device per runtime, and selected-device compile/link target defaults;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component and allocation-owned public facade, integrated on PR #134;
-- SPEC-0028 typed Device-JS leaf-library composition, active on issue #135;
+- SPEC-0028 typed Device-JS leaf-library composition, integrated on PR #136; native qualification remains open on issue #135;
+- SPEC-0020 immutable kernel-only prepared DAGs, active on issue #85 with semantic single-stream replay and no CUDA Graph claim;
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
@@ -114,6 +115,7 @@ private CUDA contexts:        1 per runtime
 private execution streams:    1 default / exactly 2 opt-in
 max pending GPU operations:   1 default / exactly 2 opt-in
 public operation lifecycle:   CudaFunction.submit() -> CudaOperation
+public prepared lifecycle:    CudaRuntime.prepareOperationDag() -> CudaPreparedOperationDag
 legacy terminal convenience:  CudaFunction.launch()
 public launch kinds:          device-memory/u32/u64/i32/f32/f64/f16/bf16 + directional mailbox-u32
 ```
@@ -124,14 +126,15 @@ SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph
 
 SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation and device-publication children, and the SPEC-0014 mailbox child are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. `loadAcquireDevice` / `storeReleaseDevice` provide device-scope publication ordering when acquire observes the matching release; consumer generation, progress, payload and queue policy remain separate. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile. Broader Device-JS parallel/numeric/service widening remains governed by proposed SPEC-0022.
 
-Accepted SPEC-0028 is the active portable packet. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
+Accepted SPEC-0028 is integrated on protected main. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
+
+Accepted SPEC-0020 is the active portable packet. Its implemented first profile owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. Each replay validates concrete aliases before backend work, submits canonical topological order on one private stream, and returns one existing SPEC-0016 operation with one final event. CUDA Graph realization, transfer/library/mailbox nodes, native qualification, and performance remain separate.
 
 ## Proposal-only successor capabilities
 
 The following remain proposal authority only and do not authorize production code:
 
 ```text
-SPEC-0020 prepared batches / CUDA Graph execution
 SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation and device-publication children accepted)
 SPEC-0023 context-bound CUDA library adapters
 SPEC-0024 multi-GPU orchestration
@@ -180,8 +183,8 @@ Not-qualified is not architectural rejection.
 
 ```text
 1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. integrate the bounded SPEC-0028 typed Device-JS library-composition packet
-3. advance the remaining serial generic CUDA-JS prerequisites selected by the CUDA-JS-Tensor plan: prepared dependency batches, then generic library adapters
+2. integrate the bounded SPEC-0020 semantic prepared-DAG packet without claiming CUDA Graph use
+3. advance the remaining serial generic CUDA-JS prerequisite selected by the CUDA-JS-Tensor plan: context-bound generic library adapters
 4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
 ```
 

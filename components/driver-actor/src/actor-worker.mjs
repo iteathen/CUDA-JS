@@ -55,6 +55,10 @@ try {
         else if (request.operation === 'execution.function.status') result = backend.execution.functionStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.function.release') result = await backend.execution.releaseFunction(request.payload.token, request.requestId);
         else if (request.operation === 'execution.submit') result = await backend.execution.submit(request.payload.functionToken, { ...request.payload, operationId: request.requestId });
+        else if (request.operation === 'execution.prepared.create') result = await backend.execution.prepareOperationDag({ nodes: request.payload.nodes, operationId: request.requestId });
+        else if (request.operation === 'execution.prepared.status') result = backend.execution.preparedOperationDagStatus(request.payload.token, request.requestId);
+        else if (request.operation === 'execution.prepared.submit') result = await backend.execution.submitPreparedOperationDag(request.payload.token, { bindings: request.payload.bindings, after: request.payload.after, operationId: request.requestId });
+        else if (request.operation === 'execution.prepared.release') result = await backend.execution.releasePreparedOperationDag(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.status') result = await backend.execution.operationStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.release') result = await backend.execution.releaseOperation(request.payload.token, request.requestId);
         else if (request.operation === 'execution.operation.timeout') result = await backend.execution.legacyTimeout(request.payload.token, request.requestId);

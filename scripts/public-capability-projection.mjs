@@ -184,6 +184,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.package?.name !== packageJson.name || compatibility.package?.version !== packageJson.version) {
     errors.push('package.json and packaging compatibility package identity differ');
   }
+  if (!(packageJson.files ?? []).includes('components/prepared-execution/')) {
+    errors.push('package.json omits the prepared-execution runtime dependency from the package');
+  }
   if (JSON.stringify(compatibility.capabilities?.functionParameters) !== JSON.stringify(expectedParameters)) {
     errors.push('packaging compatibility scalar parameter projection is stale');
   }
@@ -208,6 +211,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.publicationMailboxes !== 'private-mapped-named-u32-one-operation-lease-system-acquire-release') {
     errors.push('packaging compatibility publication mailbox projection is stale');
   }
+  if (compatibility.capabilities?.preparedOperationDags !== 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay') {
+    errors.push('packaging compatibility prepared operation DAG projection is stale');
+  }
   if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
@@ -225,6 +231,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0013',
     'SPEC-0016',
     'SPEC-0017',
+    'SPEC-0020',
     'SPEC-0028',
     'SPEC-0027',
     'separate future publish unit',
@@ -244,6 +251,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0013',
     'SPEC-0016',
     'SPEC-0017',
+    'SPEC-0020',
     'SPEC-0021',
     'SPEC-0027',
     'Optional separately packaged NN product',
@@ -271,7 +279,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'known incompatible',
     'not-qualified',
   ]);
-  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0021', 'SPEC-0027', 'separate future publish unit']);
+  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0020', 'SPEC-0021', 'SPEC-0027', 'separate future publish unit']);
   validateCapabilityTable(errors, documents.capabilities);
   validateNnAuthorityProjection(errors, packageJson, documents);
 

@@ -191,7 +191,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       const cleanupOrRead = new Set([
         'runtime.describe', 'runtime.close', 'context.status', 'memory.status', 'memory.release', 'memory.view.status', 'memory.view.release',
         'execution.module.status', 'execution.module.release', 'execution.function.status', 'execution.function.release',
-        'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
+        'execution.prepared.status', 'execution.prepared.release', 'execution.operation.status', 'execution.operation.release', 'mailbox.status', 'mailbox.release',
         'testing.disposal-status',
       ]);
       if (health.current === 'restart-required') throw new DriverRuntimeError('DRIVER_RESTART_REQUIRED', 'restart-required', 'Runtime health requires process restart.', { operation }, { operation, operationId, healthBefore: health.current, healthAfter: health.current });

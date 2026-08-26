@@ -200,12 +200,37 @@ export interface CudaLaunchOptions {
   }>[];
 }
 
+export interface CudaPreparedBindingReference { readonly binding: string; }
+
+export interface CudaPreparedKernelNode {
+  id: string;
+  kind?: 'kernel';
+  after?: readonly string[];
+  function: CudaFunction;
+  grid: LaunchDimensions;
+  block: LaunchDimensions;
+  sharedMemoryBytes?: number;
+  arguments: readonly (CudaPreparedBindingReference | number | bigint)[];
+  accesses: readonly Readonly<{
+    argumentIndex: number;
+    byteOffset: number;
+    byteLength: number;
+    mode: 'read' | 'write' | 'read-write' | 'atomic-observe-relaxed-device' | 'atomic-update-relaxed-device';
+    dtype?: 'u32' | 'u64';
+  }>[];
+}
+
+export type CudaPreparedBindingValue = CudaDeviceMemory | CudaDeviceView | number | bigint;
+export interface CudaPreparedBindingDescriptor { readonly name: string; readonly kind: FunctionParameterKind; }
+export interface CudaPreparedSubmitOptions { after?: CudaOperation | null; }
+export interface CudaPreparedSubmitRequest extends CudaPreparedSubmitOptions { bindings: Readonly<Record<string, CudaPreparedBindingValue>>; }
+
 export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned' | 'closed';
 
 export interface CudaOperationStatus {
   readonly schemaVersion: 1;
   readonly status: 'pending' | 'completed' | 'failed' | 'orphaned';
-  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device';
+  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device' | 'prepared-batch';
   readonly grid?: LaunchDimensions;
   readonly block?: LaunchDimensions;
   readonly sharedMemoryBytes?: number;
@@ -217,6 +242,9 @@ export interface CudaOperationStatus {
   readonly failure?: Readonly<Record<string, unknown>>;
   readonly orphanReason?: string;
   readonly result?: Readonly<{ bytes: Uint8Array }>;
+  readonly preparedSha256?: string;
+  readonly nodeCount?: number;
+  readonly edgeCount?: number;
 }
 
 export interface CudaOperation {
@@ -235,6 +263,21 @@ export interface CudaFunction {
   status(): Promise<Readonly<Record<string, unknown>>>;
   submit(options: CudaLaunchOptions): Promise<CudaOperation>;
   launch(options: CudaLaunchOptions): Promise<Readonly<Record<string, unknown>>>;
+  close(): Promise<Readonly<Record<string, unknown>>>;
+}
+
+export interface CudaPreparedOperationDag {
+  readonly kind: 'prepared-operation-dag';
+  readonly contract: 'SPEC-0020-prepared-kernel-dag-v1';
+  readonly sha256: string;
+  readonly nodeCount: number;
+  readonly edgeCount: number;
+  readonly bindings: readonly CudaPreparedBindingDescriptor[];
+  readonly realization: 'semantic-single-stream';
+  readonly state: string;
+  status(): Promise<Readonly<Record<string, unknown>>>;
+  submit(request: CudaPreparedSubmitRequest): Promise<CudaOperation>;
+  submit(bindings: Readonly<Record<string, CudaPreparedBindingValue>>, options?: CudaPreparedSubmitOptions): Promise<CudaOperation>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
@@ -258,6 +301,8 @@ export interface CudaRuntime {
   allocateDevice(options: { byteLength: number }): Promise<CudaDeviceMemory>;
   createPublicationMailbox(options: { lanes: readonly Readonly<{ name: string; direction: 'host-to-device' | 'device-to-host' }>[] }): Promise<CudaPublicationMailbox>;
   loadModule(options: { format: 'ptx' | 'cubin'; bytes: Uint8Array }): Promise<CudaModule>;
+  prepareOperationDag(nodes: readonly CudaPreparedKernelNode[]): Promise<CudaPreparedOperationDag>;
+  prepareOperationDag(options: { nodes: readonly CudaPreparedKernelNode[] }): Promise<CudaPreparedOperationDag>;
   compile(request: DeviceCompileRequest): Promise<CompilerResult>;
   link(request: { inputs: readonly (Uint8Array | PtxArtifact | LtoIrArtifact)[]; options?: Readonly<Record<string, unknown>> }): Promise<CompilerResult>;
   invalidateCache(key: string): Promise<Readonly<Record<string, unknown>>>;

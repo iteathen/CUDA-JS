@@ -98,6 +98,7 @@ const required = [
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
   'components/driver-actor/test/health.test.mjs',
+  'components/driver-actor/test/protocol-prepared-operation-dag.test.mjs',
   'components/memory/README.md', 'components/memory/component.yaml',
   'components/memory/index.mjs', 'components/memory/src/memory-manager.mjs',
   'components/memory/test/memory-manager.test.mjs',
@@ -110,6 +111,10 @@ const required = [
   'components/execution/README.md', 'components/execution/component.yaml',
   'components/execution/index.mjs', 'components/execution/src/execution-manager.mjs',
   'components/execution/test/execution-manager.test.mjs',
+  'components/execution/test/prepared-operation-dag.test.mjs',
+  'components/prepared-execution/README.md', 'components/prepared-execution/component.yaml',
+  'components/prepared-execution/index.mjs', 'components/prepared-execution/src/prepared-operation-dag.mjs',
+  'components/prepared-execution/test/prepared-operation-dag.test.mjs',
   'components/compiler-actor/README.md', 'components/compiler-actor/component.yaml',
   'components/compiler-actor/index.mjs', 'components/compiler-actor/testing.mjs',
   'components/compiler-actor/src/errors.mjs', 'components/compiler-actor/src/contract.mjs',
@@ -143,6 +148,7 @@ const required = [
   'components/runtime-facade/src/errors.mjs', 'components/runtime-facade/src/runtime.mjs',
   'components/runtime-facade/src/device-program.mjs',
   'components/runtime-facade/test/runtime-facade.test.mjs', 'components/runtime-facade/test/device-js.test.mjs',
+  'components/runtime-facade/test/prepared-operation-dag.test.mjs',
   'schemas/README.md', 'conformance/README.md',
   'conformance/f3/README.md', 'conformance/f3/evidence.mjs',
   'conformance/f3/run-mock.mjs', 'conformance/f3/run-native-windows.mjs', 'conformance/f3/run-native-linux.mjs',
@@ -248,6 +254,7 @@ for (const relative of [
   'components/host-memory-transfer/component.yaml',
   'components/publication-mailbox/component.yaml',
   'components/execution/component.yaml',
+  'components/prepared-execution/component.yaml',
   'components/compiler-actor/component.yaml',
   'components/cuda-target/component.yaml',
   'components/device-selection/component.yaml',
@@ -466,6 +473,7 @@ for (const relative of files) {
       && !relative.startsWith('components/host-memory-transfer/')
       && !relative.startsWith('components/publication-mailbox/')
       && !relative.startsWith('components/execution/')
+      && !relative.startsWith('components/prepared-execution/')
       && !relative.startsWith('components/compiler-actor/')
       && !relative.startsWith('components/cuda-target/')
       && !relative.startsWith('components/device-selection/')
@@ -497,4 +505,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including accepted SPEC-0013 Device-JS, owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including accepted SPEC-0013 Device-JS and SPEC-0020 semantic prepared DAGs, owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');

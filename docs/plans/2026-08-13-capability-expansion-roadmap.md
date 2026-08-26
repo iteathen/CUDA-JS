@@ -69,7 +69,7 @@ SPEC-0017 explicit device selection and selected-device target resolution
 Proposal-only remainder:
 
 ```text
-SPEC-0020 prepared batch / CUDA Graph
+SPEC-0020 CUDA Graph realization and additional prepared node families (semantic kernel-DAG baseline implemented)
 SPEC-0022 except its accepted atomic-observation/publication children
 SPEC-0023 context-bound CUDA library adapters
 SPEC-0024 multi-GPU orchestration
@@ -113,7 +113,7 @@ Do not force P2 to include P2P, NCCL, shared graphs, automatic partitioning, mig
 
 ## Other successor lanes
 
-- SPEC-0020 prepared batches/graphs build on the accepted operation/scheduling owners.
+- The SPEC-0020 semantic kernel-DAG baseline is implemented over the accepted operation/scheduling owners; CUDA Graph realization and additional node families remain successor profiles.
 - SPEC-0023 library adapters build on selected device, typed views, scheduling, and provider-specific evidence.
 - SPEC-0025 graphics/external-resource interop builds on selected-device matching, typed views, and synchronization contracts.
 - SPEC-0026 process isolation remains distinct from Worker ownership.

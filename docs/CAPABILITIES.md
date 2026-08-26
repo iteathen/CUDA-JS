@@ -36,7 +36,7 @@ Important current limits are equally explicit:
 - the capacity-two scheduler and bounded internal-pinned asynchronous transfers are implemented and qualified only on the recorded exact Windows profile;
 - the SPEC-0014 publication mailbox is implemented and qualified only for private mapped storage, named directional u32 lanes, one live operation lease, and system-scope acquire/release on the recorded exact Windows profile;
 - public caller-controlled raw streams/events are not part of the current public contract;
-- multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph execution, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities;
+- multi-GPU, MIG, managed memory, caller-registered/mapped host memory, CUDA Graph realization, graphics interop, external contexts, process isolation, arbitrary kernel signatures beyond the accepted closed parameter kinds, and native Linux CUDA execution are not currently qualified public capabilities; the separate SPEC-0020 semantic prepared-DAG fallback is implemented but not native-qualified;
 - contiguous 1D typed device views have an additive public portable/software facade through `CudaDeviceMemory.view(...)`; native view use and performance remain unqualified;
 - typed Device LTO is implemented and qualified on the exact recorded Windows x64 Node 26.7.0/CUDA 13.3/`sm_75` profile; Linux, other devices/providers and LTO performance remain separately unqualified;
 - the published `cuda-js` core does not bundle cuBLAS, cuDNN, tensor/autodiff logic, neural-network semantics, MCGS/search semantics, or application scheduling policy.
@@ -366,7 +366,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Internal pinned host staging and async transfer | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0019 first profile: two private bounded staging blocks plus contiguous H2D/D2H/D2D; caller registration/mapping remains later. |
 | Publication mailbox | `planned` | `implemented` | `qualified` | `active` | Exact SPEC-0014 first profile: private mapped storage, 1–64 named directional u32 lanes, one live operation lease, and Device-JS system-scope acquire/release. |
 | Memory pools/async allocation | `unselected` | `not-implemented` | `not-qualified` | `deferred` | Requires separate pressure/stream/lifetime semantics. |
-| Prepared batches/CUDA Graphs | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0020 retains a non-graph semantic fallback. |
+| Prepared kernel DAGs / CUDA Graphs | `planned` | `implemented` | `not-qualified` | `active` | SPEC-0020 provides immutable 1–32-node kernel DAGs, named replay bindings, canonical identity, one whole-DAG operation, and one single-stream semantic realization. CUDA Graph realization remains not implemented; no Graph use or speedup is claimed. |
 | Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0018` | Proposed SPEC-0023; no bundled cuBLAS/cuDNN/tensor semantics. |
@@ -390,7 +390,7 @@ False for the accepted execution path. CUDA-JS owns a private nonblocking stream
 
 ### "One pending operation means CUDA-JS has no GPU concurrency."
 
-False. One-pending-operation is a host admission/error-attribution rule for the current runtime profile. CUDA kernels still execute with ordinary massive GPU parallelism. Multi-operation/private-stream scheduling is a distinct, currently unimplemented and unqualified capability.
+False. One-pending-operation is the compatibility-default host admission/error-attribution rule. CUDA kernels still execute with ordinary massive GPU parallelism, and the opt-in SPEC-0018 profile admits exactly two pending operations on two private streams. Broader scheduling and performance profiles remain separate.
 
 ### "Single-flight is the permanent CUDA-JS architecture."
 
