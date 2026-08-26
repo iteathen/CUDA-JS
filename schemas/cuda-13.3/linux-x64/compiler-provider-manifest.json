@@ -1,9 +1,21 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "profile": "cuda-13.3-ubuntu-24.04-x64-compiler",
   "node": "v26.7.0",
   "toolkitVersion": "13.3",
   "sourcePackages": [
+    {
+      "file": "cuda-cudart-dev-13-3_13.3.29-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cudart-dev-13-3_13.3.29-1_amd64.deb",
+      "byteLength": 1462248,
+      "sha256": "600e5cf3685d0afae85970ba02451358068b7b56c954999b9149900ec5d940d9"
+    },
+    {
+      "file": "cuda-crt-13-3_13.3.33-1_amd64.deb",
+      "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-crt-13-3_13.3.33-1_amd64.deb",
+      "byteLength": 102058,
+      "sha256": "d7a7893e49a84f7b6bfe4cdbbecbfecd4fe1f30e00cc33e2643352ea317f5be6"
+    },
     {
       "file": "cuda-nvrtc-13-3_13.3.33-1_amd64.deb",
       "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-13-3_13.3.33-1_amd64.deb",
@@ -119,6 +131,91 @@
       "fileCount": 1166,
       "byteLength": 8527243,
       "sha256": "e887b82b535a6c7281f6ecf589f067ed68ca4047979ef61b19df19ebd7f05020"
+    },
+    "cudaCcclNv": {
+      "profile": "cuda-13.3-cccl-nv-linux-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": ["nv"],
+      "fileCount": 3,
+      "byteLength": 43086,
+      "sha256": "21727c2c9b50af2d0912e6ba8c2c1e78b5ba6a28c3a11bf8db1d87ce3e501cdc"
+    },
+    "cudaNumericBase": {
+      "profile": "cuda-13.3-dense-numeric-base-linux-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": [],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 15,
+      "byteLength": 1685672,
+      "sha256": "bf9c448dd48d32188ee25d33c7f001348428bc4dacfc79c2390af67e3f132b2f"
+    },
+    "cudaNumeric": {
+      "profile": "cuda-13.3-dense-numeric-linux-v1",
+      "algorithm": "sha256-header-profile-components-v1",
+      "components": ["cudaCcclNv", "cudaNumericBase"],
+      "roots": ["nv"],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 18,
+      "byteLength": 1728758,
+      "sha256": "80bd2336eea4a15138fbe79a58fd6fbdb4ef0cb7e0dd9f118e2b604d77c710be"
+    },
+    "cudaDevice": {
+      "profile": "cuda-13.3-device-headers-linux-v1",
+      "algorithm": "sha256-header-profile-components-v1",
+      "components": ["cudaCccl", "cudaNumericBase"],
+      "roots": ["cuda", "nv"],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 1181,
+      "byteLength": 10212915,
+      "sha256": "da5fb90ba785cd12be031ffdd89987e8ac94dc7110fdb1335b6d9c84207b64bb"
     }
   },
   "claim": "Exact official Ubuntu 24.04 x86-64 CUDA 13.3 compiler-provider package and file identities only; native operation and support remain unqualified."

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DEVICE_JS_LIBRARY_CONTRACT, DeviceJsError, translateDeviceLibrary, translateDeviceProgram } from '../testing.mjs';
+import { DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, DeviceJsError, translateDeviceLibrary, translateDeviceProgram } from '../testing.mjs';
 
 const libraryRequest = {
   source: `
@@ -35,6 +35,7 @@ function imported(library, alias = 'combine') {
     parameters: exported.parameters,
     returns: exported.returns,
     librarySha256: library.sha256,
+    libraryContract: library.contract,
     exportName: exported.name,
     artifactSha256: 'a'.repeat(64),
     format: 'ptx',
@@ -101,4 +102,43 @@ test('library and import metadata fail closed without changing ordinary Device-J
     ],
     imports: [imported(library)],
   }), (error) => error instanceof DeviceJsError && error.code === 'DEVICE_JS_IMPORT_DUPLICATE');
+});
+
+test('dense numeric leaf libraries retain an exact separate contract and typed composition', () => {
+  const library = translateDeviceLibrary({
+    source: 'function affine(x, scale, bias) { return (x * scale) + bias; }',
+    functions: [{ name: 'affine', kind: 'device', parameters: [{ name: 'x', type: 'f16' }, { name: 'scale', type: 'f16' }, { name: 'bias', type: 'f16' }], returns: 'f16' }],
+    exports: ['affine'],
+  });
+  assert.equal(library.contract, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT);
+  assert.equal(library.compile.headerProfile, 'cuda-numeric');
+  assert.match(library.generatedSource, /extern "C" __device__ __half djs_lib_/);
+  const entry = imported(library, 'apply');
+  const program = translateDeviceProgram({
+    source: 'function k(out, x) { out[gpu.u32(0)] = apply(x, gpu.f16(2), gpu.f16(1)); }',
+    functions: [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f16>' }, { name: 'x', type: 'f16' }], returns: 'void' }],
+    imports: [entry],
+  });
+  assert.equal(program.contract, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT);
+  assert.match(program.generatedSource, /extern "C" __device__ __half djs_lib_/);
+});
+
+test('a dense library contract survives composition through a legacy-shaped export', () => {
+  const library = translateDeviceLibrary({
+    source: 'function hidden(x) { return gpu.cast.f16(x); } function rounded(x) { return gpu.cast.u32(hidden(x)); }',
+    functions: [
+      { name: 'hidden', kind: 'device', parameters: [{ name: 'x', type: 'u32' }], returns: 'f16' },
+      { name: 'rounded', kind: 'device', parameters: [{ name: 'x', type: 'u32' }], returns: 'u32' },
+    ],
+    exports: ['rounded'],
+  });
+  assert.equal(library.contract, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT);
+  const program = translateDeviceProgram({
+    source: 'function k(out, x) { out[gpu.u32(0)] = rounded(x); }',
+    functions: [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }, { name: 'x', type: 'u32' }], returns: 'void' }],
+    imports: [imported(library, 'rounded')],
+  });
+  assert.equal(program.contract, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT);
+  assert.equal(program.compile.headerProfile, 'cuda-numeric');
+  assert.equal(program.imports[0].libraryContract, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT);
 });

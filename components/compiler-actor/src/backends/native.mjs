@@ -2,7 +2,7 @@ import ffi from 'node:ffi';
 
 import { LIMITS, providerTargetProfile } from '../contract.mjs';
 import { combineCompilerCleanupFailures, CompilerRuntimeError } from '../errors.mjs';
-import { snapshotHeaderProfile } from '../header-profile.mjs';
+import { composeHeaderProfiles, snapshotHeaderProfile } from '../header-profile.mjs';
 
 const NVJITLINK_INPUT_PTX = 2;
 const NVJITLINK_INPUT_LTOIR = 3;
@@ -74,14 +74,14 @@ function closeProviderLibraries(entries, primaryFailure, resources) {
   }
 }
 export async function createNativeBackend({ nativeProfile }) {
-  const { manifest, ccclRoot, nvrtcPath, nvJitLinkPath } = nativeProfile;
+  const { manifest, includeRoot, ccclRoot, nvrtcPath, nvJitLinkPath } = nativeProfile;
   const targetCapabilities = providerTargetProfile(manifest.targetCapabilities);
   let nvrtcLibrary;
   let linkLibrary;
   let nvrtc;
   let linker;
   let closed = false;
-  let cudaCccl = null;
+  const headerSnapshots = new Map();
   const resources = { programsCreated: 0, programsDestroyed: 0, linksCreated: 0, linksDestroyed: 0 };
 
   try {
@@ -108,9 +108,12 @@ export async function createNativeBackend({ nativeProfile }) {
         nvrtcBuiltins: Object.freeze({ version: manifest.providers.nvrtcBuiltins.version, byteLength: manifest.providers.nvrtcBuiltins.byteLength, sha256: manifest.providers.nvrtcBuiltins.sha256 }),
         nvJitLink: Object.freeze({ version: versions.nvJitLink, byteLength: manifest.providers.nvJitLink.byteLength, sha256: manifest.providers.nvJitLink.sha256 }),
         targetCapabilities,
-        headerProfiles: Object.freeze({
-          cudaCccl: Object.freeze({ ...manifest.headerProfiles.cudaCccl, roots: Object.freeze([...manifest.headerProfiles.cudaCccl.roots]) }),
-        }),
+        headerProfiles: Object.freeze(Object.fromEntries(Object.entries(manifest.headerProfiles).map(([name, record]) => [name, Object.freeze({
+          ...record,
+          ...(record.roots ? { roots: Object.freeze([...record.roots]) } : {}),
+          ...(record.files ? { files: Object.freeze([...record.files]) } : {}),
+          ...(record.components ? { components: Object.freeze([...record.components]) } : {}),
+        })]))),
       }),
     });
 
@@ -152,8 +155,22 @@ export async function createNativeBackend({ nativeProfile }) {
       resources,
       async prepareCompile(request) {
         if (request.options.headerProfile === 'none') return;
-        if (request.options.headerProfile !== 'cuda-cccl') throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile is unavailable.');
-        if (!cudaCccl) cudaCccl = await snapshotHeaderProfile(ccclRoot, manifest.headerProfiles.cudaCccl);
+        async function prepare(name) {
+          if (headerSnapshots.has(name)) return headerSnapshots.get(name);
+          let snapshot;
+          if (name === 'cudaCccl' || name === 'cudaCcclNv') snapshot = await snapshotHeaderProfile(ccclRoot, manifest.headerProfiles[name]);
+          else if (name === 'cudaNumericBase') snapshot = await snapshotHeaderProfile(includeRoot, manifest.headerProfiles[name]);
+          else if (name === 'cudaNumeric' || name === 'cudaDevice') {
+            const components = [];
+            for (const component of manifest.headerProfiles[name].components) components.push({ name: component, snapshot: await prepare(component) });
+            snapshot = composeHeaderProfiles(manifest.headerProfiles[name], components);
+          } else throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile is unavailable.');
+          headerSnapshots.set(name, snapshot);
+          return snapshot;
+        }
+        const key = { 'cuda-cccl': 'cudaCccl', 'cuda-numeric': 'cudaNumeric', 'cuda-device': 'cudaDevice' }[request.options.headerProfile];
+        if (!key || !manifest.headerProfiles[key]) throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile is unavailable.');
+        await prepare(key);
       },
       async compile(request) {
         const programStorage = Buffer.alloc(8);
@@ -163,8 +180,9 @@ export async function createNativeBackend({ nativeProfile }) {
         try {
           const source = cString(request.source);
           const name = cString(request.name);
-          const profileHeaders = request.options.headerProfile === 'cuda-cccl' ? cudaCccl?.headers : [];
-          if (request.options.headerProfile === 'cuda-cccl' && !profileHeaders) throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile was not prepared.');
+          const profileKey = { 'cuda-cccl': 'cudaCccl', 'cuda-numeric': 'cudaNumeric', 'cuda-device': 'cudaDevice' }[request.options.headerProfile] ?? null;
+          const profileHeaders = profileKey ? headerSnapshots.get(profileKey)?.headers : [];
+          if (profileKey && !profileHeaders) throw new CompilerRuntimeError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'unsupported', 'The selected compiler header profile was not prepared.');
           const headerSources = [...request.headers.map((header) => cString(header.source)), ...profileHeaders.map((header) => header.source)];
           const headerNames = [...request.headers.map((header) => cString(header.name)), ...profileHeaders.map((header) => cString(header.name))];
           const status = nvrtc.nvrtcCreateProgram(programStorage, source, name, headerSources.length, headerSources.length ? pointerTable(headerSources) : null, headerNames.length ? pointerTable(headerNames) : null);

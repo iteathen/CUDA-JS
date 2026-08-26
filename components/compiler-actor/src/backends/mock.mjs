@@ -28,6 +28,8 @@ export async function createBackend() {
       targetCapabilities: TARGET_CAPABILITIES,
       headerProfiles: Object.freeze({
         cudaCccl: Object.freeze({ profile: 'portable-mock-cuda-cccl-v1', algorithm: 'mock-only', roots: Object.freeze(['cuda', 'nv']), fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) }),
+        cudaNumeric: Object.freeze({ profile: 'portable-mock-cuda-numeric-v1', algorithm: 'mock-only', roots: Object.freeze(['nv']), files: Object.freeze(['cuda_fp16.h', 'cuda_bf16.h']), fileCount: 2, byteLength: 2, sha256: '1'.repeat(64) }),
+        cudaDevice: Object.freeze({ profile: 'portable-mock-cuda-device-v1', algorithm: 'mock-only', roots: Object.freeze(['cuda', 'nv']), files: Object.freeze(['cuda_fp16.h', 'cuda_bf16.h']), fileCount: 3, byteLength: 3, sha256: '2'.repeat(64) }),
       }),
     }),
   });

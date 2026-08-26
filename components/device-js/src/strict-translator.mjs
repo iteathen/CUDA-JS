@@ -3,12 +3,13 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
+import { CUDA_SCALAR_TYPES, denseNumericPreludeLines } from './dense-numeric-profile.mjs';
 import { deviceJsError } from './errors.mjs';
 import { translateDeviceLibrary as translateRawDeviceLibrary, translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
 
 const encoder = new TextEncoder();
-export const DEVICE_JS_LIBRARY_CONTRACT = `${CONTRACT}+SPEC-0028-device-library-v1`;
+export { DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT };
 
 function codeUnitCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -39,9 +40,9 @@ function canonicalMetadata(functions) {
   }));
 }
 
-function programIdentity(source, functions, compile) {
+function programIdentity(source, functions, compile, contract = CONTRACT) {
   const hash = createHash('sha256');
-  hashField(hash, 'contract', encoder.encode(CONTRACT));
+  hashField(hash, 'contract', encoder.encode(contract));
   hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
   hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
   hashField(hash, 'source', encoder.encode(source));
@@ -50,9 +51,9 @@ function programIdentity(source, functions, compile) {
   return hash.digest('hex');
 }
 
-function compositionIdentity(mode, source, functions, compile, facts) {
+function compositionIdentity(mode, source, functions, compile, facts, contract = DEVICE_JS_LIBRARY_CONTRACT) {
   const hash = createHash('sha256');
-  hashField(hash, 'contract', encoder.encode(DEVICE_JS_LIBRARY_CONTRACT));
+  hashField(hash, 'contract', encoder.encode(contract));
   hashField(hash, 'mode', encoder.encode(mode));
   hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
   hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
@@ -96,7 +97,7 @@ function memberPath(node) {
   return object ? `${object}.${node.property.name}` : null;
 }
 
-function validateAdditionalContract(ast, functions) {
+function validateAdditionalContract(ast, functions, contract) {
   let usesScopedAtomic = false;
   const declarations = new Map();
   for (const statement of ast.body) {
@@ -140,20 +141,13 @@ function validateAdditionalContract(ast, functions) {
     }
   }
   visit(ast);
-  return { usesScopedAtomic };
+  return { usesScopedAtomic, usesDenseNumeric: contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT };
 }
 
 function cppType(type) {
-  const scalar = new Map([
-    ['void', 'void'],
-    ['bool', 'bool'],
-    ['u32', 'unsigned int'],
-    ['i32', 'int'],
-    ['u64', 'unsigned long long'],
-    ['f32', 'float'],
-  ]);
+  const scalar = new Map([['void', 'void'], ...Object.entries(CUDA_SCALAR_TYPES)]);
   if (scalar.has(type)) return scalar.get(type);
-  const pointer = /^ptr<(bool|u32|i32|u64|f32)>$/.exec(type);
+  const pointer = /^ptr<(bool|u32|i32|u64|f32|f64|f16|bf16)>$/.exec(type);
   if (pointer) return `${cppType(pointer[1])}*`;
   if (/^mailbox<(?:host-to-device|device-to-host),u32>$/.test(type)) return 'unsigned int*';
   throw deviceJsError('DEVICE_JS_TYPE_INVALID', 'Canonical Device-JS function type is invalid.', { type });
@@ -208,7 +202,7 @@ function replaceGeneratedNames(text, replacements) {
   return text;
 }
 
-function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic }, { canonicalNames = generatedNameMap(sortedFunctions), imports = [], exportSymbols = new Map(), contract = CONTRACT } = {}) {
+function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic, usesDenseNumeric }, { canonicalNames = generatedNameMap(sortedFunctions), imports = [], exportSymbols = new Map(), contract = CONTRACT } = {}) {
   const rawNames = generatedNameMap(raw.functions);
   const replacements = new Map();
   for (const fn of raw.functions) replacements.set(rawNames.get(fn.name), canonicalNames.get(fn.name));
@@ -225,6 +219,7 @@ function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic },
   }
 
   const lines = [`/* cuda-js Device-JS ${contract}; generated; do not edit */`];
+  if (usesDenseNumeric) lines.push(...denseNumericPreludeLines());
   if (usesScopedAtomic) lines.push('#include <cuda/atomic>', '');
   for (const entry of imports) {
     const parameters = entry.parameters
@@ -262,7 +257,7 @@ function deepFreeze(value) {
 export function translateDeviceProgram(request) {
   const raw = translateRawDeviceProgram(request);
   const ast = parseAcceptedSource(request.source);
-  const requirements = validateAdditionalContract(ast, raw.functions);
+  const requirements = validateAdditionalContract(ast, raw.functions, raw.contract);
 
   const sortedFunctions = raw.functions
     .map((fn) => ({
@@ -282,6 +277,7 @@ export function translateDeviceProgram(request) {
     parameters: entry.parameters.map((parameter) => ({ name: parameter.name, type: parameter.type })),
     returns: entry.returns,
     librarySha256: entry.librarySha256,
+    libraryContract: entry.libraryContract,
     exportName: entry.exportName,
     artifactSha256: entry.artifactSha256,
     format: entry.format,
@@ -293,10 +289,11 @@ export function translateDeviceProgram(request) {
     if (fn.kind === 'kernel') fn.functionName = canonicalNames.get(fn.name);
   }
 
+  const compositionContract = raw.contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT ? DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT : DEVICE_JS_LIBRARY_CONTRACT;
   const sha256 = imports.length
-    ? compositionIdentity('program', request.source, sortedFunctions, raw.compile, { imports })
-    : programIdentity(request.source, sortedFunctions, raw.compile);
-  const contract = imports.length ? DEVICE_JS_LIBRARY_CONTRACT : CONTRACT;
+    ? compositionIdentity('program', request.source, sortedFunctions, raw.compile, { imports }, compositionContract)
+    : programIdentity(request.source, sortedFunctions, raw.compile, raw.contract);
+  const contract = imports.length ? compositionContract : raw.contract;
   const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements, { imports, contract });
   const kernels = sortedFunctions
     .filter((fn) => fn.kind === 'kernel')
@@ -323,7 +320,7 @@ export function translateDeviceProgram(request) {
 export function translateDeviceLibrary(request) {
   const raw = translateRawDeviceLibrary(request);
   const ast = parseAcceptedSource(request.source);
-  const requirements = validateAdditionalContract(ast, raw.functions);
+  const requirements = validateAdditionalContract(ast, raw.functions, raw.contract);
   const sortedFunctions = raw.functions
     .map((fn) => ({
       name: fn.name,
@@ -333,7 +330,8 @@ export function translateDeviceLibrary(request) {
     }))
     .sort((left, right) => codeUnitCompare(left.name, right.name));
   const exportNames = [...raw.exports].sort(codeUnitCompare);
-  const sha256 = compositionIdentity('library', request.source, sortedFunctions, raw.compile, { exports: exportNames });
+  const contract = raw.contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT ? DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT : DEVICE_JS_LIBRARY_CONTRACT;
+  const sha256 = compositionIdentity('library', request.source, sortedFunctions, raw.compile, { exports: exportNames }, contract);
   const exportIndexes = new Map(exportNames.map((name, index) => [name, index]));
   const canonicalNames = new Map(sortedFunctions.map((fn, index) => [
     fn.name,
@@ -343,7 +341,7 @@ export function translateDeviceLibrary(request) {
   const generatedSource = canonicalizeGeneratedSource(raw, sortedFunctions, requirements, {
     canonicalNames,
     exportSymbols,
-    contract: DEVICE_JS_LIBRARY_CONTRACT,
+    contract,
   });
   const functionsByName = new Map(sortedFunctions.map((fn) => [fn.name, fn]));
   const exports = exportNames.map((name) => {
@@ -357,7 +355,7 @@ export function translateDeviceLibrary(request) {
   });
   return deepFreeze({
     schemaVersion: 1,
-    contract: DEVICE_JS_LIBRARY_CONTRACT,
+    contract,
     sha256,
     parser: { name: 'acorn', version: acornVersion },
     functions: sortedFunctions,

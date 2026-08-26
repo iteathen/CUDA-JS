@@ -223,6 +223,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (compatibility.capabilities?.deviceJsFrontend !== 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1') {
     errors.push('packaging compatibility Device-JS projection is stale');
   }
+  if (compatibility.capabilities?.deviceJsDenseNumeric !== 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers') {
+    errors.push('packaging compatibility Device-JS dense-numeric projection is stale');
+  }
   if (compatibility.capabilities?.deviceJsLibraries !== 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin') {
     errors.push('packaging compatibility Device-JS library projection is stale');
   }
@@ -239,7 +242,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0017',
     'SPEC-0020',
     'SPEC-0028',
+    'SPEC-0030',
     'SPEC-0027',
+    'SPEC-0030',
     'separate future publish unit',
     'compileDeviceProgram()',
     'compileDeviceLibrary()',
