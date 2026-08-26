@@ -10,7 +10,7 @@ const NN_COMPONENT_ANCHORS = [
 ];
 
 function fixture() {
-  const common = '0.1.0-alpha.8 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0014 SPEC-0016 SPEC-0019 SPEC-0027 separate future publish unit compileDeviceProgram() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
+  const common = '0.1.0-alpha.8 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0014 SPEC-0016 SPEC-0017 SPEC-0019 SPEC-0027 separate future publish unit compileDeviceProgram() discoverCudaDevices() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
   const capabilityTable = `${common} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views Internal pinned host staging and async transfer Publication mailbox Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
   const nnAnchors = NN_COMPONENT_ANCHORS.map((anchor) => `\`${anchor}\``).join(' ');
   return {
@@ -28,6 +28,7 @@ function fixture() {
     compatibility: {
       package: { name: 'cuda-js', version: '0.1.0-alpha.8' },
       capabilities: {
+        deviceSelection: 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets',
         functionParameters: ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32'],
         typedDeviceViews: 'contiguous-1d-component-foundation-no-public-facade-yet',
         compilerOutputFormats: ['ptx', 'lto-ir'],
@@ -68,6 +69,7 @@ test('package, capability, interop, and status-dimension drift are independently
   const cases = [
     (value) => { value.documents.readme = value.documents.readme.replace('0.1.0-alpha.8', '0.1.0-alpha.2'); },
     (value) => { value.compatibility.capabilities.functionParameters = ['device-memory', 'u32']; },
+    (value) => { value.compatibility.capabilities.deviceSelection = 'missing'; },
     (value) => { value.compatibility.capabilities.typedDeviceViews = 'missing'; },
     (value) => { value.documents.capabilities = value.documents.capabilities.replace('SPEC-0021', ''); },
     (value) => { value.documents.capabilities = value.documents.capabilities.replace('SPEC-0012', ''); },

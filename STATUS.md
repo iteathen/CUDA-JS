@@ -7,7 +7,7 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     118dec1574d650557ffa65f1bbb1d89e0970ceff
+protected main:     22a4e71f285e9349e725be8025ff0c1aeef71580
 completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / issue branch #123 device publication
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
 execution package:  cuda-js@0.1.0-alpha.8
@@ -41,6 +41,7 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - SPEC-0018 exact opt-in capacity-two/two-private-stream/no-queue scheduling;
 - SPEC-0019 exact two-internal-pinned-staging contiguous H2D/D2H/D2D profile;
 - SPEC-0014 exact private mapped named-u32 publication mailbox profile;
+- SPEC-0017 finite sanitized discovery, opaque explicit selection, one selected device per runtime, and selected-device compile/link target defaults;
 - SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
 - SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component, with no public facade entry selected yet;
 - the SPEC-0006 target-syntax correction;
@@ -56,16 +57,16 @@ SPEC-0012 typed Device LTO is implemented and qualified on the exact recorded Wi
 
 The project owner requested every open issue be processed through investigate, assess, primary-source research, reassess, plan, authorized implementation and test. The durable per-issue result is `docs/plans/2026-08-14-open-issue-development-sweep.md`.
 
-### Accepted foundation: SPEC-0017 / #20
+### Implemented portable foundation: SPEC-0017 / #20
 
 ```text
 architectural disposition: selected
-implementation status:       authorized; portable/software integration next
+implementation status:       implemented in portable/software/package path
 qualification status:        not-qualified
-priority:                    active platform-neutral implementation
+priority:                    integration, then contributor-run exact native evidence
 ```
 
-SPEC-0017 accepts sanitized opaque device discovery/selection, exactly one selected physical device per runtime, and selected-device-driven compile/link target resolution. It exposes no ordinal/UUID/serial/PCI/native handle. Multi-device orchestration remains SPEC-0024 and proposal-only.
+SPEC-0017 implements `discoverCudaDevices()`, opaque process-local selectors, explicit/default `openCudaRuntime()` selection before context creation, selected-architecture compile/link defaults and cache separation, and public ordinal sanitization. It exposes no ordinal/UUID/serial/PCI/native handle. Portable mocks prove orchestration only; exact native default/explicit selection and distinct physical-device behavior remain unqualified. Multi-device orchestration remains SPEC-0024 and proposal-only.
 
 ### Implemented foundation: SPEC-0021 / #39/#88
 

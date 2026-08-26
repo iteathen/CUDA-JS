@@ -61,12 +61,13 @@ assert.equal(deviceJsObservation.atomicRelaxedDeviceU64, true);
 assert.equal(deviceJsObservation.atomicPublicationDeviceU32, true);
 assert.equal(deviceJsObservation.atomicPublicationDeviceU64, true);
 assert.deepEqual(deviceJsObservation.atomicPublicationPayload, [0x89abcdef, 0x01234567, 0x76543210, 0xfedcba98]);
-assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor));
-assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor));
+assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.architecture.major));
+assert(Number.isSafeInteger(deviceJsObservation.runtimeProfile.device.architecture.minor));
 if (nativeProfile === 'windows') {
-  assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor, 7);
-  assert.equal(deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor, 5);
+  assert.equal(deviceJsObservation.runtimeProfile.device.architecture.major, 7);
+  assert.equal(deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
 }
+assert.equal(Object.hasOwn(deviceJsObservation.runtimeProfile.device, 'ordinal'), false);
 assert.equal(deviceJsObservation.runtimeProfile.profile.nativeQualified, false);
 assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, nativeProfile === 'windows' ? 'cuda-13.3-windows-x64-compiler' : 'cuda-13.3-ubuntu-24.04-x64-compiler');
 assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);

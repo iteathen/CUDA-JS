@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 import { CUDA_JS_COMPATIBILITY, inspectCudaHost } from 'cuda-js';
-import { openCudaRuntimeForTesting } from 'cuda-js/testing';
+import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from 'cuda-js/testing';
 
 const ptx = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
 assert.equal(CUDA_JS_COMPATIBILITY.publicApi.schemaVersion, 1);
@@ -11,7 +11,20 @@ assert.equal(CUDA_JS_COMPATIBILITY.capabilities.gpuOperationLifecycle, 'opaque-s
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-mapped-named-u32-one-operation-lease-system-acquire-release');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
+
+const deviceSnapshot = await discoverCudaDevicesForTesting([
+  { nativeDevice: 0, computeCapabilityMajor: 7, computeCapabilityMinor: 5 },
+  { nativeDevice: 3, computeCapabilityMajor: 8, computeCapabilityMinor: 9 },
+]);
+const selectedRuntime = await openCudaRuntimeForTesting({ device: deviceSnapshot.devices[1].selector, compiler: true });
+const selectedDescription = await selectedRuntime.describe();
+assert.equal(selectedDescription.device.architecture.class, 'cc-8.9');
+assert.equal(selectedDescription.device.target.compile, 'compute_89');
+assert.equal((await selectedRuntime.compile({ source: 'extern "C" __global__ void selected() {}\n' })).artifact.architecture, 'compute_89');
+assert.equal(JSON.stringify(selectedDescription).includes('ordinal'), false);
+assert.equal((await selectedRuntime.close()).graceful, true);
 
 const first = await openCudaRuntimeForTesting();
 const second = await openCudaRuntimeForTesting();
@@ -111,5 +124,6 @@ console.log(JSON.stringify({
   operationLifecycle: true,
   asyncTransferLifecycle: true,
   publicationMailboxLifecycle: true,
+  deviceSelectionLifecycle: true,
   graceful: true,
 }));

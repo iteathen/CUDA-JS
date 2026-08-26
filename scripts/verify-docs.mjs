@@ -91,7 +91,8 @@ const required = [
   'components/driver-actor/index.mjs', 'components/driver-actor/testing.mjs',
   'components/driver-actor/src/errors.mjs', 'components/driver-actor/src/health.mjs',
   'components/driver-actor/src/protocol.mjs', 'components/driver-actor/src/driver-runtime.mjs',
-  'components/driver-actor/src/actor-worker.mjs', 'components/driver-actor/src/startup-rollback.mjs',
+  'components/driver-actor/src/actor-worker.mjs', 'components/driver-actor/src/device-discovery.mjs',
+  'components/driver-actor/src/device-discovery-worker.mjs', 'components/driver-actor/src/startup-rollback.mjs',
   'components/driver-actor/src/backends/mock.mjs',
   'components/driver-actor/src/backends/windows-native.mjs',
   'components/driver-actor/test/driver-runtime.test.mjs',
@@ -122,6 +123,9 @@ const required = [
   'components/compiler-actor/test/compiler-actor.test.mjs',
   'components/cuda-target/README.md', 'components/cuda-target/component.yaml',
   'components/cuda-target/index.mjs', 'components/cuda-target/test/cuda-target.test.mjs',
+  'components/device-selection/README.md', 'components/device-selection/component.yaml',
+  'components/device-selection/index.mjs', 'components/device-selection/src/device-selection.mjs',
+  'components/device-selection/test/device-selection.test.mjs',
   'components/device-js/README.md', 'components/device-js/component.yaml',
   'components/device-js/index.mjs', 'components/device-js/testing.mjs',
   'components/device-js/src/errors.mjs', 'components/device-js/src/translator.mjs',
@@ -245,6 +249,7 @@ for (const relative of [
   'components/execution/component.yaml',
   'components/compiler-actor/component.yaml',
   'components/cuda-target/component.yaml',
+  'components/device-selection/component.yaml',
   'components/device-js/component.yaml',
   'components/platform-diagnostics/component.yaml',
   'components/runtime-facade/component.yaml',
@@ -462,6 +467,7 @@ for (const relative of files) {
       && !relative.startsWith('components/execution/')
       && !relative.startsWith('components/compiler-actor/')
       && !relative.startsWith('components/cuda-target/')
+      && !relative.startsWith('components/device-selection/')
       && !relative.startsWith('components/device-js/')
       && !relative.startsWith('components/platform-diagnostics/')
       && !relative.startsWith('components/runtime-facade/')

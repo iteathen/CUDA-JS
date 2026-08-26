@@ -43,6 +43,7 @@ if (!npmCli || !existsSync(npmCli)) {
 
 const unit = { args: ['--test',
   'components/cuda-target/test/cuda-target.test.mjs',
+  'components/device-selection/test/device-selection.test.mjs',
   'components/device-js/test/translator.test.mjs',
   'components/device-js/test/strict-contract.test.mjs',
   'conformance/f8/device-publication-oracle.test.mjs',

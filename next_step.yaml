@@ -1,10 +1,10 @@
 {
-  "schema_version": 47,
-  "updated": "2026-08-25",
-  "status": "spec0017_portable_active_linux_external_evidence",
-  "objective": "Integrate accepted OS-neutral SPEC-0017 portable/software device selection and target resolution while retaining native Linux x86-64 qualification as a contributor-operated physical-hardware evidence lane and Windows as a qualified peer adapter.",
+  "schema_version": 48,
+  "updated": "2026-08-26",
+  "status": "spec0017_device_selection_complete_awaiting_integration",
+  "objective": "Review and integrate the completed OS-neutral SPEC-0017 portable/software/package device-selection packet while retaining native Linux qualification as a contributor-operated physical-hardware evidence lane, then begin the separately governed CUDA-JS-Tensor prerequisite sequence.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "118dec1574d650557ffa65f1bbb1d89e0970ceff",
+    "protected_main_authority_baseline": "22a4e71f285e9349e725be8025ff0c1aeef71580",
     "package": "cuda-js@0.1.0-alpha.8",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -23,10 +23,11 @@
       "CJS-LINUX-DRIVER-ADAPTER: shared native Driver backend, thin canonical Windows/Linux discovery profiles, and exact F3L runner implemented without promoting Linux support",
       "CJS-LINUX-COMPILER-ADAPTER: shared native CompilerActor engine, exact official-package-pinned Ubuntu profile, and exact F6L readiness/oracle/Driver-handoff runner source implemented without native qualification",
       "CJS-LINUX-FACADE-SOURCE: platform diagnostics, public facade admission, compatibility projection, and F7L/F8L readiness now accept native Linux x86-64 only as testing-unconfirmed; alpha.8 changes no qualification state",
-      "CJS-LINUX-RUNNER-CHAIN: PR #132 merged the OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile at protected main 118dec1574d650557ffa65f1bbb1d89e0970ceff; no Linux qualification state changed"
+      "CJS-LINUX-RUNNER-CHAIN: PR #132 merged the OS-neutral F4/F5 C oracles and native runners, F7 permission/lifecycle runner, F8 installed-package consumers, and the EXP-001/F1B/F3L-F8L hardware command/evidence profile at protected main 118dec1574d650557ffa65f1bbb1d89e0970ceff; no Linux qualification state changed",
+      "CJS-DEVICE-SELECTION-0017 completed on agent/spec0017-device-selection: OS-neutral finite sanitized discovery, opaque selector capabilities, pre-context DriverActor binding, selected-target defaults/cache separation, alpha.8 package projection, and portable installed-package evidence"
     ],
-    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
-    "accepted_pending_implementation": ["SPEC-0017 device selection and target resolution"],
+    "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child"],
+    "accepted_pending_implementation": [],
     "still_proposal_only": ["SPEC-0020", "SPEC-0022 except accepted scoped-atomic-observation and device-publication children", "SPEC-0023", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
     "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
   },
@@ -57,11 +58,11 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md"
   ],
   "current_focus": {
-    "id": "CJS-DEVICE-SELECTION-0017",
+    "id": "CJS-DEVICE-SELECTION-0017-INTEGRATION",
     "issues": [20],
-    "plan": "docs/plans/2026-08-13-capability-expansion-roadmap.md",
-    "next_action": "Integrate the accepted OS-neutral portable/software selector and target-resolution foundation: finite sanitized snapshots, opaque selector validation, exactly one selected device per runtime, selected-device target/cache identity, cross-owner rejection, and bounded lifecycle behavior. Do not claim native or multi-GPU qualification.",
-    "exit": "The portable/software and package paths implement accepted SPEC-0017 through public owners, pass ownership-focused and repository validation, preserve exactly-one-device runtime semantics, and make no physical-device or topology claim."
+    "plan": "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
+    "next_action": "Run exact-head author review and portable/package validation after OS-neutral reconciliation, push and integrate PR #111 with an expected-head guard, retain issue #20 only for contributor-run exact native evidence, and verify branch/worktree disposition.",
+    "exit": "The exact reviewed alpha.8 head is integrated on protected main, issue #20 accurately retains only native evidence work, public/package identity agrees, and no task-created residue remains."
   },
   "parallel_or_external_next": [
     {

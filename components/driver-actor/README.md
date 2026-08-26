@@ -2,7 +2,7 @@
 
 **Status:** Accepted F5W internal experimental component
 
-This component turns the accepted native bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical platform CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library. Windows and native Linux x86-64 use thin library-discovery profiles around the same Driver, memory, execution, transfer, and teardown implementation.
+This component turns the accepted native bootstrap into a bounded asynchronous runtime owner. A short-lived discovery Worker uses the canonical platform profile to enumerate private ordinal/architecture records without creating a context and proves Driver-library closure. One runtime Worker revalidates and fixes the selected device before creating one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library. Omitting explicit selection preserves device zero. Windows and native Linux x86-64 use thin library-discovery profiles around the same Driver, selection, memory, execution, transfer, and teardown implementation.
 
 The component surface is [`index.mjs`](index.mjs):
 

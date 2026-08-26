@@ -48,6 +48,30 @@ export interface CompilerOptions {
 export interface OpenCudaRuntimeOptions {
   driver?: DriverOptions;
   compiler?: boolean | CompilerOptions;
+  device?: CudaDeviceSelector;
+}
+
+export class CudaDeviceSelector {
+  private constructor();
+  readonly kind: 'cuda-device-selector';
+}
+
+export interface CudaDeviceArchitecture {
+  readonly major: number;
+  readonly minor: number;
+  readonly class: string;
+}
+
+export interface CudaDeviceDescriptor {
+  readonly schemaVersion: 1;
+  readonly selector: CudaDeviceSelector;
+  readonly architecture: CudaDeviceArchitecture;
+}
+
+export interface CudaDeviceSnapshot {
+  readonly schemaVersion: 1;
+  readonly deviceCount: number;
+  readonly devices: readonly CudaDeviceDescriptor[];
 }
 
 export interface DeviceCompileOptions {
@@ -257,5 +281,6 @@ export interface DeviceJsCompileResult {
 
 export const CUDA_JS_COMPATIBILITY: Readonly<Record<string, unknown>>;
 export function inspectCudaHost(): Readonly<{ schemaVersion: 1; host: Readonly<Record<string, unknown>>; compatibility: typeof CUDA_JS_COMPATIBILITY }>;
+export function discoverCudaDevices(): Promise<CudaDeviceSnapshot>;
 export function openCudaRuntime(options?: OpenCudaRuntimeOptions): Promise<CudaRuntime>;
 export function compileDeviceProgram(runtime: CudaRuntime, request: DeviceJsCompileRequest): Promise<DeviceJsCompileResult>;

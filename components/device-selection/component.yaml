@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "component": {
+    "id": "runtime.device-selection",
+    "name": "CUDA device selection authority",
+    "status": "implemented-portable-spec0017-not-native-qualified",
+    "product_area": "components",
+    "path": "components/device-selection",
+    "purpose": "Turn bounded private device inventories into sanitized snapshots, opaque selector capabilities, selected-device compatibility facts, and deterministic target-resolution identity.",
+    "public_contracts": ["index.mjs"],
+    "allowed_dependencies": ["node-standard-library"],
+    "forbidden_dependencies": ["node-ffi", "cuda-driver", "raw-public-device-identity", "compiler-provider", "consumer-semantics", "multi-gpu-orchestration"],
+    "validation": ["npm run f8:unit", "npm run f8:portable"],
+    "owner": "runtime.device-selection",
+    "lifecycle": "One authority owns one current immutable discovery snapshot. Refresh invalidates all prior selector capabilities; selectors never own native resources.",
+    "design": {
+      "owned_invariant": "Only the issuing live discovery generation can resolve a selector, and public products contain no native device identity.",
+      "public_ports": ["CudaDeviceSelector", "DeviceSelectionAuthority", "resolveArchitectureTarget"],
+      "injected_dependencies": ["private bounded inventory provider", "canonical target-policy function"],
+      "adapter_boundaries": ["DriverActor native discovery", "portable synthetic inventory", "runtime facade"],
+      "simplest_sufficient_total_system": "One authority, one immutable snapshot, process-local WeakMap capability state, and one deterministic target identity function."
+    }
+  }
+}

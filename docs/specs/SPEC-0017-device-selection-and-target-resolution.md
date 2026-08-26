@@ -6,6 +6,8 @@
 
 **Accepted:** 2026-08-14 after adversarial contract review against protected `main` `334b903be827dedb5345608a34a6df444912fe1b` and current CUDA 13.3.1 Driver device/context semantics.
 
+**Amended:** 2026-08-25 — the portable/software/package implementation selects `discoverCudaDevices()`, opaque `CudaDeviceSelector` capabilities, and `openCudaRuntime({ device })`; package identity advances to `cuda-js@0.1.0-alpha.8` while public API schema 1 remains additive. Native qualification remains separate.
+
 **Issue owner:** #20
 
 ## Outcome
@@ -18,9 +20,9 @@ It does **not** expose `CUdevice`, CUDA ordinals, UUIDs, serials, PCI identifier
 
 ```text
 architectural disposition: selected
-implementation status:       authorized; not yet integrated at acceptance
+implementation status:       implemented in portable/software/package path
 qualification status:        not-qualified
-priority:                    dependency-ready foundation
+priority:                    native promotion after integration
 ```
 
 Acceptance authorizes only the bounded implementation below. Native/public support still requires exact-profile evidence.

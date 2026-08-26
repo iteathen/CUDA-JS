@@ -117,11 +117,16 @@ export function assessCudaSupport(host, driverDescription) {
   if (host.ffi.permission === 'ffi-denied') return fail('FFI_PERMISSION_REQUIRED', host);
   if (!plainObject(driverDescription) || driverDescription.schemaVersion !== 1 || driverDescription.profile?.nativeOperational !== true || driverDescription.runtime?.backend !== nativeProfile.backend
       || driverDescription.profile?.platform !== nativeProfile.platform || driverDescription.profile?.architecture !== nativeProfile.architecture || driverDescription.profile?.node !== host.node.version) return fail(nativeProfile.backendReason, host);
-  if (!Number.isSafeInteger(driverDescription.driver?.apiVersion) || driverDescription.driver.apiVersion < 1 || driverDescription.device?.ordinal !== 0) return fail(nativeProfile.descriptionReason, host);
+  if (!Number.isSafeInteger(driverDescription.driver?.apiVersion) || driverDescription.driver.apiVersion < 1
+      || !Number.isSafeInteger(driverDescription.driver?.deviceCount) || driverDescription.driver.deviceCount < 1
+      || !Number.isSafeInteger(driverDescription.device?.ordinal) || driverDescription.device.ordinal < 0
+      || driverDescription.device.ordinal >= driverDescription.driver.deviceCount) return fail(nativeProfile.descriptionReason, host);
   const attributes = driverDescription.device?.attributes;
   if (!plainObject(attributes)) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host);
   for (const name of BINARY_ATTRIBUTES) if (![0, 1].includes(attributes[name])) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host, { field: name });
   if (!Number.isInteger(attributes.computeMode) || attributes.computeMode < 0 || attributes.computeMode > 3) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host, { field: 'computeMode' });
+  if (!Number.isSafeInteger(attributes.computeCapabilityMajor) || attributes.computeCapabilityMajor < 1 || attributes.computeCapabilityMajor > 99
+      || !Number.isSafeInteger(attributes.computeCapabilityMinor) || attributes.computeCapabilityMinor < 0 || attributes.computeCapabilityMinor > 99) return fail('CUDA_DEVICE_ATTRIBUTES_INVALID', host, { field: 'computeCapability' });
   const computeModes = ['default', 'exclusive-thread', 'prohibited', 'exclusive-process'];
   const driverModel = host.hostKind === 'linux-native-x64'
     ? 'linux-native'
@@ -134,7 +139,7 @@ export function assessCudaSupport(host, driverDescription) {
     host,
     cuda: {
       driverApiVersion: driverDescription.driver.apiVersion,
-      deviceOrdinal: driverDescription.device.ordinal,
+      selectedArchitecture: `cc-${attributes.computeCapabilityMajor}.${attributes.computeCapabilityMinor}`,
       driverModel,
       watchdog: attributes.kernelExecTimeout === 1 ? 'enabled' : 'disabled',
       integrated: attributes.integrated === 1,

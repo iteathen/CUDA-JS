@@ -8,7 +8,11 @@ import { HealthState, healthForErrorCategory, observeErrorHealth } from '../heal
 
 const MAX_DISPOSAL_ORDER_RECORDS = 32;
 
-export async function createBackend({ runtimeId, epoch, memoryPolicy, executionPolicy }) {
+export async function createBackend({ runtimeId, epoch, memoryPolicy, executionPolicy, selectedDevice }) {
+  const selected = selectedDevice ?? Object.freeze({
+    nativeDevice: 0,
+    architecture: Object.freeze({ major: 7, minor: 5, class: 'cc-7.5' }),
+  });
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const disposalOrder = [];
@@ -23,7 +27,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
     dispose() { recordDisposal('library'); return { libraryClosed: true, staleWrapperRejected: true }; },
   });
   const contextToken = registry.allocate({
-    kind: 'context', value: Object.freeze({ privateMockContext: true }), parent: libraryToken,
+    kind: 'context', value: Object.freeze({ privateMockContext: true, nativeDevice: selected.nativeDevice }), parent: libraryToken,
     dispose() { recordDisposal('context'); return { contextDestroyed: true, currentNull: true }; },
   });
   const allocations = new Set();
@@ -145,7 +149,7 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       runtime: { id: runtimeId, epoch, state: 'open', backend: 'mock' },
       profile: { node: process.version, platform: process.platform, architecture: process.arch, nativeOperational: false, nativeQualified: false },
       driver: { apiVersion: 13030, deviceCount: 1 },
-      device: { ordinal: 0, attributes: { ...deviceLimits, multiprocessorCount: 1, kernelExecTimeout: 0, integrated: 0, computeMode: 0, tccDriver: 0, computeCapabilityMajor: 0, computeCapabilityMinor: 0 } },
+      device: { ordinal: selected.nativeDevice, attributes: { ...deviceLimits, multiprocessorCount: 1, kernelExecTimeout: 0, integrated: 0, computeMode: 0, tccDriver: 0, computeCapabilityMajor: selected.architecture.major, computeCapabilityMinor: selected.architecture.minor } },
       context: contextToken,
       memory: await memory.usage(operationSequence),
       transfer: transfer.summary(),

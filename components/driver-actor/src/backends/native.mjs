@@ -27,6 +27,12 @@ const DRIVER_ACTOR_SYMBOLS = Object.freeze([
 const DRIVER_ACTOR_FFI_DEFINITIONS = Object.freeze(Object.fromEntries(
   DRIVER_ACTOR_SYMBOLS.map((symbol) => [symbol, cudaTier0FfiDefinitions[symbol]]),
 ));
+const DEVICE_DISCOVERY_SYMBOLS = Object.freeze([
+  'cuInit', 'cuDriverGetVersion', 'cuDeviceGetCount', 'cuDeviceGet', 'cuDeviceGetAttribute',
+]);
+const DEVICE_DISCOVERY_FFI_DEFINITIONS = Object.freeze(Object.fromEntries(
+  DEVICE_DISCOVERY_SYMBOLS.map((symbol) => [symbol, cudaTier0FfiDefinitions[symbol]]),
+));
 const ATTRIBUTES = Object.freeze({
   maxThreadsPerBlock: 1,
   maxBlockDimX: 2,
@@ -52,7 +58,64 @@ function readPointer(storage) { return storage.readBigUInt64LE(0); }
 function readI32(storage) { return storage.readInt32LE(0); }
 function pointerOut() { return Buffer.alloc(8); }
 
-export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, executionPolicy, nativeProfile }) {
+export async function discoverNativeDevices({ nativeProfile }) {
+  let library = null;
+  let primaryError = null;
+  let result = null;
+  let staleWrapper = null;
+  try {
+    library = new ffi.DynamicLibrary(nativeProfile.driverPath);
+    const discovery = library.getFunctions(DEVICE_DISCOVERY_FFI_DEFINITIONS);
+    staleWrapper = discovery.cuInit;
+    const requireSuccess = (operation, status) => {
+      if (status !== 0) throw new DriverRuntimeError('DRIVER_DEVICE_DISCOVERY_FAILED', 'provider', `${operation} failed during CUDA device discovery.`, { nativeStatus: status }, { operation });
+    };
+    const queryI32 = (operation, ...args) => {
+      const output = Buffer.alloc(4);
+      requireSuccess(operation, discovery[operation](output, ...args));
+      return readI32(output);
+    };
+    requireSuccess('cuInit', discovery.cuInit(0));
+    queryI32('cuDriverGetVersion');
+    const deviceCount = queryI32('cuDeviceGetCount');
+    if (!Number.isSafeInteger(deviceCount) || deviceCount < 0 || deviceCount > 256) {
+      throw new DriverRuntimeError('DRIVER_DEVICE_INVENTORY_INVALID', 'provider', 'CUDA returned an invalid bounded device count.');
+    }
+    const devices = [];
+    for (let nativeDevice = 0; nativeDevice < deviceCount; nativeDevice += 1) {
+      const device = queryI32('cuDeviceGet', nativeDevice);
+      const computeCapabilityMajor = queryI32('cuDeviceGetAttribute', ATTRIBUTES.computeCapabilityMajor, device);
+      const computeCapabilityMinor = queryI32('cuDeviceGetAttribute', ATTRIBUTES.computeCapabilityMinor, device);
+      devices.push({ nativeDevice, computeCapabilityMajor, computeCapabilityMinor });
+    }
+    result = Object.freeze(devices.map((device) => Object.freeze(device)));
+  } catch (error) {
+    primaryError = error;
+  }
+
+  if (library) {
+    try {
+      library.close();
+      if (staleWrapper) {
+        let staleWrapperRejected = false;
+        try { staleWrapper(0); } catch { staleWrapperRejected = true; }
+        if (!staleWrapperRejected) throw new Error('closed Driver wrapper remained callable');
+      }
+    } catch {
+      throw new DriverRuntimeError(
+        'DRIVER_DEVICE_DISCOVERY_CLEANUP_FAILED',
+        'restart-required',
+        'CUDA device discovery did not prove Driver library cleanup.',
+        { primaryCode: typeof primaryError?.code === 'string' ? primaryError.code : null },
+        { operation: 'driver.device-discovery.close', healthBefore: 'healthy', healthAfter: 'restart-required' },
+      );
+    }
+  }
+  if (primaryError) throw primaryError;
+  return result;
+}
+
+export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, executionPolicy, nativeProfile, selectedDevice }) {
   const health = new HealthState();
   const registry = new ResourceRegistry({ runtimeId, epoch });
   const driverPath = nativeProfile.driverPath;
@@ -196,9 +259,17 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
     const driverVersion = queryI32('cuDriverGetVersion', 0);
     const deviceCount = queryI32('cuDeviceGetCount', 0);
     if (deviceCount < 1) throw new DriverRuntimeError('DRIVER_DEVICE_MISSING', 'unsupported', 'The native DriverActor profile requires at least one CUDA device.', { deviceCount });
-    const device = queryI32('cuDeviceGet', 0, 0);
+    const selectedOrdinal = selectedDevice?.nativeDevice ?? 0;
+    if (selectedOrdinal >= deviceCount) {
+      throw new DriverRuntimeError('DRIVER_SELECTED_DEVICE_STALE', 'stale-resource', 'Selected device is outside the current CUDA visibility snapshot.');
+    }
+    const device = queryI32('cuDeviceGet', 0, selectedOrdinal);
     const attributes = {};
     for (const [name, attribute] of Object.entries(ATTRIBUTES)) attributes[name] = queryI32('cuDeviceGetAttribute', 0, attribute, device);
+    if (selectedDevice && (attributes.computeCapabilityMajor !== selectedDevice.architecture.major
+        || attributes.computeCapabilityMinor !== selectedDevice.architecture.minor)) {
+      throw new DriverRuntimeError('DRIVER_SELECTED_DEVICE_STALE', 'stale-resource', 'Selected device architecture changed after discovery.');
+    }
 
     const contextStorage = pointerOut();
     const parameters = createDefaultCuCtxCreateParams();
@@ -476,7 +547,7 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
         runtime: { id: runtimeId, epoch, state: 'open', backend: nativeProfile.backend },
         profile: { node: process.version, platform: process.platform, architecture: process.arch, cudaApiVersion: CUDA_API_VERSION, nativeOperational: true, nativeQualified: false },
         driver: { apiVersion: driverVersion, deviceCount },
-        device: { ordinal: 0, attributes },
+        device: { ordinal: selectedOrdinal, attributes },
         context: contextToken,
         memory: await memory.usage(operationSequence),
         transfer: transfer.summary(),

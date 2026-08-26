@@ -4,7 +4,7 @@ import test from 'node:test';
 import { COMPILER_RUNTIME_TEST, openCompilerRuntimeForTesting } from '../../compiler-actor/testing.mjs';
 import { CUDA_JS_COMPATIBILITY, CudaJsError, inspectCudaHost, openCudaRuntime } from '../index.mjs';
 import { openCudaRuntimeWithAdapters } from '../src/runtime.mjs';
-import { openCudaRuntimeForTesting } from '../testing.mjs';
+import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from '../testing.mjs';
 
 const MOCK_PTX = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
 const SOURCE = 'extern "C" __global__ void unrelated_kernel() {}\n';
@@ -13,8 +13,17 @@ function expectCode(code) {
   return (error) => error instanceof CudaJsError && error.code === code;
 }
 
+function driverDescription(claim = 'stub') {
+  return {
+    claim,
+    driver: { apiVersion: 13030, deviceCount: 1 },
+    device: { ordinal: 0, attributes: { computeCapabilityMajor: 7, computeCapabilityMinor: 5 } },
+  };
+}
+
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
   assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.8');
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
@@ -74,6 +83,38 @@ test('public error details bound hostile traversal and redact identity and capab
 
 test('native entry fails before provider work when its launch profile is absent', async () => {
   if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64' && !process.execArgv.includes('--experimental-ffi')) await assert.rejects(openCudaRuntime(), expectCode('CUDA_JS_FFI_FLAG_REQUIRED'));
+});
+
+test('opaque selection binds DriverActor bootstrap and selected-device compiler defaults without public native identity', async () => {
+  const snapshot = await discoverCudaDevicesForTesting([
+    { nativeDevice: 0, computeCapabilityMajor: 7, computeCapabilityMinor: 5 },
+    { nativeDevice: 7, computeCapabilityMajor: 8, computeCapabilityMinor: 9 },
+  ]);
+  assert.equal(snapshot.deviceCount, 2);
+  assert.equal(JSON.stringify(snapshot.devices[1].selector), '{}');
+
+  const selected = await openCudaRuntimeForTesting({ device: snapshot.devices[1].selector, compiler: true });
+  const selectedDescription = await selected.describe();
+  assert.deepEqual(selectedDescription.device.architecture, { major: 8, minor: 9, class: 'cc-8.9' });
+  assert.equal(selectedDescription.device.selection, 'explicit');
+  assert.equal(selectedDescription.device.target.compile, 'compute_89');
+  assert.equal(selectedDescription.device.target.link, 'sm_89');
+  assert.equal(JSON.stringify(selectedDescription).includes('ordinal'), false);
+  assert.equal(JSON.stringify(selectedDescription).includes('nativeDevice'), false);
+  const selectedCompile = await selected.compile({ source: SOURCE });
+  const selectedLink = await selected.link({ inputs: [selectedCompile.artifact] });
+  assert.equal(selectedCompile.artifact.architecture, 'compute_89');
+  assert.equal(selectedLink.artifact.architecture, 'sm_89');
+
+  const implicit = await openCudaRuntimeForTesting({ compiler: true });
+  const implicitDescription = await implicit.describe();
+  assert.equal(implicitDescription.device.selection, 'default');
+  assert.equal(implicitDescription.device.target.compile, 'compute_75');
+  const implicitCompile = await implicit.compile({ source: SOURCE });
+  assert.notEqual(selectedCompile.cache.key, implicitCompile.cache.key);
+
+  assert.equal((await selected.close()).graceful, true);
+  assert.equal((await implicit.close()).graceful, true);
 });
 
 test('facade owns copied memory and hides private actor capabilities', async () => {
@@ -139,7 +180,7 @@ test('CompilerActor cleanup degradation blocks cross-owner facade admission', as
   const driver = {
     state: 'open',
     health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
+    async describe() { return driverDescription(); },
     async allocateDevice() { allocations += 1; throw new Error('allocation should not be admitted'); },
     async loadModule() { moduleLoads += 1; throw new Error('module load should not be admitted'); },
     async close() {
@@ -191,7 +232,7 @@ test('public compiler cache never defaults to package-owned writable storage', a
 
 test('aggregate close attempts both owners and reports unproved cleanup without throwing', async () => {
   const closed = [];
-  const driver = { health: 'healthy', async describe() { return { claim: 'stub' }; }, async close() { closed.push('driver'); throw Object.assign(new Error('driver close'), { code: 'DRIVER_CLOSE', category: 'restart-required' }); } };
+  const driver = { health: 'healthy', async describe() { return driverDescription(); }, async close() { closed.push('driver'); throw Object.assign(new Error('driver close'), { code: 'DRIVER_CLOSE', category: 'restart-required' }); } };
   const compiler = { health: 'healthy', async close() { closed.push('compiler'); throw Object.assign(new Error('compiler close'), { code: 'COMPILER_CLOSE', category: 'restart-required' }); } };
   const runtime = await openCudaRuntimeWithAdapters({ compiler: true }, { openDriver: async () => driver, openCompiler: async () => compiler }, () => ({ status: 'mock-only' }));
   const terminal = await runtime.close();
@@ -205,7 +246,7 @@ test('aggregate close attempts both owners and reports unproved cleanup without 
 test('public terminal retains an acknowledged material Driver disposal failure', async () => {
   const driver = {
     health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
+    async describe() { return driverDescription(); },
     async close() {
       return {
         graceful: false,
@@ -241,7 +282,7 @@ test('public terminal retains an acknowledged material Driver disposal failure',
 });
 
 test('open failure reports restart-required when an acquired owner cannot close', async () => {
-  const driver = { health: 'healthy', async describe() { return { claim: 'stub' }; }, async close() { return { graceful: false }; } };
+  const driver = { health: 'healthy', async describe() { return driverDescription(); }, async close() { return { graceful: false }; } };
   await assert.rejects(openCudaRuntimeWithAdapters({ compiler: true }, {
     openDriver: async () => driver,
     openCompiler: async () => { throw Object.assign(new Error('compiler open'), { code: 'COMPILER_OPEN', category: 'provider' }); },
@@ -261,7 +302,7 @@ test('open failure reports restart-required when an acquired owner cannot close'
 test('open rollback retains an acquired owner material terminal failure', async () => {
   const driver = {
     health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
+    async describe() { return driverDescription(); },
     async close() {
       return {
         graceful: false,
@@ -298,7 +339,7 @@ test('failed disposal orphans the facade resource, preserves provenance, and nev
   const driver = {
     state: 'open',
     health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
+    async describe() { return driverDescription(); },
     async allocateDevice() { return { memory: Object.freeze({ private: 'token' }), byteLength: 8 }; },
     async releaseMemory() {
       releaseCalls += 1;
@@ -354,7 +395,7 @@ test('pre-disposer close rejection remains retryable and does not orphan the fac
   let calls = 0;
   const driver = {
     state: 'open', health: 'healthy',
-    async describe() { return { claim: 'stub' }; },
+    async describe() { return driverDescription(); },
     async allocateDevice() { return { memory: Object.freeze({ private: 'token' }), byteLength: 4 }; },
     async releaseMemory() {
       calls += 1;
@@ -374,7 +415,7 @@ test('pre-disposer close rejection remains retryable and does not orphan the fac
 
 test('unconfirmed profiles operate while known-incompatible profiles close and reject', async () => {
   const closed = [];
-  const adapter = { health: 'healthy', async describe() { return { claim: 'candidate' }; }, async close() { closed.push('driver'); return { graceful: true, workerExited: true, workerExitCode: 0 }; } };
+  const adapter = { health: 'healthy', async describe() { return driverDescription('candidate'); }, async close() { closed.push('driver'); return { graceful: true, workerExited: true, workerExitCode: 0 }; } };
   const candidate = await openCudaRuntimeWithAdapters({}, { openDriver: async () => adapter, openCompiler: async () => null }, () => ({ status: 'testing-unconfirmed', reason: 'PROFILE_EVIDENCE_UNCONFIRMED' }));
   assert.equal((await candidate.describe()).support.status, 'testing-unconfirmed');
   assert.equal((await candidate.close()).graceful, true);

@@ -28,7 +28,7 @@ function driver(attributes) {
     schemaVersion: 1,
     runtime: { backend: 'windows-native' },
     profile: { nativeOperational: true, nativeQualified: false, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
-    driver: { apiVersion: 13030 },
+    driver: { apiVersion: 13030, deviceCount: 1 },
     device: { ordinal: 0, attributes },
   };
 }
@@ -54,7 +54,7 @@ export function runPropertyPartitions(seed = 0xc0da1303, count = 256) {
     compileCases.push({ id, kind, outcome: actual });
 
     const diagnosticKind = next() % 5;
-    const attributes = { kernelExecTimeout: next() % 2, integrated: next() % 2, computeMode: next() % 4, tccDriver: next() % 2 };
+    const attributes = { kernelExecTimeout: next() % 2, integrated: next() % 2, computeMode: next() % 4, tccDriver: next() % 2, computeCapabilityMajor: 8, computeCapabilityMinor: 9 };
     if (diagnosticKind === 1) attributes.kernelExecTimeout = 4;
     if (diagnosticKind === 2) attributes.integrated = -1;
     if (diagnosticKind === 3) attributes.computeMode = 9;

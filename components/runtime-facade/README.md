@@ -1,6 +1,8 @@
 # CUDA-JS public runtime facade
 
-`runtime.facade` is the accepted CJS-F8 package boundary. Applications import `openCudaRuntime`, `compileDeviceProgram`, `inspectCudaHost`, `CUDA_JS_COMPATIBILITY`, and `CudaJsError` from `cuda-js`. Native actors and their tokens are not package exports.
+`runtime.facade` is the accepted CJS-F8 package boundary. Applications import `discoverCudaDevices`, `openCudaRuntime`, `compileDeviceProgram`, `inspectCudaHost`, `CUDA_JS_COMPATIBILITY`, and `CudaJsError` from `cuda-js`. Native actors and their tokens are not package exports.
+
+`discoverCudaDevices()` returns a finite sanitized snapshot whose selector objects are opaque, process-local capabilities. Passing one as `openCudaRuntime({ device })` binds the DriverActor before context creation; omitting `device` preserves the default path. Runtime descriptions expose only the selected architecture and resolved compile/link targets. Native ordinals never cross the package boundary.
 
 The native entry requires Node 26.1.0 or later on Windows x64 and Node's experimental FFI flag. Unconfirmed Node and CUDA hardware profiles operate automatically as `testing-unconfirmed`; only the published exact evidence profile is qualified. The optional compiler is disabled by default so Driver-only use does not require CUDA Toolkit providers. Pass `compiler: true` for a cache-disabled compiler or provide accepted cache options.
 
