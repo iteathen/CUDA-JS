@@ -8,7 +8,7 @@ import { evidenceRoot } from './evidence.mjs';
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.7');
+assert.equal(packageJson.version, '0.1.0-alpha.8');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -18,6 +18,7 @@ assert.equal(compatibility.package.commercialLicensing, 'available-separately');
 assert.equal(compatibility.node.minimumVersion, 'v26.1.0');
 assert.equal(compatibility.node.version, 'v26.7.0');
 assert.deepEqual(compatibility.capabilities.functionParameters, ['device-memory', 'u32', 'u64', 'i32', 'f32', 'f64', 'f16', 'bf16', 'publication-mailbox-host-to-device-u32', 'publication-mailbox-device-to-host-u32']);
+assert.equal(compatibility.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
 assert.equal(compatibility.capabilities.gpuOperationLifecycle, 'opaque-submit-status-wait-close-one-pending');
 assert.equal(compatibility.capabilities.boundedMultiOperationScheduling, 'opt-in-capacity-two-two-private-streams-one-predecessor-no-queue');
 assert.equal(compatibility.capabilities.asyncTransfers, 'opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d');
@@ -41,6 +42,7 @@ assert.deepEqual(memoryConsumer.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16',
 assert.equal(memoryConsumer.operationLifecycle, true);
 assert.equal(memoryConsumer.asyncTransferLifecycle, true);
 assert.equal(memoryConsumer.publicationMailboxLifecycle, true);
+assert.equal(memoryConsumer.deviceSelectionLifecycle, true);
 const compilerConsumer = portable.observations.consumers.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerConsumer);
 assert.equal(compilerConsumer.packageVersion, packageJson.version);
@@ -65,8 +67,9 @@ if (process.platform === 'win32') {
   assert.equal(native.deviceJsObservation.atomicPublicationDeviceU32, true);
   assert.equal(native.deviceJsObservation.atomicPublicationDeviceU64, true);
   assert.deepEqual(native.deviceJsObservation.atomicPublicationPayload, [0x89abcdef, 0x01234567, 0x76543210, 0xfedcba98]);
-  assert.equal(native.deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMajor, 7);
-  assert.equal(native.deviceJsObservation.runtimeProfile.device.attributes.computeCapabilityMinor, 5);
+  assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.major, 7);
+  assert.equal(native.deviceJsObservation.runtimeProfile.device.architecture.minor, 5);
+  assert.equal(Object.hasOwn(native.deviceJsObservation.runtimeProfile.device, 'ordinal'), false);
   assert.equal(native.deviceJsObservation.runtimeProfile.compiler.provider.profile, 'cuda-13.3-windows-x64-compiler');
   assert.equal(native.deviceJsObservation.rejectionBeforeCompilerResources, true);
   assert.equal(native.deviceJsObservation.graceful, true);

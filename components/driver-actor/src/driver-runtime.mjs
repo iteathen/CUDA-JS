@@ -8,7 +8,7 @@ import { deserializeError, DriverRuntimeError, validationError } from './errors.
 import { requestRecord } from './protocol.mjs';
 
 export const DRIVER_RUNTIME_TEST = Symbol('cuda-js.driver-runtime.test');
-const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution']);
+const PUBLIC_OPTION_FIELDS = Object.freeze(['maxPending', 'memory', 'execution', 'selectedDevice']);
 const CLIENT_HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3, closed: 4 });
 
 function delay(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
@@ -30,6 +30,19 @@ function plainObject(value) {
 }
 
 function exactOptionFields(options) { return Object.keys(options).every((key) => PUBLIC_OPTION_FIELDS.includes(key)); }
+
+function normalizeSelectedDevice(value) {
+  if (value === undefined) return null;
+  if (!plainObject(value) || Object.keys(value).sort().join('\0') !== 'architecture\0nativeDevice'
+      || !Number.isSafeInteger(value.nativeDevice) || value.nativeDevice < 0
+      || !plainObject(value.architecture) || Object.keys(value.architecture).sort().join('\0') !== 'class\0major\0minor'
+      || !Number.isSafeInteger(value.architecture.major) || value.architecture.major < 1 || value.architecture.major > 99
+      || !Number.isSafeInteger(value.architecture.minor) || value.architecture.minor < 0 || value.architecture.minor > 99
+      || value.architecture.class !== `cc-${value.architecture.major}.${value.architecture.minor}`) {
+    throw validationError('DRIVER_SELECTED_DEVICE_INVALID', 'Selected device handoff is invalid.');
+  }
+  return Object.freeze({ nativeDevice: value.nativeDevice, architecture: Object.freeze({ ...value.architecture }) });
+}
 
 function freezeRecord(value) {
   if (value === null || typeof value !== 'object') return value;
@@ -117,6 +130,7 @@ class DriverRuntime {
   #maxPending;
   #memoryPolicy;
   #executionPolicy;
+  #selectedDevice;
   #runtimeId = randomUUID();
   #epoch = 1;
   #worker;
@@ -139,12 +153,13 @@ class DriverRuntime {
   #acknowledgedTerminal = null;
   #terminalReport = null;
 
-  constructor({ backend, testHooks, maxPending, memoryPolicy, executionPolicy }) {
+  constructor({ backend, testHooks, maxPending, memoryPolicy, executionPolicy, selectedDevice }) {
     this.#backend = backend;
     this.#testHooks = testHooks;
     this.#maxPending = maxPending;
     this.#memoryPolicy = memoryPolicy;
     this.#executionPolicy = executionPolicy;
+    this.#selectedDevice = selectedDevice;
     this.#readyPromise = new Promise((resolve, reject) => { this.#readyResolve = resolve; this.#readyReject = reject; });
     this.#exitPromise = new Promise((resolve) => { this.#exitResolve = resolve; });
   }
@@ -369,7 +384,7 @@ class DriverRuntime {
     if (this.#backend === 'windows-native' && !process.execArgv.includes('--experimental-ffi')) throw new DriverRuntimeError('DRIVER_FFI_FLAG_REQUIRED', 'unsupported', 'The native DriverActor requires Node to be launched with experimental FFI enabled.');
     if (this.#backend === 'windows-native' && process.permission !== undefined && !process.execArgv.includes('--permission')) throw new DriverRuntimeError('DRIVER_PERMISSION_PROFILE_UNSUPPORTED', 'unsupported', 'The native DriverActor requires permission flags to be explicit process arguments.');
     this.#worker = new Worker(new URL('./actor-worker.mjs', import.meta.url), {
-      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy },
+      workerData: { backend: this.#backend, testHooks: this.#testHooks, runtimeId: this.#runtimeId, epoch: this.#epoch, memoryPolicy: this.#memoryPolicy, executionPolicy: this.#executionPolicy, selectedDevice: this.#selectedDevice },
       execArgv: workerExecArgv(),
     });
     this.#worker.on('message', (message) => this.#onMessage(message));
@@ -528,10 +543,10 @@ function validateMaxPending(value) {
 
 export async function openDriverRuntime(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}) });
+  return DriverRuntime.open({ backend: 'windows-native', testHooks: false, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}), selectedDevice: normalizeSelectedDevice(options.selectedDevice) });
 }
 
 export async function openDriverRuntimeForTesting(options = {}) {
   if (!plainObject(options) || !exactOptionFields(options)) throw validationError('DRIVER_OPTIONS_INVALID', 'Driver runtime options contain unknown fields.');
-  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}) });
+  return DriverRuntime.open({ backend: 'mock', testHooks: true, maxPending: validateMaxPending(options.maxPending ?? 64), memoryPolicy: normalizeMemoryPolicy(options.memory ?? {}), executionPolicy: normalizeExecutionPolicy(options.execution ?? {}), selectedDevice: normalizeSelectedDevice(options.selectedDevice) });
 }

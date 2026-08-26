@@ -1,12 +1,15 @@
 import { openCompilerRuntime } from '../../compiler-actor/index.mjs';
-import { openDriverRuntime } from '../../driver-actor/index.mjs';
+import { CUDA_TARGET_POLICY_ENTRIES, CUDA_TARGET_POLICY_VERSION } from '../../cuda-target/index.mjs';
+import { DeviceSelectionAuthority, resolveArchitectureTarget, resolveOpaqueDeviceSelector } from '../../device-selection/index.mjs';
+import { discoverDriverDevices, openDriverRuntime } from '../../driver-actor/index.mjs';
 import { assessCudaSupport, inspectHostProfile } from '../../platform-diagnostics/index.mjs';
 import { CUDA_JS_COMPATIBILITY } from '../compatibility.mjs';
 import { CudaJsError, facadeError, freezePublic, publicDetails, publicError } from './errors.mjs';
 
 const runtimeData = new WeakMap();
 const resourceData = new WeakMap();
-const OPEN_FIELDS = Object.freeze(['compiler', 'driver']);
+const OPEN_FIELDS = Object.freeze(['compiler', 'device', 'driver']);
+const DRIVER_FIELDS = Object.freeze(['execution', 'maxPending', 'memory']);
 const COMPILER_FIELDS = Object.freeze(['cacheDirectory', 'cacheMode']);
 const HEALTH_RANK = Object.freeze({ healthy: 0, suspect: 1, poisoned: 2, 'restart-required': 3 });
 const POISONED_ALLOWED_OPERATIONS = new Set([
@@ -35,10 +38,41 @@ function compilerOptions(value) {
   return Object.freeze({ ...value, cacheMode });
 }
 
+function selectedDevice(value) {
+  if (value === undefined) return null;
+  try { return resolveOpaqueDeviceSelector(value); }
+  catch (error) { throw facadeError(error.code ?? 'DEVICE_SELECTOR_INVALID', error.category ?? 'validation', error.message ?? 'Device selector is invalid.', error.details ?? {}, 'open'); }
+}
+
 function normalizeOptions(value) {
   if (!exactFields(value, OPEN_FIELDS)) throw facadeError('CUDA_JS_OPTIONS_INVALID', 'validation', 'Runtime options contain unknown fields.', {}, 'open');
-  if (value.driver !== undefined && !plainObject(value.driver)) throw facadeError('CUDA_JS_OPTIONS_INVALID', 'validation', 'Driver options must be an ordinary object.', {}, 'open');
-  return Object.freeze({ driver: value.driver ?? {}, compiler: compilerOptions(value.compiler) });
+  if (value.driver !== undefined && !exactFields(value.driver, DRIVER_FIELDS)) throw facadeError('CUDA_JS_OPTIONS_INVALID', 'validation', 'Driver options must be an ordinary object with only public fields.', {}, 'open');
+  return Object.freeze({ driver: Object.freeze({ ...(value.driver ?? {}) }), compiler: compilerOptions(value.compiler), selectedDevice: selectedDevice(value.device) });
+}
+
+function selectedArchitecture(description) {
+  const attributes = description?.device?.attributes;
+  return Object.freeze({
+    major: attributes?.computeCapabilityMajor,
+    minor: attributes?.computeCapabilityMinor,
+    class: `cc-${attributes?.computeCapabilityMajor}.${attributes?.computeCapabilityMinor}`,
+  });
+}
+
+function cudaTargetPolicy(architecture) {
+  const entry = CUDA_TARGET_POLICY_ENTRIES.find((candidate) => candidate.computeCapability === `${architecture.major}.${architecture.minor}`);
+  if (!entry) throw facadeError('CUDA_JS_DEVICE_TARGET_UNSUPPORTED', 'unsupported', 'Selected-device architecture is not admitted by the current CUDA target policy.', { architecture: architecture.class, targetPolicy: CUDA_TARGET_POLICY_VERSION }, 'open');
+  return Object.freeze({ policyVersion: CUDA_TARGET_POLICY_VERSION, compileTarget: `compute_${entry.base}`, linkTarget: `sm_${entry.base}` });
+}
+
+function withCompileTarget(request, compileTarget) {
+  if (!plainObject(request) || (request.options !== undefined && !plainObject(request.options)) || request.options?.architecture !== undefined) return request;
+  return { ...request, options: { ...(request.options ?? {}), architecture: compileTarget } };
+}
+
+function withLinkTarget(request, linkTarget) {
+  if (!plainObject(request) || (request.options !== undefined && !plainObject(request.options)) || request.options?.architecture !== undefined) return request;
+  return { ...request, options: { ...(request.options ?? {}), architecture: linkTarget } };
 }
 
 function preflight(host) {
@@ -373,7 +407,7 @@ class CudaRuntime {
   }
   get compilerEnabled() { return runtimeData.get(this)?.compiler !== null; }
   get terminalReport() { return runtimeData.get(this)?.terminalReport ?? null; }
-  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: driver.device, memory: driver.memory, transfer: driver.transfer, mailbox: driver.mailbox, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
+  async describe() { const data = dataFor(this, 'runtime.describe'); const driver = await invoke('runtime.describe', () => data.driver.describe()); const compiler = data.compiler ? await invoke('compiler.status', () => data.compiler.status()) : null; return freezePublic({ schemaVersion: 1, package: { name: CUDA_JS_COMPATIBILITY.package.name, version: CUDA_JS_COMPATIBILITY.package.version, publicApiSchema: CUDA_JS_COMPATIBILITY.publicApi.schemaVersion }, state: data.state, health: this.health, support: data.support, profile: driver.profile, driver: driver.driver, device: data.device, memory: driver.memory, transfer: driver.transfer, mailbox: driver.mailbox, execution: driver.execution, compiler: publicCompilerStatus(compiler) }); }
   async allocateDevice(options) { const data = dataFor(this, 'memory.allocate'); const result = await invoke('memory.allocate', () => data.driver.allocateDevice(options)); return registerResource(this, 'device-memory', result.memory, { byteLength: result.byteLength }, CudaDeviceMemory); }
   async createPublicationMailbox(options) {
     const data = dataFor(this, 'mailbox.create');
@@ -383,8 +417,8 @@ class CudaRuntime {
     return registerResource(this, 'publication-mailbox', result.mailbox, { generation: result.generation, buffer: result.buffer, view: new Int32Array(result.buffer), publicLanes, laneMap }, CudaPublicationMailbox);
   }
   async loadModule(options) { const data = dataFor(this, 'module.load'); const result = await invoke('module.load', () => data.driver.loadModule(options)); return registerResource(this, 'module', result.module, { format: result.format, byteLength: result.byteLength, sha256: result.sha256 }, CudaModule); }
-  async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(request))); }
-  async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(request))); }
+  async compile(request) { const data = dataFor(this, 'compiler.compile'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.compile'); return freezePublic(await invoke('compiler.compile', () => data.compiler.compile(withCompileTarget(request, data.targets.compileTarget)))); }
+  async link(request) { const data = dataFor(this, 'compiler.link'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.link'); return freezePublic(await invoke('compiler.link', () => data.compiler.link(withLinkTarget(request, data.targets.linkTarget)))); }
   async invalidateCache(key) { const data = dataFor(this, 'compiler.cache.invalidate'); if (!data.compiler) throw facadeError('CUDA_JS_COMPILER_DISABLED', 'unsupported', 'This runtime was opened without the optional compiler.', {}, 'compiler.cache.invalidate'); return freezePublic(await invoke('compiler.cache.invalidate', () => data.compiler.invalidate(key))); }
   async close() {
     const data = dataFor(this, 'runtime.close', true);
@@ -414,13 +448,27 @@ async function openWithAdapters(options, adapters, supportFactory) {
   let driver;
   let compiler;
   try {
-    driver = await invoke('driver.open', () => adapters.openDriver(normalized.driver));
+    const driverOptions = normalized.selectedDevice
+      ? { ...normalized.driver, selectedDevice: { nativeDevice: normalized.selectedDevice.nativeDevice, architecture: normalized.selectedDevice.architecture } }
+      : normalized.driver;
+    driver = await invoke('driver.open', () => adapters.openDriver(driverOptions));
     const description = await invoke('driver.describe', () => driver.describe());
     const support = supportFactory(description);
     if (!['accepted', 'testing-unconfirmed', 'mock-only'].includes(support.status)) throw facadeError('CUDA_JS_PROFILE_INCOMPATIBLE', 'unsupported', 'The selected Driver profile is known to be incompatible with this runtime.', { reason: support.reason ?? 'unknown' }, 'open');
+    const targets = await invoke('device.target.resolve', () => resolveArchitectureTarget(selectedArchitecture(description), cudaTargetPolicy));
+    if (normalized.selectedDevice && (description.device?.ordinal !== normalized.selectedDevice.nativeDevice
+        || targets.architecture.class !== normalized.selectedDevice.architecture.class)) {
+      throw facadeError('CUDA_JS_SELECTED_DEVICE_MISMATCH', 'stale-resource', 'DriverActor did not bind the requested selected device.', {}, 'open');
+    }
     if (normalized.compiler) compiler = await invoke('compiler.open', () => adapters.openCompiler(normalized.compiler));
     const runtime = new CudaRuntime();
-    runtimeData.set(runtime, { driver, compiler: compiler ?? null, support, resources: new Set(), state: 'open', closePromise: null, terminalReport: null });
+    const device = freezePublic({
+      schemaVersion: 1,
+      selection: normalized.selectedDevice ? 'explicit' : 'default',
+      architecture: targets.architecture,
+      target: { policyVersion: targets.policyVersion, compile: targets.compileTarget, link: targets.linkTarget, identity: targets.identity },
+    });
+    runtimeData.set(runtime, { driver, compiler: compiler ?? null, support, device, targets, resources: new Set(), state: 'open', closePromise: null, terminalReport: null });
     return Object.freeze(runtime);
   } catch (error) {
     const primary = publicError(error, 'open');
@@ -482,6 +530,13 @@ async function openWithAdapters(options, adapters, supportFactory) {
 }
 
 export function inspectCudaHost() { return freezePublic({ schemaVersion: 1, host: inspectHostProfile(), compatibility: CUDA_JS_COMPATIBILITY }); }
+
+export async function discoverCudaDevices() {
+  const host = inspectHostProfile();
+  preflight(host);
+  const authority = new DeviceSelectionAuthority({ listDevices: discoverDriverDevices });
+  return invoke('device.discover', () => authority.discover());
+}
 
 export async function openCudaRuntime(options = {}) {
   const host = inspectHostProfile();

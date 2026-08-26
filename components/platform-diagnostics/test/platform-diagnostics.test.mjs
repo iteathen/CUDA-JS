@@ -16,8 +16,8 @@ function driver(overrides = {}) {
     schemaVersion: 1,
     runtime: { backend: 'windows-native' },
     profile: { nativeOperational: true, nativeQualified: false, node: 'v26.7.0', platform: 'win32', architecture: 'x64' },
-    driver: { apiVersion: 13030 },
-    device: { ordinal: 0, attributes: { kernelExecTimeout: 1, integrated: 0, computeMode: 0, tccDriver: 0, ...overrides } },
+    driver: { apiVersion: 13030, deviceCount: 2 },
+    device: { ordinal: 0, attributes: { kernelExecTimeout: 1, integrated: 0, computeMode: 0, tccDriver: 0, computeCapabilityMajor: 8, computeCapabilityMinor: 9, ...overrides } },
   };
 }
 
@@ -54,6 +54,8 @@ test('Windows CUDA diagnostics distinguish WDDM watchdog and TCC without changin
   assert.equal(wddm.status, 'testing-unconfirmed');
   assert.equal(wddm.claim, 'testing-only-unconfirmed-profile');
   assert.equal(wddm.cuda.driverModel, 'wddm-watchdog');
+  assert.equal(wddm.cuda.selectedArchitecture, 'cc-8.9');
+  assert.equal(Object.hasOwn(wddm.cuda, 'deviceOrdinal'), false);
   assert.equal(wddm.cuda.watchdog, 'enabled');
   assert.equal(Object.isFrozen(wddm.cuda), true);
   assert.equal(assessCudaSupport(host(), driver({ kernelExecTimeout: 0 })).cuda.driverModel, 'wddm-no-watchdog');

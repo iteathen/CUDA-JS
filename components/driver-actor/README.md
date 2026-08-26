@@ -2,7 +2,7 @@
 
 **Status:** Accepted F5W internal experimental component
 
-This component turns the accepted Windows bootstrap into a bounded asynchronous runtime owner. One Worker opens the canonical Windows CUDA Driver, selects device zero, creates one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library.
+This component turns the accepted Windows bootstrap into a bounded asynchronous runtime owner. A short-lived discovery Worker can enumerate private ordinal/architecture records without creating a context and proves Driver-library closure. One runtime Worker then opens the canonical Windows CUDA Driver, revalidates and fixes the selected device before creating one private context, owns all raw values in an opaque registry, and closes proved-terminal operations, modules, streams, and device allocations before the context and library. Omitting explicit selection preserves the default-device path.
 
 The component surface is [`index.mjs`](index.mjs):
 

@@ -50,6 +50,8 @@ for (const required of [
   'LICENSE',
   'LICENSING.md',
   'components/device-js/index.mjs',
+  'components/device-selection/index.mjs',
+  'components/device-selection/src/device-selection.mjs',
   'components/device-js/src/strict-translator.mjs',
   'components/cuda-target/index.mjs',
   'components/cuda-target/component.yaml',
@@ -70,7 +72,7 @@ const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
 const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
-const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name === 'packaging/compatibility-manifest.json');
+const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
   for (const needle of deletionNeedles) assert(!text.includes(needle), `${relative} contains first-consumer coupling: ${needle}`);
@@ -101,6 +103,7 @@ assert(memoryObservation);
 assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
 assert.equal(memoryObservation.publicationMailboxLifecycle, true);
+assert.equal(memoryObservation.deviceSelectionLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
 for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
@@ -116,6 +119,7 @@ const target = await writeEvidence('portable-package.json', {
   sources: await sourceIdentity([
     'docs/specs/SPEC-0008-package-public-facade.md',
     'docs/specs/SPEC-0013-restricted-device-js.md',
+    'docs/specs/SPEC-0017-device-selection-and-target-resolution.md',
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0022-device-publication-addendum.md',
     'docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md',
@@ -129,6 +133,7 @@ const target = await writeEvidence('portable-package.json', {
     'components/memory/src/device-view-manager.mjs',
     'components/publication-mailbox/src/publication-mailbox-manager.mjs',
     'components/device-js/src/strict-translator.mjs',
+    'components/device-selection/src/device-selection.mjs',
     'components/runtime-facade/src/runtime.mjs',
     'components/runtime-facade/src/device-program.mjs',
     'conformance/f8/fixtures/consumer-memory.mjs',
@@ -138,9 +143,9 @@ const target = await writeEvidence('portable-package.json', {
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0019 transfer lifecycle, SPEC-0021 scalar ABI, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
+    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0021 scalar ABI, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
     'The contiguous 1D typed device-view component is packaged for internal/downstream use but has no selected public cuda-js facade entry yet.',
-    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, and typed device-view native consumers remain subject to their exact native promotion gates.',
+    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, SPEC-0017 native selection, and typed device-view native consumers remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',
   ],
 });

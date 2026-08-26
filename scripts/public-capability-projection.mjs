@@ -187,6 +187,9 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   if (JSON.stringify(compatibility.capabilities?.functionParameters) !== JSON.stringify(expectedParameters)) {
     errors.push('packaging compatibility scalar parameter projection is stale');
   }
+  if (compatibility.capabilities?.deviceSelection !== 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets') {
+    errors.push('packaging compatibility device-selection projection is stale');
+  }
   if (compatibility.capabilities?.typedDeviceViews !== 'contiguous-1d-component-foundation-no-public-facade-yet') {
     errors.push('packaging compatibility typed device-view projection is stale');
   }
@@ -218,9 +221,11 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0012',
     'SPEC-0013',
     'SPEC-0016',
+    'SPEC-0017',
     'SPEC-0027',
     'separate future publish unit',
     'compileDeviceProgram()',
+    'discoverCudaDevices()',
     '`u64`/`i32`/`f32`',
     'typed `lto-ir`',
     'one pending GPU operation',
@@ -233,10 +238,12 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0012',
     'SPEC-0013',
     'SPEC-0016',
+    'SPEC-0017',
     'SPEC-0021',
     'SPEC-0027',
     'Optional separately packaged NN product',
     'compileDeviceProgram()',
+    'discoverCudaDevices()',
     '`u64`',
     '`i32`',
     '`f32`',

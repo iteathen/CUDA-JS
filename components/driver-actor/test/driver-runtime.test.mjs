@@ -54,6 +54,19 @@ test('mock facade preserves context identity across turns and closes determinist
   await second.runtime.close();
 });
 
+test('selected device is fixed in Worker bootstrap before mock context ownership begins', async () => {
+  const { runtime } = await openMockDriverRuntime({
+    selectedDevice: { nativeDevice: 7, architecture: { major: 8, minor: 9, class: 'cc-8.9' } },
+  });
+  const description = await runtime.describe();
+  assert.equal(description.device.ordinal, 7);
+  assert.equal(description.device.attributes.computeCapabilityMajor, 8);
+  assert.equal(description.device.attributes.computeCapabilityMinor, 9);
+  assert.equal((await runtime.contextStatus(description.context)).currentOnOwner, true);
+  assert.equal((await runtime.close()).graceful, true);
+  await assert.rejects(openMockDriverRuntime({ selectedDevice: { nativeDevice: 7, architecture: { major: 8, minor: 9, class: 'cc-8.8' } } }), expectCode('DRIVER_SELECTED_DEVICE_INVALID'));
+});
+
 test('mock health records distinguish immediate and deferred provenance monotonically', async () => {
   const { runtime, testing } = await openMockDriverRuntime();
   await assert.rejects(testing.injectHealth('immediate-driver', 41), (error) => {

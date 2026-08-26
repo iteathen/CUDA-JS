@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.7",
+    "version": "0.1.0-alpha.8",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -41,6 +41,7 @@
     { "host": "wsl2-x64", "status": "backend-unavailable" }
   ],
   "capabilities": {
+    "deviceSelection": "finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets",
     "deviceMemory": "bounded-synchronous-copied-bytes",
     "moduleFormats": ["ptx", "cubin"],
     "functionParameters": ["device-memory", "u32", "u64", "i32", "f32", "f64", "f16", "bf16", "publication-mailbox-host-to-device-u32", "publication-mailbox-device-to-host-u32"],
@@ -94,6 +95,7 @@
     "SPEC-0014 publication mailboxes have exact Windows and installed-package evidence only for privately mapped named u32 lanes, one live GPU operation lease, and system-scope acquire/release publication on the recorded Node/Driver/GPU profile.",
     "SPEC-0013 Device-JS plus the scoped atomic-observation and device-publication children is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
     "SPEC-0022 device publication has exact Windows installed-package evidence only for naturally aligned u32/u64 device-scope release/acquire readiness and one immutable multiword payload on the recorded profile; freshness, progress, generation policy and queue correctness remain excluded.",
+    "SPEC-0017 device selection is implemented in the portable/software/package path. Default-device compatibility and explicit selector orchestration are mock-qualified only; native default/explicit selection and distinct-device behavior remain unqualified until exact independent evidence exists.",
     "Linux and WSL package import and portable testing are not native CUDA support.",
     "No strict-JIT, process-isolation, performance, or production-stability claim.",
     "CUDA-JS source is AGPL-3.0-or-later; separate commercial terms are available only through an executed agreement with the copyright holder.",

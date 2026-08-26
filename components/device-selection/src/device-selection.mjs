@@ -1,8 +1,8 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
-const SELECTOR_FIELDS = Object.freeze(['schemaVersion', 'snapshot', 'capability']);
 const PRIVATE_DEVICE_FIELDS = Object.freeze(['nativeDevice', 'computeCapabilityMajor', 'computeCapabilityMinor']);
 const TARGET_FIELDS = Object.freeze(['policyVersion', 'compileTarget', 'linkTarget']);
+const selectorData = new WeakMap();
 
 export class DeviceSelectionError extends Error {
   constructor(code, category, message, details = {}) {
@@ -26,18 +26,6 @@ function plainObject(value) {
 
 function exactFields(value, fields) {
   return plainObject(value) && Object.keys(value).sort().join('\0') === [...fields].sort().join('\0');
-}
-
-function defaultNonce() {
-  return randomBytes(16).toString('hex');
-}
-
-function opaqueToken(nonce, field) {
-  const value = nonce();
-  if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{16,128}$/.test(value)) {
-    fail('DEVICE_SELECTION_NONCE_INVALID', 'internal', `Device selection ${field} nonce is invalid.`);
-  }
-  return value;
 }
 
 function normalizePrivateDevice(value, index) {
@@ -89,14 +77,6 @@ function publicDescriptor(selector, device) {
   });
 }
 
-function validateSelector(value) {
-  if (!exactFields(value, SELECTOR_FIELDS) || value.schemaVersion !== 1
-      || typeof value.snapshot !== 'string' || typeof value.capability !== 'string') {
-    fail('DEVICE_SELECTOR_INVALID', 'validation', 'Device selector is malformed.');
-  }
-  return value;
-}
-
 function boundedTargetString(value, field) {
   if (typeof value !== 'string' || value.length < 1 || value.length > 128 || !/^[A-Za-z0-9._+-]+$/.test(value)) {
     fail('DEVICE_TARGET_POLICY_INVALID', 'internal', `Target policy returned invalid ${field}.`);
@@ -108,44 +88,72 @@ function canonicalTargetIdentity(value) {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
 
+export function resolveArchitectureTarget(architecture, targetPolicy) {
+  if (!exactFields(architecture, ['major', 'minor', 'class'])
+      || !Number.isSafeInteger(architecture.major) || architecture.major < 1 || architecture.major > 99
+      || !Number.isSafeInteger(architecture.minor) || architecture.minor < 0 || architecture.minor > 99
+      || architecture.class !== `cc-${architecture.major}.${architecture.minor}`) {
+    fail('DEVICE_ARCHITECTURE_INVALID', 'validation', 'Selected-device architecture facts are invalid.');
+  }
+  if (typeof targetPolicy !== 'function') {
+    fail('DEVICE_TARGET_POLICY_INVALID', 'internal', 'Selected-device target resolution requires an injected target policy.');
+  }
+  const resolved = targetPolicy(Object.freeze({ ...architecture }));
+  if (!exactFields(resolved, TARGET_FIELDS)) {
+    fail('DEVICE_TARGET_POLICY_INVALID', 'internal', 'Target policy returned an invalid record.');
+  }
+  const policyVersion = boundedTargetString(resolved.policyVersion, 'policyVersion');
+  const compileTarget = boundedTargetString(resolved.compileTarget, 'compileTarget');
+  const linkTarget = boundedTargetString(resolved.linkTarget, 'linkTarget');
+  const normalizedArchitecture = Object.freeze({ ...architecture });
+  const identityInput = Object.freeze({
+    contract: 'SPEC-0017-v1',
+    architecture: normalizedArchitecture,
+    policyVersion,
+    compileTarget,
+    linkTarget,
+  });
+  return Object.freeze({
+    schemaVersion: 1,
+    architecture: normalizedArchitecture,
+    compileTarget,
+    linkTarget,
+    policyVersion,
+    identity: canonicalTargetIdentity(identityInput),
+  });
+}
+
 export class DeviceSelectionAuthority {
   #listDevices;
-  #nonce;
   #snapshot = null;
-  #currentSnapshotId = null;
-  #issuedSnapshots = new Set();
-  #selectors = new Map();
+  #generation = 0;
 
-  constructor({ listDevices, nonce = defaultNonce }) {
+  constructor({ listDevices }) {
     if (typeof listDevices !== 'function') {
       fail('DEVICE_SELECTION_PROVIDER_INVALID', 'internal', 'Device selection requires a private inventory provider.');
     }
-    if (typeof nonce !== 'function') {
-      fail('DEVICE_SELECTION_NONCE_INVALID', 'internal', 'Device selection nonce provider is invalid.');
-    }
     this.#listDevices = listDevices;
-    this.#nonce = nonce;
   }
 
   async discover() {
-    const devices = normalizeInventory(await this.#listDevices());
-    const snapshot = opaqueToken(this.#nonce, 'snapshot');
-    const selectors = new Map();
+    const generation = ++this.#generation;
+    this.#snapshot = null;
+    let inventory;
+    try {
+      inventory = await this.#listDevices();
+    } catch (error) {
+      if (error instanceof DeviceSelectionError) throw error;
+      fail('DEVICE_DISCOVERY_FAILED', 'provider', 'CUDA device discovery failed before a snapshot was established.');
+    }
+    const devices = normalizeInventory(inventory);
     const publicDevices = [];
     for (const device of devices) {
-      let capability;
-      do capability = opaqueToken(this.#nonce, 'selector');
-      while (selectors.has(capability));
-      const selector = Object.freeze({ schemaVersion: 1, snapshot, capability });
-      selectors.set(capability, device);
+      const selector = Object.freeze(new CudaDeviceSelector());
+      selectorData.set(selector, Object.freeze({ authority: this, generation, device }));
       publicDevices.push(publicDescriptor(selector, device));
     }
-    this.#issuedSnapshots.add(snapshot);
-    this.#currentSnapshotId = snapshot;
-    this.#selectors = selectors;
     this.#snapshot = Object.freeze({
       schemaVersion: 1,
-      snapshot,
       deviceCount: publicDevices.length,
       devices: Object.freeze(publicDevices),
     });
@@ -183,48 +191,42 @@ export class DeviceSelectionAuthority {
   }
 
   resolveTarget(selector, targetPolicy) {
-    if (typeof targetPolicy !== 'function') {
-      fail('DEVICE_TARGET_POLICY_INVALID', 'internal', 'Selected-device target resolution requires an injected target policy.');
-    }
     const { device, publicSelection } = this.#resolve(selector);
     const architecture = architectureFacts(device);
-    const resolved = targetPolicy(architecture);
-    if (!exactFields(resolved, TARGET_FIELDS)) {
-      fail('DEVICE_TARGET_POLICY_INVALID', 'internal', 'Target policy returned an invalid record.');
-    }
-    const policyVersion = boundedTargetString(resolved.policyVersion, 'policyVersion');
-    const compileTarget = boundedTargetString(resolved.compileTarget, 'compileTarget');
-    const linkTarget = boundedTargetString(resolved.linkTarget, 'linkTarget');
-    const identityInput = Object.freeze({
-      contract: 'SPEC-0017-v1',
-      architecture,
-      policyVersion,
-      compileTarget,
-      linkTarget,
-    });
+    const resolved = resolveArchitectureTarget(architecture, targetPolicy);
     return Object.freeze({
-      schemaVersion: 1,
-      architecture,
-      compileTarget,
-      linkTarget,
-      policyVersion,
-      identity: canonicalTargetIdentity(identityInput),
+      ...resolved,
       selection: publicSelection,
     });
   }
 
   #resolve(selectorValue) {
-    const selector = validateSelector(selectorValue);
-    if (selector.snapshot !== this.#currentSnapshotId) {
-      if (this.#issuedSnapshots.has(selector.snapshot)) {
-        fail('DEVICE_SELECTOR_STALE', 'stale-resource', 'Device selector belongs to a superseded discovery snapshot.');
-      }
+    if (!(selectorValue instanceof CudaDeviceSelector)) {
+      fail('DEVICE_SELECTOR_INVALID', 'validation', 'Device selector is malformed.');
+    }
+    const privateSelector = selectorData.get(selectorValue);
+    if (!privateSelector || privateSelector.authority !== this) {
       fail('DEVICE_SELECTOR_FOREIGN', 'validation', 'Device selector does not belong to this selection authority.');
     }
-    const device = this.#selectors.get(selector.capability);
-    if (device === undefined) {
-      fail('DEVICE_SELECTOR_FOREIGN', 'validation', 'Device selector capability is unknown to this selection authority.');
+    if (privateSelector.generation !== this.#generation || this.#snapshot === null) {
+      fail('DEVICE_SELECTOR_STALE', 'stale-resource', 'Device selector belongs to a superseded discovery snapshot.');
     }
-    return Object.freeze({ device, publicSelection: publicDescriptor(selector, device) });
+    return Object.freeze({
+      device: privateSelector.device,
+      publicSelection: publicDescriptor(selectorValue, privateSelector.device),
+    });
   }
+}
+
+export class CudaDeviceSelector {
+  get kind() { return 'cuda-device-selector'; }
+}
+
+export function resolveOpaqueDeviceSelector(selector) {
+  if (!(selector instanceof CudaDeviceSelector)) {
+    fail('DEVICE_SELECTOR_INVALID', 'validation', 'Device selector is malformed.');
+  }
+  const privateSelector = selectorData.get(selector);
+  if (!privateSelector) fail('DEVICE_SELECTOR_FOREIGN', 'validation', 'Device selector does not belong to this process.');
+  return privateSelector.authority.resolvePrivate(selector);
 }

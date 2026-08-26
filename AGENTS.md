@@ -101,7 +101,7 @@ Exact native promotion gates for additive capabilities remain independent unless
 
 The open-issue sweep reviewed the first dependency-ready expansion contracts against current authority and primary CUDA 13.3 documentation.
 
-- `SPEC-0017` is **Accepted**: sanitized opaque device discovery/selection, one selected device per runtime, and selected-device-driven target resolution. Production portable/software implementation is authorized; native/multi-device qualification remains open.
+- `SPEC-0017` is **Accepted and portable/software/package implemented**: sanitized opaque device discovery/selection, one selected device per runtime, and selected-device-driven target resolution. Native default/explicit and distinct-device qualification remain open.
 - `SPEC-0021` is **Accepted**: new `f64`/`f16`/`bf16` packed scalar kinds plus contiguous one-dimensional generic typed device views. Accepted SPEC-0011 finite-only `f32` behavior is preserved. Production portable/software implementation is authorized; native promotion remains open.
 - `SPEC-0018` remains **Proposal**. Its own gate requires trustworthy published native SPEC-0016 lifecycle evidence. Issue #51 records a passing Windows candidate, but the exact candidate commits/evidence were not integrated on protected main; do not widen to multi-operation/multi-stream production code until that gap is repaired.
 
