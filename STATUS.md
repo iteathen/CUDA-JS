@@ -7,10 +7,10 @@
 ## CUDA-MCGS prerequisite execution baseline
 
 ```text
-protected main:     640f1be6392e7af22b1aa0b851d7a20293d684fb
-completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries / #137 prepared DAG / #138 cuBLASLt adapter / #140 dense numeric Device-JS
+protected main:     3a29b65a4ae736923dbde432356a7aad31059fc0
+completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries / #137 prepared DAG / #138 cuBLASLt adapter / #140 dense numeric Device-JS / #143 native prepared-DAG projection
 cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-execution package:  cuda-js@0.1.0-alpha.14 candidate (native prepared-DAG identity projection and exact-profile evidence)
+execution package:  cuda-js@0.1.0-alpha.14 integrated (native prepared-DAG identity projection and exact-profile evidence)
 ```
 
 **Node 26.7.0** remains the exact Node qualification baseline.
@@ -132,7 +132,7 @@ SPEC-0030 is integrated on protected main through PR #140 and issue #139 is clos
 
 Accepted SPEC-0028 is integrated on protected main. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
 
-Accepted SPEC-0020 is integrated on protected main through PR #137. Its first profile owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. Each replay validates concrete aliases before backend work, submits canonical topological order on one private stream, and returns one existing SPEC-0016 operation with one final event. Issue #142 identified that native discovery supplied a wider internal device record than the exact prepared identity admits; the alpha.14 candidate fixes the execution owner by projecting only its eight validated launch limits and adds an installed-package native semantic-replay/result/cleanup fixture. CUDA Graph realization, transfer/library/mailbox nodes, broader native profiles, and performance remain separate.
+Accepted SPEC-0020 is integrated on protected main through PR #137. Its first profile owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. Each replay validates concrete aliases before backend work, submits canonical topological order on one private stream, and returns one existing SPEC-0016 operation with one final event. PR #143 closed issue #142 by projecting the wider native discovery record to only the execution owner's eight validated launch limits; its installed-package native fixture proves semantic-replay result parity and terminal cleanup on the exact recorded Windows profile. CUDA Graph realization, transfer/library/mailbox nodes, broader native profiles, and performance remain separate.
 
 Accepted SPEC-0023 plus SPEC-0029 is integrated on protected main through PR #138. It adds one lazy context-owned cuBLASLt adapter, immutable f32 row-major contiguous matmul plans, typed-view access/range enforcement, explicit bounded workspace, and submission through the existing operation scheduler. Exact Windows CUDA 13.3/cuBLASLt 13.5.1 provider identity, independent ABI/numerical oracle, public native parity, installed-package consumer, and cleanup evidence qualify only that recorded profile; Linux, other providers/dtypes/layouts, tensor semantics, and performance remain excluded.
 
@@ -189,8 +189,8 @@ Not-qualified is not architectural rejection.
 
 ```text
 1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. integrate the alpha.14 native prepared-DAG identity projection and exact installed-package evidence without claiming CUDA Graph use
-3. return the exact protected CUDA-JS pair to the CUDA-JS-Tensor SIMT executor
+2. preserve the integrated alpha.14 native prepared-DAG identity projection and exact installed-package evidence without claiming CUDA Graph use
+3. consume protected `main@3a29b65a4ae736923dbde432356a7aad31059fc0` from the CUDA-JS-Tensor SIMT executor
 4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
 ```
 
