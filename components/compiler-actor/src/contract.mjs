@@ -122,7 +122,7 @@ export function normalizeCompileOptions(value = {}, platform = process.platform,
   const languageStandard = value.languageStandard ?? 'c++17';
   if (!['c++17', 'c++20'].includes(languageStandard)) throw compilerError('COMPILER_STANDARD_INVALID', 'languageStandard must be c++17 or c++20.');
   const headerProfile = value.headerProfile ?? 'none';
-  if (!['none', 'cuda-cccl'].includes(headerProfile)) throw compilerError('COMPILER_HEADER_PROFILE_INVALID', 'headerProfile must be none or cuda-cccl.');
+  if (!['none', 'cuda-cccl', 'cuda-numeric', 'cuda-device'].includes(headerProfile)) throw compilerError('COMPILER_HEADER_PROFILE_INVALID', 'headerProfile must be none, cuda-cccl, cuda-numeric, or cuda-device.');
   const fmad = value.fmad ?? false;
   const deviceAsDefaultExecutionSpace = value.deviceAsDefaultExecutionSpace ?? false;
   const relocatableDeviceCode = output === 'ptx' ? value.relocatableDeviceCode ?? false : false;
@@ -304,13 +304,14 @@ function providerIdentityForTarget(provider, operation, architecture) {
 
 export function compileIdentity(request, provider) {
   const { headerProfiles, baseProvider } = providerIdentityForTarget(provider, 'compile', request.options.architecture);
-  const selectedHeaderProfile = request.options.headerProfile === 'cuda-cccl' ? headerProfiles?.cudaCccl : null;
-  if (request.options.headerProfile === 'cuda-cccl' && !selectedHeaderProfile) throw compilerError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'The selected compiler header profile is unavailable.');
-  const conflictingHeader = selectedHeaderProfile && request.headers.find((header) => selectedHeaderProfile.roots.some((root) => header.name === root || header.name.startsWith(`${root}/`)));
+  const profileKey = { 'cuda-cccl': 'cudaCccl', 'cuda-numeric': 'cudaNumeric', 'cuda-device': 'cudaDevice' }[request.options.headerProfile] ?? null;
+  const selectedHeaderProfile = profileKey ? headerProfiles?.[profileKey] : null;
+  if (profileKey && !selectedHeaderProfile) throw compilerError('COMPILER_HEADER_PROFILE_UNAVAILABLE', 'The selected compiler header profile is unavailable.');
+  const conflictingHeader = selectedHeaderProfile && request.headers.find((header) => (selectedHeaderProfile.roots ?? []).some((root) => header.name === root || header.name.startsWith(`${root}/`)) || (selectedHeaderProfile.files ?? []).includes(header.name));
   if (conflictingHeader) throw compilerError('COMPILER_HEADER_PROFILE_CONFLICT', 'Caller headers cannot use a logical name owned by the selected compiler header profile.', { header: conflictingHeader.name });
   return {
     schemaVersion: 1,
-    contractVersion: request.output === 'lto-ir' ? 'SPEC-0012-v1' : request.options.relocatableDeviceCode ? 'SPEC-0010-v1' : selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
+    contractVersion: request.output === 'lto-ir' ? 'SPEC-0012-v1' : request.options.relocatableDeviceCode ? 'SPEC-0010-v1' : ['cuda-numeric', 'cuda-device'].includes(request.options.headerProfile) ? 'SPEC-0030-v1' : selectedHeaderProfile ? 'SPEC-0009-v1' : 'SPEC-0006-v1',
     operation: 'compile',
     targetPolicy: CUDA_TARGET_POLICY_IDENTITY,
     platform: provider.platform,

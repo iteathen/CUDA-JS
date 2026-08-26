@@ -382,6 +382,26 @@
       "reuse_disposition": "normative package-management reference; no implementation reuse"
     },
     {
+      "id": "NVIDIA-CUDA-MATH-13.3-DENSE-NUMERIC",
+      "kind": "primary",
+      "project": "NVIDIA CUDA Math API",
+      "revision": "CUDA Toolkit 13.3/current mathematical, half and bfloat16 documentation plus exact installed headers inspected 2026-08-26",
+      "license": "NVIDIA documentation terms; installed toolkit headers remain separately licensed system inputs",
+      "locations": [
+        "https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html",
+        "https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/group__CUDA__MATH____HALF__ARITHMETIC.html",
+        "https://docs.nvidia.com/cuda/cuda-math-api/cuda_math_api/group__CUDA__MATH____BFLOAT16__MISC.html"
+      ],
+      "verified_uses": [
+        "cuda_fp16.h and cuda_bf16.h own the provider half and bfloat16 scalar definitions",
+        "named scalar conversion and arithmetic intrinsics provide explicit round-to-nearest behavior used by SPEC-0030 lowering",
+        "half and bfloat NaN-propagating min/max and elementary math remain provider semantics rather than JavaScript approximations",
+        "double, half and bfloat special values and signed-zero behavior require explicit contract tests and exact-profile evidence",
+        "trusted header identity belongs to CompilerActor and is not an ambient consumer include path"
+      ],
+      "reuse_disposition": "normative dense-numeric semantic and exact installed-header input; no NVIDIA header or binary redistribution"
+    },
+    {
       "id": "NVIDIA-CUBLAS-13.3-NN-BOUNDARY",
       "kind": "primary",
       "project": "NVIDIA cuBLAS",

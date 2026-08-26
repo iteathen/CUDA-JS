@@ -20,6 +20,8 @@
 
 **Amended:** 2026-08-26 — accepted SPEC-0023/SPEC-0029 add one lazy opaque cuBLASLt adapter and bounded f32 row-major matmul plan through typed views and the existing operation owner. Package identity advances additively to `0.1.0-alpha.12`; public API schema remains 1. Other providers, dtypes/layouts, tensor semantics, Linux qualification, and performance remain outside the claim.
 
+**Amended:** 2026-08-26 — accepted SPEC-0030 adds the dense numeric Device-JS contract and exact trusted `cuda-numeric`/`cuda-device` compiler profiles without adding an export. Package identity advances additively to `0.1.0-alpha.13`; public API schema remains 1. Legacy Device-JS identity/bytes remain exact, and tensor semantics/cores, fast math, other native profiles, and performance remain outside the claim.
+
 ## Authorization and bounded outcome
 
 The project owner authorized continued Windows-first implementation, retained Linux preparation, publication through a protected pull request, and self-merge after required checks pass. This specification authorizes CJS-F8: an installable no-addon Node package, one safe asynchronous public facade, exact compatibility metadata, portable package conformance, and an unrelated synthetic consumer.

@@ -6,7 +6,7 @@
 
 **Date:** 2026-08-26
 
-**Exact input:** protected `main@1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3`, `cuda-js@0.1.0-alpha.11`
+**Exact input:** protected `main@2da65ff2e4287450171c477031dd380a21fa095f`, `cuda-js@0.1.0-alpha.12`
 
 ## Objective and authority
 
@@ -15,7 +15,8 @@ Supply four generic CUDA-JS mechanisms needed by CUDA-JS-Tensor without importin
 1. public typed bounded device views;
 2. typed device-callable library composition;
 3. prepared finite operation DAGs;
-4. context-bound CUDA library adapters, beginning with a bounded cuBLASLt profile.
+4. context-bound CUDA library adapters, beginning with a bounded cuBLASLt profile;
+5. an additive dense numeric Device-JS profile for the already public `f64`/`f16`/`bf16` ABI kinds.
 
 The project owner explicitly authorized implementation of broadly reusable primitives and selected CUDA-JS-Tensor as a separate public repository. `the_restaurant` integration is deferred and is not an input, dependency, write surface, or evidence source for this plan.
 
@@ -42,7 +43,8 @@ Disposition: **proceed as four serial focus branches**, accepting and implementi
 | `CJS-TENSOR-VIEW-001` | Public opaque contiguous typed-view capability | Integrated on PR #134 / `main@991330ffda926e052c857cd6a3f5bdcc37f47034` | Accepted SPEC-0021 component | Installed consumer can create, inspect, use and close a view through package exports; parent/view/operation leases and range/access failures are exact. Falsified by pointer/token escape, unbounded launch use, or cleanup ambiguity. |
 | `CJS-DEVICE-LIB-002` | Typed device-callable module/library composition | Integrated on PR #136 / `main@9726898d728fc6e1f1baabb5a1ddc67808549e84`; native qualification remains on #135 | SPEC-0010/SPEC-0012/SPEC-0013/SPEC-0028 | Two unrelated consumers compose declared device functions without CUDA source or private imports; exact header/module/compiler/cache identity and lifecycle fail closed. |
 | `CJS-PREPARED-DAG-003` | Immutable finite prepared operation DAG baseline | Integrated on PR #137 / `main@1ef0d0c7e1466ed6ea0e99c29e95e647f9d1c9f3`; native CUDA Graph realization remains on #85 | Accepted SPEC-0020 semantic baseline over SPEC-0016/SPEC-0018/SPEC-0021 | Canonical bounded kernel DAGs cross the DriverActor boundary once, preserve ordinary-operation meaning, return one opaque operation per submit, and retain exact dependency/binding/lifecycle truth. CUDA Graph realization remains proposal-only. |
-| `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Implementation/evidence candidate on `codex/context-bound-library-adapters` / issue #90 | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
+| `CJS-LIB-ADAPTER-004` | Context-bound provider framework and cuBLASLt first profile | Integrated on PR #138 / `main@2da65ff2e4287450171c477031dd380a21fa095f`; issue #90 closed | Public views and operation lifecycle | Generic provider/handle/workspace/operation lifecycle is accepted first; cuBLASLt GEMM then matches an independent oracle without exposing tensor semantics or native handles. |
+| `CJS-DEVICE-NUMERIC-005` | Additive dense numeric Device-JS profile | Active on issue #139 under accepted SPEC-0030 | SPEC-0013, SPEC-0021, SPEC-0028 and exact compiler header ownership | Legacy Device-JS bytes/identity remain exact; `f64`/`f16`/`bf16` pointers, locals, functions, kernel scalars, exact casts and special-value math compile through public contracts; two unrelated installed consumers and an independent native oracle pass. |
 
 Only one shared contract changes at a time. A head, accepted contract, provider identity, or public package revision change invalidates affected downstream evidence.
 
@@ -67,7 +69,7 @@ Validation: pure topology/identity controls, execution/DriverActor protocol and 
 
 Integrated on protected main through PR #137. Issue #85 now owns native semantic parity, optional CUDA Graph realization, later node/update profiles, and performance methodology rather than the completed semantic kernel-DAG baseline.
 
-## Current execution packet: `CJS-LIB-ADAPTER-004`
+## Completed execution packet: `CJS-LIB-ADAPTER-004`
 
 Owned operation: accept the generic context-bound provider framework and one concrete cuBLASLt f32 row-major matmul child without importing tensor, NN, training, or application policy.
 
@@ -87,6 +89,31 @@ Falsifier: eager provider dependency, a second scheduler/completion owner, publi
 Rollback: retain accepted typed views, prepared execution, and ordinary kernels while removing the SPEC-0029 child; the accepted SPEC-0023 framework may remain only if another concrete finite child still falsifies it.
 
 Validation: exact Node 26.7.0 portable contract/negative/package tests; selected provider/header identity; independent C++ ABI/layout/numerical oracle; public native parity and teardown on the same profile; missing/wrong-provider controls; full repository verification; exact-head author review; protected PR integration; issue and cleanup reconciliation.
+
+Integrated on protected main through PR #138. Issue #90 is closed. The exact reviewed tree remains preserved by the protected squash merge; Linux, other providers/dtypes/layouts, tensor semantics and performance remain separately gated.
+
+## Current execution packet: `CJS-DEVICE-NUMERIC-005`
+
+Owned operation: implement accepted SPEC-0030 as one additive Device-JS/compiler-profile change without importing tensor operations or application policy.
+
+Expected effects:
+
+- unchanged legacy Device-JS requests retain their exact contract, generated bytes and identity;
+- dense requests admit `f64`, `f16` and `bf16` metadata, pointers, locals, device calls and kernel ABI kinds;
+- exact constructors, casts, arithmetic, comparison, special constants, abs/NaN classification and explicit numeric versus NaN-propagating min/max lower through pinned CUDA 13.3 semantics;
+- `cuda-numeric` and composite `cuda-device` virtual-header profiles are verified before cache lookup and compose naturally with scoped atomics;
+- package declarations/compatibility and installed consumers expose the generic mechanism only;
+- native qualification uses one exact public-path fixture, an independent oracle and terminal cleanup on the recorded Windows profile, without promoting Linux or performance.
+
+Current evidence: focused compiler/translator tests, both unrelated installed portable consumers, documentation validation, the full exact-Node repository gate, F8 package verification, and complete non-independent author review pass on the frozen candidate tree. The installed-package Windows CUDA 13.3/compute_75/GTX 1660 Ti fixture matches a separately compiled CUDA C++ oracle for mixed `f64`/`f16`/`bf16` values, casts, arithmetic, signed zero, NaN propagation and math, with graceful CompilerActor/DriverActor teardown and zero live/orphaned resources. The oracle exposed and caused correction of operand-order-dependent signed-zero lowering before acceptance. Independent review is waived under the documented sole-maintainer exception; protected integration and issue closure remain pending.
+
+Non-goals: tensor shapes/operations, executor generation, NN/training/search policy, new atomics, vectors, fast math, FP8, CUDA Graphs, arbitrary headers/options or broader support claims.
+
+Falsifier: any changed legacy identity/byte fixture; ambient header discovery; implicit `f32` approximation presented as half/bfloat semantics; unbounded or consumer-owned CUDA; new-kind atomic admission; incompatible profile reaching CompilerActor; or native results without independent expected values and cleanup.
+
+Rollback: remove the additive SPEC-0030 contract and numeric header profiles while retaining SPEC-0021 public ABI/views, legacy SPEC-0013 Device-JS and all integrated prerequisite branches.
+
+Validation: focused translator/header/profile/facade/package tests; legacy golden identity/byte controls; two unrelated installed numerical consumers; exact Node 26.7.0 full verification; independent native mixed-dtype oracle/public fixture; exact-head author review; protected PR integration; issue and cleanup reconciliation.
 
 ## Cleanup and continuation
 

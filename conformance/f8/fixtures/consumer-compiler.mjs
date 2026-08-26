@@ -9,6 +9,7 @@ assert.equal(compatibilitySubpath.capabilities.ptxRelocatableDeviceCode, 'typed-
 assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 'typed-lto-ir']);
 assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
 assert.equal(compatibilitySubpath.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin');
+assert.equal(compatibilitySubpath.capabilities.deviceJsDenseNumeric, 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers');
 
 const runtime = await openCudaRuntimeForTesting({ compiler: true });
 const source = 'extern "C" __global__ void portable_consumer() {}\n';
@@ -32,10 +33,24 @@ const devicePublication = await compileDeviceProgram(runtime, {
   ], returns: 'void' }],
   compile: { architecture: 'compute_120', headerProfile: 'cuda-cccl' },
 });
+const denseNumeric = await compileDeviceProgram(runtime, {
+  source: 'function dense(out64, out16, outBf16, x64, x16, xBf16) { out64[gpu.u32(0)] = gpu.math.sqrt(x64); out16[gpu.u32(0)] = gpu.math.minimum(x16, gpu.f16.positiveInfinity()); outBf16[gpu.u32(0)] = gpu.math.maximum(xBf16, gpu.bf16.negativeInfinity()); }',
+  functions: [{ name: 'dense', kind: 'kernel', parameters: [
+    { name: 'out64', type: 'ptr<f64>' }, { name: 'out16', type: 'ptr<f16>' }, { name: 'outBf16', type: 'ptr<bf16>' },
+    { name: 'x64', type: 'f64' }, { name: 'x16', type: 'f16' }, { name: 'xBf16', type: 'bf16' },
+  ], returns: 'void' }],
+  compile: { architecture: 'compute_120' },
+});
 const deviceLibrary = await compileDeviceLibrary(runtime, {
   source: 'function combine(x, y) { return x + y; }',
   functions: [{ name: 'combine', kind: 'device', parameters: [{ name: 'x', type: 'u32' }, { name: 'y', type: 'u32' }], returns: 'u32' }],
   exports: ['combine'],
+  compile: { architecture: 'compute_120' },
+});
+const denseDeviceLibrary = await compileDeviceLibrary(runtime, {
+  source: 'function affine(x, scale, bias) { return (x * scale) + bias; }',
+  functions: [{ name: 'affine', kind: 'device', parameters: [{ name: 'x', type: 'f16' }, { name: 'scale', type: 'f16' }, { name: 'bias', type: 'f16' }], returns: 'f16' }],
+  exports: ['affine'],
   compile: { architecture: 'compute_120' },
 });
 const composedFirst = await compileDeviceProgram(runtime, {
@@ -65,11 +80,16 @@ assert.equal(deviceJs.compiler.artifact.format, 'ptx');
 assert.equal(deviceJs.compiler.artifact.architecture, 'compute_120');
 assert.equal(devicePublication.deviceProgram.contract, deviceJs.deviceProgram.contract);
 assert.equal(devicePublication.compiler.artifact.format, 'ptx');
+assert.match(denseNumeric.deviceProgram.contract, /SPEC-0030-dense-numeric-v1$/u);
+assert.equal(denseNumeric.compiler.headerProfile, 'cuda-numeric');
+assert.equal(denseNumeric.compiler.artifact.format, 'ptx');
 assert.equal(deviceLibrary.library.artifact.relocatableDeviceCode, true);
+assert.match(denseDeviceLibrary.library.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0028-device-library-v1$/u);
+assert.equal(denseDeviceLibrary.compiler.headerProfile, 'cuda-numeric');
 assert.equal(composedFirst.linker.artifact.format, 'cubin');
 assert.equal(composedSecond.linker.artifact.format, 'cubin');
 assert.notEqual(composedFirst.deviceProgram.sha256, composedSecond.deviceProgram.sha256);
-for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact, deviceLibrary.library.artifact, composedFirst.linker.artifact, composedSecond.linker.artifact]) {
+for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact, denseNumeric.compiler.artifact, deviceLibrary.library.artifact, denseDeviceLibrary.library.artifact, composedFirst.linker.artifact, composedSecond.linker.artifact]) {
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/);
 }
 assert.notEqual(compiled.cache.key, relocatable.cache.key);
@@ -93,7 +113,9 @@ console.log(JSON.stringify({
   deviceJs: deviceJs.compiler.artifact.sha256,
   deviceJsProgram: deviceJs.deviceProgram.sha256,
   devicePublication: devicePublication.deviceProgram.sha256,
+  denseNumeric: denseNumeric.deviceProgram.sha256,
   deviceLibrary: deviceLibrary.library.sha256,
+  denseDeviceLibrary: denseDeviceLibrary.library.sha256,
   composedFirst: composedFirst.deviceProgram.sha256,
   composedSecond: composedSecond.deviceProgram.sha256,
   deviceJsParser: deviceJs.deviceProgram.parser,

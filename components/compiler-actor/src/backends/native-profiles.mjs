@@ -106,6 +106,7 @@ async function verifiedProfile({
     toolkitRoot,
     nvrtcPath: providerPaths.nvrtc,
     nvJitLinkPath: providerPaths.nvJitLink,
+    includeRoot: includeDirectory,
     ccclRoot,
     claim,
     cleanupClaim,

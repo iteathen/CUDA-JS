@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.12",
+    "version": "0.1.0-alpha.13",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -67,13 +67,16 @@
     "compiler": "optional-nvrtc-13.3",
     "compilerHeaderProfiles": {
       "none": "default",
-      "cuda-cccl": "exact-manifest-verified-cuda-13.3-windows-qualified-linux-source-unqualified"
+      "cuda-cccl": "exact-manifest-verified-cuda-13.3-windows-qualified-linux-source-unqualified",
+      "cuda-numeric": "exact-manifest-verified-cuda-13.3-f64-f16-bf16-windows-qualified-linux-source-unqualified",
+      "cuda-device": "exact-composite-cuda-cccl-plus-cuda-numeric-windows-qualified-linux-source-unqualified"
     },
     "compilerOutputFormats": ["ptx", "lto-ir"],
     "ptxRelocatableDeviceCode": "typed-boolean-default-false",
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
     "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1",
+    "deviceJsDenseNumeric": "f64-f16-bf16-exact-casts-special-values-manifest-verified-headers",
     "deviceJsLibraries": "typed-leaf-libraries-explicit-aliased-imports-rdc-or-lto-final-cubin",
     "deviceJsParser": {
       "name": "acorn",
@@ -108,6 +111,7 @@
     "SPEC-0018 capacity-two scheduling and SPEC-0019 internal-pinned async transfers have exact Windows and installed-package evidence only for the recorded Node/Driver/GPU profile; the compatibility default remains one pending operation.",
     "SPEC-0014 publication mailboxes have exact Windows and installed-package evidence only for privately mapped named u32 lanes, one live GPU operation lease, and system-scope acquire/release publication on the recorded Node/Driver/GPU profile.",
     "SPEC-0013 Device-JS plus the scoped atomic-observation and device-publication children is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
+    "SPEC-0030 adds an exact additive Device-JS dense numeric profile for f64/f16/bf16 pointers, locals, device functions, kernel scalars, casts, arithmetic and special-value math. Exact installed-package Windows CUDA 13.3 header/compiler/compute_75/GTX 1660 Ti numerical-oracle and cleanup evidence does not qualify Linux, other providers/targets, tensor operations, tensor cores, fast math, or performance.",
     "SPEC-0022 device publication has exact Windows installed-package evidence only for naturally aligned u32/u64 device-scope release/acquire readiness and one immutable multiword payload on the recorded profile; freshness, progress, generation policy and queue correctness remain excluded.",
     "SPEC-0017 device selection is implemented in the portable/software/package path. Default-device compatibility and explicit selector orchestration are mock-qualified only; native default/explicit selection and distinct-device behavior remain unqualified until exact independent evidence exists.",
     "SPEC-0020 immutable kernel-only prepared operation DAGs are implemented through the public portable/package path with canonical identity, replay, whole-DAG operation lifecycle, and a single-stream semantic realization. CUDA Graph realization, native qualification, and performance benefit remain unimplemented or unqualified.",

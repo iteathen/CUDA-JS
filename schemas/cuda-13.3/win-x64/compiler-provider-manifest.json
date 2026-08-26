@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "profile": "cuda-13.3-windows-x64-compiler",
   "node": "v26.7.0",
   "toolkitVersion": "13.3",
@@ -87,6 +87,91 @@
       "fileCount": 1166,
       "byteLength": 8527126,
       "sha256": "e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c"
+    },
+    "cudaCcclNv": {
+      "profile": "cuda-13.3-cccl-nv-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": ["nv"],
+      "fileCount": 3,
+      "byteLength": 43086,
+      "sha256": "21727c2c9b50af2d0912e6ba8c2c1e78b5ba6a28c3a11bf8db1d87ce3e501cdc"
+    },
+    "cudaNumericBase": {
+      "profile": "cuda-13.3-dense-numeric-base-v1",
+      "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+      "roots": [],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 15,
+      "byteLength": 1726046,
+      "sha256": "8c0fa0c3d5a12eba3834564951a56725f97b2664e561b2b3a472c1483746d5c5"
+    },
+    "cudaNumeric": {
+      "profile": "cuda-13.3-dense-numeric-v1",
+      "algorithm": "sha256-header-profile-components-v1",
+      "components": ["cudaCcclNv", "cudaNumericBase"],
+      "roots": ["nv"],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 18,
+      "byteLength": 1769132,
+      "sha256": "d403c1aac7e0cba6b99deeabb3de71e74a91db5e9c9cfdab444f14eb7dc71b78"
+    },
+    "cudaDevice": {
+      "profile": "cuda-13.3-device-headers-v1",
+      "algorithm": "sha256-header-profile-components-v1",
+      "components": ["cudaCccl", "cudaNumericBase"],
+      "roots": ["cuda", "nv"],
+      "files": [
+        "builtin_types.h",
+        "crt/host_defines.h",
+        "cuda_bf16.h",
+        "cuda_bf16.hpp",
+        "cuda_device_runtime_api.h",
+        "cuda_fp16.h",
+        "cuda_fp16.hpp",
+        "cuda_runtime_api.h",
+        "device_types.h",
+        "driver_types.h",
+        "surface_types.h",
+        "texture_types.h",
+        "vector_functions.h",
+        "vector_functions.hpp",
+        "vector_types.h"
+      ],
+      "fileCount": 1181,
+      "byteLength": 10253172,
+      "sha256": "808866ffe4425d37f91add4eb6a5957ceed1134a483aa1eced3d614b42881687"
     }
   },
   "claim": "Exact reviewed local CUDA 13.3 Windows x64 compiler provider and documented target-capability profile only."

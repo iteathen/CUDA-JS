@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { CUDA_JS_COMPATIBILITY, inspectCudaHost } from 'cuda-js';
+import { compileDeviceProgram, CUDA_JS_COMPATIBILITY, inspectCudaHost } from 'cuda-js';
 import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from 'cuda-js/testing';
 
 const ptx = new TextEncoder().encode('.version 8.0\n.target sm_75\n.address_size 64\n');
@@ -14,6 +14,7 @@ assert.equal(CUDA_JS_COMPATIBILITY.capabilities.publicationMailboxes, 'private-m
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDags, 'bounded-kernel-dag-immutable-bindings-single-stream-semantic-replay');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.cublasLtF32Matmul, 'optional-row-major-contiguous-typed-views-explicit-bounded-workspace');
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
+assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceJsDenseNumeric, 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers');
 assert.equal(inspectCudaHost().compatibility, CUDA_JS_COMPATIBILITY);
 
 const deviceSnapshot = await discoverCudaDevicesForTesting([
@@ -25,6 +26,13 @@ const selectedDescription = await selectedRuntime.describe();
 assert.equal(selectedDescription.device.architecture.class, 'cc-8.9');
 assert.equal(selectedDescription.device.target.compile, 'compute_89');
 assert.equal((await selectedRuntime.compile({ source: 'extern "C" __global__ void selected() {}\n' })).artifact.architecture, 'compute_89');
+const selectedDenseNumeric = await compileDeviceProgram(selectedRuntime, {
+  source: 'function selectedDense(out, x) { out[gpu.u32(0)] = gpu.math.maximum(gpu.math.sqrt(x), gpu.f64.negativeInfinity()); }',
+  functions: [{ name: 'selectedDense', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f64>' }, { name: 'x', type: 'f64' }], returns: 'void' }],
+});
+assert.equal(selectedDenseNumeric.compiler.artifact.architecture, 'compute_75');
+assert.equal(selectedDenseNumeric.compiler.headerProfile, 'cuda-numeric');
+assert.match(selectedDenseNumeric.deviceProgram.contract, /SPEC-0030-dense-numeric-v1$/u);
 assert.equal(JSON.stringify(selectedDescription).includes('ordinal'), false);
 assert.equal((await selectedRuntime.close()).graceful, true);
 
@@ -172,6 +180,7 @@ console.log(JSON.stringify({
   preparedOperationDagLifecycle: true,
   cublasLtLifecycle: true,
   deviceSelectionLifecycle: true,
+  denseNumeric: selectedDenseNumeric.deviceProgram.sha256,
   typedViewLifecycle: true,
   graceful: true,
 }));

@@ -79,7 +79,7 @@ export interface DeviceCompileOptions {
   languageStandard?: 'c++17' | 'c++20';
   fmad?: boolean;
   deviceAsDefaultExecutionSpace?: boolean;
-  headerProfile?: 'none' | 'cuda-cccl';
+  headerProfile?: 'none' | 'cuda-cccl' | 'cuda-numeric' | 'cuda-device';
   relocatableDeviceCode?: boolean;
 }
 
@@ -357,7 +357,7 @@ export interface CudaRuntime {
   close(): Promise<Readonly<{ schemaVersion: 1; graceful: boolean; restartRequired: boolean; state: string; compiler: unknown; driver: unknown }>>;
 }
 
-export type DeviceJsScalarType = 'bool' | 'u32' | 'i32' | 'u64' | 'f32';
+export type DeviceJsScalarType = 'bool' | 'u32' | 'i32' | 'u64' | 'f32' | 'f64' | 'f16' | 'bf16';
 export type DeviceJsPointerType = `ptr<${DeviceJsScalarType}>`;
 export type DeviceJsMailboxType = 'mailbox<host-to-device,u32>' | 'mailbox<device-to-host,u32>';
 export type DeviceJsType = DeviceJsScalarType | DeviceJsPointerType | DeviceJsMailboxType;
@@ -396,7 +396,7 @@ export interface DeviceJsLibraryExport {
 
 export interface DeviceJsLibrary {
   readonly schemaVersion: 1;
-  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1';
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0028-device-library-v1';
   readonly sha256: string;
   readonly format: 'ptx' | 'lto-ir';
   readonly architecture: string;
@@ -425,7 +425,7 @@ export interface DeviceJsImport {
 }
 
 export interface DeviceJsProgramDescriptor {
-  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1';
+  readonly contract: 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1' | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0028-device-library-v1';
   readonly sha256: string;
   readonly parser: Readonly<{ name: 'acorn'; version: string }>;
   readonly functions: readonly Readonly<Record<string, unknown>>[];

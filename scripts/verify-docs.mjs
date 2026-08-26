@@ -61,6 +61,7 @@ const required = [
   'docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md',
   'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
   'docs/specs/SPEC-0028-device-js-library-composition.md',
+  'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
   'docs/specs/SPEC-0027-nn-extension-foundation.md',
   'docs/research/README.md', 'docs/research/2026-08-10-technical-assumption-audit.md',
   'docs/research/2026-08-10-node-ffi-cuda-landscape.md',

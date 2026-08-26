@@ -3,12 +3,12 @@
   "component": {
     "id": "runtime.compiler-actor",
     "name": "CUDA CompilerActor",
-    "status": "accepted-f9-windows-linux-source-unqualified",
+    "status": "accepted-f9-plus-spec0030-windows-qualified-linux-source-unqualified",
     "product_area": "components",
     "path": "components/compiler-actor",
     "purpose": "Provide bounded typed NVRTC compilation, nvJitLink composition, validated artifact caching, and copied PTX/cubin handoff from a separate Worker.",
     "public_contracts": ["index.mjs"],
-    "allowed_dependencies": ["node-standard-library", "node-ffi-26.1-or-later", "runtime.cuda-target", "canonical-cuda-13.3-nvrtc", "canonical-cuda-13.3-nvjitlink", "manifest-verified-cuda-13.3-cccl-virtual-headers"],
+    "allowed_dependencies": ["node-standard-library", "node-ffi-26.1-or-later", "runtime.cuda-target", "canonical-cuda-13.3-nvrtc", "canonical-cuda-13.3-nvjitlink", "manifest-verified-cuda-13.3-cccl-virtual-headers", "manifest-verified-cuda-13.3-numeric-virtual-headers"],
     "forbidden_dependencies": ["arbitrary-library", "arbitrary-option", "source-file", "raw-public-pointer", "driver-context", "consumer-semantics", "concurrent-compile"],
     "validation": ["npm run f6:unit", "npm run f6:native", "npm run f7", "npm run f9"],
     "owner": "runtime.compiler-actor",
@@ -17,7 +17,7 @@
       "owned_invariant": "Only canonical verified providers and normalized typed inputs enter native compilation, and no native capability crosses the Worker boundary.",
       "public_ports": ["openCompilerRuntime", "CompilerRuntimeError", "normalizeLinkRequest"],
       "injected_dependencies": ["private backend profile", "cache directory", "cache mode"],
-      "adapter_boundaries": ["shared native compiler engine", "canonical Windows provider profile", "canonical Linux x86-64 provider profile", "platform-neutral compiler mock", "validated filesystem cache"],
+      "adapter_boundaries": ["shared native compiler engine", "canonical Windows provider profile", "canonical Linux x86-64 provider profile", "finite trusted-header and composite profiles", "platform-neutral compiler mock", "validated filesystem cache"],
       "simplest_sufficient_total_system": "One facade, one serialized Worker, two verified provider libraries, local program/link lifetimes, and one validated content-addressed cache."
     }
   }

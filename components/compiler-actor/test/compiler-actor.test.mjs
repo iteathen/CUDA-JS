@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertCompilerPublicRecord, combineCompilerCleanupFailures, compileIdentity, COMPILER_RUNTIME_TEST, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
+import { assertCompilerPublicRecord, combineCompilerCleanupFailures, compileIdentity, COMPILER_RUNTIME_TEST, composeHeaderProfiles, inventoryHeaderProfile, linkIdentity, normalizeCompileOptions, normalizeCompileRequest, normalizeLinkRequest, openCompilerRuntimeForTesting, providerTargetProfile, snapshotHeaderProfile } from '../testing.mjs';
 import { CompilerRuntimeError, openCompilerRuntime } from '../index.mjs';
 import { resolveLinuxNativeProfile, resolveWindowsNativeProfile } from '../src/backends/native-profiles.mjs';
 import { selectNativeBackend } from '../src/compiler-runtime.mjs';
@@ -106,6 +107,8 @@ test('typed compiler and linker contracts normalize deterministically and reject
   ]);
   assert.equal(normalizeCompileOptions({}, 'win32').headerProfile, 'none');
   assert.equal(normalizeCompileOptions({ headerProfile: 'cuda-cccl' }, 'win32').headerProfile, 'cuda-cccl');
+  assert.equal(normalizeCompileOptions({ headerProfile: 'cuda-numeric' }, 'win32').headerProfile, 'cuda-numeric');
+  assert.equal(normalizeCompileOptions({ headerProfile: 'cuda-device' }, 'win32').headerProfile, 'cuda-device');
   assert.throws(() => normalizeCompileOptions({ headerProfile: 'ambient-path' }, 'win32'), { code: 'COMPILER_HEADER_PROFILE_INVALID' });
   assert.deepEqual(normalizeCompileOptions({}, 'linux').native.slice(-1), ['--modify-stack-limit=false']);
   const request = normalizeCompileRequest({ source, headers: [{ name: 'z.h', source: 'z' }, { name: 'a.h', source: 'a' }] }, 'linux');
@@ -119,7 +122,11 @@ test('typed compiler and linker contracts normalize deterministically and reject
     identity: {
       profile: 'fixture', nvrtc: null, nvrtcBuiltins: null, nvJitLink: null,
       targetCapabilities: NATIVE_TARGET_CAPABILITIES,
-      headerProfiles: { cudaCccl: { profile: 'fixture-cccl', algorithm: 'fixture', roots: ['cuda', 'nv'], fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) } },
+      headerProfiles: {
+        cudaCccl: { profile: 'fixture-cccl', algorithm: 'fixture', roots: ['cuda', 'nv'], fileCount: 1, byteLength: 1, sha256: '0'.repeat(64) },
+        cudaNumeric: { profile: 'fixture-numeric', algorithm: 'fixture', roots: ['nv'], files: ['cuda_fp16.h', 'cuda_bf16.h'], fileCount: 3, byteLength: 3, sha256: '1'.repeat(64) },
+        cudaDevice: { profile: 'fixture-device', algorithm: 'fixture', roots: ['cuda', 'nv'], files: ['cuda_fp16.h', 'cuda_bf16.h'], fileCount: 4, byteLength: 4, sha256: '2'.repeat(64) },
+      },
     },
   };
   const defaultIdentity = compileIdentity(normalizeCompileRequest({ source }, 'win32'), provider);
@@ -130,6 +137,10 @@ test('typed compiler and linker contracts normalize deterministically and reject
   assert.equal(profiledIdentity.request.headerProfile, 'cuda-cccl');
   assert.throws(() => compileIdentity(normalizeCompileRequest({ source, headers: [{ name: 'cuda', source: 'shadow' }], options: { headerProfile: 'cuda-cccl' } }, 'win32'), provider), { code: 'COMPILER_HEADER_PROFILE_CONFLICT' });
   assert.throws(() => compileIdentity(normalizeCompileRequest({ source, headers: [{ name: 'nv', source: 'shadow' }], options: { headerProfile: 'cuda-cccl' } }, 'win32'), provider), { code: 'COMPILER_HEADER_PROFILE_CONFLICT' });
+  const numericIdentity = compileIdentity(normalizeCompileRequest({ source, options: { headerProfile: 'cuda-numeric' } }, 'win32'), provider);
+  assert.equal(numericIdentity.contractVersion, 'SPEC-0030-v1');
+  assert.throws(() => compileIdentity(normalizeCompileRequest({ source, headers: [{ name: 'cuda_fp16.h', source: 'shadow' }], options: { headerProfile: 'cuda-numeric' } }, 'win32'), provider), { code: 'COMPILER_HEADER_PROFILE_CONFLICT' });
+  assert.equal(compileIdentity(normalizeCompileRequest({ source, options: { headerProfile: 'cuda-device' } }, 'win32'), provider).contractVersion, 'SPEC-0030-v1');
   const linkedIdentity = linkIdentity(normalizeLinkRequest({ inputs: [new Uint8Array([1, 2, 3])] }), provider);
   assert.equal(Object.hasOwn(linkedIdentity.provider, 'headerProfiles'), false);
 });
@@ -166,7 +177,7 @@ test('exact CUDA 13.3 provider targets preflight every policy-admitted compile a
       targetCapabilities: NATIVE_TARGET_CAPABILITIES, headerProfiles: {},
     },
   };
-  assert.equal(compilerProviderManifest.schemaVersion, 3);
+  assert.equal(compilerProviderManifest.schemaVersion, 4);
   assert.equal(compilerProviderManifest.targetCapabilities.revision, 'cuda-13.3-documented-provider-targets-v1');
   assert.deepEqual(compilerProviderManifest.targetCapabilities.compile, NVRTC_COMPUTE_TARGETS);
   assert.deepEqual(compilerProviderManifest.targetCapabilities.link, NVJITLINK_SM_TARGETS);
@@ -280,6 +291,78 @@ test('trusted header profiles use deterministic nested-path identity and reject 
     await writeFile(path.join(directory, 'cuda', 'atomic'), Buffer.from([0]));
     await assert.rejects(snapshotHeaderProfile(directory, manifest), { code: 'COMPILER_HEADER_PROFILE_UNSAFE' });
     await assert.rejects(inventoryHeaderProfile(directory, ['cuda', 'missing']), { code: 'COMPILER_HEADER_PROFILE_MISSING' });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('trusted header profiles admit exact top-level files and deterministic composition', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'cuda-js-numeric-headers-'));
+  try {
+    await mkdir(path.join(directory, 'nv'));
+    await writeFile(path.join(directory, 'cuda_fp16.h'), 'half\n');
+    await writeFile(path.join(directory, 'cuda_bf16.h'), 'bfloat\n');
+    await writeFile(path.join(directory, 'nv', 'target'), 'target\n');
+
+    const numericInventory = await inventoryHeaderProfile(directory, [], ['cuda_fp16.h', 'cuda_bf16.h']);
+    const nvInventory = await inventoryHeaderProfile(directory, ['nv']);
+    assert.deepEqual(numericInventory.observed.files, ['cuda_fp16.h', 'cuda_bf16.h']);
+    assert.deepEqual(numericInventory.headers.map((header) => header.name), ['cuda_bf16.h', 'cuda_fp16.h']);
+
+    const numeric = await snapshotHeaderProfile(directory, { profile: 'numeric-base', ...numericInventory.observed });
+    const nv = await snapshotHeaderProfile(directory, { profile: 'nv-root', ...nvInventory.observed });
+    const components = [
+      { name: 'numeric', snapshot: numeric },
+      { name: 'nv', snapshot: nv },
+    ];
+    const digest = createHash('sha256');
+    for (const component of components) {
+      const name = Buffer.from(component.name, 'utf8');
+      const componentDigest = Buffer.from(component.snapshot.identity.sha256, 'ascii');
+      const header = Buffer.alloc(8);
+      header.writeUInt32LE(name.byteLength, 0);
+      header.writeUInt32LE(componentDigest.byteLength, 4);
+      digest.update(header).update(name).update(componentDigest);
+    }
+    const record = {
+      profile: 'numeric-composite',
+      algorithm: 'sha256-header-profile-components-v1',
+      components: ['numeric', 'nv'],
+      roots: ['nv'],
+      files: ['cuda_fp16.h', 'cuda_bf16.h'],
+      fileCount: 3,
+      byteLength: 19,
+      sha256: digest.digest('hex'),
+    };
+    const composite = composeHeaderProfiles(record, components);
+    assert.deepEqual(composite.headers.map((header) => header.name), ['cuda_bf16.h', 'cuda_fp16.h', 'nv/target']);
+    assert.deepEqual(composite.identity.components, ['numeric', 'nv']);
+    assert.throws(() => composeHeaderProfiles({ ...record, fileCount: 4 }, components), { code: 'COMPILER_HEADER_PROFILE_IDENTITY' });
+    assert.throws(() => composeHeaderProfiles({ ...record, components: ['numeric', 'numeric'] }, [components[0], { ...components[1], name: 'numeric' }]), { code: 'COMPILER_HEADER_PROFILE_MANIFEST' });
+    assert.throws(() => composeHeaderProfiles({ ...record, files: ['cuda_fp16.h'] }, components), { code: 'COMPILER_HEADER_PROFILE_MANIFEST' });
+    assert.throws(() => composeHeaderProfiles(record, [{ ...components[0], snapshot: { ...numeric, identity: { ...numeric.identity, sha256: 'invalid' } } }, components[1]]), { code: 'COMPILER_HEADER_PROFILE_MANIFEST' });
+    assert.throws(() => composeHeaderProfiles(record, [
+      { name: 'numeric', snapshot: numeric },
+      { name: 'nv', snapshot: numeric },
+    ]), { code: 'COMPILER_HEADER_PROFILE_MANIFEST' });
+
+    const duplicate = {
+      identity: { ...numeric.identity, sha256: 'f'.repeat(64) },
+      headers: numeric.headers,
+    };
+    const duplicateDigest = createHash('sha256');
+    for (const [name, snapshot] of [['numeric', numeric], ['nv', duplicate]]) {
+      const nameBytes = Buffer.from(name, 'utf8');
+      const componentDigest = Buffer.from(snapshot.identity.sha256, 'ascii');
+      const header = Buffer.alloc(8);
+      header.writeUInt32LE(nameBytes.byteLength, 0);
+      header.writeUInt32LE(componentDigest.byteLength, 4);
+      duplicateDigest.update(header).update(nameBytes).update(componentDigest);
+    }
+    assert.throws(() => composeHeaderProfiles({ ...record, sha256: duplicateDigest.digest('hex'), fileCount: 4, byteLength: 24 }, [
+      { name: 'numeric', snapshot: numeric },
+      { name: 'nv', snapshot: duplicate },
+    ]), { code: 'COMPILER_HEADER_PROFILE_MANIFEST' });
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

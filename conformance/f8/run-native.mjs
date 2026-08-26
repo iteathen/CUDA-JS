@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import { buildAndRunDenseNumericOracle } from './dense-numeric-oracle.mjs';
 import { consumersRoot, evidenceRoot, nativePackageEvidenceName, nativeProfile, packageRoot, repositoryRoot, sha256, sourceIdentity, writeEvidence } from './evidence.mjs';
 
 assert(['win32', 'linux'].includes(process.platform), 'F8 native package conformance requires Windows or native Linux.');
@@ -30,6 +31,7 @@ const prerequisitePath = path.join(repositoryRoot, 'build', 'f7', `${process.pla
 const prerequisite = JSON.parse(await readFile(prerequisitePath, 'utf8'));
 assert.equal(prerequisite.status, 'pass', 'F8 native package conformance requires passing F7 native evidence from the same workspace.');
 if (process.platform === 'linux') assert.equal(prerequisite.environment.host.osRelease, os.release(), 'F8L requires the same native Linux kernel as F7L.');
+const denseNumericOracle = await buildAndRunDenseNumericOracle();
 const directory = path.join(consumersRoot, `consumer-native-${nativeProfile}`);
 await rm(directory, { recursive: true, force: true });
 await mkdir(directory, { recursive: true });
@@ -39,6 +41,8 @@ await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-na
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-mailbox.mjs'), path.join(directory, 'mailbox-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-cublaslt.mjs'), path.join(directory, 'cublaslt-consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-dense-numeric.mjs'), path.join(directory, 'dense-numeric-consumer.mjs'));
+await writeFile(path.join(directory, 'dense-numeric-oracle.json'), `${JSON.stringify(denseNumericOracle.observation, null, 2)}\n`);
 await cp(path.join(repositoryRoot, 'conformance', 'f5', 'fixtures', 'vector-add.ptx.txt'), path.join(directory, 'vector-add.ptx.txt'));
 await cp(path.join(repositoryRoot, 'build', 'f5', `${process.platform}-${process.arch}`, 'native', 'native-capabilities.ptx'), path.join(directory, 'native-capabilities.ptx'));
 runNode([npmCli, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarball], directory);
@@ -73,6 +77,21 @@ assert.equal(deviceJsObservation.runtimeProfile.profile.nativeQualified, false);
 assert.equal(deviceJsObservation.runtimeProfile.compiler.provider.profile, nativeProfile === 'windows' ? 'cuda-13.3-windows-x64-compiler' : 'cuda-13.3-ubuntu-24.04-x64-compiler');
 assert.equal(deviceJsObservation.rejectionBeforeCompilerResources, true);
 assert.equal(deviceJsObservation.graceful, true);
+const denseNumericOutput = runNode(['--experimental-ffi', 'dense-numeric-consumer.mjs'], directory);
+const denseNumericObservation = JSON.parse(denseNumericOutput.split(/\r?\n/).at(-1));
+assert.deepEqual({
+  f64Bits: denseNumericObservation.f64Bits,
+  f16Bits: denseNumericObservation.f16Bits,
+  bf16Bits: denseNumericObservation.bf16Bits,
+  words: denseNumericObservation.words,
+}, {
+  f64Bits: denseNumericOracle.observation.f64Bits,
+  f16Bits: denseNumericOracle.observation.f16Bits,
+  bf16Bits: denseNumericOracle.observation.bf16Bits,
+  words: denseNumericOracle.observation.words,
+});
+assert.equal(denseNumericObservation.oracleIndependent, true);
+assert.equal(denseNumericObservation.graceful, true);
 const multiOperationOutput = runNode(['--experimental-ffi', 'multi-operation-consumer.mjs'], directory);
 const multiOperationObservation = JSON.parse(multiOperationOutput.split(/\r?\n/).at(-1));
 assert.equal(multiOperationObservation.producerPendingAfterObserver, true);
@@ -114,12 +133,15 @@ const target = await writeEvidence(nativePackageEvidenceName, {
     'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
     'docs/specs/SPEC-0022-device-publication-addendum.md',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
+    'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
     'docs/specs/SPEC-0014-long-lived-sideband.md',
     'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
     'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
     'components/runtime-facade/src/runtime.mjs',
     'conformance/f8/fixtures/consumer-native-vector.mjs',
     'conformance/f8/fixtures/consumer-native-device-js.mjs',
+    'conformance/f8/fixtures/consumer-native-dense-numeric.mjs',
+    'conformance/f8/native/dense-numeric-oracle.cu',
     'conformance/f8/fixtures/consumer-native-multi-operation.mjs',
     'conformance/f8/fixtures/consumer-native-mailbox.mjs',
     'conformance/f8/fixtures/consumer-native-cublaslt.mjs',
@@ -129,9 +151,11 @@ const target = await writeEvidence(nativePackageEvidenceName, {
   package: portable.package,
   observation,
   deviceJsObservation,
+  denseNumericOracle,
+  denseNumericObservation,
   multiOperationObservation,
   mailboxObservation,
   cublasLtObservation,
-  claimLimits: [`Exact installed ${nativeProfile} x64 Node 26.7.0 package and recorded Driver/GPU input profile only.`, 'The vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'Linux evidence remains unqualified until the complete exact Ubuntu chain is reviewed and promoted; no cross-platform, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
+  claimLimits: [`Exact installed ${nativeProfile} x64 Node 26.7.0 package and recorded Driver/GPU input profile only.`, 'The vector, async-transfer, and mailbox consumers retain the F5 independent native C oracle; dense f64/f16/bf16 Device-JS retains a separately compiled CUDA C++ numerical oracle; Device-JS release/acquire publication retains a separate CUDA-free protocol oracle and exact native multiword comparison.', 'The dense numeric result qualifies exact specified semantics on the recorded compiler/header/target/GPU profile; it makes no tensor-core, performance, fast-math, or broader-provider claim.', 'The device-publication claim covers same-device u32/u64 readiness and immutable payload visibility when acquire observes release; it does not claim universal scheduling progress, freshness, fairness, generation policy or queue correctness.', 'The mailbox claim is bounded to private mapped storage, named u32 lanes, one live operation lease, and system-scope acquire/release publication.', 'Linux evidence remains unqualified until the complete exact Ubuntu chain is reviewed and promoted; no cross-platform, performance, strict-JIT, process-isolation, registry-release, or production-stability claim.'],
 });
-console.log(`F8${nativeProfile === 'windows' ? 'W' : 'L'} installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, mailbox publication${nativeProfile === 'windows' ? ', and cuBLASLt matmul' : ''} evidence; evidence: ${target}`);
+console.log(`F8${nativeProfile === 'windows' ? 'W' : 'L'} installed-package native consumers passed with vector checksum ${observation.checksum}, source-only Device-JS device publication, dense f64/f16/bf16 oracle parity, mailbox publication${nativeProfile === 'windows' ? ', and cuBLASLt matmul' : ''} evidence; evidence: ${target}`);

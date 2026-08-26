@@ -1,6 +1,6 @@
 import { normalizeLinkRequest } from '../../compiler-actor/index.mjs';
 import { inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
-import { DEVICE_JS_LIBRARY_CONTRACT, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
+import { DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
 
 import { freezePublic, publicError } from './errors.mjs';
 
@@ -8,6 +8,7 @@ const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMPORT_LIMIT = 64;
 const LIBRARY_LIMIT = 32;
+const DEVICE_JS_LIBRARY_CONTRACTS = new Set([DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT]);
 
 function fail(code, message, details = {}) {
   throw Object.assign(new Error(message), { code, category: 'validation', details });
@@ -77,7 +78,7 @@ function validateExport(entry, librarySha256, index) {
 
 function validateLibrary(value, targetArchitecture) {
   if (!exactFields(value, ['architecture', 'artifact', 'contract', 'exports', 'format', 'schemaVersion', 'sha256'])
-      || value.schemaVersion !== 1 || value.contract !== DEVICE_JS_LIBRARY_CONTRACT || typeof value.sha256 !== 'string' || !SHA256.test(value.sha256)
+      || value.schemaVersion !== 1 || !DEVICE_JS_LIBRARY_CONTRACTS.has(value.contract) || typeof value.sha256 !== 'string' || !SHA256.test(value.sha256)
       || !['ptx', 'lto-ir'].includes(value.format) || typeof value.architecture !== 'string'
       || !Array.isArray(value.exports) || value.exports.length < 1 || value.exports.length > 64) fail('DEVICE_JS_LIBRARY_INVALID', 'Device-JS library record is invalid.');
   const exports = value.exports.map((entry, index) => validateExport(entry, value.sha256, index));
@@ -144,6 +145,7 @@ function normalizeImports(value, targetArchitecture) {
       parameters: exported.parameters,
       returns: exported.returns,
       librarySha256: library.sha256,
+      libraryContract: library.contract,
       exportName: exported.name,
       artifactSha256: library.artifact.sha256,
       format: library.format,

@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
+import { CUDA_SCALAR_TYPES, DENSE_NUMERIC_SCALARS, FLOAT_SCALARS, denseNumericPreludeLines, exactCastCode, isDenseNumericHelper, specialConstantCode } from './dense-numeric-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 1_048_576;
@@ -13,20 +14,15 @@ const PARAMETER_LIMIT = 64;
 const AST_NODE_LIMIT = 20_000;
 const AST_DEPTH_LIMIT = 128;
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const SCALARS = new Set(['bool', 'u32', 'i32', 'u64', 'f32']);
-const NUMERIC = new Set(['u32', 'i32', 'u64', 'f32']);
+const SCALARS = new Set(['bool', 'u32', 'i32', 'u64', 'f32', ...DENSE_NUMERIC_SCALARS]);
+const NUMERIC = new Set(['u32', 'i32', 'u64', 'f32', ...DENSE_NUMERIC_SCALARS]);
 const INTEGER = new Set(['u32', 'i32', 'u64']);
-const KERNEL_SCALARS = new Set(['u32', 'i32', 'u64', 'f32']);
+const FLOAT = new Set(FLOAT_SCALARS);
+const KERNEL_SCALARS = new Set(['u32', 'i32', 'u64', 'f32', ...DENSE_NUMERIC_SCALARS]);
 const COMPILE_FIELDS = new Set(['architecture', 'languageStandard', 'fmad', 'deviceAsDefaultExecutionSpace', 'headerProfile', 'relocatableDeviceCode']);
 const encoder = new TextEncoder();
 
-const CUDA_TYPES = Object.freeze({
-  bool: 'bool',
-  u32: 'unsigned int',
-  i32: 'int',
-  u64: 'unsigned long long',
-  f32: 'float',
-});
+const CUDA_TYPES = CUDA_SCALAR_TYPES;
 
 function fail(code, message, node = null, details = {}) {
   const location = node?.loc?.start ? { line: node.loc.start.line, column: node.loc.start.column } : {};
@@ -51,7 +47,7 @@ function assertIdentifier(value, label) {
 function parseType(value, { allowVoid = false, allowPointer = true } = {}) {
   if (allowVoid && value === 'void') return Object.freeze({ kind: 'void', text: 'void' });
   if (SCALARS.has(value)) return Object.freeze({ kind: 'scalar', scalar: value, text: value });
-  const match = allowPointer && typeof value === 'string' ? /^ptr<(bool|u32|i32|u64|f32)>$/.exec(value) : null;
+  const match = allowPointer && typeof value === 'string' ? /^ptr<(bool|u32|i32|u64|f32|f64|f16|bf16)>$/.exec(value) : null;
   if (match) return Object.freeze({ kind: 'pointer', scalar: match[1], text: value });
   const mailbox = typeof value === 'string' ? /^mailbox<(host-to-device|device-to-host),u32>$/.exec(value) : null;
   if (mailbox) return Object.freeze({ kind: 'mailbox', direction: mailbox[1], scalar: 'u32', text: value });
@@ -87,7 +83,7 @@ function normalizeCompile(value = {}) {
   const target = inspectCudaTarget(architecture, { expectedPrefix: 'compute' });
   if (!target.ok) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS architecture is not admitted by the canonical CUDA target policy.', { architecture: typeof architecture === 'string' ? architecture : null, reason: target.reason });
   if (!['c++17', 'c++20'].includes(languageStandard)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS languageStandard must be c++17 or c++20.');
-  if (!['none', 'cuda-cccl'].includes(headerProfile)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS headerProfile must be none or cuda-cccl.');
+  if (!['none', 'cuda-cccl', 'cuda-numeric', 'cuda-device'].includes(headerProfile)) throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS headerProfile must be none, cuda-cccl, cuda-numeric, or cuda-device.');
   if (typeof fmad !== 'boolean' || typeof deviceAsDefaultExecutionSpace !== 'boolean' || typeof relocatableDeviceCode !== 'boolean') throw deviceJsError('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS compile boolean options must be booleans.');
   return Object.freeze({ architecture, languageStandard, fmad, deviceAsDefaultExecutionSpace, headerProfile, relocatableDeviceCode });
 }
@@ -127,7 +123,7 @@ function normalizeImports(value = [], localFunctions = []) {
   const localNames = new Set(localFunctions.map((entry) => entry.name));
   const names = new Set();
   return Object.freeze(value.map((entry) => {
-    const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
+    const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'libraryContract', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
     if (!plainObject(entry) || Object.keys(entry).sort().join('\0') !== fields.sort().join('\0')) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Each Device-JS import requires one exact typed semantic record.');
     const name = assertIdentifier(entry.name, 'Import alias');
     if (names.has(name) || localNames.has(name)) throw deviceJsError('DEVICE_JS_IMPORT_DUPLICATE', 'Device-JS import aliases must be unique and distinct from local functions.', { name });
@@ -136,6 +132,7 @@ function normalizeImports(value = [], localFunctions = []) {
         || typeof entry.artifactSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(entry.artifactSha256)
         || typeof entry.exportName !== 'string' || !IDENTIFIER.test(entry.exportName)
         || typeof entry.symbol !== 'string' || !new RegExp(`^djs_lib_${entry.librarySha256}_[0-9]+$`).test(entry.symbol)
+        || ![DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT].includes(entry.libraryContract)
         || !['ptx', 'lto-ir'].includes(entry.format)) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import identity or symbol metadata is invalid.', { name });
     const target = inspectCudaTarget(entry.architecture, { expectedPrefix: 'compute' });
     if (!target.ok) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import architecture is invalid.', { name, reason: target.reason });
@@ -157,6 +154,7 @@ function normalizeImports(value = [], localFunctions = []) {
       external: true,
       symbol: entry.symbol,
       librarySha256: entry.librarySha256,
+      libraryContract: entry.libraryContract,
       exportName: entry.exportName,
       artifactSha256: entry.artifactSha256,
       format: entry.format,
@@ -203,9 +201,9 @@ function hashField(hash, label, bytes) {
   hash.update(bytes);
 }
 
-function programIdentity(source, functions, compile) {
+function programIdentity(source, functions, compile, contract = CONTRACT) {
   const hash = createHash('sha256');
-  hashField(hash, 'contract', encoder.encode(CONTRACT));
+  hashField(hash, 'contract', encoder.encode(contract));
   hashField(hash, 'parser', encoder.encode(`acorn@${acornVersion}`));
   hashField(hash, 'target-policy', encoder.encode(canonicalJson(CUDA_TARGET_POLICY_IDENTITY)));
   hashField(hash, 'source', encoder.encode(source));
@@ -280,8 +278,15 @@ function f32Literal(value, node) {
   if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) fail('DEVICE_JS_LITERAL_RANGE', 'f32 literal is not finite binary32.', node);
   const rounded = Math.fround(value);
   if (Object.is(rounded, -0)) return '-0.0f';
-  if (Number.isInteger(rounded)) return `${rounded}.0f`;
+  if (Number.isInteger(rounded) && !/[eE]/.test(String(rounded))) return `${rounded}.0f`;
   return `${Number(rounded).toPrecision(9)}f`;
+}
+
+function f64Literal(value, node) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) fail('DEVICE_JS_LITERAL_RANGE', 'f64 literal is not finite binary64.', node);
+  if (Object.is(value, -0)) return '-0.0';
+  if (Number.isInteger(value) && !/[eE]/.test(String(value))) return `${value}.0`;
+  return Number(value).toPrecision(17);
 }
 
 function castLiteral(target, node) {
@@ -311,6 +316,12 @@ function castLiteral(target, node) {
     if (constant.kind !== 'number') fail('DEVICE_JS_LITERAL_TYPE', 'f32 literal must be numeric.', node);
     return { code: f32Literal(constant.value, node), type: parseType('f32') };
   }
+  if (target === 'f64' || target === 'f16' || target === 'bf16') {
+    if (constant.kind !== 'number') fail('DEVICE_JS_LITERAL_TYPE', `${target} literal must be numeric.`, node);
+    const literal = f64Literal(constant.value, node);
+    const code = target === 'f64' ? literal : target === 'f16' ? `__double2half(${literal})` : `__double2bfloat16(${literal})`;
+    return { code, type: parseType(target) };
+  }
   return null;
 }
 
@@ -328,7 +339,41 @@ function helperPath(node) {
 
 function isNumberType(type) { return type.kind === 'scalar' && NUMERIC.has(type.scalar); }
 function isIntegerType(type) { return type.kind === 'scalar' && INTEGER.has(type.scalar); }
+function isFloatType(type) { return type.kind === 'scalar' && FLOAT.has(type.scalar); }
 function boolType() { return parseType('bool'); }
+
+function inspectUnitRequirements(ast, functions) {
+  let usesDenseNumeric = functions.some((fn) => fn.libraryContract === DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT
+    || (fn.returns?.kind !== 'void' && DENSE_NUMERIC_SCALARS.includes(fn.returns.scalar))
+    || fn.parameters.some((parameter) => DENSE_NUMERIC_SCALARS.includes(parameter.type.scalar)));
+  let usesScopedAtomic = false;
+  function visit(node) {
+    if (!node || typeof node !== 'object') return;
+    if (node.type === 'CallExpression') {
+      const path = helperPath(node.callee);
+      usesDenseNumeric ||= isDenseNumericHelper(path);
+      usesScopedAtomic ||= devicePointerAtomicHelper(path) !== null || path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem';
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (['loc', 'start', 'end', 'range'].includes(key)) continue;
+      if (Array.isArray(value)) value.forEach(visit);
+      else if (value && typeof value === 'object') visit(value);
+    }
+  }
+  visit(ast);
+  return { usesDenseNumeric, usesScopedAtomic };
+}
+
+function finalizeCompileProfile(compile, { usesDenseNumeric, usesScopedAtomic }, explicit) {
+  if (!usesDenseNumeric) return compile;
+  const required = usesScopedAtomic ? 'cuda-device' : 'cuda-numeric';
+  if (explicit) {
+    const compatible = compile.headerProfile === 'cuda-device' || (!usesScopedAtomic && compile.headerProfile === 'cuda-numeric');
+    if (!compatible) throw deviceJsError('DEVICE_JS_NUMERIC_PROFILE_REQUIRED', `Dense numeric Device-JS requires compile.headerProfile "${required}"${usesScopedAtomic ? '' : ' or "cuda-device"'}.`, { headerProfile: compile.headerProfile });
+    return compile;
+  }
+  return Object.freeze({ ...compile, headerProfile: required });
+}
 
 class FunctionEmitter {
   constructor(fn, ast, functions, generatedNames, compile) {
@@ -385,6 +430,11 @@ class FunctionEmitter {
     if (!operators.has(node.operator)) fail('DEVICE_JS_ASSIGNMENT_OPERATOR', 'Assignment operator is unsupported.', node, { operator: node.operator });
     if (node.operator !== '=' && !isNumberType(left.type)) fail('DEVICE_JS_OPERATOR_TYPE', 'Compound assignment requires numeric operands.', node);
     if (['%=', '&=', '|=', '^=', '<<=', '>>='].includes(node.operator) && !isIntegerType(left.type)) fail('DEVICE_JS_OPERATOR_TYPE', 'Integer compound operator requires integer operands.', node);
+    if (['f16', 'bf16'].includes(left.type.text) && node.operator !== '=') {
+      const intrinsic = { '+=': '__hadd_rn', '-=': '__hsub_rn', '*=': '__hmul_rn', '/=': '__hdiv' }[node.operator];
+      if (!intrinsic) fail('DEVICE_JS_OPERATOR_TYPE', 'Half and bfloat compound arithmetic supports only +, -, *, and /.', node);
+      return { code: `(${left.code} = ${intrinsic}(${left.code}, ${right.code}))`, type: left.type };
+    }
     return { code: `(${left.code} ${node.operator} ${right.code})`, type: left.type };
   }
 
@@ -406,7 +456,8 @@ class FunctionEmitter {
       if (!isIntegerType(argument.type)) fail('DEVICE_JS_OPERATOR_TYPE', '~ requires integer.', node);
       return { code: `(~${argument.code})`, type: argument.type };
     }
-    if (!['i32', 'f32'].includes(argument.type.text)) fail('DEVICE_JS_OPERATOR_TYPE', 'Unary - requires i32 or f32.', node);
+    if (!['i32', 'f32', 'f64', 'f16', 'bf16'].includes(argument.type.text)) fail('DEVICE_JS_OPERATOR_TYPE', 'Unary - requires a signed integer or floating value.', node);
+    if (['f16', 'bf16'].includes(argument.type.text)) return { code: `__hneg(${argument.code})`, type: argument.type };
     return { code: `(-${argument.code})`, type: argument.type };
   }
 
@@ -419,6 +470,10 @@ class FunctionEmitter {
     if (arithmetic.has(node.operator)) {
       if (!sameType(left.type, right.type) || !isNumberType(left.type)) fail('DEVICE_JS_OPERATOR_TYPE', 'Arithmetic operands must have the same numeric Device-JS type.', node);
       if (node.operator === '%' && !isIntegerType(left.type)) fail('DEVICE_JS_OPERATOR_TYPE', '% requires integer operands.', node);
+      if (['f16', 'bf16'].includes(left.type.text)) {
+        const intrinsic = { '+': '__hadd_rn', '-': '__hsub_rn', '*': '__hmul_rn', '/': '__hdiv' }[node.operator];
+        return { code: `${intrinsic}(${left.code}, ${right.code})`, type: left.type };
+      }
       return { code: `(${left.code} ${node.operator} ${right.code})`, type: left.type };
     }
     if (bitwise.has(node.operator)) {
@@ -463,13 +518,34 @@ class FunctionEmitter {
   }
 
   helperCall(path, args, node, scope) {
-    const scalar = /^gpu\.(bool|u32|i32|u64|f32)$/.exec(path);
+    const special = /^gpu\.(f32|f64|f16|bf16)\.(nan|positiveInfinity|negativeInfinity)$/.exec(path);
+    if (special) {
+      if (args.length !== 0) fail('DEVICE_JS_HELPER_ARGUMENTS', 'Typed special-value helper takes no arguments.', node);
+      return { code: specialConstantCode(special[1], special[2]), type: parseType(special[1]) };
+    }
+
+    const exactCast = /^gpu\.cast\.(u32|i32|u64|f32|f64|f16|bf16)$/.exec(path);
+    if (exactCast) {
+      if (args.length !== 1 || args[0].type === 'SpreadElement') fail('DEVICE_JS_HELPER_ARGUMENTS', 'Exact scalar cast requires exactly one typed argument.', node);
+      const value = this.expression(args[0], scope);
+      if (!isNumberType(value.type)) fail('DEVICE_JS_CAST_TYPE', 'Exact scalar cast accepts only numeric scalar values.', args[0]);
+      const code = exactCastCode(exactCast[1], value.type.scalar, value.code);
+      if (!code) fail('DEVICE_JS_CAST_TYPE', 'Exact scalar cast combination is unsupported.', args[0], { source: value.type.text, target: exactCast[1] });
+      return { code, type: parseType(exactCast[1]) };
+    }
+
+    const scalar = /^gpu\.(bool|u32|i32|u64|f32|f64|f16|bf16)$/.exec(path);
     if (scalar) {
       if (args.length !== 1 || args[0].type === 'SpreadElement') fail('DEVICE_JS_HELPER_ARGUMENTS', 'Scalar constructor requires exactly one argument.', node);
       const literal = castLiteral(scalar[1], args[0]);
       if (literal) return literal;
       const value = this.expression(args[0], scope);
       if (value.type.kind !== 'scalar') fail('DEVICE_JS_CAST_TYPE', 'Scalar constructor accepts only scalar values.', args[0]);
+      if ((DENSE_NUMERIC_SCALARS.includes(scalar[1]) || DENSE_NUMERIC_SCALARS.includes(value.type.scalar)) && isNumberType(value.type) && scalar[1] !== 'bool') {
+        const code = exactCastCode(scalar[1], value.type.scalar, value.code);
+        if (!code) fail('DEVICE_JS_CAST_TYPE', 'Dense scalar constructor combination is unsupported.', args[0], { source: value.type.text, target: scalar[1] });
+        return { code, type: parseType(scalar[1]) };
+      }
       return { code: `static_cast<${CUDA_TYPES[scalar[1]]}>(${value.code})`, type: parseType(scalar[1]) };
     }
 
@@ -514,8 +590,8 @@ class FunctionEmitter {
     if (path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem') {
       const store = path === 'gpu.mailbox.storeReleaseSystem';
       if (args.length !== (store ? 2 : 1)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
-      if (this.compile.headerProfile !== 'cuda-cccl') {
-        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      if (!['cuda-cccl', 'cuda-device'].includes(this.compile.headerProfile)) {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires a CCCL-capable compile header profile.`, node, { headerProfile: this.compile.headerProfile });
       }
       const lane = this.expression(args[0], scope);
       const expectedDirection = store ? 'device-to-host' : 'host-to-device';
@@ -534,8 +610,8 @@ class FunctionEmitter {
     if (pointerAtomic) {
       const store = pointerAtomic.operation === 'store';
       if (args.length !== (store ? 3 : 2)) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
-      if (this.compile.headerProfile !== 'cuda-cccl') {
-        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires compile.headerProfile "cuda-cccl".`, node, { headerProfile: this.compile.headerProfile });
+      if (!['cuda-cccl', 'cuda-device'].includes(this.compile.headerProfile)) {
+        fail('DEVICE_JS_ATOMIC_PROFILE_REQUIRED', `${path} requires a CCCL-capable compile header profile.`, node, { headerProfile: this.compile.headerProfile });
       }
       const pointer = this.expression(args[0], scope);
       const index = this.expression(args[1], scope);
@@ -556,16 +632,35 @@ class FunctionEmitter {
       return { code: path === 'gpu.barrier.block' ? '__syncthreads()' : '__threadfence()', type: parseType('void', { allowVoid: true }) };
     }
 
-    const unaryMath = Object.freeze({
-      'gpu.math.sqrt': 'sqrtf',
-      'gpu.math.log': 'logf',
-      'gpu.math.exp': 'expf',
-    });
-    if (Object.hasOwn(unaryMath, path)) {
+    const unaryMath = new Set(['gpu.math.sqrt', 'gpu.math.log', 'gpu.math.exp']);
+    if (unaryMath.has(path)) {
       if (args.length !== 1) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires one argument.`, node);
       const value = this.expression(args[0], scope);
-      if (value.type.text !== 'f32') fail('DEVICE_JS_MATH_TYPE', `${path} requires f32.`, node);
-      return { code: `${unaryMath[path]}(${value.code})`, type: value.type };
+      if (!isFloatType(value.type)) fail('DEVICE_JS_MATH_TYPE', `${path} requires a floating value.`, node);
+      const operation = path.slice('gpu.math.'.length);
+      const fn = value.type.text === 'f32' ? { sqrt: 'sqrtf', log: 'logf', exp: 'expf' }[operation]
+        : value.type.text === 'f64' ? operation
+          : { sqrt: 'hsqrt', log: 'hlog', exp: 'hexp' }[operation];
+      return { code: `${fn}(${value.code})`, type: value.type };
+    }
+
+    if (path === 'gpu.math.abs') {
+      if (args.length !== 1) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires one argument.`, node);
+      const value = this.expression(args[0], scope);
+      if (!isNumberType(value.type)) fail('DEVICE_JS_MATH_TYPE', `${path} requires a numeric value.`, node);
+      const code = value.type.text === 'u32' || value.type.text === 'u64' ? value.code
+        : value.type.text === 'i32' ? `djs_abs_i32(${value.code})`
+          : value.type.text === 'f32' ? `fabsf(${value.code})`
+            : value.type.text === 'f64' ? `fabs(${value.code})`
+              : `__habs(${value.code})`;
+      return { code, type: value.type };
+    }
+
+    if (path === 'gpu.math.isNaN') {
+      if (args.length !== 1) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires one argument.`, node);
+      const value = this.expression(args[0], scope);
+      if (!isFloatType(value.type)) fail('DEVICE_JS_MATH_TYPE', `${path} requires a floating value.`, node);
+      return { code: ['f16', 'bf16'].includes(value.type.text) ? `__hisnan(${value.code})` : `isnan(${value.code})`, type: boolType() };
     }
 
     if (path === 'gpu.math.min' || path === 'gpu.math.max') {
@@ -573,7 +668,23 @@ class FunctionEmitter {
       const left = this.expression(args[0], scope);
       const right = this.expression(args[1], scope);
       if (!sameType(left.type, right.type) || !isNumberType(left.type)) fail('DEVICE_JS_MATH_TYPE', `${path} requires matching numeric operands.`, node);
-      const fn = left.type.text === 'f32' ? (path.endsWith('.min') ? 'fminf' : 'fmaxf') : (path.endsWith('.min') ? 'min' : 'max');
+      const fn = left.type.text === 'f32' ? (path.endsWith('.min') ? 'fminf' : 'fmaxf')
+        : left.type.text === 'f64' ? (path.endsWith('.min') ? 'fmin' : 'fmax')
+          : ['f16', 'bf16'].includes(left.type.text) ? (path.endsWith('.min') ? '__hmin' : '__hmax')
+            : (path.endsWith('.min') ? 'min' : 'max');
+      return { code: `${fn}(${left.code}, ${right.code})`, type: left.type };
+    }
+
+    if (path === 'gpu.math.minimum' || path === 'gpu.math.maximum') {
+      if (args.length !== 2) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires two arguments.`, node);
+      const left = this.expression(args[0], scope);
+      const right = this.expression(args[1], scope);
+      if (!sameType(left.type, right.type) || !isNumberType(left.type)) fail('DEVICE_JS_MATH_TYPE', `${path} requires matching numeric operands.`, node);
+      const minimum = path.endsWith('.minimum');
+      const fn = left.type.text === 'f32' ? (minimum ? 'djs_minimum_f32' : 'djs_maximum_f32')
+        : left.type.text === 'f64' ? (minimum ? 'djs_minimum_f64' : 'djs_maximum_f64')
+          : ['f16', 'bf16'].includes(left.type.text) ? (minimum ? '__hmin_nan' : '__hmax_nan')
+            : (minimum ? 'min' : 'max');
       return { code: `${fn}(${left.code}, ${right.code})`, type: left.type };
     }
 
@@ -755,9 +866,11 @@ function translateDeviceUnit(request, mode) {
   const functions = normalizeFunctions(request.functions, { requireKernel: mode === 'program', onlyDevice: mode === 'library' });
   const imports = mode === 'program' ? normalizeImports(request.imports ?? [], functions) : Object.freeze([]);
   const exports = mode === 'library' ? normalizeExports(request.exports, functions) : Object.freeze([]);
-  const compile = normalizeCompile(request.compile ?? {});
-  const identity = programIdentity(request.source, functions, compile);
   const ast = parseSource(request.source);
+  const requirements = inspectUnitRequirements(ast, [...functions, ...imports]);
+  const compile = finalizeCompileProfile(normalizeCompile(request.compile ?? {}), requirements, Object.hasOwn(request.compile ?? {}, 'headerProfile'));
+  const contract = requirements.usesDenseNumeric ? DEVICE_JS_DENSE_NUMERIC_CONTRACT : CONTRACT;
+  const identity = programIdentity(request.source, functions, compile, contract);
   const sourceFunctions = matchSourceFunctions(ast, functions);
   const functionMap = new Map([...functions, ...imports].map((fn) => [fn.name, fn]));
   const generatedNames = new Map();
@@ -782,7 +895,8 @@ function translateDeviceUnit(request, mode) {
   rejectRecursion(calls);
 
   const generatedSource = [
-    `/* cuda-js Device-JS ${CONTRACT}; generated; do not edit */`,
+    `/* cuda-js Device-JS ${contract}; generated; do not edit */`,
+    ...(requirements.usesDenseNumeric ? denseNumericPreludeLines() : []),
     ...(usesScopedAtomic ? ['#include <cuda/atomic>', ''] : []),
     ...prototypes,
     ...(prototypes.length ? [''] : []),
@@ -798,6 +912,7 @@ function translateDeviceUnit(request, mode) {
     parameters: Object.freeze(entry.parameters.map((parameter) => Object.freeze({ name: parameter.name, type: parameter.type.text }))),
     returns: entry.returns.text,
     librarySha256: entry.librarySha256,
+    libraryContract: entry.libraryContract,
     exportName: entry.exportName,
     artifactSha256: entry.artifactSha256,
     format: entry.format,
@@ -805,7 +920,7 @@ function translateDeviceUnit(request, mode) {
   })));
   return Object.freeze({
     schemaVersion: 1,
-    contract: CONTRACT,
+    contract,
     sha256: identity,
     parser: Object.freeze({ name: 'acorn', version: acornVersion }),
     functions: publicFunctions,

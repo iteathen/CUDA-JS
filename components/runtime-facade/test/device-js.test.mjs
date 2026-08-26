@@ -181,6 +181,18 @@ test('public Device-JS libraries compose through typed RDC/LTO without CUDA sour
       ],
     }), (error) => error.code === 'DEVICE_JS_LIBRARY_CONFLICT');
 
+    const contradictoryContract = {
+      ...compiled.library,
+      contract: `${compiled.library.contract.replace('+SPEC-0028-device-library-v1', '')}+SPEC-0030-dense-numeric-v1+SPEC-0028-device-library-v1`,
+    };
+    await assert.rejects(compileDeviceProgram(runtime, {
+      ...consumer('apply', 'contractContradictionKernel'),
+      imports: [
+        { library: compiled.library, name: 'affine', as: 'apply' },
+        { library: contradictoryContract, name: 'affine', as: 'contradictoryContract' },
+      ],
+    }), (error) => error.code === 'DEVICE_JS_LIBRARY_CONFLICT');
+
     await assert.rejects(compileDeviceProgram(runtime, {
       source: 'function useBoth(out) { out[gpu.u32(0)] = applyPtx(gpu.u32(1), gpu.u32(2), gpu.u32(3)) + applyLto(gpu.u32(4), gpu.u32(5), gpu.u32(6)); }',
       functions: [{ name: 'useBoth', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
@@ -196,6 +208,22 @@ test('public Device-JS libraries compose through typed RDC/LTO without CUDA sour
     });
     assert.equal(probe.compiler.operationSequence, 9);
     assert.equal(probe.linker.operationSequence, 10);
+
+    const hiddenDense = await compileDeviceLibrary(runtime, {
+      source: 'function hidden(x) { return gpu.cast.f16(x); } function rounded(x) { return gpu.cast.u32(hidden(x)); }',
+      functions: [
+        { name: 'hidden', kind: 'device', parameters: [{ name: 'x', type: 'u32' }], returns: 'f16' },
+        { name: 'rounded', kind: 'device', parameters: [{ name: 'x', type: 'u32' }], returns: 'u32' },
+      ],
+      exports: ['rounded'],
+    });
+    const hiddenDenseProgram = await compileDeviceProgram(runtime, {
+      source: 'function k(out, x) { out[gpu.u32(0)] = rounded(x); }',
+      functions: [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }, { name: 'x', type: 'u32' }], returns: 'void' }],
+      imports: [{ library: hiddenDense.library, name: 'rounded', as: 'rounded' }],
+    });
+    assert.match(hiddenDenseProgram.deviceProgram.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0028-device-library-v1$/u);
+    assert.equal(hiddenDenseProgram.compiler.headerProfile, 'cuda-numeric');
   } finally {
     assert.equal((await runtime.close()).graceful, true);
   }

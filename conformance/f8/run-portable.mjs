@@ -113,8 +113,9 @@ assert.equal(memoryObservation.cublasLtLifecycle, true);
 assert.equal(memoryObservation.deviceSelectionLifecycle, true);
 const compilerObservation = observations.find((entry) => entry.consumer === 'portable-compiler');
 assert(compilerObservation);
-for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
+for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication', 'denseNumeric', 'denseDeviceLibrary']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
 assert.deepEqual(compilerObservation.deviceJsParser, { name: 'acorn', version: '8.15.0' });
+assert.match(memoryObservation.denseNumeric, /^[a-f0-9]{64}$/);
 
 const target = await writeEvidence('portable-package.json', {
   schemaVersion: 1,
@@ -135,6 +136,7 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
     'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
     'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
+    'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
     'LICENSE',
     'LICENSING.md',
     'package.json',
