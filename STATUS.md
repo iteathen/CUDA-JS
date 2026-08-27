@@ -183,7 +183,7 @@ These remain independently open because the exact environment/control is unavail
 - exact CUDA-MCGS pair #32;
 - native SPEC-0021 scalar/view-consumer qualification #39/#88;
 - exact merged-head Windows F5 oracle revalidation #64;
-- GitHub private vulnerability reporting end-to-end external control #68.
+- GitHub private vulnerability reporting unaffiliated-reporter/advisory round-trip proof #68; setting mutation, enabled read-back, public entry-point visibility, and maintainer advisory-list access are complete.
 
 Not-qualified is not architectural rejection.
 

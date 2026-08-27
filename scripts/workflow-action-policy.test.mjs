@@ -70,6 +70,12 @@ test('full-SHA actions, remote reusable workflows, and repository-local actions 
   assert.deepEqual(validateWorkflowActionPolicy(fixture()), []);
 });
 
+test('human-readable action provenance accepts Windows line endings', () => {
+  const value = fixture();
+  value.publicRepository = value.publicRepository.replaceAll('\n', '\r\n');
+  assert.deepEqual(validateWorkflowActionPolicy(value), []);
+});
+
 test('mutable, unreviewed, stale, malformed, docker, and uncontrolled update paths are rejected', () => {
   const cases = [
     (value) => { value.workflows['.github/workflows/ci.yml'] = value.workflows['.github/workflows/ci.yml'].replace(`${actionSha} # v1.2.3`, 'v1 # v1'); },

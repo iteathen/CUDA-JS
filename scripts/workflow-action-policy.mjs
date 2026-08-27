@@ -70,7 +70,9 @@ function validateActionProvenanceProjection(errors, publicRepository, dependenci
   }
   const start = publicRepository.indexOf(PROJECTION_START);
   const end = publicRepository.indexOf(PROJECTION_END, start + PROJECTION_START.length);
-  const actual = publicRepository.slice(start, end + PROJECTION_END.length);
+  const actual = publicRepository
+    .slice(start, end + PROJECTION_END.length)
+    .replaceAll('\r\n', '\n');
   const expected = renderDependencies([...dependencies.values()]);
   if (actual !== expected) {
     errors.push('docs/PUBLIC_REPOSITORY.md action provenance projection differs from canonical provenance');
