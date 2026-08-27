@@ -99,7 +99,7 @@
     {
       "id": "CJS-EXTERNAL-SECURITY-68",
       "issues": [68],
-      "reason": "Requires GitHub private-vulnerability-reporting setting mutation/read-back plus unaffiliated reporter and maintainer advisory-flow proof; current connector does not expose that setting/control path."
+      "reason": "GitHub private vulnerability reporting is enabled and read back, the unauthenticated Security page exposes the private-report URL, and maintainer advisory-list access succeeds. Issue closure still requires an unaffiliated reporter to submit a private test report and the maintainer to manage that resulting advisory without publishing vulnerability details."
     },
     {
       "id": "CJS-WINDOWS-F5-64",

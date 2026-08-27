@@ -39,23 +39,22 @@ const workflows = Object.fromEntries(await Promise.all(
   workflowPaths.map(async (relative) => [relative, await text(relative)]),
 ));
 
-if (!security.includes('GitHub private vulnerability reporting') || !security.includes('currently not enabled')) {
-  errors.push('SECURITY.md must state the current private-vulnerability-reporting limitation explicitly');
+if (!security.includes('https://github.com/iteathen/CUDA-JS/security/advisories/new')
+    || !security.includes('If the private form is unexpectedly unavailable')) {
+  errors.push('SECURITY.md must route reports privately and preserve a fail-safe unavailable-channel path');
 }
 if (!security.includes('Workers provide event-loop isolation') || !security.includes('do **not** provide OS-process crash isolation')) {
   errors.push('SECURITY.md must preserve the Worker-vs-process isolation claim boundary');
 }
-if (!publicRepository.includes('GitHub private vulnerability reporting is currently **disabled**')) {
-  errors.push('docs/PUBLIC_REPOSITORY.md must record the current GitHub security-setting state');
+if (!publicRepository.includes('GitHub private vulnerability reporting is **enabled**')
+    || !publicRepository.includes('source documentation alone cannot prove that setting is enabled')) {
+  errors.push('docs/PUBLIC_REPOSITORY.md must record enabled read-back and its external-evidence limit');
 }
 if (!contributing.includes('[`SECURITY.md`](SECURITY.md)') || !contributing.includes('Security-sensitive reports')) {
   errors.push('CONTRIBUTING.md must route security-sensitive reports through SECURITY.md');
 }
-if (!issueConfig.includes('https://github.com/iteathen/CUDA-JS/blob/main/SECURITY.md')) {
-  errors.push('issue configuration must route security-sensitive reports to SECURITY.md');
-}
-if (issueConfig.includes('/security/advisories/new')) {
-  errors.push('issue configuration must not advertise the disabled private vulnerability reporting endpoint');
+if (!issueConfig.includes('https://github.com/iteathen/CUDA-JS/security/advisories/new')) {
+  errors.push('issue configuration must route security-sensitive reports to the enabled private reporting endpoint');
 }
 if (!pullRequestTemplate.includes('Security, provenance, licensing, and public-repository effects')) {
   errors.push('pull-request template must include public security/provenance disclosure');

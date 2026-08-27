@@ -2,9 +2,9 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-13
+**Updated:** 2026-08-26
 
-CUDA-JS is already public at `iteathen/CUDA-JS`. This document records the public-repository security and collaboration posture, the assessment behind the current hardening pass, and the remaining GitHub-settings work that is not represented by source files.
+CUDA-JS is public at `iteathen/CUDA-JS`. This document records the public-repository security and collaboration posture, the assessment behind the hardening pass, and external control evidence that is not represented by source files.
 
 ## Current public facts
 
@@ -19,9 +19,9 @@ As of the exact repository state inspected for this hardening pass:
 - public pull-request workflows execute portable/generated/reference checks only; native Windows qualification remains separate exact-profile evidence;
 - every remote GitHub Action is pinned to a reviewed full commit SHA with a same-line release tag, while repository-local actions remain same-commit source and remote reusable workflows follow the same immutable rule;
 - Dependabot checks the `github-actions` ecosystem weekly and opens at most three concurrent update pull requests;
-- GitHub private vulnerability reporting is currently **disabled**.
+- GitHub private vulnerability reporting is **enabled**; authenticated API read-back returned `{"enabled":true}` on 2026-08-26, and the unauthenticated Security page exposed the repository's private-report URL.
 
-The last item is an operational gap: public issue routing must never imply that a private GitHub security channel exists when the repository setting is disabled.
+The remaining end-to-end acceptance item on issue #68 is an unaffiliated reporter submission followed by maintainer management of the resulting private advisory. Setting/read-back and entry-point evidence do not fabricate that two-party proof.
 
 ## Assessment
 
@@ -51,7 +51,7 @@ This hardening pass does not:
 
 ### Strongest credible failure modes
 
-1. **Dead security channel.** Public issue configuration sends a reporter to GitHub private vulnerability reporting while that feature is disabled, encouraging either a failed report or unsafe public disclosure.
+1. **Dead security channel.** Public issue configuration must not send a reporter to a private flow unless the GitHub control is enabled and periodically read back.
 2. **Over-privileged public CI.** A pull-request workflow inherits more `GITHUB_TOKEN` authority than it needs.
 3. **Accidental local-secret commits.** Common `.env`, private-key, credential-config, or certificate files are not ignored by default.
 4. **Unowned public-security policy.** A root security policy exists without registry/validation ownership and silently drifts.
@@ -63,15 +63,15 @@ This hardening pass does not:
 Use the smallest source-controlled hardening set that addresses those failures:
 
 - add a root `SECURITY.md` with fail-safe reporting instructions;
-- point issue-menu security routing to `SECURITY.md` rather than a disabled advisory URL;
+- point issue-menu security routing to the enabled private advisory URL and keep `SECURITY.md` as canonical policy;
 - explicitly set public CI workflows to read-only repository permission;
 - add defense-in-depth ignore patterns for common secret-bearing local files;
 - make the security policy a required validated repository file and register its owner;
 - pin remote Actions to reviewed full SHAs, record their release/license provenance, reject dependency drift, and let Dependabot propose bounded reviewable updates;
 - surface security/public-repository guidance from README, CONTRIBUTING, and the documentation index;
-- keep enabling GitHub private vulnerability reporting as an explicit repository-settings follow-up because no connected write action currently owns that setting.
+- record enabled-setting read-back separately from the still-required unaffiliated-reporter/advisory-management proof.
 
-The alternative of leaving the current issue link in place is rejected because it advertises an unavailable security path. The alternative of creating a custom email address, webhook, or external reporting service is rejected because no such durable owner or secure endpoint was supplied.
+The alternative of creating a custom email address, webhook, or external reporting service is rejected because GitHub now supplies the repository-owned private workflow and no second durable secure endpoint is needed.
 
 ## Public CI trust model
 
@@ -106,13 +106,13 @@ The canonical machine-readable provenance owner is [`.github/actions-provenance.
 
 The root [`SECURITY.md`](../SECURITY.md) is the canonical public reporting entry point.
 
-While GitHub private vulnerability reporting remains disabled:
+With GitHub private vulnerability reporting enabled:
 
 - do not publish exploit details, secrets, proof-of-concept payloads, or sensitive logs in a public issue;
-- open only a minimal public issue asking the maintainer to establish a private channel, with no vulnerability details;
-- the maintainer should move the discussion to a private channel before requesting reproduction material.
+- submit the report through [`/security/advisories/new`](https://github.com/iteathen/CUDA-JS/security/advisories/new);
+- keep reproduction material and maintainer coordination inside the resulting private advisory.
 
-When GitHub private vulnerability reporting is enabled, update/verify the issue-menu route and `SECURITY.md` so the repository points directly to the working private GitHub flow.
+If read-back or the public entry point regresses, remove any dead direct route and restore a safe policy-only route before requesting sensitive material.
 
 ## Public repository hygiene
 
@@ -123,9 +123,15 @@ When GitHub private vulnerability reporting is enabled, update/verify the issue-
 - Third-party code and substantial copied material require exact provenance and compatible licensing.
 - Public documentation must distinguish exact qualified evidence from testing-unconfirmed behavior.
 
-## Remaining repository-settings action
+## External control evidence and periodic check
 
-Enable **GitHub private vulnerability reporting** for `iteathen/CUDA-JS`, then read back that the setting is enabled and verify the private reporting entry point works. This is the only public-repository hardening item identified by this pass that cannot be completed through the available connected GitHub write actions.
+The repository owner maintains the private-reporting control. On 2026-08-26:
+
+- the authenticated setting endpoint returned `{"enabled":true}`;
+- an unauthenticated request to the public Security page returned HTTP 200 and exposed `/iteathen/CUDA-JS/security/advisories/new`;
+- authenticated maintainer access to the repository security-advisory collection succeeded.
+
+Recheck the setting and public entry point quarterly and before each release. Issue #68 remains open until an unaffiliated reporter and the maintainer complete the private reporter-to-advisory round trip without placing test vulnerability details in public state.
 
 ## Validation and acceptance
 
@@ -137,4 +143,4 @@ The source-controlled hardening change is accepted only when the exact PR head p
 
 Author-side review must also confirm that no runtime/source/support claim changed, the issue security link resolves to the canonical policy, workflow permissions are least-authority, the new policy is registered/validated, and no security reporting path is described as enabled when it is not.
 
-A later change to the GitHub private-vulnerability-reporting setting requires remote read-back; source documentation alone cannot prove that setting is enabled.
+A later private-vulnerability-reporting claim requires fresh remote read-back; source documentation alone cannot prove that setting is enabled or that the two-party flow works.

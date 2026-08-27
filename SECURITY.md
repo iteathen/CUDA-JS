@@ -6,7 +6,7 @@ CUDA-JS is a public pre-release Node/CUDA runtime and toolchain. Security report
 
 Do **not** publish exploit details, credentials, private data, arbitrary-native-execution techniques, unsafe pointer/resource details, proof-of-concept payloads, or sensitive logs in a public issue.
 
-GitHub private vulnerability reporting for `iteathen/CUDA-JS` is currently not enabled. Until it is enabled, open only a minimal public issue asking the maintainer to establish a private security channel. Do not include the vulnerability details themselves in that issue.
+Use GitHub's [private vulnerability reporting form](https://github.com/iteathen/CUDA-JS/security/advisories/new). This creates a private draft security advisory visible to the reporter and repository maintainers; it does not create a public issue.
 
 Once a private channel is established, include enough information to reproduce and bound the issue:
 
@@ -19,7 +19,7 @@ Once a private channel is established, include enough information to reproduce a
 - minimal reproduction;
 - whether secrets, external systems, cache artifacts, or other users may have been affected.
 
-When GitHub private vulnerability reporting is enabled, this file and the issue-menu routing should be updated to point directly to that working private flow.
+If the private form is unexpectedly unavailable, do not fall back to public disclosure. Open only a minimal public issue asking the maintainer to restore a private channel, without including vulnerability details.
 
 ## Supported security posture
 
