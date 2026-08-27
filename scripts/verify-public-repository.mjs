@@ -31,6 +31,7 @@ const gitignore = await text('.gitignore');
 const dependabot = await text('.github/dependabot.yml');
 const provenanceText = await text('.github/actions-provenance.json');
 const workflowDirectory = path.join(root, '.github/workflows');
+const privateReportingUrl = 'https://github.com/iteathen/CUDA-JS/security/advisories/new';
 const workflowPaths = (await readdir(workflowDirectory))
   .filter((name) => /\.ya?ml$/.test(name))
   .map((name) => `.github/workflows/${name}`)
@@ -39,7 +40,14 @@ const workflows = Object.fromEntries(await Promise.all(
   workflowPaths.map(async (relative) => [relative, await text(relative)]),
 ));
 
-if (!security.includes('https://github.com/iteathen/CUDA-JS/security/advisories/new')
+const securityLinkTargets = new Set(
+  [...security.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)].map((match) => match[1]),
+);
+const issueContactUrls = new Set(
+  [...issueConfig.matchAll(/^\s*url:\s*([^\s#]+)\s*$/gm)].map((match) => match[1]),
+);
+
+if (!securityLinkTargets.has(privateReportingUrl)
     || !security.includes('If the private form is unexpectedly unavailable')) {
   errors.push('SECURITY.md must route reports privately and preserve a fail-safe unavailable-channel path');
 }
@@ -53,7 +61,7 @@ if (!publicRepository.includes('GitHub private vulnerability reporting is **enab
 if (!contributing.includes('[`SECURITY.md`](SECURITY.md)') || !contributing.includes('Security-sensitive reports')) {
   errors.push('CONTRIBUTING.md must route security-sensitive reports through SECURITY.md');
 }
-if (!issueConfig.includes('https://github.com/iteathen/CUDA-JS/security/advisories/new')) {
+if (!issueContactUrls.has(privateReportingUrl)) {
   errors.push('issue configuration must route security-sensitive reports to the enabled private reporting endpoint');
 }
 if (!pullRequestTemplate.includes('Security, provenance, licensing, and public-repository effects')) {
