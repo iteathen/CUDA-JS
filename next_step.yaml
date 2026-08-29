@@ -1,10 +1,10 @@
 {
-  "schema_version": 58,
+  "schema_version": 59,
   "updated": "2026-08-26",
-  "status": "device_library_selected_target_correction_active",
-  "objective": "Correct the generic SPEC-0017/SPEC-0028 boundary so Device-JS programs and libraries use one selected-runtime target across translation, identity, artifacts, imports, and linking; preserve Tensor/search neutrality and the existing runtime lifecycle.",
+  "status": "cuda_mcgs_compatible_pair_waiting_on_consumer_artifact",
+  "objective": "Keep the generic CUDA-JS alpha.16 substrate stable for CUDA-MCGS, qualify one exact public CUDA-MCGS/CUDA-JS compatible pair as soon as CUDA-MCGS freezes its first bounded production artifact, and continue native Linux evidence as an independent external lane without inventing new consumer-driven core semantics.",
   "exact_input_revisions": {
-    "protected_main_authority_baseline": "af29b95e0707b36b88ee4e234c25a9e7f7ed3a1d",
+    "protected_main_authority_baseline": "4971302cfb48431c0843126a59d5884d84a81641",
     "package_candidate": "cuda-js@0.1.0-alpha.16",
     "completed_since_previous_control_state": [
       "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
@@ -31,7 +31,8 @@
       "CJS-LIB-ADAPTER-004 integrated on PR #138 at protected main 2da65ff2e4287450171c477031dd380a21fa095f: bounded context-owned library-adapter framework, cuBLASLt f32 row-major matmul first child, alpha.12 package projection, independent Windows ABI/numerical oracle, public lifecycle, and cleanup; other providers/dtypes/layouts/performance remain excluded",
       "CJS-DEVICE-NUMERIC-005 integrated on PR #140 at protected main b78f3fc37e20381d950d3297861c877b71f15390: additive dense numeric Device-JS contract, alpha.13 package projection, exact trusted header profiles, legacy-byte compatibility, unrelated installed consumers, independent Windows numerical oracle, and cleanup; tensors, fast math, tensor cores, performance, and broader profiles remain excluded",
       "CJS-NATIVE-PREPARED-LIMIT-PROJECTION-142 integrated on PR #143 at protected main 3a29b65a4ae736923dbde432356a7aad31059fc0: alpha.14 projects native discovery data to the exact eight-field prepared-DAG launch identity and adds installed-package Windows semantic replay, independent result parity, and zero-live/orphaned cleanup evidence; CUDA Graphs, broader profiles, and performance remain excluded",
-      "CJS-PREPARED-CUBLASLT-006 integrated on PR #146 at protected main 20f831cc51766aee726313f7f78819b576d56307: SPEC-0031 and alpha.15 compose fixed cuBLASLt f32 plans with prepared kernels under one private stream/event/operation, preserve exact kernel-only identity, derive typed-view/workspace accesses, retain bounded leases/failure truth, and pass exact installed-package Windows mixed numerical/cleanup evidence; tensors, CUDA Graphs, broader providers, multi-GPU, tensor cores, and performance remain excluded"
+      "CJS-PREPARED-CUBLASLT-006 integrated on PR #146 at protected main 20f831cc51766aee726313f7f78819b576d56307: SPEC-0031 and alpha.15 compose fixed cuBLASLt f32 plans with prepared kernels under one private stream/event/operation, preserve exact kernel-only identity, derive typed-view/workspace accesses, retain bounded leases/failure truth, and pass exact installed-package Windows mixed numerical/cleanup evidence; tensors, CUDA Graphs, broader providers, multi-GPU, tensor cores, and performance remain excluded",
+      "CJS-DEVICE-LIBRARY-TARGET-148 integrated through PR #149 at protected main 4971302cfb48431c0843126a59d5884d84a81641: Device-JS programs and leaf libraries now share the selected runtime compute target across translation, identity, artifacts, imports and linking; alpha.16 is the current downstream package baseline"
     ],
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0020 semantic prepared-kernel DAG", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child", "SPEC-0023 framework", "SPEC-0028", "SPEC-0029 cuBLASLt f32 matmul", "SPEC-0030 dense numeric Device-JS", "SPEC-0031 prepared cuBLASLt f32 node"],
     "accepted_pending_implementation": [],
@@ -66,16 +67,17 @@
     "docs/specs/SPEC-0027-nn-extension-foundation.md",
     "docs/specs/SPEC-0028-device-js-library-composition.md",
     "docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md",
-    "docs/specs/SPEC-0029-cublaslt-f32-matmul.md"
-    ,"docs/specs/SPEC-0030-device-js-dense-numeric-profile.md"
-    ,"docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md"
+    "docs/specs/SPEC-0029-cublaslt-f32-matmul.md",
+    "docs/specs/SPEC-0030-device-js-dense-numeric-profile.md",
+    "docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md"
   ],
   "current_focus": {
-    "id": "CJS-DEVICE-LIBRARY-TARGET-148",
-    "issues": [148],
-    "plan": "issue #148 bounded correction under accepted SPEC-0017 and SPEC-0028",
-    "next_action": "Validate alpha.16 selected-compute_89 PTX/LTO library and program composition, integrate through protected main, then hand the exact package revision back to CUDA-JS-Tensor without adding tensor policy.",
-    "exit": "One exact protected alpha.16 revision preserves compute_75 behavior, binds non-default Device-JS identities/artifacts/composition to the selected runtime target, passes package controls, and leaves issue/branch/worktree state disposed."
+    "id": "MCGS-P0-PAIR-0009C",
+    "issues": [32],
+    "plan": "issue #32 exact CUDA-MCGS compatible-pair qualification",
+    "status": "blocked_on_consumer_artifact",
+    "next_action": "Keep alpha.16 generic contracts stable. When CUDA-MCGS completes its semantic acceptance and freezes the first bounded parallel Search Program/execution-package artifact, qualify that exact artifact through only public CUDA-JS contracts and record the exact pair. Do not add MCGS/search semantics or speculative CUDA mechanisms while waiting.",
+    "exit": "One exact frozen CUDA-MCGS artifact and one exact CUDA-JS package/profile complete public compile/link/load/launch/publication/failure/cleanup evidence with device-owned active-search progress and first-consumer deletion."
   },
   "parallel_or_external_next": [
     {
@@ -86,20 +88,24 @@
     {
       "id": "CJS-NUMVIEW-NATIVE-0021",
       "issues": [39, 88],
-      "action": "After the public view packet integrates, run the independent native mixed-signature scalar ABI/launch oracle and at least one native/library view-range consumer fixture on an exact qualified profile. Portable evidence does not promote native support."
+      "action": "Run independent mixed-signature scalar ABI/launch and native/library view-range evidence only on an exact qualified profile; these are support-promotion lanes rather than blockers for CUDA-MCGS preparing its artifact."
     }
   ],
+  "cross_repo_consumer_state": {
+    "cuda_mcgs": "Generic runtime prerequisites are available; issue #32 now waits on CUDA-MCGS integrated semantic acceptance and the first frozen bounded parallel artifact.",
+    "cuda_js_tensor": "cuda-js-tensor@0.1.0-alpha.6 consumes this alpha.16 target-correct library contract and has already demonstrated an item-parallel device-callable Tensor leaf on exact Windows compute_75. Tensor scheduling/search semantics remain outside CUDA-JS."
+  },
   "long_horizon": {
     "map": "docs/plans/2026-08-25-long-horizon-capability-map.md",
     "issue": 129,
     "status": "candidate_inventory_not_execution_authority",
-    "activation_gate": "Does not displace the active downstream CUDA-JS-Tensor compatibility handoff or the external issue #4 evidence lane; every other candidate requires its own accepted owner, dependencies, lifecycle, and evidence before implementation."
+    "activation_gate": "No long-horizon candidate displaces the CUDA-MCGS exact-pair gate or the independent issue #4 native-Linux evidence lane. Activate a new mechanism only from a concrete generic need with accepted ownership, bounded lifecycle/resources and evidence."
   },
   "blocked_or_deferred_lanes": [
     {
       "id": "CJS-EXTERNAL-SECURITY-68",
       "issues": [68],
-      "reason": "GitHub private vulnerability reporting is enabled and read back, the unauthenticated Security page exposes the private-report URL, and maintainer advisory-list access succeeds. Issue closure still requires an unaffiliated reporter to submit a private test report and the maintainer to manage that resulting advisory without publishing vulnerability details."
+      "reason": "Requires GitHub private-vulnerability-reporting setting mutation/read-back plus unaffiliated reporter and maintainer advisory-flow proof; current connector does not expose that setting/control path."
     },
     {
       "id": "CJS-WINDOWS-F5-64",
@@ -109,7 +115,12 @@
     {
       "id": "MCGS-P0-PAIR-0009C",
       "issues": [32],
-      "reason": "CUDA-JS implementation prerequisites, including the issue #123 device-publication branch, are complete; exact pair qualification necessarily awaits integration plus the first frozen bounded CUDA-MCGS artifact. This does not block preparing that artifact."
+      "reason": "All currently identified generic CUDA-JS mechanism prerequisites are integrated. Exact pair qualification awaits CUDA-MCGS semantic acceptance and its first frozen bounded parallel artifact; this is a consumer-artifact blocker, not unfinished CUDA-JS implementation."
+    },
+    {
+      "id": "CJS-LIBRARY-PROVIDER-FOLLOWONS",
+      "issues": [75, 85, 135],
+      "reason": "Typed/strided-batched cuBLASLt, CUDA Graph realization and broader native Device-JS library qualification may improve later Tensor/evaluator/performance profiles, but they are not prerequisites for the first functional CUDA-MCGS compatible pair unless a frozen selected profile demonstrates the need."
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
@@ -124,12 +135,12 @@
     {
       "id": "CJS-SUCCESSOR-PROPOSALS",
       "issues": [89, 91, 92, 93, 94, 95, 96],
-      "reason": "SPEC-0030 issue #139 is complete on protected main. Other successor capabilities remain outside the active path until separately selected and accepted."
+      "reason": "Other successor capabilities remain outside the CUDA-MCGS functional critical path until separately selected and accepted."
     },
     {
       "id": "CJS-NN-PROGRAM",
-      "issues": [70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84],
-      "reason": "SPEC-0027 authorizes only the separate future NN product boundary. Every nn.* production boundary needs a separately accepted child specification; issue bodies that still assume cuda-js/nn or same-package distribution are stale and must be reconciled before implementation."
+      "issues": [70, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84],
+      "reason": "SPEC-0027 authorizes only the separate future NN product boundary. Every nn.* production boundary needs a separately accepted child specification and is independent of CUDA-MCGS's consumer-owned evaluator semantics. Generic cuBLASLt issue #75 is intentionally not classified in this lane."
     }
   ],
   "validation": [
@@ -152,13 +163,14 @@
     "use unqualified pure-JavaScript wording that hides native providers, generated device code, or independent C/C++ evidence",
     "introduce a CUDA-JS-maintained native host backend or compiled addon without an accepted measured-gap architecture/package/lifecycle decision",
     "weaken tests or claim completion around missing hardware/external controls",
-    "let the Linux reference implementation introduce operating-system, distribution, loader, path, or deployment assumptions into public contracts or shared runtime owners"
+    "let the Linux reference implementation introduce operating-system, distribution, loader, path, or deployment assumptions into public contracts or shared runtime owners",
+    "add MCGS, chess, UCI, tensor scheduling, evaluator policy or product-specific semantics to generic CUDA-JS contracts to make a consumer easier"
   ],
   "historical_baseline": [
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
-    "PR #116, PR #118, PR #119, PR #120, PR #124, and PR #125 are integrated protected-main CUDA-MCGS prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact",
+    "PR #116, PR #118, PR #119, PR #120, PR #124, PR #125 and PR #149 are integrated protected-main CUDA-MCGS/Tensor prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact",
     "Windows F2W-F9 remains accepted secondary exact-profile evidence after ADR-0006; it is not deleted or used as Linux proof"
   ]
 }
