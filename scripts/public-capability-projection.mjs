@@ -230,31 +230,22 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     errors.push('packaging compatibility Device-JS library projection is stale');
   }
 
-  // README is a concise overview, not the exhaustive capability registry. Exact additive
-  // SPEC-0021 projection is owned by docs/CAPABILITIES.md plus the compatibility manifest.
+  // README is a concise public evidence surface. Exhaustive capability projection is owned
+  // by docs/CAPABILITIES.md plus machine-readable compatibility state below.
   requireMarkers(errors, 'README.md', documents.readme, [
     packageJson.version,
-    'SPEC-0010',
-    'SPEC-0011',
-    'SPEC-0012',
-    'SPEC-0013',
-    'SPEC-0016',
-    'SPEC-0017',
-    'SPEC-0020',
-    'SPEC-0028',
-    'SPEC-0030',
-    'SPEC-0031',
-    'SPEC-0027',
-    'SPEC-0030',
-    'separate future publish unit',
-    'compileDeviceProgram()',
-    'compileDeviceLibrary()',
-    'discoverCudaDevices()',
-    '`u64`/`i32`/`f32`',
-    'typed `lto-ir`',
-    'one pending GPU operation',
-    'SPEC-0019',
-    'SPEC-0014',
+    'docs/CAPABILITIES.md',
+    'Not published',
+    'Production support',
+    'Native Linux CUDA',
+    'npm run verify',
+    'npm run verify:windows',
+    'experimental `node:ffi`',
+    'Node-FFI-first',
+    'EXP-000',
+    'CJS-F1B',
+    'CJS-F2W',
+    'Windows x64',
   ]);
   requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, [
     'SPEC-0010',

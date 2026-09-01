@@ -10,8 +10,9 @@ const NN_COMPONENT_ANCHORS = [
 ];
 
 function fixture() {
-  const common = '0.1.0-alpha.16 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0014 SPEC-0016 SPEC-0017 SPEC-0019 SPEC-0020 SPEC-0023 SPEC-0027 SPEC-0028 SPEC-0029 SPEC-0030 SPEC-0031 separate future publish unit compileDeviceProgram() compileDeviceLibrary() discoverCudaDevices() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
-  const capabilityTable = `${common} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views typed Device-JS library composition Internal pinned host staging and async transfer Publication mailbox Optional CUDA library adapters Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
+  const readme = '0.1.0-alpha.16 docs/CAPABILITIES.md Not published Production support Native Linux CUDA npm run verify npm run verify:windows experimental `node:ffi` Node-FFI-first EXP-000 CJS-F1B CJS-F2W Windows x64';
+  const capabilityBase = '0.1.0-alpha.16 SPEC-0010 SPEC-0011 SPEC-0012 SPEC-0013 SPEC-0014 SPEC-0016 SPEC-0017 SPEC-0019 SPEC-0020 SPEC-0023 SPEC-0027 SPEC-0028 SPEC-0029 SPEC-0030 SPEC-0031 separate future publish unit compileDeviceProgram() compileDeviceLibrary() discoverCudaDevices() `u64`/`i32`/`f32` typed `lto-ir` one pending GPU operation `u64` `i32` `f32`';
+  const capabilityTable = `${capabilityBase} SPEC-0021 \`f64\` \`f16\` \`bf16\` contiguous 1D typed device views typed Device-JS library composition Internal pinned host staging and async transfer Publication mailbox Optional CUDA library adapters Optional separately packaged NN product Accepted SPEC-0027 authority only\n| Capability | Architecture | Implementation | Qualification | Priority | Profile / boundary |\n|---|---|---|---|---|---|\n| Example | \`planned\` | \`implemented\` | \`not-qualified\` | \`active\` | exact profile |`;
   const nnAnchors = NN_COMPONENT_ANCHORS.map((anchor) => `\`${anchor}\``).join(' ');
   return {
     packageJson: {
@@ -48,7 +49,7 @@ function fixture() {
       axes: [{ id: 'axis', architecturalDisposition: 'planned', implementationStatus: 'not-implemented', qualificationStatus: 'not-qualified', priority: 'next' }],
     },
     documents: {
-      readme: common,
+      readme,
       capabilities: capabilityTable,
       interop: 'Device-JS generated CUDA C++ external-deletion test',
       hardware: '| Axis | Architecture | Implementation | Qualification | Priority | known incompatible not-qualified',
@@ -67,6 +68,22 @@ function fixture() {
 
 test('current public capability projection satisfies independent fact owners', () => {
   assert.deepEqual(validatePublicCapabilityProjection(fixture()), []);
+});
+
+test('README keeps concise evidence anchors while exhaustive capability markers remain independently owned', () => {
+  const readmeValue = fixture();
+  readmeValue.documents.readme = readmeValue.documents.readme.replace('npm run verify:windows', '');
+  assert.equal(
+    validatePublicCapabilityProjection(readmeValue).includes('README.md is missing public capability marker: npm run verify:windows'),
+    true,
+  );
+
+  const capabilityValue = fixture();
+  capabilityValue.documents.capabilities = capabilityValue.documents.capabilities.replace('SPEC-0021', '');
+  assert.equal(
+    validatePublicCapabilityProjection(capabilityValue).includes('docs/CAPABILITIES.md is missing public capability marker: SPEC-0021'),
+    true,
+  );
 });
 
 test('package, capability, interop, and status-dimension drift are independently rejected', () => {

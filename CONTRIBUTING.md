@@ -2,6 +2,12 @@
 
 CUDA-JS is public, pre-release, contract-first, and experiment-gated.
 
+## AI-assisted development
+
+CUDA-JS may use substantial AI-agent assistance in coding, review, research, and documentation. AI-generated code, prose, analysis, and model review are working material, not validation evidence or an independent oracle. Contributors and maintainers remain responsible for understanding the change and for every correctness, ABI, lifecycle, provenance, security, compatibility, support, and qualification claim attached to it.
+
+AI-assisted contributions are welcome under the same contract, experiment, review, and exact-profile evidence bar as any other contribution. Routine AI use does not require a prompt log or tool inventory; disclose material assistance when it affects provenance, licensing, security review, reproducibility, or another repository requirement. Do not cite model agreement or model-to-model review as proof of correctness.
+
 ## Easy ways to help
 
 The lowest-friction contributions are:
