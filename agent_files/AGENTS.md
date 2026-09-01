@@ -31,6 +31,17 @@ Specifications protect ownership and authorize executable work; they are not an 
 
 PR/closure evidence must state which blocker class changed, the exact evidence supporting that transition, what remains unproven, and what downstream capability is newly unblocked.
 
+## Public surface gate
+
+Public entry points must make executable truth easier to find than architecture rationale.
+
+- README order is current executable/validatable state → run/verify commands → unsupported/unqualified limits → concise boundary → architecture/roadmap links.
+- State a current limit directly. Do not add paragraphs explaining why it is not the architectural ceiling; that rationale belongs in ADR/specification documents.
+- Keep support claims adjacent to exact evidence limits. Portable/package tests, mock evidence, and neighboring profiles do not become native qualification through wording.
+- New process, compatibility, migration, abstraction, or concurrency machinery must name a present consumer, persisted/deployed state, safety/recovery reason, or measured bottleneck. Future possibility alone is not implementation permission.
+- Before 1.0, compatibility shims require a real external/deployed/persisted beneficiary or concrete recovery need; otherwise prefer the clean break.
+- Do not let README capability prose become another generated status ledger. Link `docs/CAPABILITIES.md`, `STATUS.md`, and `next_step.yaml` for detail.
+
 ## Design hierarchy
 
 ```text
@@ -63,7 +74,7 @@ platform truth and accepted authority
 
 `CJS-F1A / EXP-000` is promoted after independent Windows x64 and native Linux x86-64 qualification. Preserve its exact-profile evidence and generated-product regression checks.
 
-`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, `CJS-F7W`, `CJS-F8W`, and the CUDA-JS-owned `CJS-F9-A/B` prerequisite are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, package compatibility, and independent native C ABI/Driver/memory/execution/compiler oracles as distinct owners. ADR-0006 requires OS-neutral public/component architecture and makes native Linux x86-64 the reference implementation and primary qualification path. The complete EXP-001/F1B/F3L-F8L native Linux command and evidence-validation source chain is runner-ready. Platform diagnostics, the public facade, and alpha.8 compatibility metadata source-admit native Linux x86-64 only as `testing-unconfirmed`; Linux remains unqualified until a contributor runs the unchanged Ubuntu 24.04 Driver/compiler/GPU/package chain on a native directly exposed physical NVIDIA GPU. VM/emulated/WSL/container/hosted-CI evidence does not qualify that cell. Issue #4 is an external evidence lane and does not block the active accepted SPEC-0017 portable/software integration. Windows remains a maintained peer adapter/profile. Exact CUDA-MCGS compatible-pair completion requires the independently owned CUDA-MCGS package/adapter in `iteathen/UMCGS` and frozen-pair evidence.
+`CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, `CJS-F3W`, `CJS-F4W`, `CJS-F5W`, `CJS-F6W / EXP-009`, `CJS-F7W`, `CJS-F8W`, and the CUDA-JS-owned `CJS-F9-A/B` prerequisite are accepted. Keep pinned CUDA header facts, curated semantics, normalized Runtime IR, generated products, package compatibility, and independent native C ABI/Driver/memory/execution/compiler oracles as distinct owners. ADR-0006 requires OS-neutral public/component architecture and makes native Linux x86-64 the reference implementation and primary qualification path. The complete EXP-001/F1B/F3L-F8L native Linux command and evidence-validation source chain is runner-ready. Platform diagnostics, the public facade, and alpha.8 compatibility metadata source-admit native Linux x86-64 only as `testing-unconfirmed`; Linux remains unqualified until a contributor runs the unchanged Ubuntu 24.04 Driver/compiler/GPU/package chain on a native directly exposed physical NVIDIA GPU. VM/emulated/WSL/container/hosted-CI evidence does not qualify that cell. Issue #4 is an external evidence lane and does not block the active accepted SPEC-0017 portable/software integration. Windows remains a maintained peer adapter/profile. Exact CUDA-MCGS compatible-pair completion requires the independently owned CUDA-MCGS package/adapter in `iteathen/CUDA-MCGS` and frozen-pair evidence.
 
 ## Testing and repair
 
