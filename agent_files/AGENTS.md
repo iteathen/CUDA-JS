@@ -42,6 +42,13 @@ Public entry points must make executable truth easier to find than architecture 
 - Before 1.0, compatibility shims require a real external/deployed/persisted beneficiary or concrete recovery need; otherwise prefer the clean break.
 - Do not let README capability prose become another generated status ledger. Link `docs/CAPABILITIES.md`, `STATUS.md`, and `next_step.yaml` for detail.
 
+## AI-assisted development accountability
+
+- AI-generated code, prose, analysis, and model review are working material, never authority, an independent oracle, or validation evidence.
+- The contributor or maintainer remains accountable for understanding the change and for every correctness, ABI, lifecycle, provenance, security, compatibility, support, and qualification claim.
+- Apply the same tests, exact-profile evidence, review, provenance, and cleanup gates regardless of how much of the change was agent-produced.
+- Keep AI disclosure brief and factual in `CONTRIBUTING.md`; do not generate defensive AI-process documents or treat model agreement as proof.
+
 ## Design hierarchy
 
 ```text
