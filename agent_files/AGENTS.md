@@ -9,6 +9,28 @@
 5. Establish one coherent outcome, decisive falsifier, and validation/cleanup/handoff reserve.
 6. Stop if the task would invent an unsupported ABI, semantic overlay, resource transition, JIT claim, or platform claim.
 
+## Portfolio readiness gate
+
+Before selecting, expanding, reviewing, or closing meaningful work, ask: **what is the highest-risk unproven boundary currently preventing the next real composed capability?**
+
+Unless accepted CUDA-JS authority or the actual dependency graph requires a different order, prioritize:
+
+1. security/correctness boundary defects;
+2. missing foundational CUDA-JS capabilities required by dependency-ready consumers;
+3. missing qualification/evidence/infrastructure for implemented required capabilities;
+4. missing thin vertical composition proof through public contracts;
+5. measured performance/concurrency bottlenecks required by real consumers;
+6. convenience/API expansion;
+7. community/presentation polish.
+
+Keep architectural disposition, implementation status, qualification/support status, and priority separate. A missing physical GPU/host/CI environment is an evidence or qualification-infrastructure gap unless the implementation is independently falsified; do not invent a code fix for absent evidence. Qualification infrastructure is product infrastructure when a support claim depends on it.
+
+Cross-repository needs enter CUDA-JS only as consumer-neutral public capability requirements with explicit consumer acceptance criteria. A downstream native workaround, deep import, or awkward escape path is evidence to classify a possible missing CUDA-JS capability before implementation, not permission to import consumer policy here.
+
+Specifications protect ownership and authorize executable work; they are not an end state. Once a boundary is sufficiently specified, prefer the thinnest meaningful public-contract vertical falsifier over additional speculative layering. Do not promote multi-streaming, concurrency, optimization, or API breadth merely because a theoretical ceiling exists; require a dependency-ready consumer or measured bottleneck.
+
+PR/closure evidence must state which blocker class changed, the exact evidence supporting that transition, what remains unproven, and what downstream capability is newly unblocked.
+
 ## Design hierarchy
 
 ```text
