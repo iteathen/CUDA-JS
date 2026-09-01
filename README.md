@@ -43,6 +43,16 @@ A passing portable run is not native-GPU qualification. Exact Node and hardware 
 
 Native Linux CUDA qualification is tracked in [issue #4](https://github.com/iteathen/CUDA-JS/issues/4). Missing physical Linux/GPU evidence is an evidence gap, not proof of a code defect.
 
+### Durable evidence anchors
+
+- **Node-FFI-first** is the v0 host-binding baseline.
+- **EXP-000** is the dependency-free synthetic ABI regression foundation.
+- **CJS-F1B** owns generated CUDA ABI facts and independent native layout evidence.
+- **CJS-F2W** owns the accepted Windows Driver/bootstrap evidence path.
+- Native qualification claims remain exact-profile claims; the retained native baseline includes **Windows x64** evidence.
+
+These names are provenance/evidence anchors, not a second capability roadmap. Detailed current status stays in the linked evidence documents.
+
 ## Public API boundary
 
 CUDA-JS owns generic CUDA runtime/toolchain mechanics:
