@@ -26,7 +26,7 @@ The existing accepted dense numeric profile already owns public floating math se
 
 The narrow missing mechanism is therefore another operation in the existing Device-JS math family. The first consumer requires ordinary floating error-function semantics, not a GELU helper or a particular model identity.
 
-CUDA 13.3 provider evidence also bounds the first honest type profile. NVIDIA documents `erff(float)` and `erf(double)` with a maximum error of 2 ULP and documented signed-zero, infinity, and NaN behavior. CUDA extended floating types such as `__half` and `__nv_bfloat16` do not have native error/gamma functions; their generic math path is defined through conversion to `float` and conversion back. Because the current consumer requires `f32`, inventing a public lower-precision conversion/rounding contract would be speculative.
+CUDA 13.3 provider evidence also bounds the first honest type profile. NVIDIA supplies ordinary `erff(float)` and `erf(double)` functions and documents their signed-zero, infinity, and NaN behavior. Its mathematical-function accuracy table reports 2 ULP for both operations, but the CUDA Programming Guide defines those table values as maximum **observed** errors from extensive, non-exhaustive testing and explicitly states that they are not guaranteed bounds. CUDA extended floating types such as `__half` and `__nv_bfloat16` do not have native error/gamma functions; their generic math path is defined through conversion to `float` and conversion back. Because the current consumer requires `f32`, inventing either a public lower-precision conversion/rounding contract or a stronger provider-wide ULP guarantee would be speculative.
 
 ## Public semantics
 
@@ -42,7 +42,7 @@ is the mathematical error function
 2 / sqrt(pi) * integral(exp(-(t*t)), t = 0..x)
 ```
 
-under the admitted provider accuracy contract.
+realized by the exact admitted same-kind provider operation.
 
 The accepted input/result table is:
 
@@ -62,7 +62,9 @@ Special values are semantic requirements, not approximation hints:
 - `erf(-Infinity) = -1`;
 - `erf(NaN)` returns NaN.
 
-For the pinned CUDA 13.3 first provider, the finite-result accuracy bound is the provider's documented maximum **2 ULP** for both `f32` and `f64`, measured against the correctly rounded mathematical result. This is an exact operation-selection contract, not a claim that every finite result is correctly rounded or bit-identical to an unrelated host math library.
+For finite inputs, `SPEC-0030-erf-v1` does **not** manufacture a provider-independent correctly-rounded, bit-identical, or global ULP ceiling that the selected provider does not guarantee. Finite rounding behavior is bound to the exact CompilerActor provider/toolkit/header/target compatibility profile and the same-kind ordinary error-function operation selected by this contract. Provider qualification records independently measure mathematical error for their test corpus and retain the observed result as evidence; NVIDIA's reported 2-ULP values are useful characterization for CUDA 13.3, not semantic authority for a guaranteed CUDA-JS maximum.
+
+A future CUDA-JS profile may add a guaranteed numerical-error ceiling only through separately accepted authority and evidence capable of supporting that stronger claim. Consumers that require a stricter bound must select such a profile or reject before execution rather than infer one from provider documentation.
 
 No tanh approximation, GELU identity, fast-math rewrite, implicit type widening/narrowing, or consumer-specific special case is authorized.
 
@@ -94,7 +96,7 @@ The first accepted CUDA 13.3 realization may lower privately to the provider's o
 - `f32` -> `erff`;
 - `f64` -> `erf`.
 
-Those CUDA names are private lowering details and never appear in the Device-JS public API or consumer metadata. The helper does not create a new public header profile or ambient toolkit dependency. Provider/toolkit identity and target admission remain exact CompilerActor inputs. A provider/target combination that cannot supply the accepted semantics must reject before execution rather than substitute another function or approximation.
+Those CUDA names are private lowering details and never appear in the Device-JS public API or consumer metadata. The helper does not create a new public header profile or ambient toolkit dependency. Provider/toolkit identity and target admission remain exact CompilerActor inputs. A provider/target combination that cannot supply the accepted same-kind operation and special-value semantics must reject before execution rather than substitute another function or approximation.
 
 ## Bounds, failures, and lifecycle
 
@@ -127,10 +129,10 @@ Before implementation can be called portable/software-qualified, evidence must p
 
 Native promotion is separate from portable implementation. It requires one exact recorded provider packet naming package revision, CUDA toolkit/provider revision, target architecture, generated artifact identity, and execution environment.
 
-An independently owned oracle must cover representative finite positive/negative values, odd symmetry, values near zero and in the tails, both signed zeros, both infinities, and NaN. Finite `f32` and `f64` results must satisfy the pinned provider's documented 2-ULP maximum; signed-zero and infinity results must satisfy the exact special-value contract and NaN must remain NaN.
+An independently authored CUDA C++ parity oracle must cover representative finite positive/negative values, odd symmetry, values near zero and in the tails, both signed zeros, both infinities, and NaN using the same declared provider operation kind. Generated Device-JS results must match that independently compiled same-provider operation according to the exact dtype result. A separate high-precision mathematical oracle must characterize finite error for the retained corpus and report the observed ULP/error result without upgrading an observed maximum into a provider-wide guarantee. Signed-zero and infinity results must satisfy the exact special-value contract and NaN must remain NaN.
 
 Evidence must use the installed public CUDA-JS path, include negative controls that would detect a tanh-style substitute or precision-changing conversion path, and end with the ordinary zero-resource terminal cleanup proof. A passing portable mock or generated-source inspection is not native support evidence.
 
 ## Non-goals
 
-`f16`/`bf16` error-function semantics, GELU or activation helpers, tensor operations/shapes, model heads, search semantics, arbitrary CUDA math exposure, fast-math variants, provider-independent bit identity, public CUDA intrinsic/header names, new native owners, or performance claims.
+`f16`/`bf16` error-function semantics, GELU or activation helpers, tensor operations/shapes, model heads, search semantics, arbitrary CUDA math exposure, fast-math variants, provider-independent bit identity, a provider-independent finite ULP guarantee, public CUDA intrinsic/header names, new native owners, or performance claims.
