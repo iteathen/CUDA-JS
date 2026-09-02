@@ -1,6 +1,6 @@
 # SPEC-0030 Addendum: Floating error-function helper
 
-**Status:** Proposal
+**Status:** Accepted
 
 **Date:** 2026-09-01
 
@@ -18,7 +18,7 @@ gpu.math.erf(x)
 
 The first profile accepts exactly `f32` and `f64` and returns the same scalar kind as its input. It does not add tensor, neural-network, model, search, chess, or application semantics to CUDA-JS.
 
-This document is a **proposal**. It does not authorize production implementation until independently accepted through the repository's normal specification review gate.
+This addendum was accepted through the repository-owner-authorized specification review and exact-head transport recorded in PRs #158 and #159. Acceptance authorizes only the bounded public semantics in this addendum; portable implementation evidence and native/support promotion remain separately gated below.
 
 ## Assessment and ownership
 
