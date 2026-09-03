@@ -57,6 +57,10 @@ The architecture umbrella #162 is closed completed. Future generic lower gaps mu
 
 `DriverActor` remains the Worker/context/native-resource owner. **CJS-F1B** remains the generated CUDA ABI-fact and independent layout-evidence anchor; **CJS-F2W** remains the accepted **Windows x64** Driver/bootstrap anchor; **CJS-F7W** remains the retained Windows platform-hardening/property/lifecycle anchor. Historical native evidence stays exact to its recorded revisions/profiles and is not silently requalified by alpha.18 metadata.
 
+## External CUDA-NN ownership
+
+**External CUDA-NN ownership** remains governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to the independent CUDA-NN repository. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those reusable NN semantics **no longer belong to a future publish unit in this repository**. Alpha.18 changes only the generic lower memory compatibility projection and does not reopen NN ownership.
+
 ## Downstream seam
 
 CUDA-MCGS #122 is protected-accepted. CUDA-MCGS #125 must consume the alignment fact only after #197 is qualified and separately protected-integrated; it must not assume the native CUDA fact or add a private/native workaround. After that lower gate, #125 can continue implementing the public runtime adapter and route any additional demonstrated generic gap back to its natural lower owner.
