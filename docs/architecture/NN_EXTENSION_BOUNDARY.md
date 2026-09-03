@@ -72,6 +72,8 @@ Current lower-layer trackers are CUDA-JS #75 for generic cuBLASLt, #163 for defe
 
 ADR-0004 and SPEC-0027 remain immutable historical accepted records documenting the earlier same-repository isolation decision. ADR-0007 supersedes their **repository/product placement** for current work.
 
+For historical validation/provenance, the superseded projection was: **Projection:** Accepted ADR-0004 and SPEC-0027; the NN product was a separate publish unit in the same repository, with implementation status `not-implemented` and qualification status `not-qualified`.
+
 Useful isolation rationale remains valid where it agrees with current owners, but neither historical record authorizes `nn.*` source, package/workspace creation, local Tensor semantics, or a training-first implementation roadmap in CUDA-JS.
 
 ## Current status and falsifiers
