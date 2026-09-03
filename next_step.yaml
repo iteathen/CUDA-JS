@@ -1,50 +1,68 @@
 {
-  "schema_version": 61,
+  "schema_version": 62,
   "updated": "2026-09-03",
-  "status": "tensor_physical_boundary_handoff",
-  "objective": "Keep CUDA-JS consumer-neutral while the active portfolio refactor removes copied CUDA/provider facts from CUDA-JS-Tensor. The alpha.17 compatibility projection supplies lower prepared-DAG and Device-JS ceilings without introducing a launch resolver, universal preparation transaction, provider registry, or consumer semantics.",
+  "status": "mcgs_alignment_projection_gate",
+  "objective": "Keep CUDA-JS consumer-neutral while resolving the demonstrated ordinary device-allocation alignment gap required by CUDA-MCGS #125. Do not reopen completed ownership-audit abstractions or dormant roadmap mechanisms without concrete new evidence.",
   "package_candidate": "cuda-js@0.1.0-alpha.17",
   "completed_refactor_nodes": [
-    "#178 provider capability/admission truth: existing SPEC-0023/SPEC-0029 model retained; workspace alignment and unsupported fallback truth publicly usable",
-    "#179 cuBLASLt borrower lifecycle: one runtime-owned underlying provider with independent public borrowers; no generic provider-sharing model",
-    "#180 executable-preparation decision: no new higher-level transaction; existing compiler/artifact/module/function/provider/prepared-DAG bricks remain the correct composition seam",
-    "#181 launch-resolution decision: no new resolver; explicit grid/block remains canonical and upper selected physical-profile geometry remains upper-owned",
-    "#186 finite public compatibility projection: SPEC-0020 prepared-DAG ceilings and Device-JS per-function parameter ceiling are exposed through immutable CUDA_JS_COMPATIBILITY"
+    "#178 provider capability/admission truth completed",
+    "#179 cuBLASLt borrower lifecycle completed without a generic provider lease",
+    "#180 completed with no new preparation transaction",
+    "#181 completed with explicit launch geometry retained and no logical-work resolver",
+    "#186 finite prepared-DAG and Device-JS lower limits projected publicly",
+    "#162 consumer-neutral mechanism ownership audit closed completed after Tensor and MCGS peer audits",
+    "CUDA-JS-Tensor #40/#44/#45 ownership cleanup completed",
+    "CUDA-MCGS #193 execution-boundary audit completed and #122 semantic packet protected-accepted"
   ],
   "current_focus": {
-    "repository": "iteathen/CUDA-JS-Tensor",
-    "issue": 45,
-    "name": "physical lowering migration",
-    "next_action": "Advance Tensor to the protected alpha.17 CUDA-JS revision. Consume CUDA_JS_COMPATIBILITY preparedOperationDagLimits and deviceJsLimits instead of copied lower ceilings; preserve Tensor-owned mathematics, liveness, access/dependency meaning, workspace budgets, blockSize and logical-work-to-grid mapping; preserve the accepted explicit ptx/lto-ir artifact-family choice while validating it against the public lower compatibility set. Continue using the existing public compile/module/function/prepareOperationDag bricks and reverse-order adapter cleanup.",
-    "exit": "Tensor #45 is protected-integrated with no copied CUDA-JS provider lifecycle, provider facts, prepared-DAG ceilings, or Device-JS parameter ceiling; no second runtime lifecycle or speculative lower abstraction exists."
+    "repository": "iteathen/CUDA-JS",
+    "issue": 193,
+    "name": "ordinary device-allocation minimum alignment",
+    "state": "authority draft PR #194 reviewed/green but unmerged; fresh exact-head integration authorization remains separate",
+    "next_action": "Keep PR #194 confined to the bounded runtime.memory base-allocation alignment authority. After normal protected integration/readback, implement one immutable CUDA_JS_COMPATIBILITY projection mechanically tied to the lower memory owner, prove 8/256-byte admission and above-guarantee rejection, and provide installed-package evidence. Do not add an aligned allocator or confer base alignment on arbitrary offset views.",
+    "exit": "A public consumer can decide before allocation whether an ordinary CUDA-JS base allocation satisfies a requested power-of-two alignment; CUDA-MCGS #125 can consume that fact without private/native assumptions."
   },
   "after_current_focus": [
-    "CUDA-JS-Tensor #40 final execution-ownership reconciliation",
-    "CUDA-MCGS #193 execution-package/CUDA-JS adapter ownership audit",
-    "CUDA-MCGS #125 only after all independent prerequisites are satisfied"
+    "CUDA-MCGS #125 implements the accepted execution-package -> public CUDA-JS adapter",
+    "CUDA-JS #32 freezes and qualifies one exact CUDA-MCGS/CUDA-JS compatible pair",
+    "CUDA-JS #157 and CUDA-JS-Tensor #32/#37 continue the independent first-real-model Tensor lane"
   ],
   "cross_repo_ownership": {
     "cuda_nn": {
       "id": "CJS-CUDA-NN-EXTERNAL",
       "authority": "ADR-0007",
       "disposition": "Reusable NN/model/inference/autodiff/training semantics are external to CUDA-JS and belong to iteathen/cuda-nn."
+    },
+    "cuda_mcgs": {
+      "issue": 125,
+      "disposition": "CUDA-MCGS owns search semantics and adapter translation; CUDA-JS owns generic lower runtime/mechanism contracts and compatibility facts."
     }
   },
   "durable_authority_markers": [
     "CJS-F0",
     "CJS-F1A",
     "ADR-0002-node-ffi-first-host-binding.md",
-    "ADR-0007"
+    "ADR-0007",
+    "SPEC-0004-device-memory-foundation.md",
+    "SPEC-0008-package-public-facade.md"
   ],
   "parallel_external_lanes": [
-    "Native Linux x86-64 qualification remains contributor/external evidence work on a directly exposed physical NVIDIA host.",
-    "Exact native promotion for other already-implemented capabilities remains independent and does not block the Tensor ownership refactor unless a selected profile specifically requires it."
+    "Native Linux x86-64 qualification remains contributor/external evidence work on a directly exposed physical NVIDIA host under #4.",
+    "Hardware/provider/platform compatibility cells remain independent evidence work and do not keep completed implementation issues open.",
+    "Private-vulnerability reporting unaffiliated two-party proof remains operational evidence under #68."
+  ],
+  "issue_tracker_rule": [
+    "Issues own concrete actionable obligations, explicit blocked gates, or concrete external evidence cells.",
+    "Protected STATUS.md and next_step.yaml own the live execution seam.",
+    "Dormant provider/service/optimization possibilities remain roadmap/history until a real consumer or measurement activates them.",
+    "Completed capabilities close; unspecified future profile qualification is owned by qualification campaigns rather than the implementation issue."
   ],
   "hard_constraints": [
     "Do not add Tensor, NN, MCGS, media, data, ray, graph-analysis or other consumer semantics to CUDA-JS.",
     "Do not replace explicit expert launch geometry with a mandatory logical-work resolver.",
     "Do not create a universal PreparedExecutable/GpuProgram/provider registry merely to reduce adapter code.",
+    "Do not expose raw pointers/native handles/provider paths or private CUDA-JS internals.",
     "Do not treat portable/mock evidence as native qualification.",
-    "Do not modify CUDA-MCGS #122 without explicit project-owner authorization."
+    "Do not merge PR #194 or any later protected subject without its normal exact-head review/authorization gate."
   ]
 }
