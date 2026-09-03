@@ -43,7 +43,7 @@ Correctness, safety, lifecycle truth, recoverability and compatibility are gates
 ## Non-negotiable boundaries
 
 - The published `cuda-js` package is a generic Node/CUDA runtime/toolchain. It contains no MCGS, minimax, graph-search, game, tensor, model, training, optimizer, evaluator, or application scheduler semantics.
-- **ADR-0004 and SPEC-0027** authorize an optional application-neutral NN product only as a **separate future publish unit in the same repository**. Its package name and directory remain unselected. Every `nn.*` production boundary requires its own accepted child specification.
+- **ADR-0007** assigns reusable NN/model/inference/autodiff/training semantics to independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to `iteathen/CUDA-JS-Tensor`. Historical ADR-0004/SPEC-0027 remain provenance for the superseded same-repository isolation plan and do not authorize `nn.*` production components here. CUDA-NN may consume only public lower-layer contracts and remains independently implementation-gated.
 - The first consumer cannot define foundational schema, memory, launch, error, or lifetime contracts.
 - Version zero is Node-FFI-first and ships no CUDA-JS project-specific compiled addon. Custom AsmJit/register stubs remain a deferred measured-gap option.
 - The canonical source-architecture description is **JavaScript-authored and JIT/native-realized**. Maintained core runtime source is JavaScript; Node/native CUDA libraries and generated device artifacts realize execution; C/C++ probes/oracles remain independent evidence rather than package runtime. Do not use unqualified “pure JavaScript” as normative wording or introduce a maintained native host backend without an accepted measured-gap decision under ADR-0005.
@@ -125,6 +125,8 @@ Issue #64 still requires exact merged-head Windows Node 26.7.0 F5 revalidation. 
 
 The exact CUDA-MCGS compatible pair remains cross-repository work. Generic CUDA-JS contracts must remain coherent if CUDA-MCGS is removed.
 
+CUDA-NN is an independent upper-layer consumer at `iteathen/cuda-nn`. Its repository creation and bootstrap authority do not establish a production NN API or compatibility claim. Missing generic CUDA mechanisms discovered by CUDA-NN must route through accepted public CUDA-JS capability work; generic Tensor mathematics routes to CUDA-JS-Tensor rather than being reimplemented in either CUDA-JS core or CUDA-NN.
+
 ## Reasoning and experiment gate
 
 Before changing Node FFI safety, ABI packing, context affinity, asynchronous completion, memory visibility, error poisoning, compiler semantics, cache identity, native security or teardown:
@@ -150,7 +152,7 @@ tests/         cross-component/end-to-end tests only
 third_party/   donor material with exact provenance
 ```
 
-No production source belongs in the repository root or an unowned catch-all directory.
+No production source belongs in the repository root or an unowned catch-all directory. CUDA-NN source belongs in its independent repository, not under a new CUDA-JS top-level NN/package/workspace directory.
 
 ## Validation
 
