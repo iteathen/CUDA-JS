@@ -89,7 +89,7 @@ test('prepared cuBLASLt nodes derive a bounded binding schema without changing k
       maxWorkspaceBytes: 256,
       workspaceBytes: 256,
       requirements: { a: 6, b: 6, c: 4, d: 4 },
-      provider: { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' },
+      provider: { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile', workspaceAlignmentBytes: 256 },
     },
     a: { binding: 'buffer', kind: 'device-memory' },
     b: { binding: 'b', kind: 'device-memory' },
@@ -113,6 +113,8 @@ test('prepared cuBLASLt nodes derive a bounded binding schema without changing k
     { name: 'scale', kind: 'f32' },
     { name: 'workspace', kind: 'device-memory' },
   ]);
+  assert.equal(mixed.nodes.find((entry) => entry.id === 'matmul').plan.provider.workspaceAlignmentBytes, 256);
   assert.throws(() => normalizePreparedOperationDag({ executionProfile, nodes: [{ ...libraryNode, workspace: null }] }), (error) => error.code === 'PREPARED_DAG_CUBLASLT_WORKSPACE_INVALID');
   assert.throws(() => normalizePreparedOperationDag({ executionProfile, nodes: [{ ...libraryNode, beta: { kind: 'f32', packedHex: '0000' } }] }), (error) => error.code === 'PREPARED_DAG_ARGUMENT_INVALID');
+  assert.throws(() => normalizePreparedOperationDag({ executionProfile, nodes: [{ ...libraryNode, plan: { ...libraryNode.plan, provider: { ...libraryNode.plan.provider, workspaceAlignmentBytes: 128 } } }] }), (error) => error.code === 'PREPARED_DAG_CUBLASLT_PLAN_INVALID');
 });

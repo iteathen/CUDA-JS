@@ -23,6 +23,10 @@ function fixture(overrides = {}) {
   };
 }
 
+function unsupported(code) {
+  return (error) => error.code === code && error.category === 'unsupported';
+}
+
 test('cuBLASLt provider profile is exact, canonical, and path-free to callers', async () => {
   const profile = await resolveWindowsCublasLtProfile(fixture());
   assert.equal(profile.providerPath, path.win32.join(root, 'bin', 'x64', 'cublasLt64_13.dll'));
@@ -30,7 +34,7 @@ test('cuBLASLt provider profile is exact, canonical, and path-free to callers', 
 });
 
 test('missing, noncanonical, and wrong-identity provider profiles fail before native resource creation', async () => {
-  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ exists: () => false })), (error) => error.code === 'CUBLASLT_PROVIDER_UNAVAILABLE');
-  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ realpath: (value) => `${value}.redirected` })), (error) => error.code === 'CUBLASLT_PROVIDER_NONCANONICAL');
-  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ hashFile: async () => 'wrong' })), (error) => error.code === 'CUBLASLT_PROVIDER_IDENTITY');
+  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ exists: () => false })), unsupported('CUBLASLT_PROVIDER_UNAVAILABLE'));
+  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ realpath: (value) => `${value}.redirected` })), unsupported('CUBLASLT_PROVIDER_NONCANONICAL'));
+  await assert.rejects(resolveWindowsCublasLtProfile(fixture({ hashFile: async () => 'wrong' })), unsupported('CUBLASLT_PROVIDER_IDENTITY'));
 });

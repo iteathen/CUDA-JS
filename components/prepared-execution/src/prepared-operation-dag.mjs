@@ -157,8 +157,9 @@ function normalizeCublasLtPlan(value, node) {
       || !Number.isSafeInteger(value.workspaceBytes) || value.workspaceBytes < 0 || value.workspaceBytes > value.maxWorkspaceBytes
       || !exactFields(value.requirements, ['a', 'b', 'c', 'd'])
       || !['a', 'b', 'c', 'd'].every((field) => Number.isSafeInteger(value.requirements[field]) && value.requirements[field] >= 1)
-      || !exactFields(value.provider, ['name', 'version', 'qualification'])
-      || !['name', 'version', 'qualification'].every((field) => typeof value.provider[field] === 'string' && value.provider[field].length >= 1 && value.provider[field].length <= 128 && /^[\x20-\x7e]+$/.test(value.provider[field]) && !/[\\/]/.test(value.provider[field]))) {
+      || !exactFields(value.provider, ['name', 'version', 'qualification', 'workspaceAlignmentBytes'])
+      || !['name', 'version', 'qualification'].every((field) => typeof value.provider[field] === 'string' && value.provider[field].length >= 1 && value.provider[field].length <= 128 && /^[\x20-\x7e]+$/.test(value.provider[field]) && !/[\\/]/.test(value.provider[field]))
+      || value.provider.workspaceAlignmentBytes !== 256) {
     fail('PREPARED_DAG_CUBLASLT_PLAN_INVALID', 'Prepared cuBLASLt plan identity is invalid.', { node });
   }
   const expectedRequirements = { a: value.m * value.k, b: value.k * value.n, c: value.m * value.n, d: value.m * value.n };
@@ -175,7 +176,7 @@ function normalizeCublasLtPlan(value, node) {
     maxWorkspaceBytes: value.maxWorkspaceBytes,
     workspaceBytes: value.workspaceBytes,
     requirements: { a: value.requirements.a, b: value.requirements.b, c: value.requirements.c, d: value.requirements.d },
-    provider: { name: value.provider.name, version: value.provider.version, qualification: value.provider.qualification },
+    provider: { name: value.provider.name, version: value.provider.version, qualification: value.provider.qualification, workspaceAlignmentBytes: value.provider.workspaceAlignmentBytes },
   };
 }
 

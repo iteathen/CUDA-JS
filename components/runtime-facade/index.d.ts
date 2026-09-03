@@ -348,7 +348,7 @@ export interface CudaCublasLtMatmulPlan {
 export interface CudaCublasLt {
   readonly kind: 'cublaslt-adapter';
   readonly profile: 'cublaslt-f32-row-major-matmul-v1';
-  readonly provider: Readonly<{ name: string; version: string; qualification: string }>;
+  readonly provider: Readonly<{ name: string; version: string; qualification: string; workspaceAlignmentBytes: number }>;
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
   createF32MatmulPlan(options: CudaCublasLtF32MatmulPlanOptions): Promise<CudaCublasLtMatmulPlan>;

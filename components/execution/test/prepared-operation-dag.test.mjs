@@ -239,7 +239,7 @@ test('prepared library-node failure after a kernel is conservatively restart-req
           plan: {
             contract: 'SPEC-0029-cublaslt-f32-row-major-matmul-v1', m: 1, n: 1, k: 1, transposeA: false, transposeB: false,
             maxWorkspaceBytes: 0, workspaceBytes: 0, requirements: { a: 1, b: 1, c: 1, d: 1 },
-            provider: { name: 'test-provider', version: '1', qualification: 'test-only' },
+            provider: { name: 'test-provider', version: '1', qualification: 'test-only', workspaceAlignmentBytes: 256 },
           },
           a: reference, b: reference, c: reference, d: reference,
           alpha: { kind: 'f32', packedHex: '0000803f' }, beta: { kind: 'f32', packedHex: '00000000' }, workspace: null,

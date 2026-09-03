@@ -3,6 +3,7 @@ const SUBMIT_FIELDS = new Set(['a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace',
 const PREPARED_NODE_FIELDS = new Set(['id', 'kind', 'after', 'planToken', 'a', 'b', 'c', 'd', 'alpha', 'beta', 'workspace']);
 const MAX_DIMENSION = 0x7fff_ffff;
 const MAX_WORKSPACE_BYTES = 256 * 1_048_576;
+const CUBLASLT_WORKSPACE_ALIGNMENT_BYTES = 256;
 
 export class CudaLibraryAdapterError extends Error {
   constructor(code, category, message, details = {}, state = {}) {
@@ -144,7 +145,7 @@ export class CudaLibraryAdapterManager {
     let token;
     try {
       token = this.#registry.allocate({
-        kind: 'cublaslt-adapter', value: Object.freeze({ native: backend.native, provider: Object.freeze({ ...backend.provider }) }), parent: this.#contextToken,
+        kind: 'cublaslt-adapter', value: Object.freeze({ native: backend.native, provider: Object.freeze({ ...backend.provider, workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES }) }), parent: this.#contextToken,
         dispose: async (record) => Object.freeze({ kind: 'cublaslt-adapter', closed: true, backend: await this.#operations.closeCublasLt({ native: record.native, operationId: null }) ?? null }),
       });
     } catch (error) {
@@ -313,7 +314,7 @@ export class CudaLibraryAdapterManager {
       const value = bindings.get(node.workspace.binding);
       if (!value || value.argument?.kind !== 'device-view') fail('CUBLASLT_PREPARED_VIEW_REQUIRED', 'validation', 'Prepared workspace must resolve to a device view.', { field: 'workspace' });
       if (value.lease.viewByteLength < node.planValue.workspaceBytes) fail('CUBLASLT_WORKSPACE_TOO_SMALL', 'validation', 'The workspace view is smaller than the plan requirement.', { expected: node.planValue.workspaceBytes, actual: value.lease.viewByteLength });
-      if (value.lease.byteOffset % 256 !== 0) fail('CUBLASLT_WORKSPACE_ALIGNMENT', 'validation', 'The workspace view must begin at a 256-byte-aligned offset.');
+      if (value.lease.byteOffset % CUBLASLT_WORKSPACE_ALIGNMENT_BYTES !== 0) fail('CUBLASLT_WORKSPACE_ALIGNMENT', 'validation', `The workspace view must begin at a ${CUBLASLT_WORKSPACE_ALIGNMENT_BYTES}-byte-aligned offset.`, { workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES });
       if (!viewAllows(value.lease.viewAccess, 'read-write')) fail('MEMORY_VIEW_ACCESS_DENIED', 'validation', 'Prepared workspace requires read-write view access.', { field: 'workspace', declared: value.lease.viewAccess, requested: 'read-write' });
       workspace = Object.freeze({ native: value.lease.native, byteOffset: value.lease.byteOffset, byteLength: node.planValue.workspaceBytes });
     }
@@ -362,7 +363,7 @@ export class CudaLibraryAdapterManager {
     let memoryLease;
     try {
       if (viewLease.byteLength < byteLength) fail('CUBLASLT_WORKSPACE_TOO_SMALL', 'validation', 'The workspace view is smaller than the plan requirement.', { expected: byteLength, actual: viewLease.byteLength });
-      if (viewLease.byteOffset % 256 !== 0) fail('CUBLASLT_WORKSPACE_ALIGNMENT', 'validation', 'The workspace view must begin at a 256-byte-aligned offset.');
+      if (viewLease.byteOffset % CUBLASLT_WORKSPACE_ALIGNMENT_BYTES !== 0) fail('CUBLASLT_WORKSPACE_ALIGNMENT', 'validation', `The workspace view must begin at a ${CUBLASLT_WORKSPACE_ALIGNMENT_BYTES}-byte-aligned offset.`, { workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES });
       memoryLease = this.#memory.acquireForExecution(viewLease.memory, viewLease.byteOffset);
     } catch (error) { viewLease.release(); throw error; }
     let released = false;
