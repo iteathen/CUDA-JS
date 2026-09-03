@@ -1,3 +1,5 @@
+export { DEVICE_MEMORY_ALLOCATION_MINIMUM_ALIGNMENT_BYTES } from './src/allocation-compatibility.mjs';
+
 export {
   DEFAULT_MEMORY_POLICY,
   MemoryError,
