@@ -9,8 +9,11 @@ function workspaceAlignmentFailure(alignment) {
     && error.details?.workspaceAlignmentBytes === alignment;
 }
 
-test('public cuBLASLt capability owns workspace alignment for ordinary and prepared execution', async () => {
+test('public cuBLASLt capability owns workspace alignment for ordinary and prepared execution', async (t) => {
   const runtime = await openCudaRuntimeForTesting();
+  t.after(async () => {
+    if (runtime.state === 'open') await runtime.close();
+  });
   const matrixMemory = await runtime.allocateDevice({ byteLength: 4 });
   const matrix = await matrixMemory.view({ dtype: 'f32', elementCount: 1 });
   const workspaceMemory = await runtime.allocateDevice({ byteLength: 512 });
