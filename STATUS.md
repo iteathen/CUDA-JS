@@ -48,6 +48,14 @@ The current public/software/package substrate includes bounded device discovery/
 
 CUDA-JS remains consumer-neutral. Tensor mathematics/planning belong to CUDA-JS-Tensor; reusable NN semantics belong to cuda-nn; search semantics belong to CUDA-MCGS; RNG/communication/I/O/media/data/ray/graph-analysis semantics remain in their independent owners.
 
+## Durable architecture and evidence anchors
+
+The refactor does not erase established architecture/evidence provenance. `DriverActor` remains the Worker/context/native-resource owner. **CJS-F1B** remains the generated CUDA ABI-fact and independent layout-evidence anchor; **CJS-F2W** remains the accepted Windows Driver/bootstrap anchor; **CJS-F7W** remains the retained Windows platform-hardening/property/lifecycle anchor. The accepted historical **Windows x64** qualification evidence remains exact to its recorded revisions and profiles rather than being requalified by alpha.17 metadata changes.
+
+## External CUDA-NN ownership
+
+ADR-0007 assigns reusable NN/model/inference/autodiff/training semantics to the independent CUDA-NN repository. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` is retained for auditability; newer cuda-nn revisions supersede it for live implementation state. Those reusable NN semantics **no longer belong to a future publish unit in this repository**. Historical ADR-0004/SPEC-0027 remain provenance only and do not authorize new `nn.*` CUDA-JS production components.
+
 ## Qualification limits
 
 Portable/mock/package evidence proves only the code paths it executes. Existing exact Windows evidence remains exact to its recorded Node/Driver/toolkit/provider/GPU revisions and is not silently requalified merely because alpha.17 adds side-effect-free compatibility metadata. Native Linux, other GPUs/providers, broader topology, multi-GPU, performance, strict-JIT and process-isolation claims remain independently gated.
