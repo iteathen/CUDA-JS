@@ -39,6 +39,7 @@ jobs:
       - run: npm run f3:portable
       - run: npm run f4:portable
       - run: npm run f5:portable
+      - run: npm run library:portable
       - run: npm run exp:014
       - run: npm run f6:portable
       - run: node scripts/run-f6.mjs linux-readiness
