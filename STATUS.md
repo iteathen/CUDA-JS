@@ -7,57 +7,62 @@
 ## Current package and boundary state
 
 ```text
-package candidate:            cuda-js@0.1.0-alpha.17
+protected package:            cuda-js@0.1.0-alpha.17
+implementation candidate:     cuda-js@0.1.0-alpha.18
 public API schema:            1
 host source model:            JavaScript/ESM, Worker-owned Node FFI
 exact Node evidence baseline: Node 26.7.0
 native Linux x86-64:          testing-unconfirmed / not-qualified
 performance claims:           none beyond exact recorded evidence
-active lower gap:             #193 ordinary base-allocation alignment projection
-cross-repository consumer:    CUDA-MCGS #125 public runtime adapter
+active implementation:        #193 ordinary base-allocation alignment projection
+first consumer:               CUDA-MCGS #125 public runtime adapter
 ```
 
 CUDA-JS owns generic CUDA device/context/memory/compiler/artifact/module/function/operation/prepared-execution/provider mechanism and lower compatibility facts. CUDA-JS-Tensor owns Tensor mathematics/planning; CUDA-MCGS owns search semantics and selected search-profile policy; reusable NN/RNG/communication/I/O/media/ray/data semantics remain in their independent owners.
 
+## Accepted alignment authority
+
+PR #196 protected-integrated the accepted SPEC-0004 allocation-alignment addendum at `426e4eb9b0c73346b19e60c81ab686b9eb5be256`, tree `a2dd4aca91456f8544b14c1312ac36c03c396808`. The authority establishes exactly one generic lower fact: ordinary CUDA-JS base allocations have a minimum alignment of 256 bytes, owned by `runtime.memory` and projected through immutable `CUDA_JS_COMPATIBILITY`.
+
+The contract does **not** add caller-selected allocation alignment, raw pointers, VMM/suballocation, a blanket guarantee for nonzero-offset views, native support promotion, or performance claims.
+
+A subsequent accidental direct create/revert of a root `noop` file changed protected history only. Current protected `main@2d43d9a5e1d4391b27966f9fcd681a15df26d346` is byte-for-byte restored to the same authorized tree `a2dd4aca91456f8544b14c1312ac36c03c396808`, and its push `verify` and `node-compatibility` workflows pass. The event is retained as governance evidence rather than hidden by history rewriting.
+
+## Alpha.18 implementation candidate
+
+Draft PR #197 implements only the accepted projection:
+
+- one memory-component owner constant for the 256-byte ordinary base-allocation minimum;
+- `CUDA_JS_COMPATIBILITY.capabilities.deviceMemoryAllocationMinimumAlignmentBytes = 256` mechanically checked against that owner;
+- an installed public compatibility consumer that admits 8-byte and 256-byte base requirements and rejects 512-byte requirements;
+- prerelease identity advanced to `0.1.0-alpha.18` because the public compatibility product materially changes;
+- existing `allocateDevice({ byteLength })`, view-offset semantics, native calls, lifecycle, errors, health and cleanup remain unchanged.
+
+The red-first probe on PR #197 failed exactly because the memory component did not yet export the required lower owner; all earlier portable stages passed before F8 reached that falsifier. Production implementation then fills that demonstrated gap rather than widening the API.
+
 ## Completed lower-boundary refactor
 
-The protected alpha.17 line already completed the consumer-ownership audit that motivated #162:
+The prior consumer-ownership audit remains complete:
 
 - #178 — provider capability/admission truth is publicly consumable;
-- #179 — cuBLASLt-specific borrower lifecycle is lower-owned without inventing a generic provider lease;
-- #180 — no universal preparation transaction was justified; existing compiler/module/function/provider-plan/prepared-DAG resources remain the composition seam;
-- #181 — no logical-work launch resolver was justified; explicit geometry remains the public expert contract while upper selected profiles own their physical-policy choices;
-- #186 — prepared-DAG and Device-JS finite lower ceilings are projected through immutable `CUDA_JS_COMPATIBILITY` with drift falsifiers;
-- CUDA-JS-Tensor #40/#44/#45 and CUDA-MCGS #193 completed their corresponding upper-boundary audits.
+- #179 — cuBLASLt-specific borrower lifecycle is lower-owned without a generic provider lease;
+- #180 — no universal preparation transaction; existing compiler/module/function/provider-plan/prepared-DAG resources remain the seam;
+- #181 — no logical-work launch resolver; explicit geometry remains the public expert contract;
+- #186 — prepared-DAG and Device-JS finite lower ceilings are projected through immutable compatibility records;
+- CUDA-JS-Tensor #40/#44/#45 and CUDA-MCGS #193 completed their peer ownership audits.
 
-The architecture umbrella #162 is therefore closed completed. Future generic lower gaps must be opened only from demonstrated consumer need rather than from the umbrella.
-
-## Existing generic substrate
-
-The public/software/package substrate includes bounded device discovery/selection, device memory and contiguous typed views, module/function resources, explicit launch/completion, operation lifecycle, the accepted capacity-two scheduling profile, bounded async transfer, publication mailboxes, NVRTC/nvJitLink compilation and typed artifacts, restricted Device-JS, Device-JS leaf-library composition, dense numeric Device-JS, immutable prepared DAGs, and the bounded cuBLASLt f32 profile including prepared-DAG composition.
-
-The public compatibility object exposes lower-owned prepared-DAG limits, Device-JS parameter limits, compiler output families, provider capability facts and other finite compatibility records. Those projections are not second validation owners.
+The architecture umbrella #162 is closed completed. Future generic lower gaps must come from demonstrated consumer need.
 
 ## Durable architecture and evidence anchors
 
-The issue-tracker cleanup does not erase established architecture/evidence provenance. `DriverActor` remains the Worker/context/native-resource owner. **CJS-F1B** remains the generated CUDA ABI-fact and independent layout-evidence anchor; **CJS-F2W** remains the accepted **Windows x64** Driver/bootstrap anchor; **CJS-F7W** remains the retained Windows platform-hardening/property/lifecycle anchor. Historical native evidence stays exact to its recorded revisions/profiles and is not silently requalified by current metadata changes.
+`DriverActor` remains the Worker/context/native-resource owner. **CJS-F1B** remains the generated CUDA ABI-fact and independent layout-evidence anchor; **CJS-F2W** remains the accepted **Windows x64** Driver/bootstrap anchor; **CJS-F7W** remains the retained Windows platform-hardening/property/lifecycle anchor. Historical native evidence stays exact to its recorded revisions/profiles and is not silently requalified by alpha.18 metadata.
 
-## Current consumer-backed lower gap
+## Downstream seam
 
-CUDA-MCGS #122 is protected-accepted and its production adapter owner #125 is now dependency-ready except for demonstrated lower capability gaps. The first such gap is CUDA-JS #193: accepted MCGS resource requirements need to prove ordinary base-allocation alignment before partial realization, while alpha.17 exposes no public allocation-alignment guarantee.
-
-Research resolved the lower contract to a minimum **256-byte base-allocation alignment** for the existing ordinary CUDA allocation path. The selected correction is an additive compatibility projection owned by `runtime.memory`; it does not add a caller-selected aligned allocator and does not confer 256-byte alignment on arbitrary nonzero-offset views.
-
-Draft authority PR #194 exists for that exact bounded contract and remains unmerged pending its normal exact-head review/authorization gate. After protected authority/readback, implementation should project the single lower-owned fact with drift/package evidence, then CUDA-MCGS #125 can consume it through public contracts.
-
-## External CUDA-NN ownership
-
-**External CUDA-NN ownership** is governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to `iteathen/cuda-nn`; the historical provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only. Those semantics **no longer belong to a future publish unit in this repository**. CUDA-JS remains the generic lower CUDA mechanism owner.
+CUDA-MCGS #122 is protected-accepted. CUDA-MCGS #125 must consume the alignment fact only after #197 is qualified and separately protected-integrated; it must not assume the native CUDA fact or add a private/native workaround. After that lower gate, #125 can continue implementing the public runtime adapter and route any additional demonstrated generic gap back to its natural lower owner.
 
 ## Qualification and issue-state policy
 
-Portable/mock/package evidence proves only the paths it executes. Existing exact Windows evidence remains exact to its recorded Node/Driver/toolkit/provider/GPU revisions. Native Linux, additional hardware/provider cells, WSL/ARM64/Jetson/TCC/virtualization/MIG/ECC, performance and stability remain independently qualified through their concrete evidence issues/campaigns.
-
-The 2026-09-03 tracker review closed completed implementation tickets that were being held open only for unspecified future qualification and closed dormant provider/service/optimization possibilities as `not planned` until a real consumer/profile activates them. Roadmap possibilities remain documented; they are not active engineering backlog merely because they are conceivable.
+Portable/mock/package evidence proves only the paths it executes. Native Linux, additional hardware/provider cells, WSL/ARM64/Jetson/TCC/virtualization/MIG/ECC, performance and stability remain independent evidence work. Completed implementation tickets close rather than remaining open for unspecified future cells; dormant roadmap possibilities remain dormant until a real consumer/profile activates them.
 
 Protected `STATUS.md` and `next_step.yaml` own the live execution seam. Issues own durable obligations, blocked gates and concrete evidence cells rather than duplicate live-SHA timelines.
