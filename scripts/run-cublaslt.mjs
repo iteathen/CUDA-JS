@@ -17,7 +17,7 @@ function run(command, args, options = {}) {
 }
 
 if (!['portable', 'native'].includes(action)) throw new Error(`Unknown cuBLASLt validation action: ${action}`);
-run(node, ['--experimental-ffi', '--test', 'components/cuda-library-adapters/test/public-cublaslt.test.mjs', 'components/cuda-library-adapters/test/provider-profile.test.mjs'], { stdio: 'inherit' });
+run(node, ['--experimental-ffi', '--test', 'components/cuda-library-adapters/test/public-cublaslt.test.mjs', 'components/cuda-library-adapters/test/provider-profile.test.mjs', 'components/cuda-library-adapters/test/capability-projection.test.mjs'], { stdio: 'inherit' });
 if (action === 'portable') process.exit(0);
 assert.equal(process.version, 'v26.7.0', 'Native cuBLASLt qualification requires exact Node v26.7.0.');
 assert.equal(process.platform, 'win32');
