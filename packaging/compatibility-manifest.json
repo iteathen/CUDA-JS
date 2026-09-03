@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.16",
+    "version": "0.1.0-alpha.17",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -62,6 +62,12 @@
     "asyncTransfers": "opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d",
     "publicationMailboxes": "private-mapped-named-u32-one-operation-lease-system-acquire-release",
     "preparedOperationDags": "bounded-kernel-cublaslt-f32-dag-immutable-bindings-derived-library-access-single-stream-semantic-replay",
+    "preparedOperationDagLimits": {
+      "nodes": 32,
+      "edges": 64,
+      "bindings": 64,
+      "predecessorsPerNode": 8
+    },
     "contextBoundLibraryAdapters": "optional-finite-driver-owned-provider-plans-existing-operation-lifecycle",
     "cublasLtF32Matmul": "optional-row-major-contiguous-typed-views-explicit-bounded-workspace",
     "compiler": "optional-nvrtc-13.3",
@@ -76,6 +82,9 @@
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
     "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1",
+    "deviceJsLimits": {
+      "parametersPerFunction": 64
+    },
     "deviceJsDenseNumeric": "f64-f16-bf16-exact-casts-special-values-manifest-verified-headers",
     "deviceJsLibraries": "typed-leaf-libraries-explicit-aliased-imports-selected-runtime-target-rdc-or-lto-final-cubin",
     "deviceJsParser": {
