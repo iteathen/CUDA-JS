@@ -23,6 +23,19 @@
     "CUDA-MCGS #193 execution-package/CUDA-JS adapter ownership audit",
     "CUDA-MCGS #125 only after all independent prerequisites are satisfied"
   ],
+  "cross_repo_ownership": {
+    "cuda_nn": {
+      "id": "CJS-CUDA-NN-EXTERNAL",
+      "authority": "ADR-0007",
+      "disposition": "Reusable NN/model/inference/autodiff/training semantics are external to CUDA-JS and belong to iteathen/cuda-nn."
+    }
+  },
+  "durable_authority_markers": [
+    "CJS-F0",
+    "CJS-F1A",
+    "ADR-0002-node-ffi-first-host-binding.md",
+    "ADR-0007"
+  ],
   "parallel_external_lanes": [
     "Native Linux x86-64 qualification remains contributor/external evidence work on a directly exposed physical NVIDIA host.",
     "Exact native promotion for other already-implemented capabilities remains independent and does not block the Tensor ownership refactor unless a selected profile specifically requires it."
