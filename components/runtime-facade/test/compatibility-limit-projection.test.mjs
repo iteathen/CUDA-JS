@@ -5,6 +5,7 @@ import test from 'node:test';
 import { DEVICE_MEMORY_ALLOCATION_MINIMUM_ALIGNMENT_BYTES } from '../../memory/index.mjs';
 import { PREPARED_OPERATION_DAG_LIMITS } from '../../prepared-execution/index.mjs';
 import { CUDA_JS_COMPATIBILITY } from '../index.mjs';
+import { openCudaRuntimeForTesting } from '../testing.mjs';
 
 async function deviceJsParameterLimit() {
   const source = await readFile(new URL('../../device-js/src/translator.mjs', import.meta.url), 'utf8');
@@ -27,4 +28,16 @@ test('public compatibility projects finite lower limits without drift', async ()
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.capabilities), true);
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDagLimits), true);
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.capabilities.deviceJsLimits), true);
+});
+
+test('public allocation request rejects caller-selected alignment before lower work', async () => {
+  const runtime = await openCudaRuntimeForTesting();
+  try {
+    await assert.rejects(
+      runtime.allocateDevice({ byteLength: 8, alignment: 256 }),
+      (error) => error?.code === 'CUDA_JS_MEMORY_OPTIONS_INVALID' && error?.category === 'validation',
+    );
+  } finally {
+    await runtime.close();
+  }
 });
