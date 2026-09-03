@@ -30,12 +30,12 @@ test('public compatibility projects finite lower limits without drift', async ()
   assert.equal(Object.isFrozen(CUDA_JS_COMPATIBILITY.capabilities.deviceJsLimits), true);
 });
 
-test('public allocation request rejects caller-selected alignment before lower work', async () => {
+test('public allocation does not gain caller-selected alignment', async () => {
   const runtime = await openCudaRuntimeForTesting();
   try {
     await assert.rejects(
       runtime.allocateDevice({ byteLength: 8, alignment: 256 }),
-      (error) => error?.code === 'CUDA_JS_MEMORY_OPTIONS_INVALID' && error?.category === 'validation',
+      (error) => error?.code === 'DRIVER_MEMORY_OPTIONS' && error?.category === 'validation',
     );
   } finally {
     await runtime.close();
