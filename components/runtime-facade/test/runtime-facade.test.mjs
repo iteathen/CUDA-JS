@@ -22,8 +22,9 @@ function driverDescription(claim = 'stub') {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.17');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.18');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
+  assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceMemoryAllocationMinimumAlignmentBytes, 256);
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.minimumVersion, 'v26.1.0');
   assert.equal(CUDA_JS_COMPATIBILITY.node.operationPolicy, 'testing-unconfirmed-at-or-above-minimum');
@@ -117,7 +118,6 @@ test('opaque selection binds DriverActor bootstrap and selected-device compiler 
   assert.equal(implicitDescription.device.target.compile, 'compute_75');
   const implicitCompile = await implicit.compile({ source: SOURCE });
   assert.notEqual(selectedCompile.cache.key, implicitCompile.cache.key);
-
   assert.equal((await selected.close()).graceful, true);
   assert.equal((await implicit.close()).graceful, true);
 });

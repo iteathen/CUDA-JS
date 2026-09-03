@@ -60,6 +60,8 @@ for (const required of [
   'components/execution/src/numeric-abi.mjs',
   'components/prepared-execution/index.mjs',
   'components/publication-mailbox/index.mjs',
+  'components/memory/index.mjs',
+  'components/memory/src/allocation-compatibility.mjs',
   'components/memory/src/device-view-manager.mjs',
   'components/runtime-facade/index.mjs',
   'components/runtime-facade/testing.mjs',
@@ -77,7 +79,7 @@ const projectLicense = await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf
 assert(projectLicense.includes('GNU AFFERO GENERAL PUBLIC LICENSE'));
 
 const deletionNeedles = ['cuda-mcgs', 'umcgs', 'graph-search', 'minimax', 'search ir'];
-const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name.startsWith('components/prepared-execution/') || name.startsWith('components/execution/') || name.startsWith('components/cuda-library-adapters/') || name === 'packaging/compatibility-manifest.json');
+const implementationFiles = fileNames.filter((name) => name.startsWith('components/runtime-facade/') || name.startsWith('components/device-js/') || name.startsWith('components/device-selection/') || name.startsWith('components/prepared-execution/') || name.startsWith('components/execution/') || name.startsWith('components/cuda-library-adapters/') || name.startsWith('components/memory/') || name === 'packaging/compatibility-manifest.json');
 for (const relative of implementationFiles) {
   const text = (await readFile(path.join(repositoryRoot, relative), 'utf8')).toLowerCase();
   for (const needle of deletionNeedles) assert(!text.includes(needle), `${relative} contains first-consumer coupling: ${needle}`);
@@ -131,6 +133,8 @@ assert.deepEqual(borrowerObservation, {
 const compatibilityObservation = observations.find((entry) => entry.consumer === 'portable-compatibility-limits');
 assert(compatibilityObservation);
 assert.equal(compatibilityObservation.packageVersion, projectPackage.version);
+assert.equal(compatibilityObservation.deviceMemoryAllocationMinimumAlignmentBytes, 256);
+assert.deepEqual(compatibilityObservation.baseAlignmentAdmission, { '8': true, '256': true, '512': false });
 assert.deepEqual(compatibilityObservation.preparedOperationDagLimits, { nodes: 32, edges: 64, bindings: 64, predecessorsPerNode: 8 });
 assert.deepEqual(compatibilityObservation.deviceJsLimits, { parametersPerFunction: 64 });
 assert.equal(compatibilityObservation.frozen, true);
@@ -143,6 +147,8 @@ const target = await writeEvidence('portable-package.json', {
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, profileName },
   sources: await sourceIdentity([
+    'docs/specs/SPEC-0004-device-memory-foundation.md',
+    'docs/specs/SPEC-0004-allocation-alignment-projection-addendum.md',
     'docs/specs/SPEC-0008-package-public-facade.md',
     'docs/specs/SPEC-0008-capability-limit-projection-addendum.md',
     'docs/specs/SPEC-0013-restricted-device-js.md',
@@ -165,6 +171,8 @@ const target = await writeEvidence('portable-package.json', {
     'components/execution/src/numeric-abi.mjs',
     'components/execution/src/execution-manager.mjs',
     'components/prepared-execution/src/prepared-operation-dag.mjs',
+    'components/memory/index.mjs',
+    'components/memory/src/allocation-compatibility.mjs',
     'components/memory/src/device-view-manager.mjs',
     'components/cuda-library-adapters/src/cuda-library-adapter-manager.mjs',
     'components/publication-mailbox/src/publication-mailbox-manager.mjs',
@@ -181,7 +189,8 @@ const target = await writeEvidence('portable-package.json', {
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade and immutable lower-limit compatibility projection, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, SPEC-0029 cuBLASLt borrower orchestration, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
+    'Portable package, public facade and immutable lower compatibility projection including ordinary base-allocation minimum alignment plus prepared/Device-JS limits, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, SPEC-0029 cuBLASLt borrower orchestration, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
+    'The allocation-alignment evidence applies only to ordinary base allocations and adds no caller-selected alignment, raw address, arbitrary nonzero-offset view guarantee, native support promotion, or performance claim.',
     'Prepared operation DAG evidence covers immutable kernel-only semantic single-stream replay, not CUDA Graph realization or performance.',
     'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, SPEC-0017 native selection, typed device-view native consumers, and native cuBLASLt/provider concurrency remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',

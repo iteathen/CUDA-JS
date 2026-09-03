@@ -10,7 +10,7 @@ CUDA-JS is an experimental Node.js runtime and toolchain for a bounded subset of
 
 | Area | Status |
 | --- | --- |
-| Package identity | `cuda-js@0.1.0-alpha.17` source/package candidate |
+| Package identity | `cuda-js@0.1.0-alpha.18` source/package candidate |
 | npm release | **Not published** |
 | Production support | **No** — public alpha/testing only |
 | Host implementation | JavaScript/ESM using Node 26's experimental `node:ffi` behind Worker-owned components |
@@ -18,7 +18,7 @@ CUDA-JS is an experimental Node.js runtime and toolchain for a bounded subset of
 | Native Linux CUDA | **Not yet qualified**; Linux x86-64 is the reference path, but the physical-NVIDIA evidence cell remains open |
 | Generic concurrency | Bounded operation profiles only; no public unbounded stream/event or scheduling API |
 
-Implemented capabilities include capability-checked device discovery/selection, explicit device-memory ownership and copies, module/function lookup, typed kernel arguments, bounded opaque GPU-operation lifecycles, NVRTC/nvJitLink compilation, artifact/cache identity, restricted Device-JS, prepared execution, selected bounded CUDA-library composition, and immutable public compatibility projection of finite prepared/Device-JS ceilings. The exact status of each capability is recorded in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md).
+Implemented capabilities include capability-checked device discovery/selection, explicit device-memory ownership and copies, module/function lookup, typed kernel arguments, bounded opaque GPU-operation lifecycles, NVRTC/nvJitLink compilation, artifact/cache identity, restricted Device-JS, prepared execution, selected bounded CUDA-library composition, and immutable public compatibility projection of finite prepared/Device-JS ceilings plus the ordinary device-allocation minimum base-address alignment. The alignment fact is a base-allocation compatibility guarantee only; it does not add caller-selected alignment or change typed-view offset semantics. The exact status of each capability is recorded in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md).
 
 CUDA-JS does **not** currently claim production readiness, native Linux CUDA qualification, generic public stream/event objects, multi-GPU/MIG support, managed/pool-memory support, CUDA Graph realization, process crash isolation, or broad performance/soak guarantees.
 
