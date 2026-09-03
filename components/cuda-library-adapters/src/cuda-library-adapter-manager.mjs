@@ -110,7 +110,6 @@ export class CudaLibraryAdapterManager {
   #execution;
   #operations;
   #adapterToken = null;
-  #borrowCount = 0;
   #planCount = 0;
 
   constructor({ registry, contextToken, memory, views, execution, operations }) {
@@ -151,15 +150,22 @@ export class CudaLibraryAdapterManager {
           kind: 'cublaslt-adapter', value: Object.freeze({ native: backend.native, provider: Object.freeze({ ...backend.provider, workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES }) }), parent: this.#contextToken,
           dispose: async (record) => Object.freeze({ kind: 'cublaslt-adapter', closed: true, backend: await this.#operations.closeCublasLt({ native: record.native, operationId: null }) ?? null }),
         });
-        adapterRecord = this.#registry.get(adapterToken, { kind: 'cublaslt-adapter' });
         createdAdapter = true;
       } catch (error) {
         try { await this.#operations.closeCublasLt({ native: backend.native, operationId }); }
         catch (cleanupError) { throw rollbackFailure('CUBLASLT_ADAPTER_REGISTRATION_ROLLBACK_FAILED', 'cuBLASLt adapter registration failed and native rollback cleanup was unproved.', error, cleanupError, operationId); }
         throw error;
       }
-    } else {
+    }
+
+    try {
       adapterRecord = this.#registry.get(adapterToken, { kind: 'cublaslt-adapter' });
+    } catch (error) {
+      if (createdAdapter) {
+        try { await this.#registry.close(adapterToken); }
+        catch (cleanupError) { throw rollbackFailure('CUBLASLT_ADAPTER_REGISTRATION_ROLLBACK_FAILED', 'cuBLASLt adapter registration succeeded but its registered resource could not be observed and rollback cleanup was unproved.', error, cleanupError, operationId); }
+      }
+      throw error;
     }
 
     let borrowerToken;
@@ -178,7 +184,6 @@ export class CudaLibraryAdapterManager {
       throw error;
     }
     if (createdAdapter) this.#adapterToken = adapterToken;
-    this.#borrowCount += 1;
     return this.#adapterDescriptor(borrowerToken, adapterRecord, operationId);
   }
 
@@ -190,12 +195,12 @@ export class CudaLibraryAdapterManager {
   async releaseAdapter(token, operationId = null) {
     const borrower = this.#registry.get(token, { kind: 'cublaslt-borrow' });
     const borrowerClosed = await this.#registry.close(token);
-    if (this.#borrowCount < 1) fail('CUBLASLT_BORROW_COUNT_INVALID', 'internal', 'cuBLASLt borrower accounting underflowed.');
-    this.#borrowCount -= 1;
     let providerClosed = null;
-    if (this.#borrowCount === 0) {
+    try {
       providerClosed = await this.#registry.close(borrower.adapter);
       if (this.#adapterToken !== null && tokenKey(this.#adapterToken) === tokenKey(borrower.adapter)) this.#adapterToken = null;
+    } catch (error) {
+      if (error?.code !== 'RESOURCE_HAS_CHILDREN') throw error;
     }
     return Object.freeze({
       schemaVersion: 1,
