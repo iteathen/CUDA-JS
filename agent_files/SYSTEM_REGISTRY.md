@@ -32,9 +32,9 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `project.foundation-index` | Complete foundational-document inventory and readiness test | [`../docs/FOUNDATION_INDEX.md`](../docs/FOUNDATION_INDEX.md) | Active |
 | `project.charter` | Product mission, universal boundary, safety, resource rules | [`../docs/PROJECT_CHARTER.md`](../docs/PROJECT_CHARTER.md) | Accepted |
 | `project.source-architecture` | JavaScript-authored core runtime, JIT/native realization, C/C++ evidence boundary, and measured-gap native-backend drift gate | [`../docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md`](../docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md) | Accepted |
-| `project.nn-extension` | Optional NN product boundary, separate-publish-unit isolation, planned component ownership, and child-specification gate | [`../docs/decisions/ADR-0004-nn-extension-package-boundary.md`](../docs/decisions/ADR-0004-nn-extension-package-boundary.md) and [`../docs/specs/SPEC-0027-nn-extension-foundation.md`](../docs/specs/SPEC-0027-nn-extension-foundation.md) | Accepted authority only; not implemented or qualified |
+| `project.cuda-nn-boundary` | Independent CUDA-NN ownership, CUDA-JS core isolation, external public-contract dependency direction, and historical NN-placement disposition | [`../docs/decisions/ADR-0007-extract-cuda-nn-semantic-product.md`](../docs/decisions/ADR-0007-extract-cuda-nn-semantic-product.md) and [`../docs/architecture/NN_EXTENSION_BOUNDARY.md`](../docs/architecture/NN_EXTENSION_BOUNDARY.md); historical ADR-0004/SPEC-0027 preserve provenance | Accepted current boundary; CUDA-NN implementation independently gated |
 | `project.decisions` | Accepted cross-cutting architecture choices, including ADR-0006 OS-neutral architecture and Linux reference-platform priority | [`../docs/decisions/`](../docs/decisions/README.md) | Active |
-| `project.specifications` | Normative public/runtime contract set | [`../docs/specs/`](../docs/specs/README.md) | Mixed accepted/proposal set; each specification's explicit status governs |
+| `project.specifications` | Normative public/runtime contract set | [`../docs/specs/`](../docs/specs/README.md) | Mixed accepted/proposal set; each specification's explicit status plus superseding ADRs govern |
 | `project.architecture` | Explanatory architecture, assessment, support bounds | [`../docs/architecture/`](../docs/architecture/README.md) | Active/proposal set |
 | `project.research` | Prior art, technical evidence, assumptions and source provenance | [`../docs/research/`](../docs/research/README.md) | Active |
 | `project.plans` | Non-authoritative sequencing and focus-branch decomposition | [`../docs/plans/`](../docs/plans/README.md) | Active |
@@ -83,7 +83,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `experiments` | Bounded decision experiments and their generated fixtures/harnesses | [`../experiments/`](../experiments/README.md) | EXP-000, Windows EXP-009, and Windows EXP-012 promoted; Linux EXP-001 prepared through the hardware boundary |
 | `benchmarks` | Future reproducible mechanism/regression evidence | [`../benchmarks/`](../benchmarks/README.md) | Reserved |
 | `packaging` | No-addon package, compatibility and release metadata | [`../packaging/`](../packaging/README.md) | F8 package/compatibility accepted; registry release guarded |
-| `optional-nn-product` | Future separately published application-neutral NN training product | Location unselected; authority in [`../docs/decisions/ADR-0004-nn-extension-package-boundary.md`](../docs/decisions/ADR-0004-nn-extension-package-boundary.md) and [`../docs/specs/SPEC-0027-nn-extension-foundation.md`](../docs/specs/SPEC-0027-nn-extension-foundation.md) | Accepted product boundary; not implemented or qualified |
+| `external.cuda-nn` | Reusable NN/model/inference/autodiff/training semantics when independently accepted; no CUDA-JS-owned product area | [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn), with CUDA-JS boundary in [`../docs/decisions/ADR-0007-extract-cuda-nn-semantic-product.md`](../docs/decisions/ADR-0007-extract-cuda-nn-semantic-product.md) | Independent repository owner integrated; production NN API/implementation still gated there |
 | `tools` | Schema/code-generation and developer tools | [`../tools/`](../tools/README.md) | F1B importer/generator accepted internal tooling |
 | `tests` | Cross-component and end-to-end test ownership | [`../tests/`](../tests/README.md) | F9 generic prerequisite active; exact compatible pair pending CUDA-MCGS |
 | `third-party` | Donor material with exact provenance and reuse decision | [`../third_party/`](../third_party/README.md) | Reserved |
@@ -91,7 +91,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 
 ## Component anchors
 
-These IDs organize implemented and future specifications. Status in the governing authority and rows above determines implementation authorization.
+These IDs organize implemented and future CUDA-JS specifications. Status in the governing authority and rows above determines implementation authorization. External semantic products such as CUDA-NN, CUDA-JS-Tensor and CUDA-MCGS do not receive CUDA-JS component-anchor IDs.
 
 | Planned boundary ID | Intended responsibility | Governing authority needed before code |
 |---|---|---|
@@ -122,20 +122,6 @@ These IDs organize implemented and future specifications. Status in the governin
 | `schema.semantic-overlay` | Reviewed blocking, ownership, lifecycle, safety and version meaning | Accepted semantic-overlay specification |
 | `backend.node-ffi` | Private Node host-call substrate | Windows F2W accepted; each additional platform requires independent qualification evidence |
 | `interop.cuda-mcgs` | Public package/capability boundary consumed by CUDA-MCGS (`iteathen/UMCGS`) | Accepted CUDA-JS public/header-profile contracts; exact compatible-pair evidence pending CUDA-MCGS integration |
-| `nn.facade` | Finite optional NN public facade and capability negotiation | Accepted SPEC-0027 plus a separately accepted facade/package child specification |
-| `nn.tensor` | Logical dtype, shape, layout, role, mutability, alias, and storage-view semantics | Accepted SPEC-0027 plus a separately accepted tensor child specification |
-| `nn.operator` | Finite versioned operator schemas, typing, effects, forward meaning, and derivative-rule linkage | Accepted SPEC-0027 plus a separately accepted operator child specification |
-| `nn.graph` | Provider-neutral typed staged graph and stable graph identity | Accepted SPEC-0027 plus accepted tensor and graph child specifications |
-| `nn.autodiff` | Reverse-mode transformation, saved values, residuals, and rematerialization policy | Accepted SPEC-0027 plus accepted graph/operator/autodiff child specifications |
-| `nn.memory-plan` | NN liveness, donation/alias, arena, residual, and bounded-workspace planning | Accepted SPEC-0027 plus accepted tensor/graph/autodiff/memory-plan child specifications and public core memory ports |
-| `nn.provider-registry` | Finite provider capabilities, selection, identity, and distinct provider-unavailable/profile-incompatible/request-unsupported results | Accepted SPEC-0027 plus a separately accepted provider-registry child specification |
-| `nn.provider.cublaslt` | Bounded NN GEMM plans over a generic current-device/stream/memory adapter | Accepted SPEC-0027 plus accepted generic library-adapter and cuBLASLt provider child specifications with exact native evidence |
-| `nn.provider.cudnn` | Bounded cuDNN graph/operator plans over a generic context-bound adapter | Accepted SPEC-0027 plus accepted operator/tensor, generic library-adapter, and cuDNN provider child specifications with exact native evidence |
-| `nn.provider.generated` | NN-specific lowering/source plans and logical association of typed artifacts returned by accepted core compiler contracts | Accepted SPEC-0027 plus accepted graph/compiler-provider child specifications; core retains compiler-provider/cache/output-byte ownership |
-| `nn.execution-plan` | Immutable provider-neutral compiled training-step orchestration | Accepted SPEC-0027 plus accepted graph/memory/provider/execution-plan child specifications and public operation ports |
-| `nn.training-state` | Optimizer, RNG, loss-scale, parameter, gradient, and persistent state semantics | Accepted SPEC-0027 plus a separately accepted training-state child specification |
-| `nn.checkpoint` | Versioned logical state serialization, integrity, restore, and migration | Accepted SPEC-0027 plus a separately accepted checkpoint child specification |
-| `nn.conformance` | Portable, package, numerical, native, lifecycle, and performance evidence partitions | Accepted SPEC-0027 plus a separately accepted mock/public conformance child specification |
 
 ## Changing the registry
 
