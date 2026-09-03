@@ -130,7 +130,7 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
   ]);
   requireMarkers(errors, 'AGENTS.md', documents.agents, ['ADR-0007', 'iteathen/cuda-nn', 'CUDA-JS-Tensor']);
   requireMarkers(errors, 'agent_files/SYSTEM_REGISTRY.md', documents.registry, ['project.cuda-nn-boundary', 'external.cuda-nn', 'ADR-0007']);
-  requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, ['External CUDA-NN ownership', 'ADR-0007', 'iteathen/cuda-nn']);
+  requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, ['External CUDA-NN semantic consumer', 'ADR-0007', 'iteathen/cuda-nn']);
   requireMarkers(errors, 'STATUS.md', documents.status, ['External CUDA-NN ownership', 'iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3', 'no longer belong to a future publish unit in this repository']);
   requireMarkers(errors, 'next_step.yaml', documents.nextStep, ['"cuda_nn"', 'CJS-CUDA-NN-EXTERNAL', 'ADR-0007']);
   requireMarkers(errors, 'packaging/README.md', documents.packaging, ['ADR-0007', 'iteathen/cuda-nn', 'iteathen/CUDA-JS-Tensor']);
@@ -277,7 +277,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0021',
     'SPEC-0027',
     'ADR-0007',
-    'External CUDA-NN ownership',
+    'External CUDA-NN semantic consumer',
     'compileDeviceProgram()',
     'discoverCudaDevices()',
     '`u64`',
