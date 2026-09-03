@@ -7,7 +7,7 @@
     "protected_main_authority_baseline": "4971302cfb48431c0843126a59d5884d84a81641",
     "package_candidate": "cuda-js@0.1.0-alpha.16",
     "completed_since_previous_control_state": [
-      "CUDA-NN owner split: independent iteathen/cuda-nn bootstrap authority integrated at main@7d7854697049db38e4a0670b80df9d600cd442c3; CUDA-JS issue #165 / ADR-0007 reconcile active same-repository NN authority while preserving ADR-0004/SPEC-0027 as historical provenance",
+      "CUDA-NN owner split: independent iteathen/cuda-nn bootstrap authority integrated at main@7d7854697049db38e4a0670b80df9d600cd442c3; CUDA-JS #165 / ADR-0007 is the governance transaction that supersedes same-repository NN authority while preserving ADR-0004/SPEC-0027 as historical provenance",
       "Historical CJS-NN-AUTHORITY-71: #71 / ADR-0004 / SPEC-0027 originally accepted an optional NN product as a separate same-repository publish unit; ADR-0007 supersedes that placement on the current governance packet",
       "#69 immutable GitHub Actions provenance integrated",
       "#65 target-syntax correction integrated",
