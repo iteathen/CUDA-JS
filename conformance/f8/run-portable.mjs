@@ -85,7 +85,7 @@ for (const relative of implementationFiles) {
 
 const tarball = path.join(packageRoot, packageRecord.filename);
 assert(existsSync(tarball));
-const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs'];
+const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-cublaslt-borrow.mjs'];
 const observations = [];
 for (const fixture of fixtureNames) {
   const consumerName = path.basename(fixture, '.mjs');
@@ -117,6 +117,17 @@ assert(compilerObservation);
 for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication', 'denseNumeric', 'denseDeviceLibrary']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
 assert.deepEqual(compilerObservation.deviceJsParser, { name: 'acorn', version: '8.15.0' });
 assert.match(memoryObservation.denseNumeric, /^[a-f0-9]{64}$/);
+const borrowerObservation = observations.find((entry) => entry.consumer === 'portable-cublaslt-borrow');
+assert(borrowerObservation);
+assert.deepEqual(borrowerObservation, {
+  consumer: 'portable-cublaslt-borrow',
+  publicOnly: true,
+  distinctBorrowers: true,
+  siblingCloseIndependent: true,
+  planFencesOwner: true,
+  cleanReacquisition: true,
+  graceful: true,
+});
 
 const target = await writeEvidence('portable-package.json', {
   schemaVersion: 1,
@@ -137,6 +148,7 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
     'docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md',
     'docs/specs/SPEC-0029-cublaslt-f32-matmul.md',
+    'docs/specs/SPEC-0029-borrower-lifecycle-addendum.md',
     'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
     'docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md',
     'LICENSE',
@@ -155,14 +167,15 @@ const target = await writeEvidence('portable-package.json', {
     'components/runtime-facade/src/device-program.mjs',
     'conformance/f8/fixtures/consumer-memory.mjs',
     'conformance/f8/fixtures/consumer-compiler.mjs',
+    'conformance/f8/fixtures/consumer-cublaslt-borrow.mjs',
     'conformance/f8/run-portable.mjs',
   ]),
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
+    'Portable package, public facade, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, SPEC-0029 cuBLASLt borrower orchestration, Device-JS translation including device-publication source admission, mock lifecycle, and install/uninstall behavior only.',
     'Prepared operation DAG evidence covers immutable kernel-only semantic single-stream replay, not CUDA Graph realization or performance.',
-    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, SPEC-0017 native selection, and typed device-view native consumers remain subject to their exact native promotion gates.',
+    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0016 operations, SPEC-0017 native selection, typed device-view native consumers, and native cuBLASLt/provider concurrency remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',
   ],
 });

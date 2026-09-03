@@ -63,15 +63,20 @@ test('transpose and explicit workspace remain finite semantic choices', async ()
   assert.equal((await runtime.close()).graceful, true);
 });
 
-test('the first profile rejects wrong dtype, short views, missing workspace, and duplicate adapters', async () => {
+test('the first profile rejects wrong dtype, short views, and missing workspace while independent borrowers coexist', async () => {
   const runtime = await openCudaRuntimeForTesting();
   await assert.rejects(runtime.openCublasLt({}), (error) => error.code === 'CUDA_JS_CUBLASLT_OPTIONS_UNSUPPORTED');
   const memory = await runtime.allocateDevice({ byteLength: 256 });
   const short = await memory.view({ dtype: 'f32', elementCount: 1 });
   const wrong = await memory.view({ dtype: 'u32', elementCount: 4 });
   const adapter = await runtime.openCublasLt();
-  await assert.rejects(runtime.openCublasLt(), (error) => error.code === 'CUBLASLT_ADAPTER_ALREADY_OPEN');
   const plain = await adapter.createF32MatmulPlan({ m: 2, n: 2, k: 1 });
+  const sibling = await runtime.openCublasLt();
+  assert.notEqual(sibling, adapter);
+  assert.equal(sibling.profile, adapter.profile);
+  assert.deepEqual(sibling.provider, adapter.provider);
+  await sibling.close();
+  assert.equal(adapter.state, 'open');
   await assert.rejects(plain.submit({ a: short, b: short, c: short, d: short, alpha: Number.MAX_VALUE }), (error) => error.code === 'CUBLASLT_MATMUL_SCALAR_INVALID');
   await assert.rejects(plain.submit({ a: wrong, b: short, c: short, d: short }), (error) => error.code === 'CUBLASLT_MATMUL_DTYPE_INVALID');
   await assert.rejects(plain.submit({ a: short, b: short, c: short, d: short }), (error) => error.code === 'CUBLASLT_MATMUL_VIEW_TOO_SMALL');
@@ -108,6 +113,8 @@ test('the first profile rejects wrong dtype, short views, missing workspace, and
     a: { binding: 'a' }, b: { binding: 'b' }, c: { binding: 'c' }, d: { binding: 'd' },
   }]), (error) => error.code === 'CUDA_JS_PREPARED_CUBLASLT_BINDING_INVALID');
   await workspacePlan.close(); await plain.close(); await adapter.close(); await wrong.close(); await short.close(); await memory.close();
+  const reacquired = await runtime.openCublasLt();
+  await reacquired.close();
   assert.equal((await runtime.close()).graceful, true);
 });
 
