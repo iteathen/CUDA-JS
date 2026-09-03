@@ -13,8 +13,8 @@ function validateCapabilityTable(errors, text) {
   const start = text.indexOf(header);
   if (start === -1) return;
   const rows = text.slice(start).split('\n').slice(2).filter((line) => line.startsWith('| '));
-  const architecture = new Set(['planned', 'deferred', 'unselected', 'rejected', 'not-applicable']);
-  const implementation = new Set(['not-implemented', 'experimental', 'partial', 'implemented']);
+  const architecture = new Set(['planned', 'deferred', 'unselected', 'rejected', 'not-applicable', 'external']);
+  const implementation = new Set(['not-implemented', 'experimental', 'partial', 'implemented', 'owner-bootstrap-integrated']);
   const qualification = new Set(['not-qualified', 'testing-unconfirmed', 'qualified', 'known-incompatible', 'not-applicable']);
   for (const row of rows) {
     const cells = row.split('|').slice(1, -1).map((cell) => cell.trim());
@@ -26,11 +26,11 @@ function validateCapabilityTable(errors, text) {
     if (!architecture.has(value(cells[1]))) errors.push(`docs/CAPABILITIES.md has invalid architectural disposition for ${cells[0]}`);
     if (!implementation.has(value(cells[2]))) errors.push(`docs/CAPABILITIES.md has invalid implementation status for ${cells[0]}`);
     if (!qualification.has(value(cells[3]))) errors.push(`docs/CAPABILITIES.md has invalid qualification status for ${cells[0]}`);
-    if (!/^(active|next|after:[^`]+|blocked:[^`]+|deferred)$/.test(value(cells[4]) ?? '')) errors.push(`docs/CAPABILITIES.md has invalid priority for ${cells[0]}`);
+    if (!/^(active|next|after:[^`]+|blocked:[^`]+|deferred|independent)$/.test(value(cells[4]) ?? '')) errors.push(`docs/CAPABILITIES.md has invalid priority for ${cells[0]}`);
   }
 }
 
-const NN_COMPONENT_ANCHORS = [
+const HISTORICAL_NN_COMPONENT_ANCHORS = [
   'nn.facade',
   'nn.tensor',
   'nn.operator',
@@ -72,7 +72,7 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
     errors.push('package.json: generic core must not export ./nn or ./nn/*');
   }
   if (JSON.stringify(packageJson.exports) !== JSON.stringify(EXPECTED_CORE_EXPORTS)) {
-    errors.push('package.json: core export surface changed during NN authority packet');
+    errors.push('package.json: core export surface changed during NN ownership projection');
   }
 
   const productionDependencies = {
@@ -90,15 +90,16 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
     bundledDependencies: null,
   };
   if (JSON.stringify(productionDependencies) !== JSON.stringify(expectedProductionDependencies)) {
-    errors.push('package.json: core production dependency surface changed during NN authority packet');
+    errors.push('package.json: core production dependency surface changed during NN ownership projection');
   }
   if (Object.hasOwn(packageJson, 'workspaces')) {
-    errors.push('package.json: NN authority packet must not create a workspace');
+    errors.push('package.json: CUDA-JS must not create an NN workspace');
   }
   if ((packageJson.files ?? []).some((entry) => /(?:^|\/)nn(?:\/|$)/i.test(entry))) {
     errors.push('package.json: generic core package files must not include an NN publish unit');
   }
 
+  // Preserve exact historical provenance. These records are intentionally not rewritten.
   requireMarkers(errors, 'docs/decisions/ADR-0004-nn-extension-package-boundary.md', documents.nnDecision, [
     'It will be a separate publish unit, not a subpath of the existing `cuda-js` package.',
     'The registry package name remains unselected',
@@ -113,36 +114,51 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
     'They do not create directories or authorize implementation',
     'This proves authority and core isolation only. It cannot prove NN behavior or native provider support.',
   ]);
+
+  // Current live authority must project the independent CUDA-NN / Tensor split.
   requireMarkers(errors, 'docs/PROJECT_CHARTER.md', documents.charter, [
-    'separate future publish unit',
-    'Every NN production boundary requires a separately accepted child specification.',
+    'ADR-0007',
+    'iteathen/cuda-nn',
+    'iteathen/CUDA-JS-Tensor',
+    'no longer authorize `nn.*` production components here',
   ]);
   requireMarkers(errors, 'docs/architecture/NN_EXTENSION_BOUNDARY.md', documents.nnArchitecture, [
-    '**Status:** Informational',
-    '**Projection:** Accepted ADR-0004 and SPEC-0027',
-    'separate publish unit in the same repository, not a `cuda-js/nn` subpath',
-    'implementation status:    not-implemented',
-    'qualification status:     not-qualified',
+    '**Current projection:** Accepted ADR-0007',
+    'iteathen/cuda-nn',
+    'CUDA-JS-Tensor',
+    'cuda-nn production API:    not-authorized',
   ]);
-  requireMarkers(errors, 'AGENTS.md', documents.agents, ['ADR-0004 and SPEC-0027', 'separate future publish unit']);
-  requireMarkers(errors, 'agent_files/SYSTEM_REGISTRY.md', documents.registry, ['project.nn-extension', 'Accepted authority only; not implemented or qualified']);
-  requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, ['Optional separately packaged NN product', 'Accepted SPEC-0027 authority only']);
-  requireMarkers(errors, 'STATUS.md', documents.status, ['Optional NN extension authority', '**Implementation status:** not implemented.', '**Qualification status:** not qualified.']);
-  requireMarkers(errors, 'next_step.yaml', documents.nextStep, ['CJS-NN-AUTHORITY-71', 'separate publish unit']);
+  requireMarkers(errors, 'AGENTS.md', documents.agents, ['ADR-0007', 'iteathen/cuda-nn', 'CUDA-JS-Tensor']);
+  requireMarkers(errors, 'agent_files/SYSTEM_REGISTRY.md', documents.registry, ['project.cuda-nn-boundary', 'external.cuda-nn', 'ADR-0007']);
+  requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, ['External CUDA-NN semantic consumer', 'ADR-0007', 'iteathen/cuda-nn']);
+  requireMarkers(errors, 'STATUS.md', documents.status, ['External CUDA-NN ownership', 'iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3', 'no longer belong to a future publish unit in this repository']);
+  requireMarkers(errors, 'next_step.yaml', documents.nextStep, ['"cuda_nn"', 'CJS-CUDA-NN-EXTERNAL', 'ADR-0007']);
+  requireMarkers(errors, 'packaging/README.md', documents.packaging, ['ADR-0007', 'iteathen/cuda-nn', 'iteathen/CUDA-JS-Tensor']);
 
-  for (const anchor of NN_COMPONENT_ANCHORS) {
-    if (!documents.nnSpec.includes(`\`${anchor}\``)) errors.push(`SPEC-0027 is missing planned NN component anchor: ${anchor}`);
-    if (!documents.registry.includes(`\`${anchor}\``)) errors.push(`agent_files/SYSTEM_REGISTRY.md is missing planned NN component anchor: ${anchor}`);
+  // Historical component anchors remain in the immutable historical spec only.
+  for (const anchor of HISTORICAL_NN_COMPONENT_ANCHORS) {
+    if (!documents.nnSpec.includes(`\`${anchor}\``)) {
+      errors.push(`SPEC-0027 historical provenance is missing planned NN component anchor: ${anchor}`);
+    }
+    if (documents.registry.includes(`\`${anchor}\``)) {
+      errors.push(`agent_files/SYSTEM_REGISTRY.md retains obsolete CUDA-JS NN component anchor: ${anchor}`);
+    }
+  }
+  if (documents.registry.includes('project.nn-extension')) {
+    errors.push('agent_files/SYSTEM_REGISTRY.md retains obsolete project.nn-extension owner');
+  }
+  if (documents.registry.includes('optional-nn-product')) {
+    errors.push('agent_files/SYSTEM_REGISTRY.md retains obsolete optional-nn-product area');
   }
 
-  const expectedStatus = {
+  const historicalStatus = {
     'architectural disposition': 'planned',
     'implementation status': 'not-implemented',
     'qualification status': 'not-qualified',
   };
-  for (const [label, expected] of Object.entries(expectedStatus)) {
+  for (const [label, expected] of Object.entries(historicalStatus)) {
     const actual = documents.nnSpec.match(new RegExp(`^${label}:\\s+([^\\s]+)$`, 'm'))?.[1];
-    if (actual !== expected) errors.push(`SPEC-0027 NN ${label} must be ${expected}`);
+    if (actual !== expected) errors.push(`SPEC-0027 historical NN ${label} must remain ${expected}`);
   }
 
   const activeDocuments = {
@@ -153,14 +169,17 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
     'docs/architecture/NN_EXTENSION_BOUNDARY.md': documents.nnArchitecture,
     'STATUS.md': documents.status,
     'next_step.yaml': documents.nextStep,
+    'packaging/README.md': documents.packaging,
   };
-  const samePackageClaims = [
+  const obsoleteActiveClaims = [
     'The NN product will ship as a `cuda-js/nn` subpath in the existing package.',
     'The NN product is part of the existing `cuda-js` package.',
+    'optional NN product only as a separate future publish unit in the same repository',
+    'separate future NN publish unit in the same repository',
   ];
   for (const [label, text] of Object.entries(activeDocuments)) {
-    for (const claim of samePackageClaims) {
-      if (text.includes(claim)) errors.push(`${label} contains a forbidden same-package NN claim`);
+    for (const claim of obsoleteActiveClaims) {
+      if (text.includes(claim)) errors.push(`${label} contains obsolete active NN placement claim: ${claim}`);
     }
   }
 
@@ -257,7 +276,8 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'SPEC-0020',
     'SPEC-0021',
     'SPEC-0027',
-    'Optional separately packaged NN product',
+    'ADR-0007',
+    'External CUDA-NN semantic consumer',
     'compileDeviceProgram()',
     'discoverCudaDevices()',
     '`u64`',
@@ -282,7 +302,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
     'known incompatible',
     'not-qualified',
   ]);
-  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0020', 'SPEC-0021', 'SPEC-0027', 'separate future publish unit']);
+  requireMarkers(errors, 'packaging/README.md', documents.packaging, [packageJson.version, 'SPEC-0020', 'SPEC-0021', 'ADR-0007', 'iteathen/cuda-nn']);
   validateCapabilityTable(errors, documents.capabilities);
   validateNnAuthorityProjection(errors, packageJson, documents);
 

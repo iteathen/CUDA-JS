@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-26
+**Updated:** 2026-09-02
 
 ## CUDA-MCGS prerequisite execution baseline
 
@@ -51,7 +51,7 @@ The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3
 - the SPEC-0006 target-syntax correction;
 - the SPEC-0003 disposal-failure correction;
 - immutable GitHub Actions provenance and public capability projection checks;
-- ADR-0004 and SPEC-0027 optional NN product authority as a separate future publish unit.
+- ADR-0007 independent CUDA-NN ownership, with historical ADR-0004/SPEC-0027 retained only as provenance for the superseded same-repository plan.
 
 Portable/software/package implementation and native qualification remain independent.
 
@@ -122,7 +122,7 @@ legacy terminal convenience:  CudaFunction.launch()
 public launch kinds:          device-memory/u32/u64/i32/f32/f64/f16/bf16 + directional mailbox-u32
 ```
 
-SPEC-0016 remains the sole operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU, sideband and future NN execution work must consume it rather than duplicate it.
+SPEC-0016 remains the sole CUDA-JS operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU and sideband work inside CUDA-JS must consume it rather than duplicate it. External upper consumers such as CUDA-NN, CUDA-JS-Tensor and CUDA-MCGS use public operation/prepared-execution contracts and must not reimplement the generic lifecycle locally.
 
 ## Device-JS
 
@@ -152,17 +152,21 @@ SPEC-0026 process-isolated execution
 
 Their dependency order is retained in the capability-expansion roadmap and the 2026-08-14 sweep record.
 
-## Optional NN extension authority
+## External CUDA-NN ownership
 
-**Architectural disposition:** planned under accepted ADR-0004 and SPEC-0027.
+**Architectural disposition:** independent semantic product under ADR-0007.
 
-**Implementation status:** not implemented.
+**CUDA-NN owner revision:** `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3`.
 
-**Qualification status:** not qualified.
+**CUDA-NN production API/implementation status:** not authorized / not implemented.
 
-The optional application-neutral NN product is authorized in this repository only as a **separate publish unit**. The published `cuda-js` core package, exports, dependencies, compatibility identity, source tree and import/provider-discovery behavior remain generic. The future NN package name and source directory remain unselected.
+Reusable NN/model/inference/autodiff/training semantics no longer belong to a future publish unit in this repository. Historical ADR-0004 and SPEC-0027 remain accepted provenance for the earlier isolation design, but ADR-0007 supersedes their same-repository product placement and SPEC-0027 cannot authorize new `nn.*` components in CUDA-JS.
 
-Issues #70 and #72-#84 contain useful research, but portions of their original text still assume a same-package `cuda-js/nn` shape. That assumption is superseded. Every `nn.*` production boundary requires a separately accepted child specification, beginning with tensor semantics (#72) and then graph/autodiff dependencies. No NN production implementation is implied by the master-program issue bodies.
+Generic Tensor mathematics/planning routes to CUDA-JS-Tensor. Generic CUDA/runtime/compiler/provider mechanisms remain here. CUDA-NN owns only reusable NN semantics through its own accepted authority, and its issue #2 must first prove that an NN inference layer adds value beyond direct product → Tensor composition. Training/autodiff/provider breadth remains independently removable and is not an inference prerequisite.
+
+The old CUDA-JS NN roadmap is reconciled: #70 and #72-#74/#76-#84 are closed as no longer planned here; #75 remains generic cuBLASLt; #163 and #164 own deferred generic cuDNN/NCCL mechanisms if selected.
+
+This section describes ownership only. It creates no CUDA-NN compatibility, native-provider, production-readiness or performance claim. On revisions where ADR-0007 is still awaiting protected integration, issue #165 is the integration/readback authority.
 
 ## Open native/platform/external gates
 

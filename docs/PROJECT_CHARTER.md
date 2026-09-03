@@ -24,7 +24,9 @@ CUDA-JS owns:
 
 The published `cuda-js` core package does not own any consumer's domain algorithm, graph model, scheduler policy, evaluator semantics, model semantics, tensor/training semantics, or resource plan.
 
-The CUDA-JS project may also own an optional, application-neutral NN training product under accepted [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) and [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md). That product is a separate future publish unit: it may consume accepted public core contracts, but core never imports it or inherits its exports, dependencies, NN-shaped/eager provider discovery, release identity, or semantics. Every NN production boundary requires a separately accepted child specification. Consumers continue to own model architecture, datasets, objectives, domain policy, deployment, and unrelated search semantics.
+Under accepted [`ADR-0007`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md), reusable neural-network semantics are owned by the independent [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn) repository, not by a future CUDA-JS publish unit. Generic tensor mathematics/planning belongs to [`iteathen/CUDA-JS-Tensor`](https://github.com/iteathen/CUDA-JS-Tensor). CUDA-JS remains the consumer-neutral runtime/compiler/memory/execution/provider foundation for those upper layers. Historical ADR-0004 and SPEC-0027 remain provenance for the earlier same-repository isolation decision but no longer authorize `nn.*` production components here.
+
+Consumers continue to own concrete model architecture/package provenance, datasets/objectives, domain policy, deployment, search/product semantics, and other meaning that is not naturally reusable NN or Tensor behavior.
 
 ## Universality rule
 

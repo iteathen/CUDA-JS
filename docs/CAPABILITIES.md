@@ -2,11 +2,11 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-26
+**Updated:** 2026-09-02
 
-This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and an accepted specification differ, the accepted specification is authoritative.
+This page is the discoverable capability map for CUDA-JS. It summarizes accepted behavior, current qualification limits, and deliberately deferred capability families without replacing the accepted ADRs and specifications. When this page and current accepted authority differ, the current accepted authority is authoritative.
 
-The published `cuda-js` package is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. The CUDA-JS project has accepted an authority-only boundary for an optional NN product as a separate future publish unit; no NN package, implementation, or qualification exists yet. Current public profiles remain intentionally narrower than the architectural extension surface.
+The published `cuda-js` package is a **schema-driven, no-project-addon, asynchronous Node.js runtime and toolchain for NVIDIA CUDA host APIs**. It is not a neural-network framework, not a search framework, not a raw-pointer FFI wrapper, and not a fixed one-kernel/one-stream architecture. Accepted ADR-0007 assigns reusable neural-network semantics to the independent `iteathen/cuda-nn` repository and generic Tensor mathematics/planning to `iteathen/CUDA-JS-Tensor`; CUDA-JS no longer plans a same-repository NN publish unit. Current public profiles remain intentionally narrower than the architectural extension surface.
 
 Its canonical source-architecture description is **JavaScript-authored and JIT/native-realized**. Maintained core runtime source is JavaScript/ESM; Node FFI and NVIDIA libraries provide native execution; Device-JS may deterministically produce private CUDA C++ and JIT-compiled device artifacts. C/C++ ABI probes, conformance oracles and generated fixtures are independent evidence rather than shipped runtime implementation. Unqualified “pure JavaScript” is deliberately avoided; see [`ADR-0005`](decisions/ADR-0005-javascript-authored-jit-native-realized.md).
 
@@ -71,7 +71,7 @@ This is an intentional ownership and safety boundary, not an inability to use CU
 
 The published `cuda-js` package owns the generic CUDA runtime/toolchain boundary. It does not own tensor layouts, autograd, neural-network layers, optimizers, MCGS/MCTS/search semantics, model architecture, batching policy, or domain-specific device programs.
 
-Accepted [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) and [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) permit a future separately published, application-neutral NN product to own bounded tensor/graph/autodiff/training contracts. That authority is not implementation: the package name and location remain unselected, every production boundary needs a child specification, and consumer model/data/objective/domain semantics remain outside the project. Generic core can compile or load device programs without becoming a deep-learning library or search engine.
+Accepted [`ADR-0007`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md) assigns reusable NN semantics to independent [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn) and generic Tensor semantics to [`iteathen/CUDA-JS-Tensor`](https://github.com/iteathen/CUDA-JS-Tensor). Historical [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) and [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) remain provenance for the earlier same-repository isolation decision but no longer authorize `nn.*` production components in CUDA-JS. CUDA-NN itself remains implementation-gated by its own consumer-backed inference assessment. Generic core can compile or load device programs without becoming a deep-learning library or search engine.
 
 ## Current capability surface
 
@@ -373,7 +373,7 @@ See accepted [`SPEC-0012`](specs/SPEC-0012-device-lto.md) and the retained [LTO 
 | Process-isolated Driver/compiler backend | `planned` | `not-implemented` | `not-qualified` | `deferred` | Proposed SPEC-0026; Workers do not contain fatal process crashes. |
 | Graphics external-resource interop | `planned` | `not-implemented` | `not-qualified` | `after:SPEC-0017` | Proposed SPEC-0025 requires one concrete API/profile and exact synchronization. |
 | Optional CUDA library adapters | `planned` | `implemented` | `qualified` | `active` | Accepted SPEC-0023 framework and SPEC-0029 cuBLASLt f32 row-major matmul child, usable through ordinary operations or bounded SPEC-0031 prepared nodes. Exact Windows CUDA 13.3/cuBLASLt 13.5.1 ABI, numerical, lifecycle, mixed-replay, and cleanup profile only; no bundled provider, tensor semantics, Linux promotion, or performance claim. |
-| Optional separately packaged NN product | `planned` | `not-implemented` | `not-qualified` | `after:accepted-child-spec` | Accepted SPEC-0027 authority only; separate publish unit, package name unselected, and every implementation boundary still needs an accepted child spec. |
+| External CUDA-NN semantic consumer | `external` | `owner-bootstrap-integrated` | `not-qualified` | `independent` | ADR-0007; `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3`. No CUDA-JS-owned NN product/API; CUDA-NN production implementation remains gated by its own inference assessment. |
 | Native Linux x64 CUDA execution | `planned` | `implemented` | `not-qualified` | `blocked:physical-contributor-host` | Shared native engines, diagnostics, current facade admission, compatibility metadata, OS-neutral C oracles and an EXP-001/F1B/F3L–F8L command/evidence chain are source-complete; contributor-run exact native Ubuntu/physical-NVIDIA evidence remains open. |
 | Linux ARM64 / WSL2 native CUDA | `planned` | `partial` | `not-qualified` | `deferred` | Separate ABI/provider/platform profiles. |
 
@@ -463,7 +463,7 @@ For normative behavior and exact claim limits, start with:
 - [`SPEC-0016`](specs/SPEC-0016-operation-lifecycle.md) — opaque one-pending-operation lifecycle;
 - [`SPEC-0017`](specs/SPEC-0017-device-selection-and-target-resolution.md) — accepted opaque device selection/target-resolution foundation;
 - [`SPEC-0021`](specs/SPEC-0021-extended-numeric-abi-and-device-views.md) — extended scalar ABI and contiguous 1D typed device-view foundation;
-- [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) — authority-only optional NN product boundary and separate-publish-unit isolation;
+- [`ADR-0007`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md) — external CUDA-NN ownership and core-isolation decision; historical [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) remains provenance only;
 - [`SPEC-0030`](specs/SPEC-0030-device-js-dense-numeric-profile.md) — additive dense `f64`/`f16`/`bf16` Device-JS semantics and trusted numeric header profiles;
 - [`SPEC-0031`](specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md) — bounded fixed-plan cuBLASLt f32 nodes inside the existing prepared-DAG operation lifecycle;
 - [`TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) — proposal-level extension shape;

@@ -1,13 +1,14 @@
 {
-  "schema_version": 59,
-  "updated": "2026-08-26",
+  "schema_version": 60,
+  "updated": "2026-09-02",
   "status": "cuda_mcgs_compatible_pair_waiting_on_consumer_artifact",
-  "objective": "Keep the generic CUDA-JS alpha.16 substrate stable for CUDA-MCGS, qualify one exact public CUDA-MCGS/CUDA-JS compatible pair as soon as CUDA-MCGS freezes its first bounded production artifact, and continue native Linux evidence as an independent external lane without inventing new consumer-driven core semantics.",
+  "objective": "Keep the generic CUDA-JS alpha.16 substrate stable for CUDA-MCGS, qualify one exact public CUDA-MCGS/CUDA-JS compatible pair as soon as CUDA-MCGS freezes its first bounded production artifact, preserve CUDA-NN as an independent upper-layer consumer, and continue native Linux evidence as an independent external lane without inventing consumer-driven core semantics.",
   "exact_input_revisions": {
     "protected_main_authority_baseline": "4971302cfb48431c0843126a59d5884d84a81641",
     "package_candidate": "cuda-js@0.1.0-alpha.16",
     "completed_since_previous_control_state": [
-      "CJS-NN-AUTHORITY-71 completed: #71 / ADR-0004 / SPEC-0027 optional NN product authority accepted on protected main as a separate publish unit",
+      "CUDA-NN owner split: independent iteathen/cuda-nn bootstrap authority integrated at main@7d7854697049db38e4a0670b80df9d600cd442c3; CUDA-JS #165 / ADR-0007 is the governance transaction that supersedes same-repository NN authority while preserving ADR-0004/SPEC-0027 as historical provenance",
+      "Historical CJS-NN-AUTHORITY-71: #71 / ADR-0004 / SPEC-0027 originally accepted an optional NN product as a separate same-repository publish unit; ADR-0007 supersedes that placement on the current governance packet",
       "#69 immutable GitHub Actions provenance integrated",
       "#65 target-syntax correction integrated",
       "#66 disposal-failure correction integrated",
@@ -37,7 +38,7 @@
     "implemented_portable_or_package": ["SPEC-0010", "SPEC-0011", "SPEC-0012", "SPEC-0013", "SPEC-0014 first profile", "SPEC-0016", "SPEC-0017", "SPEC-0018", "SPEC-0019 first profile", "SPEC-0020 semantic prepared-kernel DAG", "SPEC-0021", "SPEC-0022 scoped-atomic-observation child", "SPEC-0022 device-publication child", "SPEC-0023 framework", "SPEC-0028", "SPEC-0029 cuBLASLt f32 matmul", "SPEC-0030 dense numeric Device-JS", "SPEC-0031 prepared cuBLASLt f32 node"],
     "accepted_pending_implementation": [],
     "still_proposal_only": ["SPEC-0020 CUDA Graph realization and node families other than accepted kernels/SPEC-0031", "SPEC-0022 except accepted scoped-atomic-observation and device-publication children", "unaccepted SPEC-0023 provider children", "SPEC-0024", "SPEC-0025", "SPEC-0026"],
-    "accepted_authority_only": ["SPEC-0027 optional NN product boundary: same repository, separate publish unit, no nn.* implementation without accepted child specifications"]
+    "historical_authority_only": ["ADR-0004 / SPEC-0027 same-repository NN product placement: retained as accepted provenance; ADR-0007 supersedes current product/package/component placement and forbids new nn.* CUDA-JS implementation authority"]
   },
   "authority": [
     "AGENTS.md",
@@ -53,9 +54,9 @@
     "agent_files/VALIDATION_POLICY.md",
     "docs/PROJECT_CHARTER.md",
     "docs/decisions/ADR-0002-node-ffi-first-host-binding.md",
-    "docs/decisions/ADR-0004-nn-extension-package-boundary.md",
     "docs/decisions/ADR-0005-javascript-authored-jit-native-realized.md",
     "docs/decisions/ADR-0006-linux-first-reference-platform.md",
+    "docs/decisions/ADR-0007-extract-cuda-nn-semantic-product.md",
     "docs/specs/SPEC-0017-device-selection-and-target-resolution.md",
     "docs/specs/SPEC-0018-bounded-multi-operation-scheduling.md",
     "docs/specs/SPEC-0019-host-memory-and-async-transfer.md",
@@ -64,7 +65,6 @@
     "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md",
     "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md",
     "docs/specs/SPEC-0022-device-publication-addendum.md",
-    "docs/specs/SPEC-0027-nn-extension-foundation.md",
     "docs/specs/SPEC-0028-device-js-library-composition.md",
     "docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md",
     "docs/specs/SPEC-0029-cublaslt-f32-matmul.md",
@@ -93,7 +93,8 @@
   ],
   "cross_repo_consumer_state": {
     "cuda_mcgs": "Generic runtime prerequisites are available; issue #32 now waits on CUDA-MCGS integrated semantic acceptance and the first frozen bounded parallel artifact.",
-    "cuda_js_tensor": "cuda-js-tensor@0.1.0-alpha.6 consumes this alpha.16 target-correct library contract and has already demonstrated an item-parallel device-callable Tensor leaf on exact Windows compute_75. Tensor scheduling/search semantics remain outside CUDA-JS."
+    "cuda_js_tensor": "cuda-js-tensor@0.1.0-alpha.6 consumes this alpha.16 target-correct library contract and has already demonstrated an item-parallel device-callable Tensor leaf on exact Windows compute_75. Tensor scheduling/search semantics remain outside CUDA-JS.",
+    "cuda_nn": "Independent reusable NN semantic owner is integrated at iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3. Production NN inference remains gated by cuda-nn#2; generic Tensor gaps route to CUDA-JS-Tensor and generic CUDA/provider gaps route back to CUDA-JS through public contracts."
   },
   "long_horizon": {
     "map": "docs/plans/2026-08-25-long-horizon-capability-map.md",
@@ -119,8 +120,8 @@
     },
     {
       "id": "CJS-LIBRARY-PROVIDER-FOLLOWONS",
-      "issues": [75, 85, 135],
-      "reason": "Typed/strided-batched cuBLASLt, CUDA Graph realization and broader native Device-JS library qualification may improve later Tensor/evaluator/performance profiles, but they are not prerequisites for the first functional CUDA-MCGS compatible pair unless a frozen selected profile demonstrates the need."
+      "issues": [75, 85, 135, 163, 164],
+      "reason": "Typed/strided-batched cuBLASLt, CUDA Graph realization, broader native Device-JS library qualification, and deferred generic cuDNN/NCCL providers may improve later Tensor/NN/evaluator/performance profiles, but none is a prerequisite for the first functional CUDA-MCGS compatible pair unless a frozen selected profile demonstrates the need."
     },
     {
       "id": "CJS-NATIVE-QUALIFICATION",
@@ -138,9 +139,9 @@
       "reason": "Other successor capabilities remain outside the CUDA-MCGS functional critical path until separately selected and accepted."
     },
     {
-      "id": "CJS-NN-PROGRAM",
-      "issues": [70, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84],
-      "reason": "SPEC-0027 authorizes only the separate future NN product boundary. Every nn.* production boundary needs a separately accepted child specification and is independent of CUDA-MCGS's consumer-owned evaluator semantics. Generic cuBLASLt issue #75 is intentionally not classified in this lane."
+      "id": "CJS-CUDA-NN-EXTERNAL",
+      "issues": [163, 164],
+      "reason": "The former CUDA-JS NN semantic roadmap moved to iteathen/cuda-nn and is not active CUDA-JS work. CUDA-JS retains only consumer-neutral lower-layer provider/mechanism gaps such as deferred cuDNN/NCCL children when a concrete selected consumer proves the bounded need; #75 remains generic cuBLASLt."
     }
   ],
   "validation": [
@@ -151,25 +152,26 @@
     "remote protected-main read-back before any integrated/publication claim"
   ],
   "do_not": [
-    "treat an open issue, roadmap, proposal, or experiment as production implementation authority",
+    "treat an open issue, roadmap, proposal, experiment, or historical specification as current production implementation authority",
     "widen accepted SPEC-0011 finite-only f32 semantics implicitly while adding new floating kinds",
     "widen the accepted SPEC-0021 public view facade beyond allocation-owned contiguous one-dimensional views and explicit bounded launch access",
     "widen SPEC-0028 beyond finite leaf libraries, explicit typed exports/import aliases, deterministic symbols, and existing RDC/LTO ownership",
     "infer native support from portable/mock/neighboring-profile evidence",
-    "duplicate SPEC-0016 operation lifecycle in scheduler, transfer, graph, library, graphics, sideband, multi-GPU, or NN work",
+    "duplicate SPEC-0016 operation lifecycle in scheduler, transfer, graph, library, graphics, sideband or multi-GPU work, or allow an external CUDA-NN/Tensor/MCGS consumer to recreate it as an upper-layer workaround",
     "add NN exports/dependencies/provider discovery/tensor/autodiff/training semantics to the cuda-js core package",
-    "assume the future NN package name or directory before its own accepted child authority selects it",
+    "create a CUDA-JS-owned NN package, directory, workspace, or nn.* component anchor after ADR-0007; reusable NN semantics belong to iteathen/cuda-nn and generic Tensor semantics to CUDA-JS-Tensor",
     "expose raw native pointers, streams, events, device ordinals/UUIDs, providers, generated CUDA, or machine-specific identifiers through ordinary public products",
     "use unqualified pure-JavaScript wording that hides native providers, generated device code, or independent C/C++ evidence",
     "introduce a CUDA-JS-maintained native host backend or compiled addon without an accepted measured-gap architecture/package/lifecycle decision",
     "weaken tests or claim completion around missing hardware/external controls",
     "let the Linux reference implementation introduce operating-system, distribution, loader, path, or deployment assumptions into public contracts or shared runtime owners",
-    "add MCGS, chess, UCI, tensor scheduling, evaluator policy or product-specific semantics to generic CUDA-JS contracts to make a consumer easier"
+    "add MCGS, chess, UCI, Tensor scheduling, NN model/training policy, evaluator policy or product-specific semantics to generic CUDA-JS contracts to make a consumer easier"
   ],
   "historical_baseline": [
     "CJS-F1A / EXP-000 remains the accepted synthetic Node-FFI foundation",
     "CJS-F0 through CJS-F9 implementation history remains under docs/archive/plans/",
     "EXP-014 remains portable orchestration evidence for SPEC-0016, not native qualification",
+    "ADR-0004 and SPEC-0027 remain accepted historical provenance for the superseded same-repository NN isolation/product plan; ADR-0007 owns current placement",
     "PR #116, PR #118, PR #119, PR #120, PR #124, PR #125 and PR #149 are integrated protected-main CUDA-MCGS/Tensor prerequisites; exact pair issue #32 awaits the frozen CUDA-MCGS artifact",
     "Windows F2W-F9 remains accepted secondary exact-profile evidence after ADR-0006; it is not deleted or used as Linux proof"
   ]
