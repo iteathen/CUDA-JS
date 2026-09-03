@@ -20,17 +20,42 @@ CUDA-JS owns:
 - generic kernel argument and launch contracts;
 - asynchronous completion and cancellation delivery;
 - normalized errors and context health;
-- generic mocks, conformance, diagnostics, packaging, and compatibility.
+- generic mocks, conformance, diagnostics, packaging, and compatibility;
+- separately accepted consumer-neutral CUDA/provider mechanisms whose lifecycle remains coherent after deleting the motivating semantic consumer.
 
-The published `cuda-js` core package does not own any consumer's domain algorithm, graph model, scheduler policy, evaluator semantics, model semantics, tensor/training semantics, or resource plan.
+The published `cuda-js` core package does not own an upper library's reusable semantic domain or a downstream consumer's product meaning. It does not become a Tensor, neural-network, search, RNG, communication, storage-I/O, media, dataframe, ray-tracing, graph-analytics, renderer, database, model, game, or application framework merely because CUDA mechanisms realize those workloads.
 
-Under accepted [`ADR-0007`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md), reusable neural-network semantics are owned by the independent [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn) repository, not by a future CUDA-JS publish unit. Generic tensor mathematics/planning belongs to [`iteathen/CUDA-JS-Tensor`](https://github.com/iteathen/CUDA-JS-Tensor). CUDA-JS remains the consumer-neutral runtime/compiler/memory/execution/provider foundation for those upper layers. Historical ADR-0004 and SPEC-0027 remain provenance for the earlier same-repository isolation decision but no longer authorize `nn.*` production components here.
+Under accepted [`ADR-0007`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md), reusable neural-network semantics are owned by the independent [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn) repository, not by a future CUDA-JS publish unit. Generic tensor mathematics/planning belongs to [`iteathen/CUDA-JS-Tensor`](https://github.com/iteathen/CUDA-JS-Tensor). Historical ADR-0004 and SPEC-0027 remain provenance for the earlier same-repository NN isolation decision but no longer authorize `nn.*` production components here.
 
-Consumers continue to own concrete model architecture/package provenance, datasets/objectives, domain policy, deployment, search/product semantics, and other meaning that is not naturally reusable NN or Tensor behavior.
+Accepted [`ADR-0008`](decisions/ADR-0008-semantic-library-boundary.md) generalizes that separation across the CUDA portfolio. Current reusable semantic owners above CUDA-JS are:
+
+- [`iteathen/CUDA-JS-Tensor`](https://github.com/iteathen/CUDA-JS-Tensor) — generic Tensor mathematics, planning and execution semantics;
+- [`iteathen/cuda-nn`](https://github.com/iteathen/cuda-nn) — reusable NN/model/inference/training semantics;
+- [`iteathen/CUDA-MCGS`](https://github.com/iteathen/CUDA-MCGS) — reusable search/MCGS semantics;
+- [`iteathen/cuda-rng`](https://github.com/iteathen/cuda-rng) — provider-neutral RNG/distribution/reproducibility semantics;
+- [`iteathen/cuda-comm`](https://github.com/iteathen/cuda-comm) — provider-neutral collective/P2P/PGAS/RMA communication semantics;
+- [`iteathen/cuda-io`](https://github.com/iteathen/cuda-io) — GPU source/sink/storage-I/O semantics;
+- [`iteathen/cuda-media`](https://github.com/iteathen/cuda-media) — image/frame/video/codec-pipeline semantics;
+- [`iteathen/cuda-data`](https://github.com/iteathen/cuda-data) — columnar/table/dataframe semantics;
+- [`iteathen/cuda-ray`](https://github.com/iteathen/cuda-ray) — ray/geometry/traversal semantics;
+- [`iteathen/cuda-graph-analytics`](https://github.com/iteathen/cuda-graph-analytics) — graph representation and analytics semantics, distinct from CUDA-MCGS search.
+
+CUDA-JS remains the consumer-neutral runtime/compiler/device/memory/view/operation/synchronization/artifact/provider/resource foundation beneath those libraries. A semantic library may consume CUDA-JS directly or through another natural semantic layer only through versioned public contracts; CUDA-JS does not depend upward on those semantic libraries.
+
+Provider branding does not determine ownership. A bounded cuFFT/cuRAND/NCCL/NVSHMEM/GPUDirect/media/OptiX/TensorRT or other provider mechanism may be CUDA-JS-owned while FFT/RNG/communication/I-O/media/ray/NN meaning stays above it. Conversely, an upper semantic repository does not own native/provider handles, memory, streams, operations, compiler artifacts, synchronization, native errors, or teardown merely because it is the first consumer.
+
+Two similarly named boundaries remain explicit:
+
+- CUDA **Graphs** are CUDA-JS execution mechanisms; `cuda-graph-analytics` owns graph-data/algorithm semantics, not CUDA Graph capture/replay.
+- graphics/external-memory/semaphore interoperability remains a CUDA-JS mechanism; it does not become `cuda-ray` or `cuda-media` semantics merely because those consumers may use it.
+
+Downstream consumers continue to own concrete model/package provenance, datasets/objectives, domain and product policy, deployment, protocol/output meaning, application-level quality/tolerance and other semantics that do not naturally belong to a reusable semantic library.
 
 ## Universality rule
 
-The public contract describes the widest truthful CUDA runtime invariants. It does not expose one consumer's object layout or assume one memory kind, CPU ABI, GPU architecture, driver version, launch strategy, or Node release beyond a declared support profile.
+The public contract describes the widest truthful CUDA runtime invariants. It does not expose one consumer's object layout or assume one memory kind, CPU ABI, GPU architecture, driver version, launch strategy, provider family, semantic workload, or Node release beyond a declared support profile.
+
+A candidate mechanism enters CUDA-JS only when it has a coherent consumer-neutral name, finite resources/lifecycle/errors/identity, and a credible deletion argument showing that CUDA-JS remains naturally meaningful after the motivating semantic consumer is removed. Multiple consumers are useful evidence but do not replace the ownership test.
 
 ## Host-binding rule
 
@@ -48,8 +73,8 @@ JavaScript does not receive an unconstrained pointer capability. Native resource
 
 ## Resource rule
 
-All resources are finite and owned. Allocation failure, unsupported capability, cancellation, teardown, and deferred asynchronous error are specified behavior.
+All CUDA-JS-owned resources are finite and owned. Allocation failure, unsupported capability, cancellation, teardown, and deferred asynchronous error are specified behavior. Upper semantic resources may map onto CUDA-JS resources but do not change the lower owner or fabricate successful cleanup.
 
 ## First milestone
 
-Propose the version-zero contracts, run the bounded foundation experiments, accept only the supported contract slices, and publish no production package until the schema, backend, actor/resource, memory, compile/link/load, launch/completion, error/health, security, conformance, and package gates pass.
+Propose the version-zero contracts, run the bounded foundation experiments, accept only the supported contract slices, and publish no production package until the schema, backend, actor/resource, memory, compile/link/load, launch/completion, error/health, security, conformance, and package gates pass. Future provider breadth remains demand-driven and independently accepted rather than implied by the expanded semantic portfolio.
