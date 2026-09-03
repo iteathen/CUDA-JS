@@ -38,6 +38,10 @@ The public/software/package substrate includes bounded device discovery/selectio
 
 The public compatibility object exposes lower-owned prepared-DAG limits, Device-JS parameter limits, compiler output families, provider capability facts and other finite compatibility records. Those projections are not second validation owners.
 
+## Durable architecture and evidence anchors
+
+The issue-tracker cleanup does not erase established architecture/evidence provenance. `DriverActor` remains the Worker/context/native-resource owner. **CJS-F1B** remains the generated CUDA ABI-fact and independent layout-evidence anchor; **CJS-F2W** remains the accepted **Windows x64** Driver/bootstrap anchor; **CJS-F7W** remains the retained Windows platform-hardening/property/lifecycle anchor. Historical native evidence stays exact to its recorded revisions/profiles and is not silently requalified by current metadata changes.
+
 ## Current consumer-backed lower gap
 
 CUDA-MCGS #122 is protected-accepted and its production adapter owner #125 is now dependency-ready except for demonstrated lower capability gaps. The first such gap is CUDA-JS #193: accepted MCGS resource requirements need to prove ordinary base-allocation alignment before partial realization, while alpha.17 exposes no public allocation-alignment guarantee.
