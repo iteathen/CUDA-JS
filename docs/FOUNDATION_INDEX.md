@@ -31,7 +31,7 @@ This index defines the minimum documentation foundation that must exist and agre
 | CUDA-JS/CUDA-MCGS repository and public-contract boundary | [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md), [`decisions/ADR-0001-repository-boundary.md`](decisions/ADR-0001-repository-boundary.md) |
 | Host-binding and production-source architecture | [`decisions/ADR-0002-node-ffi-first-host-binding.md`](decisions/ADR-0002-node-ffi-first-host-binding.md) and [`decisions/ADR-0005-javascript-authored-jit-native-realized.md`](decisions/ADR-0005-javascript-authored-jit-native-realized.md) |
 | Generated ABI facts versus reviewed semantics | [`decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md`](decisions/ADR-0003-generated-abi-facts-and-semantic-overlays.md) |
-| Optional NN product and core-package isolation | [`decisions/ADR-0004-nn-extension-package-boundary.md`](decisions/ADR-0004-nn-extension-package-boundary.md), [`specs/SPEC-0027-nn-extension-foundation.md`](specs/SPEC-0027-nn-extension-foundation.md), and [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md) |
+| External CUDA-NN ownership and core isolation | [`decisions/ADR-0007-extract-cuda-nn-semantic-product.md`](decisions/ADR-0007-extract-cuda-nn-semantic-product.md) and [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md); historical [`ADR-0004`](decisions/ADR-0004-nn-extension-package-boundary.md) / [`SPEC-0027`](specs/SPEC-0027-nn-extension-foundation.md) preserve the superseded same-repository decision |
 | Foundation assessment | [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md) |
 | Framework and target architecture | [`architecture/FRAMEWORK_OVERVIEW.md`](architecture/FRAMEWORK_OVERVIEW.md), [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md) |
 | Version-zero support bounds | [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md) |
@@ -61,7 +61,7 @@ These remain owned boundaries; implementation is limited to the accepted phase c
 
 ## Current phase gate
 
-`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, atomic-publication, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; the exact compatible-pair and CUDA-MCGS-owned adapter evidence are still pending. Linux `CJS-F2L / EXP-001` and native Linux F3L through F9L remain retained, deferred, and incomplete.
+`CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact host, ABI, Driver, compiler, linker, GPU, oracle, cache, permission, actor-affinity, resource, package, consumer, install, byte-parity, atomic-publication, and cleanup evidence. The platform-neutral F3 through F8 capsules also pass without establishing native Linux CUDA support. The repository remains in an **active implementation phase**; exact compatible-pair and consumer-owned adapter evidence remain independent gates. Linux `CJS-F2L / EXP-001` and native Linux F3L through F9L remain retained, deferred, and incomplete.
 
 ## Foundation completeness test
 
@@ -75,5 +75,5 @@ The foundation is considered present only when all of the following are true:
 6. raw pointers, private FFI/provider mechanisms, and accidental first-consumer limits do not leak into public contracts;
 7. source provenance and superseded alternatives remain traceable;
 8. documentation/static validation passes;
-9. implementation source remains inside its accepted component, conformance, experiment, or tool boundary and no native binary is tracked.
-10. the optional NN product remains a separate publish unit, generic core contains no NN export/dependency/semantics, and every NN implementation boundary has its own accepted child specification.
+9. implementation source remains inside its accepted component, conformance, experiment, or tool boundary and no native binary is tracked;
+10. CUDA-NN remains an external public-contract consumer, CUDA-JS core contains no NN export/dependency/model/training semantics, generic Tensor semantics remain CUDA-JS-Tensor-owned, and historical ADR-0004/SPEC-0027 cannot authorize new `nn.*` production components in this repository.
