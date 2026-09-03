@@ -1,9 +1,9 @@
 {
-  "schema_version": 62,
+  "schema_version": 63,
   "updated": "2026-09-03",
-  "status": "mcgs_alignment_projection_gate",
-  "objective": "Keep CUDA-JS consumer-neutral while resolving the demonstrated ordinary device-allocation alignment gap required by CUDA-MCGS #125. Do not reopen completed ownership-audit abstractions or dormant roadmap mechanisms without concrete new evidence.",
-  "package_candidate": "cuda-js@0.1.0-alpha.17",
+  "status": "mcgs_alignment_projection_implementation",
+  "objective": "Implement the protected #193 ordinary device-allocation alignment authority as one lower-owned immutable compatibility projection, then stop at an exact-head protected integration gate. Do not change allocation/view/native behavior or widen CUDA-JS for speculative consumers.",
+  "package_candidate": "cuda-js@0.1.0-alpha.18",
   "completed_refactor_nodes": [
     "#178 provider capability/admission truth completed",
     "#179 cuBLASLt borrower lifecycle completed without a generic provider lease",
@@ -12,18 +12,28 @@
     "#186 finite prepared-DAG and Device-JS lower limits projected publicly",
     "#162 consumer-neutral mechanism ownership audit closed completed after Tensor and MCGS peer audits",
     "CUDA-JS-Tensor #40/#44/#45 ownership cleanup completed",
-    "CUDA-MCGS #193 execution-boundary audit completed and #122 semantic packet protected-accepted"
+    "CUDA-MCGS #193 execution-boundary audit completed and #122 semantic packet protected-accepted",
+    "#196 protected-integrated the accepted SPEC-0004 ordinary base-allocation alignment authority"
   ],
+  "protected_authority": {
+    "issue": 193,
+    "merge_commit": "426e4eb9b0c73346b19e60c81ab686b9eb5be256",
+    "authorized_tree": "a2dd4aca91456f8544b14c1312ac36c03c396808",
+    "current_main": "2d43d9a5e1d4391b27966f9fcd681a15df26d346",
+    "current_main_tree": "a2dd4aca91456f8544b14c1312ac36c03c396808",
+    "history_note": "An accidental direct noop create/revert occurred after #196; current protected content is byte-for-byte restored to the authorized tree and push verification is green."
+  },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
     "issue": 193,
-    "name": "ordinary device-allocation minimum alignment",
-    "state": "authority draft PR #194 reviewed/green but unmerged; fresh exact-head integration authorization remains separate",
-    "next_action": "Keep PR #194 confined to the bounded runtime.memory base-allocation alignment authority. After normal protected integration/readback, implement one immutable CUDA_JS_COMPATIBILITY projection mechanically tied to the lower memory owner, prove 8/256-byte admission and above-guarantee rejection, and provide installed-package evidence. Do not add an aligned allocator or confer base alignment on arbitrary offset views.",
-    "exit": "A public consumer can decide before allocation whether an ordinary CUDA-JS base allocation satisfies a requested power-of-two alignment; CUDA-MCGS #125 can consume that fact without private/native assumptions."
+    "pr": 197,
+    "name": "ordinary device-allocation minimum alignment implementation",
+    "state": "draft implementation candidate; red-first probe recorded before production changes",
+    "next_action": "Finish alpha.18 by keeping one memory-component owner constant, projecting it through CUDA_JS_COMPATIBILITY, proving owner/projection drift rejection, proving installed 8/256 admission and 512 rejection, reconciling package/control docs, then run complete exact-head PR qualification and author review. Do not merge without fresh exact-head authorization.",
+    "exit": "PR #197 is green and reviewed on one frozen head/tree/base; public compatibility exposes the exact lower-owned 256-byte base-allocation minimum, allocation/view/native behavior is unchanged, and a fresh protected merge authorization remains the only integration gate."
   },
   "after_current_focus": [
-    "CUDA-MCGS #125 implements the accepted execution-package -> public CUDA-JS adapter",
+    "CUDA-MCGS #125 consumes the protected alignment fact through the public package and resumes the accepted execution-package -> CUDA-JS adapter",
     "CUDA-JS #32 freezes and qualifies one exact CUDA-MCGS/CUDA-JS compatible pair",
     "CUDA-JS #157 and CUDA-JS-Tensor #32/#37 continue the independent first-real-model Tensor lane"
   ],
@@ -35,7 +45,7 @@
     },
     "cuda_mcgs": {
       "issue": 125,
-      "disposition": "CUDA-MCGS owns search semantics and adapter translation; CUDA-JS owns generic lower runtime/mechanism contracts and compatibility facts."
+      "disposition": "CUDA-MCGS owns search semantics and adapter translation; CUDA-JS owns the generic lower memory guarantee and other runtime/mechanism contracts."
     }
   },
   "durable_authority_markers": [
@@ -44,12 +54,18 @@
     "ADR-0002-node-ffi-first-host-binding.md",
     "ADR-0007",
     "SPEC-0004-device-memory-foundation.md",
+    "SPEC-0004-allocation-alignment-projection-addendum.md",
     "SPEC-0008-package-public-facade.md"
+  ],
+  "red_first_evidence": [
+    "PR #197 head 15d12900d04bc0a7abcb6a646f3a7390f5417322 kept all earlier portable stages green and failed in F8 because components/memory/index.mjs did not export DEVICE_MEMORY_ALLOCATION_MINIMUM_ALIGNMENT_BYTES.",
+    "The first divergence was the intentionally missing lower owner/projection, not an unrelated repository failure."
   ],
   "parallel_external_lanes": [
     "Native Linux x86-64 qualification remains contributor/external evidence work on a directly exposed physical NVIDIA host under #4.",
     "Hardware/provider/platform compatibility cells remain independent evidence work and do not keep completed implementation issues open.",
-    "Private-vulnerability reporting unaffiliated two-party proof remains operational evidence under #68."
+    "Private-vulnerability reporting unaffiliated two-party proof remains operational evidence under #68.",
+    "#156 owns the governance follow-up for admin-enforced protected-branch writes exposed by the accidental noop incident."
   ],
   "issue_tracker_rule": [
     "Issues own concrete actionable obligations, explicit blocked gates, or concrete external evidence cells.",
@@ -59,10 +75,11 @@
   ],
   "hard_constraints": [
     "Do not add Tensor, NN, MCGS, media, data, ray, graph-analysis or other consumer semantics to CUDA-JS.",
+    "Do not add allocateDevice alignment selection, raw addresses, VMM/suballocation, or blanket nonzero-offset view alignment under #193.",
     "Do not replace explicit expert launch geometry with a mandatory logical-work resolver.",
     "Do not create a universal PreparedExecutable/GpuProgram/provider registry merely to reduce adapter code.",
     "Do not expose raw pointers/native handles/provider paths or private CUDA-JS internals.",
     "Do not treat portable/mock evidence as native qualification.",
-    "Do not merge PR #194 or any later protected subject without its normal exact-head review/authorization gate."
+    "Do not merge PR #197 or any later protected subject without its own normal exact-head review/authorization gate."
   ]
 }
