@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.17",
+    "version": "0.1.0-alpha.18",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -53,6 +53,7 @@
   "capabilities": {
     "deviceSelection": "finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets",
     "deviceMemory": "bounded-synchronous-copied-bytes",
+    "deviceMemoryAllocationMinimumAlignmentBytes": 256,
     "moduleFormats": ["ptx", "cubin"],
     "functionParameters": ["device-memory", "u32", "u64", "i32", "f32", "f64", "f16", "bf16", "publication-mailbox-host-to-device-u32", "publication-mailbox-device-to-host-u32"],
     "typedDeviceViews": "allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access",
@@ -113,6 +114,7 @@
   "claimLimits": [
     "Structurally admitted native Windows x64 and Linux x64 CUDA profiles may operate for testing without a separate opt-in; native Linux x64 remains not-qualified.",
     "Only exact capability/profile combinations with their required evidence are qualified; successful operation does not promote support.",
+    "The ordinary device-allocation minimum-alignment projection applies only to ordinary base allocations; it adds no caller-selected alignment, arbitrary offset-view guarantee, native support promotion, or performance claim.",
     "SPEC-0010 relocatable PTX and SPEC-0012 Device LTO have exact Windows native qualification; Linux and every other provider/device profile remain independently gated. SPEC-0011 u64/i32/f32 scalar launch kinds retain their own native promotion gate.",
     "SPEC-0021 f64/f16/bf16 scalar launch kinds are implemented in the public portable/software/package path; their exact native ABI/launch promotion evidence remains open.",
     "SPEC-0021 contiguous one-dimensional typed device views are implemented as allocation-owned opaque public capabilities with explicit launch-access enforcement. Portable/package behavior is implemented; native view consumption remains unqualified.",
