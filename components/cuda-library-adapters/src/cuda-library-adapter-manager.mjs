@@ -110,6 +110,7 @@ export class CudaLibraryAdapterManager {
   #execution;
   #operations;
   #adapterToken = null;
+  #borrowCount = 0;
   #planCount = 0;
 
   constructor({ registry, contextToken, memory, views, execution, operations }) {
@@ -140,38 +141,78 @@ export class CudaLibraryAdapterManager {
   }
 
   async openCublasLt(operationId = null) {
-    if (this.#adapterToken !== null) fail('CUBLASLT_ADAPTER_ALREADY_OPEN', 'backpressure', 'This runtime already owns an open cuBLASLt adapter.');
-    const backend = await this.#operations.openCublasLt({ operationId });
-    let token;
+    let adapterToken = this.#adapterToken;
+    let adapterRecord = null;
+    let createdAdapter = false;
+    if (adapterToken === null) {
+      const backend = await this.#operations.openCublasLt({ operationId });
+      try {
+        adapterToken = this.#registry.allocate({
+          kind: 'cublaslt-adapter', value: Object.freeze({ native: backend.native, provider: Object.freeze({ ...backend.provider, workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES }) }), parent: this.#contextToken,
+          dispose: async (record) => Object.freeze({ kind: 'cublaslt-adapter', closed: true, backend: await this.#operations.closeCublasLt({ native: record.native, operationId: null }) ?? null }),
+        });
+        adapterRecord = this.#registry.get(adapterToken, { kind: 'cublaslt-adapter' });
+        createdAdapter = true;
+      } catch (error) {
+        try { await this.#operations.closeCublasLt({ native: backend.native, operationId }); }
+        catch (cleanupError) { throw rollbackFailure('CUBLASLT_ADAPTER_REGISTRATION_ROLLBACK_FAILED', 'cuBLASLt adapter registration failed and native rollback cleanup was unproved.', error, cleanupError, operationId); }
+        throw error;
+      }
+    } else {
+      adapterRecord = this.#registry.get(adapterToken, { kind: 'cublaslt-adapter' });
+    }
+
+    let borrowerToken;
     try {
-      token = this.#registry.allocate({
-        kind: 'cublaslt-adapter', value: Object.freeze({ native: backend.native, provider: Object.freeze({ ...backend.provider, workspaceAlignmentBytes: CUBLASLT_WORKSPACE_ALIGNMENT_BYTES }) }), parent: this.#contextToken,
-        dispose: async (record) => Object.freeze({ kind: 'cublaslt-adapter', closed: true, backend: await this.#operations.closeCublasLt({ native: record.native, operationId: null }) ?? null }),
+      borrowerToken = this.#registry.allocate({
+        kind: 'cublaslt-borrow',
+        value: Object.freeze({ adapter: adapterToken }),
+        parent: adapterToken,
+        dispose: () => Object.freeze({ kind: 'cublaslt-adapter', closed: true }),
       });
     } catch (error) {
-      try { await this.#operations.closeCublasLt({ native: backend.native, operationId }); }
-      catch (cleanupError) { throw rollbackFailure('CUBLASLT_ADAPTER_REGISTRATION_ROLLBACK_FAILED', 'cuBLASLt adapter registration failed and native rollback cleanup was unproved.', error, cleanupError, operationId); }
+      if (createdAdapter) {
+        try { await this.#registry.close(adapterToken); }
+        catch (cleanupError) { throw rollbackFailure('CUBLASLT_BORROW_REGISTRATION_ROLLBACK_FAILED', 'cuBLASLt borrower registration failed and provider rollback cleanup was unproved.', error, cleanupError, operationId); }
+      }
       throw error;
     }
-    this.#adapterToken = token;
-    return this.#adapterDescriptor(token, this.#registry.get(token, { kind: 'cublaslt-adapter' }), operationId);
+    if (createdAdapter) this.#adapterToken = adapterToken;
+    this.#borrowCount += 1;
+    return this.#adapterDescriptor(borrowerToken, adapterRecord, operationId);
   }
 
-  adapterStatus(token, operationId = null) { return this.#adapterDescriptor(token, this.#registry.get(token, { kind: 'cublaslt-adapter' }), operationId); }
+  adapterStatus(token, operationId = null) {
+    const borrower = this.#registry.get(token, { kind: 'cublaslt-borrow' });
+    return this.#adapterDescriptor(token, this.#registry.get(borrower.adapter, { kind: 'cublaslt-adapter' }), operationId);
+  }
 
   async releaseAdapter(token, operationId = null) {
-    this.#registry.get(token, { kind: 'cublaslt-adapter' });
-    const closed = await this.#registry.close(token);
-    if (this.#adapterToken !== null && tokenKey(this.#adapterToken) === tokenKey(token)) this.#adapterToken = null;
-    return Object.freeze({ schemaVersion: 1, released: Object.freeze({ kind: 'cublaslt-adapter' }), disposition: closed.disposition, operationSequence: operationId });
+    const borrower = this.#registry.get(token, { kind: 'cublaslt-borrow' });
+    const borrowerClosed = await this.#registry.close(token);
+    if (this.#borrowCount < 1) fail('CUBLASLT_BORROW_COUNT_INVALID', 'internal', 'cuBLASLt borrower accounting underflowed.');
+    this.#borrowCount -= 1;
+    let providerClosed = null;
+    if (this.#borrowCount === 0) {
+      providerClosed = await this.#registry.close(borrower.adapter);
+      if (this.#adapterToken !== null && tokenKey(this.#adapterToken) === tokenKey(borrower.adapter)) this.#adapterToken = null;
+    }
+    return Object.freeze({
+      schemaVersion: 1,
+      released: Object.freeze({ kind: 'cublaslt-adapter' }),
+      disposition: providerClosed?.disposition ?? borrowerClosed.disposition,
+      operationSequence: operationId,
+    });
   }
 
   async createF32MatmulPlan(adapterToken, options, operationId = null) {
     const normalized = normalizePlan(options);
-    const adapterLease = this.#registry.acquire(adapterToken, { kind: 'cublaslt-adapter' });
+    const borrowerLease = this.#registry.acquire(adapterToken, { kind: 'cublaslt-borrow' });
+    const underlyingAdapterToken = borrowerLease.value.adapter;
     let backend = null;
     try {
-      backend = await this.#operations.createF32MatmulPlan({ adapterNative: adapterLease.value.native, plan: normalized, operationId });
+      const adapter = this.#registry.get(underlyingAdapterToken, { kind: 'cublaslt-adapter' });
+      backend = await this.#operations.createF32MatmulPlan({ adapterNative: adapter.native, plan: normalized, operationId });
       let token;
       try {
         if (!Number.isSafeInteger(backend.workspaceBytes) || backend.workspaceBytes < 0 || backend.workspaceBytes > normalized.maxWorkspaceBytes) {
@@ -179,7 +220,7 @@ export class CudaLibraryAdapterManager {
         }
         token = this.#registry.allocate({
           kind: 'cublaslt-matmul-plan',
-          value: Object.freeze({ ...normalized, native: backend.native, adapter: adapterToken, workspaceBytes: backend.workspaceBytes }),
+          value: Object.freeze({ ...normalized, native: backend.native, adapter: underlyingAdapterToken, workspaceBytes: backend.workspaceBytes }),
           parent: adapterToken,
           dispose: async (record) => Object.freeze({ kind: 'cublaslt-matmul-plan', closed: true, backend: await this.#operations.destroyF32MatmulPlan({ native: record.native, operationId: null }) ?? null }),
         });
@@ -190,7 +231,7 @@ export class CudaLibraryAdapterManager {
       }
       this.#planCount += 1;
       return this.#planDescriptor(token, this.#registry.get(token, { kind: 'cublaslt-matmul-plan' }), operationId);
-    } finally { adapterLease.release(); }
+    } finally { borrowerLease.release(); }
   }
 
   planStatus(token, operationId = null) { return this.#planDescriptor(token, this.#registry.get(token, { kind: 'cublaslt-matmul-plan' }), operationId); }
