@@ -2,204 +2,62 @@
 
 **Status:** Informational
 
-**Updated:** 2026-09-02
+**Updated:** 2026-09-03
 
-## CUDA-MCGS prerequisite execution baseline
-
-```text
-protected main input: af29b95e0707b36b88ee4e234c25a9e7f7ed3a1d
-completed P0/P1:    #116 P0 / #118 SPEC-0018 / #119 SPEC-0019 / #120 SPEC-0014 / #125 device publication / #134 typed views / #136 Device-JS libraries / #137 prepared DAG / #138 cuBLASLt adapter / #140 dense numeric Device-JS / #143 native prepared-DAG projection / #146 prepared cuBLASLt DAG nodes
-cross-repo gate:    #32 exact CUDA-JS/CUDA-MCGS pair; awaits a frozen CUDA-MCGS artifact
-candidate package:  cuda-js@0.1.0-alpha.16 (selected-runtime Device-JS target propagation correction; issue #148)
-```
-
-**Node 26.7.0** remains the exact Node qualification baseline.
-
-## Production-source architecture
-
-ADR-0005 records the canonical split: **CUDA-JS is JavaScript-authored and JIT/native-realized**. The published core runtime is maintained as JavaScript/ESM and currently ships no CUDA-JS-specific compiled addon. Node FFI, NVIDIA native providers, private generated CUDA C++ and produced device artifacts realize execution. Repository C/C++ probes, fixtures and native oracles remain independent evidence rather than shipped runtime implementation.
-
-This wording does not claim that every host call or device artifact is JIT-produced. Precompiled artifacts remain valid, and host JIT claims remain exact-profile gated under ADR-0002. A future maintained native host backend requires an accepted measured-gap decision rather than entering as incidental drift.
-
-## Reference-platform direction
-
-ADR-0006 keeps the public/component architecture OS-neutral while making native Linux x86-64 the reference implementation and primary qualification platform. Ubuntu 24.04 LTS is the first exact qualification cell. The accepted Windows x64 evidence below remains valid as a peer exact profile, but it no longer determines forward platform priority. DriverActor and CompilerActor use shared native engines with thin Windows/Linux profiles. The Linux compiler profile is pinned to exact official Ubuntu packages and installed-file identities, and the repository now has one runner-ready EXP-001/F1B/F3L–F8L command/evidence chain. That chain has not run on a controlled native Linux NVIDIA host, so source completion is not a Linux support claim.
-
-Issue #4 is now an external contributor-evidence lane rather than an active repository implementation blocker. Platform diagnostics, public-facade admission, and compatibility metadata admit native Linux x86-64 only as `testing-unconfirmed`, and the OS-neutral F4/F5 oracles plus F3–F8 runners are source-complete. The available VM hosts cannot currently expose an accepted CUDA qualification environment; VM, emulated, WSL, container, hosted-CI, portable, or mock results do not substitute for the unchanged chain on a native Ubuntu 24.04 host with a directly exposed physical NVIDIA GPU. Only that exact passing compatibility cell may be promoted, and issue #17 expands distributions only after it.
-
-Accepted SPEC-0017 portable/software integration is complete on protected `main`. It establishes finite sanitized device snapshots, opaque selectors, exactly one selected device per runtime, and selected-device-driven target/cache identity without using native qualification as a portable-contract gate. Native selected-device promotion follows contributed physical-host evidence. Multi-GPU orchestration remains proposal-only under SPEC-0024, and topology or overlap qualification requires a controlled host with at least two independently visible physical GPUs; it is pursued only where it fits naturally.
-
-The accepted secondary **Windows x64** foundation (`CJS-F1B`, `CJS-F2W`, `CJS-F3W` through `CJS-F7W`, and F8/F9), active reference **Linux x86-64** implementation/qualification path, and portable/software/package implementations include:
-
-- SPEC-0010 typed relocatable device code;
-- SPEC-0011 `u64`, `i32`, finite-only `f32` scalar arguments;
-- SPEC-0012 typed Device LTO;
-- SPEC-0013 restricted Device-JS;
-- SPEC-0022 accepted relaxed device-scope `u32`/`u64` atomic-observation child;
-- SPEC-0022 accepted device-scope `u32`/`u64` release/acquire publication child;
-- SPEC-0016 opaque submission/completion with a one-pending compatibility default;
-- SPEC-0018 exact opt-in capacity-two/two-private-stream/no-queue scheduling;
-- SPEC-0019 exact two-internal-pinned-staging contiguous H2D/D2H/D2D profile;
-- SPEC-0014 exact private mapped named-u32 publication mailbox profile;
-- SPEC-0017 finite sanitized discovery, opaque explicit selection, one selected device per runtime, and selected-device compile/link target defaults;
-- SPEC-0021 `f64`/`f16`/`bf16` scalar ABI in the public portable/software/package path;
-- SPEC-0021 contiguous 1D generic typed-device-view range/lifecycle component and allocation-owned public facade, integrated on PR #134;
-- SPEC-0028 typed Device-JS leaf-library composition, integrated on PR #136; native qualification remains open on issue #135;
-- SPEC-0020 immutable prepared DAGs, with exact kernel-only identity plus the integrated SPEC-0031 cuBLASLt f32 child and no CUDA Graph claim;
-- SPEC-0023/SPEC-0029 optional context-owned cuBLASLt f32 row-major matmul over typed views and the ordinary operation lifecycle;
-- SPEC-0030 additive `f64`/`f16`/`bf16` Device-JS scalar computation and exact trusted numeric/device header profiles, integrated on PR #140;
-- the SPEC-0006 target-syntax correction;
-- the SPEC-0003 disposal-failure correction;
-- immutable GitHub Actions provenance and public capability projection checks;
-- ADR-0007 independent CUDA-NN ownership, with historical ADR-0004/SPEC-0027 retained only as provenance for the superseded same-repository plan.
-
-Portable/software/package implementation and native qualification remain independent.
-
-SPEC-0012 typed Device LTO is implemented and qualified on the exact recorded Windows x64 profile. PR #116 integrated the NQ-LTO independent-oracle capsule on protected `main@9f13785e4d1d8d887099571a7a41be0b5b42f749`; a current-head rerun from `main@2135216b1a9fd88066a1c82b61ae533645eac9c2` again passed byte-identical two-unit LTO-IR/cubin/output parity, fail-closed negative controls and terminal zero-live-resource cleanup. Linux, other devices/providers and LTO performance remain separately unqualified.
-
-## 2026-08-14 open-issue sweep
-
-The project owner requested every open issue be processed through investigate, assess, primary-source research, reassess, plan, authorized implementation and test. The durable per-issue result is `docs/plans/2026-08-14-open-issue-development-sweep.md`.
-
-### Implemented portable foundation: SPEC-0017 / #20
+## Current package and boundary state
 
 ```text
-architectural disposition: selected
-implementation status:       implemented in portable/software/package path
-qualification status:        not-qualified
-priority:                    integration, then contributor-run exact native evidence
+package candidate:            cuda-js@0.1.0-alpha.17
+public API schema:            1
+host source model:            JavaScript/ESM, Worker-owned Node FFI
+exact Node evidence baseline: Node 26.7.0
+native Linux x86-64:          testing-unconfirmed / not-qualified
+performance claims:           none beyond exact recorded evidence
 ```
 
-SPEC-0017 implements `discoverCudaDevices()`, opaque process-local selectors, explicit/default `openCudaRuntime()` selection before context creation, selected-architecture compile/link defaults and cache separation, and public ordinal sanitization. It exposes no ordinal/UUID/serial/PCI/native handle. Portable mocks prove orchestration only; exact native default/explicit selection and distinct physical-device behavior remain unqualified. Multi-device orchestration remains SPEC-0024 and proposal-only.
+The current alpha.17 packet completes the lower CUDA boundary needed by the active Tensor refactor without adding a universal GPU IR, launch resolver, executable-preparation transaction, provider registry, or consumer-specific semantics.
 
-### Implemented foundation: SPEC-0021 / #39/#88
+Completed refactor decisions and mechanisms are:
+
+- **#178 provider capability/admission truth:** the existing SPEC-0023/SPEC-0029 provider model remains the owner; cuBLASLt workspace alignment is projected as a public lower fact and ordinary unavailable/incompatible cases use the public `unsupported` category.
+- **#179 cuBLASLt lifecycle:** CUDA-JS owns one underlying runtime/provider resource and independent public borrower children. No generic provider-sharing lifecycle was introduced because materially different providers do not share one coherent handle/teardown model.
+- **#180 executable preparation:** no new `PreparedExecutable`, `GpuProgram`, or universal preparation transaction is justified. Compiler/artifact/module/function/provider/prepared-DAG resources remain independently composable LEGO pieces.
+- **#181 launch resolution:** explicit grid/block geometry remains the canonical public expert contract. Physical topology selected by Tensor, MCGS, or another upper profile stays upper-owned while CUDA-JS owns launch validity and device limits.
+- **#186 finite compatibility projection:** alpha.17 exposes the already-owned SPEC-0020 prepared-DAG limits and Device-JS per-function parameter ceiling through immutable `CUDA_JS_COMPATIBILITY` records, with drift tests tying the public projection to the lower owners.
+
+The relevant additive compatibility fields are:
 
 ```text
-architectural disposition: selected
-implementation status:       implemented in portable/software/package scalar path; contiguous 1D view component implemented
-qualification status:        not-qualified
-priority:                    integrate the public typed-view facade, then native/library evidence
+capabilities.preparedOperationDagLimits = {
+  nodes: 32,
+  edges: 64,
+  bindings: 64,
+  predecessorsPerNode: 8
+}
+
+capabilities.deviceJsLimits = {
+  parametersPerFunction: 64
+}
 ```
 
-SPEC-0021 preserves accepted finite-only `f32` and implements new `f64`, `f16`, and `bf16` scalar packing with deterministic width/alignment, round-to-nearest-even half/bfloat conversion, signed-zero/infinity behavior and canonical new-kind NaNs. Execution packing and DriverActor protocol admission share one execution-owned scalar-kind/value authority, preventing duplicate Worker/execution whitelists from drifting.
+These values are public compatibility facts, not a second validation owner. Device-JS and prepared execution continue to validate every actual request.
 
-The same specification implements a generic contiguous 1D `device-view` component over opaque device allocations. Views use ResourceRegistry parent/child/generation/lease behavior, exact dtype/range/access semantics and half-open overlap classification without exposing native addresses. The active public packet adds only `CudaDeviceMemory.view(...) -> CudaDeviceView`: an allocation-owned opaque child usable wherever a `device-memory` kernel argument is accepted, with explicit per-launch access declarations constrained by the view range and access role. It does not add tensor shape, stride, algebra, host-array, pointer, conversion, or hardware-bound semantics.
+## Existing generic CUDA-JS substrate
 
-The exact implementation-only head `7a22461fa84412b9350152291f58855f54dbe6f9` passed `verify` and `node-compatibility`, including F4/F5/F6 and the F8 public package/facade path. The fully reconciled implementation/documentation head must pass the same protected checks before merge. Native scalar ABI/launch and native view-consumer qualification remain open.
+The current public/software/package substrate includes bounded device discovery/selection, device memory and typed views, module/function resources, explicit launch/completion, the SPEC-0016 operation lifecycle, the exact capacity-two SPEC-0018 scheduling profile, bounded async transfer, publication mailboxes, NVRTC/nvJitLink compilation and typed artifacts, restricted Device-JS, Device-JS leaf-library composition, dense numeric Device-JS, immutable prepared DAGs, and the bounded cuBLASLt f32 row-major profile including prepared-DAG composition.
 
-### Implemented and qualified first profiles: SPEC-0018 / #40, SPEC-0019 / #86, and SPEC-0014 / #38
+CUDA-JS remains consumer-neutral. Tensor mathematics/planning belong to CUDA-JS-Tensor; reusable NN semantics belong to cuda-nn; search semantics belong to CUDA-MCGS; RNG/communication/I/O/media/data/ray/graph-analysis semantics remain in their independent owners.
 
-```text
-architectural disposition: selected
-implementation status:       SPEC-0018, SPEC-0019, and SPEC-0014 merged
-qualification status:        exact recorded Windows profile plus installed-package evidence
-priority:                    consume from a bounded CUDA-MCGS artifact, then qualify exact pair #32
-```
+## Qualification limits
 
-PR #116 and the scoped atomic child are merged and their issues closed. PR #118 merged SPEC-0018's exact capacity-two profile with two private nonblocking streams, one optional predecessor, declared hazard admission, no queue, conservative failure attribution, native independent atomic-observer evidence, and installed-package coverage. PR #119 merged SPEC-0019 at protected-main `3f3e142bfb6479c6ff5f6ce636b7c2354d81a34d` with exactly two lazy internal pinned staging blocks, snapshot H2D, terminal-result D2H, contiguous D2D, the same operation dependency/hazard lifecycle, an independent MSVC copy oracle, public H2D→kernel→D2H ordering evidence, installed-package coverage, and terminal cleanup. Issue #86 is closed. Caller registration outside the accepted publication-mailbox specialization, chunk queues, and overlap claims remain excluded.
+Portable/mock/package evidence proves only the code paths it executes. Existing exact Windows evidence remains exact to its recorded Node/Driver/toolkit/provider/GPU revisions and is not silently requalified merely because alpha.17 adds side-effect-free compatibility metadata. Native Linux, other GPUs/providers, broader topology, multi-GPU, performance, strict-JIT and process-isolation claims remain independently gated.
 
-### Integrated and qualified first profile: SPEC-0014 / #38
+The repository-side Ubuntu 24.04 native runner chain remains available for contributor evidence, but hosted CI, VMs, WSL, containers and portable mocks do not substitute for a directly exposed physical NVIDIA host where native qualification is required.
 
-```text
-architectural disposition: accepted exact first profile
-implementation status:       merged on PR #120 at protected-main ed35718ea15ce7a878f67580e271aee5820948ee
-qualification status:        portable, independent native, public native, and installed-package evidence pass
-priority:                    preserve the exact profile while CUDA-MCGS supplies the #32 pair artifact
-```
+## Current cross-repository seam
 
-The accepted profile owns an opaque `runtime.publication-mailbox` component with at most 64 named naturally aligned u32 lanes over one internally allocated and strongly retained `SharedArrayBuffer`. Every lane has one immutable host-to-device or device-to-host direction. Each kernel argument binds one named lane through a direction-specific parameter kind; Device-JS supplies only system-scope acquire-load and release-store helpers. The backing store and mapped alias remain private, one live GPU operation may lease a mailbox, and reset/unregister is forbidden before terminality. The integrated implementation proves generation/stale handling, mapping rollback, unregister-failure orphan retention, lease backpressure, independent MSVC/Driver publication, public Device-JS/native publication from `41` to `42`, installed-package use, and zero-resource terminal cleanup on the exact recorded Windows profile.
+After alpha.17 protected integration, the next dependency-ready refactor is **CUDA-JS-Tensor #45**. Tensor should consume the public prepared/Device-JS limit projection, remove copied lower ceilings where there is no independent Tensor rationale, preserve Tensor-selected `blockSize` and logical-work-to-grid mapping, preserve its accepted `ptx | lto-ir` artifact-family control, and continue composing the existing public compile/module/function/prepared-DAG bricks.
 
-## Execution baseline
+After Tensor #45, Tensor #40 performs final execution-ownership reconciliation. CUDA-MCGS #193 follows that reconciliation. CUDA-MCGS #125 remains independently blocked by its existing prerequisites. No CUDA-MCGS search semantics are authorized by this status document.
 
-```text
-DriverActor Workers:          1 per runtime
-private CUDA contexts:        1 per runtime
-private execution streams:    1 default / exactly 2 opt-in
-max pending GPU operations:   1 default / exactly 2 opt-in
-public operation lifecycle:   CudaFunction.submit() -> CudaOperation
-public prepared lifecycle:    CudaRuntime.prepareOperationDag() -> CudaPreparedOperationDag
-legacy terminal convenience:  CudaFunction.launch()
-public launch kinds:          device-memory/u32/u64/i32/f32/f64/f16/bf16 + directional mailbox-u32
-```
-
-SPEC-0016 remains the sole CUDA-JS operation lifecycle owner. Scheduler, transfer, graph, library, graphics, multi-GPU and sideband work inside CUDA-JS must consume it rather than duplicate it. External upper consumers such as CUDA-NN, CUDA-JS-Tensor and CUDA-MCGS use public operation/prepared-execution contracts and must not reimplement the generic lifecycle locally.
-
-## Device-JS
-
-SPEC-0013, the accepted bounded SPEC-0022 scoped-atomic-observation and device-publication children, the SPEC-0014 mailbox child, and additive SPEC-0030 dense numeric profile are implemented. `acorn@8.15.0` is syntax-only parsing; CUDA-JS owns the accepted restricted language, typing, helper semantics, deterministic code-unit ordering, CUDA lowering, identity, diagnostics and CompilerActor handoff. Explicit `u32`/`u64` `loadRelaxedDevice` / `storeRelaxedDevice` helpers provide one-location device-scope relaxed semantics. `loadAcquireDevice` / `storeReleaseDevice` provide device-scope publication ordering when acquire observes the matching release; consumer generation, progress, payload and queue policy remain separate. Direction-specific `gpu.mailbox.loadAcquireSystem` / `storeReleaseSystem` helpers consume only opaque u32 mailbox lane types and lower through the manifest-owned `cuda-cccl` profile.
-
-SPEC-0030 is integrated on protected main through PR #140 and issue #139 is closed. Dense requests add `f64`/`f16`/`bf16` pointers, locals, device functions, leaf libraries and kernel scalars plus exact casts, round-to-nearest half/bfloat arithmetic, special values and finite math helpers. CompilerActor owns the exact `cuda-numeric` and composite `cuda-device` profiles. Legacy Device-JS contract/identity/generated bytes remain exact. Two unrelated installed consumers pass, and the exact installed Windows CUDA 13.3/compute_75/GTX 1660 Ti launch matches a separately compiled CUDA C++ oracle with zero live/orphaned resources. Linux/other profiles, tensor operations/cores, fast math and performance remain unqualified or excluded.
-
-Accepted SPEC-0028 is integrated on protected main. It adds device-function-only leaf libraries with explicit typed exports, deterministic identity-derived external symbols, explicit consumer-local import aliases, homogeneous copied RDC/LTO artifacts, and final cubin composition through the existing CompilerActor link owner. It adds no tensor/search semantics, native symbol controls, ambient registry, or native qualification claim.
-
-The alpha.16 candidate corrects the SPEC-0017/SPEC-0028 boundary: `compileDeviceProgram()` and `compileDeviceLibrary()` now bind Device-JS translation and semantic identity to the selected runtime's compile target before compiler work. Portable `compute_89` evidence covers PTX and LTO libraries, composed cubin linking, kernel-only identity separation, and fail-closed conflicting-target rejection. This is target/identity correctness, not qualification of another physical GPU.
-
-Accepted SPEC-0020 is integrated on protected main through PR #137. Its baseline owns a pure canonical topology/identity component and one opaque public prepared-DAG capability for 1–32 immutable kernel nodes, at most 64 edges/bindings, fixed launch facts, fixed scalars or named bindings, and explicit accesses. PR #143 corrected native launch-limit identity projection and qualified kernel-only semantic replay on the recorded Windows profile. PR #146 integrated accepted SPEC-0031 and closed issue #145: fixed SPEC-0029 plans add exact cuBLASLt f32 nodes whose owner derives typed-view/workspace accesses and enqueues within the same one-stream, one-event, one-operation lifecycle. Kernel-only identity remains exact. Exact installed-package Windows evidence covers a three-node kernel → cuBLASLt → kernel batch with numerical parity and zero live/orphaned resources. CUDA Graph realization, transfer/mailbox/other-library nodes, broader native profiles, tensor semantics/cores, multi-GPU, and performance remain separate.
-
-Accepted SPEC-0023 plus SPEC-0029 is integrated on protected main through PR #138. It adds one lazy context-owned cuBLASLt adapter, immutable f32 row-major contiguous matmul plans, typed-view access/range enforcement, explicit bounded workspace, and submission through the existing operation scheduler. Exact Windows CUDA 13.3/cuBLASLt 13.5.1 provider identity, independent ABI/numerical oracle, public native parity, installed-package consumer, and cleanup evidence qualify only that recorded profile; Linux, other providers/dtypes/layouts, tensor semantics, and performance remain excluded.
-
-## Proposal-only successor capabilities
-
-The following remain proposal authority only and do not authorize production code:
-
-```text
-SPEC-0022 remaining Device-JS parallel + service profiles (scoped atomic-observation and device-publication children accepted)
-unaccepted SPEC-0023 provider/operation children beyond SPEC-0029
-SPEC-0024 multi-GPU orchestration
-SPEC-0025 graphics interop
-SPEC-0026 process-isolated execution
-```
-
-Their dependency order is retained in the capability-expansion roadmap and the 2026-08-14 sweep record.
-
-## External CUDA-NN ownership
-
-**Architectural disposition:** independent semantic product under ADR-0007.
-
-**CUDA-NN owner revision:** `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3`.
-
-**CUDA-NN production API/implementation status:** not authorized / not implemented.
-
-Reusable NN/model/inference/autodiff/training semantics no longer belong to a future publish unit in this repository. Historical ADR-0004 and SPEC-0027 remain accepted provenance for the earlier isolation design, but ADR-0007 supersedes their same-repository product placement and SPEC-0027 cannot authorize new `nn.*` components in CUDA-JS.
-
-Generic Tensor mathematics/planning routes to CUDA-JS-Tensor. Generic CUDA/runtime/compiler/provider mechanisms remain here. CUDA-NN owns only reusable NN semantics through its own accepted authority, and its issue #2 must first prove that an NN inference layer adds value beyond direct product → Tensor composition. Training/autodiff/provider breadth remains independently removable and is not an inference prerequisite.
-
-The old CUDA-JS NN roadmap is reconciled: #70 and #72-#74/#76-#84 are closed as no longer planned here; #75 remains generic cuBLASLt; #163 and #164 own deferred generic cuDNN/NCCL mechanisms if selected.
-
-This section describes ownership only. It creates no CUDA-NN compatibility, native-provider, production-readiness or performance claim. On revisions where ADR-0007 is still awaiting protected integration, issue #165 is the integration/readback authority.
-
-## Open native/platform/external gates
-
-These remain independently open because the exact environment/control is unavailable here, not because the architecture is rejected. Issue #4 is specifically a contributor-operated physical-hardware evidence lane and does not block accepted portable/software work:
-
-- native Linux x64 #4 and distro expansion #17;
-- additional GPU models #12;
-- WSL2 #13;
-- Linux ARM64/SBSA #14;
-- Jetson #15;
-- controlled GPU hosts #16 and independently attested runners #29;
-- virtualization #21;
-- compatibility matrix #22;
-- ECC #24;
-- Windows Server/TCC #26;
-- MIG #27;
-- performance/soak #28;
-- exact CUDA-MCGS pair #32;
-- native SPEC-0021 scalar/view-consumer qualification #39/#88;
-- exact merged-head Windows F5 oracle revalidation #64;
-- GitHub private vulnerability reporting unaffiliated-reporter/advisory round-trip proof #68; setting mutation, enabled read-back, public entry-point visibility, and maintainer advisory-list access are complete.
-
-Not-qualified is not architectural rejection.
-
-## Current forward order
-
-```text
-1. preserve OS-neutral contracts and the accepted Windows peer evidence
-2. integrate the issue #148 selected-runtime Device-JS target correction, then consume the exact protected `cuda-js@0.1.0-alpha.16` revision from CUDA-JS-Tensor without adding tensor policy to CUDA-JS
-3. keep CUDA Graph realization, broader provider/node families, tensor-core claims, and performance behind their own accepted contracts and evidence
-4. accept exact native evidence when contributors can run unchanged qualification chains on suitable physical-NVIDIA hosts, including 2+ physical-GPU behavior only where it fits naturally
-```
-
-Hardware/platform lanes may proceed whenever exact controlled environments exist and do not block unrelated portable work.
-
-`next_step.yaml` is the machine-readable current focus. Plans organize work beneath accepted authority and never reopen completed implementation by implication.
+Detailed historical evidence and capability provenance remain in the accepted specifications, ADRs, issues/PRs, `docs/CAPABILITIES.md`, support documents, and qualification artifacts rather than being duplicated here.
