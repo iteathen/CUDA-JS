@@ -28,6 +28,16 @@ State whether the change affects credentials, workflow permissions, native/execu
 
 ## Test capsules, mutations/faults, benchmarks, and exact evidence keys
 
+## Current-state and issue-disposition reconciliation
+
+Before protected integration or issue closure/transfer, apply the issue-disposition rules in `agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md`.
+
+- [ ] I checked whether this change materially changes the dependency-ready leaf or current execution seam.
+- [ ] If it does, `STATUS.md` and `next_step.yaml` are reconciled in this transaction or an explicit gated follow-up is named before new semantic/native work.
+- [ ] Every issue this PR closes, transfers, supersedes, or leaves open is classified as actionable work, an explicit blocked gate, a concrete evidence cell, completed, not planned, or superseded/duplicate with its successor/evidence owner recorded.
+- [ ] Historical exact SHAs/evidence remain provenance and are not presented as self-updating current-state authority.
+- [ ] `./scripts/verify-docs.sh` passes the current-state contract when designated current-state surfaces are affected.
+
 ## Token/backpressure, scope changes, deferred work, and checks not run
 
 ## Cleanup and final local/remote/native/resource state
