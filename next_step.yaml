@@ -1,8 +1,8 @@
 {
-  "schema_version": 64,
+  "schema_version": 65,
   "updated": "2026-09-04",
-  "status": "current_state_freshness_recurrence_prevention",
-  "objective": "Complete #156 by reconciling the protected alpha.18 state and adding a small mechanical current-state contract so package/capability/execution-seam declarations cannot silently drift after later protected integration.",
+  "status": "cuda_mcgs_exact_pair_assessment",
+  "objective": "Assess and qualify one exact CUDA-MCGS/CUDA-JS compatible pair through the protected production adapter and public CUDA-JS only, preserving exact evidence classes and routing any demonstrated generic lower gap to its CUDA-JS owner.",
   "package_candidate": "cuda-js@0.1.0-alpha.18",
   "public_api_schema": 1,
   "live_state_policy": {
@@ -14,52 +14,73 @@
     "issue_owner": "durable obligations, explicit blocked gates and concrete evidence cells; never live SHA dashboards"
   },
   "recorded_protected_input": {
-    "main": "49a2f77d2c8364d67030fbc1c2e870e58e70d334",
-    "tree": "b67890e2499f04ab3b81b8f4a72dab38a5281c7e",
-    "meaning": "Exact protected base from which the #156 recurrence-prevention transaction was constructed. It remains transaction provenance after integration and is not a self-updating current-main field."
+    "main": "87c174d1e5218efb791e4024591bae93ccdc6fa8",
+    "tree": "9d81cde71ee46b0538f3f1382836335bbfe05b1e",
+    "meaning": "Exact protected CUDA-JS base from which the post-#156 activation transaction was constructed. It remains transaction provenance after integration and is not a self-updating current-main field."
+  },
+  "durable_architecture_provenance": {
+    "foundation": [
+      "CJS-F0",
+      "CJS-F1A",
+      "ADR-0002-node-ffi-first-host-binding.md"
+    ],
+    "external_nn_ownership": "CJS-CUDA-NN-EXTERNAL",
+    "meaning": "Durable architecture/evidence routing markers retained for governance validation only; they are not a live package, support or current-work dashboard."
   },
   "completed_dependencies": [
-    "#193 / PR #197 protected-integrated the lower-owned 256-byte ordinary base-allocation compatibility projection and alpha.18 package identity",
-    "#178/#179/#180/#181/#186 lower-boundary ownership work completed",
+    "#156 / PR #199 protected-integrated the current-state freshness governance LEGO; protected verify/schema/node-compatibility/CodeQL are green",
     "CUDA-MCGS #125 / PR #210 protected-integrated the production integration.cuda-js adapter through public cuda-js@0.1.0-alpha.18 contracts",
-    "Protected alpha.18 required verify/schema/node-compatibility and current-head CodeQL are green"
-  ],
-  "durable_authority_markers": [
-    "CJS-F0",
-    "CJS-F1A",
-    "ADR-0002-node-ffi-first-host-binding.md",
-    "ADR-0007"
+    "CUDA-MCGS #211 / PR #212 protected-integrated and read back the post-#125 governance seam",
+    "CUDA-MCGS protected adapter/docs/CodeQL qualification is green on its post-#212 head"
   ],
   "cross_repo_ownership": {
-    "cuda_nn": {
-      "id": "CJS-CUDA-NN-EXTERNAL",
-      "authority": "ADR-0007",
-      "disposition": "Reusable NN/model/inference/autodiff/training semantics are external to CUDA-JS and belong to iteathen/cuda-nn. Generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
-    },
     "cuda_mcgs": {
-      "issue": 32,
-      "disposition": "CUDA-MCGS owns search semantics and integration.cuda-js translation; CUDA-JS owns generic lower runtime/mechanism contracts and exact lower compatibility facts."
+      "repository": "iteathen/CUDA-MCGS",
+      "recorded_input": "6f39fe765a1b7ca721cafc52081d4fcfd3683214",
+      "recorded_tree": "8b192d018ccc5136da9a07122893b257c31843a6",
+      "component": "integration.cuda-js",
+      "semantic_owner": "tool.search-compiler plus accepted CUDA-MCGS owner profiles",
+      "disposition": "CUDA-MCGS owns search meaning, exact consumer workload/resource policy and translation; CUDA-JS owns consumer-neutral lower runtime/mechanism/compatibility facts."
+    },
+    "cuda_nn": {
+      "authority": "ADR-0007",
+      "disposition": "Reusable NN/model/inference/autodiff/training semantics belong to iteathen/cuda-nn; generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
     }
   },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
-    "issue": 156,
-    "name": "current-state and issue-obligation freshness recurrence prevention",
-    "state": "governance implementation from exact protected alpha.18 base",
-    "next_action": "Replace stale live-dashboard prose in agent entry points, reconcile STATUS.md/next_step.yaml to protected alpha.18, add and qualify the current-state contract validator, complete exact-head author review, then stop for fresh protected-integration authorization.",
-    "exit": "One exact #156 head is green and completely reviewed; package/compatibility/status/next-step agreement is mechanically checked; agent entry points no longer carry live package/SHA snapshots; issue disposition/current-state ownership rules are documented; protected integration remains gated on fresh exact-tuple authorization."
+    "issue": 32,
+    "name": "exact CUDA-MCGS/CUDA-JS compatible-pair qualification through public CUDA-JS",
+    "state": "fresh assess/research and exact-profile evidence construction",
+    "next_action": "Freeze one truthful exact CUDA-MCGS/CUDA-JS pair from the protected consumer input and the actually executed CUDA-JS revision; derive the smallest safe accepted MCGS workload through tool.search-compiler, execute it through integration.cuda-js/public CUDA-JS only on a qualifying physical profile, and record provider/device/target/toolkit/artifact/progress/publication/failure/health/cleanup evidence.",
+    "exit": "One exact pair satisfies issue #32 acceptance with no private/native consumer bypass and every support claim limited to the exact evidence profile, or the first demonstrated generic lower gap is routed to its CUDA-JS owner with the pair remaining unqualified."
   },
+  "assessment_findings": [
+    "The public alpha.18 compatibility projection already exposes the generic lower mechanisms selected by the v0 adapter; no new lower capability is assumed before a real accepted pair demonstrates one.",
+    "The #125 portable fake is not a native workload oracle: it declares a 16-byte u32 output while a 64-thread globalX write could address beyond that allocation.",
+    "The production adapter requires exact agreement among execution-package peer identity, injected peer provenance and public package/API identity. A docs-only later checkout must not be labeled with an older revision merely because package/runtime bytes are otherwise compatible.",
+    "Issue #198 remains conditional pressure only; it becomes a blocker only if the selected accepted pair actually requires its host-written/device-read behavior."
+  ],
   "parallel_evidence": [
-    "#4 native Ubuntu 24.04 x86-64 qualification remains runner-ready but requires a directly exposed physical NVIDIA GPU; hosted CI/VM/WSL/mock evidence cannot close it.",
-    "#68 unaffiliated private-vulnerability reporter -> advisory -> maintainer proof remains external operational evidence.",
-    "#157 remains an independent public Device-JS erf helper consumer lane for CUDA-JS-Tensor."
+    "#4 linux-native-x64 remains runner-ready with zero missing repository capsules but requires native Ubuntu 24.04 x86-64 and a directly exposed physical NVIDIA GPU; VM/WSL/container/hosted-CI/mock/portable evidence cannot close it.",
+    "#68 remains external operational security evidence.",
+    "#157 remains an independent CUDA-JS-Tensor consumer lane."
+  ],
+  "qualification_requirements": [
+    "Freeze exact CUDA-MCGS commit/tree and exact actually executed CUDA-JS commit/tree/package/API schema.",
+    "Freeze Node version/module ABI, OS/ABI, Driver, toolkit/NVRTC/nvJitLink providers, selected device/GPU/compute capability and selected target.",
+    "Use accepted CUDA-MCGS Search Program/execution-package generation and production integration.cuda-js; no portable fixture promotion or second interpreter.",
+    "Validate all requested capabilities/resources before lower partial realization where the owning contracts permit it.",
+    "Show more than one admitted device work item makes useful progress without a host-produced intermediate or host read-decide-write/relaunch loop.",
+    "Exercise required release/acquire publication, pressure/backpressure, deferred failure, timeout/abandonment, health and cleanup truth for the selected profile.",
+    "Retain exact artifact/input/cache/load identities and conservative orphan/restart-required truth.",
+    "Run complete exact-head repository qualification and any native oracle/capsule required by the selected evidence profile."
   ],
   "after_current_focus": [
-    "Read back the resulting protected CUDA-JS commit/tree after #156 integration.",
-    "Perform a fresh #32 assess/research pass against that exact CUDA-JS revision and the exact protected CUDA-MCGS consumer revision produced after its #211/#212 governance reconciliation.",
-    "Run the smallest exact compatible-pair/native capsule entirely through CUDA-MCGS integration.cuda-js and public CUDA-JS contracts; freeze Node/ABI/OS/Driver/toolkit/provider/GPU/target/artifact identity and preserve pressure/failure/health/cleanup truth.",
-    "If #32 demonstrates a generic lower gap, route it to the owning CUDA-JS capability before any consumer-local native/private workaround.",
-    "Run #4 unchanged when an accepted native Ubuntu 24.04 x86-64 physical-NVIDIA host becomes available; preserve the complete exact-profile evidence bundle and promote only the tested cell."
+    "If #32 passes, retain an exact compatible-pair record and update only the exact qualified compatibility/evidence cell; do not infer Linux support unless #4's exact native Linux chain also passes on the same qualifying profile.",
+    "If the first pair exposes a generic lower gap, resolve that gap in CUDA-JS and re-freeze the pair after protected integration rather than creating a CUDA-MCGS workaround.",
+    "Run #4 unchanged when an accepted native Ubuntu 24.04 x86-64 physical-NVIDIA host is available; preserve the complete hardware qualification bundle.",
+    "Keep CUDA-MCGS #109 independent; CUDA-MCGS #123 remains downstream of usable public surface plus exact-pair evidence."
   ],
   "current_state_contract": {
     "validator": "scripts/current-state-contract.mjs",
@@ -67,24 +88,18 @@
     "gate": "scripts/verify-docs.sh",
     "checks": [
       "package.json name/version equals next_step package_candidate",
-      "package.json name/version and public API schema agree with packaging/compatibility-manifest.json",
-      "STATUS.md states the same package and current issue",
-      "recorded protected input is explicitly provenance, not a self-referential current-main declaration",
-      "durable agent entry points contain live-state routing and do not reintroduce the retired live-dashboard headings",
-      "forbidden live-SHA field names such as current_main/current_main_tree are rejected"
+      "package.json and compatibility manifest package/API projection agree",
+      "STATUS.md names the same current issue and recorded protected input",
+      "recorded protected input is provenance rather than a self-updating current-main field",
+      "durable agent entry points route live state to existing owners and do not carry retired live dashboards",
+      "the status/current-focus adversarial test derives the active issue dynamically rather than hard-coding the issue that introduced the guard"
     ]
   },
-  "issue_disposition_rule": [
-    "Open: concrete actionable implementation/governance work, explicit blocked gate with a known unblock condition, or concrete external qualification/evidence cell.",
-    "Completed: implementation/obligation complete; later unspecified profile evidence moves to qualification campaigns rather than keeping the implementation issue open.",
-    "Not planned: dormant possibility with no active consumer/profile/measurement; this is administrative scheduling, not architectural rejection.",
-    "Superseded/duplicate: retain exact successor/provenance and do not let the old issue remain a competing current-state owner."
-  ],
   "hard_constraints": [
     "No protected integration without exact-head qualification, complete review and fresh exact-tuple authorization.",
-    "Do not use agent docs, issues, plans or historical comments as live package/SHA/capability dashboards.",
-    "Do not treat portable/mock evidence as native CUDA qualification.",
-    "Do not add consumer semantics, raw pointers, private/deep imports or native bypasses to satisfy #32 or #4.",
-    "Generic lower gaps route to CUDA-JS; generic Tensor gaps route to CUDA-JS-Tensor; reusable NN/model gaps route to cuda-nn."
+    "Do not treat portable/mock/readiness evidence as native CUDA qualification.",
+    "Do not add consumer semantics, raw pointers, private/deep imports, generated-artifact inspection or native bypasses to satisfy #32 or #4.",
+    "Generic lower gaps route to CUDA-JS; generic Tensor gaps route to CUDA-JS-Tensor; reusable NN/model gaps route to cuda-nn.",
+    "Do not misstate peer revision provenance when the actually executed checkout differs from an older package-compatible revision."
   ]
 }

@@ -55,13 +55,16 @@ test('rejects self-referential live main fields', async () => {
   assert.ok(errors.some((error) => error.includes('current_main_tree')));
 });
 
-test('rejects status/current-focus disagreement', async () => {
+test('rejects status/current-focus disagreement for the active issue', async () => {
   const fixture = await loadRepositoryFixture();
+  const issue = fixture.nextStep.current_focus.issue;
+  const marker = `#${issue}`;
+  assert.ok(fixture.statusText.includes(marker));
   const errors = validateCurrentStateContract({
     ...fixture,
-    statusText: fixture.statusText.replaceAll('#156', '#999'),
+    statusText: fixture.statusText.replaceAll(marker, '#999'),
   });
-  assert.ok(errors.some((error) => error.includes('current focus #156')));
+  assert.ok(errors.some((error) => error.includes(`current focus #${issue}`)));
 });
 
 test('rejects retired live-dashboard headings in agent entry points', async () => {
