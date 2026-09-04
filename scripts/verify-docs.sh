@@ -18,6 +18,8 @@ if [[ -z "$node_bin" ]]; then
   node_bin="$(command -v node)"
 fi
 
+"$node_bin" --test scripts/current-state-contract.test.mjs
+"$node_bin" scripts/current-state-contract.mjs
 "$node_bin" --test scripts/public-capability-projection.test.mjs
 "$node_bin" --test scripts/workflow-action-policy.test.mjs
 "$node_bin" scripts/verify-docs.mjs
