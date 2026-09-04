@@ -16,60 +16,50 @@ production support:          no
 performance claims:          none beyond exact recorded evidence
 ```
 
-`package.json` owns package identity. `packaging/compatibility-manifest.json` owns the immutable current public capability/compatibility projection. Exact protected branch/commit/tree identity is read from GitHub when required; it is not maintained here as a self-referential live-SHA field.
+`package.json` owns package identity. `packaging/compatibility-manifest.json` owns the immutable public capability/compatibility projection. Exact protected branch/commit/tree identity is read from GitHub when required; it is not maintained here as a self-referential live-SHA field.
 
-The recorded protected input for the current governance transaction is `main@49a2f77d2c8364d67030fbc1c2e870e58e70d334`, tree `b67890e2499f04ab3b81b8f4a72dab38a5281c7e`. That value identifies the base from which this transaction was constructed; after integration it remains historical transaction provenance rather than pretending to be a self-updating current-main declaration.
+The recorded protected input for this post-integration activation transaction is `main@87c174d1e5218efb791e4024591bae93ccdc6fa8`, tree `9d81cde71ee46b0538f3f1382836335bbfe05b1e`. That value is transaction provenance for the protected #156 integration; after this reconciliation integrates it remains historical input rather than a self-updating current-main declaration.
 
 ## Protected alpha.18 state
 
-#193 / PR #197 is protected-integrated. The ordinary CUDA-JS base-allocation minimum alignment is lower-owned by `runtime.memory` and projected through public immutable compatibility as 256 bytes. The existing `allocateDevice({ byteLength })` request shape, view-offset semantics, native calls, lifecycle, errors, health and cleanup remain unchanged.
+#156 / PR #199 is protected-integrated. Its small current-state governance LEGO routes live state to existing owners, rejects self-referential live-main fields and retired agent dashboards, and checklist-enforces issue disposition/reconciliation without creating a second technical authority. Protected-head `verify`/`schema` workflow `33920262023`, `node-compatibility` `33920262001`, and CodeQL `33920261450` passed.
 
-Protected alpha.18 also retains the completed lower-boundary ownership work: provider capability/admission truth, bounded provider-specific borrower lifecycle, existing compiler/module/function/prepared-DAG composition rather than a universal preparation transaction, explicit expert launch geometry, and public finite compatibility ceilings. Generic Tensor mathematics remains in CUDA-JS-Tensor; reusable NN/model semantics remain in `iteathen/cuda-nn`; search semantics remain in CUDA-MCGS.
+The ordinary CUDA-JS base-allocation minimum alignment remains lower-owned by `runtime.memory` and publicly projected as 256 bytes. The package retains Device-JS, opaque operation lifecycle, publication mailboxes, device publication, explicit launch geometry, finite compatibility ceilings, compiler/linker/module/function/resource ownership, and the existing Windows x64 exact-profile evidence. Generic Tensor mathematics remains in CUDA-JS-Tensor; reusable NN/model semantics remain in `iteathen/cuda-nn`; search semantics remain in CUDA-MCGS.
 
-Latest protected push qualification for `49a2f77d2c8364d67030fbc1c2e870e58e70d334` passed required `verify`, `schema`, and `node-compatibility`; current-head CodeQL analysis also completed successfully. Historical native qualification remains exact-profile evidence and is not silently requalified by the alpha.18 package change.
+Native Linux CUDA remains unqualified. Portable/readiness/package evidence is not native support, successful execution is not a broad compatibility claim, and no performance or production-stability claim is promoted here.
 
 ### Durable architecture and evidence anchors
 
-These are provenance/ownership anchors, not broader support claims. `DriverActor` remains the Worker/context/native-resource owner. `CJS-F1B` remains the generated CUDA ABI-fact and independent layout-evidence anchor; `CJS-F2W` remains the accepted **Windows x64** Driver/bootstrap anchor; `CJS-F7W` remains the retained Windows platform-hardening/property/lifecycle anchor. Their historical evidence remains exact to its recorded revisions and profiles.
+These are provenance/ownership anchors, not live implementation or support dashboards. `DriverActor` remains the Worker/context/native-resource owner. `CJS-F1B` remains the generated CUDA ABI-fact and independent layout-evidence anchor; `CJS-F2W` remains the accepted Windows x64 Driver/bootstrap evidence anchor; `CJS-F7W` remains the retained Windows platform-hardening/property/lifecycle evidence anchor. Their historical evidence remains exact to the recorded revisions/profiles and is not silently requalified by this transaction.
 
 ### External CUDA-NN ownership
 
 **External CUDA-NN ownership** remains governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to CUDA-JS-Tensor. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those reusable NN semantics **no longer belong to a future publish unit in this repository**.
 
-## Current focus — #156 recurrence prevention
+## Current focus — #32 exact CUDA-MCGS compatible-pair qualification
 
-**#156 — keep current-state declarations and issue obligations freshness-safe** is the active in-repository governance owner.
+**#32 — CUDA-MCGS compatible-pair qualification through public CUDA-JS** is the current P0 cross-repository assess/research/evidence seam.
 
-The demonstrated recurrence is broader than stale `STATUS.md`/`next_step.yaml`: high-authority agent entry points also accumulated dated implementation snapshots phrased as live state. This transaction therefore:
+The exact protected consumer input for this assessment is CUDA-MCGS `main@6f39fe765a1b7ca721cafc52081d4fcfd3683214`, tree `8b192d018ccc5136da9a07122893b257c31843a6`. CUDA-MCGS #125 / PR #210 provides the production `integration.cuda-js` adapter, and #211 / PR #212 is protected-integrated and closed. The protected adapter translates accepted execution-package requirements through the public CUDA-JS namespace only and has portable Windows/Ubuntu conformance; that evidence is not native compatible-pair proof.
 
-- removes live package/SHA/capability dashboards from durable agent procedure files;
-- designates exact owners for package identity, public compatibility, execution seam, support evidence and issue obligations;
-- records protected-input SHAs as transaction provenance rather than self-referential current-main facts;
-- adds a mechanical current-state contract gate that checks package/compatibility/status/next-step agreement and rejects reintroduction of stale live-dashboard headings/fields;
-- documents issue disposition rules and the requirement to reconcile designated state surfaces whenever the dependency-ready leaf materially changes.
+Fresh assessment must freeze one truthful exact pair before native execution. The historical #125 portable fixture pins the then-protected CUDA-JS revision `49a2f77d2c8364d67030fbc1c2e870e58e70d334`; it is conformance provenance, not permission to mislabel a later checkout with that revision. The #32 capsule must bind the execution package, injected peer provenance, and actually executed CUDA-JS source revision consistently.
 
-No CUDA runtime, ABI, public API, native mechanism, or support claim changes under #156.
+The first selected pair should reuse CUDA-MCGS `tool.search-compiler` to produce accepted product-neutral Search Program/execution-package meaning and `integration.cuda-js` to realize it. CUDA-JS contributes only its existing public mechanisms unless that real consumer demonstrates a missing generic lower capability. No CUDA-MCGS private/deep import, raw-handle path, generated-artifact inspection, duplicated lower validator, or direct CUDA/PTX/FFI bypass is permitted.
 
-## Next dependency-ready work
+The existing #125 portable fake is not a physical workload oracle: its synthetic 16-byte `u32` output is paired with a 64-thread `globalX` write and therefore must not be promoted unchanged to native execution. A physical #32 workload must derive safe resource bounds and launch geometry from the accepted MCGS owner path.
 
-After #156 is qualified, completely reviewed, freshly authorized and protected-integrated, **CUDA-MCGS #211 / PR #212 must itself be separately exact-head authorized, protected-integrated, and read back** before the cross-repository native qualification subject is frozen. That docs-only reconciliation owns the exact post-#125 CUDA-MCGS current-state seam and is not covered by authorization for this CUDA-JS transaction.
+## Parallel evidence — #4 native Linux
 
-After both governance seams are protected and their resulting commits/trees are read back, the next P0 cross-repository seam is **CUDA-JS #32 — exact CUDA-MCGS/CUDA-JS compatible-pair qualification through the protected public adapter**.
+#4 remains an independent external evidence cell. The `linux-native-x64` hardware profile is repository `runner-ready` with zero missing capsules, but acceptance requires native Ubuntu 24.04 x86-64 with a directly exposed physical NVIDIA GPU, exact Node v26.7.0, and the required Driver/toolkit/compiler providers. VM, WSL, container, GitHub-hosted CI, mock, portable, or source-readiness evidence cannot close #4.
 
-CUDA-MCGS #125 / PR #210 is protected-integrated at the currently recorded consumer baseline `CUDA-MCGS main@67d16badb6dd65be9c96c4198b4451b1edb82f57`, tree `750a2a7ee7c519241c82e180cf84c76f3d5ee398`, and its production `integration.cuda-js` adapter consumes this protected alpha.18 peer through public contracts only. Portable adapter evidence is green but is not native compatible-pair evidence. The exact consumer revision for #32 will be the protected readback produced after #211/#212, not this pre-reconciliation baseline.
-
-CUDA-JS #4 remains a parallel external evidence lane: the native Ubuntu 24.04 x86-64 runner/evidence chain is repository-complete but still requires a directly exposed physical NVIDIA GPU. VM, WSL, container, hosted-CI, mock, source-readiness, and portable results do not qualify that cell.
-
-#157 remains an independent CUDA-JS-Tensor consumer lane. #68 remains an external operational security-evidence lane. Neither blocks #32.
+A passing #32 pair on another OS/profile would not automatically close #4; a passing #4 generic lower chain would not by itself prove CUDA-MCGS #32. Evidence may be composed only when the exact profile and required observations overlap truthfully.
 
 ## Open capability pressure
 
-#198 records a demonstrated generic candidate gap for bounded host-written/device-read publication payloads while a long-lived operation remains pending. It is not silently assumed to block the first exact #32 pair. If the selected pair requires that behavior, #32 must stop and route the demonstrated generic requirement through #198 before any consumer-local workaround.
+#198 remains a candidate generic lower gap for bounded host-written/device-read publication payloads while a long-lived operation is pending. It is not predeclared as a #32 blocker. If the selected accepted MCGS pair actually requires that behavior, #32 must stop and route the demonstrated lower requirement through #198 before any consumer-local workaround.
 
-## Claim limits
+## Claim and integration limits
 
-Portable/mock/package evidence proves only the paths it executes. Native Linux, additional hardware/provider cells, WSL/ARM64/Jetson/TCC/virtualization/MIG/ECC, broad Node/Driver/toolkit matrices, performance, soak and production stability remain independent qualification work.
+#157 remains an independent CUDA-JS-Tensor consumer lane. #68 remains an external operational security-evidence lane. CUDA-MCGS #109 remains independent public-surface work and CUDA-MCGS #123 remains downstream external-consumer acceptance.
 
-Issues own concrete actionable obligations, explicit blocked gates, or concrete evidence cells. Completed capabilities close rather than remaining open solely for unspecified future hardware cells; dormant possibilities remain roadmap/history until activated by a real consumer/profile/measurement.
-
-No protected integration occurs without exact-head qualification, complete review and fresh exact-tuple authorization. After integration, read back the remote protected commit/tree and reconcile any execution-seam change before starting the next semantic/native transaction.
+Issues own concrete obligations/evidence cells; historical exact SHAs remain provenance. No protected integration occurs without exact-head qualification, complete review, and fresh exact-tuple authorization. After integration, read back the protected commit/tree and reconcile the execution seam before new semantic/native construction.
