@@ -9,7 +9,7 @@ import { evidenceRoot, nativePackageEvidenceName, nativeProfile } from './eviden
 
 assert.equal(packageJson.name, compatibility.package.name);
 assert.equal(packageJson.version, compatibility.package.version);
-assert.equal(packageJson.version, '0.1.0-alpha.16');
+assert.equal(packageJson.version, '0.1.0-alpha.18');
 assert.equal(packageJson.dependencies.acorn, '8.15.0');
 assert.equal(packageJson.engines.node, '>=26.1.0');
 assert.equal(packageJson.private, false);
@@ -103,7 +103,7 @@ if (['win32', 'linux'].includes(process.platform) && process.arch === 'x64' && e
   if (nativeProfile === 'windows') {
     assert.deepEqual(native.cublasLtObservation.output, [58, 64, 139, 154]);
     assert.equal(native.cublasLtObservation.status, 'completed');
-    assert.deepEqual(native.cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' });
+    assert.deepEqual(native.cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile', workspaceAlignmentBytes: 256 });
     assert.equal(native.cublasLtObservation.graceful, true);
   } else {
     assert.equal(native.cublasLtObservation, null);
