@@ -4,7 +4,9 @@
 
 **Registry updated:** 2026-08-11
 
-This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
+This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: full support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.
+
+The registry also records managed-risk evidence axes separately. A run may prove source revision, Node runtime, host OS/ABI, visible CUDA GPU/Driver/provider, and individual capsule-chain facts independently. Those facts may clear only gates that explicitly accept that narrower axis. They do not promote the full profile, and they do not transfer silently across another OS, Node version, GPU model, Driver/toolkit/provider version, performance target, or unrun capsule.
 
 ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The complete EXP-001/F1B/F3L-F8L runner and evidence-validation source chain is implemented. Exact native evidence remains unrun, so runner readiness is not a support claim. Qualification waits for contributor-operated native Ubuntu with a directly exposed physical NVIDIA GPU; VM, emulated, WSL, container, hosted-CI, portable, or mock evidence does not qualify this cell. The accepted Windows x64 result remains valid as a maintained peer profile.
 
@@ -17,6 +19,18 @@ CUDA-JS is in public testing. Unconfirmed Windows x64 CUDA hardware may operate 
 | GeForce GTX 1660 Ti | 7.5 | windows-native-x64 (WDDM) | v26.7.0 | 610.74 / 13030 | 13.3.0 | F2W–F8W experimental | [#5](https://github.com/iteathen/CUDA-JS/pull/5), [#6](https://github.com/iteathen/CUDA-JS/pull/6), [#7](https://github.com/iteathen/CUDA-JS/pull/7), [#8](https://github.com/iteathen/CUDA-JS/pull/8), [#9](https://github.com/iteathen/CUDA-JS/pull/9), [#10](https://github.com/iteathen/CUDA-JS/pull/10), [#11](https://github.com/iteathen/CUDA-JS/pull/11); integrated `09e9ada6c1d0` |
 
 The listed result qualifies only the recorded model and exact software/host identity. It does not qualify every device with the same compute capability.
+
+## Managed-risk evidence axes
+
+These axes are intentionally separable so limited hardware can retire the specific uncertainty it actually tested. Full support still requires a passing exact-profile bundle.
+
+| Axis | Can clear | Does not clear |
+|---|---|---|
+| source-revision | The run started from the exact recorded commit and tree. | Runtime, OS, CUDA provider, GPU, package, or capability behavior. |
+| node-runtime | The exact Node version, module ABI, and required FFI substrate for this runner. | OS loader behavior, CUDA Driver/provider behavior, GPU execution, or package semantics. |
+| host-os-abi | The host platform, processor architecture, and ABI class for this runner. | A specific GPU model, Driver/toolkit/provider identity, Node version, or capability capsule. |
+| cuda-gpu-driver-provider | Directly visible CUDA GPU and Driver/provider availability for this runner. | All CUDA-JS capabilities, installed-package behavior, another GPU model, another OS, or another provider version. |
+| capsule-chain | Each passed capsule's bounded behavior on the recorded axes. | The full hardware profile or any failed, skipped, unrun, performance, production-stability, cross-OS, cross-GPU, or cross-Node claim. |
 
 ## Public qualification calls
 
@@ -84,9 +98,10 @@ The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile
 1. Start with [`conformance/hardware/README.md`](../conformance/hardware/README.md) and select an exact profile.
 2. Run `npm run hardware:plan` to see whether that profile has a complete runner.
 3. On a runner-ready profile, use exact Node 26.7.0 from a clean tested commit and run `npm run hardware:qualify`.
-4. Review the generated public summary and evidence index. Keep host names, account names, filesystem paths, serial numbers, UUIDs, and bus identifiers out of public uploads.
-5. Open a hardware qualification issue, attach the sanitized result, and link the exact source commit.
-6. Promotion requires maintainer review and a registry PR. Evidence from one profile never silently promotes another.
+4. Review `managedRisk.axes` first. A failed bundle can still contain useful axis evidence, but only for gates that explicitly accept that axis and residual risk.
+5. Review the generated public summary and evidence index. Keep host names, account names, filesystem paths, serial numbers, UUIDs, and bus identifiers out of public uploads.
+6. Open a hardware qualification issue, attach the sanitized result, and link the exact source commit.
+7. Promotion requires maintainer review and a registry PR. Evidence from one profile never silently promotes another.
 
 ## Upstream candidate references
 
@@ -106,6 +121,7 @@ The exact Windows 11 Pro 10.0.26200 / NVIDIA GeForce GTX 1660 Ti Hyper-V profile
 
 - Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.
 - Successful operation on unconfirmed hardware is test evidence, not a support claim.
+- Managed-risk axis evidence can retire a named uncertainty without retiring the whole exact-profile gate.
 - A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.
 - CUDA-JS currently selects device zero and admits one pending GPU operation. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified; their architectural and implementation dispositions are recorded separately.
 - Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.

@@ -4,7 +4,9 @@ This directory owns the machine-readable hardware support registry and the repea
 
 ## Claims and evidence
 
-CUDA-JS qualifies an exact Node/OS/ABI/Driver/toolkit/provider/GPU profile. A model, architecture family, operating-system family, or CUDA-capable label is never enough by itself. Promotion requires one clean source commit, direct hardware execution, all required phase capsules, independent native-oracle agreement, permission controls, installed-package execution, and terminal cleanup.
+CUDA-JS promotes full support only for an exact Node/OS/ABI/Driver/toolkit/provider/GPU profile. A model, architecture family, operating-system family, or CUDA-capable label is never enough by itself. Promotion requires one clean source commit, direct hardware execution, all required phase capsules, independent native-oracle agreement, permission controls, installed-package execution, and terminal cleanup.
+
+The runner also records managed-risk evidence by separate concern axis: source revision, Node runtime, host OS/ABI, CUDA GPU/Driver/provider, and capsule chain. These axis facts may clear only gates that explicitly accept the narrower evidence and residual risk. They do not promote full support, and they do not transfer silently across another OS, Node version, GPU model, Driver/toolkit/provider version, performance target, or unrun capsule.
 
 The support list at [`../../docs/HARDWARE_SUPPORT.md`](../../docs/HARDWARE_SUPPORT.md) is generated from [`registry.json`](registry.json). [`profiles.json`](profiles.json) defines which platform runners are complete and names every missing native capsule for incomplete profiles.
 
@@ -36,7 +38,7 @@ build/hardware-qualification/<profile>/<run-id>/
   logs/
 ```
 
-`qualification.json` is the local complete manifest. `public-summary.json` removes log paths while retaining command identities, exit states, durations, log digests, evidence digests, source commit/tree, final clean-tree state, device-zero model/compute capability, and exact software profile.
+`qualification.json` is the local complete manifest. `public-summary.json` removes log paths while retaining command identities, exit states, durations, log digests, evidence digests, source commit/tree, final clean-tree state, device-zero model/compute capability, exact software profile, and managed-risk axis results.
 
 Before uploading anything, inspect every file. Do not publish host names, account names, filesystem paths, GPU serial numbers, UUIDs, PCI bus identifiers, credentials, environment secrets, or arbitrary raw logs. The public summary is designed for review, but human privacy inspection remains mandatory.
 
@@ -48,8 +50,9 @@ Before uploading anything, inspect every file. Do not publish host names, accoun
 4. Confirm the native profile uses directly exposed physical NVIDIA hardware; do not submit VM/emulated/WSL/container/hosted-CI evidence as native qualification.
 5. Run `npm run hardware:plan`; stop if the profile is incomplete and contribute the named adapter/capsules first.
 6. Run `npm run hardware:qualify` unchanged on a runner-ready profile.
-7. Review and attach `public-summary.json`; retain the complete local bundle until review closes.
-8. Submit a registry PR only after maintainers accept the evidence. One entry represents one exact profile.
+7. Review `managedRisk.axes` in `public-summary.json`; use partial evidence only for gates that explicitly name the accepted axis.
+8. Review and attach `public-summary.json`; retain the complete local bundle until review closes.
+9. Submit a registry PR only after maintainers accept the evidence. One entry represents one exact profile.
 
 Test failures are useful results. A command, evidence-validation, or final-worktree failure still produces the standardized bundle and a sanitized public failure kind. Report the first failing case and preserve the bundle; do not weaken assertions, substitute package self-comparison for a native oracle, or edit a result into a pass.
 

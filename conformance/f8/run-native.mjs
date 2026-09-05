@@ -127,7 +127,7 @@ if (nativeProfile === 'windows') {
   });
   assert.deepEqual(cublasLtObservation.finalWords, [1114112003, 1115684867, 1124794371, 1125777411]);
   assert.equal(cublasLtObservation.workspaceBytes, 0);
-  assert.deepEqual(cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile' });
+  assert.deepEqual(cublasLtObservation.provider, { name: 'cuBLASLt', version: '13.5.1', qualification: 'exact-windows-profile', workspaceAlignmentBytes: 256 });
   assert.equal(cublasLtObservation.graceful, true);
 }
 runNode([npmCli, 'uninstall', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', 'cuda-js'], directory);

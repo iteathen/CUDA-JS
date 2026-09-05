@@ -19,7 +19,37 @@
       "x86-64 to ARM64",
       "portable or mock controls to native CUDA support",
       "a passing Driver smoke to compiler, package, performance, or production support"
-    ]
+    ],
+    "managedRisk": {
+      "fullPromotionStillRequiresExactProfile": true,
+      "axes": [
+        {
+          "id": "source-revision",
+          "clears": "The run started from the exact recorded commit and tree.",
+          "doesNotClear": "Runtime, OS, CUDA provider, GPU, package, or capability behavior."
+        },
+        {
+          "id": "node-runtime",
+          "clears": "The exact Node version, module ABI, and required FFI substrate for this runner.",
+          "doesNotClear": "OS loader behavior, CUDA Driver/provider behavior, GPU execution, or package semantics."
+        },
+        {
+          "id": "host-os-abi",
+          "clears": "The host platform, processor architecture, and ABI class for this runner.",
+          "doesNotClear": "A specific GPU model, Driver/toolkit/provider identity, Node version, or capability capsule."
+        },
+        {
+          "id": "cuda-gpu-driver-provider",
+          "clears": "Directly visible CUDA GPU and Driver/provider availability for this runner.",
+          "doesNotClear": "All CUDA-JS capabilities, installed-package behavior, another GPU model, another OS, or another provider version."
+        },
+        {
+          "id": "capsule-chain",
+          "clears": "Each passed capsule's bounded behavior on the recorded axes.",
+          "doesNotClear": "The full hardware profile or any failed, skipped, unrun, performance, production-stability, cross-OS, cross-GPU, or cross-Node claim."
+        }
+      ]
+    }
   },
   "upstreamSources": [
     {

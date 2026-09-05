@@ -41,6 +41,22 @@ test('portable evidence cannot promote a hardware profile', async () => {
   assert.throws(() => validateRegistry(registry, profiles, extensions), /direct-hardware evidence/);
 });
 
+test('managed-risk axes are explicit and do not replace exact-profile promotion', async () => {
+  const { registry, profiles, extensions } = await fixtures();
+  assert.equal(registry.policy.managedRisk.fullPromotionStillRequiresExactProfile, true);
+  assert.deepEqual(registry.policy.managedRisk.axes.map(({ id }) => id), [
+    'source-revision',
+    'node-runtime',
+    'host-os-abi',
+    'cuda-gpu-driver-provider',
+    'capsule-chain',
+  ]);
+  const rendered = renderSupportDocument(registry, profiles, extensions);
+  assert.match(rendered, /Managed-risk evidence axes/);
+  registry.policy.managedRisk.axes = registry.policy.managedRisk.axes.filter(({ id }) => id !== 'node-runtime');
+  assert.throws(() => validateRegistry(registry, profiles, extensions), /Managed-risk axes are incomplete/);
+});
+
 test('an incomplete profile cannot expose a promotable command chain', async () => {
   const { registry, profiles, extensions } = await fixtures();
   const wsl = profiles.profiles.find((profile) => profile.id === 'wsl2-x64');

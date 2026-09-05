@@ -19,6 +19,7 @@ const architecturalDispositions = new Set(['planned', 'deferred', 'unselected', 
 const implementationStatuses = new Set(['not-implemented', 'experimental', 'partial', 'implemented']);
 const qualificationStatuses = new Set(['not-qualified', 'testing-unconfirmed', 'qualified', 'known-incompatible', 'not-applicable']);
 const requiredExtensionAxes = ['multi-gpu', 'mig', 'virtualization', 'concurrent-launch', 'performance-thermal-soak', 'ecc', 'driver-toolkit-matrix', 'windows-tcc-server', 'independent-attestation'];
+const managedRiskAxes = new Set(['source-revision', 'node-runtime', 'host-os-abi', 'cuda-gpu-driver-provider', 'capsule-chain']);
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -48,6 +49,16 @@ export function validateRegistry(registry, profiles, extensions) {
   invariant(Array.isArray(registry.coordinationIssues) && registry.coordinationIssues.length > 0, 'Public coordination issues are required.');
   invariant(Array.isArray(registry.architectureCoverage) && registry.architectureCoverage.length > 0, 'Architecture coverage is required.');
   invariant(Array.isArray(registry.qualifiedProfiles) && registry.qualifiedProfiles.length > 0, 'At least one directly qualified profile is required.');
+  invariant(registry.policy?.supportUnit === 'exact-node-os-abi-driver-toolkit-provider-gpu-profile', 'The full promotion support unit must remain exact-profile scoped.');
+  invariant(registry.policy?.managedRisk?.fullPromotionStillRequiresExactProfile === true, 'Managed-risk evidence must not replace full exact-profile promotion.');
+  invariant(Array.isArray(registry.policy?.managedRisk?.axes), 'Managed-risk axes are required.');
+  unique(registry.policy.managedRisk.axes.map((entry) => entry.id), 'Managed-risk axis IDs');
+  invariant([...managedRiskAxes].every((id) => registry.policy.managedRisk.axes.some((entry) => entry.id === id)), 'Managed-risk axes are incomplete.');
+  for (const axis of registry.policy.managedRisk.axes) {
+    invariant(managedRiskAxes.has(axis.id), `Unknown managed-risk axis ${axis.id}.`);
+    invariant(typeof axis.clears === 'string' && axis.clears.length > 0, `Managed-risk axis ${axis.id} needs a clears statement.`);
+    invariant(typeof axis.doesNotClear === 'string' && axis.doesNotClear.length > 0, `Managed-risk axis ${axis.id} needs a doesNotClear statement.`);
+  }
   invariant(Array.isArray(profiles.profiles) && profiles.profiles.length > 0, 'Qualification profiles are required.');
   invariant(extensions?.schemaVersion === 2, 'Hardware extension schemaVersion must be 2.');
   invariant(Array.isArray(extensions.upstreamSources) && extensions.upstreamSources.length >= 3, 'Extended-profile upstream sources are required.');
@@ -150,7 +161,9 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     `**Registry updated:** ${registry.updated}`,
     '',
-    'This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.',
+    'This is the published hardware support list for CUDA-JS. It is generated from [`conformance/hardware/registry.json`](../conformance/hardware/registry.json). A CUDA-capable product is not automatically supported by CUDA-JS: full support is recorded only for an exact profile that passed direct hardware execution, independent native-oracle comparison, permissions, packaging, and terminal cleanup.',
+    '',
+    'The registry also records managed-risk evidence axes separately. A run may prove source revision, Node runtime, host OS/ABI, visible CUDA GPU/Driver/provider, and individual capsule-chain facts independently. Those facts may clear only gates that explicitly accept that narrower axis. They do not promote the full profile, and they do not transfer silently across another OS, Node version, GPU model, Driver/toolkit/provider version, performance target, or unrun capsule.',
     '',
     'ADR-0006 keeps public/component architecture OS-neutral and makes native Linux x86-64 the reference implementation and primary qualification path, beginning with one exact Ubuntu 24.04 LTS cell. The complete EXP-001/F1B/F3L-F8L runner and evidence-validation source chain is implemented. Exact native evidence remains unrun, so runner readiness is not a support claim. Qualification waits for contributor-operated native Ubuntu with a directly exposed physical NVIDIA GPU; VM, emulated, WSL, container, hosted-CI, portable, or mock evidence does not qualify this cell. The accepted Windows x64 result remains valid as a maintained peer profile.',
     '',
@@ -170,6 +183,19 @@ export function renderSupportDocument(registry, profiles, extensions) {
   lines.push(
     '',
     'The listed result qualifies only the recorded model and exact software/host identity. It does not qualify every device with the same compute capability.',
+    '',
+    '## Managed-risk evidence axes',
+    '',
+    'These axes are intentionally separable so limited hardware can retire the specific uncertainty it actually tested. Full support still requires a passing exact-profile bundle.',
+    '',
+    '| Axis | Can clear | Does not clear |',
+    '|---|---|---|',
+  );
+  for (const axis of registry.policy.managedRisk.axes) {
+    lines.push(`| ${safeCell(axis.id)} | ${safeCell(axis.clears)} | ${safeCell(axis.doesNotClear)} |`);
+  }
+
+  lines.push(
     '',
     '## Public qualification calls',
     '',
@@ -230,9 +256,10 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '1. Start with [`conformance/hardware/README.md`](../conformance/hardware/README.md) and select an exact profile.',
     '2. Run `npm run hardware:plan` to see whether that profile has a complete runner.',
     '3. On a runner-ready profile, use exact Node 26.7.0 from a clean tested commit and run `npm run hardware:qualify`.',
-    '4. Review the generated public summary and evidence index. Keep host names, account names, filesystem paths, serial numbers, UUIDs, and bus identifiers out of public uploads.',
-    '5. Open a hardware qualification issue, attach the sanitized result, and link the exact source commit.',
-    '6. Promotion requires maintainer review and a registry PR. Evidence from one profile never silently promotes another.',
+    '4. Review `managedRisk.axes` first. A failed bundle can still contain useful axis evidence, but only for gates that explicitly accept that axis and residual risk.',
+    '5. Review the generated public summary and evidence index. Keep host names, account names, filesystem paths, serial numbers, UUIDs, and bus identifiers out of public uploads.',
+    '6. Open a hardware qualification issue, attach the sanitized result, and link the exact source commit.',
+    '7. Promotion requires maintainer review and a registry PR. Evidence from one profile never silently promotes another.',
     '',
     '## Upstream candidate references',
     '',
@@ -248,6 +275,7 @@ export function renderSupportDocument(registry, profiles, extensions) {
     '',
     '- Portable, mock, schema-generation, package-import, and readiness checks do not prove native CUDA support.',
     '- Successful operation on unconfirmed hardware is test evidence, not a support claim.',
+    '- Managed-risk axis evidence can retire a named uncertainty without retiring the whole exact-profile gate.',
     '- A Driver-only pass does not prove memory, execution, compiler/linker, installed-package, performance, or production behavior.',
     '- CUDA-JS currently selects device zero and admits one pending GPU operation. Multi-GPU, MIG, virtualization, concurrent launch, performance/thermal/soak, ECC, TCC/server, version-matrix, and attested-runner axes remain not-qualified; their architectural and implementation dispositions are recorded separately.',
     '- Driver/toolkit, Node, OS, ABI, provider, schema, permission, artifact, resource-lifecycle, or GPU changes can invalidate evidence.',
@@ -317,6 +345,65 @@ function timestampId(date = new Date()) {
 
 async function writeJson(target, value) {
   await writeFile(target, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function buildManagedRiskEvidence(profile, device, sourceCommit, sourceTree, commandResults) {
+  const commandStatuses = commandResults.map(({ caseId, command, status }) => ({
+    caseId,
+    command,
+    status: status === 0 ? 'pass' : 'fail',
+  }));
+  const passedCapsules = commandStatuses.filter(({ status }) => status === 'pass').map(({ caseId }) => caseId);
+  const failedCapsule = commandStatuses.find(({ status }) => status === 'fail') ?? null;
+  const axes = {
+    'source-revision': {
+      status: 'pass',
+      sourceCommit,
+      sourceTree,
+      cleanTreeAtStart: true,
+      clears: 'The run started from an exact, immutable source revision and tree.',
+      doesNotClear: 'It does not prove any runtime, OS, provider, GPU, or capability behavior by itself.',
+    },
+    'node-runtime': {
+      status: process.version === profile.requiredNode ? 'pass' : 'fail',
+      required: profile.requiredNode,
+      observed: process.version,
+      clears: 'The Node/ABI/FFI substrate matched this runner profile.',
+      doesNotClear: 'It does not prove OS loader behavior, CUDA provider behavior, GPU execution, or package semantics.',
+    },
+    'host-os-abi': {
+      status: process.platform === profile.host.platform && process.arch === profile.host.architecture ? 'pass' : 'fail',
+      observed: { platform: process.platform, architecture: process.arch, release: os.release() },
+      required: profile.host,
+      clears: 'The host platform and processor ABI matched this runner profile.',
+      doesNotClear: 'It does not prove a specific GPU model, Driver/toolkit/provider identity, Node version, or capability capsule.',
+    },
+    'cuda-gpu-driver-provider': {
+      status: device ? 'pass' : 'fail',
+      observed: device ?? null,
+      clears: 'A directly visible CUDA GPU and Driver path were observed before capsule execution.',
+      doesNotClear: 'It does not prove all CUDA-JS capabilities, installed-package behavior, another GPU model, another OS, or another provider version.',
+    },
+    'capsule-chain': {
+      status: failedCapsule ? 'partial' : commandStatuses.length > 0 ? 'pass' : 'not-run',
+      passedCapsules,
+      failedCapsule,
+      clears: 'Each passed capsule may be used as bounded evidence for its own capability gate.',
+      doesNotClear: 'A partial chain does not promote the full hardware profile or any capsule that did not pass.',
+    },
+  };
+  return {
+    schemaVersion: 1,
+    eligibleForManagedRiskGates: Object.values(axes).some((axis) => axis.status === 'pass' || axis.status === 'partial'),
+    fullPromotionStillRequiresExactProfile: true,
+    axes,
+    rules: [
+      'Managed-risk evidence may clear only gates that explicitly name the relevant axis and accept bounded residual risk.',
+      'Full support promotion still requires one passing exact Node/OS/ABI/Driver/toolkit/provider/GPU profile bundle.',
+      'A failed or unrun capsule remains closed even when Node, OS, or GPU axes pass.',
+      'Cross-OS, cross-GPU, cross-Node, performance, production-stability, and provider-version claims require their own evidence.',
+    ],
+  };
 }
 
 async function summarizeProfileEvidence(profile, device) {
@@ -532,6 +619,7 @@ async function runQualification(profile, registry) {
   const failure = failedCommand
     ? { kind: 'command', caseId: failedCommand.caseId, status: failedCommand.status }
     : evidenceFailure ?? (!finishedCleanTree ? { kind: 'worktree-changed' } : null);
+  const managedRisk = buildManagedRiskEvidence(profile, device, sourceCommit, sourceTree, commandResults);
 
   const result = {
     schemaVersion: 1,
@@ -539,6 +627,7 @@ async function runQualification(profile, registry) {
     profile: profile.id,
     status: allPassed ? 'pass' : 'fail',
     promotionEligible: allPassed,
+    managedRiskEligible: managedRisk.eligibleForManagedRiskGates,
     failure,
     startedFrom: { sourceCommit, sourceTree, cleanTree: true },
     finishedCleanTree,
@@ -550,6 +639,7 @@ async function runQualification(profile, registry) {
     },
     deviceZero: device,
     profileSummary,
+    managedRisk,
     commands: commandResults,
     evidence,
     privacyReviewRequired: true,
@@ -566,6 +656,7 @@ async function runQualification(profile, registry) {
     profile: result.profile,
     status: result.status,
     promotionEligible: result.promotionEligible,
+    managedRiskEligible: result.managedRiskEligible,
     failure: result.failure ? {
       kind: result.failure.kind,
       ...(result.failure.caseId ? { caseId: result.failure.caseId, status: result.failure.status } : {}),
@@ -575,6 +666,7 @@ async function runQualification(profile, registry) {
     environment: result.environment,
     deviceZero: result.deviceZero,
     profileSummary: result.profileSummary,
+    managedRisk: result.managedRisk,
     commands: result.commands.map(({ caseId, command, status, elapsedMs, logSha256 }) => ({ caseId, command, status, elapsedMs, logSha256 })),
     evidence: result.evidence,
     claimLimits: result.claimLimits,
@@ -605,7 +697,14 @@ export async function execute(action, args = process.argv.slice(3)) {
   if (action === 'plan') {
     const profile = await currentProfile(profiles, requestedProfile);
     invariant(profile, 'No unique qualification profile matches this host. Pass --profile=<id>.');
-    console.log(JSON.stringify({ id: profile.id, status: profile.status, requiredCapsules: profile.requiredCapsules, missingCapsules: profile.missingCapsules }, null, 2));
+    console.log(JSON.stringify({
+      id: profile.id,
+      status: profile.status,
+      managedRiskAxes: registry.policy.managedRisk.axes.map(({ id, clears, doesNotClear }) => ({ id, clears, doesNotClear })),
+      fullPromotionStillRequiresExactProfile: registry.policy.managedRisk.fullPromotionStillRequiresExactProfile,
+      requiredCapsules: profile.requiredCapsules,
+      missingCapsules: profile.missingCapsules,
+    }, null, 2));
     return;
   }
   if (action === 'qualify') {
