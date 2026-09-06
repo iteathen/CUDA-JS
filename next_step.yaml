@@ -1,8 +1,8 @@
 {
-  "schema_version": 69,
+  "schema_version": 70,
   "updated": "2026-09-06",
-  "status": "physical_pair_qualification_blocked_on_infrastructure",
-  "objective": "Qualify the exact public CUDA-MCGS/CUDA-JS physical pair when its required NVIDIA environment is available; preserve completed tanh implementation and downstream model work as separate ownership and evidence.",
+  "status": "bounded_admission_protected_physical_pair_qualification_blocked_on_infrastructure",
+  "objective": "Preserve the protected finite Device-JS/compiler admission correction and completed downstream exact-pair resource qualification; qualify the exact public CUDA-MCGS/CUDA-JS physical pair only when an accepted directly exposed NVIDIA environment is available.",
   "package_candidate": "cuda-js@0.1.0-alpha.18",
   "public_api_schema": 1,
   "live_state_policy": {
@@ -13,70 +13,74 @@
     "qualification_owner": "support documents + qualification registries/evidence",
     "issue_owner": "durable obligations and concrete evidence cells, not live SHA dashboards"
   },
-  "recorded_protected_input": {
-    "main": "d1a8edef5bd06c402a5c14c8945269f206520174",
+  "protected_bounded_admission": {
+    "issue": 213,
+    "pr": 216,
+    "merge": "45a9ef15537b52d6fd7c615b7e596676dfd00587",
+    "tree": "8d25993380770b5616d0340b4b7fc369b5af603a",
+    "device_js_source_bytes": 4194304,
+    "device_js_ast_nodes": 1048576,
+    "compiler_source_bytes": 4194304,
+    "device_js_depth_unchanged": 128,
+    "post_merge_verify": 34020219808,
+    "post_merge_node_compatibility": 34020219809,
+    "claim_limit": "accepted finite portable/software/package admission only; no native/provider/hardware promotion"
+  },
+  "protected_tanh_provenance": {
+    "merge": "d1a8edef5bd06c402a5c14c8945269f206520174",
     "tree": "4e71779e19132fedbaa60bacee7db84b0692e1ae",
-    "meaning": "Protected #206/#209 tanh implementation provenance, not a self-updating current-main field. This documentation transaction moves protected main; exact live protected identity is always read from GitHub before qualification or cross-repository freezing."
-  },
-  "durable_architecture_provenance": {
-    "foundation": ["CJS-F0", "CJS-F1A", "ADR-0002-node-ffi-first-host-binding.md"],
-    "external_nn_ownership": "CJS-CUDA-NN-EXTERNAL",
-    "meaning": "Durable architecture/evidence routing markers retained for governance validation only; not a live package, support or current-work dashboard."
-  },
-  "cuda_nn": {
-    "authority": "ADR-0007",
-    "repository": "iteathen/cuda-nn",
-    "disposition": "Reusable NN/model/inference/autodiff/training semantics remain external; generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
-  },
-  "completed_dependencies": [
-    "CUDA-MCGS #125 public CUDA-JS adapter protected-complete.",
-    "CUDA-JS #157 / PR #205 protected f32/f64 Device-JS erf at 30d11a5d38dd7b9987bc8bac4ac67c2fcf8fee60.",
-    "CUDA-JS #206/#209 protected f32/f64 Device-JS tanh and canonical erf+tanh composition at d1a8edef5bd06c402a5c14c8945269f206520174.",
-    "CUDA-JS-Tensor #32 ordinary SPEC-0010 erf/gather/concat protected-complete.",
-    "CUDA-JS-Tensor #52 device-callable erf protected-complete.",
-    "CUDA-JS-Tensor #37 device-callable gather/concat protected-complete.",
-    "UCI-Arena-Vector #3 / PR #17 protected frozen-model coverage at 67b2512794c4389abdea22e7f353dac712f6c03d.",
-    "CUDA-JS-Tensor #61 / PR #63 protected SPEC-0011 unary:tanh implementation at 3a62bc47017aa10198eb1640b66f6b71a608b562; portable/software/package evidence only.",
-    "CUDA-JS #198 closed not planned because no current accepted consumer requires the historical resident-payload shape."
-  ],
-  "protected_tanh_profile": {
     "owner": "runtime.device-js",
     "helper": "gpu.math.tanh",
     "dtypes": ["f32", "f64"],
     "child": "SPEC-0030-tanh-v1",
-    "canonical_numeric_child_order": ["SPEC-0030-erf-v1", "SPEC-0030-tanh-v1"],
-    "forbidden_substitutions": ["exp-identity", "__tanhf", "implicit-precision-conversion", "consumer-specific-activation"]
+    "meaning": "Implementation provenance only; distinct from the later bounded-admission protected transaction."
+  },
+  "completed_dependencies": [
+    "CUDA-MCGS #125 public CUDA-JS adapter protected-complete.",
+    "CUDA-JS #157 protected f32/f64 Device-JS erf.",
+    "CUDA-JS #206/#209 protected f32/f64 Device-JS tanh and canonical erf+tanh composition.",
+    "CUDA-JS #213/#216 protected the finite Device-JS source/AST and CompilerActor source admission correction required by the real Tensor leaf.",
+    "CUDA-JS-Tensor #32/#52/#37/#61 protected the required Tensor erf/gather/concat/tanh semantics and device-callable realization.",
+    "CUDA-JS-Tensor PR #68 protected exact dependency refresh to CUDA-JS 45a9ef15537b52d6fd7c615b7e596676dfd00587 as Tensor merge 0da2c70a0a10df908a33e842aa4ba3dbd7605c48; protected verify 34020688142 succeeded.",
+    "UCI-Arena-Vector PR #24 protected the exact frozen LatticeKnight FP32 TensorProgram/TensorPlan and public callable/resource gate at ca3cce162a73a664a789f6a27a819097ec994bd6 / tree 2182527aa9cd058824d3658a549a2f8224d18db5; post-merge Repository quality 34023725885 and Model Tensor Coverage 34023725845 succeeded.",
+    "Vector PR #25 and Tensor PR #69 reconciled current control state so the independent checkpoint-bound numerical oracle is the only remaining first-model correctness seam.",
+    "CUDA-JS #198 remains closed not planned because no current accepted consumer requires the historical resident-payload shape."
+  ],
+  "downstream_real_model": {
+    "repository": "iteathen/UCI-Arena-Vector",
+    "issue": 3,
+    "protected_resource_merge": "ca3cce162a73a664a789f6a27a819097ec994bd6",
+    "tensor_revision": "0da2c70a0a10df908a33e842aa4ba3dbd7605c48",
+    "selected_cuda_js_revision": "45a9ef15537b52d6fd7c615b7e596676dfd00587",
+    "result": "real Tensor leaf compiles through the public bounded-admission path with no demonstrated new generic CUDA-JS gap",
+    "remaining_owner": "UCI-Arena-Vector #3 independent checkpoint-bound policy/value numerical oracle",
+    "claim_limit": "Tensor workspace and model numerical semantics remain owned outside CUDA-JS."
   },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
     "issue": 32,
     "name": "exact physical CUDA-MCGS/CUDA-JS compatible-pair qualification",
-    "state": "Blocked on the accepted physical NVIDIA qualification environment; no generic lower source defect is currently demonstrated.",
-    "next_action": "When the required physical environment is available, read live protected heads, trees, package/API and toolchain identities, freeze the exact pair, and execute the existing public compatible-pair runner under issue #32. Until then preserve the evidence gap; do not substitute hosted, VM or mock results or invent lower source changes.",
-    "exit": "Issue #32 receives reviewed exact-profile physical evidence, or its runner demonstrates a generic CUDA-JS defect that is then owned and fixed here."
-  },
-  "consumer_evidence": {
-    "repository": "iteathen/UCI-Arena-Vector",
-    "issue": 3,
-    "protected_merge": "67b2512794c4389abdea22e7f353dac712f6c03d",
-    "fact": "Historical frozen-model coverage exposed unary:tanh. Protected CUDA-JS and Tensor now supply that child; Vector #3 owns the remaining concrete TensorProgram/workspace and independent numerical evidence."
+    "state": "Runner-ready and portable-qualified, blocked on an accepted directly exposed physical NVIDIA environment; no generic lower source defect is currently demonstrated.",
+    "next_action": "When accepted physical hardware is available, read live protected CUDA-MCGS/CUDA-JS heads, trees, package/API/toolchain/environment identities, freeze the exact tuple, and execute the existing public compatible-pair runner. Until then preserve the evidence gap and do not substitute hosted, VM, mock, DevBridge, Tensor, or product evidence.",
+    "exit": "Issue #32 receives reviewed exact-profile physical evidence, or the physical runner demonstrates a concrete generic CUDA-JS defect that is fixed here and requalified."
   },
   "parallel_evidence": [
     "#4 native Ubuntu/NVIDIA qualification remains a separate directly exposed physical evidence gate.",
-    "#68 remains external operational security evidence."
+    "#68 remains external operational security evidence.",
+    "DevBridge may improve reproducible VM/host orchestration but its VM/CI evidence does not satisfy physical CUDA-JS support gates."
   ],
   "after_current_focus": [
-    "UCI-Arena-Vector #3 continues its downstream TensorProgram/TensorPlan workspace/resource and oracle gates against protected Tensor #61; that consumer lane is independent of CUDA-JS physical pair qualification.",
-    "CUDA-MCGS #124 consumes only resulting generic callable/resource facts; model/search ownership does not move into CUDA-JS.",
-    "Resume #32 or #4 unchanged when suitable physical hardware is available; immediately re-read live protected identities before execution."
+    "UCI-Arena-Vector #3 owns only its remaining independent checkpoint numerical-oracle campaign; missing oracle vectors are not a CUDA-JS source gap.",
+    "CUDA-MCGS #124 consumes only completed public generic callable/resource facts after product numerical qualification while retaining evaluator/search lifecycle ownership.",
+    "Resume #32 or #4 unchanged when suitable physical hardware is available and immediately re-freeze the exact live identities actually executed."
   ],
   "hard_constraints": [
     "No Tensor, model, NN, evaluator, search or product semantics in CUDA-JS.",
     "No consumer-local CUDA/native workaround for a generic lower capability.",
     "No approximate __tanhf or algebraic exp substitution under the exact tanh child.",
     "No lower-precision tanh breadth without separate consumer-backed authority.",
-    "No additional CUDA-JS source work merely because downstream model qualification remains open.",
-    "No portable/mock/package evidence promoted to native/provider support.",
+    "No additional CUDA-JS source work merely because downstream model oracle qualification remains open.",
+    "No portable/mock/package/VM evidence promoted to native/provider/physical support.",
     "Protected integration requires exact-head qualification, complete review, exact base/tree validation and protected read-back."
   ]
 }
