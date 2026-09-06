@@ -19,9 +19,13 @@ A lower principle cannot excuse violating a higher one.
 
 Treat system and component boundaries as replaceable bricks with explicit contracts, injected dependencies, stable identities, and no hidden assumptions. A brick owns its full lifecycle and can be tested independently through its public surface.
 
+LEGO is recursive at every scale. **The application or system itself is the outermost LEGO.** Its supported external inputs, outputs, commands, events, data contracts, and lifecycle entry/exit points are its public **studs/surfaces**. Large application sections, subsystems, services, components, and large objects should preferably be compositions of smaller internal LEGOs when that preserves cohesion and brings each reasoning unit inside full attention. Parents own their externally visible responsibility and hide child topology; callers connect through supported studs/surfaces rather than drilling into private children.
+
 LEGO is the outer architectural discipline. It governs semantic ownership, universality, replaceability, scope containment, damage-limiting encapsulation, and cognitive/context containment. A brick is not correctly sized if one agent cannot load and actively reason about its complete authoritative working set—public contract, implementation, invariants, lifecycle/resource/failure rules, tests/conformance, and the immediate dependency and consumer interfaces needed to understand consequences—with substantial headroom for the task, evidence, and review. Merely fitting inside a model's maximum context window is not sufficient.
 
 A LEGO is encapsulated composition, not necessarily an atomic leaf. A larger brick may recursively contain smaller internal bricks, each with a narrower coherent invariant, state machine, lifecycle, resource, failure domain, substitution boundary, or independently changing responsibility. The parent remains the external semantic owner and hides its child topology; consumers must not deep-import or wire private child bricks merely because they exist.
+
+Treat studs/surfaces as real contract boundaries. They define what may enter or leave a brick—ports, inputs, outputs, commands, events, capabilities, or lifecycle seams—and must not expose private mutable state, private child topology, or foreign implementation details merely for convenience.
 
 Choose LEGO boundaries using both **cohesion** and **full-attention fit**. Semantic/ontological ownership and lifecycle cohesion remain strong seam signals, followed by functional cohesion, stable dependency/substitution seams, independently owned failure/resource behavior, volatility, and execution locality. Context size is also a first-class architectural constraint: when a coherent component's authoritative working set exceeds one agent's full-attention envelope, recursively decompose it at the strongest real internal seam or narrow its scope. Context pressure is not permission for arbitrary file splitting; a valid split must protect a meaningful responsibility, lifecycle, resource/failure domain, substitution/change boundary, or independently testable invariant.
 
@@ -29,7 +33,7 @@ The same rule applies to very large functions. Split where independently meaning
 
 Stop recursive decomposition when another split would protect no independent ownership, lifecycle, substitution, failure/resource boundary, testing/change value, or attention boundary without introducing duplicated truth or cross-boundary internal knowledge. Avoid both monoliths and abstraction confetti.
 
-An entering agent should be able to determine quickly what the brick owns, what it explicitly does not own, what enters and leaves, which invariants cannot be violated, what can replace it, what failures/resources it contains, and how to prove it still works. If establishing those facts requires repository archaeology across unrelated internals, the boundary is suspect.
+An entering agent should be able to determine quickly what the brick owns, what it explicitly does not own, what enters and leaves through its studs/surfaces, which invariants cannot be violated, what can replace it, what failures/resources it contains, and how to prove it still works. If establishing those facts requires repository archaeology across unrelated internals, the boundary is suspect.
 
 ## SOLID
 
@@ -43,7 +47,7 @@ Prefer code and contracts that are composable, Unix-like where appropriate, pred
 
 Choose the simplest design that satisfies the complete lifecycle. A design is not simple if it exports complexity to callers, synchronization, memory, migration, failure recovery, cleanup, diagnostics, tests, or future integrations.
 
-The ordering is deliberate: **LEGO chooses and contains the boundary; SOLID structures responsibilities and dependencies inside the brick; CUPID shapes the valid implementation; KISS removes remaining unjustified complexity.** A lower layer may not defeat a higher one.
+The ordering is deliberate: **LEGO chooses and contains the boundary and studs/surfaces; SOLID structures responsibilities and dependencies inside the brick; CUPID shapes the valid implementation; KISS removes remaining unjustified complexity.** A lower layer may not defeat a higher one.
 
 ## Domain-appropriate foundations
 
