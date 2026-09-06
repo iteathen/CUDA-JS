@@ -17,7 +17,7 @@ const DENSE_HELPERS = Object.freeze([
   /^gpu\.(?:f32|f64|f16|bf16)\.(?:nan|positiveInfinity|negativeInfinity)$/,
   /^gpu\.(?:f64|f16|bf16)$/,
   /^gpu\.cast\.(?:u32|i32|u64|f32|f64|f16|bf16)$/,
-  /^gpu\.math\.(?:abs|isNaN|minimum|maximum|erf)$/,
+  /^gpu\.math\.(?:abs|isNaN|minimum|maximum|erf|tanh)$/,
 ]);
 
 export function isDenseNumericHelper(path) {
