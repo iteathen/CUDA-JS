@@ -1,21 +1,12 @@
 # CompilerActor
 
-`runtime.compiler-actor` is the OS-neutral compiler owner. It runs CUDA 13.3 NVRTC and nvJitLink in a Worker separate from the DriverActor, accepts only copied source/typed artifact inputs with typed options, and returns copied PTX, typed LTO-IR, or linked cubin artifacts according to the accepted contract selected by the request. One shared native engine consumes thin canonical Windows and Linux provider profiles; Windows F6W/F9 is accepted, while the Linux source path remains unqualified until its exact native evidence passes.
+Runs NVRTC and nvJitLink in a separate Worker, producing copied typed PTX, LTO-IR, or cubin artifacts and maintaining their cache identities. It implements bounded compilation/linking and verified header profiles. Windows has recorded native evidence; the Linux source path remains unqualified.
 
-Each provider profile is fail-closed: CUDA-JS checks canonical toolkit discovery, exact versions, file lengths, SHA-256 identities, required named exports, and the manifest-owned CUDA 13.3 compile/link target sets before compiling or linking. The Linux profile accepts only `/usr/local/cuda-13.3/targets/x86_64-linux` files whose exact identities match the reviewed Ubuntu 24.04 manifest; it does not search the ambient loader path or accept caller paths. Repository policy and provider capability remain separate: the exact NVRTC 13.3 profiles reject policy-admitted `compute_88` and `compute_110` as unsupported before cache lookup or native work, while nvJitLink admits the corresponding `sm_88` and `sm_110` targets.
+## Entry points
 
-Trusted headers are path-free finite profiles. `cuda-cccl` verifies the accepted CUDA 13.3 `cuda/` and `nv/` roots. SPEC-0030 adds `cuda-numeric`, which verifies the exact top-level dependency closure for `cuda_fp16.h` and `cuda_bf16.h`, and `cuda-device`, which composes numeric headers with the full CCCL profile. Every component is snapshotted before cache lookup, composite identity hashes ordered component identities, duplicate logical headers are rejected, and caller headers cannot shadow an owned root or exact file. No profile exposes or searches an include path.
+- [Component interface](index.mjs).
+- [Runtime and platform requirements](../../README.md).
+- [Capability map](../../docs/CAPABILITIES.md) and [specification index](../../docs/specs/README.md).
+- [Conformance entry points](../../conformance/README.md).
 
-SPEC-0010 adds the typed `relocatableDeviceCode` compile option. It defaults to `false`, preserving the established whole-program PTX path. When `true`, CUDA-JS maps it to the canonical NVRTC relocatable-device-code option, separates compile/cache identity, and marks the resulting typed PTX artifact with `relocatableDeviceCode: true`. Relocatable PTX remains an input to the existing bounded `link()` owner.
-
-SPEC-0012 adds a separate typed Device-LTO path. `compile({ output: "lto-ir" })` internally selects NVRTC device-LTO generation and returns binary LTO-IR with producer/target identity. Raw LTO-IR bytes are not accepted by `link()`: a homogeneous set of typed LTO-IR artifacts selects the private LTO link mode, and the existing linker owner returns final cubin. PTX/LTO-IR mixing, caller-selected native input kinds, staged linking, and arbitrary native options remain unavailable.
-
-SPEC-0028 reuses the compiler contract's production `normalizeLinkRequest` port at the facade boundary so copied Device-JS library artifacts are snapshotted and fail closed before any new compilation. CompilerActor still owns artifact validation and link compatibility; Device-JS does not duplicate those rules or acquire provider/native authority.
-
-The cache recomputes its key and validates its manifest, provider identity, request identity, type, length, and artifact digest on every hit. Corrupt entries become misses and are quarantined only inside the exact cache directory. Cache entries never store source, headers, logs, toolkit paths, or native state.
-
-Native Windows or Linux x86-64 usage requires Node 26.1.0 or later with its experimental FFI flag. Exact Node 26.7.0 remains the evidence baseline; support is still profile-specific. `compile()` and `link()` serialize in the CompilerActor but do not block the application event loop. A temporary program/link destroy failure preserves the bounded primary operation failure, every retained cleanup failure, the strongest resulting health, and unproved terminal inventory; it blocks further admission when cleanup requires restart. Provider shutdown attempts both owned libraries and retains each bounded close failure instead of allowing a later failure to overwrite an earlier one. Call `close()` and verify `graceful: true` before considering native cleanup proved.
-
-The combined cleanup envelope and admission behavior are covered by portable injected-failure tests. Destructive NVRTC, nvJitLink, and provider-library close failures have not been induced on the exact Windows native profile by those tests and remain independently unqualified.
-
-Linux request normalization includes mandatory stack-limit side-effect suppression. Canonical provider discovery, exact manifest verification, shared ABI calls, a direct C oracle build, public compile/link/Driver handoff runner, and cleanup assertions are implemented in source. They have not run in this Windows environment and do not qualify Linux, LTO/RDC, trusted headers, package behavior, or support.
+Use the governing specifications for parameter, lifecycle, failure, and compatibility details. [Current status](../../STATUS.md) tracks outstanding implementation and qualification work.

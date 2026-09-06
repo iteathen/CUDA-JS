@@ -2,7 +2,7 @@
 
 **Status:** Active operational state
 
-**Updated:** 2026-09-05
+**Updated:** 2026-09-06
 
 ## Current package and capability projection
 
@@ -15,8 +15,8 @@ native Linux x86-64:         testing-unconfirmed / not-qualified
 production support:          no
 performance claims:          none beyond exact recorded evidence
 current source blocker:      none in the protected Vector tanh dependency lane
-current dependency handoff:  CUDA-JS-Tensor #61 implements accepted unary:tanh through public CUDA-JS
-parallel physical gate:      #32 exact CUDA-MCGS/CUDA-JS compatible-pair qualification
+completed dependency:        CUDA-JS-Tensor #61 protected unary:tanh through public CUDA-JS
+current physical gate:       #32 exact CUDA-MCGS/CUDA-JS compatible-pair qualification
 ```
 
 `package.json` owns package identity. `packaging/compatibility-manifest.json` owns the immutable public capability projection. **Exact protected branch/commit/tree identity is read from GitHub** when required; it is not maintained here as a self-referential live-SHA field.
@@ -47,19 +47,19 @@ The tanh implementation preserves pre-tanh base/dense/dense+erf identities, lowe
 
 CUDA-JS #206 and #209 are therefore protected-complete. There is no remaining generic CUDA-JS source gap demonstrated by the current frozen LatticeKnight model lane.
 
-## Current actionable handoff — CUDA-JS-Tensor #61
+## Completed dependency handoff — CUDA-JS-Tensor #61
 
 Protected UCI-Arena-Vector PR #17 / merge `67b2512794c4389abdea22e7f353dac712f6c03d` freezes one exact LatticeKnight model and proves that, after protected Tensor erf/gather/concat support, the one remaining generic model mathematical requirement is `unary:tanh`.
 
-CUDA-JS now supplies the required lower scalar mechanism. CUDA-JS-Tensor has accepted `SPEC-0011` for consumer-backed f32/f64 `unary:tanh` at protected merge `3f34e3153b75e5059a6473ee52c95c7b662a62ed`; Tensor issue #61 owns the next implementation/evidence step. That downstream Tensor work must consume public CUDA-JS only and does not authorize another CUDA-JS widening merely to accelerate completion.
+CUDA-JS supplies the required lower scalar mechanism. CUDA-JS-Tensor #61 is closed after PR #63 integrated the accepted f32/f64 `SPEC-0011` implementation at `3a62bc47017aa10198eb1640b66f6b71a608b562`. That is portable/software/package evidence through public CUDA-JS, not native numerical qualification.
 
-After Tensor #61 is protected-qualified, UCI-Arena-Vector #3 should refresh its exact capability snapshot and continue to its already-demonstrated TensorProgram/TensorPlan workspace/resource and oracle gates. CUDA-MCGS #124 remains downstream of those generic callable/resource facts.
+UCI-Arena-Vector #3 has refreshed its protected Tensor capability snapshot and continues its concrete TensorProgram/TensorPlan workspace/resource and independent oracle gates. CUDA-MCGS #124 remains downstream of those generic callable/resource facts. These consumer obligations do not create a new CUDA-JS source task.
 
-## Parallel evidence gates
+## Current CUDA-JS focus — #32 physical compatible pair
 
 **#32 exact CUDA-MCGS compatible pair** remains valid P0 physical qualification but is not executable on repository-hosted portable CI alone. Both CUDA-MCGS and CUDA-JS have moved since older recorded pair tuples, so any physical run must re-read both protected heads/trees/package/API identities immediately before execution and freeze only the exact tuple actually run. No tanh result closes or broadens that physical support claim.
 
-**#4 native Linux** remains separately blocked on a directly exposed physical NVIDIA/Linux host. **#68** remains external operational security evidence.
+The next CUDA-JS-owned action is the existing #32 runner once an accepted physical NVIDIA environment is available. Until then this is an infrastructure/evidence blocker. **#4 native Linux** remains separately blocked on a directly exposed physical NVIDIA/Linux host. **#68** remains external operational security evidence.
 
 CUDA-JS #198 is closed not planned for the current path because protected CUDA-MCGS #125 completed without selecting that resident-payload capability. Reopen only on fresh concrete consumer evidence.
 

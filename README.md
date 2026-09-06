@@ -1,104 +1,43 @@
 # CUDA-JS
 
-[![Documentation and verification](https://github.com/iteathen/CUDA-JS/actions/workflows/docs.yml/badge.svg)](https://github.com/iteathen/CUDA-JS/actions/workflows/docs.yml)
-[![Node compatibility](https://github.com/iteathen/CUDA-JS/actions/workflows/node-compatibility.yml/badge.svg)](https://github.com/iteathen/CUDA-JS/actions/workflows/node-compatibility.yml)
-[![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue)](LICENSE)
+CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work through CUDA. It is intended for JavaScript library and application developers who need explicit device-memory, compilation, and execution control.
 
-CUDA-JS is an experimental Node.js runtime and toolchain for a bounded subset of CUDA Driver, NVRTC, nvJitLink, and selected CUDA-library operations.
+**Package:** `cuda-js@0.1.0-alpha.18`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
 
-## Current reality
+## What exists
 
-| Area | Status |
-| --- | --- |
-| Package identity | `cuda-js@0.1.0-alpha.18` source/package candidate |
-| npm release | **Not published** |
-| Production support | **No** — public alpha/testing only |
-| Host implementation | JavaScript/ESM using Node 26's experimental `node:ffi` behind Worker-owned components |
-| Restricted Device-JS math | Dense scalar profile plus additive public f32/f64 `erf` and `tanh` children in portable/software/package implementation; native numerical qualification remains exact-profile-specific |
-| Native evidence | Exact Windows x64 evidence exists for recorded profiles; support remains capability/profile-specific |
-| Native Linux CUDA | **Not yet qualified**; Linux x86-64 is the reference path, but the physical-NVIDIA evidence cell remains open |
-| Generic concurrency | Bounded operation profiles only; no public unbounded stream/event or scheduling API |
+- Device discovery and selection, device allocations and typed views, copied and bounded asynchronous transfers.
+- CUDA module loading, kernel arguments, GPU-operation submission, completion, and explicit cleanup.
+- NVRTC/nvJitLink compilation, artifact caching, and restricted Device-JS authoring.
+- Prepared execution and a bounded optional cuBLASLt matrix-multiplication profile.
 
-Implemented capabilities include capability-checked device discovery/selection, explicit device-memory ownership and copies, module/function lookup, typed kernel arguments, bounded opaque GPU-operation lifecycles, NVRTC/nvJitLink compilation, artifact/cache identity, restricted Device-JS including public same-kind f32/f64 `gpu.math.erf` and `gpu.math.tanh`, prepared execution, selected bounded CUDA-library composition, and immutable public compatibility projection of finite prepared/Device-JS ceilings plus the ordinary device-allocation minimum base-address alignment. The alignment fact is a base-allocation compatibility guarantee only; it does not add caller-selected alignment or change typed-view offset semantics. The exact status of each capability is recorded in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md), with current dependency/work selection in [`STATUS.md`](STATUS.md) and [`next_step.yaml`](next_step.yaml).
+These capabilities have different qualification limits. See the [capability map](docs/CAPABILITIES.md), [hardware evidence](docs/HARDWARE_SUPPORT.md), and [Node support](docs/NODE_SUPPORT.md) before choosing a native profile.
 
-CUDA-JS does **not** currently claim production readiness, native Linux CUDA qualification, generic public stream/event objects, multi-GPU/MIG support, managed/pool-memory support, CUDA Graph realization, process crash isolation, or broad performance/soak guarantees.
+## Scope and direction
 
-The Node host-call substrate is experimental upstream API. A Node FFI change can require CUDA-JS adaptation or requalification; the project does not treat that dependency as stable merely because current profiles pass.
+CUDA-JS owns generic CUDA runtime and compiler mechanisms. Tensor mathematics, neural networks, graph search, and application scheduling belong to consuming libraries.
 
-## Verify what exists
+The project aims to provide a reusable JavaScript CUDA foundation with explicit resource ownership and independently qualified platform profiles. Linux x86-64 is the reference qualification target. Multi-GPU, CUDA Graph realization, broader memory profiles, and process isolation remain future capabilities; see the [architecture](docs/architecture/README.md) and [plans](docs/plans/README.md).
 
-Requirements: Node.js 26.1.0 or later. Clone the repository, then run the portable/package verification:
+## Getting started
+
+Source development requires Node.js 26.1.0 or later and Git. From a terminal:
 
 ```bash
-npm install
+git clone https://github.com/iteathen/CUDA-JS.git
+cd CUDA-JS
+npm ci
 npm run verify
 ```
 
-On a Windows machine with the required CUDA/toolchain environment, the deeper Windows qualification path is:
+This runs repository and portable/package checks; it does not establish native GPU support. Native execution also needs an NVIDIA GPU/Driver, the profile's documented toolchain, and Node's experimental FFI flag. The Node-FFI-first substrate uses experimental `node:ffi` and may require adaptation between Node releases.
 
-```bash
-npm run verify:windows
-```
+For API entry points and an allocation/copy example, see the [public runtime facade](components/runtime-facade/README.md). Read the exact platform requirements in the [hardware qualification guide](conformance/hardware/README.md) before running native checks such as `npm run verify:windows`. EXP-000 provides the synthetic ABI baseline; CJS-F1B and CJS-F2W identify the schema and Windows bootstrap evidence documented there.
 
-A passing portable run is not native-GPU qualification. Exact Node and hardware evidence is tracked separately in [`docs/NODE_SUPPORT.md`](docs/NODE_SUPPORT.md) and [`docs/HARDWARE_SUPPORT.md`](docs/HARDWARE_SUPPORT.md).
+## Further information
 
-Native Linux CUDA qualification is tracked in [issue #4](https://github.com/iteathen/CUDA-JS/issues/4). Missing physical Linux/GPU evidence is an evidence gap, not proof of a code defect.
-
-### Durable evidence anchors
-
-- **Node-FFI-first** is the v0 host-binding baseline.
-- **EXP-000** is the dependency-free synthetic ABI regression foundation.
-- **CJS-F1B** owns generated CUDA ABI facts and independent native layout evidence.
-- **CJS-F2W** owns the accepted Windows Driver/bootstrap evidence path.
-- Native qualification claims remain exact-profile claims; the retained native baseline includes **Windows x64** evidence.
-
-These names are provenance/evidence anchors, not a second capability roadmap. Detailed current status stays in the linked evidence documents.
-
-## Public API boundary
-
-CUDA-JS owns generic CUDA runtime/toolchain mechanics:
-
-- CUDA device discovery and target resolution;
-- Driver/toolkit capability and version negotiation;
-- explicit context/resource/memory/module/function lifecycles;
-- bounded launch/completion/error/teardown semantics;
-- NVRTC/nvJitLink and device-artifact caching;
-- restricted Device-JS lowering and selected generic library-provider integration.
-
-CUDA-JS does **not** own MCGS, chess, tensor policy, models, training, application schedulers, or other consumer semantics. Consumers use public contracts rather than raw pointers, private FFI objects, Driver handles, or sibling-repository internals.
-
-## Runtime shape
-
-```text
-application
-    |
-    v
-CUDA-JS facade
-    |
-    +--> DriverActor Worker ----> CUDA Driver / GPU
-    |
-    +--> CompilerActor Worker --> NVRTC / nvJitLink / artifacts
-```
-
-The Workers own blocking native work and raw native resources. JavaScript callers receive opaque capabilities and bounded results. Resource lifetime is explicit; garbage collection is not the primary teardown mechanism.
-
-Detailed architecture and rationale live in the accepted ADR/specification set rather than in this README. Start with [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md), [`STATUS.md`](STATUS.md), and [`next_step.yaml`](next_step.yaml).
-
-## Current development rule
-
-Work follows the highest-risk unproven boundary required by the next real consumer:
-
-- missing physical qualification stays an evidence/infrastructure task unless implementation is independently falsified;
-- downstream consumers request consumer-neutral public capabilities rather than local/native escape paths;
-- additional concurrency, optimization, or API breadth requires a dependency-ready consumer or measured bottleneck;
-- once a boundary is sufficiently specified, a thin executable public-contract falsifier is preferred over more speculative architecture.
-
-The frozen Vector model lane currently demonstrates no additional CUDA-JS source gap after protected f32/f64 Device-JS tanh. Its next semantic implementation step belongs to CUDA-JS-Tensor #61; CUDA-JS changes again only if that downstream work produces concrete evidence of a missing generic lower capability.
-
-## Contributing and security
-
-Read [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md) before changing behavior. Current work and accepted evidence are tracked in [`STATUS.md`](STATUS.md) and [`next_step.yaml`](next_step.yaml).
-
-Report vulnerabilities privately according to [`SECURITY.md`](SECURITY.md); do not place exploit details, secrets, or sensitive logs in public issues.
-
-CUDA-JS is licensed under [AGPL-3.0-or-later](LICENSE). Separate commercial terms may be available; see [`LICENSING.md`](LICENSING.md).
+- [Current status](STATUS.md) and [next development step](next_step.yaml).
+- [Documentation](docs/README.md).
+- [Contributing](CONTRIBUTING.md) and [developer instructions](AGENTS.md).
+- [Private security reporting](SECURITY.md).
+- [AGPL-3.0-or-later license](LICENSE) and [commercial licensing information](LICENSING.md).
