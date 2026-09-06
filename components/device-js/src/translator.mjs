@@ -9,11 +9,11 @@ import { erfCode, isErfHelper } from './erf-profile.mjs';
 import { isTanhHelper } from './tanh-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
-const SOURCE_LIMIT = 1_048_576;
+const SOURCE_LIMIT = 4_194_304;
 const FUNCTION_LIMIT = 64;
 const IMPORT_LIMIT = 64;
 const PARAMETER_LIMIT = 64;
-const AST_NODE_LIMIT = 20_000;
+const AST_NODE_LIMIT = 1_048_576;
 const AST_DEPTH_LIMIT = 128;
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const SCALARS = new Set(['bool', 'u32', 'i32', 'u64', 'f32', ...DENSE_NUMERIC_SCALARS]);
