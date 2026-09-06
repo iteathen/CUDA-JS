@@ -1,7 +1,13 @@
+import { ERF_CONTRACT_SUFFIX } from './erf-profile.mjs';
+
 export const DEVICE_JS_CONTRACT = 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1';
 export const DEVICE_JS_DENSE_NUMERIC_CONTRACT = `${DEVICE_JS_CONTRACT}+SPEC-0030-dense-numeric-v1`;
+export const DEVICE_JS_ERF_CONTRACT = `${DEVICE_JS_CONTRACT}+${ERF_CONTRACT_SUFFIX}`;
+export const DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT = `${DEVICE_JS_DENSE_NUMERIC_CONTRACT}+${ERF_CONTRACT_SUFFIX}`;
 export const DEVICE_JS_LIBRARY_CONTRACT = `${DEVICE_JS_CONTRACT}+SPEC-0028-device-library-v1`;
 export const DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT = `${DEVICE_JS_DENSE_NUMERIC_CONTRACT}+SPEC-0028-device-library-v1`;
+export const DEVICE_JS_ERF_LIBRARY_CONTRACT = `${DEVICE_JS_ERF_CONTRACT}+SPEC-0028-device-library-v1`;
+export const DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT = `${DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT}+SPEC-0028-device-library-v1`;
 
 const DEVICE_POINTER_ATOMIC_HELPERS = new Map([
   ['gpu.atomic.loadRelaxedDevice', Object.freeze({ operation: 'load', order: 'relaxed' })],
