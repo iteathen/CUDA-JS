@@ -1,6 +1,6 @@
 import { normalizeLinkRequest } from '../../compiler-actor/index.mjs';
 import { inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
-import { DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
+import { DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
 
 import { freezePublic, publicError } from './errors.mjs';
 import { inspectRuntimeCompileTarget } from './runtime.mjs';
@@ -9,7 +9,13 @@ const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMPORT_LIMIT = 64;
 const LIBRARY_LIMIT = 32;
-const DEVICE_JS_LIBRARY_CONTRACTS = new Set([DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT]);
+const DEVICE_JS_LIBRARY_CONTRACTS = new Set([
+  DEVICE_JS_LIBRARY_CONTRACT,
+  DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT,
+  DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT,
+  DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT,
+  DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT,
+]);
 
 function fail(code, message, details = {}) {
   throw Object.assign(new Error(message), { code, category: 'validation', details });

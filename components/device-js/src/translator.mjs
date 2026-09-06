@@ -3,9 +3,10 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_ERF_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_ERF_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_ERF_TANH_CONTRACT, DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_TANH_CONTRACT, DEVICE_JS_TANH_LIBRARY_CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
 import { CUDA_SCALAR_TYPES, DENSE_NUMERIC_SCALARS, FLOAT_SCALARS, denseNumericPreludeLines, exactCastCode, isDenseNumericHelper, specialConstantCode } from './dense-numeric-profile.mjs';
 import { erfCode, isErfHelper } from './erf-profile.mjs';
+import { isTanhHelper } from './tanh-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 1_048_576;
@@ -128,6 +129,10 @@ function normalizeImports(value = [], localFunctions = []) {
     DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT,
     DEVICE_JS_ERF_LIBRARY_CONTRACT,
     DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT,
+    DEVICE_JS_TANH_LIBRARY_CONTRACT,
+    DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT,
+    DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT,
+    DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT,
   ]);
   return Object.freeze(value.map((entry) => {
     const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'libraryContract', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
@@ -350,10 +355,11 @@ function isFloatType(type) { return type.kind === 'scalar' && FLOAT.has(type.sca
 function boolType() { return parseType('bool'); }
 
 function inspectUnitRequirements(ast, functions) {
-  let usesDenseNumeric = functions.some((fn) => [DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT].includes(fn.libraryContract)
+  let usesDenseNumeric = functions.some((fn) => [DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract)
     || (fn.returns?.kind !== 'void' && DENSE_NUMERIC_SCALARS.includes(fn.returns.scalar))
     || fn.parameters.some((parameter) => DENSE_NUMERIC_SCALARS.includes(parameter.type.scalar)));
-  let usesErf = functions.some((fn) => [DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT].includes(fn.libraryContract));
+  let usesErf = functions.some((fn) => [DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract));
+  let usesTanh = functions.some((fn) => [DEVICE_JS_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract));
   let usesScopedAtomic = false;
   function visit(node) {
     if (!node || typeof node !== 'object') return;
@@ -361,6 +367,7 @@ function inspectUnitRequirements(ast, functions) {
       const path = helperPath(node.callee);
       usesDenseNumeric ||= isDenseNumericHelper(path);
       usesErf ||= isErfHelper(path);
+      usesTanh ||= isTanhHelper(path);
       usesScopedAtomic ||= devicePointerAtomicHelper(path) !== null || path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem';
     }
     for (const [key, value] of Object.entries(node)) {
@@ -370,7 +377,7 @@ function inspectUnitRequirements(ast, functions) {
     }
   }
   visit(ast);
-  return { usesDenseNumeric, usesErf, usesScopedAtomic };
+  return { usesDenseNumeric, usesErf, usesTanh, usesScopedAtomic };
 }
 
 function finalizeCompileProfile(compile, { usesDenseNumeric, usesScopedAtomic }, explicit) {
@@ -648,6 +655,13 @@ class FunctionEmitter {
       return { code: erfCode(value.type.text, value.code), type: value.type };
     }
 
+    if (path === 'gpu.math.tanh') {
+      if (args.length !== 1 || args[0].type === 'SpreadElement') fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires exactly one argument.`, node);
+      const value = this.expression(args[0], scope);
+      if (!['f32', 'f64'].includes(value.type.text)) fail('DEVICE_JS_MATH_TYPE', `${path} requires an f32 or f64 value.`, node, { type: value.type.text });
+      return { code: value.type.text === 'f32' ? `tanhf(${value.code})` : `tanh(${value.code})`, type: value.type };
+    }
+
     const unaryMath = new Set(['gpu.math.sqrt', 'gpu.math.log', 'gpu.math.exp']);
     if (unaryMath.has(path)) {
       if (args.length !== 1) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires one argument.`, node);
@@ -873,10 +887,14 @@ function freezeFunctionPublic(fn, generatedName) {
   });
 }
 
-function selectedContract({ usesDenseNumeric, usesErf }) {
+function selectedContract({ usesDenseNumeric, usesErf, usesTanh }) {
+  if (usesDenseNumeric && usesErf && usesTanh) return DEVICE_JS_DENSE_NUMERIC_ERF_TANH_CONTRACT;
   if (usesDenseNumeric && usesErf) return DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT;
+  if (usesDenseNumeric && usesTanh) return DEVICE_JS_DENSE_NUMERIC_TANH_CONTRACT;
   if (usesDenseNumeric) return DEVICE_JS_DENSE_NUMERIC_CONTRACT;
+  if (usesErf && usesTanh) return DEVICE_JS_ERF_TANH_CONTRACT;
   if (usesErf) return DEVICE_JS_ERF_CONTRACT;
+  if (usesTanh) return DEVICE_JS_TANH_CONTRACT;
   return CONTRACT;
 }
 
