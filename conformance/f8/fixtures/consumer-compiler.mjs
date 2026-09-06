@@ -10,6 +10,7 @@ assert.deepEqual(compatibilitySubpath.capabilities.linkInputFamilies, ['ptx', 't
 assert.equal(compatibilitySubpath.capabilities.deviceJsFrontend, 'restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1');
 assert.equal(compatibilitySubpath.capabilities.deviceJsLibraries, 'typed-leaf-libraries-explicit-aliased-imports-selected-runtime-target-rdc-or-lto-final-cubin');
 assert.equal(compatibilitySubpath.capabilities.deviceJsDenseNumeric, 'f64-f16-bf16-exact-casts-special-values-manifest-verified-headers');
+assert.equal(compatibilitySubpath.capabilities.deviceJsErf, 'f32-f64-same-kind-dense-child-provider-bound-erff-erf');
 
 const snapshot = await discoverCudaDevicesForTesting([
   { nativeDevice: 5, computeCapabilityMajor: 12, computeCapabilityMinor: 0 },
@@ -44,6 +45,11 @@ const denseNumeric = await compileDeviceProgram(runtime, {
   ], returns: 'void' }],
   compile: { architecture: 'compute_120' },
 });
+const erf = await compileDeviceProgram(runtime, {
+  source: 'function gaussian(out, x) { out[gpu.u32(0)] = gpu.math.erf(x); }',
+  functions: [{ name: 'gaussian', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f32>' }, { name: 'x', type: 'f32' }], returns: 'void' }],
+  compile: { architecture: 'compute_120' },
+});
 const deviceLibrary = await compileDeviceLibrary(runtime, {
   source: 'function combine(x, y) { return x + y; }',
   functions: [{ name: 'combine', kind: 'device', parameters: [{ name: 'x', type: 'u32' }, { name: 'y', type: 'u32' }], returns: 'u32' }],
@@ -56,6 +62,12 @@ const denseDeviceLibrary = await compileDeviceLibrary(runtime, {
   exports: ['affine'],
   compile: { architecture: 'compute_120' },
 });
+const erfDeviceLibrary = await compileDeviceLibrary(runtime, {
+  source: 'function gaussian(x) { return gpu.math.erf(x); }',
+  functions: [{ name: 'gaussian', kind: 'device', parameters: [{ name: 'x', type: 'f32' }], returns: 'f32' }],
+  exports: ['gaussian'],
+  compile: { architecture: 'compute_120' },
+});
 const composedFirst = await compileDeviceProgram(runtime, {
   source: 'function first(out) { out[gpu.u32(0)] = add(gpu.u32(2), gpu.u32(3)); }',
   functions: [{ name: 'first', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
@@ -66,6 +78,12 @@ const composedSecond = await compileDeviceProgram(runtime, {
   source: 'function second(out) { out[gpu.u32(0)] = merge(gpu.u32(5), gpu.u32(8)); }',
   functions: [{ name: 'second', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<u32>' }], returns: 'void' }],
   imports: [{ library: deviceLibrary.library, name: 'combine', as: 'merge' }],
+  compile: { architecture: 'compute_120' },
+});
+const composedErf = await compileDeviceProgram(runtime, {
+  source: 'function applyErf(out, x) { out[gpu.u32(0)] = gaussian(x); }',
+  functions: [{ name: 'applyErf', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f32>' }, { name: 'x', type: 'f32' }], returns: 'void' }],
+  imports: [{ library: erfDeviceLibrary.library, name: 'gaussian', as: 'gaussian' }],
   compile: { architecture: 'compute_120' },
 });
 
@@ -86,13 +104,20 @@ assert.equal(devicePublication.compiler.artifact.format, 'ptx');
 assert.match(denseNumeric.deviceProgram.contract, /SPEC-0030-dense-numeric-v1$/u);
 assert.equal(denseNumeric.compiler.headerProfile, 'cuda-numeric');
 assert.equal(denseNumeric.compiler.artifact.format, 'ptx');
+assert.match(erf.deviceProgram.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0030-erf-v1$/u);
+assert.equal(erf.compiler.headerProfile, 'cuda-numeric');
+assert.equal(erf.compiler.artifact.format, 'ptx');
 assert.equal(deviceLibrary.library.artifact.relocatableDeviceCode, true);
 assert.match(denseDeviceLibrary.library.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0028-device-library-v1$/u);
 assert.equal(denseDeviceLibrary.compiler.headerProfile, 'cuda-numeric');
+assert.match(erfDeviceLibrary.library.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0030-erf-v1\+SPEC-0028-device-library-v1$/u);
+assert.equal(erfDeviceLibrary.compiler.headerProfile, 'cuda-numeric');
 assert.equal(composedFirst.linker.artifact.format, 'cubin');
 assert.equal(composedSecond.linker.artifact.format, 'cubin');
+assert.equal(composedErf.linker.artifact.format, 'cubin');
+assert.match(composedErf.deviceProgram.contract, /SPEC-0030-dense-numeric-v1\+SPEC-0030-erf-v1\+SPEC-0028-device-library-v1$/u);
 assert.notEqual(composedFirst.deviceProgram.sha256, composedSecond.deviceProgram.sha256);
-for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact, denseNumeric.compiler.artifact, deviceLibrary.library.artifact, denseDeviceLibrary.library.artifact, composedFirst.linker.artifact, composedSecond.linker.artifact]) {
+for (const artifact of [compiled.artifact, relocatable.artifact, ltoFirst.artifact, linked.artifact, ltoLinked.artifact, deviceJs.compiler.artifact, devicePublication.compiler.artifact, denseNumeric.compiler.artifact, erf.compiler.artifact, deviceLibrary.library.artifact, denseDeviceLibrary.library.artifact, erfDeviceLibrary.library.artifact, composedFirst.linker.artifact, composedSecond.linker.artifact, composedErf.linker.artifact]) {
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/);
 }
 assert.notEqual(compiled.cache.key, relocatable.cache.key);
@@ -117,10 +142,13 @@ console.log(JSON.stringify({
   deviceJsProgram: deviceJs.deviceProgram.sha256,
   devicePublication: devicePublication.deviceProgram.sha256,
   denseNumeric: denseNumeric.deviceProgram.sha256,
+  erf: erf.deviceProgram.sha256,
   deviceLibrary: deviceLibrary.library.sha256,
   denseDeviceLibrary: denseDeviceLibrary.library.sha256,
+  erfDeviceLibrary: erfDeviceLibrary.library.sha256,
   composedFirst: composedFirst.deviceProgram.sha256,
   composedSecond: composedSecond.deviceProgram.sha256,
+  composedErf: composedErf.deviceProgram.sha256,
   deviceJsParser: deviceJs.deviceProgram.parser,
   graceful: terminal.graceful,
 }));
