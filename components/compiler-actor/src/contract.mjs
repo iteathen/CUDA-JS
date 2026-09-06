@@ -4,7 +4,7 @@ import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget, pairedCudaTarget, parse
 import { CompilerRuntimeError, compilerError } from './errors.mjs';
 
 export const LIMITS = Object.freeze({
-  sourceBytes: 1_048_576,
+  sourceBytes: 4_194_304,
   headerCount: 32,
   headerBytes: 262_144,
   totalHeaderBytes: 1_048_576,
