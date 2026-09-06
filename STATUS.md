@@ -46,7 +46,7 @@ These markers are retained provenance and governance anchors, not live support o
 
 ### External CUDA-NN ownership
 
-ADR-0007 keeps reusable NN/model/inference/autodiff/training semantics in independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to `iteathen/CUDA-JS-Tensor`. Historical bootstrap provenance remains audit evidence only.
+**External CUDA-NN ownership** remains governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to `iteathen/CUDA-JS-Tensor`. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those reusable NN semantics **no longer belong to a future publish unit in this repository**.
 
 ## Protected Device-JS numeric children
 
