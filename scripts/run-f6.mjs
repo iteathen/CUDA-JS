@@ -9,6 +9,7 @@ const action = process.argv[2] ?? 'all';
 const unitFiles = [
   'components/cuda-target/test/cuda-target.test.mjs',
   'components/compiler-actor/test/compiler-actor.test.mjs',
+  'components/compiler-actor/test/bounded-source-policy.test.mjs',
   'components/compiler-actor/test/relocatable-device-code.test.mjs',
   'components/compiler-actor/test/device-lto.test.mjs',
   'components/memory/test/device-view-manager.test.mjs',
