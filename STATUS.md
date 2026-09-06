@@ -26,6 +26,14 @@ The recorded protected CUDA-JS input for the current state transition remains `m
 
 CUDA-JS owns generic Device-JS/compiler/runtime/provider/resource/lifecycle/compatibility mechanisms. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item semantics. `cuda-nn` owns reusable NN/model semantics only when independently justified. CUDA-MCGS owns search/evaluator request/batch/scatter/publication lifecycle. Product/model/chess/head meaning stays downstream.
 
+### Durable architecture/evidence anchors
+
+These markers are retained provenance and governance anchors, not live support or work dashboards. `DriverActor` remains the Worker/context/native-resource owner. `CJS-F1B` remains the generated CUDA ABI-fact and independent layout-evidence anchor; `CJS-F2W` remains the accepted **Windows x64** Driver/bootstrap evidence anchor; `CJS-F7W` remains the retained Windows platform-hardening/property/lifecycle evidence anchor. Historical exact profiles do not silently requalify the current candidate.
+
+### External CUDA-NN ownership
+
+**External CUDA-NN ownership** remains governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to CUDA-JS-Tensor. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those reusable NN semantics **no longer belong to a future publish unit in this repository**.
+
 Current package capability includes the protected dense numeric profile and `SPEC-0030-erf-v1` same-kind f32/f64 `gpu.math.erf`. Portable/package evidence for erf does not promote native/provider numerical support.
 
 ## Current focus — #206 composable tanh child
