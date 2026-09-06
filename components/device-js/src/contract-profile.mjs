@@ -7,6 +7,11 @@ export const DEVICE_JS_LIBRARY_CONTRACT = `${DEVICE_JS_CONTRACT}+SPEC-0028-devic
 export const DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT = `${DEVICE_JS_DENSE_NUMERIC_CONTRACT}+SPEC-0028-device-library-v1`;
 export const DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT = `${DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT}+SPEC-0028-device-library-v1`;
 
+// Internal aliases keep the translator composition code single-shaped while the accepted
+// authority deliberately has no erf-only contract: every erf unit selects dense+erf.
+export const DEVICE_JS_ERF_CONTRACT = DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT;
+export const DEVICE_JS_ERF_LIBRARY_CONTRACT = DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT;
+
 const DEVICE_POINTER_ATOMIC_HELPERS = new Map([
   ['gpu.atomic.loadRelaxedDevice', Object.freeze({ operation: 'load', order: 'relaxed' })],
   ['gpu.atomic.storeRelaxedDevice', Object.freeze({ operation: 'store', order: 'relaxed' })],
