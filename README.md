@@ -4,6 +4,15 @@ CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work th
 
 **Package:** `cuda-js@0.1.0-alpha.18`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
 
+## Why CUDA-JS
+
+- **No compiled addon.** No `node-gyp`, no prebuilt binaries pinned to a Node module ABI, and no CUDA Toolkit required just to install the package. CUDA ABI facts are generated from pinned CUDA headers into normalized schemas/products rather than hand-typed one function at a time.
+- **Schema-driven, not curated.** Coverage grows by regenerating the schema against a CUDA release and reviewing the semantic overlay, not by maintaining a hand-written list of whichever calls one application happened to need.
+- **Hot calls are shaped for the fast path.** Kernel launch selects `cuLaunchKernelEx` rather than the legacy `cuLaunchKernel`. Execution-path bindings are deliberately kept inside bounded signature and argument shapes intended for Node's fastest FFI dispatch path. This is an interface/schema property, not a performance claim.
+- **Explicit instead of hidden.** Context ownership, asynchronous error attribution, and resource lifetimes are first-class API facts rather than behavior hidden behind native RAII. Public contracts preserve the Driver's ownership and failure semantics instead of replacing them with an implicit host-side model.
+- **One binding core, not one per platform.** Windows and Linux use the same runtime/component model and execution engine; target-specific ABI facts and driver/provider discovery remain isolated by profile. Windows carries the current native evidence. Linux x86-64 implementation/readiness exists, but native CUDA qualification remains open.
+- **Built for GPU-resident work.** Device memory persists across launches. The runtime does not require a host round trip between device operations; higher-level consumers can keep their own active state and progression on the GPU when their contracts permit it.
+
 ## What exists
 
 - Device discovery and selection, device allocations and typed views, copied and bounded asynchronous transfers.
