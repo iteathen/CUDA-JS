@@ -1,9 +1,10 @@
-# SPEC-0006 bounded-source admission addendum
+# SPEC-0006 Addendum: Bounded Source Admission
 
-**Status:** Accepted implementation profile
+**Status:** Accepted
+
 **Date:** 2026-09-05
-**Parent:** SPEC-0006
-**Issue:** #213
+
+**Issue owner:** #213
 
 ## Outcome
 
