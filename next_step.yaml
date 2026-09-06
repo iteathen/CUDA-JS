@@ -1,8 +1,8 @@
 {
-  "schema_version": 67,
+  "schema_version": 68,
   "updated": "2026-09-05",
-  "status": "consumer_backed_tanh_authority",
-  "objective": "Implement the smallest consumer-neutral Device-JS tanh capability required by one protected real Tensor/model consumer while preserving exact pre-tanh identities and keeping physical/native qualification separate.",
+  "status": "tanh_lower_complete_tensor_handoff",
+  "objective": "Keep the protected consumer-neutral Device-JS tanh mechanism stable while CUDA-JS-Tensor implements the accepted unary:tanh semantic child; preserve physical/native qualification as independent exact-profile evidence.",
   "package_candidate": "cuda-js@0.1.0-alpha.18",
   "public_api_schema": 1,
   "live_state_policy": {
@@ -14,9 +14,9 @@
     "issue_owner": "durable obligations and concrete evidence cells, not live SHA dashboards"
   },
   "recorded_protected_input": {
-    "main": "dd41ce0693c91aff867a9db9ad4f11b507eeb38b",
-    "tree": "b331ddc3cadb48003ba86d7b920e7b6cb34606a1",
-    "meaning": "Transaction provenance from the prior state-refresh chain; it is not a self-updating current-main field. Exact live protected identity is read from GitHub."
+    "main": "d1a8edef5bd06c402a5c14c8945269f206520174",
+    "tree": "4e71779e19132fedbaa60bacee7db84b0692e1ae",
+    "meaning": "Protected #206/#209 tanh implementation provenance. This documentation transaction moves protected main; exact live protected identity is always read from GitHub before qualification or cross-repository freezing."
   },
   "durable_architecture_provenance": {
     "foundation": ["CJS-F0", "CJS-F1A", "ADR-0002-node-ffi-first-host-binding.md"],
@@ -29,29 +29,17 @@
     "disposition": "Reusable NN/model/inference/autodiff/training semantics remain external; generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
   },
   "completed_dependencies": [
-    "CUDA-MCGS #125 public CUDA-JS adapter protected-complete",
-    "CUDA-JS #157 / PR #205 protected f32/f64 Device-JS erf at 30d11a5d38dd7b9987bc8bac4ac67c2fcf8fee60",
-    "CUDA-JS-Tensor #32 ordinary SPEC-0010 erf/gather/concat protected-complete",
-    "CUDA-JS-Tensor #52 device-callable erf protected-complete",
-    "CUDA-JS-Tensor #37 device-callable gather/concat protected-complete",
-    "UCI-Arena-Vector #3 / PR #17 protected frozen-model coverage at 67b2512794c4389abdea22e7f353dac712f6c03d",
-    "CUDA-JS #198 closed not planned because no current accepted consumer requires the historical resident-payload shape"
+    "CUDA-MCGS #125 public CUDA-JS adapter protected-complete.",
+    "CUDA-JS #157 / PR #205 protected f32/f64 Device-JS erf at 30d11a5d38dd7b9987bc8bac4ac67c2fcf8fee60.",
+    "CUDA-JS #206/#209 protected f32/f64 Device-JS tanh and canonical erf+tanh composition at d1a8edef5bd06c402a5c14c8945269f206520174.",
+    "CUDA-JS-Tensor #32 ordinary SPEC-0010 erf/gather/concat protected-complete.",
+    "CUDA-JS-Tensor #52 device-callable erf protected-complete.",
+    "CUDA-JS-Tensor #37 device-callable gather/concat protected-complete.",
+    "UCI-Arena-Vector #3 / PR #17 protected frozen-model coverage at 67b2512794c4389abdea22e7f353dac712f6c03d.",
+    "CUDA-JS-Tensor SPEC-0011 unary:tanh authority accepted at 3f34e3153b75e5059a6473ee52c95c7b662a62ed; implementation remains Tensor #61.",
+    "CUDA-JS #198 closed not planned because no current accepted consumer requires the historical resident-payload shape."
   ],
-  "current_focus": {
-    "repository": "iteathen/CUDA-JS",
-    "issue": 206,
-    "name": "composable f32/f64 Device-JS tanh helper",
-    "state": "protected real-consumer gap demonstrated; accepted SPEC-0030 tanh child authority transaction active",
-    "next_action": "After authority is protected, implement gpu.math.tanh for f32/f64 through the existing Device-JS numeric owner. Preserve exact base/dense/dense+erf identities, add canonical dense+tanh and dense+erf+tanh program/library/import contracts, reject f16/bf16/integer/bool and forged child combinations, use only ordinary tanhf/tanh private lowering, and add installed-package plus legacy-byte falsifiers.",
-    "exit": "One exact protected candidate supplies portable/software/package tanh and erf+tanh composition through public CUDA-JS without changing legacy identities or promoting native/provider claims, or implementation demonstrates a different natural-owner gap and stops."
-  },
-  "consumer_evidence": {
-    "repository": "iteathen/UCI-Arena-Vector",
-    "issue": 3,
-    "protected_merge": "67b2512794c4389abdea22e7f353dac712f6c03d",
-    "fact": "Frozen LatticeKnight operation matrix has exactly one uncovered generic mathematical requirement: unary:tanh; test-only tanh admission exposes TensorProgram/TensorPlan workspace as the next gate."
-  },
-  "accepted_tanh_profile": {
+  "protected_tanh_profile": {
     "owner": "runtime.device-js",
     "helper": "gpu.math.tanh",
     "dtypes": ["f32", "f64"],
@@ -59,21 +47,36 @@
     "canonical_numeric_child_order": ["SPEC-0030-erf-v1", "SPEC-0030-tanh-v1"],
     "forbidden_substitutions": ["exp-identity", "__tanhf", "implicit-precision-conversion", "consumer-specific-activation"]
   },
+  "current_focus": {
+    "repository": "iteathen/CUDA-JS-Tensor",
+    "issue": 61,
+    "name": "downstream Tensor unary:tanh implementation through protected public CUDA-JS",
+    "state": "CUDA-JS source dependency complete; no additional CUDA-JS widening is demonstrated by the current frozen-model lane.",
+    "next_action": "Keep CUDA-JS public tanh/erf+tanh identities stable while Tensor #61 pins the exact protected lower revision and implements its accepted SPEC-0011 f32/f64 unary:tanh child through public gpu.math.tanh only. If Tensor demonstrates a genuinely generic lower defect, route that evidence back here; otherwise do not mutate CUDA-JS for the downstream semantic step.",
+    "exit": "Tensor #61 protects a portable/software/package unary:tanh implementation against the exact public CUDA-JS contract, or produces concrete evidence of a missing generic lower CUDA-JS capability that is then owned and fixed here."
+  },
+  "consumer_evidence": {
+    "repository": "iteathen/UCI-Arena-Vector",
+    "issue": 3,
+    "protected_merge": "67b2512794c4389abdea22e7f353dac712f6c03d",
+    "fact": "Frozen LatticeKnight operation matrix has exactly one previously uncovered generic mathematical requirement, unary:tanh; protected CUDA-JS now supplies the lower helper and protected Tensor has accepted the semantic child."
+  },
   "parallel_evidence": [
-    "#32 exact CUDA-MCGS/CUDA-JS physical compatible-pair remains valid but requires suitable physical NVIDIA evidence.",
-    "#4 native Ubuntu/NVIDIA qualification remains a separate physical evidence gate.",
+    "#32 exact CUDA-MCGS/CUDA-JS physical compatible-pair remains valid but requires suitable physical NVIDIA evidence and a fresh live protected-pair freeze.",
+    "#4 native Ubuntu/NVIDIA qualification remains a separate directly exposed physical evidence gate.",
     "#68 remains external operational security evidence."
   ],
   "after_current_focus": [
-    "Route the protected tanh mechanism to CUDA-JS-Tensor as the natural Tensor unary owner; do not add model semantics here.",
-    "Resume Vector #3 complete f32 TensorProgram/TensorPlan/workspace/oracle only after exact protected lower identities are rebound.",
-    "Resume #32 unchanged when suitable physical hardware is available; portable tanh evidence cannot substitute."
+    "After Tensor #61 is protected-qualified, UCI-Arena-Vector #3 refreshes its exact Tensor capability snapshot and proceeds to the already-demonstrated TensorProgram/TensorPlan workspace/resource and oracle gates.",
+    "CUDA-MCGS #124 consumes only resulting generic callable/resource facts; model/search ownership does not move into CUDA-JS.",
+    "Resume #32 or #4 unchanged when suitable physical hardware is available; immediately re-read live protected identities before execution."
   ],
   "hard_constraints": [
     "No Tensor, model, NN, evaluator, search or product semantics in CUDA-JS.",
     "No consumer-local CUDA/native workaround for a generic lower capability.",
     "No approximate __tanhf or algebraic exp substitution under the exact tanh child.",
     "No lower-precision tanh breadth without separate consumer-backed authority.",
+    "No additional CUDA-JS source work merely because a downstream Tensor semantic implementation remains open.",
     "No portable/mock/package evidence promoted to native/provider support.",
     "Protected integration requires exact-head qualification, complete review, exact base/tree validation and protected read-back."
   ]
