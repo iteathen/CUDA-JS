@@ -68,6 +68,25 @@ test('gpu.math.erf fails closed on wrong arity and unsupported scalar kinds', ()
       functions: [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: `ptr<${kind}>` }, { name: 'x', type: kind }], returns: 'void' }],
     }), deviceError('DEVICE_JS_MATH_TYPE'), kind);
   }
+  assert.throws(() => translateDeviceProgram({
+    source: 'function bad(x) { gpu.math.erf(x); return; } function k() { bad(gpu.bool(true)); }',
+    functions: [
+      { name: 'bad', kind: 'device', parameters: [{ name: 'x', type: 'bool' }], returns: 'void' },
+      { name: 'k', kind: 'kernel', parameters: [], returns: 'void' },
+    ],
+  }), deviceError('DEVICE_JS_MATH_TYPE'));
+});
+
+test('gpu.math.erf rejects contradictory header profiles before provider work', () => {
+  const request = {
+    source: 'function k(out, x) { out[gpu.u32(0)] = gpu.math.erf(x); }',
+    functions: [{ name: 'k', kind: 'kernel', parameters: [{ name: 'out', type: 'ptr<f32>' }, { name: 'x', type: 'f32' }], returns: 'void' }],
+  };
+  for (const headerProfile of ['none', 'cuda-cccl']) {
+    assert.throws(() => translateDeviceProgram({ ...request, compile: { headerProfile } }), deviceError('DEVICE_JS_NUMERIC_PROFILE_REQUIRED'), headerProfile);
+  }
+  assert.equal(translateDeviceProgram({ ...request, compile: { headerProfile: 'cuda-numeric' } }).compile.headerProfile, 'cuda-numeric');
+  assert.equal(translateDeviceProgram({ ...request, compile: { headerProfile: 'cuda-device' } }).compile.headerProfile, 'cuda-device');
 });
 
 test('erf device libraries propagate the exact dense plus erf child through typed imports', () => {
