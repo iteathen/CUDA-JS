@@ -18,6 +18,16 @@
     "tree": "b331ddc3cadb48003ba86d7b920e7b6cb34606a1",
     "meaning": "Transaction provenance from the prior state-refresh chain; it is not a self-updating current-main field. Exact live protected identity is read from GitHub."
   },
+  "durable_architecture_provenance": {
+    "foundation": ["CJS-F0", "CJS-F1A", "ADR-0002-node-ffi-first-host-binding.md"],
+    "external_nn_ownership": "CJS-CUDA-NN-EXTERNAL",
+    "meaning": "Durable architecture/evidence routing markers retained for governance validation only; not a live package, support or current-work dashboard."
+  },
+  "cuda_nn": {
+    "authority": "ADR-0007",
+    "repository": "iteathen/cuda-nn",
+    "disposition": "Reusable NN/model/inference/autodiff/training semantics remain external; generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
+  },
   "completed_dependencies": [
     "CUDA-MCGS #125 public CUDA-JS adapter protected-complete",
     "CUDA-JS #157 / PR #205 protected f32/f64 Device-JS erf at 30d11a5d38dd7b9987bc8bac4ac67c2fcf8fee60",
