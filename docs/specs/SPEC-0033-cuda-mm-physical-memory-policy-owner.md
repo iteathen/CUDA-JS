@@ -1,6 +1,6 @@
 # SPEC-0033: CUDA-MM Physical Memory-Policy Ownership Addendum
 
-**Status:** Accepted successor authority candidate
+**Status:** Accepted
 
 **Version:** 1.0.0
 
