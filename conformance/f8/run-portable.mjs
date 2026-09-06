@@ -51,6 +51,7 @@ for (const required of [
   'LICENSING.md',
   'components/device-js/index.mjs',
   'components/device-js/src/erf-profile.mjs',
+  'components/device-js/src/tanh-profile.mjs',
   'components/device-selection/index.mjs',
   'components/device-selection/src/device-selection.mjs',
   'components/device-js/src/strict-translator.mjs',
@@ -88,7 +89,7 @@ for (const relative of implementationFiles) {
 
 const tarball = path.join(packageRoot, packageRecord.filename);
 assert(existsSync(tarball));
-const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs'];
+const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-tanh.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs'];
 const observations = [];
 for (const fixture of fixtureNames) {
   const consumerName = path.basename(fixture, '.mjs');
@@ -120,6 +121,11 @@ assert(compilerObservation);
 for (const field of ['ptx', 'rdc', 'ltoIr', 'ltoCubin', 'cubin', 'deviceJs', 'deviceJsProgram', 'devicePublication', 'denseNumeric', 'erf', 'deviceLibrary', 'denseDeviceLibrary', 'erfDeviceLibrary', 'composedFirst', 'composedSecond', 'composedErf']) assert.match(compilerObservation[field], /^[a-f0-9]{64}$/);
 assert.deepEqual(compilerObservation.deviceJsParser, { name: 'acorn', version: '8.15.0' });
 assert.match(memoryObservation.denseNumeric, /^[a-f0-9]{64}$/);
+const tanhObservation = observations.find((entry) => entry.consumer === 'portable-tanh');
+assert(tanhObservation);
+assert.equal(tanhObservation.publicOnly, true);
+for (const field of ['tanh', 'erfTanh', 'tanhLibrary', 'composedErfTanh']) assert.match(tanhObservation[field], /^[a-f0-9]{64}$/);
+assert.equal(tanhObservation.graceful, true);
 const borrowerObservation = observations.find((entry) => entry.consumer === 'portable-cublaslt-borrow');
 assert(borrowerObservation);
 assert.deepEqual(borrowerObservation, {
@@ -166,6 +172,7 @@ const target = await writeEvidence('portable-package.json', {
     'docs/specs/SPEC-0029-borrower-lifecycle-addendum.md',
     'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
     'docs/specs/SPEC-0030-erf-addendum.md',
+    'docs/specs/SPEC-0030-tanh-addendum.md',
     'docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md',
     'LICENSE',
     'LICENSING.md',
@@ -181,12 +188,14 @@ const target = await writeEvidence('portable-package.json', {
     'components/publication-mailbox/src/publication-mailbox-manager.mjs',
     'components/device-js/src/dense-numeric-profile.mjs',
     'components/device-js/src/erf-profile.mjs',
+    'components/device-js/src/tanh-profile.mjs',
     'components/device-js/src/strict-translator.mjs',
     'components/device-selection/src/device-selection.mjs',
     'components/runtime-facade/src/runtime.mjs',
     'components/runtime-facade/src/device-program.mjs',
     'conformance/f8/fixtures/consumer-memory.mjs',
     'conformance/f8/fixtures/consumer-compiler.mjs',
+    'conformance/f8/fixtures/consumer-tanh.mjs',
     'conformance/f8/fixtures/consumer-cublaslt-borrow.mjs',
     'conformance/f8/fixtures/consumer-compatibility-limits.mjs',
     'conformance/f8/run-portable.mjs',
@@ -194,10 +203,10 @@ const target = await writeEvidence('portable-package.json', {
   package: { name: packageRecord.name, version: packageRecord.version, license: projectPackage.license, filename: packageRecord.filename, sha256: await sha256(tarball), files: fileNames.length, unpackedSize: packageRecord.unpackedSize },
   observations: { consumers: observations, firstConsumerDeletion: true, secondInstance: true, installed: fixtureNames.length, uninstalled: fixtureNames.length },
   claimLimits: [
-    'Portable package, public facade and immutable lower compatibility projection including ordinary base-allocation minimum alignment plus prepared/Device-JS limits, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, SPEC-0029 cuBLASLt borrower orchestration, Device-JS translation including device-publication and SPEC-0030-erf source admission/library composition, mock lifecycle, and install/uninstall behavior only.',
+    'Portable package, public facade and immutable lower compatibility projection including ordinary base-allocation minimum alignment plus prepared/Device-JS limits, SPEC-0014 mailbox lifecycle, SPEC-0017 selection/target orchestration, SPEC-0019 transfer lifecycle, SPEC-0020 semantic prepared-DAG replay, SPEC-0021 scalar/view behavior, SPEC-0029 cuBLASLt borrower orchestration, and Device-JS translation including device-publication plus SPEC-0030-erf/tanh source admission and library composition, mock lifecycle, and install/uninstall behavior only.',
     'The allocation-alignment evidence applies only to ordinary base allocations and adds no caller-selected alignment, raw address, arbitrary nonzero-offset view guarantee, native support promotion, or performance claim.',
     'Prepared operation DAG evidence covers immutable kernel-only semantic single-stream replay, not CUDA Graph realization or performance.',
-    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0030-erf native/provider numerical behavior, SPEC-0016 operations, SPEC-0017 native selection, typed device-view native consumers, and native cuBLASLt/provider concurrency remain subject to their exact native promotion gates.',
+    'RDC, extended scalar ABI, Device LTO, Device-JS, SPEC-0030-erf/tanh native/provider numerical behavior, SPEC-0016 operations, SPEC-0017 native selection, typed device-view native consumers, and native cuBLASLt/provider concurrency remain subject to their exact native promotion gates.',
     'No native CUDA, Linux CUDA, performance, strict-JIT, process-isolation, or registry-release claim.',
   ],
 });
