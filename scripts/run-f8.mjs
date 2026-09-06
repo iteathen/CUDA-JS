@@ -60,6 +60,7 @@ const unit = { args: ['--test',
   'components/runtime-facade/test/scalar-launch.test.mjs',
   'components/runtime-facade/test/operation-lifecycle.test.mjs',
   'components/runtime-facade/test/prepared-operation-dag.test.mjs',
+  'components/runtime-facade/test/device-js-contract-types.test.mjs',
   'components/runtime-facade/test/device-js.test.mjs',
 ] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
