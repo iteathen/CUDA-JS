@@ -13,6 +13,11 @@
     "qualification_owner": "support documents + qualification registries/evidence",
     "issue_owner": "durable obligations and concrete evidence cells, not live SHA dashboards"
   },
+  "recorded_protected_input": {
+    "main": "45a9ef15537b52d6fd7c615b7e596676dfd00587",
+    "tree": "8d25993380770b5616d0340b4b7fc369b5af603a",
+    "meaning": "Protected #213/#216 bounded-admission implementation provenance, not a self-updating current-main field. Exact live protected branch/commit/tree identity is always read from GitHub before qualification or cross-repository freezing."
+  },
   "protected_bounded_admission": {
     "issue": 213,
     "pr": 216,
