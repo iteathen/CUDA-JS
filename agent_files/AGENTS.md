@@ -67,11 +67,14 @@ Public entry points must make executable truth easier to find than architecture 
 platform truth and accepted authority
   -> purpose, support bounds, and capability profile
   -> generated ABI facts plus reviewed semantics
-  -> LEGO component/public-contract ownership
+  -> LEGO component/public-contract ownership and attention-bounded containment
   -> SOLID internal responsibilities
-  -> simplest sufficient total lifecycle
+  -> CUPID implementation quality
+  -> KISS among complete designs
   -> independent conformance and measured performance
 ```
+
+**Attention-bounded LEGO rule:** a component is too large when one agent cannot hold its complete authoritative working set—contract, implementation, invariants, lifecycle/resource/failure rules, tests/conformance, and immediate dependency/consumer interfaces—in focused attention with substantial headroom for reasoning and review. Context size is a first-class boundary criterion alongside semantic, lifecycle, resource/failure, substitution, and change cohesion. When the envelope is exceeded, recursively split at the strongest real seam or narrow scope; do not create arbitrary modules that duplicate truth or require cross-boundary knowledge of internals. LEGO determines the boundary, SOLID structures inside it, CUPID shapes the implementation, and KISS removes the remaining unjustified complexity. Lower levels may not defeat higher ones.
 
 ## Required adversarial questions
 
