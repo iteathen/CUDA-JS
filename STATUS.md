@@ -14,13 +14,14 @@ exact Node evidence baseline: Node 26.7.0
 native Linux x86-64:         testing-unconfirmed / not-qualified
 production support:          no
 performance claims:          none beyond exact recorded evidence
-current source blocker:      #206 composable f32/f64 Device-JS tanh for a protected real Tensor consumer
+current source blocker:      none in the protected Vector tanh dependency lane
+current dependency handoff:  CUDA-JS-Tensor #61 implements accepted unary:tanh through public CUDA-JS
 parallel physical gate:      #32 exact CUDA-MCGS/CUDA-JS compatible-pair qualification
 ```
 
 `package.json` owns package identity. `packaging/compatibility-manifest.json` owns the immutable public capability projection. **Exact protected branch/commit/tree identity is read from GitHub** when required; it is not maintained here as a self-referential live-SHA field.
 
-The recorded protected CUDA-JS input for the current state transition remains `main@dd41ce0693c91aff867a9db9ad4f11b507eeb38b`, tree `b331ddc3cadb48003ba86d7b920e7b6cb34606a1`, as transaction provenance only. Live protected state is read from GitHub.
+The protected tanh implementation transaction is `d1a8edef5bd06c402a5c14c8945269f206520174`, reviewed tree `4e71779e19132fedbaa60bacee7db84b0692e1ae`. Those values are implementation provenance, not permanent compatibility or physical-qualification constants; this documentation reconciliation itself moves protected `main` after integration.
 
 ## Stable ownership
 
@@ -34,28 +35,29 @@ These markers are retained provenance and governance anchors, not live support o
 
 **External CUDA-NN ownership** remains governed by ADR-0007. Reusable NN/model/inference/autodiff/training semantics belong to independent `iteathen/cuda-nn`, while generic Tensor mathematics/planning belongs to CUDA-JS-Tensor. The historical bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those reusable NN semantics **no longer belong to a future publish unit in this repository**.
 
-Current package capability includes the protected dense numeric profile and `SPEC-0030-erf-v1` same-kind f32/f64 `gpu.math.erf`. Portable/package evidence for erf does not promote native/provider numerical support.
+## Protected Device-JS numeric children
 
-## Current focus — #206 composable tanh child
+The current package capability includes the protected dense numeric profile plus additive same-kind f32/f64 Device-JS children for:
 
-Protected UCI-Arena-Vector PR #17 / merge `67b2512794c4389abdea22e7f353dac712f6c03d` freezes one exact LatticeKnight model and proves that current protected Tensor closes its prior erf/gather/concat gaps while exactly one model mathematical requirement remains uncovered: `unary:tanh`.
+- `SPEC-0030-erf-v1` → public `gpu.math.erf(x)`;
+- `SPEC-0030-tanh-v1` → public `gpu.math.tanh(x)`; and
+- canonical dense+erf+tanh contract/library composition when both helpers are semantically required.
 
-That consumer evidence is dependency-ready and source-actionable, so it outranks the currently hardware-blocked #32 physical qualification cell under the repository portfolio-readiness rule.
+The tanh implementation preserves pre-tanh base/dense/dense+erf identities, lowers privately through ordinary `tanhf`/`tanh`, rejects unsupported lower-precision/integer/bool use and forged child combinations, and does not introduce Tensor/model/activation/search semantics. Portable/software/package evidence for erf or tanh does not promote native/provider numerical support.
 
-The accepted authority transaction defines a new `SPEC-0030-tanh-v1` child with:
+CUDA-JS #206 and #209 are therefore protected-complete. There is no remaining generic CUDA-JS source gap demonstrated by the current frozen LatticeKnight model lane.
 
-- public `gpu.math.tanh(x)`;
-- f32/f64 same-kind semantics only in the first profile;
-- ordinary private `tanhf`/`tanh` lowering, never approximate `__tanhf` or an exp identity;
-- canonical additive contract ordering that preserves all existing base/dense/dense+erf identities and adds dense+tanh plus dense+erf+tanh;
-- typed library/import propagation of exact selected children;
-- no Tensor/model/activation/search semantics and no native-support or performance promotion.
+## Current actionable handoff — CUDA-JS-Tensor #61
 
-Implementation must preserve representative pre-tanh contract strings, semantic identities, generated names and generated CUDA bytes exactly. Unknown or forged child combinations fail closed.
+Protected UCI-Arena-Vector PR #17 / merge `67b2512794c4389abdea22e7f353dac712f6c03d` freezes one exact LatticeKnight model and proves that, after protected Tensor erf/gather/concat support, the one remaining generic model mathematical requirement is `unary:tanh`.
+
+CUDA-JS now supplies the required lower scalar mechanism. CUDA-JS-Tensor has accepted `SPEC-0011` for consumer-backed f32/f64 `unary:tanh` at protected merge `3f34e3153b75e5059a6473ee52c95c7b662a62ed`; Tensor issue #61 owns the next implementation/evidence step. That downstream Tensor work must consume public CUDA-JS only and does not authorize another CUDA-JS widening merely to accelerate completion.
+
+After Tensor #61 is protected-qualified, UCI-Arena-Vector #3 should refresh its exact capability snapshot and continue to its already-demonstrated TensorProgram/TensorPlan workspace/resource and oracle gates. CUDA-MCGS #124 remains downstream of those generic callable/resource facts.
 
 ## Parallel evidence gates
 
-**#32 exact CUDA-MCGS compatible pair** remains valid P0 physical qualification but is not executable on repository-hosted portable CI alone. It requires a suitable physical NVIDIA environment and exact pair evidence. No tanh implementation result closes or broadens that physical support claim.
+**#32 exact CUDA-MCGS compatible pair** remains valid P0 physical qualification but is not executable on repository-hosted portable CI alone. Both CUDA-MCGS and CUDA-JS have moved since older recorded pair tuples, so any physical run must re-read both protected heads/trees/package/API identities immediately before execution and freeze only the exact tuple actually run. No tanh result closes or broadens that physical support claim.
 
 **#4 native Linux** remains separately blocked on a directly exposed physical NVIDIA/Linux host. **#68** remains external operational security evidence.
 
