@@ -3,13 +3,13 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_ERF_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
 import { CUDA_SCALAR_TYPES, denseNumericPreludeLines } from './dense-numeric-profile.mjs';
 import { deviceJsError } from './errors.mjs';
 import { translateDeviceLibrary as translateRawDeviceLibrary, translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
 
 const encoder = new TextEncoder();
-export { DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT };
+export { DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT };
 
 function codeUnitCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -97,6 +97,17 @@ function memberPath(node) {
   return object ? `${object}.${node.property.name}` : null;
 }
 
+function contractUsesDenseNumeric(contract) {
+  return contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT || contract === DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT;
+}
+
+function libraryContractFor(contract) {
+  if (contract === DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT;
+  if (contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT;
+  if (contract === DEVICE_JS_ERF_CONTRACT) return DEVICE_JS_ERF_LIBRARY_CONTRACT;
+  return DEVICE_JS_LIBRARY_CONTRACT;
+}
+
 function validateAdditionalContract(ast, functions, contract) {
   let usesScopedAtomic = false;
   const declarations = new Map();
@@ -141,7 +152,7 @@ function validateAdditionalContract(ast, functions, contract) {
     }
   }
   visit(ast);
-  return { usesScopedAtomic, usesDenseNumeric: contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT };
+  return { usesScopedAtomic, usesDenseNumeric: contractUsesDenseNumeric(contract) };
 }
 
 function cppType(type) {
@@ -289,7 +300,7 @@ export function translateDeviceProgram(request) {
     if (fn.kind === 'kernel') fn.functionName = canonicalNames.get(fn.name);
   }
 
-  const compositionContract = raw.contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT ? DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT : DEVICE_JS_LIBRARY_CONTRACT;
+  const compositionContract = libraryContractFor(raw.contract);
   const sha256 = imports.length
     ? compositionIdentity('program', request.source, sortedFunctions, raw.compile, { imports }, compositionContract)
     : programIdentity(request.source, sortedFunctions, raw.compile, raw.contract);
@@ -330,7 +341,7 @@ export function translateDeviceLibrary(request) {
     }))
     .sort((left, right) => codeUnitCompare(left.name, right.name));
   const exportNames = [...raw.exports].sort(codeUnitCompare);
-  const contract = raw.contract === DEVICE_JS_DENSE_NUMERIC_CONTRACT ? DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT : DEVICE_JS_LIBRARY_CONTRACT;
+  const contract = libraryContractFor(raw.contract);
   const sha256 = compositionIdentity('library', request.source, sortedFunctions, raw.compile, { exports: exportNames }, contract);
   const exportIndexes = new Map(exportNames.map((name, index) => [name, index]));
   const canonicalNames = new Map(sortedFunctions.map((fn, index) => [

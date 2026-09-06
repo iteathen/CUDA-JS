@@ -3,8 +3,9 @@ import { createHash } from 'node:crypto';
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
 
-import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
+import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_ERF_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, devicePointerAtomicHelper } from './contract-profile.mjs';
 import { CUDA_SCALAR_TYPES, DENSE_NUMERIC_SCALARS, FLOAT_SCALARS, denseNumericPreludeLines, exactCastCode, isDenseNumericHelper, specialConstantCode } from './dense-numeric-profile.mjs';
+import { erfCode, isErfHelper } from './erf-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 1_048_576;
@@ -122,6 +123,12 @@ function normalizeImports(value = [], localFunctions = []) {
   if (!Array.isArray(value) || value.length > IMPORT_LIMIT) throw deviceJsError('DEVICE_JS_IMPORTS_INVALID', 'Device-JS imports must be a bounded array.');
   const localNames = new Set(localFunctions.map((entry) => entry.name));
   const names = new Set();
+  const acceptedLibraryContracts = new Set([
+    DEVICE_JS_LIBRARY_CONTRACT,
+    DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT,
+    DEVICE_JS_ERF_LIBRARY_CONTRACT,
+    DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT,
+  ]);
   return Object.freeze(value.map((entry) => {
     const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'libraryContract', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
     if (!plainObject(entry) || Object.keys(entry).sort().join('\0') !== fields.sort().join('\0')) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Each Device-JS import requires one exact typed semantic record.');
@@ -132,7 +139,7 @@ function normalizeImports(value = [], localFunctions = []) {
         || typeof entry.artifactSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(entry.artifactSha256)
         || typeof entry.exportName !== 'string' || !IDENTIFIER.test(entry.exportName)
         || typeof entry.symbol !== 'string' || !new RegExp(`^djs_lib_${entry.librarySha256}_[0-9]+$`).test(entry.symbol)
-        || ![DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT].includes(entry.libraryContract)
+        || !acceptedLibraryContracts.has(entry.libraryContract)
         || !['ptx', 'lto-ir'].includes(entry.format)) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import identity or symbol metadata is invalid.', { name });
     const target = inspectCudaTarget(entry.architecture, { expectedPrefix: 'compute' });
     if (!target.ok) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import architecture is invalid.', { name, reason: target.reason });
@@ -343,15 +350,17 @@ function isFloatType(type) { return type.kind === 'scalar' && FLOAT.has(type.sca
 function boolType() { return parseType('bool'); }
 
 function inspectUnitRequirements(ast, functions) {
-  let usesDenseNumeric = functions.some((fn) => fn.libraryContract === DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT
+  let usesDenseNumeric = functions.some((fn) => [DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT].includes(fn.libraryContract)
     || (fn.returns?.kind !== 'void' && DENSE_NUMERIC_SCALARS.includes(fn.returns.scalar))
     || fn.parameters.some((parameter) => DENSE_NUMERIC_SCALARS.includes(parameter.type.scalar)));
+  let usesErf = functions.some((fn) => [DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT].includes(fn.libraryContract));
   let usesScopedAtomic = false;
   function visit(node) {
     if (!node || typeof node !== 'object') return;
     if (node.type === 'CallExpression') {
       const path = helperPath(node.callee);
       usesDenseNumeric ||= isDenseNumericHelper(path);
+      usesErf ||= isErfHelper(path);
       usesScopedAtomic ||= devicePointerAtomicHelper(path) !== null || path === 'gpu.mailbox.loadAcquireSystem' || path === 'gpu.mailbox.storeReleaseSystem';
     }
     for (const [key, value] of Object.entries(node)) {
@@ -361,7 +370,7 @@ function inspectUnitRequirements(ast, functions) {
     }
   }
   visit(ast);
-  return { usesDenseNumeric, usesScopedAtomic };
+  return { usesDenseNumeric, usesErf, usesScopedAtomic };
 }
 
 function finalizeCompileProfile(compile, { usesDenseNumeric, usesScopedAtomic }, explicit) {
@@ -632,6 +641,13 @@ class FunctionEmitter {
       return { code: path === 'gpu.barrier.block' ? '__syncthreads()' : '__threadfence()', type: parseType('void', { allowVoid: true }) };
     }
 
+    if (path === 'gpu.math.erf') {
+      if (args.length !== 1 || args[0].type === 'SpreadElement') fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires exactly one argument.`, node);
+      const value = this.expression(args[0], scope);
+      if (!['f32', 'f64'].includes(value.type.text)) fail('DEVICE_JS_MATH_TYPE', `${path} requires an f32 or f64 value.`, node, { type: value.type.text });
+      return { code: erfCode(value.type.text, value.code), type: value.type };
+    }
+
     const unaryMath = new Set(['gpu.math.sqrt', 'gpu.math.log', 'gpu.math.exp']);
     if (unaryMath.has(path)) {
       if (args.length !== 1) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} requires one argument.`, node);
@@ -857,6 +873,13 @@ function freezeFunctionPublic(fn, generatedName) {
   });
 }
 
+function selectedContract({ usesDenseNumeric, usesErf }) {
+  if (usesDenseNumeric && usesErf) return DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT;
+  if (usesDenseNumeric) return DEVICE_JS_DENSE_NUMERIC_CONTRACT;
+  if (usesErf) return DEVICE_JS_ERF_CONTRACT;
+  return CONTRACT;
+}
+
 function translateDeviceUnit(request, mode) {
   const allowed = mode === 'library' ? ['source', 'functions', 'exports', 'compile'] : ['source', 'functions', 'compile', 'imports'];
   if (!plainObject(request) || Object.keys(request).some((key) => !allowed.includes(key)) || !Object.hasOwn(request, 'source') || !Object.hasOwn(request, 'functions') || (mode === 'library' && !Object.hasOwn(request, 'exports'))) throw deviceJsError('DEVICE_JS_REQUEST_INVALID', mode === 'library' ? 'Device-JS library request requires source/functions/exports and optional compile.' : 'Device-JS request requires source/functions and optional compile/imports.');
@@ -869,7 +892,7 @@ function translateDeviceUnit(request, mode) {
   const ast = parseSource(request.source);
   const requirements = inspectUnitRequirements(ast, [...functions, ...imports]);
   const compile = finalizeCompileProfile(normalizeCompile(request.compile ?? {}), requirements, Object.hasOwn(request.compile ?? {}, 'headerProfile'));
-  const contract = requirements.usesDenseNumeric ? DEVICE_JS_DENSE_NUMERIC_CONTRACT : CONTRACT;
+  const contract = selectedContract(requirements);
   const identity = programIdentity(request.source, functions, compile, contract);
   const sourceFunctions = matchSourceFunctions(ast, functions);
   const functionMap = new Map([...functions, ...imports].map((fn) => [fn.name, fn]));
