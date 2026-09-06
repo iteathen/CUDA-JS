@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 
 import { compileDeviceLibrary, compileDeviceProgram } from 'cuda-js';
 import { CUDA_JS_COMPATIBILITY } from 'cuda-js/compatibility';
@@ -6,6 +7,17 @@ import { discoverCudaDevicesForTesting, openCudaRuntimeForTesting } from 'cuda-j
 
 assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceJsTanh, 'f32-f64-same-kind-dense-child-provider-bound-tanhf-tanh');
 assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.deviceJsNumericChildOrder, ['SPEC-0030-erf-v1', 'SPEC-0030-tanh-v1']);
+
+const installedEntry = import.meta.resolve('cuda-js');
+const declarations = await readFile(new URL('./index.d.ts', installedEntry), 'utf8');
+assert.match(declarations, /export type DeviceJsLibraryContract =/u);
+assert.match(declarations, /export type DeviceJsProgramContract =/u);
+for (const child of [
+  'SPEC-0030-erf-v1',
+  'SPEC-0030-tanh-v1',
+  'SPEC-0030-erf-v1+SPEC-0030-tanh-v1',
+]) assert(declarations.includes(child), `installed public declarations are missing ${child}`);
+assert.doesNotMatch(declarations, /readonly contract:\s*string\s*;/u);
 
 const snapshot = await discoverCudaDevicesForTesting([{ nativeDevice: 9, computeCapabilityMajor: 12, computeCapabilityMinor: 0 }]);
 const runtime = await openCudaRuntimeForTesting({ device: snapshot.devices[0].selector, compiler: true });
@@ -45,6 +57,7 @@ try {
   console.log(JSON.stringify({
     consumer: 'portable-tanh',
     publicOnly: true,
+    declarationsExact: true,
     tanh: tanh.deviceProgram.sha256,
     erfTanh: combined.deviceProgram.sha256,
     tanhLibrary: tanhLibrary.library.sha256,
