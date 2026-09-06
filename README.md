@@ -14,11 +14,12 @@ CUDA-JS is an experimental Node.js runtime and toolchain for a bounded subset of
 | npm release | **Not published** |
 | Production support | **No** — public alpha/testing only |
 | Host implementation | JavaScript/ESM using Node 26's experimental `node:ffi` behind Worker-owned components |
+| Restricted Device-JS math | Dense scalar profile plus additive public f32/f64 `erf` and `tanh` children in portable/software/package implementation; native numerical qualification remains exact-profile-specific |
 | Native evidence | Exact Windows x64 evidence exists for recorded profiles; support remains capability/profile-specific |
 | Native Linux CUDA | **Not yet qualified**; Linux x86-64 is the reference path, but the physical-NVIDIA evidence cell remains open |
 | Generic concurrency | Bounded operation profiles only; no public unbounded stream/event or scheduling API |
 
-Implemented capabilities include capability-checked device discovery/selection, explicit device-memory ownership and copies, module/function lookup, typed kernel arguments, bounded opaque GPU-operation lifecycles, NVRTC/nvJitLink compilation, artifact/cache identity, restricted Device-JS, prepared execution, selected bounded CUDA-library composition, and immutable public compatibility projection of finite prepared/Device-JS ceilings plus the ordinary device-allocation minimum base-address alignment. The alignment fact is a base-allocation compatibility guarantee only; it does not add caller-selected alignment or change typed-view offset semantics. The exact status of each capability is recorded in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md).
+Implemented capabilities include capability-checked device discovery/selection, explicit device-memory ownership and copies, module/function lookup, typed kernel arguments, bounded opaque GPU-operation lifecycles, NVRTC/nvJitLink compilation, artifact/cache identity, restricted Device-JS including public same-kind f32/f64 `gpu.math.erf` and `gpu.math.tanh`, prepared execution, selected bounded CUDA-library composition, and immutable public compatibility projection of finite prepared/Device-JS ceilings plus the ordinary device-allocation minimum base-address alignment. The alignment fact is a base-allocation compatibility guarantee only; it does not add caller-selected alignment or change typed-view offset semantics. The exact status of each capability is recorded in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md), with current dependency/work selection in [`STATUS.md`](STATUS.md) and [`next_step.yaml`](next_step.yaml).
 
 CUDA-JS does **not** currently claim production readiness, native Linux CUDA qualification, generic public stream/event objects, multi-GPU/MIG support, managed/pool-memory support, CUDA Graph realization, process crash isolation, or broad performance/soak guarantees.
 
@@ -91,6 +92,8 @@ Work follows the highest-risk unproven boundary required by the next real consum
 - downstream consumers request consumer-neutral public capabilities rather than local/native escape paths;
 - additional concurrency, optimization, or API breadth requires a dependency-ready consumer or measured bottleneck;
 - once a boundary is sufficiently specified, a thin executable public-contract falsifier is preferred over more speculative architecture.
+
+The frozen Vector model lane currently demonstrates no additional CUDA-JS source gap after protected f32/f64 Device-JS tanh. Its next semantic implementation step belongs to CUDA-JS-Tensor #61; CUDA-JS changes again only if that downstream work produces concrete evidence of a missing generic lower capability.
 
 ## Contributing and security
 
