@@ -1,7 +1,20 @@
-# Components
+# CUDA-JS components
 
-Production LEGO components are created only after their contracts and predecessor experiments pass.
+This directory contains the runtime's implemented components. Application developers start with the [public facade](runtime-facade/README.md); the other components are internal owners.
 
-Implemented owners are [`driver-actor/`](driver-actor/README.md), [`resource-registry/`](resource-registry/README.md), [`memory/`](memory/README.md), [`host-memory-transfer/`](host-memory-transfer/README.md), [`publication-mailbox/`](publication-mailbox/README.md), [`execution/`](execution/README.md), [`prepared-execution/`](prepared-execution/README.md), [`cuda-library-adapters/`](cuda-library-adapters/README.md), [`cuda-target/`](cuda-target/README.md), [`device-selection/`](device-selection/README.md), [`compiler-actor/`](compiler-actor/README.md), [`device-js/`](device-js/README.md), [`platform-diagnostics/`](platform-diagnostics/README.md), and the public [`runtime-facade/`](runtime-facade/README.md). The pure prepared-execution owner canonicalizes bounded kernel-DAG topology, bindings, and identity while execution retains every resource/submission/completion lifecycle. The CUDA-library adapter owner keeps optional provider handles, plans, typed-view/workspace leases, and calls inside DriverActor while reusing the existing scheduler. The internal CUDA-target owner centralizes syntax and reviewed admission metadata without claiming provider/device/native qualification. Device selection owns sanitized snapshots, opaque selector capabilities, and selected-architecture target identity while DriverActor retains native discovery/context ownership. CUDA Graph realization, other prepared node families, later library providers, registered/mapped host-memory profiles, optional process isolation, strict JIT, and consumer interop remain separately gated.
+- [CUDA context and native-resource ownership](driver-actor/README.md).
+- [Opaque resource identity and lifecycle](resource-registry/README.md).
+- [Device allocations and typed views](memory/README.md).
+- [Bounded asynchronous copies](host-memory-transfer/README.md).
+- [Host/device publication lanes](publication-mailbox/README.md).
+- [Kernel submission, completion, and cleanup](execution/README.md).
+- [Finite execution DAG normalization](prepared-execution/README.md).
+- [Optional bounded native-library plans](cuda-library-adapters/README.md).
+- [Target syntax and admission policy](cuda-target/README.md).
+- [Device snapshots and opaque selection](device-selection/README.md).
+- [Compilation, linking, and caching](compiler-actor/README.md).
+- [Restricted JavaScript device programs](device-js/README.md).
+- [Sanitized platform assessment](platform-diagnostics/README.md).
+- [Public package API](runtime-facade/README.md).
 
-The first code remains experiment-owned; do not create empty production component scaffolding merely to mirror the plan.
+Implementation and native qualification are separate. Consult the [capability map](../docs/CAPABILITIES.md) and [component specifications](../docs/specs/README.md) for limits and future profiles.

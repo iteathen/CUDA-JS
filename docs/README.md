@@ -1,55 +1,20 @@
-# Documentation Index
+# CUDA-JS documentation
 
 **Status:** Informational
 
-- [`CAPABILITIES.md`](CAPABILITIES.md) — full discoverable CUDA-JS capability map: accepted behavior, current qualification limits, planned/deferred capability families, concurrency, GPU residency, memory lifetime, runtime compilation, fault isolation, and common classification corrections.
-- [`PUBLIC_REPOSITORY.md`](PUBLIC_REPOSITORY.md) — public-repository security/CI posture, hardening assessment, security-reporting state, and remaining GitHub-settings follow-up.
-- [`../SECURITY.md`](../SECURITY.md) — canonical public security-reporting policy and native/executable trust boundaries.
-- [`SPONSORSHIP.md`](SPONSORSHIP.md) — low-maintenance GitHub Sponsors setup, funding purpose, and no-reward tier text.
+Use this index to find usage boundaries, platform requirements, design, and development material.
 
-## Authority
+| Purpose | Start here |
+| --- | --- |
+| Understand available and planned capabilities | [Capability map](CAPABILITIES.md) |
+| Check Node and GPU requirements | [Node support](NODE_SUPPORT.md), [hardware support](HARDWARE_SUPPORT.md) |
+| Find public API entry points | [Runtime facade](../components/runtime-facade/README.md) |
+| Understand design | [Architecture](architecture/README.md), [project charter](PROJECT_CHARTER.md) |
+| Read contracts and decisions | [Specifications](specs/README.md), [ADRs](decisions/README.md) |
+| Run verification | [Conformance](../conformance/README.md) |
+| Select development work | [Current status](../STATUS.md), [plans](plans/README.md) |
+| Investigate experiments and prior art | [Experiments](../experiments/README.md), [research](research/README.md) |
+| Find historical material | [Archive](archive/README.md) |
+| Contribute or report a vulnerability | [Contributing](../CONTRIBUTING.md), [security policy](../SECURITY.md) |
 
-- [`FOUNDATION_INDEX.md`](FOUNDATION_INDEX.md)
-- [`PROJECT_CHARTER.md`](PROJECT_CHARTER.md)
-- [`decisions/README.md`](decisions/README.md)
-- [`decisions/ADR-0005-javascript-authored-jit-native-realized.md`](decisions/ADR-0005-javascript-authored-jit-native-realized.md) — canonical JavaScript-authored and JIT/native-realized source/runtime split.
-- [`specs/README.md`](specs/README.md)
-- [`specs/SPEC-0000-runtime-contract-map.md`](specs/SPEC-0000-runtime-contract-map.md)
-- [`specs/SPEC-0001-cuda-schema-compiler.md`](specs/SPEC-0001-cuda-schema-compiler.md)
-- [`specs/SPEC-0002-windows-driver-bootstrap.md`](specs/SPEC-0002-windows-driver-bootstrap.md)
-- [`INTEROP_WITH_CUDA_MCGS.md`](INTEROP_WITH_CUDA_MCGS.md)
-
-## Research and assessment
-
-- [`research/README.md`](research/README.md)
-- [`research/2026-08-10-node-ffi-cuda-landscape.md`](research/2026-08-10-node-ffi-cuda-landscape.md)
-- [`research/2026-08-10-technical-assumption-audit.md`](research/2026-08-10-technical-assumption-audit.md)
-- [`research/2026-08-13-nn-extension-authority-assessment.md`](research/2026-08-13-nn-extension-authority-assessment.md)
-- [`research/source-register.yaml`](research/source-register.yaml)
-- [`architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md`](architecture/FOUNDATION_ASSESSMENT_AND_PLAN.md)
-
-## Architecture and plan
-
-- [`HARDWARE_SUPPORT.md`](HARDWARE_SUPPORT.md) — generated exact-profile hardware support list and qualification entry point.
-- [`NODE_SUPPORT.md`](NODE_SUPPORT.md) — generated exact-version Node qualification matrix with qualified, testing-unconfirmed, and known-incompatible rows.
-- [`architecture/README.md`](architecture/README.md)
-- [`architecture/TARGET_ARCHITECTURE.md`](architecture/TARGET_ARCHITECTURE.md)
-- [`architecture/V0_SUPPORT_MATRIX.md`](architecture/V0_SUPPORT_MATRIX.md)
-- [`architecture/FRAMEWORK_OVERVIEW.md`](architecture/FRAMEWORK_OVERVIEW.md)
-- [`architecture/NN_EXTENSION_BOUNDARY.md`](architecture/NN_EXTENSION_BOUNDARY.md)
-- [`plans/README.md`](plans/README.md)
-- [`plans/2026-08-10-master-plan.md`](plans/2026-08-10-master-plan.md)
-- [`plans/2026-08-10-focus-branch-map.json`](plans/2026-08-10-focus-branch-map.json)
-- [`plans/2026-08-11-hardware-qualification-program.md`](plans/2026-08-11-hardware-qualification-program.md)
-- [`plans/2026-08-11-node-and-extended-qualification.md`](plans/2026-08-11-node-and-extended-qualification.md)
-
-## Experiments and history
-
-- [`../experiments/README.md`](../experiments/README.md)
-- [`../experiments/EXPERIMENT_MATRIX.md`](../experiments/EXPERIMENT_MATRIX.md)
-- [`../experiments/EXP-000-node-ffi-synthetic-abi.md`](../experiments/EXP-000-node-ffi-synthetic-abi.md)
-- [`../experiments/EXP-001-node-ffi-cuda-smoke.md`](../experiments/EXP-001-node-ffi-cuda-smoke.md)
-- [`../experiments/EXP-012-windows-node-ffi-cuda-smoke.md`](../experiments/EXP-012-windows-node-ffi-cuda-smoke.md)
-- [`archive/README.md`](archive/README.md)
-
-Research, proposals, plans, and experiments remain beneath accepted charter, ADRs, and specifications. `CAPABILITIES.md` and `PUBLIC_REPOSITORY.md` are discoverability/operational summaries and do not widen support or implementation authority. `CJS-F1A / EXP-000`, `CJS-F1B`, Windows-only `CJS-F2W / EXP-012`, and Windows CJS-F3W through the CUDA-JS-owned portion of CJS-F9W are accepted on exact evidence. The F3 through F8 portable control/package path passes without establishing native Linux CUDA support. The F9 exact compatible-pair and CUDA-MCGS-owned adapter evidence remain pending; Linux `CJS-F2L / EXP-001` through F9L remain retained, deferred, and incomplete.
+Accepted specifications govern their stated scope. Research, plans, and historical evidence do not establish current native support.

@@ -1,11 +1,12 @@
 # Bounded device memory
 
-The internal `runtime.memory` component implements the accepted CJS-F4 contract. It validates one exact policy, accounts for reserved device bytes, validates every byte range before backend invocation, stores private allocations behind opaque registry capabilities, fences transfers with leases, and releases children before their context.
+Owns bounded device allocations, byte-range validation, copied transfers, and allocation-owned typed views. Resources have explicit lifetimes and leases. Views are contiguous one-dimensional capabilities, not tensors or a general strided-memory interface.
 
-The component has no direct CUDA, FFI, Worker, or platform dependency. The DriverActor injects either the exact Windows CUDA adapter or a portable owned-byte mock. Only copied `Uint8Array` values cross the actor boundary; native addresses and host staging storage remain private.
+## Entry points
 
-`runtime.memory` also owns contiguous one-dimensional typed views over an existing allocation. A view is an opaque allocation child with an exact dtype, byte range, and `read`, `write`, or `read-write` role. The public facade creates it through `CudaDeviceMemory.view(...)`; launches must declare every view access explicitly, and the operation leases both the view and its parent allocation until terminality. Views deliberately add no tensor shape, stride, algebra, host-array, pointer, conversion, or hardware-bound contract.
+- [Component interface](index.mjs).
+- [Runtime and platform requirements](../../README.md).
+- [Capability map](../../docs/CAPABILITIES.md) and [specification index](../../docs/specs/README.md).
+- [Conformance entry points](../../conformance/README.md).
 
-If native allocation succeeds but registry admission fails, rollback free is mandatory. A failed rollback retains the sanitized registration failure and cleanup failure independently, publishes the strongest resulting health and bounded unproved inventory, and keeps the allocation quota reserved because release was not proved. The first unproved rollback is stored: later allocation admission returns that same failure without creating more native ownership, and runtime close must consume it instead of claiming a clean registry-only teardown.
-
-Run `npm run f4:unit` for owner tests and `npm run f4:portable` for the platform-neutral integrated capsule.
+Use the governing specifications for parameter, lifecycle, failure, and compatibility details. [Current status](../../STATUS.md) tracks outstanding implementation and qualification work.
