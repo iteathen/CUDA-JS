@@ -192,6 +192,45 @@ function publicProgram(translated) {
   };
 }
 
+function inspectionCompile(request, hasImports) {
+  const compile = request?.compile;
+  if (compile !== undefined && !plainObject(compile)) fail('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Device-JS compile options must be an ordinary object.');
+  if (!hasImports || compile?.architecture !== undefined) return compile;
+  const architecture = request?.imports?.[0]?.library?.architecture;
+  if (typeof architecture !== 'string') fail('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Composed Device-JS inspection requires a valid import architecture when compile.architecture is absent.');
+  return Object.freeze({ ...(compile ?? {}), architecture });
+}
+
+function inspectProgram(request, compileOverride = undefined) {
+  const hasImports = plainObject(request) && Array.isArray(request.imports) && request.imports.length > 0;
+  if (!hasImports) {
+    if (!plainObject(request)) fail('DEVICE_JS_REQUEST_INVALID', 'Device-JS request must be an ordinary object.');
+    const compile = compileOverride === undefined ? request.compile : compileOverride;
+    return Object.freeze({
+      translated: translateDeviceProgram({ ...request, ...(compile === undefined ? {} : { compile }) }),
+      normalizedImports: null,
+    });
+  }
+
+  if (!plainObject(request) || Object.keys(request).some((key) => !['compile', 'functions', 'imports', 'source'].includes(key))) fail('DEVICE_JS_REQUEST_INVALID', 'Composed Device-JS request contains unknown fields.');
+  assertCompositionOwnsRdc(request.compile);
+  const compile = compileOverride === undefined ? inspectionCompile(request, true) : compileOverride;
+  const target = inspectCudaTarget(compile?.architecture, { expectedPrefix: 'compute' });
+  if (!target.ok) fail('DEVICE_JS_COMPILE_OPTIONS_INVALID', 'Composed Device-JS inspection requires a valid compute architecture.');
+  const normalizedImports = normalizeImports(request.imports, target.target.name);
+  const translated = translateDeviceProgram({ source: request.source, functions: request.functions, imports: normalizedImports.imports, compile });
+  return Object.freeze({ translated, normalizedImports });
+}
+
+export function inspectDeviceProgram(request) {
+  try {
+    const inspected = inspectProgram(request);
+    return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(inspected.translated) });
+  } catch (error) {
+    throw publicError(error, 'device-js.inspect');
+  }
+}
+
 export async function compileDeviceLibrary(runtime, request) {
   try {
     assertRuntime(runtime, 'compileDeviceLibrary');
@@ -222,19 +261,14 @@ export async function compileDeviceProgram(runtime, request) {
   try {
     assertRuntime(runtime, 'compileDeviceProgram');
     const hasImports = plainObject(request) && Array.isArray(request.imports) && request.imports.length > 0;
+    const compile = bindRuntimeCompileTarget(runtime, request?.compile, 'compileDeviceProgram');
+    const inspected = inspectProgram(request, compile);
+    const translated = inspected.translated;
     if (!hasImports) {
-      if (!plainObject(request)) fail('DEVICE_JS_REQUEST_INVALID', 'Device-JS request must be an ordinary object.');
-      const compile = bindRuntimeCompileTarget(runtime, request.compile, 'compileDeviceProgram');
-      const translated = translateDeviceProgram({ ...request, compile });
       const compiler = await runtime.compile({ source: translated.generatedSource, name: translated.generatedName, options: translated.compile });
       return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(translated), compiler });
     }
-    if (!plainObject(request) || Object.keys(request).some((key) => !['compile', 'functions', 'imports', 'source'].includes(key))) fail('DEVICE_JS_REQUEST_INVALID', 'Composed Device-JS request contains unknown fields.');
-    assertCompositionOwnsRdc(request.compile);
-    const compile = bindRuntimeCompileTarget(runtime, request.compile, 'compileDeviceProgram');
-    const target = inspectCudaTarget(compile.architecture, { expectedPrefix: 'compute' });
-    const normalized = normalizeImports(request.imports, target.target.name);
-    const translated = translateDeviceProgram({ source: request.source, functions: request.functions, imports: normalized.imports, compile });
+    const normalized = inspected.normalizedImports;
     const compiler = await runtime.compile(compilationRequest(translated, normalized.format));
     const linker = await runtime.link({ inputs: [compiler.artifact, ...normalized.artifacts], options: { architecture: pairedCudaTarget(translated.compile.architecture, 'sm') } });
     return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(translated), compiler, linker });
