@@ -54,7 +54,7 @@ function fixture() {
       interop: 'Device-JS generated CUDA C++ external-deletion test',
       hardware: '| Axis | Architecture | Implementation | Qualification | Priority | known incompatible not-qualified',
       packaging: 'cuda-js 0.1.0-alpha.16 SPEC-0020 SPEC-0021 ADR-0007 iteathen/cuda-nn iteathen/CUDA-JS-Tensor',
-      agents: 'ADR-0007 assigns reusable NN semantics to iteathen/cuda-nn and generic Tensor semantics to CUDA-JS-Tensor',
+      agents: 'CUDA-JS local context: CUDA-JS-Tensor owns generic Tensor semantics; reusable NN/model semantics remain external; MCGS/search policy is not owned here.',
       charter: 'ADR-0007 iteathen/cuda-nn iteathen/CUDA-JS-Tensor historical records no longer authorize `nn.*` production components here',
       registry: 'project.cuda-nn-boundary external.cuda-nn ADR-0007',
       nnArchitecture: '**Status:** Informational **Current projection:** Accepted ADR-0007 iteathen/cuda-nn CUDA-JS-Tensor cuda-nn production API:    not-authorized Historical projection: **Projection:** Accepted ADR-0004 and SPEC-0027 separate publish unit historical implementation status: not-implemented historical qualification status: not-qualified',
