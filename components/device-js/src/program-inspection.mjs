@@ -1,5 +1,31 @@
 import { parse } from 'acorn';
 
+const PUBLIC_PROFILE_HELPERS = new Set([
+  'gpu.thread.x',
+  'gpu.thread.y',
+  'gpu.thread.z',
+  'gpu.block.x',
+  'gpu.block.y',
+  'gpu.block.z',
+  'gpu.blockDim.x',
+  'gpu.blockDim.y',
+  'gpu.blockDim.z',
+  'gpu.gridDim.x',
+  'gpu.gridDim.y',
+  'gpu.gridDim.z',
+  'gpu.thread.globalX',
+  'gpu.atomic.add',
+  'gpu.atomic.cas',
+  'gpu.atomic.loadRelaxedDevice',
+  'gpu.atomic.storeRelaxedDevice',
+  'gpu.atomic.loadAcquireDevice',
+  'gpu.atomic.storeReleaseDevice',
+  'gpu.mailbox.loadAcquireSystem',
+  'gpu.mailbox.storeReleaseSystem',
+  'gpu.barrier.block',
+  'gpu.fence.device',
+]);
+
 function codeUnitCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -19,7 +45,7 @@ function visit(value, helpers) {
   if (!value || typeof value !== 'object') return;
   if (value.type === 'CallExpression') {
     const path = memberPath(value.callee);
-    if (path?.startsWith('gpu.')) helpers.add(path);
+    if (PUBLIC_PROFILE_HELPERS.has(path)) helpers.add(path);
   }
   for (const [key, child] of Object.entries(value)) {
     if (['loc', 'start', 'end', 'range'].includes(key)) continue;
