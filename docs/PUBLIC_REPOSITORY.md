@@ -2,7 +2,7 @@
 
 **Status:** Informational
 
-**Updated:** 2026-08-26
+**Updated:** 2026-09-07
 
 CUDA-JS is public at `iteathen/CUDA-JS`. This document records the public-repository security and collaboration posture, the assessment behind the hardening pass, and external control evidence that is not represented by source files.
 
@@ -38,16 +38,17 @@ This hardening pass does not:
 - change CUDA runtime, compiler, memory, execution, or LTO semantics;
 - add repository secrets or privileged public-PR automation;
 - claim OS-process isolation or exploit resistance beyond existing evidence;
-- replace the accepted engineering/security doctrine under `agent_files/`.
+- replace the account-global engineering/security doctrine or the repository-local ownership/validation context.
 
 ### Governing authority
 
-- [`../AGENTS.md`](../AGENTS.md)
-- [`../agent_files/AI_RULES.md`](../agent_files/AI_RULES.md)
-- [`../agent_files/general_foundation/SECURITY.md`](../agent_files/general_foundation/SECURITY.md)
-- [`../agent_files/general_foundation/ASSESSMENT_AND_PLANNING.md`](../agent_files/general_foundation/ASSESSMENT_AND_PLANNING.md)
-- [`../agent_files/general_foundation/PULL_REQUEST_REVIEW_AND_MERGE.md`](../agent_files/general_foundation/PULL_REQUEST_REVIEW_AND_MERGE.md)
-- [`../agent_files/VALIDATION_POLICY.md`](../agent_files/VALIDATION_POLICY.md)
+- [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md) — universal engineering, security, review, and cleanup doctrine;
+- [`../AGENT_LOCAL.md`](../AGENT_LOCAL.md) — CUDA-JS-specific mission, ownership, routing, hard constraints, and validation entry;
+- [`../agent_files/VALIDATION_POLICY.md`](../agent_files/VALIDATION_POLICY.md) — repository-specific evidence selection and acceptance;
+- [`../agent_files/SYSTEM_REGISTRY.md`](../agent_files/SYSTEM_REGISTRY.md) — CUDA-JS ownership/source routing;
+- [`../SECURITY.md`](../SECURITY.md) — public vulnerability-reporting policy.
+
+Older reusable-process cards under `agent_files/` are retained context/provenance rather than competing universal authority.
 
 ### Strongest credible failure modes
 
