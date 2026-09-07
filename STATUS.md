@@ -26,6 +26,14 @@ Recorded design-governance provenance for this status transition is protected `7
 
 CUDA-JS owns consumer-neutral Device-JS, compiler, artifact, module/function, runtime, provider, memory/resource, operation/publication, lifecycle and compatibility mechanisms. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics. CUDA-MCGS owns evaluator/search/request/batch/scatter/publication/search-lifecycle semantics. Product/model/checkpoint/domain meaning remains downstream.
 
+### External CUDA-NN ownership
+
+ADR-0007 keeps reusable NN/model/inference/autodiff/training semantics outside CUDA-JS in `iteathen/cuda-nn`. The bootstrap provenance anchor `iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3` remains audit evidence only; those semantics **no longer belong to a future publish unit in this repository**.
+
+### Durable architecture/evidence anchors
+
+`DriverActor` remains the Worker/context/raw-resource owner. `CJS-F1B` remains the generated CUDA ABI-fact and independent layout-evidence anchor; `CJS-F2W` and `CJS-F7W` remain retained Windows x64 evidence/provenance anchors. These names are durable architecture/evidence markers, not live support or current-work dashboards.
+
 ### Cross-repository readiness rule
 
 CUDA-JS owns only its **producer facts**: what public capability exists, its exact contract/compatibility identity, and what qualification supports it. A consuming repository owns whether those facts are sufficient for its own work.
