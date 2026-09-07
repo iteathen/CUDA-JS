@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.18",
+    "version": "0.1.0-alpha.19",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -83,6 +83,7 @@
     "linker": "optional-nvjitlink-13.3",
     "linkInputFamilies": ["ptx", "typed-lto-ir"],
     "deviceJsFrontend": "restricted-spec-0013-v1+spec-0022-atomic-observation-v1+spec-0022-device-publication-v1+spec-0014-publication-mailbox-v1",
+    "deviceJsInspection": "pure-cuda-free-public-program-semantic-inspection-shared-with-compile",
     "deviceJsLimits": {
       "parametersPerFunction": 64
     },
@@ -125,6 +126,7 @@
     "SPEC-0018 capacity-two scheduling and SPEC-0019 internal-pinned async transfers have exact Windows and installed-package evidence only for the recorded Node/Driver/GPU profile; the compatibility default remains one pending operation.",
     "SPEC-0014 publication mailboxes have exact Windows and installed-package evidence only for privately mapped named u32 lanes, one live GPU operation lease, and system-scope acquire/release publication on the recorded Node/Driver/GPU profile.",
     "SPEC-0013 Device-JS plus the scoped atomic-observation and device-publication children is an implemented restricted frontend using pinned Acorn only for syntax parsing; exact Windows source-only generated-source/compiler/launch/oracle/lifecycle evidence qualifies only its recorded profile.",
+    "inspectDeviceProgram() is a pure CUDA-free frontend inspection path. Its portable/package conformance proves only deterministic Device-JS semantic validation and public descriptor projection; it does not claim native/provider execution or performance.",
     "SPEC-0030 adds an exact additive Device-JS dense numeric profile for f64/f16/bf16 pointers, locals, device functions, kernel scalars, casts, arithmetic and special-value math. Exact installed-package Windows CUDA 13.3 header/compiler/compute_75/GTX 1660 Ti numerical-oracle and cleanup evidence does not qualify Linux, other providers/targets, tensor operations, tensor cores, fast math, or performance.",
     "SPEC-0030-erf-v1 additively admits same-kind f32/f64 gpu.math.erf through the dense numeric profile and private ordinary erff/erf lowering. Portable/package evidence does not promote native numerical accuracy, provider compatibility, Linux support, fast-math, lower precision, GELU semantics, or performance.",
     "SPEC-0030-tanh-v1 additively admits same-kind f32/f64 gpu.math.tanh through the dense numeric profile and private ordinary tanhf/tanh lowering, with canonical composition after erf when both children are required. Portable/package evidence does not promote native numerical accuracy, provider compatibility, Linux support, fast-math, lower precision, activation/model semantics, or performance.",
