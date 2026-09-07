@@ -9,15 +9,15 @@ import { validateCurrentStateContract } from './current-state-contract.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 async function loadRepositoryFixture() {
-  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, canonicalAgentsText] = await Promise.all([
+  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText] = await Promise.all([
     readFile(path.join(root, 'package.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'packaging/compatibility-manifest.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'next_step.yaml'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'STATUS.md'), 'utf8'),
     readFile(path.join(root, 'AGENTS.md'), 'utf8'),
-    readFile(path.join(root, 'agent_files/AGENTS.md'), 'utf8'),
+    readFile(path.join(root, 'AGENT_LOCAL.md'), 'utf8'),
   ]);
-  return { packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, canonicalAgentsText };
+  return { packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText };
 }
 
 function clone(value) {
@@ -67,17 +67,26 @@ test('rejects status/current-focus disagreement for the active issue', async () 
   assert.ok(errors.some((error) => error.includes(`current focus #${issue}`)));
 });
 
-test('rejects retired live-dashboard headings in agent entry points', async () => {
+test('rejects root AGENTS mutation away from the immutable global redirect', async () => {
   const fixture = await loadRepositoryFixture();
-  const rootErrors = validateCurrentStateContract({
+  const errors = validateCurrentStateContract({
     ...fixture,
-    rootAgentsText: `${fixture.rootAgentsText}\n## Current accepted implementation baseline\n`,
+    rootAgentsText: `${fixture.rootAgentsText}Local policy must not be added here.\n`,
   });
-  assert.ok(rootErrors.some((error) => error.includes('retired live implementation dashboard')));
+  assert.ok(errors.some((error) => error.includes('exact immutable one-line redirect')));
+});
 
-  const canonicalErrors = validateCurrentStateContract({
+test('rejects local agent routing drift and retired dashboards', async () => {
+  const fixture = await loadRepositoryFixture();
+  const missingGlobal = validateCurrentStateContract({
     ...fixture,
-    canonicalAgentsText: `${fixture.canonicalAgentsText}\n## Current workstream\n`,
+    agentLocalText: fixture.agentLocalText.replace('account-global `AGENTS.md`', 'local instructions'),
   });
-  assert.ok(canonicalErrors.some((error) => error.includes('retired live workstream dashboard')));
+  assert.ok(missingGlobal.some((error) => error.includes('account-global AGENTS.md')));
+
+  const retired = validateCurrentStateContract({
+    ...fixture,
+    agentLocalText: `${fixture.agentLocalText}\n## Current workstream\n`,
+  });
+  assert.ok(retired.some((error) => error.includes('retired live implementation/workstream dashboards')));
 });

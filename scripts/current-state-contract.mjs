@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const GLOBAL_AGENTS_REDIRECT = '[Global agent instructions](https://github.com/iteathen/.github/blob/main/AGENTS.md)\n';
 
 const forbiddenLiveKeys = new Set([
   'current_main',
@@ -37,7 +38,7 @@ export function validateCurrentStateContract({
   nextStep,
   statusText,
   rootAgentsText,
-  canonicalAgentsText,
+  agentLocalText,
 }) {
   const errors = [];
   const expectedPackage = `${packageJson?.name}@${packageJson?.version}`;
@@ -91,21 +92,22 @@ export function validateCurrentStateContract({
     errors.push('STATUS.md must state that live protected identity comes from GitHub read-back');
   }
 
-  if (typeof rootAgentsText !== 'string' || !rootAgentsText.includes('## Live-state routing')) {
-    errors.push('root AGENTS.md must contain Live-state routing');
-  }
-  if (rootAgentsText?.includes('## Current accepted implementation baseline')) {
-    errors.push('root AGENTS.md must not contain the retired live implementation dashboard heading');
-  }
-  if (!rootAgentsText?.includes('package.json') || !rootAgentsText?.includes('packaging/compatibility-manifest.json')) {
-    errors.push('root AGENTS.md must route current package/capability truth to designated owners');
+  if (rootAgentsText !== GLOBAL_AGENTS_REDIRECT) {
+    errors.push('root AGENTS.md must be the exact immutable one-line redirect to iteathen/.github/AGENTS.md');
   }
 
-  if (typeof canonicalAgentsText !== 'string' || !canonicalAgentsText.includes('## Current-state discipline')) {
-    errors.push('agent_files/AGENTS.md must contain Current-state discipline');
-  }
-  if (canonicalAgentsText?.includes('## Current workstream')) {
-    errors.push('agent_files/AGENTS.md must not contain the retired live workstream dashboard heading');
+  if (typeof agentLocalText !== 'string') {
+    errors.push('AGENT_LOCAL.md must exist as repository-local agent context');
+  } else {
+    if (!/account-global `AGENTS\.md`/i.test(agentLocalText)) {
+      errors.push('AGENT_LOCAL.md must route universal engineering guidance to the account-global AGENTS.md');
+    }
+    for (const owner of ['package.json', 'packaging/compatibility-manifest.json', 'STATUS.md', 'next_step.yaml']) {
+      if (!agentLocalText.includes(owner)) errors.push(`AGENT_LOCAL.md must route local current-state truth to ${owner}`);
+    }
+    if (agentLocalText.includes('## Current accepted implementation baseline') || agentLocalText.includes('## Current workstream')) {
+      errors.push('AGENT_LOCAL.md must not contain retired live implementation/workstream dashboards');
+    }
   }
 
   return errors;
@@ -116,13 +118,13 @@ async function readJson(relative) {
 }
 
 export async function validateRepositoryCurrentState() {
-  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, canonicalAgentsText] = await Promise.all([
+  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText] = await Promise.all([
     readJson('package.json'),
     readJson('packaging/compatibility-manifest.json'),
     readJson('next_step.yaml'),
     readFile(path.join(root, 'STATUS.md'), 'utf8'),
     readFile(path.join(root, 'AGENTS.md'), 'utf8'),
-    readFile(path.join(root, 'agent_files/AGENTS.md'), 'utf8'),
+    readFile(path.join(root, 'AGENT_LOCAL.md'), 'utf8'),
   ]);
 
   return validateCurrentStateContract({
@@ -131,7 +133,7 @@ export async function validateRepositoryCurrentState() {
     nextStep,
     statusText,
     rootAgentsText,
-    canonicalAgentsText,
+    agentLocalText,
   });
 }
 

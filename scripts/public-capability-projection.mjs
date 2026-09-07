@@ -128,7 +128,11 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
     'CUDA-JS-Tensor',
     'cuda-nn production API:    not-authorized',
   ]);
-  requireMarkers(errors, 'AGENTS.md', documents.agents, ['ADR-0007', 'iteathen/cuda-nn', 'CUDA-JS-Tensor']);
+  requireMarkers(errors, 'AGENT_LOCAL.md', documents.agents, [
+    'CUDA-JS-Tensor',
+    'reusable NN/model semantics',
+    'MCGS/search policy',
+  ]);
   requireMarkers(errors, 'agent_files/SYSTEM_REGISTRY.md', documents.registry, ['project.cuda-nn-boundary', 'external.cuda-nn', 'ADR-0007']);
   requireMarkers(errors, 'docs/CAPABILITIES.md', documents.capabilities, ['External CUDA-NN semantic consumer', 'ADR-0007', 'iteathen/cuda-nn']);
   requireMarkers(errors, 'STATUS.md', documents.status, ['External CUDA-NN ownership', 'iteathen/cuda-nn@7d7854697049db38e4a0670b80df9d600cd442c3', 'no longer belong to a future publish unit in this repository']);
@@ -162,7 +166,7 @@ function validateNnAuthorityProjection(errors, packageJson, documents) {
   }
 
   const activeDocuments = {
-    'AGENTS.md': documents.agents,
+    'AGENT_LOCAL.md': documents.agents,
     'docs/PROJECT_CHARTER.md': documents.charter,
     'agent_files/SYSTEM_REGISTRY.md': documents.registry,
     'docs/CAPABILITIES.md': documents.capabilities,

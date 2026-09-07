@@ -10,18 +10,8 @@ const errors = [];
 const ignoredDirectories = new Set(['.git', 'build', 'node_modules', 'docs/archive']);
 
 const required = [
-  'README.md', 'AGENTS.md', 'STATUS.md', 'next_step.yaml', 'CONTRIBUTING.md', 'LICENSE', 'LICENSING.md', 'package.json',
-  'agent_files/README.md', 'agent_files/AGENTS.md', 'agent_files/AI_RULES.md',
-  'agent_files/DESIGN_ALIGNMENT_CARD.md', 'agent_files/SYSTEM_REGISTRY.md', 'agent_files/VALIDATION_POLICY.md',
-  'agent_files/general_foundation/README.md', 'agent_files/general_foundation/PRINCIPLES.md',
-  'agent_files/general_foundation/ENGINEERING_JUDGMENT.md', 'agent_files/general_foundation/ASSESSMENT_AND_PLANNING.md',
-  'agent_files/general_foundation/PROJECT_ORGANIZATION.md', 'agent_files/general_foundation/SPEC_AND_AGENT_FILE_READING.md',
-  'agent_files/general_foundation/FOCUS_BRANCHES.md', 'agent_files/general_foundation/PLAN_EXECUTION.md',
-  'agent_files/general_foundation/TESTING.md', 'agent_files/general_foundation/DEBUGGING.md',
-  'agent_files/general_foundation/SANITY_CHECKING.md', 'agent_files/general_foundation/PULL_REQUEST_REVIEW_AND_MERGE.md',
-  'agent_files/general_foundation/CLEANUP_AND_DISPOSITION.md', 'agent_files/general_foundation/TOKEN_DISCIPLINE.md',
-  'agent_files/general_foundation/DOCUMENTATION_GOVERNANCE.md', 'agent_files/general_foundation/STATUS_SEMANTICS.md',
-  'agent_files/general_foundation/SECURITY.md',
+  'README.md', 'AGENT_LOCAL.md', 'STATUS.md', 'next_step.yaml', 'CONTRIBUTING.md', 'LICENSE', 'LICENSING.md', 'package.json',
+  'agent_files/README.md', 'agent_files/SYSTEM_REGISTRY.md', 'agent_files/VALIDATION_POLICY.md',
   'agent_files/application_specific/CUDA_JS_PROFILE.md',
   'docs/README.md', 'docs/FOUNDATION_INDEX.md', 'docs/PROJECT_CHARTER.md', 'docs/CAPABILITIES.md', 'docs/INTEROP_WITH_CUDA_MCGS.md',
   'docs/HARDWARE_SUPPORT.md', 'docs/NODE_SUPPORT.md', 'docs/THIRD_PARTY_DEPENDENCIES.md',
@@ -334,7 +324,7 @@ try {
     readFile(path.join(root, 'docs/INTEROP_WITH_CUDA_MCGS.md'), 'utf8'),
     readFile(path.join(root, 'docs/HARDWARE_SUPPORT.md'), 'utf8'),
     readFile(path.join(root, 'packaging/README.md'), 'utf8'),
-    readFile(path.join(root, 'AGENTS.md'), 'utf8'),
+    readFile(path.join(root, 'AGENT_LOCAL.md'), 'utf8'),
     readFile(path.join(root, 'docs/PROJECT_CHARTER.md'), 'utf8'),
     readFile(path.join(root, 'agent_files/SYSTEM_REGISTRY.md'), 'utf8'),
     readFile(path.join(root, 'docs/architecture/NN_EXTENSION_BOUNDARY.md'), 'utf8'),
@@ -415,10 +405,9 @@ for (const relative of files.filter((file) =>
 const markers = {
   'README.md': ['Node-FFI-first', 'EXP-000', 'CJS-F1B', 'CJS-F2W', 'Windows x64'],
   'STATUS.md': ['Node 26.7.0', 'Windows x64', 'Linux x86-64', 'CJS-F1B', 'CJS-F2W', 'CJS-F7W', 'DriverActor'],
-  'AGENTS.md': ['Node-FFI-first', 'fast-jit-required', 'EXP-000', 'EXP-001', 'EXP-012', 'CJS-F1B', 'active implementation phase'],
+  'AGENT_LOCAL.md': ['generic Node/CUDA runtime', 'Device-JS', 'CUDA-JS-Tensor', 'CUDA-MCGS/search policy', 'package.json', 'STATUS.md'],
   'docs/FOUNDATION_INDEX.md': ['active implementation phase', 'agent_files/SYSTEM_REGISTRY.md', 'PROJECT_CHARTER.md'],
   'agent_files/SYSTEM_REGISTRY.md': ['experiment.exp-000', 'runtime.driver-actor', 'interop.cuda-mcgs'],
-  'agent_files/AI_RULES.md': ['EXP-000', 'Apply token use as backpressure', 'Organize the repository as though it is already large'],
   'docs/plans/2026-08-10-master-plan.md': ['CJS-F0', 'CJS-F9', 'EXP-011'],
   'experiments/EXPERIMENT_MATRIX.md': ['EXP-000', 'EXP-001', 'EXP-011', 'EXP-012', 'Node FFI'],
   'next_step.yaml': ['CJS-F0', 'CJS-F1A', 'ADR-0002-node-ffi-first-host-binding.md'],
@@ -511,4 +500,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log('CUDA-JS documentation, links, structured data, authority, source boundaries including accepted SPEC-0013 Device-JS and SPEC-0020 semantic prepared DAGs, owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
+console.log('CUDA-JS documentation, links, structured data, repository-local authority routing, source boundaries including accepted SPEC-0013 Device-JS and SPEC-0020 semantic prepared DAGs, owner-authorized EXP-013 and retained EXP-014, exact Node matrix, extended qualification profiles, promoted EXP-000/EXP-009, accepted F1B/F2W/F3W/F4W/F5W/F6W/F7W/F8W plus the F9 CUDA-JS prerequisite, and retained Linux native handoff checks passed');
