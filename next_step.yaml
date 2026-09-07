@@ -18,6 +18,17 @@
     "tree": "22c3e9eca3163feac1167942807ec383ed457149",
     "meaning": "Protected design-governance provenance, not a self-updating current-main field. Exact live protected branch/commit/tree identity is always read from GitHub before qualification or cross-repository freezing."
   },
+  "durable_architecture_provenance": {
+    "foundation": ["CJS-F0", "CJS-F1A", "ADR-0002-node-ffi-first-host-binding.md"],
+    "external_nn_ownership": "CJS-CUDA-NN-EXTERNAL",
+    "meaning": "Durable architecture/evidence routing markers retained for governance validation only; not a live package, support or downstream-readiness dashboard."
+  },
+  "cuda_nn": {
+    "authority": "ADR-0007",
+    "repository": "iteathen/cuda-nn",
+    "revision": "7d7854697049db38e4a0670b80df9d600cd442c3",
+    "disposition": "Reusable NN/model/inference/autodiff/training semantics remain external; generic Tensor mathematics/planning belongs to CUDA-JS-Tensor."
+  },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
     "issue": 32,
