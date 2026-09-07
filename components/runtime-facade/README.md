@@ -1,6 +1,12 @@
 # CUDA-JS public runtime facade
 
-Provides the public cuda-js package interface for discovery, runtimes, memory, compilation, and execution. Applications use package exports; native handles and actor tokens remain private. GPU execution requires Node's experimental FFI flag and a matching native profile. Linux source admission is not native qualification.
+Provides the public cuda-js package interface for discovery, pure Device-JS inspection, runtimes, memory, compilation, and execution. Applications use package exports; native handles and actor tokens remain private. GPU execution requires Node's experimental FFI flag and a matching native profile. Linux source admission is not native qualification.
+
+## Runtime-free Device-JS inspection
+
+`inspectDeviceProgram(request)` validates and normalizes the public Device-JS program request through the same CUDA-JS-owned frontend used by `compileDeviceProgram()`. It is synchronous and requires no CUDA runtime, compiler provider, Driver, or GPU. The result contains only the immutable public `deviceProgram` descriptor; generated CUDA source and parser/native internals remain private.
+
+This is a composition/preflight surface, not native execution evidence. A consuming compiler or framework may use it to fail closed without maintaining its own copy of CUDA-JS helper/type semantics.
 
 ## Minimal allocation and copy
 
