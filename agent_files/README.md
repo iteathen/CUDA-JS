@@ -1,18 +1,16 @@
 # Agent Documentation
 
-Universal engineering and agent guidance is owned by [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md). The live CUDA-JS repository entry point is [`../AGENT_LOCAL.md`](../AGENT_LOCAL.md), which contains only repository-specific mission, ownership, routing, constraints, and validation context.
+The root [`AGENTS.md`](../AGENTS.md) is mandatory. This directory contains the compact CUDA-JS operating foundation and the project-specific native/JIT/runtime profile.
 
-This directory contains retained CUDA-JS-specific registries/validation context plus older local guidance retained for provenance. Older reusable-process manuals here are **not** the universal agent authority and must not be copied forward as competing policy.
+## Canonical files
 
-## Live repository-specific files
-
-- [`SYSTEM_REGISTRY.md`](SYSTEM_REGISTRY.md) — CUDA-JS ownership and source-of-truth registry.
-- [`VALIDATION_POLICY.md`](VALIDATION_POLICY.md) — repository-specific evidence and validation selection.
-- [`application_specific/CUDA_JS_PROFILE.md`](application_specific/CUDA_JS_PROFILE.md) — native/JIT/runtime boundary context.
-
-## Retained historical/local guidance
-
-`AI_RULES.md`, `DESIGN_ALIGNMENT_CARD.md`, and `general_foundation/` may preserve historical rationale or still-useful local context, but universal process/design doctrine comes from the account-global authority. They are not required live agent entry points.
+- [`AGENTS.md`](AGENTS.md) — canonical working procedure and task routing.
+- [`AI_RULES.md`](AI_RULES.md) — concise hard rules.
+- [`DESIGN_ALIGNMENT_CARD.md`](DESIGN_ALIGNMENT_CARD.md) — compact design and integration gate.
+- [`SYSTEM_REGISTRY.md`](SYSTEM_REGISTRY.md) — ownership and source-of-truth registry.
+- [`VALIDATION_POLICY.md`](VALIDATION_POLICY.md) — evidence and completion requirements.
+- [`application_specific/CUDA_JS_PROFILE.md`](application_specific/CUDA_JS_PROFILE.md) — native/JIT/runtime boundary.
+- [`general_foundation/README.md`](general_foundation/README.md) — reusable engineering doctrine for planning, organization, reading, execution, testing, debugging, sanity checks, PRs, cleanup, tokens, documentation, and security.
 
 ## Project authority
 
@@ -22,6 +20,9 @@ Detailed product authority lives in:
 - the target architecture and support matrix;
 - the runtime contract map;
 - the research/source register;
+- the non-authoritative master plan and experiment protocols;
 - current status and `next_step.yaml`.
 
-Use [`../docs/FOUNDATION_INDEX.md`](../docs/FOUNDATION_INDEX.md) to discover repository authority. Do not copy application-specific search rules into CUDA-JS, and do not maintain duplicate drifting universal authority merely to appear complete.
+Use [`../docs/FOUNDATION_INDEX.md`](../docs/FOUNDATION_INDEX.md) to verify completeness and discoverability.
+
+Reusable engineering doctrine may be promoted from sibling repositories only through deliberate ownership and applicability review. Do not copy application-specific search rules into CUDA-JS, and do not maintain duplicate drifting authority merely to appear complete.

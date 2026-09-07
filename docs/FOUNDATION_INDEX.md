@@ -10,16 +10,17 @@ This index defines the minimum documentation foundation that must exist and agre
 
 | Concern | Authoritative document |
 |---|---|
-| Universal engineering, process, review, cleanup, and agent authority | [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md) |
-| CUDA-JS repository-specific mission, ownership, routing, constraints, and validation entry | [`../AGENT_LOCAL.md`](../AGENT_LOCAL.md) |
+| Agent entry and authority order | [`../AGENTS.md`](../AGENTS.md) |
+| Concise hard rules | [`../agent_files/AI_RULES.md`](../agent_files/AI_RULES.md) |
+| Design hierarchy and alignment gate | [`../agent_files/DESIGN_ALIGNMENT_CARD.md`](../agent_files/DESIGN_ALIGNMENT_CARD.md) |
+| Reusable planning/testing/cleanup/token/review doctrine | [`../agent_files/general_foundation/README.md`](../agent_files/general_foundation/README.md) and linked files |
+| Canonical repository procedure | [`../agent_files/AGENTS.md`](../agent_files/AGENTS.md) |
 | Ownership/source-of-truth registry | [`../agent_files/SYSTEM_REGISTRY.md`](../agent_files/SYSTEM_REGISTRY.md) |
 | Validation and evidence policy | [`../agent_files/VALIDATION_POLICY.md`](../agent_files/VALIDATION_POLICY.md) |
 | Native/JIT/runtime application profile | [`../agent_files/application_specific/CUDA_JS_PROFILE.md`](../agent_files/application_specific/CUDA_JS_PROFILE.md) |
 | Contribution and change rules | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
 | Current verified state | [`../STATUS.md`](../STATUS.md) |
 | Current bounded next step | [`../next_step.yaml`](../next_step.yaml) |
-
-Older reusable-process cards under `agent_files/` are retained local/historical context, not competing universal authority and not mandatory live agent entry points.
 
 ## Mandatory product foundation
 
