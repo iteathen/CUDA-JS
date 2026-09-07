@@ -2,7 +2,7 @@
 
 CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work through CUDA. It is intended for JavaScript library and application developers who need explicit device-memory, compilation, and execution control.
 
-**Package:** `cuda-js@0.1.0-alpha.18`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
+**Package:** `cuda-js@0.1.0-alpha.19`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
 
 ## Why CUDA-JS
 
@@ -18,9 +18,10 @@ CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work th
 - Device discovery and selection, device allocations and typed views, copied and bounded asynchronous transfers.
 - CUDA module loading, kernel arguments, GPU-operation submission, completion, and explicit cleanup.
 - NVRTC/nvJitLink compilation, artifact caching, and restricted Device-JS authoring.
+- Pure `inspectDeviceProgram()` validation/normalization through the same Device-JS frontend used by compilation, without opening a CUDA runtime or provider.
 - Prepared execution and a bounded optional cuBLASLt matrix-multiplication profile.
 
-These capabilities have different qualification limits. See the [capability map](docs/CAPABILITIES.md), [hardware evidence](docs/HARDWARE_SUPPORT.md), and [Node support](docs/NODE_SUPPORT.md) before choosing a native profile.
+These capabilities have different qualification limits. See the [capability map](docs/CAPABILITIES.md), [hardware evidence](docs/HARDWARE_SUPPORT.md), and [Node support](docs/NODE_SUPPORT.md) before choosing a native profile. Pure Device-JS inspection is portable/frontend evidence only and does not establish native CUDA support.
 
 ## Scope and direction
 

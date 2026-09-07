@@ -468,6 +468,20 @@ export interface DeviceJsProgramDescriptor {
   readonly imports?: readonly Readonly<Record<string, unknown>>[];
 }
 
+export interface DeviceJsPublicHelperUsage {
+  readonly function: string;
+  readonly helpers: readonly string[];
+}
+
+export interface DeviceJsInspectionResult {
+  readonly schemaVersion: 1;
+  readonly deviceProgram: DeviceJsProgramDescriptor;
+  readonly inspection: Readonly<{
+    compile: Readonly<DeviceCompileOptions>;
+    publicHelperUsage: readonly DeviceJsPublicHelperUsage[];
+  }>;
+}
+
 export interface DeviceJsCompileResult {
   readonly schemaVersion: 1;
   readonly deviceProgram: DeviceJsProgramDescriptor;
@@ -479,5 +493,6 @@ export const CUDA_JS_COMPATIBILITY: Readonly<Record<string, unknown>>;
 export function inspectCudaHost(): Readonly<{ schemaVersion: 1; host: Readonly<Record<string, unknown>>; compatibility: typeof CUDA_JS_COMPATIBILITY }>;
 export function discoverCudaDevices(): Promise<CudaDeviceSnapshot>;
 export function openCudaRuntime(options?: OpenCudaRuntimeOptions): Promise<CudaRuntime>;
+export function inspectDeviceProgram(request: DeviceJsCompileRequest): DeviceJsInspectionResult;
 export function compileDeviceLibrary(runtime: CudaRuntime, request: DeviceJsLibraryCompileRequest): Promise<DeviceJsLibraryCompileResult>;
 export function compileDeviceProgram(runtime: CudaRuntime, request: DeviceJsCompileRequest): Promise<DeviceJsCompileResult>;

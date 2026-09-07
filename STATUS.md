@@ -2,29 +2,37 @@
 
 **Status:** Active operational state
 
-**Updated:** 2026-09-06
+**Updated:** 2026-09-07
 
 ## Current package and support truth
 
 ```text
-package:                     cuda-js@0.1.0-alpha.18
+package:                     cuda-js@0.1.0-alpha.19
 public API schema:           1
 host source model:           JavaScript/ESM, Worker-owned Node FFI
 exact Node evidence baseline: Node 26.7.0
 native Linux x86-64:         testing-unconfirmed / not-qualified
 production support:          no
 performance claims:          none beyond exact recorded evidence
-current generic source gap:  none demonstrated by the protected consumer-neutral lanes
+current generic source gap:  #251 lower Device-JS inspection stud implemented; protected integration pending
 current physical gate:       #32 exact CUDA-MCGS/CUDA-JS compatible-pair qualification
 ```
 
 `package.json` owns package identity. `packaging/compatibility-manifest.json` owns the public capability projection. The exact protected branch/commit/tree identity is read from GitHub when exact identity matters; this file does not own a self-updating live SHA.
 
-Recorded design-governance provenance for this status transition is protected `7e9221e71bd618bdc404299c3b707ca1ced37c6b`, tree `22c3e9eca3163feac1167942807ec383ed457149`. That tuple is provenance only, not a substitute for live read-back.
+Recorded design-governance provenance for this status transition remains protected `7e9221e71bd618bdc404299c3b707ca1ced37c6b`, tree `22c3e9eca3163feac1167942807ec383ed457149`. That tuple is provenance only, not a substitute for live read-back.
 
 ## Stable ownership
 
 CUDA-JS owns consumer-neutral Device-JS, compiler, artifact, module/function, runtime, provider, memory/resource, operation/publication, lifecycle and compatibility mechanisms. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics. CUDA-MCGS owns evaluator/search/request/batch/scatter/publication/search-lifecycle semantics. Product/model/checkpoint/domain meaning remains downstream.
+
+### Device-JS frontend inspection — #251
+
+Issue #251 is the active producer correction demonstrated by CUDA-MCGS #124/#249: CUDA-JS already owned `gpu.atomic.cas` and the rest of the closed Device-JS language, but downstream composers lacked a public CUDA-free way to validate that language before compiler/native mutation.
+
+`inspectDeviceProgram(request)` is now implemented on the #251 candidate as a pure public frontend surface. It uses the same authoritative Device-JS translation path as `compileDeviceProgram()`, supports public `DeviceJsImport` values, and returns only the immutable public `deviceProgram` descriptor. Compilation reuses the same internal inspection path so the public preflight and compile frontend cannot independently define helper/type semantics.
+
+This capability makes no native/provider/hardware/performance claim. Its downstream deletion test is CUDA-MCGS #124 removing PR #249's CAS-specific strip/restore admission shim and shadow helper authority after this producer surface is protected.
 
 ### External CUDA-NN ownership
 
@@ -40,11 +48,9 @@ CUDA-JS owns only its **producer facts**: what public capability exists, its exa
 
 Therefore CUDA-JS does **not** sequence CUDA-MCGS #124 behind UCI-Arena-Vector numerical qualification. Vector's independent checkpoint oracle remains Vector-owned product evidence. CUDA-MCGS independently owns the readiness and work ordering of its product-neutral evaluator/runtime composition. If either consumer demonstrates a genuinely consumer-neutral CUDA-JS defect, that defect routes back here without moving consumer policy into CUDA-JS.
 
-This correction changes governance/current-state ownership only; it does not add or remove a public CUDA-JS capability.
+## Current CUDA-JS steady-state focus — #32 physical compatible pair
 
-## Current CUDA-JS focus — #32 physical compatible pair
-
-CUDA-JS #32 remains the current CUDA-JS-owned execution seam. The runner is ready and portable-qualified, but exact physical qualification is blocked on an accepted directly exposed NVIDIA environment. Hosted, VM, mock, package, Tensor or downstream product evidence cannot substitute for that physical evidence.
+Outside the bounded #251 producer correction, CUDA-JS #32 remains the steady CUDA-JS-owned execution seam. The runner is ready and portable-qualified, but exact physical qualification is blocked on an accepted directly exposed NVIDIA environment. Hosted, VM, mock, package, Tensor or downstream product evidence cannot substitute for that physical evidence.
 
 Immediately before a hardware run, read the live protected CUDA-JS and CUDA-MCGS heads/trees plus package/API/toolchain/environment identities and freeze only the tuple actually executed. A failure that demonstrates a generic lower defect belongs here; absence of hardware does not.
 

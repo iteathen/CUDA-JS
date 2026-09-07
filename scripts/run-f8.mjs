@@ -63,6 +63,7 @@ const unit = { args: ['--test',
   'components/runtime-facade/test/prepared-operation-dag.test.mjs',
   'components/runtime-facade/test/device-js-contract-types.test.mjs',
   'components/runtime-facade/test/device-js.test.mjs',
+  'components/runtime-facade/test/device-js-inspection.test.mjs',
 ] };
 const portable = { args: ['conformance/f8/run-portable.mjs'] };
 const native = { nativeX64Only: true, args: ['conformance/f8/run-native.mjs'] };
