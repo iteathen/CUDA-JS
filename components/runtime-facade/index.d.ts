@@ -468,9 +468,18 @@ export interface DeviceJsProgramDescriptor {
   readonly imports?: readonly Readonly<Record<string, unknown>>[];
 }
 
+export interface DeviceJsPublicHelperUsage {
+  readonly function: string;
+  readonly helpers: readonly string[];
+}
+
 export interface DeviceJsInspectionResult {
   readonly schemaVersion: 1;
   readonly deviceProgram: DeviceJsProgramDescriptor;
+  readonly inspection: Readonly<{
+    compile: Readonly<DeviceCompileOptions>;
+    publicHelperUsage: readonly DeviceJsPublicHelperUsage[];
+  }>;
 }
 
 export interface DeviceJsCompileResult {
