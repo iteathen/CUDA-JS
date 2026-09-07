@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 import { CUDA_JS_COMPATIBILITY } from 'cuda-js/compatibility';
 
-assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.18');
+assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.19');
 assert.deepEqual(CUDA_JS_COMPATIBILITY.capabilities.preparedOperationDagLimits, {
   nodes: 32,
   edges: 64,
