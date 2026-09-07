@@ -1,6 +1,6 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.18",
+  "version": "0.1.0-alpha.19",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
   "license": "AGPL-3.0-or-later",
@@ -78,6 +78,7 @@
     "exp:001:prepare": "node scripts/run-exp-001.mjs prepare",
     "f3:unit": "node scripts/run-f3.mjs unit",
     "f3:mock": "node scripts/run-f3.mjs mock",
+    "f3:build": "node scripts/run-f3.mjs build",
     "f3:native": "node scripts/run-f3.mjs native",
     "f3:verify": "node scripts/run-f3.mjs verify",
     "f3:portable": "node scripts/run-f3.mjs portable",
