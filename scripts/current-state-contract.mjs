@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const GLOBAL_AGENTS_REDIRECT = '[Global agent instructions](https://github.com/iteathen/.github/blob/main/AGENTS.md)\n';
 
 const forbiddenLiveKeys = new Set([
   'current_main',
@@ -36,6 +37,7 @@ export function validateCurrentStateContract({
   compatibilityManifest,
   nextStep,
   statusText,
+  rootAgentsText,
   agentLocalText,
 }) {
   const errors = [];
@@ -90,6 +92,10 @@ export function validateCurrentStateContract({
     errors.push('STATUS.md must state that live protected identity comes from GitHub read-back');
   }
 
+  if (rootAgentsText !== GLOBAL_AGENTS_REDIRECT) {
+    errors.push('root AGENTS.md must be the exact immutable one-line redirect to iteathen/.github/AGENTS.md');
+  }
+
   if (typeof agentLocalText !== 'string') {
     errors.push('AGENT_LOCAL.md must exist as repository-local agent context');
   } else {
@@ -112,11 +118,12 @@ async function readJson(relative) {
 }
 
 export async function validateRepositoryCurrentState() {
-  const [packageJson, compatibilityManifest, nextStep, statusText, agentLocalText] = await Promise.all([
+  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText] = await Promise.all([
     readJson('package.json'),
     readJson('packaging/compatibility-manifest.json'),
     readJson('next_step.yaml'),
     readFile(path.join(root, 'STATUS.md'), 'utf8'),
+    readFile(path.join(root, 'AGENTS.md'), 'utf8'),
     readFile(path.join(root, 'AGENT_LOCAL.md'), 'utf8'),
   ]);
 
@@ -125,6 +132,7 @@ export async function validateRepositoryCurrentState() {
     compatibilityManifest,
     nextStep,
     statusText,
+    rootAgentsText,
     agentLocalText,
   });
 }
