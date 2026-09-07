@@ -1,9 +1,9 @@
 {
-  "schema_version": 71,
-  "updated": "2026-09-06",
-  "status": "design_alignment_current_state_corrected_physical_pair_blocked",
-  "objective": "Preserve CUDA-JS as the consumer-neutral CUDA runtime/toolchain owner, remove copied downstream readiness sequencing from CUDA-JS authority, and retain the exact physical CUDA-MCGS/CUDA-JS qualification gap until suitable hardware exists.",
-  "package_candidate": "cuda-js@0.1.0-alpha.18",
+  "schema_version": 72,
+  "updated": "2026-09-07",
+  "status": "device_js_inspection_candidate_physical_pair_blocked",
+  "objective": "Preserve CUDA-JS as the consumer-neutral CUDA runtime/toolchain and Device-JS language owner, expose the lower-owned pure Device-JS inspection stud demonstrated necessary by CUDA-MCGS #124, and retain the separate exact physical CUDA-MCGS/CUDA-JS qualification gap until suitable hardware exists.",
+  "package_candidate": "cuda-js@0.1.0-alpha.19",
   "public_api_schema": 1,
   "live_state_policy": {
     "protected_commit_identity": "remote-readback-only",
@@ -33,12 +33,13 @@
     "repository": "iteathen/CUDA-JS",
     "issue": 32,
     "name": "exact physical CUDA-MCGS/CUDA-JS compatible-pair qualification",
-    "state": "runner-ready and portable-qualified; blocked only on an accepted directly exposed physical NVIDIA environment",
-    "next_action": "When accepted physical hardware is available, freeze the exact live CUDA-JS/CUDA-MCGS revisions and environment and run the existing physical compatible-pair qualification. Until then do not manufacture source work for an evidence-infrastructure gap.",
-    "exit": "Issue #32 receives reviewed exact-profile physical evidence or the physical runner demonstrates a concrete consumer-neutral CUDA-JS defect."
+    "state": "runner-ready and portable-qualified; blocked only on an accepted directly exposed physical NVIDIA environment; bounded #251 producer correction is independently qualifying",
+    "next_action": "Protect the independently qualified #251 pure Device-JS inspection correction, then return to the existing physical-pair wait state. When accepted physical hardware is available, freeze the exact live CUDA-JS/CUDA-MCGS revisions and environment and run the existing physical compatible-pair qualification.",
+    "exit": "Issue #32 receives reviewed exact-profile physical evidence or the physical runner demonstrates another concrete consumer-neutral CUDA-JS defect."
   },
   "producer_boundary": {
     "owns": [
+      "consumer-neutral Device-JS syntax/type/helper validation and semantic program identity",
       "consumer-neutral Device-JS/compiler/runtime/provider/resource/lifecycle/compatibility mechanisms",
       "the exact public capabilities and qualification facts exposed by CUDA-JS"
     ],
@@ -47,9 +48,10 @@
       "CUDA-MCGS issue readiness or work ordering",
       "downstream product numerical qualification or release gates"
     ],
-    "rule": "A downstream consumer decides whether CUDA-JS public facts are sufficient for that consumer. CUDA-JS may record a consumer-demonstrated generic gap, but it does not gate one consumer on another consumer's evidence."
+    "rule": "A downstream consumer decides whether CUDA-JS public facts are sufficient for that consumer. CUDA-JS may record and repair a consumer-demonstrated generic gap, but it does not gate one consumer on another consumer's evidence."
   },
   "cross_repository_facts": [
+    "CUDA-JS #251 exposes pure inspectDeviceProgram() so downstream composers can validate the CUDA-JS-owned Device-JS language without copying helper/type truth or opening native resources.",
     "CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics and may consume public CUDA-JS capabilities independently.",
     "CUDA-MCGS owns evaluator/search/request/batch/scatter/publication lifecycle and independently decides when its public lower dependencies are sufficient.",
     "UCI-Arena-Vector owns its checkpoint-bound numerical oracle; that product evidence is not a CUDA-JS prerequisite for unrelated CUDA-MCGS framework work.",
@@ -57,7 +59,7 @@
   ],
   "hard_constraints": [
     "No Tensor, NN, evaluator, search or product semantics in CUDA-JS.",
-    "No consumer-local native workaround for a generic CUDA-JS capability gap.",
+    "No consumer-local native or Device-JS-language workaround for a generic CUDA-JS capability gap.",
     "No portable/mock/package/VM evidence promoted to native/provider/physical support.",
     "Consumer readiness and downstream work ordering are not copied into CUDA-JS as authority.",
     "Protected integration requires exact-head qualification, complete review, exact base/tree validation and protected read-back."
