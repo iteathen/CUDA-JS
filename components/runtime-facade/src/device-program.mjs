@@ -1,6 +1,6 @@
 import { normalizeLinkRequest } from '../../compiler-actor/index.mjs';
 import { inspectCudaTarget, pairedCudaTarget } from '../../cuda-target/index.mjs';
-import { DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
+import { DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, inspectValidatedDeviceProgramUsage, translateDeviceLibrary, translateDeviceProgram } from '../../device-js/index.mjs';
 
 import { freezePublic, publicError } from './errors.mjs';
 import { inspectRuntimeCompileTarget } from './runtime.mjs';
@@ -225,7 +225,14 @@ function inspectProgram(request, compileOverride = undefined) {
 export function inspectDeviceProgram(request) {
   try {
     const inspected = inspectProgram(request);
-    return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(inspected.translated) });
+    return freezePublic({
+      schemaVersion: 1,
+      deviceProgram: publicProgram(inspected.translated),
+      inspection: {
+        compile: { ...inspected.translated.compile },
+        publicHelperUsage: inspectValidatedDeviceProgramUsage(request.source, inspected.translated),
+      },
+    });
   } catch (error) {
     throw publicError(error, 'device-js.inspect');
   }
