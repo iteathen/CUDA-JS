@@ -148,3 +148,15 @@ Completion requires exact-effect inspection, evidence, cleanup, Git state, contr
 ## Publication state
 
 The public `iteathen/CUDA-JS` repository exists. Publication/integration claims require remote read-back of the exact protected branch/tree. Local or candidate evidence is not a protected-main publication claim until the exact remote revision and required checks/evidence are read back.
+
+## Execution efficiency / mutation hygiene
+
+These are **default suggestions, not mandatory sequencing rules**. Use them when they reduce uncertainty, duplication, or avoidable mutation risk. Current validated information and repository-specific authority can justify a different sequence; do not perform a step merely for procedural completeness.
+
+- **Read before write when the read can materially improve the decision.** Reuse prior validated context when its assumptions still hold. A safe, isolated, informative write can itself be research.
+- **Prefer one ownership unit at a time when that keeps reasoning and review clear.** Cross ownership boundaries deliberately when the real problem or solution spans them.
+- **Introduce new mechanisms when they solve a real problem.** Avoid gratuitous machinery, not invention.
+- **When state is unexpected, stop and assess before acting.** Then choose whether to preserve it, repair forward, or roll back; rollback is not the default.
+- **Qualify proportionally.** Validate before propagation when remaining uncertainty would become meaningfully more expensive. For simple, well-understood, mechanical changes, propagate then qualify once when that is cheaper and equally sound.
+- **Reuse valid evidence and established conclusions.** Do not repeat research or validation solely to satisfy process form.
+- Prefer the path that uses available information to reduce uncertainty and rework at reasonable cost while preserving correctness, ownership, recoverability, and honest evidence.
