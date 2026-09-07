@@ -1,12 +1,12 @@
 # Repository context: CUDA-JS
 
-Universal engineering and design guidance comes from the account-global `AGENTS.md`. This file contains only CUDA-JS-specific context.
+Universal engineering and design guidance comes from the account-global `AGENTS.md` in `iteathen/.github`. This file contains only CUDA-JS-specific context.
 
 ## Mission and ownership
 
 CUDA-JS is the generic Node/CUDA runtime and toolchain layer. It owns consumer-neutral Device-JS/compiler/artifact/module/function/runtime/provider/memory/operation/lifecycle/compatibility mechanisms and scalar Device-JS numeric helpers.
 
-It does not own MCGS/search policy, generic Tensor semantics, reusable NN/model semantics, or downstream product/domain semantics.
+It does not own CUDA-MCGS/search policy, generic Tensor semantics, reusable NN/model semantics, or downstream product/domain semantics. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics.
 
 ## Local routing
 
