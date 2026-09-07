@@ -9,14 +9,15 @@ import { validateCurrentStateContract } from './current-state-contract.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 async function loadRepositoryFixture() {
-  const [packageJson, compatibilityManifest, nextStep, statusText, agentLocalText] = await Promise.all([
+  const [packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText] = await Promise.all([
     readFile(path.join(root, 'package.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'packaging/compatibility-manifest.json'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'next_step.yaml'), 'utf8').then(JSON.parse),
     readFile(path.join(root, 'STATUS.md'), 'utf8'),
+    readFile(path.join(root, 'AGENTS.md'), 'utf8'),
     readFile(path.join(root, 'AGENT_LOCAL.md'), 'utf8'),
   ]);
-  return { packageJson, compatibilityManifest, nextStep, statusText, agentLocalText };
+  return { packageJson, compatibilityManifest, nextStep, statusText, rootAgentsText, agentLocalText };
 }
 
 function clone(value) {
@@ -64,6 +65,15 @@ test('rejects status/current-focus disagreement for the active issue', async () 
     statusText: fixture.statusText.replaceAll(marker, '#999'),
   });
   assert.ok(errors.some((error) => error.includes(`current focus #${issue}`)));
+});
+
+test('rejects root AGENTS mutation away from the immutable global redirect', async () => {
+  const fixture = await loadRepositoryFixture();
+  const errors = validateCurrentStateContract({
+    ...fixture,
+    rootAgentsText: `${fixture.rootAgentsText}Local policy must not be added here.\n`,
+  });
+  assert.ok(errors.some((error) => error.includes('exact immutable one-line redirect')));
 });
 
 test('rejects local agent routing drift and retired dashboards', async () => {
