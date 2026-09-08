@@ -18,16 +18,19 @@ This registry tells developers and agents where durable truth belongs. Update it
 
 ## Governance and documentation boundaries
 
+Reusable engineering, design, execution, evidence, review and cleanup doctrine is owned by the account-global [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md). Repository `AGENTS.md` files are compatibility/discovery pointers only. CUDA-JS-specific context starts at `AGENT_LOCAL.md`; retained general-process material under `agent_files/` is legacy where it overlaps the global authority.
+
 | Boundary ID | Owns | Authoritative location | Status |
 |---|---|---|---|
-| `governance.entry` | Mandatory startup, authority order, hard project boundaries, current phase | [`../AGENTS.md`](../AGENTS.md) | Active |
-| `governance.agent-procedure` | Repository-specific reasoning, work sizing, experiment discipline, cleanup | [`AGENTS.md`](AGENTS.md) and [`AI_RULES.md`](AI_RULES.md) | Active |
-| `governance.design` | LEGO/SOLID/CUPID/KISS hierarchy, domain-appropriate foundations, value ordering | [`DESIGN_ALIGNMENT_CARD.md`](DESIGN_ALIGNMENT_CARD.md), [`general_foundation/PRINCIPLES.md`](general_foundation/PRINCIPLES.md), and [`general_foundation/ENGINEERING_JUDGMENT.md`](general_foundation/ENGINEERING_JUDGMENT.md) | Accepted |
-| `governance.workflow` | Assessment, focus branches, plan execution, testing/debugging, sanity checks, PR integration, cleanup, token use, documentation and security | [`general_foundation/`](general_foundation/README.md) | Accepted |
-| `governance.validation` | Evidence, exact-profile claims, completion and cleanup requirements | [`VALIDATION_POLICY.md`](VALIDATION_POLICY.md) | Active |
-| `governance.runtime-profile` | CUDA-JS native/JIT/runtime-specific constraints | [`application_specific/CUDA_JS_PROFILE.md`](application_specific/CUDA_JS_PROFILE.md) | Active |
-| `governance.registry` | Ownership and source-of-truth map | This file | Active |
-| `governance.public-security` | Public vulnerability-reporting entry point, public native/executable trust-boundary guidance, secret/incident handling | [`../SECURITY.md`](../SECURITY.md), governed by [`general_foundation/SECURITY.md`](general_foundation/SECURITY.md) | Active |
+| `governance.global-agent` | Reusable engineering/design/process/evidence/review/cleanup doctrine shared across iteathen repositories | [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md) | Active account-global authority |
+| `governance.repository-agent-context` | CUDA-JS mission, ownership split, local hard constraints, authority/current-state routing and validation entry | [`../AGENT_LOCAL.md`](../AGENT_LOCAL.md) | Active local authority |
+| `governance.agent-index` | Current CUDA-JS agent-support routing and legacy classification | [`README.md`](README.md) | Active local routing |
+| `governance.validation` | CUDA-JS-specific evidence, exact-profile claims, completion and cleanup requirements | [`VALIDATION_POLICY.md`](VALIDATION_POLICY.md) | Active local authority |
+| `governance.runtime-profile` | CUDA-JS native/JIT/runtime-specific constraints | [`application_specific/CUDA_JS_PROFILE.md`](application_specific/CUDA_JS_PROFILE.md) | Active local context |
+| `governance.registry` | CUDA-JS ownership and source-of-truth map | This file | Active |
+| `governance.legacy-agent-material` | Historical rationale for superseded repository-local reusable engineering/process doctrine | [`AI_RULES.md`](AI_RULES.md), [`DESIGN_ALIGNMENT_CARD.md`](DESIGN_ALIGNMENT_CARD.md), and [`general_foundation/`](general_foundation/README.md) | Retained legacy; global authority governs overlap |
+| `governance.entry-pointer` | Compatibility discovery of the account-global agent authority | [`../AGENTS.md`](../AGENTS.md) and [`AGENTS.md`](AGENTS.md) | Pointer only; not independent authority |
+| `governance.public-security` | CUDA-JS public vulnerability-reporting entry point and repository-specific native/executable trust-boundary guidance | [`../SECURITY.md`](../SECURITY.md) | Active local/public authority; reusable security method remains account-global |
 | `project.public-repository` | Public-repository CI trust model, immutable Action provenance/update policy, hardening assessment, security-setting state, and source-controlled public hygiene | [`../docs/PUBLIC_REPOSITORY.md`](../docs/PUBLIC_REPOSITORY.md), [`../.github/actions-provenance.json`](../.github/actions-provenance.json), and [`../scripts/verify-public-repository.mjs`](../scripts/verify-public-repository.mjs) | Active informational/validation boundary |
 | `project.foundation-index` | Complete foundational-document inventory and readiness test | [`../docs/FOUNDATION_INDEX.md`](../docs/FOUNDATION_INDEX.md) | Active |
 | `project.charter` | Product mission, universal boundary, safety, resource rules | [`../docs/PROJECT_CHARTER.md`](../docs/PROJECT_CHARTER.md) | Accepted |
@@ -47,7 +50,7 @@ This registry tells developers and agents where durable truth belongs. Update it
 | `project.archive` | Superseded design provenance | [`../docs/archive/`](../docs/archive/README.md) | Active, non-authoritative |
 | `project.state` | Current phase and verified repository state | [`../STATUS.md`](../STATUS.md) | Active |
 | `project.next-step` | One coherent current boundary | [`../next_step.yaml`](../next_step.yaml) | Active |
-| `schema.header-facts` | Pinned official CUDA 13.3 provenance, selection, imported facts, target layouts, deterministic products, and Win64 compatibility bridge | [`../schemas/cuda-13.3/`](../schemas/cuda-13.3/) and [`../tools/cuda-schema/`](../tools/cuda-schema/README.md) | Accepted F1B/F5 internal plus Windows bridge |
+| `schema.header-facts` | Pinned official CUDA 13.3 provenance, selection, imported facts, target layouts, deterministic products, and Win64 compatibility bridge | [`../schemas/cuda-13.3/`](../schemas/cuda-13.3/README.md) and [`../tools/cuda-schema/`](../tools/cuda-schema/README.md) | Accepted F1B/F5 internal plus Windows bridge |
 | `schema.semantic-overlay` | Reviewed Tier-0 argument, lifecycle, safety, version, exposure, and conformance meaning | [`../schemas/cuda-13.3/tier-0/semantic-overlay.json`](../schemas/cuda-13.3/tier-0/semantic-overlay.json) | Accepted through F8W private-experimental backend |
 | `runtime.driver-actor` | Bounded async command protocol, one Worker-owned context, memory/execution adapters, permission inheritance, health, and graceful/unexpected-loss lifecycle | [`../components/driver-actor/`](../components/driver-actor/README.md) | Shared native backend with thin Windows/Linux profiles implemented; Windows accepted through F7W, Linux F3L exact qualification pending |
 | `runtime.resource-registry` | Opaque capability identity, generation, state, dependencies, leases, close ordering, and orphan inventory | [`../components/resource-registry/`](../components/resource-registry/README.md) | Accepted F3 internal experimental |

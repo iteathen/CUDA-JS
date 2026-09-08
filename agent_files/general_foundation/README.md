@@ -1,8 +1,12 @@
-# Reusable Engineering Foundation
+# Retained Legacy Engineering Foundation
 
-These documents adapt the shared engineering doctrine used across the owner's large projects to CUDA-JS. They are project-neutral where possible and subordinate to root `AGENTS.md`, accepted CUDA-JS ADRs/specifications, and explicit current owner instruction.
+These documents predate the account-global [`iteathen/.github/AGENTS.md`](https://github.com/iteathen/.github/blob/main/AGENTS.md). They are retained for historical rationale and migration comparison; they are **not** the current reusable engineering instruction chain.
 
-Read selectively: load the instruction chain and every objectively triggered doctrine file, but do not reread the full directory for routine work.
+For current work, read the account-global `AGENTS.md`, then repository `AGENT_LOCAL.md`, then the accepted CUDA-JS-specific authority routed by `agent_files/README.md` and the task. Where a document below overlaps reusable engineering, design, execution, testing, review, cleanup, token, documentation or security doctrine, the account-global authority governs.
+
+Use a legacy document only when its historical rationale is materially useful or when a current CUDA-JS authority explicitly references a still-valid repository-specific fact from it. Do not let a legacy self-description such as “mandatory”, “canonical”, or “accepted” recreate a second universal rule set.
+
+Retained files:
 
 - [`PRINCIPLES.md`](PRINCIPLES.md)
 - [`ENGINEERING_JUDGMENT.md`](ENGINEERING_JUDGMENT.md)
