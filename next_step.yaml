@@ -1,9 +1,9 @@
 {
   "schema_version": 72,
   "updated": "2026-09-09",
-  "status": "physical_pair_passed_reviewed_owner_approved",
+  "status": "view_relation_candidate_review_pending",
   "objective": "Preserve consumer-neutral CUDA-JS mechanisms and the accepted exact physical pair; qualify future changed profiles separately.",
-  "package_candidate": "cuda-js@0.1.0-alpha.19",
+  "package_candidate": "cuda-js@0.1.0-alpha.20",
   "public_api_schema": 1,
   "live_state_policy": {
     "protected_commit_identity": "remote-readback-only",
@@ -35,12 +35,11 @@
   },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
-    "issue": 32,
-    "name": "exact physical CUDA-MCGS/CUDA-JS compatible-pair qualification",
-    "state": "passed-reviewed-owner-approved",
-    "next_action": "Publish accepted evidence and reconcile #32 closure; retain separate #4 native Ubuntu and #68 operational evidence gates.",
-    "exit": "Exact-profile physical evidence passed review and received project-owner approval.",
-    "evidence": "https://github.com/iteathen/CUDA-MCGS/blob/main/docs/evidence/gate-32-2026-09-09/README.md"
+    "issue": 260,
+    "name": "public device-view byte-range relation",
+    "state": "implemented-candidate",
+    "next_action": "Complete portable/package checks and PR review; await project-owner review before merge.",
+    "evidence": "docs/specs/SPEC-0021-view-relation-addendum.md"
   },
   "producer_boundary": {
     "owns": [

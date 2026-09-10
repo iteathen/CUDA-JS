@@ -7,7 +7,7 @@
 ## Current package and support truth
 
 ```text
-package:                     cuda-js@0.1.0-alpha.19
+package:                     cuda-js@0.1.0-alpha.20
 public API schema:           1
 host source model:           JavaScript/ESM, Worker-owned Node FFI
 exact Node evidence baseline: Node 26.7.0
@@ -57,3 +57,7 @@ This qualifies only the recorded pair. The later F8 verifier correction updates 
 ## Claim limits
 
 Portable/mock/package evidence cannot become native CUDA/provider support. Protected integration requires exact-head qualification, complete review, exact base/tree validation and protected read-back. No downstream readiness claim is authoritative merely because it is repeated in this repository.
+
+## Candidate #260 — public view relation
+
+The [SPEC-0021 relation addendum](docs/specs/SPEC-0021-view-relation-addendum.md) proposes synchronous `inspectDeviceViewRelation(a, b)` with private parent/range validation and no native work. The alpha.20 candidate returns only same-range/overlap/disjoint; upper libraries retain alias policy. PR review and owner review precede integration. Existing #32 native qualification remains tied to its recorded alpha.19 pair.

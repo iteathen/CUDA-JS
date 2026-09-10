@@ -89,7 +89,7 @@ for (const relative of implementationFiles) {
 
 const tarball = path.join(packageRoot, packageRecord.filename);
 assert(existsSync(tarball));
-const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-tanh.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs'];
+const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-tanh.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs', 'consumer-view-relation.mjs'];
 const observations = [];
 for (const fixture of fixtureNames) {
   const consumerName = path.basename(fixture, '.mjs');
@@ -138,6 +138,9 @@ assert.deepEqual(borrowerObservation, {
   graceful: true,
 });
 const compatibilityObservation = observations.find((entry) => entry.consumer === 'portable-compatibility-limits');
+assert.deepEqual(observations.find((entry) => entry.consumer === 'portable-view-relation'), {
+  consumer: 'portable-view-relation', publicOnly: true, independentPolicies: 2, graceful: true,
+});
 assert(compatibilityObservation);
 assert.equal(compatibilityObservation.packageVersion, projectPackage.version);
 assert.equal(compatibilityObservation.deviceMemoryAllocationMinimumAlignmentBytes, 256);

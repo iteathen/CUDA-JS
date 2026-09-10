@@ -1,6 +1,6 @@
 # CUDA-JS packaging
 
-This directory owns package compatibility metadata and release boundaries for the no-addon ESM library. The `cuda-js@0.1.0-alpha.19` source package is available for alpha testing; npm publication has not occurred.
+This directory owns package compatibility metadata and release boundaries for the no-addon ESM library. The `cuda-js@0.1.0-alpha.20` source package is available for alpha testing; npm publication has not occurred.
 
 Node.js 26.1.0 or later is required. The package exposes the main runtime, compatibility inspection, pure `inspectDeviceProgram()` frontend inspection, and a mock-only testing entry point. Native execution also requires the experimental FFI flag and the selected Driver/toolkit profile; pure Device-JS inspection does not.
 
