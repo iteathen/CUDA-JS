@@ -2,7 +2,7 @@
 
 **Status:** Active operational state
 
-**Updated:** 2026-09-07
+**Updated:** 2026-09-09
 
 ## Current package and support truth
 
@@ -15,7 +15,7 @@ native Linux x86-64:         testing-unconfirmed / not-qualified
 production support:          no
 performance claims:          none beyond exact recorded evidence
 current generic source gap:  #251 lower Device-JS inspection stud implemented; protected integration pending
-current physical gate:       #32 exact CUDA-MCGS/CUDA-JS compatible-pair qualification
+physical pair #32:          passed, reviewed and owner-approved; exact Windows profile only
 ```
 
 `package.json` owns package identity. `packaging/compatibility-manifest.json` owns the public capability projection. The exact protected branch/commit/tree identity is read from GitHub when exact identity matters; this file does not own a self-updating live SHA.
@@ -48,13 +48,11 @@ CUDA-JS owns only its **producer facts**: what public capability exists, its exa
 
 Therefore CUDA-JS does **not** sequence CUDA-MCGS #124 behind UCI-Arena-Vector numerical qualification. Vector's independent checkpoint oracle remains Vector-owned product evidence. CUDA-MCGS independently owns the readiness and work ordering of its product-neutral evaluator/runtime composition. If either consumer demonstrates a genuinely consumer-neutral CUDA-JS defect, that defect routes back here without moving consumer policy into CUDA-JS.
 
-## Current CUDA-JS steady-state focus — #32 physical compatible pair
+## Accepted physical compatible pair — #32
 
-Outside the bounded #251 producer correction, CUDA-JS #32 remains the steady CUDA-JS-owned execution seam. The runner is ready and portable-qualified, but exact physical qualification is blocked on an accepted directly exposed NVIDIA environment. Hosted, VM, mock, package, Tensor or downstream product evidence cannot substitute for that physical evidence.
+The exact protected pair passed on Windows x64 / GTX 1660 Ti / driver 610.74 / CUDA 13.3 / Node 26.7.0. The [published review and evidence](https://github.com/iteathen/CUDA-MCGS/blob/main/docs/evidence/gate-32-2026-09-09/README.md) record all source/tree/package/API identities, one 4 × 256 launch, 4096 terminal bytes, Channel release/acquire publication and graceful cleanup. The project owner approved the review and gate completion.
 
-Immediately before a hardware run, read the live protected CUDA-JS and CUDA-MCGS heads/trees plus package/API/toolchain/environment identities and freeze only the tuple actually executed. A failure that demonstrates a generic lower defect belongs here; absence of hardware does not.
-
-CUDA-JS #4 native Ubuntu qualification remains a separate physical support cell. CUDA-JS #68 remains external operational security evidence.
+This qualifies only the recorded pair. The later F8 verifier correction updates its stale alpha.18 expectation to alpha.19; its full Windows hardware run is separate from the protected pair evidence. Future materially changed pairs require fresh qualification. CUDA-JS #4 native Ubuntu qualification and #68 operational security evidence remain separate.
 
 ## Claim limits
 
