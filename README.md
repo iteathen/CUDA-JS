@@ -2,7 +2,7 @@
 
 CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work through CUDA. It is intended for JavaScript library and application developers who need explicit device-memory, compilation, and execution control.
 
-**Package:** `cuda-js@0.1.0-alpha.19`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
+**Package:** `cuda-js@0.1.0-alpha.20`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
 
 ## Why CUDA-JS
 

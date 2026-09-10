@@ -1,4 +1,5 @@
 import { openCompilerRuntime } from '../../compiler-actor/index.mjs';
+import { deviceViewRangesOverlap } from '../../memory/index.mjs';
 import { CUDA_TARGET_POLICY_ENTRIES, CUDA_TARGET_POLICY_VERSION } from '../../cuda-target/index.mjs';
 import { DeviceSelectionAuthority, resolveArchitectureTarget, resolveOpaqueDeviceSelector } from '../../device-selection/index.mjs';
 import { discoverDriverDevices, openDriverRuntime } from '../../driver-actor/index.mjs';
@@ -211,6 +212,23 @@ function resourceFor(resource, runtime, kind, operation) {
   }
   dataFor(runtime, operation);
   return entry;
+}
+
+/** Inspect byte-range relations without exposing allocation identity or contacting an actor. */
+export function inspectDeviceViewRelation(a, b) {
+  const operation = 'memory.view.relation';
+  const runtime = resourceData.get(a)?.runtime;
+  const left = resourceFor(a, runtime, 'device-view', operation);
+  const right = resourceFor(b, runtime, 'device-view', operation);
+  const leftMemory = resourceFor(left.memory, runtime, 'device-memory', operation);
+  const rightMemory = resourceFor(right.memory, runtime, 'device-memory', operation);
+  // A close may be awaiting its actor reply while the facade still says open.
+  if ([left, right, leftMemory, rightMemory].some((entry) => entry.closePromise !== null)) {
+    throw facadeError('CUDA_JS_RESOURCE_CLOSING', 'stale-resource', 'View relation requires capabilities with no pending close.', {}, operation);
+  }
+  if (left.memory !== right.memory) return 'disjoint';
+  if (left.byteOffset === right.byteOffset && left.byteLength === right.byteLength) return 'same-range';
+  return deviceViewRangesOverlap(left, right) ? 'overlap' : 'disjoint';
 }
 
 async function invoke(operation, callback) {

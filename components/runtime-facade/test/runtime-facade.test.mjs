@@ -22,7 +22,7 @@ function driverDescription(claim = 'stub') {
 }
 
 test('compatibility and host inspection are immutable and reconcile the current public surface', () => {
-  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.19');
+  assert.equal(CUDA_JS_COMPATIBILITY.package.version, '0.1.0-alpha.20');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceSelection, 'finite-sanitized-snapshot-opaque-process-local-selector-one-device-per-runtime-selected-targets');
   assert.equal(CUDA_JS_COMPATIBILITY.capabilities.deviceMemoryAllocationMinimumAlignmentBytes, 256);
   assert.equal(CUDA_JS_COMPATIBILITY.node.version, 'v26.7.0');

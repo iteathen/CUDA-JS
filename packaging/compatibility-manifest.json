@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.19",
+    "version": "0.1.0-alpha.20",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -56,6 +56,7 @@
     "deviceMemoryAllocationMinimumAlignmentBytes": 256,
     "moduleFormats": ["ptx", "cubin"],
     "functionParameters": ["device-memory", "u32", "u64", "i32", "f32", "f64", "f16", "bf16", "publication-mailbox-host-to-device-u32", "publication-mailbox-device-to-host-u32"],
+    "deviceViewRelation": "pure-same-runtime-byte-range-relation-v1",
     "typedDeviceViews": "allocation-owned-contiguous-1d-opaque-capability-explicit-launch-access",
     "launchConcurrency": 1,
     "gpuOperationLifecycle": "opaque-submit-status-wait-close-one-pending",

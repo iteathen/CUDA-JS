@@ -139,6 +139,12 @@ export interface LaunchDimensions { x: number; y: number; z: number; }
 
 export type CudaDeviceViewDtype = 'u32' | 'u64' | 'i32' | 'f32' | 'f64' | 'f16' | 'bf16';
 export type CudaDeviceViewAccess = 'read' | 'write' | 'read-write';
+export type CudaDeviceViewRelation = 'same-range' | 'overlap' | 'disjoint';
+/** Synchronous byte-range fact for live same-runtime views; throws on incomparable capabilities.
+ * Equal empty ranges of one allocation are same-range; all other empty comparisons are disjoint.
+ * Dtype/access do not affect the relation. No allocation identity or native work is exposed.
+ */
+export function inspectDeviceViewRelation(a: CudaDeviceView, b: CudaDeviceView): CudaDeviceViewRelation;
 export interface CudaDeviceViewOptions {
   dtype: CudaDeviceViewDtype;
   elementCount: number;

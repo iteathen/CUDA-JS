@@ -311,7 +311,7 @@ export function validatePublicCapabilityProjection({ packageJson, compatibility,
   validateNnAuthorityProjection(errors, packageJson, documents);
 
   const stalePatterns = [
-    [/0\.1\.0-alpha\.2/, 'obsolete package version'],
+    [/0\.1\.0-alpha\.2(?!\d)/, 'obsolete package version'],
     [/Device LTO is (?:\*\*)?planned/i, 'obsolete Device LTO implementation state'],
     [/not yet an accepted production capability/i, 'obsolete Device LTO authority state'],
     [/compiled or source device modules/i, 'obsolete CUDA-MCGS module ownership'],

@@ -3,6 +3,17 @@ import test from 'node:test';
 
 import { validatePublicCapabilityProjection } from './public-capability-projection.mjs';
 
+test('obsolete alpha.2 detection does not reject additive alpha.20 package identities', () => {
+  for (const document of ['readme', 'packaging']) {
+    const old = fixture();
+    old.documents[document] += '\n0.1.0-alpha.2';
+    assert(validatePublicCapabilityProjection(old).includes(`${document} contains obsolete package version`));
+    const current = fixture();
+    current.documents[document] += '\n0.1.0-alpha.20';
+    assert(!validatePublicCapabilityProjection(current).includes(`${document} contains obsolete package version`));
+  }
+});
+
 const HISTORICAL_NN_COMPONENT_ANCHORS = [
   'nn.facade', 'nn.tensor', 'nn.operator', 'nn.graph', 'nn.autodiff', 'nn.memory-plan',
   'nn.provider-registry', 'nn.provider.cublaslt', 'nn.provider.cudnn', 'nn.provider.generated',

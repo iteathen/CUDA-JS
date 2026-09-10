@@ -50,3 +50,5 @@ The example copies zero-filled bytes to and from device memory. It does not comp
 - [Conformance entry points](../../conformance/README.md).
 
 Use the governing specifications for parameter, lifecycle, failure, and compatibility details. [Current status](../../STATUS.md) tracks outstanding implementation and qualification work.
+
+Public view inspection: import inspectDeviceViewRelation from cuda-js to compare live same-runtime views synchronously. The result is same-range, overlap, or disjoint; dtype/access do not affect byte relations. Invalid, closing, closed and cross-runtime capabilities throw. No actor/native calls or parent identity are exposed. See docs/specs/SPEC-0021-view-relation-addendum.md for empty-range semantics and claim limits.
