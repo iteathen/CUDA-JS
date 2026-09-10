@@ -1,8 +1,8 @@
 {
   "schema_version": 72,
-  "updated": "2026-09-07",
-  "status": "device_js_inspection_candidate_physical_pair_blocked",
-  "objective": "Preserve CUDA-JS as the consumer-neutral CUDA runtime/toolchain and Device-JS language owner, expose the lower-owned pure Device-JS inspection stud demonstrated necessary by CUDA-MCGS #124, and retain the separate exact physical CUDA-MCGS/CUDA-JS qualification gap until suitable hardware exists.",
+  "updated": "2026-09-09",
+  "status": "physical_pair_passed_reviewed_owner_approved",
+  "objective": "Preserve consumer-neutral CUDA-JS mechanisms and the accepted exact physical pair; qualify future changed profiles separately.",
   "package_candidate": "cuda-js@0.1.0-alpha.19",
   "public_api_schema": 1,
   "live_state_policy": {
@@ -19,7 +19,11 @@
     "meaning": "Protected design-governance provenance, not a self-updating current-main field. Exact live protected branch/commit/tree identity is always read from GitHub before qualification or cross-repository freezing."
   },
   "durable_architecture_provenance": {
-    "foundation": ["CJS-F0", "CJS-F1A", "ADR-0002-node-ffi-first-host-binding.md"],
+    "foundation": [
+      "CJS-F0",
+      "CJS-F1A",
+      "ADR-0002-node-ffi-first-host-binding.md"
+    ],
     "external_nn_ownership": "CJS-CUDA-NN-EXTERNAL",
     "meaning": "Durable architecture/evidence routing markers retained for governance validation only; not a live package, support or downstream-readiness dashboard."
   },
@@ -33,9 +37,10 @@
     "repository": "iteathen/CUDA-JS",
     "issue": 32,
     "name": "exact physical CUDA-MCGS/CUDA-JS compatible-pair qualification",
-    "state": "runner-ready and portable-qualified; blocked only on an accepted directly exposed physical NVIDIA environment; bounded #251 producer correction is independently qualifying",
-    "next_action": "Protect the independently qualified #251 pure Device-JS inspection correction, then return to the existing physical-pair wait state. When accepted physical hardware is available, freeze the exact live CUDA-JS/CUDA-MCGS revisions and environment and run the existing physical compatible-pair qualification.",
-    "exit": "Issue #32 receives reviewed exact-profile physical evidence or the physical runner demonstrates another concrete consumer-neutral CUDA-JS defect."
+    "state": "passed-reviewed-owner-approved",
+    "next_action": "Publish accepted evidence and reconcile #32 closure; retain separate #4 native Ubuntu and #68 operational evidence gates.",
+    "exit": "Exact-profile physical evidence passed review and received project-owner approval.",
+    "evidence": "https://github.com/iteathen/CUDA-MCGS/blob/main/docs/evidence/gate-32-2026-09-09/README.md"
   },
   "producer_boundary": {
     "owns": [
