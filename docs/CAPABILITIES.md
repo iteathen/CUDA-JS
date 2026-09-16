@@ -12,6 +12,11 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
+The accepted [Device-JS warp-32 child](specs/SPEC-0022-warp32-addendum.md) adds
+typed width, lane identity and masked Boolean ballot. It executes entirely on GPU,
+propagates through typed device libraries, and requires explicit collective
+participation. Exact qualification is tracked in the [implementation record](plans/2026-09-15-device-js-warp32.md).
+
 CUDA-JS currently provides an OS-neutral public/component architecture with an exact qualified Windows x64 peer profile. ADR-0006 makes native Linux x86-64 the reference implementation and primary qualification path without making Linux a public-contract assumption. The repository-side EXP-001/F1B/F3L–F8L runner/evidence chain is complete behind shared native owners; exact Linux Driver/compiler/GPU/package evidence remains unrun and unqualified and now waits in a contributor-operated physical-hardware lane. VM/emulated CUDA does not qualify that cell. Later additive capabilities are called out separately when their portable/software implementation is integrated but their exact native qualification remains open:
 
 - Node 26 experimental `node:ffi` as the private host-call substrate, with no CUDA-JS-specific compiled N-API addon in the baseline;

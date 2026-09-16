@@ -50,6 +50,10 @@ The ordinary no-import `compileDeviceProgram()` request and result remain byte-f
 
 ## Identity and ownership
 
+The accepted [warp-32 child](SPEC-0022-warp32-addendum.md) appends its versioned
+requirement to a library contract and propagates it into importing programs.
+Callers must preserve collective participation through device-function calls.
+
 `runtime.device-js` owns source syntax, static types, function/import/export metadata, semantic identities, deterministic symbols, private CUDA lowering, and bounded import-graph rules.
 
 `runtime.compiler-actor` remains the sole owner of NVRTC/nvJitLink options, provider admission, artifact copying/validation, compatibility, cache identity, failure health, and cleanup. Existing compile/link identities already include the generated source or input artifact bytes and provider facts; the Device-JS identities additionally bind the library contract, source/functions/exports/compile options, or the ordered imported semantic/artifact facts.

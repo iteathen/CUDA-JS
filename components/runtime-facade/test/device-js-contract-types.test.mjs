@@ -46,8 +46,11 @@ test('public Device-JS declaration contract unions exactly match admitted runtim
     DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT,
   ].sort();
 
-  assert.deepEqual(literalUnion(text, 'DeviceJsLibraryContract'), libraryContracts);
-  assert.deepEqual(literalUnion(text, 'DeviceJsProgramContract'), programContracts);
+  assert.deepEqual(literalUnion(text, 'DeviceJsBaseLibraryContract'), libraryContracts);
+  assert.deepEqual(literalUnion(text, 'DeviceJsBaseProgramContract'), programContracts);
+  for (const kind of ['Library', 'Program']) {
+    assert(text.includes('export type DeviceJs' + kind + 'Contract = DeviceJsBase' + kind + 'Contract | `${DeviceJsBase' + kind + 'Contract}+SPEC-0022-warp32-v1`;'));
+  }
   assert.match(text, /readonly contract: DeviceJsLibraryContract;/u);
   assert.match(text, /readonly contract: DeviceJsProgramContract;/u);
   assert.doesNotMatch(text, /readonly contract:\s*string\s*;/u);

@@ -2,19 +2,19 @@
 
 **Status:** Active operational state
 
-**Updated:** 2026-09-09
+**Updated:** 2026-09-15
 
 ## Current package and support truth
 
 ```text
-package:                     cuda-js@0.1.0-alpha.20
+package:                     cuda-js@0.1.0-alpha.21
 public API schema:           1
 host source model:           JavaScript/ESM, Worker-owned Node FFI
 exact Node evidence baseline: Node 26.7.0
 native Linux x86-64:         testing-unconfirmed / not-qualified
 production support:          no
 performance claims:          none beyond exact recorded evidence
-current generic source gap:  #251 lower Device-JS inspection stud implemented; protected integration pending
+current generic source work: #262 GPU-resident warp-32 child implemented; exact Windows installed-package evidence passed
 physical pair #32:          passed, reviewed and owner-approved; exact Windows profile only
 ```
 
@@ -25,6 +25,19 @@ Recorded design-governance provenance for this status transition remains protect
 ## Stable ownership
 
 CUDA-JS owns consumer-neutral Device-JS, compiler, artifact, module/function, runtime, provider, memory/resource, operation/publication, lifecycle and compatibility mechanisms. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics. CUDA-MCGS owns evaluator/search/request/batch/scatter/publication/search-lifecycle semantics. Product/model/checkpoint/domain meaning remains downstream.
+
+### GPU-resident warp-32 voting — #262
+
+The [accepted child](docs/specs/SPEC-0022-warp32-addendum.md) implements
+`gpu.warp.width()`, `gpu.warp.laneId()`, and explicit-mask
+`gpu.warp.ballot(mask, predicate)` entirely in device execution.
+Typed libraries propagate the profile into importing programs. Participation is
+an explicit caller obligation; ballot adds no memory fence or host progress loop.
+The [implementation record](docs/archive/plans/2026-09-15-device-js-warp32.md) retains
+evidence and disposition: 45 physical-GPU launches and 993,600 words compared,
+including dependent on-device rounds and both PTX/Device-LTO composition.
+Issue #262 and its linked PR own live integration status. Portable and exact native
+evidence remain separate; no performance or broader platform support is inferred.
 
 ### Device-JS frontend inspection — #251
 

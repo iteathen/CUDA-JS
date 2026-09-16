@@ -15,3 +15,7 @@ These files retain completed or superseded execution plans with their archival d
 | [`2026-08-25-device-js-release-acquire-publication.md`](2026-08-25-device-js-release-acquire-publication.md) | `docs/plans/2026-08-25-device-js-release-acquire-publication.md` | Issue #123 fixed-helper implementation and exact Windows/package qualification completed. | Integration disposition in `next_step.yaml`, then compatible-pair continuation. |
 
 The archive preserves the exact old documents rather than rewriting history. Current work must follow accepted authority and the active forward plans.
+
+The [warp-32 execution record](2026-09-15-device-js-warp32.md) retains the completed
+#262 generic Device-JS implementation and exact installed-package GPU evidence.
+Its live integration disposition belongs to the linked issue/PR.

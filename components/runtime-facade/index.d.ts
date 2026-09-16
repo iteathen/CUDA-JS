@@ -402,14 +402,17 @@ export interface DeviceJsDeviceFunction extends Omit<DeviceJsFunction, 'kind'> {
 
 export type DeviceJsLibraryCompileOptions = Omit<DeviceCompileOptions, 'relocatableDeviceCode'>;
 
-export type DeviceJsLibraryContract =
+export type DeviceJsBaseLibraryContract =
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-tanh-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0030-tanh-v1+SPEC-0028-device-library-v1';
 
-export type DeviceJsProgramContract =
+/** The warp profile requires warp-aware invocation, including imported collectives. */
+export type DeviceJsLibraryContract = DeviceJsBaseLibraryContract | `${DeviceJsBaseLibraryContract}+SPEC-0022-warp32-v1`;
+
+export type DeviceJsBaseProgramContract =
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1'
@@ -420,6 +423,8 @@ export type DeviceJsProgramContract =
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-tanh-v1+SPEC-0028-device-library-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0030-tanh-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0030-tanh-v1+SPEC-0028-device-library-v1';
+
+export type DeviceJsProgramContract = DeviceJsBaseProgramContract | `${DeviceJsBaseProgramContract}+SPEC-0022-warp32-v1`;
 
 export interface DeviceJsCompileRequest {
   source: string;

@@ -1,9 +1,9 @@
 {
-  "schema_version": 72,
-  "updated": "2026-09-09",
-  "status": "view_relation_candidate_review_pending",
+  "schema_version": 73,
+  "updated": "2026-09-15",
+  "status": "warp32_implemented_exact_profile_evidence",
   "objective": "Preserve consumer-neutral CUDA-JS mechanisms and the accepted exact physical pair; qualify future changed profiles separately.",
-  "package_candidate": "cuda-js@0.1.0-alpha.20",
+  "package_candidate": "cuda-js@0.1.0-alpha.21",
   "public_api_schema": 1,
   "live_state_policy": {
     "protected_commit_identity": "remote-readback-only",
@@ -35,11 +35,11 @@
   },
   "current_focus": {
     "repository": "iteathen/CUDA-JS",
-    "issue": 260,
-    "name": "public device-view byte-range relation",
-    "state": "implemented-candidate",
-    "next_action": "Complete portable/package checks and PR review; await project-owner review before merge.",
-    "evidence": "docs/specs/SPEC-0021-view-relation-addendum.md"
+    "issue": 262,
+    "name": "general-purpose GPU-resident warp-32 voting",
+    "state": "implemented-exact-windows-evidence",
+    "next_action": "Consult #262 and its linked PR for protected integration read-back. Additional architectures or platforms require their own exact native evidence; broader helpers remain demand-driven.",
+    "evidence": "docs/archive/plans/2026-09-15-device-js-warp32.md"
   },
   "producer_boundary": {
     "owns": [

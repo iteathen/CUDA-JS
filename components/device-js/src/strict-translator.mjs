@@ -6,6 +6,7 @@ import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
 import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_ERF_CONTRACT, DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_LIBRARY_CONTRACT, DEVICE_JS_TANH_CONTRACT, DEVICE_JS_TANH_LIBRARY_CONTRACT, isScopedAtomicHelper, isVoidHelper } from './contract-profile.mjs';
 import { CUDA_SCALAR_TYPES, denseNumericPreludeLines } from './dense-numeric-profile.mjs';
 import { deviceJsError } from './errors.mjs';
+import { contractUsesWarp, warpPreludeLines, withoutWarpContract, withWarpContract } from './warp-profile.mjs';
 import { translateDeviceLibrary as translateRawDeviceLibrary, translateDeviceProgram as translateRawDeviceProgram } from './translator.mjs';
 
 const encoder = new TextEncoder();
@@ -98,6 +99,7 @@ function memberPath(node) {
 }
 
 function contractUsesDenseNumeric(contract) {
+  contract = withoutWarpContract(contract);
   return [
     DEVICE_JS_DENSE_NUMERIC_CONTRACT,
     DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT,
@@ -107,6 +109,7 @@ function contractUsesDenseNumeric(contract) {
 }
 
 function libraryContractFor(contract) {
+  if (contractUsesWarp(contract)) return withWarpContract(libraryContractFor(withoutWarpContract(contract)), true);
   if (contract === DEVICE_JS_DENSE_NUMERIC_ERF_TANH_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT;
   if (contract === DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT;
   if (contract === DEVICE_JS_DENSE_NUMERIC_TANH_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT;
@@ -160,7 +163,7 @@ function validateAdditionalContract(ast, functions, contract) {
     }
   }
   visit(ast);
-  return { usesScopedAtomic, usesDenseNumeric: contractUsesDenseNumeric(contract) };
+  return { usesScopedAtomic, usesDenseNumeric: contractUsesDenseNumeric(contract), usesWarp: contractUsesWarp(contract) };
 }
 
 function cppType(type) {
@@ -221,7 +224,7 @@ function replaceGeneratedNames(text, replacements) {
   return text;
 }
 
-function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic, usesDenseNumeric }, { canonicalNames = generatedNameMap(sortedFunctions), imports = [], exportSymbols = new Map(), contract = CONTRACT } = {}) {
+function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic, usesDenseNumeric, usesWarp }, { canonicalNames = generatedNameMap(sortedFunctions), imports = [], exportSymbols = new Map(), contract = CONTRACT } = {}) {
   const rawNames = generatedNameMap(raw.functions);
   const replacements = new Map();
   for (const fn of raw.functions) replacements.set(rawNames.get(fn.name), canonicalNames.get(fn.name));
@@ -239,6 +242,7 @@ function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic, u
 
   const lines = [`/* cuda-js Device-JS ${contract}; generated; do not edit */`];
   if (usesDenseNumeric) lines.push(...denseNumericPreludeLines());
+  if (usesWarp) lines.push(...warpPreludeLines());
   if (usesScopedAtomic) lines.push('#include <cuda/atomic>', '');
   for (const entry of imports) {
     const parameters = entry.parameters

@@ -38,6 +38,7 @@ await mkdir(directory, { recursive: true });
 await writeFile(path.join(directory, 'package.json'), `${JSON.stringify({ name: `cuda-js-native-${nativeProfile}-consumer`, version: '1.0.0', private: true, type: 'module' }, null, 2)}\n`);
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-vector.mjs'), path.join(directory, 'consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-device-js.mjs'), path.join(directory, 'device-js-consumer.mjs'));
+await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-warp32.mjs'), path.join(directory, 'warp32-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-multi-operation.mjs'), path.join(directory, 'multi-operation-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-prepared-dag.mjs'), path.join(directory, 'prepared-dag-consumer.mjs'));
 await cp(path.join(repositoryRoot, 'conformance', 'f8', 'fixtures', 'consumer-native-mailbox.mjs'), path.join(directory, 'mailbox-consumer.mjs'));
@@ -54,6 +55,12 @@ const observation = JSON.parse(output.split(/\r?\n/).at(-1));
 assert.equal(observation.checksum, 15_600_773);
 assert.equal(observation.graceful, true);
 const deviceJsOutput = runNode(['--experimental-ffi', 'device-js-consumer.mjs'], directory);
+const warpOutput = runNode(['--experimental-ffi', 'warp32-consumer.mjs', '--native'], directory);
+const warpObservation = JSON.parse(warpOutput.split(/\r?\n/).at(-1));
+assert.equal(warpObservation.native, true);
+assert.equal(warpObservation.submissions, 45);
+assert.equal(warpObservation.checkedWords, 993600);
+assert.equal(warpObservation.graceful, true);
 const deviceJsObservation = JSON.parse(deviceJsOutput.split(/\r?\n/).at(-1));
 assert.equal(deviceJsObservation.sourceOnly, true);
 assert.equal(deviceJsObservation.structuredIntegerBitwise, true);
@@ -136,7 +143,7 @@ assert(!existsSync(installed));
 const target = await writeEvidence(nativePackageEvidenceName, {
   schemaVersion: 1,
   workPackage: `CJS-F8${nativeProfile === 'windows' ? 'W' : 'L'}`,
-  capsule: `installed-package-native-vector-device-js-device-publication-operation-transfer-prepared-dag-mailbox${nativeProfile === 'windows' ? '-cublaslt' : ''}-consumers`,
+  capsule: `installed-package-native-vector-device-js-warp32-device-publication-operation-transfer-prepared-dag-mailbox${nativeProfile === 'windows' ? '-cublaslt' : ''}-consumers`,
   status: 'pass',
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, kernel: os.release(), osVersion: os.version() },
@@ -146,6 +153,14 @@ const target = await writeEvidence(nativePackageEvidenceName, {
     'docs/specs/SPEC-0013-public-surface-addendum.md',
     'docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md',
     'docs/specs/SPEC-0022-device-publication-addendum.md',
+    'docs/specs/SPEC-0022-warp32-addendum.md',
+    'components/device-js/src/warp-profile.mjs',
+    'components/device-js/src/contract-profile.mjs',
+    'components/device-js/src/translator.mjs',
+    'components/device-js/src/strict-translator.mjs',
+    'components/runtime-facade/src/device-program.mjs',
+    'conformance/f8/fixtures/consumer-warp32.mjs',
+    'conformance/f8/run-native.mjs',
     'docs/specs/SPEC-0019-host-memory-and-async-transfer.md',
     'docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md',
     'docs/specs/SPEC-0030-device-js-dense-numeric-profile.md',
@@ -168,6 +183,7 @@ const target = await writeEvidence(nativePackageEvidenceName, {
   package: portable.package,
   observation,
   deviceJsObservation,
+  warpObservation,
   denseNumericOracle,
   denseNumericObservation,
   multiOperationObservation,

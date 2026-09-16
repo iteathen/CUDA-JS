@@ -52,6 +52,7 @@ for (const required of [
   'components/device-js/index.mjs',
   'components/device-js/src/erf-profile.mjs',
   'components/device-js/src/tanh-profile.mjs',
+  'components/device-js/src/warp-profile.mjs',
   'components/device-selection/index.mjs',
   'components/device-selection/src/device-selection.mjs',
   'components/device-js/src/strict-translator.mjs',
@@ -89,7 +90,7 @@ for (const relative of implementationFiles) {
 
 const tarball = path.join(packageRoot, packageRecord.filename);
 assert(existsSync(tarball));
-const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-tanh.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs', 'consumer-view-relation.mjs'];
+const fixtureNames = ['consumer-memory.mjs', 'consumer-compiler.mjs', 'consumer-tanh.mjs', 'consumer-warp32.mjs', 'consumer-cublaslt-borrow.mjs', 'consumer-compatibility-limits.mjs', 'consumer-view-relation.mjs'];
 const observations = [];
 for (const fixture of fixtureNames) {
   const consumerName = path.basename(fixture, '.mjs');
@@ -108,6 +109,12 @@ for (const fixture of fixtureNames) {
 }
 
 const memoryObservation = observations.find((entry) => entry.consumer === 'portable-memory');
+const warpObservation = observations.find((entry) => entry.consumer === 'portable-warp32');
+assert(warpObservation);
+assert.equal(warpObservation.native, false);
+assert.equal(warpObservation.submissions, 0);
+assert.equal(warpObservation.identities.length, 3);
+assert.equal(warpObservation.graceful, true);
 assert(memoryObservation);
 assert.deepEqual(memoryObservation.scalarKinds, ['u64', 'i32', 'f32', 'f64', 'f16', 'bf16']);
 assert.equal(memoryObservation.asyncTransferLifecycle, true);
@@ -157,6 +164,13 @@ const target = await writeEvidence('portable-package.json', {
   generatedAt: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch, profileName },
   sources: await sourceIdentity([
+    'docs/specs/SPEC-0022-warp32-addendum.md',
+    'components/device-js/src/warp-profile.mjs',
+    'components/device-js/src/contract-profile.mjs',
+    'components/device-js/src/translator.mjs',
+    'components/device-js/src/program-inspection.mjs',
+    'components/runtime-facade/index.d.ts',
+    'conformance/f8/fixtures/consumer-warp32.mjs',
     'docs/specs/SPEC-0004-device-memory-foundation.md',
     'docs/specs/SPEC-0004-allocation-alignment-projection-addendum.md',
     'docs/specs/SPEC-0008-package-public-facade.md',

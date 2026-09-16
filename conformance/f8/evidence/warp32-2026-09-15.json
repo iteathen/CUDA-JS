@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "scope": "bounded-warp32-installed-package-qualification",
+  "status": "pass",
+  "generatedAt": "2026-09-16T01:06:30.521Z",
+  "environment": {
+    "node": "v26.7.0",
+    "platform": "win32",
+    "architecture": "x64",
+    "kernel": "10.0.26200",
+    "osVersion": "Windows 11 Pro"
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce GTX 1660 Ti",
+    "driver": "610.74"
+  },
+  "package": {
+    "name": "cuda-js",
+    "version": "0.1.0-alpha.21",
+    "license": "AGPL-3.0-or-later",
+    "filename": "cuda-js-0.1.0-alpha.21.tgz",
+    "sha256": "17f1cb27628d939272e5e9a3b72f726111783b0f68a42f9f4540771b94a4d49f",
+    "files": 155,
+    "unpackedSize": 1255754
+  },
+  "sources": {
+    "docs/specs/SPEC-0022-warp32-addendum.md": "7a64b76f111c670875321b93914d188f26eaec177441e2b59db8a003c8c2bfd2",
+    "components/device-js/src/warp-profile.mjs": "ba6e914ae55ccb31068ed285a8768a47c8825092e0f652fddf1aca54a312c993",
+    "components/device-js/src/contract-profile.mjs": "3cf9ad11ed09bc245f7b0164a8ec006b5523ec52ff897d921c68588cb18be8a6",
+    "components/device-js/src/translator.mjs": "c4839967217203debbf5fe09ab6fe6fbd967c8d8716c48354dba7c66acee65c6",
+    "components/device-js/src/program-inspection.mjs": "15c431fb83298c5e6458d750e8e26eca47c34f0d6261d3068faffac0cc36f2fd",
+    "components/runtime-facade/index.d.ts": "a6f6d50c0e114f1a6b85cfbb9d374d666a94f1e969bafe560d0740dbd2cbbd08",
+    "conformance/f8/fixtures/consumer-warp32.mjs": "3507b2b16c98506b6d1df986f5b1ec4b7423bc841812846e4102370c59b13099",
+    "docs/specs/SPEC-0004-device-memory-foundation.md": "6b25d428e9ab1ac6f188075c77b5b17291737f662a683c16545dfd80a284372b",
+    "docs/specs/SPEC-0004-allocation-alignment-projection-addendum.md": "1e1179314a95f383681c4c428434f66e3bb5181d6d7239dde3dacb49b35eaa1e",
+    "docs/specs/SPEC-0008-package-public-facade.md": "876d400582ea58542a81964ea712f595f250e2216b31b8beed9a73220c0ea713",
+    "docs/specs/SPEC-0008-capability-limit-projection-addendum.md": "443168979d338908a35d5d63ee8ecdf82f514b50d3148d79d8eaf9d32c75b411",
+    "docs/specs/SPEC-0013-restricted-device-js.md": "3c08161c75bab79f15cbbd07ddc1c6c5b4e40909ca58942175ba3c1041a75897",
+    "docs/specs/SPEC-0017-device-selection-and-target-resolution.md": "fe0aed30492f59ad285ee3b3f29cb018f2384d9120a2a35a911f191b784970cc",
+    "docs/specs/SPEC-0013-public-surface-addendum.md": "6b017967baf40a2a7951a9d06387afa85815ce7abeee061379dd082407b37b86",
+    "docs/specs/SPEC-0022-device-publication-addendum.md": "e2a04f9f3a6cd49af31de3e126ad450537c76af8a820b1ffd45bdb6bddb7196d",
+    "docs/specs/SPEC-0021-extended-numeric-abi-and-device-views.md": "32384d0f9654934bbb97a8637e753e6760bda6c9e3bf1ddbac1555468d173212",
+    "docs/specs/SPEC-0019-host-memory-and-async-transfer.md": "d3e7b15d7a6b25952c534462fb45a371052acfc8d860b1b88173c7fe8b59ea0d",
+    "docs/specs/SPEC-0014-long-lived-sideband.md": "77cfcd6373267c708ed3d31ee4e4feefcb6163c67ef319aa7c85f62bb2b932e3",
+    "docs/specs/SPEC-0020-prepared-batch-and-graph-execution.md": "ffcf7ea6a9708dfada971c398631fe8f9e922cea2791314ef279306a22fb3269",
+    "docs/specs/SPEC-0023-context-bound-cuda-library-adapters.md": "694d83981bdde32ae19826bbe7dd5d7596b8ad556747731429308806cfe55527",
+    "docs/specs/SPEC-0028-device-js-library-composition.md": "617352e6abf25b9ca7f4b24d143c931727f071e900f57f5488b46f76012714da",
+    "docs/specs/SPEC-0029-cublaslt-f32-matmul.md": "e1b3afc2edeb955176e538882f1dfa074688d4c1a51cc2a47d10e55f7e2aaf13",
+    "docs/specs/SPEC-0029-borrower-lifecycle-addendum.md": "0352797530eb826efdf7779703ef7bd422b62028111828b6ec2b6b0ae21f1389",
+    "docs/specs/SPEC-0030-device-js-dense-numeric-profile.md": "e3b6ac88b7df86aa8ba115ad9d00defd87356069d199e490c250b895c020d620",
+    "docs/specs/SPEC-0030-erf-addendum.md": "cb37537e751c8601f9ec5f32513ccd12bc7886a25a90c586409aff4d4b2bf91c",
+    "docs/specs/SPEC-0030-tanh-addendum.md": "495771823f062a956752d964d27397fce8017d62263e0f445144932fa588b0e7",
+    "docs/specs/SPEC-0031-prepared-cublaslt-f32-matmul-node.md": "229b21c6ad4ca08c37d11d397de1e5216e4f1602216e58ca74ba61cba1c599e8",
+    "LICENSE": "e0eedba615d5cd1b986afb6c5b3a4b1ae33713e7e9dc74d19daec5e3221f9d2e",
+    "LICENSING.md": "5803d98bf139a95e4d68bf7b67f424d0d208b769c2a66d42abf24b279e97ca2b",
+    "package.json": "eb21980e7efe3e8f72b4bbc47e67f9c78184db07996b19446b364606975ee1eb",
+    "packaging/compatibility-manifest.json": "6c0a010aa925d8c1a05c7ed674aedbe1c8b10e2b222f8c680b1a2d213ec2d212",
+    "components/execution/src/numeric-abi.mjs": "4ea53115e8a9aeb24a5a32e556e93ce16727d46f20f0e870a36b3f29fa9140c1",
+    "components/execution/src/execution-manager.mjs": "fe8a39cc01a2dfd1c7ce779672808df9c80347d02d6765438859d606a8b0e5f7",
+    "components/prepared-execution/src/prepared-operation-dag.mjs": "be87e25b77463a0031211667eb7607b4f3fd5807aa538c91cc60281a56303f32",
+    "components/memory/index.mjs": "cd79c6a4f53f098bebe90d4844e5c8663769cebeefb294394ef2594e39401846",
+    "components/memory/src/allocation-compatibility.mjs": "9eccb7c64bcf4f3f502be26fe29758dd71da00ad99428188890716a06c54d368",
+    "components/memory/src/device-view-manager.mjs": "573d6a7598cfdc027aa65158eddd426c880e28d70ab02b782c58b8b9465ef98d",
+    "components/cuda-library-adapters/src/cuda-library-adapter-manager.mjs": "90372189c8f663121e3f4be75d34faf3b62127c113094af9adf28666fb98553b",
+    "components/publication-mailbox/src/publication-mailbox-manager.mjs": "21375cc4fe3738a0323b5a6350a323370b681fd06dfa1a3725c643bd9a647333",
+    "components/device-js/src/dense-numeric-profile.mjs": "66c4cba97ef5e88ba3d7a0aaafefad44e5dd82fc0cb3f86909ecdafb2d990456",
+    "components/device-js/src/erf-profile.mjs": "d1fecf4e1f053a5473b8861ba2ab7cb0ab566b10edefda3d821921ddbcd4535f",
+    "components/device-js/src/tanh-profile.mjs": "39eac7a739624b32f816c357ae5ac2f0caaa08d713e6f577bb43e3cde2d30437",
+    "components/device-js/src/strict-translator.mjs": "7150d5f2ad15876fc12678b032941c50c762aea75262b06e067bff125bd8f407",
+    "components/device-selection/src/device-selection.mjs": "5d6daf1362a49e1a740d5a87b0f8d59d012c08a557d1afce60a7d412c804871b",
+    "components/runtime-facade/src/runtime.mjs": "246dba35200be03834ec7269e450f37a8a4c7131ce41ed2b886b9b9679d10074",
+    "components/runtime-facade/src/device-program.mjs": "a731c47f494f6fff2e76446fec3629de2a6d613b614e6c890971caecdd17c352",
+    "conformance/f8/fixtures/consumer-memory.mjs": "3510075e41101853ee803af7587d812e14a87edbc649a1794b6c2562d4753ba2",
+    "conformance/f8/fixtures/consumer-compiler.mjs": "a4b7888126df483d1805eb0f707b523d015ce41da823421dab90c2328530f4b8",
+    "conformance/f8/fixtures/consumer-tanh.mjs": "62e9a1ddc76da19ea64580e4c40f1cae4d7ebb0386fca08d464b79141831e550",
+    "conformance/f8/fixtures/consumer-cublaslt-borrow.mjs": "1fbf19535dbb9f2d509493e85375e13f2313f3234a446b2a7e3e99b0321b523e",
+    "conformance/f8/fixtures/consumer-compatibility-limits.mjs": "93ec467f6a94725624314e1bde49323727a23046b2e0e600b0ca2546ba9d2f0c",
+    "conformance/f8/run-portable.mjs": "5642e08e99ebc4617e67ae7e90f218869430abd1708009e0438ef96a0cc2993c",
+    "docs/specs/SPEC-0022-scoped-atomic-observation-addendum.md": "92908db0740ae40cad226d4f3be339d8fa41cc0bbb1bc102b7edfbe76c599374",
+    "conformance/f8/run-native.mjs": "fc0a42750010b57001e0b027e40b84e26689eaf0882e9a1ab9d6eb315ded7e92",
+    "conformance/f8/fixtures/consumer-native-vector.mjs": "cee5f2478e44dab594c1562af4537d9305a6d305ea6ef83a6d01e1e38f486e30",
+    "conformance/f8/fixtures/consumer-native-device-js.mjs": "4f9bbeb111fe95f729de53875e2eb7a451dea07370aaec03d22acc26c0d6c9d0",
+    "conformance/f8/fixtures/consumer-native-dense-numeric.mjs": "7a9f3c0a8fc12eee1ce29d6a716265aaac299dd925ce7a187cd2bf4c38d1094a",
+    "conformance/f8/native/dense-numeric-oracle.cu": "0cee609dec510c94bfa579eb405eaa6417b56e6d71ea76e28cbed496a2345ab6",
+    "conformance/f8/fixtures/consumer-native-multi-operation.mjs": "afc6c5128ce81a0b37ea0fbe5d2dcc55515a73e3c16aef6f7f4bc7c7cc7bfbff",
+    "conformance/f8/fixtures/consumer-native-prepared-dag.mjs": "67c87ba743753494059d112af1353afb5df666c580ba69f8a81dfdaa8b86f42d",
+    "conformance/f8/fixtures/consumer-native-mailbox.mjs": "43362e9213e80601e26347321cdccbb87f516ccc156db1641101f698f24fcfce",
+    "conformance/f8/fixtures/consumer-native-cublaslt.mjs": "1375584fa2ac114347a8482bd1e78eb9e173ad02900697c55afe9a92a1588d76",
+    "conformance/f5/fixtures/vector-add.ptx.txt": "9016259111d05f45df859766b72cb8618eb6df90d0f288b645911bd741987060"
+  },
+  "portable": {
+    "consumer": "portable-warp32",
+    "publicOnly": true,
+    "native": false,
+    "identities": [
+      "24c1f3101517db3ed3a0f1df929f5f9d3ae1f74b8f08c3ddc92ffe4c01fd95c0",
+      "88c01c9b578143e63e9469eb9dc5912a420029ff98e90be1c50be51807fe1939",
+      "6d022ad5c8068ff6ac36612c7ba3c58fc18476667990134721608dab4dc5ad60"
+    ],
+    "checkedWords": 0,
+    "submissions": 0,
+    "deviceRoundsPerSubmission": 8,
+    "graceful": true,
+    "profile": {
+      "profile": {
+        "node": "v26.7.0",
+        "platform": "win32",
+        "architecture": "x64",
+        "nativeOperational": false,
+        "nativeQualified": false
+      },
+      "device": {
+        "schemaVersion": 1,
+        "selection": "default",
+        "architecture": {
+          "major": 7,
+          "minor": 5,
+          "class": "cc-7.5"
+        },
+        "target": {
+          "policyVersion": "SPEC-0006-target-v1",
+          "compile": "compute_75",
+          "link": "sm_75",
+          "identity": "2b31c1c950698dabf4967645afb29d6050d7933eb5b9230a439c230370b93f2d"
+        }
+      },
+      "driver": {
+        "apiVersion": 13030,
+        "deviceCount": 1
+      },
+      "compiler": {
+        "profile": "portable-compiler-mock-v1",
+        "nvrtc": null,
+        "nvrtcBuiltins": null,
+        "nvJitLink": null,
+        "headerProfiles": {
+          "cudaCccl": {
+            "profile": "portable-mock-cuda-cccl-v1",
+            "algorithm": "mock-only",
+            "roots": [
+              "cuda",
+              "nv"
+            ],
+            "fileCount": 1,
+            "byteLength": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "cudaNumeric": {
+            "profile": "portable-mock-cuda-numeric-v1",
+            "algorithm": "mock-only",
+            "roots": [
+              "nv"
+            ],
+            "files": [
+              "cuda_fp16.h",
+              "cuda_bf16.h"
+            ],
+            "fileCount": 2,
+            "byteLength": 2,
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "cudaDevice": {
+            "profile": "portable-mock-cuda-device-v1",
+            "algorithm": "mock-only",
+            "roots": [
+              "cuda",
+              "nv"
+            ],
+            "files": [
+              "cuda_fp16.h",
+              "cuda_bf16.h"
+            ],
+            "fileCount": 3,
+            "byteLength": 3,
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          }
+        }
+      }
+    },
+    "compilerResources": {
+      "programsCreated": 5,
+      "programsDestroyed": 5,
+      "linksCreated": 2,
+      "linksDestroyed": 2
+    },
+    "driverResourceCounts": {
+      "live": 0,
+      "closing": 0,
+      "closed": 2,
+      "orphaned": 0
+    }
+  },
+  "native": {
+    "consumer": "native-warp32",
+    "publicOnly": true,
+    "native": true,
+    "identities": [
+      "24c1f3101517db3ed3a0f1df929f5f9d3ae1f74b8f08c3ddc92ffe4c01fd95c0",
+      "7f27b2b2713adc3cf0da10ea11c1705cc38171f09e68b9d24a5846833d7cf5b8",
+      "63eba4f9c9306d446b6fdf11fd969862e2bf00a5a20bd44b1f44f9a2ef5771d0"
+    ],
+    "checkedWords": 993600,
+    "submissions": 45,
+    "deviceRoundsPerSubmission": 8,
+    "graceful": true,
+    "profile": {
+      "profile": {
+        "node": "v26.7.0",
+        "platform": "win32",
+        "architecture": "x64",
+        "cudaApiVersion": 13030,
+        "nativeOperational": true,
+        "nativeQualified": false
+      },
+      "device": {
+        "schemaVersion": 1,
+        "selection": "default",
+        "architecture": {
+          "major": 7,
+          "minor": 5,
+          "class": "cc-7.5"
+        },
+        "target": {
+          "policyVersion": "SPEC-0006-target-v1",
+          "compile": "compute_75",
+          "link": "sm_75",
+          "identity": "2b31c1c950698dabf4967645afb29d6050d7933eb5b9230a439c230370b93f2d"
+        }
+      },
+      "driver": {
+        "apiVersion": 13030,
+        "deviceCount": 1
+      },
+      "compiler": {
+        "profile": "cuda-13.3-windows-x64-compiler",
+        "nvrtc": {
+          "version": "13.3",
+          "byteLength": 101385328,
+          "sha256": "c7af6b5dbd001852d1b4a18effc6fbcfc94787eddadffea629a8333cb25b05fe"
+        },
+        "nvrtcBuiltins": {
+          "version": "13.3",
+          "byteLength": 6684784,
+          "sha256": "82c703802846329d3bab3d8df06f8c956516a0eeec568033092d6c0a69b2733a"
+        },
+        "nvJitLink": {
+          "version": "13.3",
+          "byteLength": 92465776,
+          "sha256": "727a0acfc4495b229143b53843004eef36e0a3463fb2e1c7c4215468607fd613"
+        },
+        "headerProfiles": {
+          "cudaCccl": {
+            "profile": "cuda-13.3-cccl-cuda-nv-v1",
+            "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+            "roots": [
+              "cuda",
+              "nv"
+            ],
+            "fileCount": 1166,
+            "byteLength": 8527126,
+            "sha256": "e9a5447d01afe22e7d15d2a4bb8c71a9f3a74175d9788781d51a8b61f3c2913c"
+          },
+          "cudaCcclNv": {
+            "profile": "cuda-13.3-cccl-nv-v1",
+            "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+            "roots": [
+              "nv"
+            ],
+            "fileCount": 3,
+            "byteLength": 43086,
+            "sha256": "21727c2c9b50af2d0912e6ba8c2c1e78b5ba6a28c3a11bf8db1d87ce3e501cdc"
+          },
+          "cudaNumericBase": {
+            "profile": "cuda-13.3-dense-numeric-base-v1",
+            "algorithm": "sha256-path-u32le-size-u64le-content-v1",
+            "roots": [],
+            "files": [
+              "builtin_types.h",
+              "crt/host_defines.h",
+              "cuda_bf16.h",
+              "cuda_bf16.hpp",
+              "cuda_device_runtime_api.h",
+              "cuda_fp16.h",
+              "cuda_fp16.hpp",
+              "cuda_runtime_api.h",
+              "device_types.h",
+              "driver_types.h",
+              "surface_types.h",
+              "texture_types.h",
+              "vector_functions.h",
+              "vector_functions.hpp",
+              "vector_types.h"
+            ],
+            "fileCount": 15,
+            "byteLength": 1726046,
+            "sha256": "8c0fa0c3d5a12eba3834564951a56725f97b2664e561b2b3a472c1483746d5c5"
+          },
+          "cudaNumeric": {
+            "profile": "cuda-13.3-dense-numeric-v1",
+            "algorithm": "sha256-header-profile-components-v1",
+            "components": [
+              "cudaCcclNv",
+              "cudaNumericBase"
+            ],
+            "roots": [
+              "nv"
+            ],
+            "files": [
+              "builtin_types.h",
+              "crt/host_defines.h",
+              "cuda_bf16.h",
+              "cuda_bf16.hpp",
+              "cuda_device_runtime_api.h",
+              "cuda_fp16.h",
+              "cuda_fp16.hpp",
+              "cuda_runtime_api.h",
+              "device_types.h",
+              "driver_types.h",
+              "surface_types.h",
+              "texture_types.h",
+              "vector_functions.h",
+              "vector_functions.hpp",
+              "vector_types.h"
+            ],
+            "fileCount": 18,
+            "byteLength": 1769132,
+            "sha256": "d403c1aac7e0cba6b99deeabb3de71e74a91db5e9c9cfdab444f14eb7dc71b78"
+          },
+          "cudaDevice": {
+            "profile": "cuda-13.3-device-headers-v1",
+            "algorithm": "sha256-header-profile-components-v1",
+            "components": [
+              "cudaCccl",
+              "cudaNumericBase"
+            ],
+            "roots": [
+              "cuda",
+              "nv"
+            ],
+            "files": [
+              "builtin_types.h",
+              "crt/host_defines.h",
+              "cuda_bf16.h",
+              "cuda_bf16.hpp",
+              "cuda_device_runtime_api.h",
+              "cuda_fp16.h",
+              "cuda_fp16.hpp",
+              "cuda_runtime_api.h",
+              "device_types.h",
+              "driver_types.h",
+              "surface_types.h",
+              "texture_types.h",
+              "vector_functions.h",
+              "vector_functions.hpp",
+              "vector_types.h"
+            ],
+            "fileCount": 1181,
+            "byteLength": 10253172,
+            "sha256": "808866ffe4425d37f91add4eb6a5957ceed1134a483aa1eced3d614b42881687"
+          }
+        }
+      }
+    },
+    "compilerResources": {
+      "programsCreated": 5,
+      "programsDestroyed": 5,
+      "linksCreated": 2,
+      "linksDestroyed": 2
+    },
+    "driverResourceCounts": {
+      "live": 0,
+      "closing": 0,
+      "closed": 10,
+      "orphaned": 0
+    }
+  },
+  "parentEvidenceSha256": "9557bf3c9fa10b0e11b5bb568a32c816f2ddd851cd13ae0c1475f1818dece284",
+  "claimLimits": [
+    "Exact recorded source bytes, tarball and Windows x64 / Node 26.7.0 / CUDA 13.3 / compute_75 hardware profile only.",
+    "Independent arithmetic Boolean oracle, not mock execution or generated-source self-comparison.",
+    "No CPU-produced intermediate progress across the eight dependent device rounds.",
+    "No performance, other architecture, Linux qualification, registry release or production-stability claim."
+  ]
+}
