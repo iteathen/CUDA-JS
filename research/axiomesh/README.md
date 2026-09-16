@@ -1,153 +1,335 @@
-# Axiomesh
+# AxiomeSH
 
-**Status:** research incubation
+**Status:** research incubation  
+**Research direction:** Josh Oshiro  
+**Current core hypothesis:** agent-native scoped hypergraph rewriting
 
-**Research direction:** Josh Oshiro
+AxiomeSH is an experimental structural knowledge representation for neural reasoning agents.
 
-Axiomesh is a proposed compact formal-logic language and intermediate representation optimized for agent context windows.
+Its central question is:
 
-The central objective is not merely shorter notation. It is to maximize **recoverable logical structure per token** while preserving deterministic semantics, compositional reasoning, explicit dependencies, and machine-checkable reconstruction.
+> Can an agent reason, synthesize, and continue work more effectively when the external representation of knowledge is closer to the relational structure it must manipulate than to a language optimized for human communication?
 
-## Core question
+AxiomeSH is not initially a shorter notation for existing logic. It is an attempt to discover a more direct structural substrate for agent reasoning.
 
-> What is the smallest token-efficient formal representation that lets an agent recover the same useful proof state, dependencies, alternatives, and inference obligations that a much larger natural-language context would carry?
+The current leading hypothesis is:
 
-The language should be designed for model consumption first. Human readability is useful but secondary to semantic density, unambiguous reconstruction, locality, and robust continuation across constrained context windows.
+\[
+\boxed{\text{knowledge}=\text{relational structure}+\text{lawful structural transformation}}
+\]
 
-## Initial hypothesis: tokenized transition chains
+and therefore:
 
-A useful starting hypothesis is to model reasoning as transitions among compact typed logical states:
+\[
+\boxed{G \xrightarrow{R} G'}
+\]
 
-```text
-state/token -> guarded transition -> state/token
-```
+A fact is structure. A relation is structure. A state is structure. A rule is structure. A derivation is a rewrite history. An invariant is structure preserved across a specified class of rewrites. Rules and theories may themselves become first-class structures.
 
-and to investigate whether parts of this transition system admit Markov-like factorization: the next valid inference may depend on a compact sufficient state rather than the complete textual history.
+The graph-rewrite direction is a **research hypothesis, not a settled commitment**.
 
-This is deliberately a **hypothesis, not an architectural commitment**. Ordinary Markov chains discard history by construction; formal reasoning often requires provenance, variable binding, scopes, unresolved alternatives, proof obligations, and nonlocal dependencies. Axiomesh should therefore search for the smallest sufficient state and the exact conditions under which history can be quotiented away.
+## Current documents
 
-Candidate structures to compare include:
+- [`CORE_SPEC_DRAFT_0_1.md`](./CORE_SPEC_DRAFT_0_1.md) — first explicit core specification.
+- [`DESIGN_NOTES.md`](./DESIGN_NOTES.md) — current research rationale, constraints, hypotheses, and falsifiers.
 
-- finite-state and higher-order Markov models;
-- typed transition systems;
-- proof nets and sequent-calculus states;
-- term graphs / DAGs;
-- hypergraphs and dependency graphs;
-- event structures and partial orders;
-- factor graphs / CSP-style local relations;
-- e-graphs and congruence classes;
-- probabilistic automata where uncertainty is genuinely part of the semantics.
+This directory is the durable home for the AxiomeSH incubation work on the `research/axiomesh-context-logic` branch.
 
-## Design objectives
+## Objective
 
-A candidate Axiomesh representation should be evaluated on at least:
+AxiomeSH aims to maximize:
 
-1. **semantic exactness** — equivalent logical content reconstructs equivalently;
-2. **token density** — low tokenizer cost per retained relation/invariant;
-3. **local resumability** — an agent can continue reasoning from a bounded state without rereading irrelevant history;
-4. **compositionality** — independently derived fragments combine without semantic ambiguity;
-5. **canonical identity** — equivalent structures can share stable compact identities where justified;
-6. **dependency visibility** — assumptions, scopes, guards, provenance, unresolved branches, and proof obligations remain explicit;
-7. **incremental update cost** — one new fact should not require rewriting the entire representation;
-8. **model robustness** — syntax should remain reliably interpretable by different agents/models and across context truncation;
-9. **proof/checkability** — compactness must not turn reasoning into opaque lossy shorthand;
-10. **transportability** — the representation should be serializable, diffable, cacheable, and embeddable in ordinary agent workflows.
+> **durable, correct agent synthesis per total lifecycle resource cost**
 
-## Important separations
+under non-negotiable preservation of:
 
-Do not conflate:
+- semantic fidelity;
+- structural soundness;
+- canonical integrity;
+- load-bearing distinctions;
+- required provenance;
+- recoverability.
 
-```text
-compression != semantic quotient
-short token sequence != sufficient state
-probabilistic transition != logical implication
-high-frequency continuation != valid inference
-canonical encoding != proof
-model-predictable syntax != formally defined syntax
-```
+Character count and tokenizer cost matter, but they are costs rather than the objective.
 
-A Markov-style representation is valid only if the retained state is sufficient for the target inference semantics. If two histories map to the same compact state but permit different valid continuations, the quotient is unsound for that observation.
+A compact representation that makes reasoning harder is not a success.
 
-## First research program
+A useful rough objective is:
 
-### R1 — define the observation
+\[
+\max_R
+\frac{S(R)}
+{C_{\text{context}}+
+ C_{\text{compute}}+
+ C_{\text{retrieval}}+
+ C_{\text{ingest}}+
+ C_{\text{maintenance}}+
+ C_{\text{migration}}}
+\]
 
-Specify what an agent must recover from a context snapshot:
+where \(S(R)\) is valid synthesis yield under representation \(R\).
 
-- established propositions;
-- assumptions and scopes;
-- variable bindings / quantification;
-- dependency and provenance edges;
-- alternatives and unresolved branches;
-- confidence/epistemic status where applicable;
-- permitted inference rules;
-- current goals / obligations.
+## Raw core first
 
-### R2 — find sufficient-state boundaries
-
-Construct small formal reasoning traces and ask when two prefixes can be merged without changing the set of valid future deductions.
-
-This is the direct analogue of behavioral quotienting: history may be discarded only under an explicit continuation-preservation relation.
-
-### R3 — compare encodings under real tokenizers
-
-For equivalent logical structures, measure:
+The initial architecture is deliberately:
 
 ```text
-natural language
-symbolic logic
-S-expressions
-postfix/prefix encodings
-typed edge lists
-compact DAG encodings
-Axiomesh candidates
+raw AxiomeSH -> agent -> raw AxiomeSH
 ```
 
-Measure tokenizer cost separately from byte count and character count.
+During the core research phase:
 
-### R4 — test Markov order
+\[
+\boxed{\text{representation}=\text{interface}}
+\]
 
-Determine whether useful reasoning fragments are:
+There is no mandatory:
 
-- first-order Markov under a sufficiently rich state token;
-- finite higher-order Markov;
-- variable-order / context-dependent;
-- fundamentally non-Markov unless dependency state is carried explicitly.
+- English parser;
+- English renderer;
+- existing formal-logic translation;
+- JSON envelope;
+- model-specific adapter;
+- database translation;
+- compatibility layer.
 
-The desired result may be a compact state machine whose state contains exactly the nonlocal information needed to restore a Markov property.
+This is intentional.
 
-### R5 — design a proof-preserving token grammar
+An early translation boundary would make failures hard to attribute and could hide exactly the isomorphic shapes AxiomeSH is intended to expose.
 
-Only after the sufficient-state experiments should syntax be stabilized. Prefer a small typed algebra over clever punctuation.
+The project therefore starts with **one semantic structure**. Later serializers, renderers, theorem-language adapters, databases, model-specific encodings, and compatibility layers may project from that core, but they must not become peer semantic authorities.
 
-## Candidate primitive shape
-
-One deliberately provisional model is:
+The native fast path should remain possible:
 
 ```text
-@id : type [guards] <- dependencies => relation/output
+AxiomeSH -> native agent -> AxiomeSH
 ```
 
-with repeated structures interned and referenced by compact IDs. This is not yet Axiomesh syntax; it is a test fixture for measuring what information must survive.
+## Why structure and rewriting
 
-## Falsifiers
+The requirements accumulated independently around a representation that must support:
 
-A proposed representation fails if any of the following occurs:
+- arbitrary relational structure;
+- higher-arity relations;
+- explicit scope;
+- composition;
+- transformation;
+- recursive self-representation;
+- isomorphism and partial isomorphism;
+- structural residuals;
+- invariant preservation;
+- exact continuation across context boundaries.
 
-- two encoded states compare equal but admit different logically valid continuations;
-- reconstruction requires hidden natural-language assumptions;
-- token savings disappear under the target model tokenizer;
-- an update requires global rewriting often enough to erase the context advantage;
-- canonicalization destroys provenance or scope needed by later proof steps;
-- probabilistic prediction is mistaken for entailment;
-- the representation is compact only because a large external dictionary/context is silently assumed.
+A small hypergraph/rewrite substrate is currently the strongest candidate because it can represent both what a structure **is** and what lawful reasoning **does to it** using the same substrate.
+
+The intended direction is closer to:
+
+\[
+\text{valid inference}
+=
+\text{allowed structural transformation}
+\]
+
+than to privileging human-readable proposition manipulation as the fundamental operation.
+
+This does not prove that graph rewriting is the correct basis. If important knowledge repeatedly requires awkward graph scaffolding while another exact representation gives a more direct natural analog, the graph-rewrite hypothesis should be generalized or rejected.
+
+## Minimal current shape
+
+The current draft starts with opaque atoms, ordered hyperedges, unordered scopes, pattern variables, local references, negative application conditions, and local rewrite rules.
+
+Example structure:
+
+```text
+[
+  (0 1 2)
+  (3 2 4)
+]
+```
+
+Example rewrite:
+
+```text
+[(0 ?0 ?1)] > [(1 ?0 ?1)]
+```
+
+Example guarded rewrite:
+
+```text
+[
+  [(0 ?0) !(1 ?0)]
+  >
+  [(0 ?0)(2 ?0)]
+]
+```
+
+This syntax is provisional.
+
+The project should resist adding primitives merely because conventional logic has named operators for them. `AND`, `OR`, `TYPE`, `FORALL`, `EXISTS`, `JOIN`, `IMPLIES`, and similar concepts must earn primitive status if structural composition does not already express the needed semantics.
+
+## Structural identity
+
+AxiomeSH is interested in structural equality rather than textual equality.
+
+Incidental differences such as atom spelling, reference numbering, whitespace, or unordered member presentation should not change semantic identity.
+
+Load-bearing differences such as ordered incidence, scope boundaries, rewrite direction, shared identity, guards, or negative conditions must remain visible.
+
+A central target operation is therefore:
+
+\[
+G_A \cong G_B
+\]
+
+or, when equivalence is only partial:
+
+\[
+G_A = C + \Delta_A
+\]
+
+\[
+G_B = C + \Delta_B
+\]
+
+where \(C\) is the common structural core and the residuals remain explicit.
+
+## Composition is central
+
+AxiomeSH is not primarily a notation-compression project.
+
+The important operation is composition.
+
+The representation must let agents determine which independently derived structures can be combined, under which guards, while preserving required semantics.
+
+The first hypothesis is that compatible structures may compose naturally through common scope and shared identity:
+
+```text
+[
+  G1
+  G2
+]
+```
+
+but this remains a major research seam. Loss of correlation, scope, support, timing, provenance, or dependency information must not be hidden by an attractive coarse composition.
+
+## The Markov / sufficient-state hypothesis
+
+The branch began by investigating tokenized transition chains and Markov-like sufficient states.
+
+That question remains useful but no longer determines the architecture.
+
+The relevant hypothesis is:
+
+> A current structural state may be made semantically sufficient for future reasoning so that irrelevant textual history can be discarded.
+
+Formally, the desired situation is approximately:
+
+\[
+S_{t+1}=F(S_t,o_t)
+\]
+
+where \(S_t\) contains every nonlocal distinction needed for valid continuation.
+
+This is not the claim that transformer reasoning is an ordinary first-order Markov chain.
+
+If two histories map to the same compact state but permit different valid continuations, the quotient is unsound and the missing distinction must remain represented.
+
+## Latent-capability hypothesis
+
+A major motivation is the possibility that observed model limits partly reflect representation and bookkeeping limits rather than only missing reasoning operations.
+
+A transformer may already possess strong local capabilities for:
+
+- relational analogy;
+- constraint propagation;
+- decomposition;
+- formal manipulation;
+- optimization;
+- invariant recognition;
+
+while failing to coordinate them reliably across very large human-oriented representations.
+
+AxiomeSH tests whether some of the burden can move from:
+
+\[
+\text{remember}+\text{interpret}+\text{reason}
+\]
+
+toward:
+
+\[
+\text{reason over explicit structure}
+\]
+
+without claiming that representation can eliminate genuine search, learning, or architectural limits.
+
+## Let agents help discover the representation
+
+AxiomeSH should not assume that humans can infer the representation most natural to neural agents.
+
+One proposed discovery loop is:
+
+```text
+Agent A receives novel structure X
+-> emits compact representation C
+
+Fresh Agent B receives only C
+-> reconstructs X'
+```
+
+Require:
+
+\[
+X'=X
+\]
+
+for every semantically relevant distinction.
+
+Then test reasoning directly over \(C\).
+
+The shortest exact encoding is not automatically the best reasoning encoding. A candidate must be judged both on recovery and on downstream synthesis under fixed resource budgets.
+
+Synthetic and adversarial structures are required so that an agent cannot appear to compress information merely by pointing at knowledge already stored in model weights.
+
+## Qualification
+
+Initial comparisons should include:
+
+1. cold exact reconstruction;
+2. near-isomorph discrimination;
+3. full isomorphism recognition;
+4. partial isomorphism with exact residuals;
+5. rewrite correctness;
+6. long composition without scope/identity drift;
+7. cross-context continuation;
+8. novel synthesis;
+9. performance under context pressure;
+10. comparison against natural language and established formal representations at matched resource budgets.
+
+AxiomeSH is interesting only if the representation produces measurable advantages where its design predicts them.
+
+## Target agent
+
+AxiomeSH is not defined around one vendor, tokenizer, or model generation.
+
+The target is a capability class:
+
+> bounded-context reasoning agents capable of learning a compact representation, maintaining structural references, retrieving external knowledge, and synthesizing relations across independently developed domains.
+
+Current transformer models are the immediate experimental population. Their behavior matters to optimization, but they do not define core semantics.
 
 ## Ownership boundary
 
-This branch exists inside CUDA-JS only as the lowest available generic incubation host. Axiomesh is **not** currently a CUDA-JS runtime responsibility and must not leak into maintained CUDA-JS APIs or implementation merely because the research branch lives here.
+This research branch lives in CUDA-JS because it is the current generic incubation host.
 
-If the formal-language idea becomes independently load-bearing, its natural destination is a dedicated repository/package with its own authority and contracts.
+AxiomeSH is **not** a CUDA-JS runtime responsibility and must not leak into maintained CUDA-JS APIs or implementation merely because the research branch lives here.
 
-## Immediate next step
+If AxiomeSH becomes independently load-bearing, it should move to a dedicated repository/package with its own authority and contracts.
 
-Build a tiny corpus of equivalent reasoning traces and search for the minimum continuation-preserving state. Use tokenized Markov models as one candidate factorization, then actively try to falsify the Markov assumption with provenance, quantifier-scope, branching, and dependency counterexamples before designing the language syntax.
+## Current operating rule
+
+> **Core semantics must never depend on a translation layer.**
+
+The first job is to discover the structural core.
+
+Transport optimization comes later.
