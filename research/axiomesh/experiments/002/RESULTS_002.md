@@ -1,6 +1,6 @@
 # Experiment 002 — Results
 
-**Status:** first render reclassified as incomplete; specification expanded; complete native logical rerender pending.
+**Status:** Draft 0.2 full native logical rerender complete; author-side structural and semantic qualification complete; independent cold decode pending.
 
 ## Source integrity
 
@@ -19,71 +19,106 @@ The copied logical source is retained locally in this experiment as:
 
 ## First render disposition
 
-Initial native payload:
+The original `CONNECT4_LOGIC_002.axh` render remains classified as a **structural graph prototype**. It preserved the research graph but externalized proposition meaning through opaque proposition IDs, so it did not satisfy the intended experiment.
 
-`CONNECT4_LOGIC_002.axh`
+That failure produced `SPEC_EXPANSION_002.md` and the experimental `CORE_SPEC_DRAFT_0_2_CANDIDATE.md`.
 
-Initial scoring sidecar:
+## Replacement native logical render
 
-`ATOM_ORACLE_002.json`
+Replacement payload:
 
-The first payload successfully encoded the **research graph surrounding the claims**:
+`CONNECT4_LOGIC_002_DRAFT_0_2.axh`
 
-- 59 claim identities;
-- 59 statuses;
-- 59 primary-layer attachments;
-- 137 source claim-relation edges;
-- 23 explicit guards;
-- 19 bounded-scope attachments;
-- two deferred dispositions;
-- eight central layer-flow edges;
-- proposition-to-concept incidence structure.
+Scoring/reviewer semantic glossary:
 
-However, each full claim body was represented by an opaque proposition object (`5001..5059`) whose actual source meaning remained in external source/oracle material.
+`SEMANTIC_SIGNATURE_002_DRAFT_0_2.json`
 
-Therefore the first render is now classified as:
+Formalization audit:
+
+- `FORMALIZATION_AUDIT_002.json`
+- `FORMALIZATION_AUDIT_002.md`
+- `SEMANTIC_FIDELITY_REVIEW_002.md`
+
+The replacement payload itself now carries the proposition/formula structure. The semantic glossary supplies only human-readable names for stable `^n` theory symbols and is excluded from the blind structural cold decode.
+
+Payload SHA-256:
+
+`4b84e3019bbc5b40c39741dde234040d341656ea7bc7c0ac10e0489e4e6ebdef`
+
+## Author-side structural qualification
+
+| Check | Result |
+|---|---:|
+| claim objects | 59 |
+| native claim bodies | 59 |
+| status attachments | 59 |
+| primary-layer attachments | 59 |
+| source claim relations | 137 |
+| guard metadata | 23 |
+| bounded-scope metadata | 19 |
+| deferred dispositions | 2 |
+| layer-flow edges | 8 |
+| first-class open-question objects | 10 |
+| exact literal occurrences | 167 |
+| universal binders | 56 |
+| existential binders | 1 |
+| declarative implications | 24 |
+| declarative equalities | 132 |
+| classical negations | 52 |
+| explicit choices | 3 |
+
+Every source claim `C4-R0001..C4-R0059` has an actual native body. The old opaque proposition IDs `5001..5059` are absent from the replacement payload.
+
+The source status partition remains exactly:
 
 ```text
-structural graph prototype
+research_model          1
+deductive_exact        10
+guarded_exact           7
+accepted_contract       4
+empirically_supported  25
+hypothesis              2
+candidate_rule           2
+missing_law              3
+disproven                4
+rejected                 1
 ```
 
-and **not** as:
+## Author-side semantic fidelity review
 
-```text
-complete native logical render
-```
+The replacement render has been checked against the copied normalized source for the load-bearing logical distinctions that motivated Draft 0.2.
 
-The earlier statement that the first render was complete was incorrect for the intended Experiment 002 objective.
+Confirmed native structures include:
 
-## Why this is a specification result
+- guarded terminal implications and exact terminal consequences;
+- CPC arithmetic and exact numeric literals;
+- `69 -> 625` residual-universe structure;
+- empirical counts and approximate measurements without promotion to exact theorem status;
+- the `(support,H0,H1)` quotient and line-hit product order;
+- the realizability-preserving predecessor/composition requirements in `R0043`;
+- exact antichain terminal subtraction;
+- the set-valued W/D/L recurrence in `R0047`;
+- separate W/D/L-only `61`, distance-optimal terminal `28`, and structural-core `28` objects;
+- rank/kernel formulas and standard-board equalities;
+- the searchless `38 -> 28` extremal refinement;
+- the center/deadline missing bridge;
+- 6x7 `30` upper-bound and 8x7 `40` counterexample controls;
+- the exact `28 = 2 + 20 + 6` filtration;
+- Connect-K `v2(K)` factorization;
+- K=4 diagonal equations;
+- the seven-mode regular-board periodic code.
 
-The failure was not merely a conversion omission. Draft 0.1 lacked several distinctions required to encode the actual Connect4 propositions without hidden convention.
+The three missing-law objects remain distinct:
 
-Concrete pressure included:
+- `R0011` — general guarded composition/closure;
+- `R0043` — line-hit support-local realizability/predecessor closure;
+- `R0052` — distance-optimal center/deadline selection bridge.
 
-- numeric values versus alpha-renamable identities;
-- stable theory symbols versus anonymous graph atoms;
-- declarative implication versus operational rewrite;
-- explicit universal and existential binding;
-- propositional equality;
-- classical negation versus negative application condition;
-- declarative alternatives;
-- exact reference semantics;
-- boundary-preserving comparison;
-- variable aliasing/freshness rules;
-- scope multiplicity.
+## Specification result
 
-These findings are recorded in:
+Experiment 002 expanded Draft 0.1 rather than working around its limitations.
 
-`SPEC_EXPANSION_002.md`
-
-and produced the experimental candidate:
-
-`research/axiomesh/CORE_SPEC_DRAFT_0_2_CANDIDATE.md`
-
-## Draft 0.2 candidate additions
-
-The candidate introduces the minimum forms currently justified by evidence:
+Draft 0.2 candidate adds the currently evidenced minimum distinctions:
 
 ```text
 bare n      structural identity, alpha-renamable
@@ -100,62 +135,53 @@ A == B      declarative equality
 {...}       unordered declarative alternatives
 ```
 
-It also corrects Draft 0.1's grammar closure, reference scope, boundary-aware isomorphism, duplicate-member semantics, and hidden variable-injectivity/freshness defaults.
+It also closes the Draft 0.1 grammar inconsistency and fixes reference scope, boundary-aware isomorphism, ordinary-scope duplicate membership, default variable aliasing, and explicit freshness.
 
-## What remains valid from the first render
+## Semantic-symbol sidecar boundary
 
-The first render remains useful evidence that the Draft 0.1 substrate can compactly preserve the normalized research topology.
+`SEMANTIC_SIGNATURE_002_DRAFT_0_2.json` maps stable semantic symbols to human gloss for scorer/reviewer use. It contains no formula bodies.
 
-The following author-side checks remain valid for that **graph prototype**:
+The relevant distinction is now:
 
-- source claims: 59 (`C4-R0001..C4-R0059`);
-- claim hubs: 59;
-- status partition reproduced exactly;
-- claim-relation topology preserved for the copied normalized graph;
-- general composition gap `R0011`, line-hit realizability refinement `R0043`, and optimal-selection bridge `R0052` remain separate objects;
-- derivative geometry and game-semantic lift remain structurally separated;
-- negative/rejected/deferred evidence is not merged into positive proof authority.
+```text
+native payload = actual formula structure + stable semantic-symbol identity
+sidecar        = human gloss for theory symbols
+```
 
-These results do not qualify proposition-body recovery.
+not the rejected first-render form:
 
-## Compression observation withdrawn as a language result
+```text
+native payload = proposition identity only
+sidecar        = proposition meaning
+```
 
-The first source snapshot was about 21.7 KB and the first `.axh` graph about 8.1 KB.
+## Independent qualification protocol
 
-This ratio is not evidence of logical compression because proposition bodies were externalized. It must not be cited as an AxiomeSH compression result.
+`COLD_DECODER_PROMPT_002_DRAFT_0_2.md` freezes Q2/Q3 isolation.
 
-Any future size comparison must include all native theory structure needed to recover the actual claims.
+A fresh decoder receives only:
 
-## New completion criterion
+1. `CORE_SPEC_DRAFT_0_2_CANDIDATE.md`;
+2. `COLD_DECODER_PROMPT_002_DRAFT_0_2.md`;
+3. `CONNECT4_LOGIC_002_DRAFT_0_2.axh`.
 
-Experiment 002 is complete only when all 59 normalized Connect4 claims have native formula structure under the candidate spec or a later evidence-driven expansion.
+It must not receive the copied Connect4 source, relation oracle, semantic glossary, formalization audit, results, issues, prior conversations, or old Draft 0.1 graph prototype.
 
-For every claim, the replacement render must preserve where applicable:
-
-- variables and their binding;
-- quantifier kind;
-- antecedent/guard structure;
-- consequence structure;
-- exact numeric values;
-- equality and negation;
-- alternatives;
-- algebraic/set-valued operations as theory symbols;
-- empirical measurement values and bounded scope;
-- epistemic status;
-- source claim-to-claim relations.
-
-A scorer may translate semantic symbol IDs to human gloss, but must not contain proposition structure absent from the native payload.
+The blind decoder must reconstruct all 59 native formulas and answer the frozen structural probes without guessing English names.
 
 ## Current qualification state
 
 ```text
-Experiment 001 / Draft 0.1 synthetic structural reconstruction: passed on exercised surface
-Experiment 002 first Connect4 graph prototype: structurally qualified as graph only
-Experiment 002 Draft 0.1 full logical expressibility: failed
-Draft 0.2 candidate spec expansion: produced
-Experiment 002 complete Draft 0.2 Connect4 logical rerender: pending
-Independent cold decode of complete logical rerender: pending
-Native continuation/synthesis test: pending
+Experiment 001 / Draft 0.1 synthetic structural reconstruction: PASS on exercised surface
+Experiment 002 Draft 0.1 full logical expressibility: FAIL -> specification pressure
+Draft 0.2 candidate spec expansion: COMPLETE on experimental branch
+Experiment 002 Draft 0.2 full proposition rerender: COMPLETE
+Q0 expressibility across 59 normalized claims: PASS author-side
+Q1 structural preservation: PASS author-side
+source-to-native semantic fidelity review: PASS author-side, not independent
+Q2 independent cold reconstruction: PENDING
+Q3 native structural reasoning probes: PENDING
+Q4 continuation/synthesis: PENDING
 ```
 
-The next artifact must be a replacement Connect4 theory payload, not another metadata-only graph.
+No compression, latency, reasoning-superiority, or synthesis-superiority claim is made yet. Those require independent decode and controlled baselines.
