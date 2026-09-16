@@ -4,24 +4,24 @@
 **Source repository:** `iteathen/Connect4`  
 **Source branch:** `research/unified-knowledge`  
 **Frozen source commit:** `0e5e29e4ca4fd3941bdcffe70a52b66348705589`  
-**Status:** Draft 0.2 full native rerender complete; independent cold qualification pending
+**Status:** Draft 0.2 independently cold-qualified; Draft 0.3 scoping/signature tightening awaiting regression decode
 
 ## Purpose
 
-Render the normalized Connect4 structural-logic research corpus into native AxiomeSH without mutating or relocating the Connect4 research branch.
+Render the normalized Connect4 structural-logic research corpus into native AxiomeSH without mutating or relocating Connect4 research.
 
-Connect4 is read-only source material for this experiment. Every copied source snapshot, AxiomeSH render, candidate specification, oracle, test protocol, audit, and result belongs only on this CUDA-JS experimental branch.
+Connect4 is read-only source material. Every copied source snapshot, AxiomeSH render, candidate specification, oracle, test protocol, audit, and result belongs only on this CUDA-JS experimental branch.
 
-This experiment is also a language-development pressure test. The AxiomeSH specification is **not frozen** when the source exposes a genuine expressiveness gap. The correct response is to identify the minimum missing structural form, expand the experimental candidate specification, and retry the native render.
+Experiment 002 is also a language-development pressure test. When source logic exposes a genuine expressiveness or reconstruction gap, the experimental AxiomeSH candidate may grow minimally and must then be cold-tested again.
 
-Draft 0.1 remains frozen only as the authority for Experiment 001.
+Draft 0.1 remains frozen as Experiment 001 authority. Draft 0.2 remains frozen as the version independently decoded in issue #267.
 
 ## Source boundary
 
-The source problem is the normalized logical research plane at the frozen commit, specifically:
+The frozen source problem is the normalized Connect4 research plane at the source commit, including:
 
 - `research/canonical/CORE_MODEL.md`;
-- all claim registries listed by `research/canonical/CLAIM_INDEX.json` (`C4-R0001..C4-R0059`);
+- all claim registries named by `research/canonical/CLAIM_INDEX.json` (`C4-R0001..C4-R0059`);
 - `research/canonical/CROSS_LINEAGE_SYNTHESIS.md`;
 - `research/maps/CORE_LOGIC_MAP.md`;
 - `research/open-questions/README.md`;
@@ -30,155 +30,194 @@ The source problem is the normalized logical research plane at the frozen commit
 - `research/open-questions/WINSET_SELECTION.md`;
 - `research/hypotheses/README.md`.
 
-Historical provenance and solver implementation are not copied as new logical premises. Their normalized epistemic effect is retained through claim status, scope, guards, disposition, measurements, and relations.
+Historical provenance and solver implementation are not copied as new logical premises. Their normalized epistemic effect is retained through status, scope, guards, disposition, measurements, and claim relations.
 
 ## Experiment question
 
-Can the complete normalized Connect4 research logic—not merely the metadata graph around its claims—be represented as one native AxiomeSH theory such that a fresh agent can recover the actual proposition structure and continue reasoning without source prose or a proposition oracle?
+Can the complete normalized Connect4 research logic be represented natively such that an isolated agent can recover the actual proposition structure, preserve epistemic distinctions, reason over the structural graph, and continue the research without source prose or proposition oracles?
 
 ## Required preservation
 
-The final native render must preserve at least:
+The native theory must preserve:
 
-1. all 59 stable claim identities;
-2. the actual logical/formula content of all 59 claim bodies;
+1. all 59 claim identities;
+2. all 59 actual claim bodies;
 3. epistemic status for every claim;
-4. exact numeric values as values rather than alpha-renamable identities;
-5. quantification, implication, equality, negation, alternatives, and algebraic/set-valued structure where present;
-6. guards and bounded scope where they change truth conditions;
-7. claim-to-claim and claim-to-concept relations;
-8. disproven/rejected/deferred distinctions without turning them into positive proof authority;
-9. explicit missing-law and hypothesis status;
-10. the central layer structure: geometry → residual/win-space → local certificates → guarded composition → semantic quotient → exact consequence/residual;
-11. the separate perfect-play selection bridge around structural 28 versus distance-optimal terminal 28;
-12. the concrete line-hit realizability gap (`C4-R0043`) as a refinement of the general composition gap;
-13. the research-method distinction represented by `C4-R0035`.
+4. exact numeric values as literals rather than alpha-renamable identities;
+5. quantification, implication, equality, negation, alternatives, and algebraic/set structure where present;
+6. guards and bounded scopes;
+7. all source claim relations;
+8. disproven/rejected/deferred distinctions without promoting them;
+9. all explicit missing-law and hypothesis objects;
+10. the central logical layer flow;
+11. structural `28`, terminal `28`, W/D/L `61`, 6x7 `30`, and 8x7 `40` as distinct objects;
+12. the line-hit realizability gap `R0043`;
+13. the optimal-selection bridge `R0052`;
+14. the research-method separation in `R0035`.
 
-## First render and discovered failure
+## Render lineage
 
-The first `CONNECT4_LOGIC_002.axh` render successfully preserved the research graph topology but represented every claim body as an opaque proposition object whose source meaning remained in scorer/oracle material.
+### Draft 0.1 graph prototype
 
-That artifact is retained as a **structural graph prototype**, not a complete native logical render.
+`CONNECT4_LOGIC_002.axh`
 
-It demonstrated that Draft 0.1 lacked enough native distinction to encode the complete source corpus honestly.
+Preserves research topology but not proposition bodies. Retained as failed/full-logic evidence and structural prototype only.
 
-The concrete language gaps and resulting changes are recorded in:
-
-`SPEC_EXPANSION_002.md`
-
-and implemented experimentally in:
-
-`research/axiomesh/CORE_SPEC_DRAFT_0_2_CANDIDATE.md`
-
-## Draft 0.2 replacement render
-
-The complete experimental replacement is:
+### Draft 0.2 full proposition render
 
 `CONNECT4_LOGIC_002_DRAFT_0_2.axh`
 
-It contains native bodies for all 59 normalized claims. The old opaque proposition placeholder range `5001..5059` is absent.
+Carries the complete 59-body native logical corpus and the surrounding research graph.
 
-Associated author-side qualification artifacts are:
+Author-side artifacts:
 
 - `FORMALIZATION_AUDIT_002.json`;
 - `FORMALIZATION_AUDIT_002.md`;
 - `SEMANTIC_FIDELITY_REVIEW_002.md`;
-- `SEMANTIC_SIGNATURE_002_DRAFT_0_2.json` — human-gloss/scoring sidecar only;
+- `SEMANTIC_SIGNATURE_002_DRAFT_0_2.json` — reviewer glossary only;
 - `RESULTS_002.md`.
 
-The replacement payload preserves the source graph around the bodies: all statuses, logical layers, 137 source claim relations, 23 guard attachments, 19 bounded-scope attachments, two deferred dispositions, the central flow, and ten first-class open seams.
+## Independent Draft 0.2 result — issue #267
 
-## Native-render rule
+Issue #267 is independent cold-decoder evidence.
 
-The replacement native payload contains the proposition structure itself.
-
-A scoring sidecar may map opaque semantic symbols to human-readable source terms, but it MUST NOT provide:
-
-- theorem body structure;
-- quantifier structure;
-- implication direction;
-- exact literal values;
-- equality/negation structure;
-- guards;
-- logical alternatives;
-- missing premises.
-
-If removing the sidecar makes the logical proposition disappear, the native render is incomplete.
-
-## Specification-growth rule
-
-When a source proposition cannot be represented exactly:
-
-1. identify the smallest load-bearing distinction that is missing;
-2. determine whether it is domain-specific theory structure or a genuinely core representation need;
-3. prefer theory structure when the distinction is not universal;
-4. add a core form only when the same semantic distinction is required independently of the Connect4 domain;
-5. record the motivating source cases;
-6. rerender affected claims;
-7. cold-test the expanded form before promotion.
-
-Do not solve expressiveness failures by hiding semantics in an oracle, English prompt, adapter, or undocumented convention.
-
-## Qualification layers
-
-### Q0 — expressibility
-
-Every normalized source claim must have an actual native formula structure. Any claim remaining opaque is a failure or explicit unresolved spec pressure.
-
-**Current state:** author-side PASS for all 59 claims.
-
-### Q1 — graph and formula preservation
-
-Machine/auditor comparison checks every source claim, status, relation, guard/scope attachment, exact literal, central-layer membership, and native body presence.
-
-**Current state:** author-side PASS. See `FORMALIZATION_AUDIT_002.json` and `SEMANTIC_FIDELITY_REVIEW_002.md`.
-
-### Q2 — cold reconstruction
-
-A fresh decoder receives only:
+The decoder received only:
 
 1. `CORE_SPEC_DRAFT_0_2_CANDIDATE.md`;
 2. `COLD_DECODER_PROMPT_002_DRAFT_0_2.md`;
 3. `CONNECT4_LOGIC_002_DRAFT_0_2.axh`.
 
-It must reconstruct the claim/formula graph without source prose, semantic glossary, proposition oracle, audit, result, issue, or Connect4 access.
+It recovered all 59 native formulas and the frozen corpus/graph counts, then passed every structural probe.
 
-**Current state:** pending independent execution.
+This establishes Q2 and Q3 for Draft 0.2 on the exercised surface.
 
-### Q3 — structural queries
+The run also exposed one actual ambiguity and one representation-boundary question:
 
-The same isolated decoder must answer the frozen raw-symbol structural probes in `COLD_DECODER_PROMPT_002_DRAFT_0_2.md`, including the `69/625` object, the three distinct missing laws, all structural roles of literal `28`, the `28=2+20+6` filtration, the rank/kernel formulas, the set-valued W/D/L recurrence, the `46-6=40` counterexample, and the derivative chain.
+- Draft 0.2's wording around variable-number reuse was not explicitly lexical;
+- theory signature membership was not itself represented as native structure.
 
-**Current state:** pending independent execution.
+Those findings drive Draft 0.3.
+
+## Draft 0.3 tightening
+
+Artifacts:
+
+- `CORE_SPEC_DRAFT_0_3_CANDIDATE.md`;
+- `SPEC_TIGHTENING_003.md`;
+- `SEMANTIC_SIGNATURE_002_DRAFT_0_3.axh`.
+
+Draft 0.3 does **not** rewrite the qualified 59 formula bodies.
+
+It adds only:
+
+### Explicit lexical variable scope
+
+- binders own variables only in their lexical term;
+- disjoint sibling binders may reuse variable numbers;
+- separate formulas may reuse variable numbers;
+- nested rebinding of a visible number is forbidden;
+- capture-free alpha-renaming is valid.
+
+### Native signature closure
+
+Core-reserved marker `^0` declares the theory-owned semantic-symbol inventory:
+
+```text
+[
+  (^0 [
+    ^1
+    ^2
+    ...
+  ])
+]
+```
+
+The human JSON glossary is no longer the only record of signature membership.
+
+English labels remain non-semantic and are deliberately not added to canonical core. A primitive theory symbol may be human-opaque while still being formally complete and natively usable.
+
+## Qualification layers
+
+### Q0 — expressibility
+
+Every normalized claim must have actual native formula structure.
+
+**Draft 0.2:** PASS author-side for all 59 claims.
+
+### Q1 — preservation
+
+Every source status, relation, guard/scope attachment, exact literal, central-layer relation, and formula body must survive the native render.
+
+**Draft 0.2:** PASS author-side.
+
+### Q2 — isolated cold reconstruction
+
+A fresh decoder must recover the corpus without source prose, oracle, human glossary, audit, results, issues, or Connect4 access.
+
+**Draft 0.2:** PASS in issue #267.
+
+### Q3 — native structural queries
+
+The isolated decoder must answer the frozen probes directly from native structure.
+
+**Draft 0.2:** PASS in issue #267.
+
+### Q3b — Draft 0.3 closure regression
+
+A fresh decoder receives only:
+
+1. `CORE_SPEC_DRAFT_0_2_CANDIDATE.md`;
+2. `CORE_SPEC_DRAFT_0_3_CANDIDATE.md`;
+3. `COLD_DECODER_PROMPT_002_DRAFT_0_3.md`;
+4. `SEMANTIC_SIGNATURE_002_DRAFT_0_3.axh`;
+5. `CONNECT4_LOGIC_002_DRAFT_0_2.axh`.
+
+It must establish:
+
+- claim `1017` has one unambiguous lexical interpretation;
+- every theory-owned `^n` used by the formula payload is declared;
+- no undeclared semantic symbol is needed;
+- the human glossary is unnecessary for formal reconstruction and probes;
+- previously passed structural probes still pass.
+
+**Current state:** pending.
 
 ### Q4 — continuation/synthesis
 
-Only after reconstruction qualifies do we test whether a fresh agent can continue the research from the AxiomeSH theory alone, identify the highest-leverage unresolved composition seam, and propose a structurally valid new candidate relation without promoting hypotheses to theorem status.
+After Q3b, a fresh agent reasons only from the native theory bundle and attempts useful continuation without promoting hypotheses or empirical claims.
 
 **Current state:** pending.
+
+## Specification-growth rule
+
+When a source proposition or cold decode exposes a load-bearing gap:
+
+1. isolate the smallest missing distinction;
+2. determine whether it belongs in domain theory structure or universal core;
+3. prefer domain structure when possible;
+4. change core only when the distinction is representation-general;
+5. preserve the motivating counterexample;
+6. rerun cold qualification;
+7. do not hide the distinction in an oracle, adapter, English prompt, or undocumented convention.
 
 ## Non-goals
 
 - Do not mutate Connect4.
-- Do not replace Connect4's canonical research authority.
-- Do not claim AxiomeSH superiority from successful conversion alone.
-- Do not treat source empirical results as deductive facts.
-- Do not hide source-text meaning in a decoder prompt or scorer.
-- Do not force every declarative theorem to become an operational rewrite.
+- Do not replace Connect4 canonical research authority.
+- Do not claim AxiomeSH superiority from conversion success.
+- Do not make English naming mandatory for agent-native semantics.
+- Do not turn empirical/hypothetical material into theorem authority.
+- Do not force declarative formulas to become operational rewrites.
 
 ## Promotion rule
 
-Experiment 002 may produce candidate AxiomeSH specification changes, but no experiment artifact automatically becomes parent research authority.
-
-Promotion requires:
+Candidate spec changes may move to the parent research branch only after:
 
 ```text
-source pressure
--> minimal candidate form
--> complete native rerender
--> cold reconstruction
--> reasoning qualification
--> review of complexity and necessity
+source/cold-decode pressure
+-> minimal candidate change
+-> native rerender or closure proof
+-> isolated reconstruction
+-> structural reasoning qualification
+-> complexity/necessity review
 ```
-
-Only then should a candidate change move from the experiment branch to the parent AxiomeSH research specification.
