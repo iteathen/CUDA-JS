@@ -1,0 +1,49 @@
+{
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "candidate_spec": "CORE_SPEC_DRAFT_0_6_CANDIDATE.md",
+  "cases": {
+    "1": {
+      "disposition": "valid",
+      "normalized": "[(^7200 1)]",
+      "checks": ["simple_owned_occurrence_replaced"]
+    },
+    "2": {
+      "disposition": "valid",
+      "normalized": "[(^7200 #28 ^7201 4)]",
+      "checks": ["literal_preserved", "semantic_symbol_preserved", "structural_identity_substituted"]
+    },
+    "3": {
+      "disposition": "valid",
+      "normalized": "*?1[(^7200 1 ?1)]",
+      "checks": ["unrelated_nested_binder_preserved"]
+    },
+    "4": {
+      "disposition": "valid_open_term",
+      "normalized_alpha_example": "*?2[(^7200 ?1 ?2)]",
+      "checks": ["capture_avoidance", "inner_binder_alpha_renamed", "argument_remains_free"]
+    },
+    "5": {
+      "disposition": "valid",
+      "checks": ["compact_forall_equals_explicit_abstraction_forall_under_alpha_normalization"]
+    },
+    "6": {
+      "disposition": "valid",
+      "checks": ["compact_exists_equals_explicit_abstraction_exists_under_alpha_normalization"]
+    },
+    "7": {
+      "disposition": "invalid",
+      "checks": ["left_operand_is_not_abstraction"]
+    },
+    "8": {
+      "disposition": "valid",
+      "normalized": "[(^7200 #3 ^7201)]",
+      "checks": ["absent_bound_variable_leaves_body_unchanged"]
+    }
+  },
+  "signature": {
+    "declared": [7100, 7101, 7200, 7201],
+    "used_but_undeclared": [],
+    "declared_but_unused": []
+  }
+}
