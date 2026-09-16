@@ -1,0 +1,47 @@
+{
+  "experiment": "AxiomeSH Experiment 002 — Draft 0.4 regression assertions",
+  "decoder_access": false,
+  "formula_payload": "CONNECT4_LOGIC_002_DRAFT_0_2.axh",
+  "signature": "SEMANTIC_SIGNATURE_002_DRAFT_0_4.axh",
+  "signature_assertions": {
+    "declared_theory_symbols": 530,
+    "used_theory_symbols": 530,
+    "used_but_undeclared": 0,
+    "declared_but_unused": 0,
+    "core_reserved": [0]
+  },
+  "binder_assertions": {
+    "claim_1017_sibling_reuse_valid": true,
+    "nested_same_number_rebinding_violations": 0
+  },
+  "corpus_assertions": {
+    "claims": 59,
+    "claim_bodies": 59,
+    "claim_relations": 137,
+    "guard_meta": 23,
+    "scope_meta": 19,
+    "deferred": 2,
+    "layer_flow": 8,
+    "open_questions": 10
+  },
+  "raw_probe_assertions": {
+    "literal_69_625_claim": 1015,
+    "missing_law_claim_ids": [1011, 1043, 1052],
+    "literal_28_claim_ids": [1038, 1049, 1050, 1051, 1052, 1053, 1056],
+    "filtration_claim": 1056,
+    "rank_kernel_claim": 1050,
+    "set_valued_recurrence_claim": 1047,
+    "counterexample_46_6_40_claim": 1055,
+    "center_deadline_open_question": 2010,
+    "line_hit_missing_law_selector": {
+      "claim": 1043,
+      "required_relations": [[304, 1042], [306, 1011], [302, 1008]],
+      "required_body_symbols": [1120, 1121, 1253, 1254]
+    },
+    "derivative_chain": [
+      [5, 1058, 304, 1057],
+      [5, 1059, 304, 1058]
+    ]
+  },
+  "rule": "This file is scorer-only. Cold prompts must select targets structurally without exposing expected answers."
+}
