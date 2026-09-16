@@ -4,13 +4,13 @@
 **Source repository:** `iteathen/Connect4`  
 **Source branch:** `research/unified-knowledge`  
 **Frozen source commit:** `0e5e29e4ca4fd3941bdcffe70a52b66348705589`  
-**Status:** active specification-expansion experiment
+**Status:** Draft 0.2 full native rerender complete; independent cold qualification pending
 
 ## Purpose
 
 Render the normalized Connect4 structural-logic research corpus into native AxiomeSH without mutating or relocating the Connect4 research branch.
 
-Connect4 is read-only source material for this experiment. Every copied source snapshot, AxiomeSH render, candidate specification, oracle, test protocol, and result belongs only on this CUDA-JS experimental branch.
+Connect4 is read-only source material for this experiment. Every copied source snapshot, AxiomeSH render, candidate specification, oracle, test protocol, audit, and result belongs only on this CUDA-JS experimental branch.
 
 This experiment is also a language-development pressure test. The AxiomeSH specification is **not frozen** when the source exposes a genuine expressiveness gap. The correct response is to identify the minimum missing structural form, expand the experimental candidate specification, and retry the native render.
 
@@ -58,7 +58,7 @@ The final native render must preserve at least:
 
 The first `CONNECT4_LOGIC_002.axh` render successfully preserved the research graph topology but represented every claim body as an opaque proposition object whose source meaning remained in scorer/oracle material.
 
-That artifact is now classified as a **structural graph prototype**, not a complete native logical render.
+That artifact is retained as a **structural graph prototype**, not a complete native logical render.
 
 It demonstrated that Draft 0.1 lacked enough native distinction to encode the complete source corpus honestly.
 
@@ -70,9 +70,27 @@ and implemented experimentally in:
 
 `research/axiomesh/CORE_SPEC_DRAFT_0_2_CANDIDATE.md`
 
+## Draft 0.2 replacement render
+
+The complete experimental replacement is:
+
+`CONNECT4_LOGIC_002_DRAFT_0_2.axh`
+
+It contains native bodies for all 59 normalized claims. The old opaque proposition placeholder range `5001..5059` is absent.
+
+Associated author-side qualification artifacts are:
+
+- `FORMALIZATION_AUDIT_002.json`;
+- `FORMALIZATION_AUDIT_002.md`;
+- `SEMANTIC_FIDELITY_REVIEW_002.md`;
+- `SEMANTIC_SIGNATURE_002_DRAFT_0_2.json` — human-gloss/scoring sidecar only;
+- `RESULTS_002.md`.
+
+The replacement payload preserves the source graph around the bodies: all statuses, logical layers, 137 source claim relations, 23 guard attachments, 19 bounded-scope attachments, two deferred dispositions, the central flow, and ten first-class open seams.
+
 ## Native-render rule
 
-The replacement native payload must contain the proposition structure itself.
+The replacement native payload contains the proposition structure itself.
 
 A scoring sidecar may map opaque semantic symbols to human-readable source terms, but it MUST NOT provide:
 
@@ -107,32 +125,37 @@ Do not solve expressiveness failures by hiding semantics in an oracle, English p
 
 Every normalized source claim must have an actual native formula structure. Any claim remaining opaque is a failure or explicit unresolved spec pressure.
 
-### Q1 — graph preservation
+**Current state:** author-side PASS for all 59 claims.
 
-Machine/auditor comparison checks that every source claim, status, relation, guard/scope attachment, exact literal, and central-layer membership represented in the frozen source is recoverable.
+### Q1 — graph and formula preservation
+
+Machine/auditor comparison checks every source claim, status, relation, guard/scope attachment, exact literal, central-layer membership, and native body presence.
+
+**Current state:** author-side PASS. See `FORMALIZATION_AUDIT_002.json` and `SEMANTIC_FIDELITY_REVIEW_002.md`.
 
 ### Q2 — cold reconstruction
 
-A fresh decoder receives only the candidate spec, the cold-decoder prompt, and the replacement native AxiomeSH theory. It must reconstruct the claim/formula graph without source prose or proposition oracle access.
+A fresh decoder receives only:
+
+1. `CORE_SPEC_DRAFT_0_2_CANDIDATE.md`;
+2. `COLD_DECODER_PROMPT_002_DRAFT_0_2.md`;
+3. `CONNECT4_LOGIC_002_DRAFT_0_2.axh`.
+
+It must reconstruct the claim/formula graph without source prose, semantic glossary, proposition oracle, audit, result, issue, or Connect4 access.
+
+**Current state:** pending independent execution.
 
 ### Q3 — structural queries
 
-A fresh agent must answer native queries including:
+The same isolated decoder must answer the frozen raw-symbol structural probes in `COLD_DECODER_PROMPT_002_DRAFT_0_2.md`, including the `69/625` object, the three distinct missing laws, all structural roles of literal `28`, the `28=2+20+6` filtration, the rank/kernel formulas, the set-valued W/D/L recurrence, the `46-6=40` counterexample, and the derivative chain.
 
-- Which nodes are missing laws?
-- What is the actual proposition asserted by each missing law?
-- Which exact geometric claims feed the derivative semantic-lift gap?
-- Which claims constrain or support the central composition gap?
-- Which results distinguish structural 28 from optimal terminal 28?
-- Which line-hit result exposes a realizability-preserving predecessor requirement?
-- Which negative results constrain compatibility or selector candidates?
-- Which numeric equalities are source theorems versus empirical observations?
-
-Queries are scored on structural/logical identity, not English wording.
+**Current state:** pending independent execution.
 
 ### Q4 — continuation/synthesis
 
 Only after reconstruction qualifies do we test whether a fresh agent can continue the research from the AxiomeSH theory alone, identify the highest-leverage unresolved composition seam, and propose a structurally valid new candidate relation without promoting hypotheses to theorem status.
+
+**Current state:** pending.
 
 ## Non-goals
 
