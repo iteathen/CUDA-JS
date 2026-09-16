@@ -1,10 +1,10 @@
 # Experiment 003 — Results
 
-**Status:** 18-benchmark source corpus and native Draft 0.5 benchmark bundle constructed; author-side structural audit complete; independent E2 reconstruction pending; exact premise/profile modules and proof execution pending.
+**Status:** 18-benchmark source corpus and native statement scaffold constructed; Drafts 0.5/0.6 produced; Draft 0.7 primitive-decomposition gate added; independent E2 reconstruction and all proof execution remain pending.
 
 ## Added benchmark surface
 
-Experiment 003 now contains 18 benchmark objects covering six broad domains:
+Experiment 003 contains 18 benchmark objects covering six broad domains:
 
 ```text
 propositional / structural            3
@@ -19,33 +19,59 @@ total                                18
 
 Native structural IDs are `3001..3018` in source order `FL-001..FL-018`.
 
-## Candidate-spec pressure
+## Specification pressure lineage
 
-The suite produced Draft 0.5.
+### Draft 0.5
 
-One new core form was added:
+Experiment 003 first exposed the need for first-class lexical abstraction:
 
 ```text
 \?n term
 ```
 
-This is generic lexical abstraction only. It does not itself mean lambda, Pi, set-builder, fold, or another theory constructor.
+Draft 0.5 also made proof-theory neutrality explicit.
 
-The following were deliberately kept theory-owned:
+### Draft 0.6
 
-- types/sorts;
-- higher-order application;
-- modal/epistemic/deontic operators;
-- temporal/path operators;
-- separation/program operators;
-- proof/theorem predicates;
-- XOR/parity;
-- closure/well-foundedness;
-- lambda/Pi constructors.
+Construction of FOL/equality profiles then exposed a second representation-general gap: a bound native body could be packaged but not capture-avoidably instantiated without hidden host substitution.
 
-Draft 0.5 also makes proof-theory neutrality explicit so classical rules cannot silently become global core semantics.
+Draft 0.6 therefore proposes structural instantiation:
 
-## Native bundle
+```text
+ABSTRACTION @@ ARGUMENT
+```
+
+plus explicit abstraction-valued quantifier forms.
+
+Focused author-side cases exist under `instantiation/`; independent cold qualification is still pending. FOL/HOL profiles remain blocked on that result.
+
+### Draft 0.7
+
+A semantic-decomposition review found that Draft 0.5 was too permissive if interpreted as allowing standard formal operators to become semantically complete merely by receiving stable `^n` names.
+
+Draft 0.7 adds no new notation. It adds a stricter representation rule:
+
+```text
+named formal operator
+-> native semantic construction
+-> primitive model leaves
+```
+
+rather than:
+
+```text
+named formal operator
+-> opaque semantic symbol
+```
+
+The existing benchmark payload is therefore retained as a **statement/formalization scaffold**, not as primitive-semantic completion for modal, temporal, deontic, spatial, proof-meta, closure, or higher-order semantics.
+
+See:
+
+- `../../CORE_SPEC_DRAFT_0_7_CANDIDATE.md`
+- `PRIMITIVE_DECOMPOSITION_AUDIT_003.md`
+
+## Native statement bundle
 
 Artifacts:
 
@@ -69,24 +95,53 @@ required-construct attachments:   3
 lexical abstraction occurrences:  9
 ```
 
-`^0` is core-reserved and therefore is not counted among the 135 theory-owned symbols.
+These counts prove structural closure of the scaffold, not primitive semantic sufficiency.
 
-## Readiness encoded natively
+## Primitive-decomposition correction
+
+The following conventional operators/concepts must not remain opaque when their semantics are constructible:
+
+- finite AND/OR folds and parity/XOR;
+- biconditional;
+- epistemic `K_i`, common knowledge, public announcement;
+- obligation/permission under the selected deontic semantics;
+- LTL `G/F/X/U`;
+- CTL `A/E`, `AG/EF`;
+- separating conjunction, Hoare validity, frame rule;
+- proof/derivable predicates;
+- reflexive-transitive closure;
+- higher-order application/lambda/Pi behavior where used by proof.
+
+Their semantic mechanisms must be represented from lower-level relational/state structure. Named aliases may remain only when their native definitions are present and alias erasure preserves the obligation.
+
+Admissible primitive leaves include source/model facts such as atomic valuations, domain identities, one-step transitions/accessibility/reduction edges, heap cell incidence, and source algebraic operations constrained by explicit axioms.
+
+## New qualification gate
+
+Experiment 003 now inserts:
+
+### E1P — primitive semantic decomposition
+
+A benchmark/profile passes only if:
+
+1. every derived formal operator used in the obligation has a native expansion;
+2. primitive leaves are explicitly identified;
+3. no host evaluator/substitution/prover callback supplies missing semantics;
+4. aliases are erasure-safe;
+5. concrete measured instances contain their finite/model structure;
+6. meta-theorem proof relations connect to native proof objects.
+
+### E1A — alias-erasure audit
+
+Where named derived aliases remain for compactness, expand/remove them and verify the primitive-normal obligation is equivalent.
+
+E1P/E1A block E3/E4.
+
+## Readiness encoded in the initial scaffold
 
 Each benchmark carries a raw `^9` readiness value so statement reconstruction cannot be mistaken for proof completion.
 
-The four readiness classes are:
-
-```text
-^350  statement structurally ready for the next profile step
-^351  concrete parameter instance(s) still required
-^352  exact premises/reduction relation still required
-^353  native logic/profile semantics still required
-```
-
-These names are reviewer gloss only; the identities themselves are native.
-
-Current partition:
+Current initial partition remains:
 
 ```text
 ^350  5
@@ -95,18 +150,18 @@ Current partition:
 ^353  8
 ```
 
+Those classes predate Draft 0.7 and do not imply E1P completion.
+
 ## Source-fidelity cautions retained
 
 The suite does not silently repair source problems:
 
 - PHP, XOR parity, and muddy children remain parameterized families.
 - Steamroller is not proof-scored until the exact premise set is imported.
-- Chisholm remains a deontic consistency/profile probe.
+- Chisholm remains a deontic consistency/profile probe and requires an explicit deontic semantics.
 - the supplied Cantor formula is retained as supplied and is not silently substituted with the standard no-surjection formulation.
 - well-founded induction requires explicit well-foundedness authority.
 - Church–Rosser remains a property schema until a concrete reduction/inductive theory is supplied.
-
-The Steamroller object currently records its conclusion plus an explicit dependency on the not-yet-imported exact axiom set. It is therefore **not E1-complete at the premise-body level**. Likewise, property/family objects whose concrete instance or reduction theory is absent are not promoted to complete proof problems.
 
 ## Qualification state
 
@@ -115,22 +170,34 @@ E0 source fidelity:
   18 benchmark intents copied: COMPLETE author-side
   source caveats made explicit: COMPLETE
 
-E1 native expressibility:
+E1 statement/native expressibility:
   18 benchmark envelopes rendered: COMPLETE author-side
   supplied explicit formula structures rendered: COMPLETE author-side
-  exact Draft 0.5 signature: PASS author-side
-  lexical abstraction exercised: YES
-  proof-system distinctions represented: YES as profile/readiness structure
-  complete premise/body expansion for every named standard benchmark: NOT YET
-  overall E1 proof-problem completeness: PARTIAL
+  exact statement-bundle signature: PASS author-side
+  overall complete proof-problem input: PARTIAL
 
-E2 isolated cold reconstruction:
+E1P primitive semantic decomposition:
+  per-benchmark audit: COMPLETE
+  primitive semantic foundations: PENDING / PARTIAL
+  advanced modal/temporal/deontic/spatial/HOL operators: NOT YET QUALIFIED
+
+E1A alias-erasure:
+  protocol requirement: SPECIFIED
+  executions: PENDING
+
+Draft 0.6 structural instantiation:
+  candidate + focused cases: COMPLETE author-side
+  independent cold qualification: PENDING
+
+E2 isolated cold reconstruction of statement bundle:
   protocol frozen: COMPLETE
   independent run: PENDING
 
 E3 proof-profile completeness:
-  protocol defined: COMPLETE
-  logic-specific native profile modules: PENDING
+  classical propositional candidate: EXISTS, requires Draft 0.7 decomposition review
+  intuitionistic propositional candidate: EXISTS, requires Draft 0.7 decomposition review
+  FOL/HOL: BLOCKED on Draft 0.6 cold qualification
+  modal/temporal/spatial/deontic: BLOCKED on primitive semantic foundations
 
 E4 proof execution:
   PENDING
@@ -144,10 +211,10 @@ E5 independent proof review:
 Experiment 003 does not yet establish:
 
 - that all 18 benchmarks are complete formal proof problems;
+- that named modal/temporal/deontic/spatial/HOL symbols are semantically sufficient by themselves;
 - that all 18 benchmarks are provable from the current native bundle;
 - that AxiomeSH outperforms natural-language, TPTP, SMT-LIB, Lean/Coq/Isabelle, or another formal representation;
-- that theory-level typing/modal/temporal/spatial constructs are optimal;
-- that Draft 0.5 abstraction improves proof performance;
-- that the supplied benchmark formulations are all canonical statements of the named textbook theorems.
+- that any current derived alias is optimal;
+- that Draft 0.5/0.6/0.7 improve proof performance.
 
-Those require exact source/profile completion plus E2-E5 evidence.
+The required standard is now explicit: source-faithful statement + primitive semantic construction + explicit proof authority + cold reconstruction + proof execution + independent proof review.
