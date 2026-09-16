@@ -1,6 +1,6 @@
 # Experiment 003 — Results
 
-**Status:** 18-benchmark source corpus and native statement scaffold constructed; Drafts 0.5/0.6 produced; Draft 0.7 primitive-decomposition gate active; first shared primitive semantic foundations constructed; independent qualification and proof execution remain pending.
+**Status:** 18-benchmark source corpus and native statement scaffold constructed; Drafts 0.5/0.6 produced; Draft 0.7 primitive-decomposition gate active; multiple shared primitive semantic foundations and first explicit proof-term candidate constructed; independent qualification and proof execution remain pending.
 
 ## Added benchmark surface
 
@@ -116,7 +116,8 @@ This prevents LTL, epistemic, and later semantic profiles from each inventing un
 
 ### Generic finite path construction
 
-`foundations/FOUNDATION_FINITE_PATH_003.axh`
+- `foundations/FOUNDATION_FINITE_PATH_003.axh`
+- `foundations/FOUNDATION_FINITE_PATH_003.md`
 
 Constructs zero-or-more reachability from:
 
@@ -155,7 +156,61 @@ Constructed semantics include:
 - public announcement as an explicit restricted-model construction;
 - S5 authority as reflexive/symmetric/transitive accessibility structure, not opaque introspection axioms.
 
-These are author-side candidates only. Cold reconstruction/alias-erasure/proof qualification are still required.
+### Explicit proof-object foundation
+
+- `foundations/FOUNDATION_PROOF_OBJECT_003.axh`
+- `foundations/FOUNDATION_PROOF_OBJECT_003.md`
+
+Proof authority is no longer modeled only as a boolean-like `derivable(context,formula)` relation.
+
+The shared foundation now carries:
+
+- native context construction and recursive membership;
+- `concludes(profile,context,proof_term,formula)`;
+- theoremhood as existence of a concrete proof term in the empty context.
+
+The foundation supplies no primitive proof conclusions. Profiles must construct them from explicit rule-specific proof-term constructors.
+
+### Constructive/classical natural-deduction proof terms
+
+- `profiles/PROFILE_ND_CONSTRUCTIVE_BASE_003.axh`
+- `profiles/PROFILE_ND_INTUITIONISTIC_PRIMITIVE_003.axh`
+- `profiles/PROFILE_ND_CLASSICAL_PRIMITIVE_003.axh`
+
+The constructive base explicitly defines proof constructors for assumption, implication introduction/elimination, negation, bottom, conjunction, disjunction, and case analysis.
+
+The classical profile adds one classical-only proof constructor for double-negation elimination. The intuitionistic profile does not.
+
+This gives the classical/constructive boundary a concrete structural location in the proof term rather than a hidden global proof mode.
+
+### FL-001 Peirce proof-term candidate
+
+- `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.axh`
+- `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.md`
+
+An explicit proof-term tree has been constructed for Peirce's law. Its only classical-only step is the DNE constructor.
+
+This is **not yet an E4 proof claim**. The artifact is candidate proof data; independent validation must recursively establish every constructor against the native profile. The required negative control is that the same proof term fails under the intuitionistic profile when the DNE constructor is unavailable.
+
+### Heap / separation foundation
+
+- `foundations/FOUNDATION_HEAP_SEPARATION_003.axh`
+- `foundations/FOUNDATION_HEAP_SEPARATION_003.md`
+
+Primitive leaves are heap address/value incidence and concrete program-state transition.
+
+Constructed semantics include:
+
+- heap-cell functionality;
+- disjointness as absence of a shared address;
+- extensional disjoint heap union;
+- points-to as singleton-heap satisfaction;
+- separating conjunction as existential disjoint partition + subheap satisfaction;
+- Hoare partial-correctness validity from program transition + pre/post satisfaction.
+
+The frame rule is deliberately **not** primitive. It must be derived from explicit locality/disjointness conditions. Concrete swap transition semantics are still pending.
+
+All foundations above are author-side candidates. Cold reconstruction, alias-erasure, and proof qualification are still required.
 
 ## Primitive-decomposition correction
 
@@ -236,10 +291,13 @@ E1P primitive semantic decomposition:
   per-benchmark audit: COMPLETE
   shared formula satisfaction: CONSTRUCTED author-side
   finite path/reachability: CONSTRUCTED author-side
+  explicit proof-object structure: CONSTRUCTED author-side
+  primitive constructive/classical ND: CONSTRUCTED author-side
   LTL trace semantics: CONSTRUCTED author-side for FL-011 exercised surface
   epistemic/PAL semantics: CONSTRUCTED author-side candidate
   relational S5 constraints: CONSTRUCTED author-side candidate
-  deontic/spatial/HOL/FOL/parity/CTL foundations: PENDING
+  heap/separation/Hoare semantics: CONSTRUCTED author-side candidate
+  deontic/HOL/FOL/parity/CTL foundations: PENDING
   independent foundation qualification: PENDING
 
 E1A alias-erasure:
@@ -255,15 +313,17 @@ E2 isolated cold reconstruction of statement bundle:
   independent run: PENDING
 
 E3 proof-profile completeness:
-  classical propositional candidate: EXISTS, requires Draft 0.7 proof-object/decomposition review
-  intuitionistic propositional candidate: EXISTS, requires Draft 0.7 proof-object/decomposition review
+  primitive constructive ND candidate: EXISTS, unqualified
+  primitive classical extension: EXISTS, unqualified
+  FL-001 proof-term candidate: EXISTS, unvalidated
   epistemic S5 relational candidate: EXISTS, primitive foundation unqualified
   FOL/HOL: BLOCKED on Draft 0.6 cold qualification
   LTL: primitive semantic foundation exists; proof profile/proof still pending
-  CTL/spatial/deontic/parity: primitive foundations pending
+  spatial: primitive heap/separation foundation exists; concrete swap/locality proof pending
+  CTL/deontic/parity: primitive foundations pending
 
 E4 proof execution:
-  PENDING
+  no independently validated proof yet
 
 E5 independent proof review:
   PENDING
@@ -275,6 +335,7 @@ Experiment 003 does not yet establish:
 
 - that all 18 benchmarks are complete formal proof problems;
 - that any author-side primitive foundation is independently correct;
+- that the Peirce proof candidate is a validated E4 proof;
 - that all 18 benchmarks are provable from the current native bundle;
 - that AxiomeSH outperforms natural-language, TPTP, SMT-LIB, Lean/Coq/Isabelle, or another formal representation;
 - that any current derived alias is optimal;
