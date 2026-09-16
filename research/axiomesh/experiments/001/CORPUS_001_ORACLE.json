@@ -1,0 +1,185 @@
+{
+  "experiment": "AxiomeSH Experiment 001 — Native Reconstruction",
+  "version": 1,
+  "frozen": true,
+  "notes": [
+    "This file is scoring authority and MUST NOT be supplied to cold decoders.",
+    "Scope members are unordered; edge positions are ordered; repeated atom IDs denote shared identity.",
+    "Pair cases are scored for the declared relation in addition to exact reconstruction of both members."
+  ],
+  "cases": [
+    {
+      "id": "P01",
+      "family": "plain",
+      "source": {"scope": {"members": [
+        {"edge": [14,27,63]},
+        {"edge": [52,63,88]},
+        {"edge": [31,27,88]}
+      ]}},
+      "probes": {
+        "atoms": [14,27,31,52,63,88],
+        "shared": {"27":2,"63":2,"88":2},
+        "edge_count": 3
+      }
+    },
+    {
+      "id": "P02",
+      "family": "plain-order-trap",
+      "source": {"scope": {"members": [
+        {"edge": [9,41,72,18]},
+        {"edge": [9,41,18,72]},
+        {"edge": [55,72,41]}
+      ]}},
+      "probes": {"edge_count":3,"ordered_distinction_required":true}
+    },
+    {
+      "id": "P03",
+      "family": "plain-shared-identity",
+      "source": {"scope": {"members": [
+        {"edge": [33,70,12]},
+        {"edge": [48,70,95]},
+        {"edge": [61,12,95]},
+        {"edge": [84,70,12]}
+      ]}},
+      "probes": {"edge_count":4,"shared": {"70":3,"12":3,"95":2}}
+    },
+    {
+      "id": "P04",
+      "family": "plain-repeated-motif",
+      "source": {"scope": {"members": [
+        {"edge": [4,21,37]},
+        {"edge": [8,21,37]},
+        {"edge": [4,65,79]},
+        {"edge": [8,65,79]}
+      ]}},
+      "probes": {"edge_count":4,"repeated_motif":true}
+    },
+    {
+      "id": "S01",
+      "family": "nested-boundary",
+      "source": {"scope": {"members": [
+        {"edge": [11,24,90]},
+        {"scope": {"members": [
+          {"edge": [73,24,58]},
+          {"edge": [36,58,91]}
+        ]}},
+        {"edge": [44,91,11]}
+      ]}},
+      "probes": {"scope_count":2,"boundary_atoms":[24,91]}
+    },
+    {
+      "id": "S02",
+      "family": "nested-sibling-scopes",
+      "source": {"scope": {"members": [
+        {"edge": [5,17,29]},
+        {"scope": {"members": [
+          {"edge": [62,17,74]},
+          {"edge": [81,74,93]}
+        ]}},
+        {"scope": {"members": [
+          {"edge": [46,29,57]},
+          {"edge": [68,57,82]}
+        ]}},
+        {"edge": [39,93,82]}
+      ]}},
+      "probes": {"scope_count":3,"left_boundary":[17,93],"right_boundary":[29,82]}
+    },
+    {
+      "id": "R01",
+      "family": "rewrite-multiway",
+      "source": {"scope": {"members": [
+        {"rule": {"lhs":{"scope":{"members":[{"edge":[7,"?0",13]}]}},"rhs":{"scope":{"members":[{"edge":[8,"?0",13]}]}}}},
+        {"rule": {"lhs":{"scope":{"members":[{"edge":[7,"?0",13]}]}},"rhs":{"scope":{"members":[{"edge":[9,"?0",13]}]}}}},
+        {"edge": [7,42,13]}
+      ]}},
+      "probes": {
+        "immediate_successor_count":2,
+        "successor_added_edges":[[8,42,13],[9,42,13]],
+        "matched_edge_removed":[7,42,13]
+      }
+    },
+    {
+      "id": "R02",
+      "family": "rewrite-negative-guard",
+      "source": {"scope": {"members": [
+        {"rule": {"lhs":{"scope":{"members":[{"edge":[3,"?0"]},{"not":{"edge":[4,"?0"]}}]}},"rhs":{"scope":{"members":[{"edge":[3,"?0"]},{"edge":[5,"?0"]}]}}}},
+        {"edge": [3,26]},
+        {"edge": [3,71]},
+        {"edge": [4,71]}
+      ]}},
+      "probes": {"enabled_bindings":[{"?0":26}],"disabled_bindings":[{"?0":71}],"added_edge":[5,26]}
+    },
+    {
+      "id": "I01",
+      "family": "isomorphic-pair",
+      "left": {"scope": {"members": [
+        {"edge": [12,44,71]},
+        {"edge": [39,71,85]},
+        {"edge": [12,63,85]}
+      ]}},
+      "right": {"scope": {"members": [
+        {"edge": [7,90,31]},
+        {"edge": [56,31,22]},
+        {"edge": [7,48,22]}
+      ]}},
+      "expected_relation":"isomorphic",
+      "witness":{"12":7,"44":90,"71":31,"39":56,"85":22,"63":48}
+    },
+    {
+      "id": "I02",
+      "family": "nested-isomorphic-pair",
+      "left": {"scope": {"members": [
+        {"edge": [2,10,18]},
+        {"scope": {"members": [
+          {"edge": [31,10,47]},
+          {"edge": [52,47,66]}
+        ]}},
+        {"edge": [70,66,2]}
+      ]}},
+      "right": {"scope": {"members": [
+        {"edge": [96,72,83]},
+        {"scope": {"members": [
+          {"edge": [40,69,72]},
+          {"edge": [25,54,69]}
+        ]}},
+        {"edge": [83,54,11]}
+      ]}},
+      "expected_relation":"isomorphic",
+      "witness":{"2":83,"10":54,"18":11,"31":25,"47":69,"52":40,"66":72,"70":96}
+    },
+    {
+      "id": "N01",
+      "family": "near-isomorphic-edge-order",
+      "left": {"scope": {"members": [
+        {"edge": [13,26,41]},
+        {"edge": [55,41,78]}
+      ]}},
+      "right": {"scope": {"members": [
+        {"edge": [13,41,26]},
+        {"edge": [55,41,78]}
+      ]}},
+      "expected_relation":"not-isomorphic",
+      "residual":"first edge swaps positions 2 and 3 while the second edge pins atom 41 to position 2"
+    },
+    {
+      "id": "N02",
+      "family": "near-isomorphic-scope-boundary",
+      "left": {"scope": {"members": [
+        {"edge": [5,19,32]},
+        {"scope": {"members": [
+          {"edge": [44,19,57]}
+        ]}},
+        {"edge": [68,57,5]}
+      ]}},
+      "right": {"scope": {"members": [
+        {"edge": [5,19,32]},
+        {"edge": [44,19,57]},
+        {"scope": {"members": [
+          {"edge": [68,57,5]}
+        ]}}
+      ]}},
+      "expected_relation":"not-isomorphic",
+      "residual":"same edge incidences are distributed across different scope boundaries"
+    }
+  ]
+}
