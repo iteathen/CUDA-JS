@@ -54,6 +54,7 @@ The public helper profile is intentionally narrower than every `gpu.*` value hel
 - scoped Device-JS atomic load/store helpers;
 - publication-mailbox load/store helpers;
 - block barrier and device fence helpers.
+- warp width, lane identity and masked ballot under the accepted SPEC-0022 warp-32 child.
 
 Scalar constructors, exact casts, special-value helpers and value-local math helpers are excluded from this profile. Their validity remains fully CUDA-JS-owned and is still checked by inspection; exclusion only prevents consumers from treating the profile as a redundant complete Device-JS language catalog.
 

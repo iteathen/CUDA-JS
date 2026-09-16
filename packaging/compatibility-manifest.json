@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.20",
+    "version": "0.1.0-alpha.21",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -91,6 +91,7 @@
     "deviceJsDenseNumeric": "f64-f16-bf16-exact-casts-special-values-manifest-verified-headers",
     "deviceJsErf": "f32-f64-same-kind-dense-child-provider-bound-erff-erf",
     "deviceJsTanh": "f32-f64-same-kind-dense-child-provider-bound-tanhf-tanh",
+    "deviceJsWarp32": "typed-width-lane-masked-ballot-device-only-v1",
     "deviceJsNumericChildOrder": ["SPEC-0030-erf-v1", "SPEC-0030-tanh-v1"],
     "deviceJsLibraries": "typed-leaf-libraries-explicit-aliased-imports-selected-runtime-target-rdc-or-lto-final-cubin",
     "deviceJsParser": {
@@ -117,6 +118,7 @@
     "resource ownership, lifetime, error, health, or cleanup behavior"
   ],
   "claimLimits": [
+    "SPEC-0022-warp32-v1 adds GPU-only width/lane/masked-ballot helpers with explicit participation and imported-library profile propagation. Native qualification is recorded separately for each exact profile; portable evidence does not establish GPU execution, participation safety, or performance.",
     "Structurally admitted native Windows x64 and Linux x64 CUDA profiles may operate for testing without a separate opt-in; native Linux x64 remains not-qualified.",
     "Only exact capability/profile combinations with their required evidence are qualified; successful operation does not promote support.",
     "The ordinary device-allocation minimum-alignment projection applies only to ordinary base allocations; it adds no caller-selected alignment, arbitrary offset-view guarantee, native support promotion, or performance claim.",

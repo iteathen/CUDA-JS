@@ -6,6 +6,16 @@ On the accepted Windows x64 profile, the installed package runs the tracked PTX 
 
 ## Native Windows
 
+The warp-32 fixture (`fixtures/consumer-warp32.mjs`) is shared by portable and
+native installed-package runners. Portable mode proves compilation/composition
+only. Native mode compares direct, PTX-library and Device-LTO-library execution
+against arithmetic/per-lane Boolean truth: 45 launches, eight dependent device
+rounds per launch and 993,600 terminal words across five block shapes. Masks
+include every singleton lane, sparse and disjoint groups, partial warps and legal
+early exits. No host operation advances the dependent rounds. Both modes verify
+terminal resource balance; malformed statically detectable requests reject before
+compiler resources. Never deliberately launch an invalid participation mask.
+
 Use the exact standalone Node 26.7.0 selected by `scripts/run-f8.mjs`:
 
 ```powershell

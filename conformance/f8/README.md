@@ -4,6 +4,11 @@ Checks package contents, clean install/uninstall, public exports, independent co
 
 Portable package checks do not establish native CUDA support. Windows native results are profile-specific; Linux remains unqualified.
 
+The [retained warp-32 evidence](evidence/warp32-2026-09-15.json) records the exact
+installed-package source/provider/hardware profile and terminal cleanup.
+The [execution record](../../docs/archive/plans/2026-09-15-device-js-warp32.md)
+explains its scope and limits.
+
 ## Start here
 
 Use the [complete runbook](RUNBOOK.md) for environment preparation, command order, expected evidence, failure reporting, and cleanup. It retains the platform-specific instructions needed to complete a run.

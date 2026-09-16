@@ -4,13 +4,16 @@
 
 **Date:** 2026-08-13
 
-**Reconciled:** 2026-08-25 for scoped atomic observation and device publication
+**Reconciled:** 2026-09-15 for scoped atomic observation, device publication and warp-32 voting
 
-**Accepted children:** [`SPEC-0022-scoped-atomic-observation-addendum.md`](SPEC-0022-scoped-atomic-observation-addendum.md) accepts relaxed device-scope `u32`/`u64` load/store observation; [`SPEC-0022-device-publication-addendum.md`](SPEC-0022-device-publication-addendum.md) accepts device-scope `u32`/`u64` release/acquire publication. This parent and all other families remain proposal-only.
+**Accepted children:** [`SPEC-0022-scoped-atomic-observation-addendum.md`](SPEC-0022-scoped-atomic-observation-addendum.md) accepts relaxed device-scope `u32`/`u64` load/store observation; [`SPEC-0022-device-publication-addendum.md`](SPEC-0022-device-publication-addendum.md) accepts device-scope `u32`/`u64` release/acquire publication; [`SPEC-0022-warp32-addendum.md`](SPEC-0022-warp32-addendum.md) accepts warp width, lane identity and masked predicate voting. This parent and all other families remain proposal-only.
 
 **Issue owners:** #87, #89, and #123
 
 ## Outcome
+
+The [warp-32 child](SPEC-0022-warp32-addendum.md) now accepts typed width, lane
+identity and explicit-mask ballot. Other warp families remain proposal-only.
 
 Extend accepted SPEC-0013 in two explicitly separate directions:
 
@@ -26,9 +29,9 @@ Trusted-source capability is not a sandbox. Service safety cannot be inferred fr
 ```text
 trusted parallel profile:
   architectural disposition: planned
-  implementation status:       atomic-observation and device-publication children implemented; remaining families not implemented
-  qualification status:        atomic-observation and device-publication exact Windows profiles qualified; remaining families not qualified
-  priority:                    accepted atomic children complete; broader primitives remain demand-driven
+  implementation status:       atomic-observation, device-publication and warp32 children implemented; remaining families not implemented
+  qualification status:        atomic-observation and device-publication exact Windows profiles qualified; warp32 evidence tracked in its implementation record; remaining families not qualified
+  priority:                    warp32 qualification/review; broader primitives remain demand-driven
 
 service-safe profile:
   architectural disposition: planned

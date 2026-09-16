@@ -7,6 +7,8 @@ import { DEVICE_JS_CONTRACT as CONTRACT, DEVICE_JS_DENSE_NUMERIC_CONTRACT, DEVIC
 import { CUDA_SCALAR_TYPES, DENSE_NUMERIC_SCALARS, FLOAT_SCALARS, denseNumericPreludeLines, exactCastCode, isDenseNumericHelper, specialConstantCode } from './dense-numeric-profile.mjs';
 import { erfCode, isErfHelper } from './erf-profile.mjs';
 import { isTanhHelper } from './tanh-profile.mjs';
+import { isDeviceJsLibraryContract } from './contract-profile.mjs';
+import { contractUsesWarp, emitWarpHelper, isWarpHelper, warpPreludeLines, withoutWarpContract, withWarpContract } from './warp-profile.mjs';
 import { DeviceJsError, deviceJsError } from './errors.mjs';
 
 const SOURCE_LIMIT = 4_194_304;
@@ -124,16 +126,6 @@ function normalizeImports(value = [], localFunctions = []) {
   if (!Array.isArray(value) || value.length > IMPORT_LIMIT) throw deviceJsError('DEVICE_JS_IMPORTS_INVALID', 'Device-JS imports must be a bounded array.');
   const localNames = new Set(localFunctions.map((entry) => entry.name));
   const names = new Set();
-  const acceptedLibraryContracts = new Set([
-    DEVICE_JS_LIBRARY_CONTRACT,
-    DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT,
-    DEVICE_JS_ERF_LIBRARY_CONTRACT,
-    DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT,
-    DEVICE_JS_TANH_LIBRARY_CONTRACT,
-    DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT,
-    DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT,
-    DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT,
-  ]);
   return Object.freeze(value.map((entry) => {
     const fields = ['architecture', 'artifactSha256', 'exportName', 'format', 'libraryContract', 'librarySha256', 'name', 'parameters', 'returns', 'symbol'];
     if (!plainObject(entry) || Object.keys(entry).sort().join('\0') !== fields.sort().join('\0')) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Each Device-JS import requires one exact typed semantic record.');
@@ -144,7 +136,7 @@ function normalizeImports(value = [], localFunctions = []) {
         || typeof entry.artifactSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(entry.artifactSha256)
         || typeof entry.exportName !== 'string' || !IDENTIFIER.test(entry.exportName)
         || typeof entry.symbol !== 'string' || !new RegExp(`^djs_lib_${entry.librarySha256}_[0-9]+$`).test(entry.symbol)
-        || !acceptedLibraryContracts.has(entry.libraryContract)
+        || !isDeviceJsLibraryContract(entry.libraryContract)
         || !['ptx', 'lto-ir'].includes(entry.format)) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import identity or symbol metadata is invalid.', { name });
     const target = inspectCudaTarget(entry.architecture, { expectedPrefix: 'compute' });
     if (!target.ok) throw deviceJsError('DEVICE_JS_IMPORT_INVALID', 'Device-JS import architecture is invalid.', { name, reason: target.reason });
@@ -355,16 +347,20 @@ function isFloatType(type) { return type.kind === 'scalar' && FLOAT.has(type.sca
 function boolType() { return parseType('bool'); }
 
 function inspectUnitRequirements(ast, functions) {
+  const usesImportedWarp = functions.some((fn) => contractUsesWarp(fn.libraryContract));
+  functions = functions.map((fn) => ({ ...fn, libraryContract: withoutWarpContract(fn.libraryContract) }));
   let usesDenseNumeric = functions.some((fn) => [DEVICE_JS_DENSE_NUMERIC_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract)
     || (fn.returns?.kind !== 'void' && DENSE_NUMERIC_SCALARS.includes(fn.returns.scalar))
     || fn.parameters.some((parameter) => DENSE_NUMERIC_SCALARS.includes(parameter.type.scalar)));
   let usesErf = functions.some((fn) => [DEVICE_JS_ERF_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT, DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract));
   let usesTanh = functions.some((fn) => [DEVICE_JS_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_TANH_LIBRARY_CONTRACT, DEVICE_JS_ERF_TANH_LIBRARY_CONTRACT, DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT].includes(fn.libraryContract));
   let usesScopedAtomic = false;
+  let usesWarp = usesImportedWarp;
   function visit(node) {
     if (!node || typeof node !== 'object') return;
     if (node.type === 'CallExpression') {
       const path = helperPath(node.callee);
+      usesWarp ||= isWarpHelper(path);
       usesDenseNumeric ||= isDenseNumericHelper(path);
       usesErf ||= isErfHelper(path);
       usesTanh ||= isTanhHelper(path);
@@ -377,7 +373,7 @@ function inspectUnitRequirements(ast, functions) {
     }
   }
   visit(ast);
-  return { usesDenseNumeric, usesErf, usesTanh, usesScopedAtomic };
+  return { usesDenseNumeric, usesErf, usesTanh, usesScopedAtomic, usesWarp };
 }
 
 function finalizeCompileProfile(compile, { usesDenseNumeric, usesScopedAtomic }, explicit) {
@@ -534,6 +530,9 @@ class FunctionEmitter {
   }
 
   helperCall(path, args, node, scope) {
+    if (isWarpHelper(path)) {
+      return { code: emitWarpHelper(path, args, node, (arg) => this.expression(arg, scope), fail), type: parseType('u32') };
+    }
     const special = /^gpu\.(f32|f64|f16|bf16)\.(nan|positiveInfinity|negativeInfinity)$/.exec(path);
     if (special) {
       if (args.length !== 0) fail('DEVICE_JS_HELPER_ARGUMENTS', 'Typed special-value helper takes no arguments.', node);
@@ -910,7 +909,7 @@ function translateDeviceUnit(request, mode) {
   const ast = parseSource(request.source);
   const requirements = inspectUnitRequirements(ast, [...functions, ...imports]);
   const compile = finalizeCompileProfile(normalizeCompile(request.compile ?? {}), requirements, Object.hasOwn(request.compile ?? {}, 'headerProfile'));
-  const contract = selectedContract(requirements);
+  const contract = withWarpContract(selectedContract(requirements), requirements.usesWarp);
   const identity = programIdentity(request.source, functions, compile, contract);
   const sourceFunctions = matchSourceFunctions(ast, functions);
   const functionMap = new Map([...functions, ...imports].map((fn) => [fn.name, fn]));
@@ -938,6 +937,7 @@ function translateDeviceUnit(request, mode) {
   const generatedSource = [
     `/* cuda-js Device-JS ${contract}; generated; do not edit */`,
     ...(requirements.usesDenseNumeric ? denseNumericPreludeLines() : []),
+    ...(requirements.usesWarp ? warpPreludeLines() : []),
     ...(usesScopedAtomic ? ['#include <cuda/atomic>', ''] : []),
     ...prototypes,
     ...(prototypes.length ? [''] : []),
