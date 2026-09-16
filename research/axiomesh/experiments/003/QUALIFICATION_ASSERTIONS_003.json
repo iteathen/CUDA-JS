@@ -1,0 +1,47 @@
+{
+  "experiment": "AxiomeSH Experiment 003 — cross-logic proof benchmarks",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "counts": {
+    "benchmarks": 18,
+    "theory_symbols_used": 135,
+    "theory_symbols_declared": 135,
+    "used_but_undeclared": 0,
+    "declared_but_unused": 0,
+    "premise_attachments": 15,
+    "benchmarks_with_premises": 7,
+    "parameter_attachments": 2,
+    "required_construct_attachments": 3,
+    "lexical_abstractions": 9
+  },
+  "domain_partition": {"100":3,"101":4,"102":3,"103":3,"104":2,"105":3},
+  "mode_partition": {"300":12,"301":3,"302":1,"303":1,"304":1},
+  "gate_partition": {"350":5,"351":3,"352":2,"353":8},
+  "structural_ids": [3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018],
+  "probe_answers": {
+    "pure_implication_goal": 3001,
+    "three_existential_515_516_517_gate_352": 3004,
+    "gate_351": [3002,3003,3008],
+    "premises_529_goal_543": 3010,
+    "goal_531_532_premise_533": 3011,
+    "goal_535_536_under_521": 3012,
+    "goal_540_spatial_swap": 3013,
+    "double_negation_choice": 3014,
+    "meta_theorem_542_choice": 3015,
+    "construct_544_abstraction": 3016,
+    "construct_545_abstraction": 3018,
+    "goal_four_548_common_579": 3018,
+    "gate_352": [3004,3018],
+    "gate_353": [3009,3010,3011,3012,3013,3015,3016,3017]
+  },
+  "source_blockers": {
+    "3002": "concrete PHP instances required for measured proof runs",
+    "3003": "concrete expander graph fixture required",
+    "3004": "exact Steamroller premise set not yet imported",
+    "3008": "concrete epistemic instances required",
+    "3010": "deontic profile determines consistency result",
+    "3016": "supplied formula preserved; canonical Cantor theorem normalization separate",
+    "3017": "well-foundedness/profile authority required",
+    "3018": "concrete reduction/inductive theory required"
+  }
+}
