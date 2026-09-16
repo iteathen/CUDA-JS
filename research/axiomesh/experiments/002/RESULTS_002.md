@@ -1,6 +1,6 @@
 # Experiment 002 — Results
 
-**Status:** Draft 0.2 full logical render independently cold-decoded; Draft 0.3 tightening produced; signature/scoping regression qualification pending.
+**Status:** Draft 0.3 independently qualified; Draft 0.4 tightening produced; Draft 0.4 regression pending.
 
 ## Source integrity
 
@@ -52,81 +52,110 @@ The obsolete opaque proposition IDs `5001..5059` are absent.
 
 ## Independent Draft 0.2 qualification — issue #267
 
-CUDA-JS issue #267 records an isolated cold decode that read only the Draft 0.2 candidate spec, frozen cold prompt, and Draft 0.2 native payload.
+Issue #267 independently recovered all 59 formula bodies and the complete exercised structural surface. It exposed one real specification ambiguity: variable-number reuse was not scoped precisely enough. It also made clear that native theory-symbol membership should be explicit rather than existing only in reviewer metadata.
 
-The decoder independently recovered:
+Those findings produced Draft 0.3.
 
-- all 59 claim objects;
-- all 59 claim-body attachments;
-- the exact epistemic-status partition;
-- the primary-layer partition;
-- all 137 claim relations and their relation-symbol partition;
-- both deferred dispositions;
-- all 23 guard attachments;
-- all 19 bounded-scope attachments;
-- all eight high-level layer-flow edges;
-- all ten open-question objects;
-- all 59 raw formula bodies;
-- every frozen structural probe.
+## Draft 0.3 qualification — issue #268
 
-The probe results included the `#69/#625` residual object, the line-hit realizability missing law, all distinct occurrences of `#28`, the `#28 = #2 + #20 + #6` filtration, the rank/kernel formulas, the set-valued W/D/L recurrence, the `#46-#6=#40` counterexample, the three missing-law objects, the derivative chain, and the open-question link to the center/deadline bridge.
+Draft 0.3 added:
 
-The decoder reported:
+- explicit lexical variable scope;
+- legal sibling/disjoint reuse of a variable number;
+- prohibition of nested same-number rebinding while the outer binding is visible;
+- native `^0` theory-signature membership.
 
-- no opaque proposition placeholders;
-- no demonstrable semantic value accidentally encoded as a bare alpha-renamable identity;
-- no unbound variables under ordinary lexical binding;
-- one specification ambiguity concerning the scope of variable-number reuse;
-- intentionally unavailable English glosses for opaque semantic symbols.
+Issue #268 then ran a cold qualification followed by a post-freeze reference-backed review.
 
-Therefore the Draft 0.2 formula payload passes independent cold reconstruction and structural-query qualification on the exercised surface.
-
-## Draft 0.3 tightening
-
-Issue #267 produced two follow-up questions. They are resolved experimentally in:
-
-- `CORE_SPEC_DRAFT_0_3_CANDIDATE.md`;
-- `SPEC_TIGHTENING_003.md`;
-- `SEMANTIC_SIGNATURE_002_DRAFT_0_3.axh`.
-
-### Lexical binder rule
-
-Draft 0.3 makes variable binding explicitly lexical:
-
-- sibling/disjoint binders may reuse the same variable number;
-- separate proposition bodies may reuse variable numbers;
-- nested rebinding while the same number remains visible is forbidden;
-- capture-free alpha-renaming preserves meaning.
-
-This resolves the claim-1017 ambiguity without changing the qualified formula payload.
-
-### Native signature closure
-
-Draft 0.3 reserves core marker `^0` for a native theory-signature inventory.
-
-`SEMANTIC_SIGNATURE_002_DRAFT_0_3.axh` declares the theory-owned semantic symbols used by the Experiment 002 theory family.
-
-The human JSON glossary remains optional reviewer metadata. It is not semantic authority and is excluded from cold qualification.
-
-Draft 0.3 deliberately does **not** add English strings to canonical core. Primitive theory symbols are permitted to remain human-opaque; their formal identity and use are native.
-
-## What Draft 0.3 does not change
-
-The independently decoded Draft 0.2 formula payload remains byte-for-byte the proposition body used by the tightened theory bundle:
+Cold/native results:
 
 ```text
-CORE_SPEC_DRAFT_0_2_CANDIDATE.md
-+
-CORE_SPEC_DRAFT_0_3_CANDIDATE.md
-+
-SEMANTIC_SIGNATURE_002_DRAFT_0_3.axh
-+
-CONNECT4_LOGIC_002_DRAFT_0_2.axh
+signature closure: PASS
+lexical variable scope: PASS
+reconstruction regression: PASS
+sidecar independence: PASS
 ```
 
-Draft 0.3 is a scoping/signature closure refinement, not a rewrite of the 59 formulas.
+It recovered:
 
-## Qualification state
+- 59/59 claim bodies;
+- 137 claim relations;
+- 23 guards;
+- 19 bounded scopes;
+- 2 deferred dispositions;
+- 8 layer-flow edges;
+- 10 open questions;
+- zero unbound variables;
+- zero used-but-undeclared theory symbols;
+- zero illegal nested same-number rebindings.
+
+The Draft 0.3 signature contained 541 declared symbols, of which 530 were used and 11 were unused.
+
+### Issue #268 decoder miss
+
+One structural probe was answered incorrectly: the decoder selected the wrong nearby relation cluster for the English-labelled “derivative chain” request.
+
+The correct raw relation chain was present in the native payload:
+
+```text
+(^5 1058 ^304 1057)
+(^5 1059 ^304 1058)
+```
+
+The post-freeze review classified this as a decoder/protocol selection error, not missing native semantics: the global raw relation graph had been reconstructed correctly, but the cold prompt mixed human semantic wording with an intentionally withheld human glossary.
+
+This distinction is the primary evidence behind Draft 0.4.
+
+## Draft 0.4 tightening
+
+Draft 0.4 acts only on recommendations supported by issue #268.
+
+Artifacts:
+
+- `CORE_SPEC_DRAFT_0_4_CANDIDATE.md`;
+- `SEMANTIC_SIGNATURE_002_DRAFT_0_4.axh`;
+- `SIGNATURE_AUDIT_002_DRAFT_0_4.md`;
+- `QUALIFICATION_ASSERTIONS_002_DRAFT_0_4.json` — scorer-only;
+- `COLD_DECODER_PROMPT_002_DRAFT_0_4.md`;
+- `SPEC_TIGHTENING_002_DRAFT_0_4.md`.
+
+### Exact canonical bundle signature
+
+Draft 0.4 defines the canonical self-contained bundle signature as the exact set of theory-owned symbols actually used by the body.
+
+For Experiment 002:
+
+```text
+used theory symbols:     530
+declared theory symbols: 530
+used but undeclared:       0
+declared but unused:       0
+```
+
+The 11 unused Draft 0.3 declarations are removed from the canonical bundle signature. Broader reusable theory-family vocabularies may exist separately but are not the bundle working-set signature.
+
+### Native/formal probes separated from human gloss
+
+Cold formal probes must identify targets using native/raw selectors only. Human semantic naming is measured only after the cold result is frozen.
+
+A naming miss cannot retroactively invalidate a correct raw reconstruction. A wrong raw relation/literal/binder/formula answer remains a native failure.
+
+### Derivative-chain regression
+
+The exact expected raw chain is now scorer authority hidden from the decoder. The Draft 0.4 cold prompt selects the target structurally without exposing the expected answer.
+
+### Canonical presentation profile
+
+Draft 0.4 adds non-semantic presentation guidance intended to reduce decoder effort:
+
+- direct scope/choice members on separate lines;
+- consistent nesting indentation;
+- visually contiguous infix propositions;
+- deterministic increasing-ID signature serialization.
+
+Whitespace remains semantically inert. No new logical primitive or string-label mechanism was added.
+
+## Current qualification state
 
 ```text
 Experiment 001 / Draft 0.1 synthetic structural reconstruction: PASS on exercised surface
@@ -134,20 +163,25 @@ Experiment 001 / Draft 0.1 synthetic structural reconstruction: PASS on exercise
 Experiment 002 Draft 0.1 full logical expressibility:
   FAIL -> specification pressure
 
-Draft 0.2 candidate:
-  Q0 expressibility across 59 claims: PASS author-side
-  Q1 source/formula preservation: PASS author-side
-  Q2 isolated cold reconstruction: PASS (#267)
-  Q3 frozen structural probes: PASS (#267)
-  issue found: variable-number scope wording ambiguous
-  issue found: signature inventory not native
+Draft 0.2:
+  full 59-claim native render: COMPLETE
+  isolated reconstruction: PASS (#267)
+  issue: variable scope wording
+  issue: signature membership not native
 
-Draft 0.3 tightening:
-  lexical scope rule: SPECIFIED
-  native semantic-symbol inventory: ADDED
-  independent scoping/signature regression test: PENDING
+Draft 0.3:
+  lexical scoping: PASS (#268)
+  native signature closure: PASS (#268)
+  59/59 reconstruction regression: PASS (#268)
+  one English-labelled structural probe: DECODER MISS (#268)
+
+Draft 0.4:
+  exact 530-symbol bundle signature: PASS author-side
+  native-only cold protocol: FROZEN
+  derivative-chain hidden regression assertion: ADDED
+  independent Draft 0.4 regression: PENDING
 
 Q4 continuation/synthesis from native theory alone: PENDING
 ```
 
-No compression, latency, or reasoning-superiority claim is made by Experiment 002. Those require controlled baselines after the theory representation itself qualifies.
+No compression, latency, reasoning-superiority, or synthesis-superiority claim is made yet. Those require controlled baselines after the representation and qualification protocol stabilize.
