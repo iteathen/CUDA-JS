@@ -1,0 +1,35 @@
+{
+  "experiment": "AxiomeSH Experiment 003 — cross-logic proof benchmarks",
+  "scoring_sidecar": true,
+  "decoder_access": false,
+  "rule": "Human gloss only. Formula structure, binding, premises, goals, parameterization, benchmark modes, and readiness gates are native in FORMAL_LOGIC_BENCHMARKS_003.axh.",
+  "benchmarks": {
+    "3001": "FL-001 Peirce's Law",
+    "3002": "FL-002 Pigeonhole Principle",
+    "3003": "FL-003 Urquhart XOR parity",
+    "3004": "FL-004 Schubert's Steamroller",
+    "3005": "FL-005 Drinker Paradox",
+    "3006": "FL-006 Group inverse uniqueness",
+    "3007": "FL-007 Barber Paradox",
+    "3008": "FL-008 Muddy Children",
+    "3009": "FL-009 Wisest Wise Man",
+    "3010": "FL-010 Chisholm contrary-to-duty",
+    "3011": "FL-011 LTL request/acknowledge",
+    "3012": "FL-012 CTL state duality",
+    "3013": "FL-013 Pointer swap/frame rule",
+    "3014": "FL-014 Glivenko embedding",
+    "3015": "FL-015 Disjunction property",
+    "3016": "FL-016 Cantor supplied benchmark",
+    "3017": "FL-017 Well-founded induction",
+    "3018": "FL-018 Church-Rosser confluence"
+  },
+  "semantic_symbols": {
+    "1": "benchmark", "2": "domain", "3": "logic_profile", "4": "goal", "5": "premise", "6": "tested_feature", "7": "benchmark_mode", "8": "parameter_instances", "9": "proof_readiness", "10": "required_construct",
+    "100": "propositional_structural", "101": "first_order_equality", "102": "epistemic_modal_deontic", "103": "temporal_dynamic_spatial", "104": "intuitionistic_constructive", "105": "higher_order_type_theory",
+    "200": "classical_propositional", "201": "sat_cnf", "202": "xor_parity", "203": "typed_first_order", "204": "classical_first_order", "205": "first_order_equality", "206": "first_order_biconditional", "207": "dynamic_epistemic_s5", "208": "multi_agent_modal_s4_s5", "209": "deontic_dyadic", "210": "ltl", "211": "ctl", "212": "separation_dynamic", "213": "intuitionistic_propositional", "214": "intuitionistic_meta", "215": "higher_order_logic", "216": "second_order_typed", "217": "dependent_type_theory",
+    "300": "theorem", "301": "parameterized_family", "302": "consistency_profile_probe", "303": "meta_theorem", "304": "property_schema",
+    "350": "statement_ready", "351": "concrete_instances_required", "352": "exact_premise_or_relation_import_required", "353": "native_logic_profile_required",
+    "400": "pure_implication", "401": "classical_constructive_boundary", "402": "indexed_formula_scale", "403": "proof_hardness_search", "404": "modulo_parity_reasoning", "405": "sorted_reasoning", "406": "quantifier_scope", "407": "equality_rewrite_congruence", "408": "self_reference", "409": "individual_knowledge", "410": "common_knowledge", "411": "public_announcement_update", "412": "modal_introspection", "413": "contrary_to_duty", "414": "linear_temporal_operators", "415": "branching_time_duality", "416": "separation_frame_reasoning", "417": "constructive_negation", "418": "disjunction_property_proof_extraction", "419": "higher_order_quantification", "420": "lexical_abstraction", "421": "diagonal_argument", "422": "predicate_quantification", "423": "well_founded_induction", "424": "reflexive_transitive_closure", "425": "dependent_type_structure",
+    "500": "apply", "501": "has_type_or_sort", "502": "function_type", "503": "predicate_type", "504": "positive_integer", "505": "integer_range", "506": "add", "507": "all_index", "508": "any_index", "509": "any_distinct_pair", "510": "indexed_proposition", "511": "expander_graph", "512": "edge_variable", "513": "xor_fold", "514": "steamroller_axiom_set", "515": "animal", "516": "grain", "517": "eats", "518": "mul", "519": "identity_element", "520": "inverse", "521": "iff", "522": "shaves", "523": "knowledge", "524": "common_knowledge_operator", "525": "public_announcement_none_knows_self", "526": "repeat_update", "528": "agent_group", "529": "obligation", "531": "globally", "532": "eventually", "533": "next", "535": "AG", "536": "EF", "537": "points_to", "538": "separating_conjunction", "540": "hoare_triple", "541": "swap_program", "542": "provable_or_theorem", "543": "bottom", "544": "lambda_constructor", "545": "dependent_product_constructor", "546": "well_founded", "547": "relation_R", "548": "reflexive_transitive_closure", "549": "Req", "550": "Ack", "551": "Release", "552": "p", "553": "q", "556": "type_A", "557": "type_Bool", "558": "type_Prop", "559": "distinct", "560": "map_edges", "562": "parity_value", "570": "agent_1", "571": "agent_2", "572": "agent_3", "573": "modal_proposition_P", "574": "muddy", "577": "proof_extraction_obligation", "579": "reduction_relation", "585": "epistemic_axioms", "586": "member_of_group", "587": "dependent_type_family"
+  }
+}
