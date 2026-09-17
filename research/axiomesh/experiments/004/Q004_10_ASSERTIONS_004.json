@@ -1,0 +1,18 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-10",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "source_A": 1000,
+    "source_B": 2000,
+    "frozen_extraction_A": 1100,
+    "frozen_extraction_B": 2100,
+    "exploratory_pair_conditioned_extraction_B": 2200,
+    "1100_vs_2100_under_V0": "NON_ISOMORPHIC",
+    "1100_vs_2200_under_V0": "ISOMORPHIC",
+    "example_map_1100_to_2200": {"1": "20", "2": "21", "3": "22"},
+    "may_use_2200_as_blind_qualification_evidence": false,
+    "correct_disposition": "MATCH_EXISTS_ONLY_AFTER_PAIR_CONDITIONED_EXTRACTION_SO_BLIND_QUALIFICATION_NOT_ESTABLISHED"
+  }
+}
