@@ -1,10 +1,10 @@
 # Experiment 003 — Results
 
-**Status:** 18-benchmark source corpus/native statement scaffold constructed; Drafts 0.5–0.12 produced; primitive-decomposition, structural-discovery, witnessed-comparison, and versioned-class qualification rules are now specified; independent structural qualification and proof execution remain pending.
+**Status:** 18-benchmark source corpus/historical statement scaffold constructed; Draft 0.13 is the current consolidated candidate for new artifacts; structural substrate/discovery/class safeguards are specified; focused Draft 0.13 qualification, current-semantic rerenders/bridges, proof execution, and independent review remain pending.
 
 ## Benchmark surface
 
-Experiment 003 contains 18 benchmark objects across six domains:
+Experiment 003 contains 18 benchmark families across six domains:
 
 ```text
 propositional / structural            3
@@ -17,11 +17,9 @@ higher-order / type-theoretic         3
 total                                18
 ```
 
-Native IDs are `3001..3018` in source order `FL-001..FL-018`.
+Historical native scaffold IDs remain `3001..3018` in source order `FL-001..FL-018`.
 
-The original bundle remains a source-faithful **historical statement/formalization scaffold**, not final primitive-semantic or current-isomorphism completion.
-
-Author-side historical scaffold counts remain:
+Historical scaffold counts remain:
 
 ```text
 benchmark objects:              18
@@ -36,269 +34,300 @@ required-construct attachments:   3
 lexical abstraction occurrences:  9
 ```
 
-These establish closure of that selected surface serialization only.
+These prove closure of that historical serialization only. They do not prove Draft 0.13 semantics, primitive decomposition, class membership, proof validity, or discovery coverage.
 
 ---
 
-# Specification correction lineage
+# Current candidate authority
 
-## Drafts 0.5–0.8
+For **new** artifacts:
 
-- **0.5:** bound-body surface `\?n term`, proof-theory neutrality.
-- **0.6:** candidate `ABSTRACTION @@ ARGUMENT`; now retained as surface/operation pending lower rewrite factorization.
-- **0.7:** compound formal operators must expose native semantic construction.
-- **0.8:** labels/classes retained after decomposition; useful naming separated from primitive status.
+- `../../CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md`
 
-## Draft 0.9 — first isomorphism line review
+Historical Draft 0.1–0.12 artifacts remain frozen evidence under their recorded semantics.
 
-Introduced plural factorizations; N0/N1/D/E separation; witnessed mappings/common cores/residuals; explicit ports/boundaries; label-blind controls; class registries as hypotheses only; correction of context-only scope/freshness overload for new artifacts; reference-order correction; mapping multiplicity/maximal-core discipline.
+Parallel Draft 0.11/0.12 candidate tracks are preserved as historical design evidence; Draft 0.13 resolves their authority ambiguity for new work.
 
-## Draft 0.10 — second line review
+Key current supporting artifacts:
 
-Added:
+- `SPEC_LINE_REVIEW_006_CONSOLIDATION_AND_DISCOVERY.md`
+- `SPEC_LINE_REVIEW_007_DRAFT_0_12_CONSOLIDATION.md`
+- `STRUCTURAL_DISCOVERY_PROTOCOL_005.md`
+- `STRUCTURAL_COMPARISON_PROTOCOL_005.md`
+- `STRUCTURAL_CLASS_SCHEMA_CONTRACT_005.md`
+- `STRUCTURAL_CLASS_CATALOG_005.md`
 
-- independent view/authority/relation axes;
-- policy freeze before scoring;
-- theory/signature namespaces for stable symbols;
-- qualified bundle partitioning;
-- exact D round trips and recursive fixed-point contracts;
-- explicit quantifier domains/generators;
-- carrier-role and absence/completeness contracts;
-- structured schema parameters and no post-hoc parameterization;
-- class-class witnesses and immutable schema revisions;
-- independent witness verification;
-- certified negative versus no-witness/unknown/resource-limit;
-- factorization-set completeness;
-- strong/weak embedding and relational correspondence distinctions;
-- target-layer and parametric-versus-semantic conclusion discipline;
-- circular-evidence prohibition and legacy bridges.
-
-## Draft 0.11 — discovery-system review
-
-Pairwise verification was recognized as insufficient by itself. Added:
-
-- structural candidate retrieval as part of correctness;
-- fingerprint/index declarations;
-- class non-vacuity/selectivity;
-- semantic versus archival round-trip distinction;
-- held-out policy generalization;
-- corpus coverage reporting;
-- witnessed substructure extraction;
-- discovery-visible versus archival/scorer-only evidence partitions;
-- structurally label-independent path for new instances.
-
-## Draft 0.12 — fourth-pass edge-case review
-
-Closed additional residual defects:
-
-- bare structural identities are namespace-scoped across independent documents/bundles;
-- N0 reference resolution preserves identity sharing, not naïve textual copies;
-- every `?n` variable occurrence has a reconstructable owner/role;
-- fingerprint mismatch pruning is based on a verified view/layer-specific invariant, not vague injectivity/completeness wording;
-- class non-vacuity depends on nontrivial reusable constraints, not how many bytes parameters contain;
-- exact round-trip fidelity and semantic-decomposition coverage are reported separately;
-- undecomposed residuals preserve recoverability but do not count as decomposed semantics;
-- blind discovery requires enforceable fresh-context information isolation;
-- retrieval recall and index guarantees are target-policy/view relative;
-- substructure extraction distinguishes induced from lossy/projection forms;
-- common-core witnesses classify every common/residual/boundary/excluded/projected structural item;
-- strong embeddings reflect a relation signature frozen before scoring;
-- search engines declare soundness/completeness/heuristic behavior;
-- learned/approximate retrieval scores remain non-semantic;
-- inferred class labels carry provenance and multiple verified memberships may coexist;
-- qualification includes novel-class structures absent from the existing registry.
-
-Corrective review/spec artifacts:
-
-- `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`
-- `../../CORE_SPEC_DRAFT_0_10_CANDIDATE.md`
-- `../../CORE_SPEC_DRAFT_0_11_CANDIDATE.md`
-- `../../CORE_SPEC_DRAFT_0_12_CANDIDATE.md`
-- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md`
-- `SPEC_LINE_REVIEW_004_ISOMORPHISM_SECOND_PASS.md`
-- `SPEC_LINE_REVIEW_005_DISCOVERY_SYSTEM.md`
-- `SPEC_LINE_REVIEW_006_CORE_EDGE_CASES.md`
+Earlier 003/004 protocols/catalogs remain historical evidence.
 
 ---
 
-# Current structural-discovery architecture
+# Major corrections now incorporated
 
-Current governing artifacts:
+## Information-preserving substrate
 
-- `STRUCTURAL_DISCOVERY_PROTOCOL_004.md` — corpus candidate generation, index policy, coverage, recall/precision, isolation, novel-class discovery;
-- `STRUCTURAL_COMPARISON_PROTOCOL_003.md` — pairwise frozen-policy structural search and independent witness/certificate verification;
-- `STRUCTURAL_CLASS_SCHEMA_CONTRACT_004.md` — immutable/versioned class schema, ports, structured parameters, non-vacuity/selectivity, class-class witnesses;
-- `STRUCTURAL_CLASS_CATALOG_004.md` — current candidate class/factorization hypothesis catalog;
-- `STRUCTURAL_CLASS_REGISTRY_003.axh` / `.md` — navigation hypotheses only, excluded from blind discovery;
-- `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md` — semantic foundation ownership;
-- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md` — primitive versus useful-surface audit.
+For new Draft 0.13 artifacts:
 
-C1–C12 / `^9101..^9112` remain candidate names in the Experiment 003 registry namespace. No current class revision or source-to-class mapping is independently qualified.
+- raw scope is unordered **occurrence-preserving**, not an implicit set;
+- raw scope is not implicitly conjunction/list/set/execution state;
+- rewrite update uses multiset subtraction/addition by default;
+- duplicate RHS occurrences are not silently collapsed;
+- distinct rule/match applications can remain distinct derivation events even if they reach the same successor;
+- active rule authority is profile-owned rather than hidden in bare containment;
+- RHS-only variables have no implicit freshness;
+- `+?n` freshness overload is legacy-only;
+- nested structural boundaries are not flattened implicitly.
 
-Active factorization hypotheses still include:
+## Identity / binding / references
+
+- bare structural IDs are namespace-relative;
+- stable `^n` labels are namespace-relative;
+- coincidental numeric equality across independent namespaces is non-semantic;
+- reference resolution is hygienic/structure-preserving, not naïve text copying;
+- repeated references preserve use-site multiplicity without making the reference handle semantic occurrence identity;
+- every variable occurrence has a reconstructable owner;
+- same variable repeats one binding;
+- distinct variables may alias unless explicit distinctness is represented;
+- NAC-only unbound variables are invalid;
+- NAC absence remains boundary/completeness-sensitive structural absence, not semantic falsity.
+
+## Decomposition / normalization
+
+- N0 serialization, N1 source-local alpha normalization, D factorization, and E theorem/profile equivalence remain separate;
+- exact D requires semantic round trip;
+- decomposition coverage is reported separately from round-trip fidelity;
+- opaque/re-encoded source backups do not count as decomposition evidence;
+- undecomposed residual preserves recoverability but reduces semantic coverage;
+- recursive/fixed-point definitions require explicit existence/admissibility authority;
+- alternative factorizations remain plural unless convergence/uniqueness is qualified.
+
+## Isomorphism/comparison
+
+Pairwise comparison now freezes independently:
 
 ```text
-C1/C2/C3 -> generated-region evaluation family
-C7       -> precondition gate + universal evaluation over transition successors
-C10      -> constrained structural rewrite
-C11      -> relation-image selection + uniqueness/totality
+target layer
+view
+included relation signature
+source-local roles/ports
+N0/N1 rules
+allowed D/E authority
+factorization/extraction bounds
+relation kinds
+common-core objective
+resource budget
 ```
 
-These are labels for hypotheses to test, not ontology facts.
+Relation kinds remain distinct:
+
+```text
+ISOMORPHISM
+STRONG_EMBEDDING
+WEAK_EMBEDDING
+SPECIALIZATION
+HOMOMORPHISM
+SIMULATION
+BISIMULATION
+QUOTIENT_OR_PROJECTION
+COMMON_CORE
+CERTIFIED_NON_ISOMORPHIC
+NO_WITNESS_FOUND
+UNKNOWN
+RESOURCE_LIMIT
+```
+
+- strong embedding reflects all frozen included relation/scope/constraint kinds;
+- no-witness under incomplete search is not non-isomorphism;
+- maximum-core claims require explicit objective + optimality/completeness certificate;
+- common-core witnesses classify every included/residual/boundary/excluded/projected item;
+- distinct valid mappings/automorphisms remain explicit by default;
+- witness verification is independent from discovery.
+
+## Structural classes
+
+A reusable class is an immutable/versioned, namespaced schema graph with:
+
+- structured parameter slots;
+- ports/boundaries;
+- positive and negative constraints;
+- absence/completeness conditions;
+- relation signature;
+- target-layer/view/relation-kind contract;
+- D/E dependencies;
+- residual/composition policy;
+- non-vacuity/selectivity evidence;
+- verified instance/class-class witnesses.
+
+Class recognition and new-class induction are separate.
+
+C1–C12 / `^9101..^9112` remain candidate navigation labels only; none is yet a qualified reusable schema revision.
+
+## Corpus discovery
+
+Candidate generation is part of correctness.
+
+Current protocol requires:
+
+- frozen extraction universe/rules;
+- independent source-side factorization/extraction before pairing;
+- label-blind structural candidate path or demonstrated hidden-label recall;
+- view-specific fingerprint invariance guarantees;
+- learned-index training/supervision provenance;
+- candidate-pair, search, verification, and unsearched-region coverage reporting;
+- policy-relative recall/precision controls;
+- fresh-context information isolation;
+- sealed/fresh held-out generalization;
+- structurally novel class cases absent from the registry.
+
+Approximate retrieval scores remain non-semantic metadata.
 
 ---
 
-# Primitive/core-surface status
+# Historical Experiment 003 artifact status
 
-Open surface/primitive questions include:
+The following remain valuable author-side/historical candidates but are **not automatically Draft 0.13-native** because they were produced under earlier conventions:
 
-1. `@@` versus structural rewrite;
-2. lexical binder ownership versus quantifier kind/domain semantics;
-3. explicit co-satisfaction versus legacy scope-as-conjunction;
-4. explicit fresh allocation versus legacy `+?n` RHS overload;
-5. stable namespaced `^n` labels versus irreducible token class;
-6. semantic-symbol-headed application versus explicit relation/function contracts;
-7. structural numeral/value encoding versus `#n` shorthand;
-8. signature/dependency objects versus `^0` serialization convention;
-9. negative structural matching `!` versus lower matching constraints/completeness assumptions.
+- `FORMAL_LOGIC_BENCHMARKS_003.axh`
+- `foundations/FOUNDATION_FORMULA_SAT_003.axh`
+- `foundations/FOUNDATION_FINITE_PATH_003.axh`
+- `foundations/FOUNDATION_LTL_TRACE_003.axh`
+- `foundations/FOUNDATION_KRIPKE_EPISTEMIC_003.axh`
+- `foundations/FOUNDATION_PROOF_OBJECT_003.axh`
+- `foundations/FOUNDATION_HEAP_SEPARATION_003.axh`
+- natural-deduction profile `.axh` files
+- `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.axh`
 
-Historical artifacts keep historical decoding rules. Current structural qualification requires a current rerender or exact verified legacy bridge.
+Before current structural/proof qualification they require either:
+
+```text
+Draft 0.13 rerender
+OR
+exact independently verified legacy-to-current bridge
+```
+
+No mathematical/research content is discarded by this status correction.
+
+The historical Draft 0.5 cold-reconstruction protocol remains a test of that historical scaffold only.
 
 ---
 
-# Primitive semantic foundations constructed author-side
+# Remaining semantic-foundation work
 
-Current candidates include:
+Author-side candidates exist for:
 
-- propositional formula satisfaction;
-- generic finite path/reachability;
-- FL-011 linear temporal trace semantics;
-- Kripke epistemic/common-knowledge/public-announcement/S5 relational structure;
-- explicit proof-object/context/conclusion structure;
-- constructive/classical natural-deduction proof constructors;
-- Peirce proof-term candidate with one classical-only DNE constructor;
-- heap/separation/Hoare partial-correctness structure.
+- propositional satisfaction;
+- finite path/reachability;
+- exercised LTL trace semantics;
+- epistemic/common-knowledge/public-announcement/S5 relational semantics;
+- explicit proof-object structure;
+- constructive/classical ND proof constructors;
+- Peirce proof term;
+- heap/separation/Hoare partial correctness.
 
-Still substantially pending:
+Substantially pending:
 
 - finite index/parity;
-- complete FOL/equality after instantiation audits;
+- complete FOL/equality after binder/instantiation audits;
 - CTL;
-- selected deontic semantics;
+- explicit deontic semantics;
 - HOL/function/type structure;
-- concrete Church–Rosser reduction theory;
-- concrete pointer swap/locality semantics.
+- Church–Rosser concrete reduction theory;
+- concrete pointer-swap/locality semantics.
 
-All existing foundations are author-side candidate evidence only.
+No new foundation should be promoted before the Draft 0.13 structural qualification cases below are exercised.
 
 ---
 
 # Qualification gates
 
-```text
-E0    source fidelity
-E1    native statement expressibility
-E1P   primitive semantic decomposition
-E1A   alias/factorization expansion
-E1C   structural-class classification after verified witness
-E1E   class/instance expansion
-E1N   normalization-layer audit
-E1F   alternative-factorization audit
-E1W   witnessed comparison/common-core/residual audit
-E1B   boundary/port/joint-realizability audit
-E1L   label-blind audit
-E1M   multiple-mapping/automorphism/maximal-core audit
-E1Q   comparison-policy freeze audit
-E1D   decomposition round-trip/recursion audit
-E1S   symbol/bundle namespace audit
-E1V   independent witness/certificate verification
-E1T   target-layer/conclusion-scope audit
-E1R   retrieval/discovery coverage audit
-E1U   class non-vacuity/selectivity audit
-E1X   substructure extraction/context audit
-E1H   held-out policy-generalization audit
-E1I   identity/reference/variable ownership audit
-E1K   index-invariant/search-engine audit
-E1COV decomposition/common-core coverage audit
-E1ISO information-flow isolation audit
-E2    isolated cold reconstruction
-E3    proof-profile completeness
-E4    proof execution
-E5    independent proof review
-```
+Unique current gate set:
 
-Applicable E1* gates block dependent class/isomorphism/proof claims.
+```text
+E0     source fidelity
+E1     native statement expressibility
+E1P    primitive semantic decomposition
+E1A    alias/factorization expansion
+E1C    structural-class classification after witness
+E1E    class/instance expansion
+E1N    N0/N1 versus D/E audit
+E1F    alternative-factorization audit
+E1W    witnessed comparison audit
+E1B    boundary/port/joint-realizability audit
+E1L    label-blind/anti-cheating audit
+E1M    multiple-mapping/maximal-core audit
+E1Q    comparison-policy/relation-signature freeze audit
+E1D    decomposition exactness/recursion/residual audit
+E1S    namespace/bundle/manifest audit
+E1H    reference/binder hygiene + occurrence/rewrite audit
+E1V    independent witness/negative/optimality verification
+E1T    target-layer/conclusion-scope audit
+E1R    retrieval/discovery coverage audit
+E1U    class non-vacuity/selectivity audit
+E1X    extraction/context audit
+E1G    held-out discovery-policy generalization audit
+E1I    identity/variable-owner/namespace edge-case audit
+E1K    index-invariant/search-engine audit
+E1COV  decomposition/common-core item coverage audit
+E1ISO  enforceable information-flow isolation audit
+E2     isolated cold reconstruction
+E3     proof-profile completeness
+E4     proof execution
+E5     independent proof review
+```
 
 ---
 
-# Qualification state
+# Current qualification state
 
 ```text
 E0:
   source intents/caveats: COMPLETE author-side
 
 E1:
-  18 statement envelopes: COMPLETE author-side
-  historical surface signature closure: PASS author-side
-  complete proof-problem input: PARTIAL
+  historical 18-object scaffold: COMPLETE author-side
+  Draft 0.13 current rerender: PENDING
 
 E1P:
-  benchmark decomposition audit: COMPLETE
-  several foundations: CONSTRUCTED author-side
-  deontic/HOL/FOL/parity/CTL completion: PENDING
-  independent foundation qualification: PENDING
+  benchmark decomposition audit: COMPLETE historical/research-side
+  several foundation candidates: CONSTRUCTED historical author-side
+  Draft 0.13-native rerenders/bridges: PENDING
 
-E1A/E1N/E1F/E1B:
-  rules/protocols: SPECIFIED
-  executions: PENDING
+E1A/E1N/E1F/E1B/E1M/E1Q/E1D/E1S/E1H/E1T:
+  current rules specified
+  focused executions: PENDING
 
 E1C/E1E/E1U:
-  schema contract/catalog: CREATED / Draft 0.12 aligned
+  Draft 0.13 schema contract/catalog: CREATED
   qualified immutable class revisions: NONE
-  verified membership/class-class witnesses: NONE
+  verified memberships/class-class witnesses: NONE
 
 E1W/E1V:
-  pairwise protocol + independent verification contract: CREATED
+  Draft 0.13 pairwise protocol: CREATED
   verified cross-domain witnesses: NONE
 
-E1L/E1Q/E1ISO:
-  label/policy/information isolation rules: SPECIFIED
+E1L/E1ISO:
+  label/information isolation rules: SPECIFIED
   executions: PENDING
 
-E1D/E1S/E1I/E1K/E1COV/E1T:
-  contracts specified through Draft 0.12
+E1R/E1X/E1G/E1I/E1K/E1COV:
+  discovery/edge-case contracts: SPECIFIED
   executions: PENDING
 
-E1R/E1X/E1H:
-  corpus discovery protocol: CREATED
-  executions: PENDING
-
-Candidate-core audit:
-  four corrective review passes: COMPLETE author-side
-  Draft 0.12 amendment: CREATED
-  focused primitive/surface qualification: PENDING
-
-Draft 0.6 instantiation:
-  focused cases: COMPLETE author-side
-  independent cold qualification: PENDING
-  rewrite-factorization comparison: PENDING
+Draft 0.6 @@:
+  historical focused cases: COMPLETE author-side
+  lower structural-rewrite factorization comparison: PENDING
+  current Draft 0.13 qualification: PENDING
 
 E2:
-  historical statement reconstruction protocol: FROZEN
-  independent run: PENDING
+  historical Draft 0.5 scaffold protocol: FROZEN
+  independent historical run: PENDING
+  Draft 0.13 cold protocol: NOT YET CREATED
 
 E3:
-  constructive ND candidate: EXISTS, unqualified
-  classical extension: EXISTS, unqualified
-  FL-001 proof-term candidate: EXISTS, unvalidated
-  epistemic S5 candidate: EXISTS, unqualified
-  FOL/HOL: BLOCKED on lower audits
-  LTL: semantic foundation exists; proof pending
-  spatial: foundation exists; swap/locality pending
-  CTL/deontic/parity: foundations pending
+  existing profile candidates: historical/unqualified
+  Draft 0.13 rerender/bridge: PENDING
 
 E4:
-  independently validated proofs: NONE
+  independently validated current proofs: NONE
 
 E5:
   PENDING
@@ -306,37 +335,69 @@ E5:
 
 ---
 
+# Immediate Draft 0.13 focused qualification
+
+Required before more semantic/class expansion:
+
+1. duplicate scope occurrences vs explicit set quotient;
+2. multiset rewrite + duplicate RHS;
+3. distinct application events / identical successor;
+4. nested boundary no-flattening;
+5. variable same-binding / distinct-variable aliasing / explicit distinctness;
+6. invalid NAC-only variable;
+7. NAC open/closed-world boundary;
+8. hygienic reference expansion under binders;
+9. repeated reference use: multiplicity without occurrence identity;
+10. active vs inert identical rule object;
+11. no implicit rule priority;
+12. structural-ID and stable-label namespace collisions;
+13. same quantified body / different domains;
+14. exact D semantic round-trip vs residual/source-copy cheating;
+15. independent decomposition/extraction freeze vs co-adaptation;
+16. strong vs weak embedding relation-signature control;
+17. same-label/different-structure and hidden-label/same-structure controls;
+18. learned-index label/training leakage;
+19. retrieval false-negative / extraction-universe coverage;
+20. vacuous parameter schema rejection;
+21. class recognition vs novel-class induction;
+22. certified negative vs resource-limited no-witness;
+23. automorphism/multiple valid mappings;
+24. common-core item-accounting completeness;
+25. legacy-to-current bridge.
+
+---
+
 # Claims not yet allowed
 
 Experiment 003 does not establish:
 
-- that all 18 benchmarks are complete proof problems;
-- that any author-side semantic foundation is independently correct;
-- that any C1–C12 label names a qualified class revision;
+- that all 18 benchmarks are current-complete proof problems;
+- that any historical foundation/proof is Draft 0.13-qualified;
+- that any C1–C12 label is a qualified reusable class;
 - that any registry mapping is proven;
-- that the discovery system has acceptable corpus recall/precision;
-- that one unique factorization/common core/mapping exists;
-- that no-witness results prove non-isomorphism;
-- that a schema-level match proves source-theory semantic equivalence;
-- that the Peirce candidate is a validated E4 proof;
+- that candidate retrieval has acceptable recall/precision;
+- that one unique factorization/core/mapping exists;
+- that a no-witness result proves non-isomorphism;
+- that a schema match proves source-theory semantic equivalence;
+- that the Peirce candidate is an E4 proof;
 - that all 18 benchmarks are provable;
 - that AxiomeSH outperforms another representation;
 - that every post-0.1 surface is irreducible core;
-- that Draft 0.5–0.12 improve proof/synthesis performance.
+- that Draft 0.13 improves proof/synthesis performance.
 
-The current required standard is:
+The current standard is:
 
 ```text
 source fidelity
-+ semantic decomposition
-+ versioned factorization preservation
-+ structurally qualified candidate retrieval
-+ frozen-policy isolated search
-+ independently verified witnesses/certificates
-+ explicit boundaries/ports/gluing
-+ complete common-core/residual accounting
-+ honest search/factorization/coverage uncertainty
-+ non-vacuous versioned class recognition
++ information-preserving native construction
++ semantic decomposition with honest residual coverage
++ independent factorization/extraction freeze
++ qualified label-blind candidate retrieval
++ frozen-policy witnessed comparison
++ independent verification
++ explicit ports/gluing/common-core/residual accounting
++ honest search/coverage uncertainty
++ non-vacuous versioned class recognition/induction
 + retained useful labels with provenance
 + explicit proof authority
 + cold reconstruction
