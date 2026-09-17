@@ -1,22 +1,24 @@
 # Experiment 003 — Structural Discovery Protocol 004
 
 **Status:** candidate corpus-discovery protocol  
-**Spec:** `../../CORE_SPEC_DRAFT_0_11_CANDIDATE.md`  
+**Spec:** `../../CORE_SPEC_DRAFT_0_12_CANDIDATE.md`  
 **Pairwise verifier:** `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
 
 ## Purpose
 
 Qualify the step before pairwise comparison: finding which independently represented objects/substructures should be compared at all.
 
-A sound pairwise verifier does not prevent false negatives if candidate retrieval is label-bound or incomplete.
+A sound pairwise verifier does not prevent false negatives if retrieval, substructure extraction, namespaces, or indexes prevent the right pair from reaching it.
 
-## 1. Freeze corpus and policy
+## 1. Freeze corpus and target policy
 
 Before expected cross-domain matches are unblinded, freeze:
 
 ```text
 corpus revision
+target comparison layer/view/relation kinds
 eligible object/substructure population
+structural namespace rules
 substructure extraction rules
 factorization/index depth bounds
 label visibility policy
@@ -26,9 +28,11 @@ pairwise comparison policy families
 resource budget
 ```
 
-## 2. Discovery evidence partition
+Recall/false-negative claims are relative to this target policy.
 
-Mark bundle data as:
+## 2. Enforce discovery isolation
+
+Partition available material as:
 
 ```text
 DISCOVERY_VISIBLE
@@ -40,20 +44,22 @@ REVIEWER_SCORER_ONLY
 
 `REVIEWER_SCORER_ONLY` may include expected mappings/classes/answers.
 
-Neither category is visible to blind candidate generation.
+Blind qualification uses a fresh isolated agent/context or another enforceable information-flow boundary. Merely tagging data as hidden is insufficient if the agent already read it.
+
+Record every file/resource accessible before result freeze.
 
 ## 3. Candidate generation channels
 
 A run may combine:
 
-- structural fingerprints/hashes;
+- qualified structural invariants/fingerprints;
 - local motif/subgraph indexes;
 - factorization signatures;
 - qualified class labels from already-known instances;
-- semantic/source labels as optional recall boosters;
-- learned approximate indexes, if their role is measured and non-authoritative.
+- semantic/source labels as optional retrieval boosters;
+- learned approximate indexes as explicitly non-semantic heuristics.
 
-At least one qualification channel must remain label-blind for novel cross-domain discovery, or the system must establish equivalent recall guarantees with labels hidden.
+At least one qualification path must allow unlabeled cross-domain instances to become candidates, or equivalent structural recall must be demonstrated with labels hidden.
 
 ## 4. Fingerprint/index declaration
 
@@ -62,6 +68,7 @@ Every structural index declares:
 ```text
 index revision
 target layer
+qualified view/role policy
 N0/N1 policy
 D/E policy
 factorization depth
@@ -69,32 +76,61 @@ included/excluded roles
 boundary treatment
 parameter treatment
 namespace handling
+invariance guarantee, if any
 collision behavior
 known false-positive risk
 known false-negative risk
+algorithm soundness/completeness/heuristic status
+random seed where relevant
 ```
 
-A fingerprint is retrieval evidence only, never a structural witness.
+A mismatch may prune a relation only when a verified invariant establishes:
 
-## 5. Substructure extraction
+```text
+A R B => f(A) = f(B)
+```
 
-If the index/search operates on components/subgraphs rather than whole source objects, each extracted candidate records:
+for the exact declared relation/view/layer.
+
+Injectivity is unnecessary for mismatch pruning. Equal fingerprints do not prove correspondence unless a much stronger property is independently established.
+
+An index qualified for one view is heuristic outside that view unless separately qualified.
+
+Approximate/learned scores are retrieval metadata only and never witness semantics.
+
+## 5. Structural namespaces
+
+Bare structural IDs and stable semantic symbols are resolved in their proper namespaces before indexing.
+
+Coincidental numeric equality across independent namespaces must not create candidate identity/sharing facts.
+
+Intentional cross-document sharing requires an explicit shared namespace/import/port/bundle-partition relation.
+
+## 6. Substructure extraction
+
+Each extracted candidate records:
 
 ```text
 source object revision
 extraction rule revision
+extraction kind:
+  induced substructure / boundary-cut component /
+  relation-filtered projection / quotient / other declared form
 selected substructure
 boundary/cut relations
 discarded residual/context
+dropped internal relations as projection loss, if any
 factorization dependencies
 selection timing relative to unblinding
 ```
 
 Pair-specific post-hoc extraction is exploratory, not blind qualification evidence.
 
-## 6. Candidate-pair generation
+A strong/induced common-core claim cannot hide relations among retained objects through a non-induced extraction.
 
-Generate candidate pairs without using expected class/mapping answers.
+## 7. Candidate-pair generation
+
+Generate candidate pairs without expected class/mapping answers.
 
 Record:
 
@@ -103,68 +139,64 @@ retrieval channel(s)
 score/signature causing candidacy
 factorization/substructure revisions
 labels visible to that channel
+target policy/relation for which candidacy was generated
 ```
 
-Deduplicate only by a transparent retrieval identity; do not merge candidates whose materially distinct boundaries/factorizations could yield different results.
+Deduplicate only by transparent retrieval identity. Preserve candidates whose distinct boundaries/factorizations could yield different results.
 
-## 7. Pairwise comparison
+## 8. Pairwise comparison
 
-Each candidate pair is handed to `STRUCTURAL_COMPARISON_PROTOCOL_003.md` with its own frozen comparison policy.
+Hand each candidate to `STRUCTURAL_COMPARISON_PROTOCOL_003.md` under a frozen policy.
 
 Retrieval score does not affect witness validity.
 
-A low-score pair that verifies structurally is a valid discovery.
+Positive structural claims require independently verified witnesses regardless of retrieval source.
 
-A high-score pair that fails verification remains a retrieval false positive.
-
-## 8. Coverage accounting
+## 9. Coverage accounting
 
 A corpus run records:
 
 ```text
 objects/substructures eligible
 objects/substructures indexed
-known qualified factorization nodes considered
+qualified factorization nodes considered
 candidate pairs emitted
-candidate pairs pairwise searched
-candidate pairs independently verified
+candidate pairs searched
+candidate witnesses independently verified
 resource/time limits
 unindexed/unsearched regions
 ```
 
-If exhaustive pairwise coverage is not achieved, the run must not claim no undiscovered isomorphs remain.
+If coverage is incomplete, absence of a reported relation remains unknown outside the searched set.
 
-## 9. Recall controls
+## 10. Recall controls
 
-Hold out known positive pairs from label/class hints and measure whether the retrieval system surfaces them structurally.
+Hold out positives from label/class hints and test structural retrieval.
 
-Mandatory controls include:
+Controls include:
 
 - unrelated domain vocabulary;
 - randomized source/class labels;
-- independent symbol namespaces;
+- independent structural/semantic namespaces;
 - serialization/identity randomization;
 - alternative factorization;
 - partial/common-core cases;
-- newly generated synthetic classes not used to design the index.
+- structurally novel classes absent from the registry;
+- synthetic/independently sourced structures not used to design the index.
 
-## 10. Precision controls
+Recall is reported relative to the frozen target policy.
 
-Include near-isomorphic/boundary/policy-leak negatives that generate tempting retrieval similarity but must fail or downgrade at pairwise verification.
+## 11. Precision/selectivity controls
 
-Measure:
+Use near-isomorphic, boundary, namespace-collision, policy-leak, and parameter-abuse negatives.
 
-```text
-candidate precision
-verified precision
-false-positive causes
-```
+Measure candidate versus independently verified precision.
 
-A noisy retrieval index may be acceptable if recall/total cost are good and pairwise verification remains exact.
+A noisy retrieval index may be acceptable if recall and total lifecycle cost are favorable and exact verification remains authoritative.
 
-## 11. Discovery result states
+## 12. Discovery result states
 
-For any potential relation distinguish:
+Do not collapse these states:
 
 ```text
 VERIFIED_RELATION_FOUND
@@ -177,11 +209,19 @@ FACTORIZATION_NOT_AVAILABLE
 UNKNOWN_RESOURCE_LIMIT
 ```
 
-These states must not collapse into a single “no match.”
+Only a verified negative certificate/complete search for the declared pairwise problem supports certified non-isomorphism.
 
-## 12. Generalization audit
+## 13. Novel-class discovery
 
-Evaluate the candidate-generation policy on held-out/synthetic structures not used to design:
+Qualification must include objects whose correct reusable class/common-core hypothesis is absent from the catalog.
+
+The system must be able to return a witnessed new candidate structural class/common-core hypothesis rather than forcing the object into the nearest known label.
+
+Such a candidate remains unqualified until the normal schema, non-vacuity/selectivity, held-out, and adversarial promotion path succeeds.
+
+## 14. Generalization audit
+
+Evaluate retrieval and comparison-policy families on held-out/synthetic structures not used to design:
 
 - class schemas;
 - fingerprint rules;
@@ -189,20 +229,20 @@ Evaluate the candidate-generation policy on held-out/synthetic structures not us
 - role mappings;
 - benchmark-specific heuristics.
 
-A discovery system that works only on the examples that shaped its indexes is not qualified for the AxiomeSH mission.
+## 15. Labels after discovery
 
-## 13. Labels after discovery
+Qualified labels may accelerate future retrieval/construction.
 
-After a relation is pairwise verified, qualified class/domain labels may be attached and used to accelerate future retrieval.
+Inferred class membership remains derived knowledge with schema revision, target layer/view, factorization set, verified witness, and qualification status attached.
 
-The system must retain a structural path by which an unlabeled new instance can still enter the candidate set.
+The system must retain a structural path by which an unlabeled new instance can still enter candidate search.
 
-## 14. Metrics
+## 16. Metrics
 
 Record at minimum:
 
 ```text
-known-positive recall
+policy-relative known-positive recall
 candidate precision
 verified precision
 candidate count
@@ -212,6 +252,7 @@ factorization depth/coverage
 label-blind versus label-assisted recall
 false-negative causes
 false-positive causes
+novel-class discovery success
 ```
 
-The target is not zero candidates. It is high structural discovery yield under bounded total lifecycle cost while preserving exact verification.
+The target is high structural discovery yield under bounded total lifecycle cost with exact, independently verified final relations.
