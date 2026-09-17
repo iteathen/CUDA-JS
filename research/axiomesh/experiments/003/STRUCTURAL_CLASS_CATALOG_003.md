@@ -2,6 +2,7 @@
 
 **Status:** candidate class map derived from primitive-decomposition work  
 **Spec:** `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`  
+**Native registry:** `STRUCTURAL_CLASS_REGISTRY_003.axh`  
 **Authority:** classification aid only; primitive/native definitions remain semantic authority
 
 ## Rule
@@ -19,6 +20,36 @@ source operator/object
 ```
 
 A class label does not prove equivalence. It records a candidate common structural form whose instance must still preserve all source constraints.
+
+## Native candidate identities
+
+The class registry provides stable candidate identities so agents can refer to classes without rediscovering or renaming them on every pass:
+
+| Catalog class | Native class ID | Human construction label |
+|---|---:|---|
+| C1 | `^9101` | universal satisfaction over generated region |
+| C2 | `^9102` | existential satisfaction over generated region |
+| C3 | `^9103` | immediate-successor evaluation |
+| C4 | `^9104` | finite path / reflexive-transitive closure |
+| C5 | `^9105` | predicate-selected structure restriction |
+| C6 | `^9106` | disjoint decomposition / recomposition |
+| C7 | `^9107` | transition-preservation judgment |
+| C8 | `^9108` | finite locally validated derivation |
+| C9 | `^9109` | finite indexed fold |
+| C10 | `^9110` | bound-body instantiation |
+| C11 | `^9111` | functional-graph application |
+| C12 | `^9112` | well-founded propagation |
+
+Registry relations are deliberately classification-only:
+
+```text
+^9000  candidate class declaration
+^9001  candidate instance-of
+^9002  candidate composed-of
+^9003  candidate specialization-of
+```
+
+These identities help agents recognize the classes. They do not replace the native construction or independently establish semantic equivalence.
 
 ## C1 — Universal satisfaction over a generated region
 
@@ -266,43 +297,43 @@ This remains a candidate class until the Experiment 003 well-founded profile is 
 ```text
 agent-indexed accessibility leaf
 + shared satisfaction
-+ C1 universal-over-generated-region
++ C1 / ^9101
 ```
 
 ### Common knowledge
 
 ```text
 union/group accessibility construction
-+ C4 finite-path closure
-+ C1 universal-over-generated-region
++ C4 / ^9104
++ C1 / ^9101
 ```
 
 ### LTL G
 
 ```text
 linear trace/future-order structure
-+ C1 universal-over-generated-region
++ C1 / ^9101
 ```
 
 ### LTL F
 
 ```text
 linear trace/future-order structure
-+ C2 existential-over-generated-region
++ C2 / ^9102
 ```
 
 ### LTL X
 
 ```text
 discrete trace successor
-+ C3 immediate-successor evaluation
++ C3 / ^9103
 ```
 
 ### Public announcement
 
 ```text
 shared satisfaction
-+ C5 predicate-selected structure restriction
++ C5 / ^9105
 + post-update satisfaction
 ```
 
@@ -310,7 +341,7 @@ shared satisfaction
 
 ```text
 heap/resource leaves
-+ C6 disjoint decomposition/recomposition
++ C6 / ^9106
 + recursive satisfaction on each part
 ```
 
@@ -319,14 +350,14 @@ heap/resource leaves
 ```text
 program transition leaf
 + satisfaction
-+ C7 transition-preservation judgment
++ C7 / ^9107
 ```
 
 ### Common reduction closure
 
 ```text
 one-step reduction leaf
-+ C4 finite-path closure
++ C4 / ^9104
 ```
 
 ## Class creation rule
@@ -346,8 +377,8 @@ A candidate class becomes qualified only after:
 
 ## Labels
 
-Human class labels in this document are aids for review and construction.
+Both human and native labels are retained because they help agents identify, retrieve, and construct classes of objects.
 
-Native class identities may be assigned later once the class boundaries stabilize. Numeric native IDs should not be allocated merely to make the catalog look complete.
+The native IDs in `STRUCTURAL_CLASS_REGISTRY_003.axh` are **candidate classification handles**, not semantic authority. The registry currently maps only already-observed source aliases where the decomposed shape provides a plausible class mapping.
 
-The semantic authority remains the decomposed native structure until class identity itself is qualified.
+The semantic authority remains the decomposed native structure until each class/instance mapping is independently qualified.
