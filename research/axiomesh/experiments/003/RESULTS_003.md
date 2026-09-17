@@ -1,6 +1,6 @@
 # Experiment 003 — Results
 
-**Status:** 18-benchmark source corpus and native statement scaffold constructed; Drafts 0.5/0.6 produced; Draft 0.7 primitive-decomposition gate active; multiple shared primitive semantic foundations and first explicit proof-term candidate constructed; independent qualification and proof execution remain pending.
+**Status:** 18-benchmark source corpus and native statement scaffold constructed; Drafts 0.5/0.6 produced; Draft 0.7 primitive-decomposition gate active; Draft 0.8 structural-class/retained-label correction active; multiple shared primitive semantic foundations and first explicit proof-term candidate constructed; independent qualification and proof execution remain pending.
 
 ## Added benchmark surface
 
@@ -66,11 +66,33 @@ named formal operator
 
 The existing benchmark payload is retained as a **statement/formalization scaffold**, not as primitive-semantic completion for modal, temporal, deontic, spatial, proof-meta, closure, or higher-order semantics.
 
+### Draft 0.8
+
+A follow-up review found the opposite risk: a useful named surface or construction guide must not be mistaken for evidence that the eventual core needs a new irreducible primitive.
+
+Draft 0.8 keeps labels while making their role explicit:
+
+```text
+source concept
+-> semantic decomposition
+-> primitive/native construction
+-> structural-class recognition
+-> named class / named domain instance
+-> optional compact surface
+```
+
+The correction is **not** to throw away labels. Labels/classes are useful construction and retrieval handles. Their semantics must remain expandable to lower native structure.
+
+Earlier syntax introduced in Drafts 0.2–0.6 remains usable on the experimental branch, but final primitive status is now an explicit audit question rather than a consequence of having added syntax.
+
 See:
 
 - `../../CORE_SPEC_DRAFT_0_7_CANDIDATE.md`
+- `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`
 - `PRIMITIVE_DECOMPOSITION_AUDIT_003.md`
 - `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md`
+- `STRUCTURAL_CLASS_CATALOG_003.md`
+- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
 
 ## Native statement bundle
 
@@ -97,6 +119,57 @@ lexical abstraction occurrences:  9
 ```
 
 These counts prove structural closure of the scaffold, not primitive semantic sufficiency.
+
+## Structural-class correction
+
+The initial class catalog currently identifies candidate reusable shapes including:
+
+- universal satisfaction over a generated region;
+- existential satisfaction over a generated region;
+- immediate-successor evaluation;
+- finite path/reflexive-transitive closure;
+- predicate-selected structure restriction;
+- disjoint decomposition/recomposition;
+- transition-preservation judgment;
+- finite locally validated derivation;
+- finite indexed fold;
+- bound-body instantiation;
+- functional-graph application;
+- well-founded propagation.
+
+These are **class labels**, not new core primitives.
+
+Current decomposed examples map naturally as compositions/specializations:
+
+```text
+knowledge        -> accessibility + universal-over-generated-region
+common knowledge -> group relation + finite-path closure + universal-over-generated-region
+LTL G            -> linear future region + universal-over-generated-region
+LTL F            -> linear future region + existential-over-generated-region
+LTL X            -> immediate-successor evaluation
+public announce  -> predicate-selected restriction + post-update satisfaction
+separating *     -> disjoint decomposition/recomposition + recursive satisfaction
+Hoare validity   -> transition-preservation judgment
+reduction *      -> finite-path closure
+```
+
+These mappings remain candidate classifications until class/instance erasure and cold reconstruction qualify them.
+
+## Candidate core-surface audit
+
+`CORE_SURFACE_PRIMITIVE_AUDIT_003.md` now separates three questions for forms introduced after Draft 0.1:
+
+```text
+is the semantic distinction required?
+is a compact/canonical surface useful?
+is irreducible primitive status actually demonstrated?
+```
+
+The audit retains useful surfaces such as literals, stable labels, implication, equality, negation, choice, quantifiers, lexical abstraction, and structural instantiation while explicitly reopening whether each belongs in the eventual irreducible substrate.
+
+The highest-priority challenge is Draft 0.6 `@@`: capture-avoiding substitution may itself be representable as ordinary structural rewrite over explicit binder/occurrence structure. The existing `@@` syntax and tests remain useful even if it becomes a named class/surface rather than a core primitive.
+
+Draft 0.2 formula-scope conjunction and the `^0` signature marker are also explicitly marked for primitive-status audit rather than silently promoted.
 
 ## Primitive semantic foundations now constructed
 
@@ -127,8 +200,6 @@ Constructs zero-or-more reachability from:
 - explicit path witness.
 
 A compact reachability alias is defined by existence of such a witness and is therefore erasure-safe in principle.
-
-This is intended to be shared by common knowledge, CTL/path reasoning, and reduction closure.
 
 ### Linear temporal trace foundation
 
@@ -181,8 +252,6 @@ The constructive base explicitly defines proof constructors for assumption, impl
 
 The classical profile adds one classical-only proof constructor for double-negation elimination. The intuitionistic profile does not.
 
-This gives the classical/constructive boundary a concrete structural location in the proof term rather than a hidden global proof mode.
-
 ### FL-001 Peirce proof-term candidate
 
 - `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.axh`
@@ -190,7 +259,7 @@ This gives the classical/constructive boundary a concrete structural location in
 
 An explicit proof-term tree has been constructed for Peirce's law. Its only classical-only step is the DNE constructor.
 
-This is **not yet an E4 proof claim**. The artifact is candidate proof data; independent validation must recursively establish every constructor against the native profile. The required negative control is that the same proof term fails under the intuitionistic profile when the DNE constructor is unavailable.
+This is **not yet an E4 proof claim**. Independent validation must recursively establish every constructor against the native profile. The required negative control is that the same proof term fails under the intuitionistic profile when the DNE constructor is unavailable.
 
 ### Heap / separation foundation
 
@@ -210,28 +279,9 @@ Constructed semantics include:
 
 The frame rule is deliberately **not** primitive. It must be derived from explicit locality/disjointness conditions. Concrete swap transition semantics are still pending.
 
-All foundations above are author-side candidates. Cold reconstruction, alias-erasure, and proof qualification are still required.
+All foundations above are author-side candidates. Cold reconstruction, alias/class erasure, and proof qualification are still required.
 
-## Primitive-decomposition correction
-
-The following conventional operators/concepts must not remain opaque when their semantics are constructible:
-
-- finite AND/OR folds and parity/XOR;
-- biconditional;
-- epistemic `K_i`, common knowledge, public announcement;
-- obligation/permission under the selected deontic semantics;
-- LTL `G/F/X/U`;
-- CTL `A/E`, `AG/EF`;
-- separating conjunction, Hoare validity, frame rule;
-- proof/derivable predicates;
-- reflexive-transitive closure;
-- higher-order application/lambda/Pi behavior where used by proof.
-
-Their semantic mechanisms must be represented from lower-level relational/state structure. Named aliases may remain only when their native definitions are present and alias erasure preserves the obligation.
-
-Admissible primitive leaves include source/model facts such as atomic valuations, domain identities, one-step transitions/accessibility/reduction edges, heap cell incidence, and source algebraic operations constrained by explicit axioms.
-
-## New qualification gate
+## Qualification gates
 
 ### E1P — primitive semantic decomposition
 
@@ -248,7 +298,22 @@ A benchmark/profile passes only if:
 
 Where named derived aliases remain for compactness, expand/remove them and verify the primitive-normal obligation is equivalent.
 
-E1P/E1A block E3/E4.
+### E1C — structural-class classification
+
+After decomposition, classify derived objects only from their native construction shape as instances, specializations, compositions, or genuinely new candidate classes.
+
+### E1E — class/instance erasure
+
+Verify both:
+
+```text
+domain label -> structural-class instance
+structural-class instance -> primitive-normal construction
+```
+
+without changing the obligation.
+
+E1P/E1A/E1C/E1E block E3/E4.
 
 ## Readiness encoded in the initial scaffold
 
@@ -263,7 +328,7 @@ Current initial partition remains:
 ^353  8
 ```
 
-Those classes predate Draft 0.7 and do not imply E1P completion.
+Those classes predate Draft 0.7/0.8 and do not imply primitive/class completion.
 
 ## Source-fidelity cautions retained
 
@@ -304,6 +369,22 @@ E1A alias-erasure:
   protocol requirement: SPECIFIED
   executions: PENDING
 
+E1C structural-class classification:
+  initial class catalog: CREATED
+  existing decomposed foundations: MAPPED provisionally
+  independent/cross-domain qualification: PENDING
+
+E1E class/instance erasure:
+  protocol requirement: SPECIFIED
+  executions: PENDING
+
+Candidate-core primitive audit:
+  audit created: COMPLETE
+  Draft 0.6 @@ rewrite-decomposition comparison: PENDING
+  binder-vs-quantifier separation audit: PENDING
+  formula-scope conjunction audit: PENDING
+  semantic-label token-class audit: PENDING
+
 Draft 0.6 structural instantiation:
   candidate + focused cases: COMPLETE author-side
   independent cold qualification: PENDING
@@ -317,7 +398,7 @@ E3 proof-profile completeness:
   primitive classical extension: EXISTS, unqualified
   FL-001 proof-term candidate: EXISTS, unvalidated
   epistemic S5 relational candidate: EXISTS, primitive foundation unqualified
-  FOL/HOL: BLOCKED on Draft 0.6 cold qualification
+  FOL/HOL: BLOCKED on Draft 0.6 cold qualification and primitive audit
   LTL: primitive semantic foundation exists; proof profile/proof still pending
   spatial: primitive heap/separation foundation exists; concrete swap/locality proof pending
   CTL/deontic/parity: primitive foundations pending
@@ -335,10 +416,24 @@ Experiment 003 does not yet establish:
 
 - that all 18 benchmarks are complete formal proof problems;
 - that any author-side primitive foundation is independently correct;
+- that any candidate structural class is independently qualified;
 - that the Peirce proof candidate is a validated E4 proof;
 - that all 18 benchmarks are provable from the current native bundle;
 - that AxiomeSH outperforms natural-language, TPTP, SMT-LIB, Lean/Coq/Isabelle, or another formal representation;
 - that any current derived alias is optimal;
-- that Draft 0.5/0.6/0.7 improve proof performance.
+- that every syntax form introduced since Draft 0.1 is an irreducible core primitive;
+- that Draft 0.5/0.6/0.7/0.8 improve proof performance.
 
-The required standard is now explicit: source-faithful statement + primitive semantic construction + alias erasure + explicit proof authority + cold reconstruction + proof execution + independent proof review.
+The required standard is now explicit:
+
+```text
+source-faithful statement
++ primitive semantic construction
++ structural-class recognition
++ retained useful labels
++ two-stage erasure
++ explicit proof authority
++ cold reconstruction
++ proof execution
++ independent proof review
+```
