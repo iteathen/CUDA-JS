@@ -1,12 +1,14 @@
 # Experiment 003 — Structural Class Schema Contract 004
 
-**Status:** candidate authority for class definitions under Draft 0.10  
-**Spec:** `../../CORE_SPEC_DRAFT_0_10_CANDIDATE.md`  
+**Status:** candidate authority for class definitions under Draft 0.11  
+**Spec:** `../../CORE_SPEC_DRAFT_0_11_CANDIDATE.md`  
+**Discovery protocol:** `STRUCTURAL_DISCOVERY_PROTOCOL_004.md`  
+**Pairwise protocol:** `STRUCTURAL_COMPARISON_PROTOCOL_003.md`  
 **Supersedes for new qualification:** informal class-schema minimum in `STRUCTURAL_CLASS_CATALOG_003.md`
 
 ## Purpose
 
-A class label must name a reconstructable parameterized structural schema, not an ontology assertion. This contract defines the minimum object required before a candidate class can be independently qualified.
+A class label must name a reconstructable, selective, non-vacuous parameterized structural schema—not an ontology assertion and not an identity wrapper around an arbitrary instance.
 
 ## 1. Schema identity and revision
 
@@ -19,7 +21,7 @@ parent/superseded revision, if any
 status: candidate / qualified / rejected / superseded
 ```
 
-The navigation label may remain stable across research revisions. Qualification attaches to one immutable schema revision.
+Qualification attaches to one immutable schema revision.
 
 Changing any load-bearing field creates a new revision.
 
@@ -46,6 +48,8 @@ residual policy
 comparison target layer
 known exact/partial factorizations
 known instances as hypotheses or verified witnesses
+non-vacuity/selectivity rationale
+discovery/index representation, if any
 falsifiers
 qualification evidence references
 ```
@@ -66,7 +70,7 @@ substructure
 boundary/port
 ```
 
-Structured slots expose their own interface/constraint contract. A numeric handle naming a relation is not a substitute for mapping the relation structure when that relation is part of the class evidence.
+Structured slots expose their own interface/constraint contract. A numeric handle naming a relation is not a substitute for mapping its structure when that relation is part of class evidence.
 
 ## 4. Ports
 
@@ -99,7 +103,26 @@ For a newly discovered reusable class, parameterization requires either:
 - evidence from at least two independent decomposed instances; or
 - an independently specified construction law followed by held-out positive/negative tests.
 
-## 6. Membership witness
+## 6. Non-vacuity / selectivity
+
+A reusable class must expose shared construction outside its free parameters.
+
+Invalid/vacuous pattern:
+
+```text
+Class(X) where X carries the entire instance and the schema adds no structural restriction
+```
+
+Promotion requires:
+
+- non-parameterized schema relations/invariants shared across instances;
+- parameter slots that do not collectively encode the entire instance while leaving only an identity wrapper;
+- held-out near misses rejected for structural reasons;
+- evidence that the schema provides predictive/compositional/retrieval value beyond restating the object.
+
+No fixed description-length threshold is yet constitutional, but compression/predictive-value measurements are encouraged.
+
+## 7. Membership witness
 
 A verified instance witness contains:
 
@@ -113,18 +136,18 @@ structured parameter assignments
 port map
 rigid roles preserved
 constraints/invariants checked
-relation strength: exact / strong embedding / weak embedding / specialization / ...
+relation strength
 residual
 independent verification result
 ```
 
 A class label edge without this witness remains an annotation/hypothesis.
 
-## 7. Class-class witness
+## 8. Class-class witness
 
 A relation between schema revisions uses the same discipline.
 
-Possible class-class relations include:
+Possible relations include:
 
 ```text
 specializes
@@ -140,7 +163,7 @@ E-equivalent under profile
 
 The witness includes schema maps, parameter/port maps, constraints, residuals, and exact dependency revisions.
 
-## 8. Composition
+## 9. Composition
 
 A composition requires:
 
@@ -156,23 +179,33 @@ composition residual
 
 Shared identity alone is not proof of valid composition.
 
-## 9. Alternative factorizations
+## 10. Alternative factorizations
 
 A schema may have several exact or non-exact factorizations.
 
-Record each as a node/edge in a factorization graph with:
+Record each with:
 
 ```text
 edge kind
-round-trip status
+semantic versus archival round-trip status
 loss/residual
 applicability guards
 D/E dependencies
 ```
 
+An opaque source backup does not count as evidence of semantic decomposition.
+
 Do not declare one canonical factorization without confluence/uniqueness evidence.
 
-## 10. Promotion criteria
+## 11. Discovery requirement
+
+A qualified reusable class must have at least one structural candidate-generation path by which an unlabeled new instance can enter comparison.
+
+Qualified labels may accelerate later retrieval, but shared labels cannot be the only discovery mechanism for cross-domain instances.
+
+If a class defines a fingerprint/index, record its target layer, normalization/factorization policy, boundary treatment, collision behavior, and known recall risk.
+
+## 12. Promotion criteria
 
 A candidate becomes a reusable qualified class only after:
 
@@ -180,15 +213,17 @@ A candidate becomes a reusable qualified class only after:
 2. all load-bearing fields in this contract are present;
 3. decomposition dependencies are independently qualified;
 4. at least two independently sourced verified instances exist, unless an independently specified construction law is tested on held-out instances;
-5. mandatory adversarial controls pass;
-6. label-blind discovery succeeds;
-7. witness verification succeeds independently;
-8. alternative-factorization and boundary/composition audits pass for the exercised surface;
-9. no simpler existing class/factorization explains the same structure without loss.
+5. non-vacuity/selectivity passes;
+6. mandatory adversarial controls pass;
+7. label-blind discovery/recall controls pass;
+8. witness verification succeeds independently;
+9. alternative-factorization and boundary/composition audits pass for the exercised surface;
+10. policy-generalization is tested on held-out/synthetic structures;
+11. no simpler existing class/factorization explains the same structure without loss.
 
 A cross-domain class requires independently sourced domains.
 
-## 11. Revision rule
+## 13. Revision rule
 
 A qualified revision is immutable.
 
@@ -196,7 +231,7 @@ Semantic changes create a successor revision. Prior witnesses remain evidence on
 
 A successor may claim compatibility with an earlier revision only through an explicit verified class-class relation.
 
-## 12. Current C1–C12 status
+## 14. Current C1–C12 status
 
 The C1–C12 / `^9101..^9112` labels from Experiment 003 remain **candidate navigation labels**.
 
