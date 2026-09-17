@@ -1,0 +1,28 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-16",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "schema_1601": {
+      "parameter_slots": [1],
+      "required_patterns": [],
+      "non_vacuous": false,
+      "reason": "one arbitrary pass-through parameter and no reusable structural constraint",
+      "assignments_present": [1710, 1711]
+    },
+    "schema_1602": {
+      "parameter_slots": [1],
+      "required_pattern": ["(?0 ?1)", "(?1 ?2)"],
+      "non_vacuity_candidate": true,
+      "instance_1701_matches": true,
+      "instance_1701_example_binding": {"?0": "20", "?1": "21", "?2": "22"},
+      "instance_1702_matches": true,
+      "instance_1702_example_binding": {"?0": "40", "?1": "41", "?2": "42"},
+      "instance_1703_matches": false,
+      "near_miss_reason": "star has no edge whose first identity is the second identity of another edge",
+      "large_parameter_size_disqualifies": false,
+      "promotion_status": "NOT_QUALIFIED_BY_THIS_CASE_ALONE"
+    }
+  }
+}
