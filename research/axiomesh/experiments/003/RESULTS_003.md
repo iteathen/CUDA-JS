@@ -1,10 +1,10 @@
 # Experiment 003 — Results
 
-**Status:** 18-benchmark source corpus/native statement scaffold constructed; Drafts 0.5–0.9 produced; primitive-decomposition, factorization, label-blind witnessed-comparison, and structural-class gates active; several shared semantic foundations and one explicit proof-term candidate exist; independent qualification and proof execution remain pending.
+**Status:** 18-benchmark source corpus/native statement scaffold constructed; Drafts 0.5–0.9 produced; primitive-decomposition, factorization, label-blind witnessed-comparison, boundary, and mapping-multiplicity gates active; several shared semantic foundations and one explicit proof-term candidate exist; independent qualification and proof execution remain pending.
 
-## Added benchmark surface
+## Benchmark surface
 
-Experiment 003 contains 18 benchmark objects across six broad domains:
+Experiment 003 contains 18 benchmark objects across six domains:
 
 ```text
 propositional / structural            3
@@ -19,118 +19,9 @@ total                                18
 
 Native structural IDs are `3001..3018` in source order `FL-001..FL-018`.
 
----
+The original bundle remains a source-faithful **statement/formalization scaffold**, not final primitive-semantic completion.
 
-# Specification pressure lineage
-
-## Draft 0.5 — bound-body surface
-
-Added:
-
-```text
-\?n term
-```
-
-and made proof-theory neutrality explicit.
-
-Current disposition: useful bound-body surface; irreducible primitive status not established.
-
-## Draft 0.6 — structural instantiation surface
-
-Added:
-
-```text
-ABSTRACTION @@ ARGUMENT
-```
-
-plus explicit abstraction-valued quantifier forms.
-
-Focused author-side cases exist under `instantiation/`; independent cold qualification remains pending.
-
-Draft 0.9 now demotes the claim that `@@` is already an irreducible core primitive. It remains a useful named construction while an ordinary structural-rewrite factorization is tested.
-
-## Draft 0.7 — primitive semantic decomposition
-
-Corrected the overly permissive idea that a conventional operator becomes native merely by receiving a stable `^n` name.
-
-Required direction:
-
-```text
-named formal operator
--> native semantic construction
--> justified primitive/model leaves
-```
-
-The original 18-case payload is therefore a statement/formalization scaffold, not primitive-semantic completion for every logic.
-
-## Draft 0.8 — structural classes and retained labels
-
-Corrected the opposite risk: useful labels/surfaces should remain available even when their semantics decompose.
-
-Required direction became:
-
-```text
-source concept
--> decomposition
--> native construction
--> structural class
--> retained class/domain label
-```
-
-## Draft 0.9 — isomorphism-safe factoring and witnessed comparison
-
-A line-by-line review of Drafts 0.1–0.8 found that Draft 0.8 still left several dangerous gaps for the project's central isomorphism objective.
-
-Draft 0.9 corrects them:
-
-```text
-source semantics
--> one or more qualified decompositions/factorizations
--> N0/N1 representation-only normalization
--> label-blind structural comparison under explicit projection
--> mapping/common-core/residual witness
--> structural-class recognition
--> retained useful labels
-```
-
-Key corrections:
-
-- decomposition is a relation and may have multiple valid factorization nodes;
-- a unique primitive-normal form is not assumed without confluence/uniqueness evidence;
-- serialization normalization, structural alpha/boundary normalization, definitional expansion, and theorem/profile equivalence are separate layers;
-- every isomorphism/class result names its comparison projection;
-- semantic labels are rigid by default but may map only under an explicit witnessed projection;
-- literals remain rigid, while class schemas may explicitly parameterize literal positions;
-- class schemas require ports/boundaries, parameters, invariants, mappings, and residual policy;
-- class membership requires a schema-to-instance witness;
-- composite classes require gluing/joint-realizability witnesses;
-- partial isomorphism returns a common core plus explicit residuals;
-- class/domain labels are forbidden as discovery evidence during label-blind qualification;
-- same interior/different boundary, near-isomorphic, partial, alternate-factorization, and misleading-label controls are mandatory;
-- surface signatures are representation-layer facts, not semantic-isomorphism criteria;
-- new canonical artifacts may not depend on context-only scope-as-conjunction or `+?n` existential/freshness overloading.
-
-Corrective artifacts:
-
-- `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`
-- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md`
-- `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
-- updated `STRUCTURAL_CLASS_CATALOG_003.md`
-- updated `STRUCTURAL_CLASS_REGISTRY_003.axh`
-- `STRUCTURAL_CLASS_REGISTRY_003.md`
-
----
-
-# Native statement bundle
-
-Artifacts:
-
-- `FORMAL_LOGIC_BENCHMARKS_003.axh`
-- `SEMANTIC_SIGNATURE_003_DRAFT_0_5.axh`
-- `FORMALIZATION_AUDIT_003.md`
-- `SEMANTIC_GLOSS_003.json` — reviewer/scorer gloss only, forbidden during cold E2.
-
-Author-side construction checks remain:
+## Author-side scaffold checks
 
 ```text
 benchmark objects:              18
@@ -145,41 +36,141 @@ required-construct attachments:   3
 lexical abstraction occurrences:  9
 ```
 
-These counts establish closure of that **surface scaffold**, not primitive semantic sufficiency or unique canonical decomposition.
+These counts prove closure of the selected surface serialization only.
+
+They do not prove unique factorization, primitive sufficiency, class membership, or theorem validity.
 
 ---
 
-# Structural-class correction
+# Specification lineage / correction status
 
-The catalog retains candidate labels C1–C12 / `^9101..^9112`, but no longer treats them as a flat ontology.
+## Draft 0.5
 
-Current family/factorization hypotheses include:
+Introduced first-class bound-body surface:
 
 ```text
-C1 universal evaluation
-C2 existential evaluation
+\?n term
+```
+
+and made proof-theory neutrality explicit.
+
+Current disposition: useful surface; irreducible primitive status unproven.
+
+## Draft 0.6
+
+Introduced candidate structural instantiation:
+
+```text
+ABSTRACTION @@ ARGUMENT
+```
+
+Current disposition under Draft 0.9: retained named operation, demoted from assumed irreducible core pending comparison with an ordinary structural-rewrite construction over explicit binder/occurrence ownership.
+
+Draft 0.6's optional canonical reduction of `@@` is superseded. Instantiation reduction is a recorded D/E transformation, not N0/N1 canonicalization.
+
+## Draft 0.7
+
+Added primitive semantic decomposition:
+
+```text
+named operator
+-> native semantic construction
+-> justified primitive/model leaves
+```
+
+This prevents conventional logic names from becoming opaque native semantics merely by receiving `^n` labels.
+
+## Draft 0.8
+
+Added structural classes and retained labels:
+
+```text
+decompose
+-> recognize reusable structure
+-> attach useful class/domain labels
+```
+
+Labels remain useful construction/retrieval handles but are downstream of semantic construction.
+
+## Draft 0.9
+
+The line-by-line review of Drafts 0.1–0.8 found remaining failure modes capable of corrupting isomorphism discovery.
+
+Draft 0.9 now requires:
+
+```text
+source semantics
+-> one or more qualified decompositions/factorizations
+-> N0/N1 representation-only normalization
+-> label-blind structural comparison under explicit projection
+-> mapping/common-core/residual witness(es)
+-> structural-class recognition
+-> retained labels
+```
+
+Major corrections now recorded:
+
+- decomposition is a relation, not assumed to be one function to one primitive-normal form;
+- alternative qualified factorizations are preserved unless uniqueness/confluence is established;
+- N0 serialization normalization, N1 alpha-structural normalization, D definitional expansion, and E theorem/profile equivalence are separate;
+- structural comparison names an explicit projection: P0/PB/PS/PC/PE/PQ as applicable;
+- isomorphism, embedding, homomorphism, quotient/projection, specialization, and semantic equivalence are distinct result types;
+- stable semantic labels/literals are rigid by default and become mappable/parameterized only through explicit comparison/schema rules;
+- ordered incidence positions are rigid by default; argument-order convention differences require explicit role decomposition/schema mapping rather than arbitrary tuple permutation;
+- structural classes require schema graphs, parameters, ports, invariants, mapping rules, decomposition dependencies, gluing rules, and residual policy;
+- class membership requires a mapping witness;
+- composite class membership requires gluing + joint-realizability evidence;
+- partial correspondence returns common core plus explicit residuals and boundary-cut relations;
+- multiple materially distinct mappings/automorphisms are preserved unless a justified quotient proves the distinction irrelevant;
+- “maximum common core” requires an explicit measure; otherwise materially distinct maximal cores are preserved;
+- class/domain labels are excluded from discovery evidence during label-blind qualification;
+- the native class registry is hypothesis/navigation metadata only;
+- surface signatures are layer-relative (`Sig_surface`, dependency closure, selected factorization signature), not semantic-isomorphism criteria;
+- new canonical artifacts do not inherit scope-as-conjunction merely from “formula context”;
+- new canonical artifacts do not overload `+?n` between existential and freshness solely by syntactic position;
+- Draft 0.2's point-of-definition reference visibility was corrected because sibling textual order cannot be semantic inside an unordered scope; Draft 0.9 reference dependencies are serialization-order-independent and acyclic;
+- `^0` remains a useful legacy/canonical signature convention but cannot depend on invisible external knowledge that a file “is a signature document”;
+- source multiplicity must be resolved/preserved before set-like scope canonicalization.
+
+Correction authorities:
+
+- `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`
+- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md`
+- `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
+- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
+
+---
+
+# Structural-class status
+
+Candidate native labels remain `^9101..^9112`, but the catalog is a **hypothesis lattice**, not a flat ontology.
+
+Current strongest family/factorization hypotheses include:
+
+```text
+C1 universal-over-generated-region
+C2 existential-over-generated-region
 C3 immediate-successor evaluation
 ```
 
-as possible specializations of a broader **evaluation over a generated region** family.
+as possible specializations of a broader generated-region evaluation family.
 
-Additional hypotheses:
+Additional factorization hypotheses:
 
-- C7 transition-preservation may factor as precondition gating + universal evaluation over transition successors;
+- C7 transition-preservation may factor into precondition gating + universal evaluation over transition successors;
 - C10 bound-body instantiation may factor through constrained structural rewrite;
-- C11 functional-graph application may factor through relation-image selection + uniqueness/totality constraints.
+- C11 functional-graph application may factor into relation-image selection + uniqueness/totality constraints.
 
-These labels are deliberately retained so agents can identify/retrieve candidate constructions while the class boundaries are tested.
+The class registry now represents source-to-class mappings as explicit **unqualified hypothesis objects** with witness-pending status rather than direct qualified-looking membership edges.
 
-## Registry correction
+No current source-to-class mapping is qualified.
 
-The original native registry used direct candidate source-to-class edges.
+Relevant artifacts:
 
-It now encodes each mapping as a separate **unqualified hypothesis object** with witness-pending status.
-
-Direct class assertions are no longer structurally indistinguishable from qualified membership.
-
-The registry is prohibited as input to label-blind discovery qualification.
+- `STRUCTURAL_CLASS_CATALOG_003.md`
+- `STRUCTURAL_CLASS_REGISTRY_003.axh`
+- `STRUCTURAL_CLASS_REGISTRY_003.md`
+- `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
 
 ---
 
@@ -190,99 +181,98 @@ The registry is prohibited as input to label-blind discovery qualification.
 ```text
 semantic distinction required?
 compact/canonical surface useful?
-irreducible primitive status demonstrated?
+irreducible primitive demonstrated?
+isomorphism/comparison role safe?
 ```
 
-Current highest-risk surfaces/semantics:
+Highest-priority open primitive/surface questions:
 
-1. Draft 0.6 `@@` — likely candidate for rewrite-level decomposition;
-2. formula-scope conjunction — context-sensitive semantic overload;
-3. `+?n` existential/freshness overload — context-sensitive semantic overload;
-4. lexical abstraction — useful surface, lower binder/occurrence construction still to compare;
-5. `^0` signature marker — serialization convention, not proven primitive;
-6. stable `^n` token class — useful labels, but cross-domain comparison requires explicit mapped-signature projection;
-7. exact literals — useful rigid-value shorthand, while class schemas may expose selected literal positions as parameters.
+1. `@@` versus structural rewrite;
+2. lexical binder ownership versus universal/existential semantics;
+3. explicit co-satisfaction versus legacy scope-as-conjunction;
+4. explicit fresh allocation versus legacy `+?n` RHS overload;
+5. stable `^n` labels under rigid P0 versus mapped PS/PC comparison;
+6. structural numeral/value representation versus `#n` shorthand;
+7. native signature objects/dependency closures versus the `^0` serialization convention;
+8. negative application condition `!` primitive status.
 
-Historical experiment payloads keep their old decode rules. New Draft 0.9 canonical artifacts must make semantic role explicit enough for structural comparison.
+Historical experiment artifacts retain their historical decode semantics. New Draft 0.9 artifacts use the corrected rules.
 
 ---
 
 # Primitive semantic foundations constructed author-side
 
-## Shared formula satisfaction
+## Formula satisfaction
 
 `foundations/FOUNDATION_FORMULA_SAT_003.axh`
 
 Provides recursive satisfaction for the exercised propositional constructors.
 
-Draft 0.9 warning: formula-scope conjunction in this foundation is a candidate surface/profile construction and must not be generalized into an unmarked universal meaning of raw `[]`.
+Legacy scope-as-conjunction use remains a surface/profile construction and must not be generalized into an unmarked meaning of raw `[]` in new canonical artifacts.
 
-## Generic finite path construction
+## Finite path/reachability
 
 - `foundations/FOUNDATION_FINITE_PATH_003.axh`
 - `foundations/FOUNDATION_FINITE_PATH_003.md`
 
 Constructs zero-or-more reachability from a primitive one-step relation and explicit finite path witnesses.
 
-Candidate class relation: C4 / `^9104`; witnessed cross-domain qualification pending.
+Candidate C4 mapping remains witness-pending.
 
-## Linear temporal trace foundation
+## Linear temporal trace
 
 - `foundations/FOUNDATION_LTL_TRACE_003.axh`
 - `foundations/FOUNDATION_LTL_TRACE_003.md`
 - `instances/FL_011_LTL_PRIMITIVE_003.axh`
 
-Uses a linear future-order model and derives `X/F/G` through satisfaction rather than primitive temporal tokens.
+Constructs the exercised `X/F/G` semantics from a linear future-order model and recursive satisfaction.
 
-Candidate class/family mappings to F1/C1/C2/C3 are unqualified hypotheses pending label-blind witnesses.
+F1/C1/C2/C3 mappings remain unqualified hypotheses.
 
-## Epistemic / public-announcement foundation
+## Epistemic / public announcement / S5
 
 - `foundations/FOUNDATION_KRIPKE_EPISTEMIC_003.axh`
 - `foundations/FOUNDATION_KRIPKE_EPISTEMIC_003.md`
 - `profiles/PROFILE_EPISTEMIC_S5_RELATIONAL_003.axh`
 - `profiles/PROFILE_EPISTEMIC_S5_RELATIONAL_003.md`
 
-Constructs knowledge, common knowledge, announcement restriction, and S5 relation constraints from worlds/accessibility/valuation/group structure.
+Constructs knowledge, common knowledge, public-announcement restriction, and S5 relation constraints from world/accessibility/valuation/group structure.
 
-Candidate class mappings remain witness-pending.
+Class/family mappings remain witness-pending.
 
-## Explicit proof-object foundation
+## Proof-object foundation / ND profiles
 
 - `foundations/FOUNDATION_PROOF_OBJECT_003.axh`
 - `foundations/FOUNDATION_PROOF_OBJECT_003.md`
-
-Provides explicit proof-term/context/conclusion structure rather than an unexplained theorem boolean.
-
-Candidate class relation to C8 is unqualified.
-
-## Constructive/classical natural-deduction proof terms
-
 - `profiles/PROFILE_ND_CONSTRUCTIVE_BASE_003.axh`
 - `profiles/PROFILE_ND_INTUITIONISTIC_PRIMITIVE_003.axh`
 - `profiles/PROFILE_ND_CLASSICAL_PRIMITIVE_003.axh`
 
-Constructive proof constructors are explicit; the classical profile adds a distinct DNE constructor.
+Proof authority is explicit proof-term/context/rule structure rather than an opaque theorem boolean.
+
+The classical profile adds a distinct DNE proof constructor unavailable in the intuitionistic profile.
+
+Candidate C8 mapping is unqualified.
 
 ## FL-001 Peirce proof-term candidate
 
 - `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.axh`
 - `proofs/FL_001_PEIRCE_PROOF_CANDIDATE_003.md`
 
-Explicit proof-term tree exists. Its only classical-only step is the DNE constructor.
+Candidate proof tree exists. Its only classical-only step is the DNE constructor.
 
-This remains candidate proof data, not E4 proof evidence. Negative control under the intuitionistic profile remains required.
+This remains candidate data, not an independently validated E4 proof.
 
-## Heap / separation foundation
+## Heap / separation / Hoare
 
 - `foundations/FOUNDATION_HEAP_SEPARATION_003.axh`
 - `foundations/FOUNDATION_HEAP_SEPARATION_003.md`
 
-Constructs disjointness, union, points-to satisfaction, separating conjunction, and Hoare partial-correctness from heap/program-state structure.
+Constructs heap functionality/disjoint union, points-to, separating conjunction, and Hoare partial correctness from heap/program-state structure.
 
-C6/C7 mappings remain candidate and C7 has an explicit factorization challenge under Draft 0.9.
+C6/C7 mappings remain unqualified; C7 itself has an open factorization challenge.
 
-All current foundations remain author-side candidates pending independent cold reconstruction, factorization/label controls, and proof qualification.
+All foundations above remain author-side candidates pending independent reconstruction and the relevant E1* controls.
 
 ---
 
@@ -300,104 +290,101 @@ E1F  alternative-factorization audit
 E1W  witnessed comparison/common-core/residual audit
 E1B  boundary/port/joint-realizability audit
 E1L  label-blind discovery audit
+E1M  multiple-mapping/automorphism/maximal-core audit
 E2   isolated cold reconstruction
 E3   proof-profile completeness
 E4   proof execution
 E5   independent proof review
 ```
 
-E1P through E1L block any E3/E4 claim that depends on the relevant class/isomorphism relation.
+E1P through E1M block class/isomorphism-dependent E3/E4 claims.
 
 ---
 
 # Qualification state
 
 ```text
-E0 source fidelity:
-  18 benchmark intents copied: COMPLETE author-side
-  source caveats explicit: COMPLETE
+E0:
+  source intents/caveats: COMPLETE author-side
 
-E1 statement/native expressibility:
-  18 benchmark envelopes rendered: COMPLETE author-side
-  surface signature closure: PASS author-side
+E1:
+  18 statement envelopes: COMPLETE author-side
+  selected surface signature closure: PASS author-side
   complete proof-problem input: PARTIAL
 
-E1P primitive semantic decomposition:
-  per-benchmark audit: COMPLETE
-  formula satisfaction: CONSTRUCTED author-side
-  finite path/reachability: CONSTRUCTED author-side
-  proof-object structure: CONSTRUCTED author-side
-  constructive/classical ND: CONSTRUCTED author-side
-  LTL exercised surface: CONSTRUCTED author-side
-  epistemic/PAL/S5: CONSTRUCTED author-side candidate
-  heap/separation/Hoare: CONSTRUCTED author-side candidate
-  deontic/HOL/FOL/parity/CTL: PENDING
+E1P:
+  benchmark decomposition audit: COMPLETE
+  several shared foundations: CONSTRUCTED author-side
+  deontic/HOL/FOL/parity/CTL completion: PENDING
   independent foundation qualification: PENDING
 
-E1A alias/factorization expansion:
-  protocol concept: SPECIFIED
+E1A:
+  factorization/expansion discipline: SPECIFIED
   executions: PENDING
 
-E1C structural-class classification:
-  catalog: CREATED / corrected for factorization families
-  candidate native labels: RETAINED
-  qualified membership witnesses: NONE YET
+E1C:
+  class/family catalog: CREATED
+  candidate labels retained
+  qualified membership witnesses: NONE
 
-E1E class/instance expansion:
-  protocol: SPECIFIED
+E1E:
+  class/instance expansion discipline: SPECIFIED
   executions: PENDING
 
-E1N normalization-layer audit:
-  N0/N1/D/E distinction: SPECIFIED in Draft 0.9
+E1N:
+  N0/N1/D/E separation: SPECIFIED
+  reference-order correction: SPECIFIED
   executions: PENDING
 
-E1F alternative-factorization audit:
-  protocol: SPECIFIED
+E1F:
+  alternative-factorization policy: SPECIFIED
   executions: PENDING
 
-E1W witnessed comparison:
-  protocol: CREATED
-  qualified cross-domain witnesses: NONE YET
+E1W:
+  witnessed comparison protocol: CREATED / synced to final Draft 0.9
+  qualified cross-domain witnesses: NONE
 
-E1B boundary/composition audit:
-  protocol: SPECIFIED
+E1B:
+  ports/gluing/joint-realizability: SPECIFIED
   executions: PENDING
 
-E1L label-blind audit:
-  registry exclusion/randomized-label control: SPECIFIED
+E1L:
+  registry exclusion + label randomization: SPECIFIED
   executions: PENDING
 
-Candidate-core primitive audit:
-  line-by-line Draft 0.1–0.8 review: COMPLETE
-  corrective Draft 0.9: CREATED
-  @@ rewrite-decomposition comparison: PENDING
-  binder-vs-quantifier separation: PENDING
-  formula-scope conjunction correction test: PENDING
-  semantic-label mapping/role test: PENDING
-  signature layer-relative test: PENDING
+E1M:
+  automorphism/multiple-witness handling: SPECIFIED
+  maximal-vs-maximum common-core rule: SPECIFIED
+  executions: PENDING
+
+Candidate-core audit:
+  Draft 0.1–0.8 line review: COMPLETE
+  Draft 0.9 amendment + self-review: COMPLETE author-side
+  focused primitive/surface tests: PENDING
 
 Draft 0.6 instantiation:
   candidate + focused cases: COMPLETE author-side
   independent cold qualification: PENDING
+  rewrite-factorization comparison: PENDING
 
-E2 cold reconstruction of statement bundle:
-  protocol frozen: COMPLETE
+E2:
+  statement reconstruction protocol: FROZEN
   independent run: PENDING
 
-E3 proof-profile completeness:
+E3:
   constructive ND candidate: EXISTS, unqualified
   classical extension: EXISTS, unqualified
   FL-001 proof-term candidate: EXISTS, unvalidated
   epistemic S5 relational candidate: EXISTS, foundation unqualified
   FOL/HOL: BLOCKED on instantiation/primitive/factorization audits
-  LTL: semantic foundation exists; proof still pending
+  LTL: semantic foundation exists; proof pending
   spatial: semantic foundation exists; concrete swap/locality proof pending
   CTL/deontic/parity: foundations pending
 
-E4 proof execution:
-  no independently validated proof yet
+E4:
+  independently validated proofs: NONE
 
-E5 independent proof review:
+E5:
   PENDING
 ```
 
@@ -410,28 +397,32 @@ Experiment 003 does not establish:
 - that all 18 benchmarks are complete formal proof problems;
 - that any author-side primitive foundation is independently correct;
 - that any candidate structural class is qualified;
-- that any source-to-class mapping in the registry is proven;
+- that any registry source-to-class mapping is proven;
 - that one unique primitive-normal factorization exists;
+- that one unique common core/mapping exists for an arbitrary comparison;
 - that the Peirce proof candidate is a validated E4 proof;
-- that all 18 benchmarks are provable from the current native bundle;
-- that AxiomeSH outperforms natural-language, TPTP, SMT-LIB, Lean/Coq/Isabelle, or another representation;
+- that all 18 benchmarks are provable from the current bundle;
+- that AxiomeSH outperforms natural language or an established formal system;
 - that any current derived alias/class is optimal;
-- that every syntax form introduced since Draft 0.1 is irreducible core;
-- that Draft 0.5–0.9 improve proof or synthesis performance.
+- that every post-0.1 surface is irreducible core;
+- that Draft 0.5–0.9 improve proof/synthesis performance.
 
-The required standard is now:
+The required standard is:
 
 ```text
 source-faithful statement
 + primitive semantic construction
-+ alternative-factorization preservation
++ preserved alternative factorizations
++ representation-only normalization
++ explicit comparison projection
 + label-blind witnessed structural comparison
-+ explicit boundaries/ports
++ explicit boundaries/ports/gluing
 + common-core/residual recovery
++ preservation of materially distinct mappings/maximal cores
 + structural-class recognition from witnesses
 + retained useful labels
 + explicit proof authority
 + cold reconstruction
 + proof execution
-+ independent proof review
++ independent review
 ```
