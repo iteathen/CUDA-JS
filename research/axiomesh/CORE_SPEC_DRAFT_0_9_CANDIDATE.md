@@ -37,14 +37,16 @@ Draft 0.9 changes or clarifies:
 
 - canonicalization/normalization layers;
 - decomposition/factorization multiplicity;
-- comparison projections;
+- comparison projections and mapping kinds;
 - semantic-label treatment during cross-domain comparison;
 - structural-class schema requirements;
-- class-membership and isomorphism witnesses;
+- class-membership and structural-relation witnesses;
 - boundary/port semantics;
 - exact versus partial structural correspondence;
+- embeddings, homomorphisms, and quotients as distinct from isomorphism;
 - class composition/gluing;
 - signature exactness by representation layer;
+- reference binding order-independence;
 - label-blind qualification;
 - treatment of context-sensitive formula surfaces;
 - primitive-status interpretation of Draft 0.2–0.6 syntax.
@@ -67,7 +69,7 @@ N0 removes only transport/presentation differences known to be semantically tran
 
 - whitespace;
 - permitted presentation line breaks;
-- reference numbering after transparent reference expansion;
+- reference spelling/numbering after transparent reference resolution;
 - deterministic ordering used only for serialization.
 
 N0 MUST NOT apply theorem rules, definitional expansions, algebraic laws, logical equivalences, substitution, beta-style reduction, or class mappings.
@@ -240,7 +242,9 @@ PS allows selected stable semantic identities from independent theories to map t
 
 The mapping MUST be explicit and witnessed.
 
-It MUST preserve every structural role/occurrence constraint attached to the mapped symbols, including arity/position use where those are load-bearing.
+It MUST preserve every structural role/occurrence constraint attached to the mapped symbols, including arity and ordered-position use where those are load-bearing.
+
+Ordered incidence is rigid by default. If two source conventions encode equivalent roles in different tuple positions, PS does not arbitrarily permute them. A qualified D factorization or class-schema port mapping must first expose the role correspondence explicitly.
 
 A PS mapping does not rename or mutate either source theory. It exists only inside the comparison witness.
 
@@ -263,9 +267,17 @@ PE may use represented theorem/profile equivalences beyond pure structure.
 
 PE is not an isomorphism result unless the resulting relation is separately shown to preserve the structural requirements of the claimed isomorphism class.
 
-### 4.6 Comparison result identifies its projection
+### 4.6 PQ — projection/quotient comparison
 
-A result such as “isomorphic,” “specialization,” “embedding,” or “common core” is invalid if the projection is omitted.
+Some useful common structure is obtained only by a declared many-to-one abstraction or quotient.
+
+PQ permits such a relation only when the projection/quotient map and information loss are explicit.
+
+A PQ result is **not** an isomorphism. It may support an invariant/common-quotient claim, but the collapsed distinctions remain recorded as residual/projection loss.
+
+### 4.7 Comparison result identifies its projection
+
+A result such as “isomorphic,” “specialization,” “embedding,” “homomorphic,” “quotient,” or “common core” is invalid if the projection/mapping policy is omitted.
 
 ---
 
@@ -392,13 +404,21 @@ An embedding is an injective structure-preserving map from the compared schema/c
 
 An embedding is not automatically a specialization: specialization additionally asserts the relevant class semantics/constraints of the target instance.
 
-### 7.4 Composition of classes
+### 7.4 Homomorphism
+
+A homomorphism preserves the declared structural relations but need not be injective or surjective.
+
+It is weaker than isomorphism and embedding and MUST be reported as such.
+
+A homomorphic relationship may expose an invariant shape but may also collapse distinctions; those collapsed distinctions are part of the witness/projection loss.
+
+### 7.5 Composition of classes
 
 A composite instance carries multiple class witnesses plus an explicit gluing/overlap map and compatibility constraints.
 
 Shared identity alone is not a sufficient composition proof.
 
-### 7.5 Hypothesis registries are not discovery evidence
+### 7.6 Hypothesis registries are not discovery evidence
 
 A registry of candidate class labels/mappings MAY exist for navigation and experiment planning.
 
@@ -406,7 +426,7 @@ Such a registry MUST be excluded from label-blind class-discovery qualification 
 
 ---
 
-## 8. Isomorphism and partial-isomorphism results are witnessed
+## 8. Structural-comparison results are witnessed
 
 A comparison returns a structured result, not only a boolean.
 
@@ -418,6 +438,8 @@ BOUNDARY_PRESERVING_ISOMORPHISM
 MAPPED_SIGNATURE_ISOMORPHISM
 SPECIALIZATION
 EMBEDDING
+STRUCTURAL_HOMOMORPHISM
+QUOTIENT_OR_PROJECTION
 COMMON_CORE_WITH_RESIDUALS
 NON_ISOMORPHIC_UNDER_PROJECTION
 UNRESOLVED_FACTORING_OR_EQUIVALENCE
@@ -431,7 +453,13 @@ An exact isomorphism witness is bijective over the compared structural objects u
 
 An embedding witness is injective on the mapped structural objects and preserves the required incidence/constraints. Unmapped target structure remains explicit residual.
 
-### 8.3 Common-core integrity
+### 8.3 Homomorphism/quotient map
+
+A non-injective structure-preserving map or many-to-one quotient is recorded separately from isomorphism.
+
+The witness MUST identify which distinctions were collapsed and what invariant structure survives the map.
+
+### 8.4 Common-core integrity
 
 A common core MUST preserve all load-bearing relations among the mapped objects under the selected projection.
 
@@ -439,7 +467,7 @@ A comparison may not obtain a larger core by silently omitting an inconvenient r
 
 Any unmatched relation/constraint incident on the mapped core belongs to a residual/boundary cut and must remain explicit.
 
-### 8.4 Witness contents
+### 8.5 Witness contents
 
 A witness records at least:
 
@@ -456,9 +484,10 @@ constraints checked
 common core C
 residual A
 residual B
+collapsed/projected distinctions if any
 ```
 
-### 8.5 Residuals are first-class
+### 8.6 Residuals are first-class
 
 For partial correspondence:
 
@@ -471,11 +500,32 @@ B = C + ΔB
 
 AxiomeSH must prefer a precise common core plus residuals over a larger but false equivalence.
 
-### 8.6 Maximum common structure is projection-relative
+### 8.7 Multiple valid mappings and automorphisms
 
-“Maximum common core” is meaningful only under a specified projection, boundary policy, factorization set, and admissible mapping rules.
+A pair of structures may admit multiple valid mappings because of symmetry/automorphism or because several distinct partial correspondences are equally strong.
 
-The result must record those assumptions.
+The comparison MUST NOT silently choose one witness if different witnesses produce materially different port assignments, residuals, or downstream compositions.
+
+Either:
+
+- preserve the materially distinct witnesses; or
+- quotient them by an explicitly established automorphism/equivalence relation that proves the distinction irrelevant to the requested comparison.
+
+### 8.8 Maximal versus maximum common cores
+
+Draft 0.1's phrase “maximum common structure” is tightened.
+
+There may be several incomparable maximal common cores, and “maximum” requires a declared measure/partial order.
+
+A comparison MUST state the optimization criterion if it claims a maximum.
+
+Absent a justified unique criterion, preserve the non-dominated materially distinct maximal cores rather than selecting one by implementation accident.
+
+### 8.9 Common structure is projection-relative
+
+Any “common core” is meaningful only under a specified projection, boundary policy, factorization set, admissible mapping rules, and—if optimized—comparison measure.
+
+The result records those assumptions.
 
 ---
 
@@ -544,6 +594,12 @@ Expected: relationship survives or factorization dependence is reported explicit
 Labels are swapped or deliberately suggest the wrong class.
 
 Expected: structural result unchanged.
+
+### 10.8 Symmetry/automorphism pair
+
+A structure has multiple valid mappings that differ only—or not only—by symmetry.
+
+Expected: preserve materially different mappings or justify their quotient.
 
 No class is qualified from positive examples alone.
 
@@ -658,6 +714,36 @@ Legacy Draft 0.2 behavior remains readable for frozen artifacts.
 
 If a rule is active because of structural location, that nesting/location is load-bearing and must survive normalization/comparison.
 
+### 13.4 Reference binding is order-independent
+
+Draft 0.2's rule that `@n=term` is visible “from its point of definition to the end of its containing scope” conflicts with the rule that ordinary scope membership is unordered.
+
+Draft 0.9 supersedes that visibility rule for new canonical artifacts.
+
+A reference binding:
+
+- is a serialization/compression directive, not a semantic scope member after N0 expansion;
+- is visible throughout its containing serialization scope and descendant scopes unless a stricter explicit reference scope is represented;
+- does not gain or lose meaning from sibling textual order;
+- MUST be unique within the visible ancestry; shadowing remains invalid;
+- may be referenced regardless of textual before/after position;
+- participates in an acyclic reference-dependency graph; self/cyclic dependencies remain invalid.
+
+After transparent expansion, reference binding terms are removed from the semantic comparison structure.
+
+This restores consistency between unordered scope semantics and reference transparency.
+
+### 13.5 Signature marker is a surface convention, not hidden document context
+
+Draft 0.3 gives `^0` special meaning “inside a theory-signature document.” New Draft 0.9 artifacts MUST NOT require an unrepresented document kind to interpret `^0`.
+
+Either:
+
+- the signature object's role is explicit in native structure; or
+- `^0` is treated strictly as the legacy/canonical serialization convention defined by the applicable bundle specification.
+
+`^0` remains available for frozen/current experiments, but no isomorphism/class claim may depend on invisible knowledge that a file “is a signature document.”
+
 ---
 
 ## 14. Multiplicity must be decided before set-like scope canonicalization
@@ -680,6 +766,7 @@ Before creating a new class, test whether the candidate is:
 - a specialization;
 - a composition;
 - a constrained projection;
+- a homomorphic/quotient image rather than an isomorphic class;
 - the same class under a different factorization.
 
 Current hypotheses requiring explicit test include:
@@ -771,6 +858,10 @@ Test exposed ports and joint realizability; interior similarity alone is insuffi
 
 Hide/permutate non-evidential source and class labels and rerun the discovery result.
 
+### E1M — mapping multiplicity audit
+
+When symmetry or multiple maximal common cores produce materially distinct witnesses, preserve them or justify an automorphism/equivalence quotient.
+
 These gates block structural-class promotion and any E3/E4 claim depending on the class relation.
 
 ---
@@ -800,6 +891,7 @@ Revise Draft 0.9 if controlled evidence shows that:
 - label-blind qualification removes useful structural information that should actually be modeled as a rigid parameter;
 - boundary/port modeling proves redundant because the same composition information is always recoverable unambiguously from native incidence;
 - residual-first partial comparison consistently performs worse than a different exact method without preventing false equivalences;
+- preserving multiple mapping witnesses creates cost without protecting downstream composition/residual correctness;
 - the N0/N1/D/E separation cannot be reconstructed reliably by qualified agents;
 - a simpler comparison framework provides equal or better isomorphism discovery with the same semantic fidelity.
 
@@ -813,7 +905,8 @@ preserve source semantics
 -> preserve alternative factorizations
 -> normalize representation only
 -> compare under an explicit projection
--> produce a mapping/core/residual witness
--> classify only from that witness
+-> produce mapping/core/residual witness(es)
+-> preserve materially distinct alternative mappings
+-> classify only from witnessed structure
 -> retain labels afterward
 ```
