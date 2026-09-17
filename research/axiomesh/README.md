@@ -11,7 +11,7 @@ Its central question is:
 
 > Can an agent reason, synthesize, and continue work more effectively when external knowledge is represented close to the relational structure it must manipulate rather than primarily in forms optimized for human communication?
 
-AxiomeSH is not initially a shorter notation for existing logic. It is an attempt to discover a more direct structural substrate for agent reasoning and cross-domain structural synthesis.
+AxiomeSH is not intended to be a numbered copy of existing formal notation. Its main research opportunity is to expose invariant structural shape across domains so that agents can discover exact and partial isomorphisms that names and conventional notation hide.
 
 The leading hypothesis remains:
 
@@ -19,24 +19,25 @@ The leading hypothesis remains:
 \boxed{\text{knowledge}=\text{relational structure}+\text{lawful structural transformation}}
 \]
 
-The graph/hypergraph-rewrite direction remains a **research hypothesis, not a settled commitment**.
+The graph/hypergraph-rewrite substrate remains a **research hypothesis**, not a settled commitment.
 
 ## Current specification lineage
 
-The drafts are cumulative experimental amendments, not individually final language releases.
+The drafts are cumulative experimental amendments, not final language releases.
 
 - [`CORE_SPEC_DRAFT_0_1.md`](./CORE_SPEC_DRAFT_0_1.md) — original minimal scoped-hypergraph/rewrite candidate.
-- [`CORE_SPEC_DRAFT_0_2_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_2_CANDIDATE.md) — exact literals, stable semantic labels, declarative formula surfaces.
-- [`CORE_SPEC_DRAFT_0_3_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_3_CANDIDATE.md) — lexical binding clarification and native signature inventory.
+- [`CORE_SPEC_DRAFT_0_2_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_2_CANDIDATE.md) — literals, stable labels, declarative formula surfaces.
+- [`CORE_SPEC_DRAFT_0_3_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_3_CANDIDATE.md) — lexical scope/signature inventory.
 - [`CORE_SPEC_DRAFT_0_4_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_4_CANDIDATE.md) — qualification/presentation/signature tightening.
-- [`CORE_SPEC_DRAFT_0_5_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_5_CANDIDATE.md) — first-class bound-body surface and proof-profile separation.
-- [`CORE_SPEC_DRAFT_0_6_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_6_CANDIDATE.md) — candidate capture-avoiding structural-instantiation surface.
+- [`CORE_SPEC_DRAFT_0_5_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_5_CANDIDATE.md) — bound-body surface and proof-profile separation.
+- [`CORE_SPEC_DRAFT_0_6_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_6_CANDIDATE.md) — candidate structural-instantiation surface.
 - [`CORE_SPEC_DRAFT_0_7_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_7_CANDIDATE.md) — primitive semantic decomposition requirement.
 - [`CORE_SPEC_DRAFT_0_8_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_8_CANDIDATE.md) — retained labels and structural-class layer.
-- [`CORE_SPEC_DRAFT_0_9_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_9_CANDIDATE.md) — isomorphism-safe factorization, explicit comparison projections, witnesses, boundaries, residuals, and label-blind qualification.
+- [`CORE_SPEC_DRAFT_0_9_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_9_CANDIDATE.md) — plural factorizations, witnessed comparisons, ports/residuals, label-blind qualification.
+- [`CORE_SPEC_DRAFT_0_10_CANDIDATE.md`](./CORE_SPEC_DRAFT_0_10_CANDIDATE.md) — policy freeze, namespaced stable symbols, exact-D round trips, versioned schemas, independent witness verification, negative-result/search discipline, target-layer separation.
 - [`DESIGN_NOTES.md`](./DESIGN_NOTES.md) — research rationale, constraints, hypotheses, and falsifiers.
 
-Historical drafts remain frozen evidence for the experiments that qualified them. Later drafts supersede conflicting interpretation without rewriting old inputs.
+Historical drafts remain frozen evidence for their experiments. Later drafts supersede conflicting interpretation without rewriting old inputs.
 
 ## Objective
 
@@ -44,20 +45,20 @@ AxiomeSH aims to maximize:
 
 > **durable, correct agent synthesis per total lifecycle resource cost**
 
-under non-negotiable preservation of:
+subject to preservation of:
 
 - semantic fidelity;
 - structural soundness;
 - canonical integrity;
 - load-bearing distinctions;
-- required provenance;
+- provenance when required;
 - recoverability;
 - composition boundaries;
 - falsifiable structural correspondences.
 
 Character/token count is a cost, not the objective.
 
-## Raw core first
+## Native path
 
 The native research path remains:
 
@@ -67,102 +68,207 @@ raw AxiomeSH -> agent -> raw AxiomeSH
 
 No mandatory English parser, theorem-language translation, JSON envelope, database adapter, or model-specific semantic layer belongs inside the native correctness path.
 
-Later renderers/adapters may project from the same structure, but they must not become peer semantic authorities.
+Adapters may project from native structure later, but must not become peer semantic authorities.
 
-## Discover structure before naming it
+## Constitutional isomorphism pipeline
 
-The current governing construction order is:
+The current governing order is:
 
 ```text
 source semantics
--> one or more qualified native decompositions/factorizations
--> representation-only normalization
--> label-independent structural comparison
--> explicit mapping/common-core/residual witness
--> structural-class recognition
--> retained useful domain/class labels
--> optional compact surface syntax
+-> qualified/versioned factorization set
+-> N0/N1 representation normalization
+-> frozen comparison policy
+-> label-blind structural search
+-> candidate mapping/certificate
+-> independent witness verification
+-> exact/common-core/residual result
+-> versioned structural-class recognition
+-> retained useful labels
+-> optional compact surface
 ```
 
-Labels are intentionally retained because they help retrieval, construction, and reuse.
+Labels are intentionally retained because they improve retrieval, construction, and reuse.
 
-They are downstream of the structural evidence. A label may not choose the decomposition or prove the isomorphism/class it names.
+They may not choose the decomposition, mapping policy, parameterization, or class result they later name.
 
-## Why this matters for isomorphism
+## Why this matters
 
-AxiomeSH's central opportunity is to reveal the same relational shape when different fields use different names, notation, or conceptual packaging.
+AxiomeSH must avoid both:
 
-The system therefore must avoid both:
-
-- **false negatives:** equivalent/related structures fail to match because labels, IDs, or factorization choices differ;
-- **false positives:** semantically different structures are collapsed because constraints, boundaries, multiplicity, or residuals were erased.
-
-A structural comparison must state its projection and return a witness.
+- **false negatives** — related structures fail to match because labels, namespaces, serialization, or factorization differ;
+- **false positives** — different structures collapse because boundaries, constraints, multiplicity, residuals, domains, or search uncertainty disappear.
 
 When only part of two objects corresponds, prefer:
 
 \[
-A = C + \Delta_A
+A=C+\Delta_A
 \]
 
 \[
-B = C + \Delta_B
+B=C+\Delta_B
 \]
 
-with explicit residuals rather than forcing a larger false equivalence.
+with explicit residuals over a larger false equivalence.
 
-## Multiple factorizations are allowed
+## Factorization is plural by default
 
-AxiomeSH does not assume every object has one privileged “primitive-normal form.”
+AxiomeSH does not assume one privileged primitive-normal decomposition.
 
-When several decompositions are faithful:
+When several factorizations are faithful:
 
-- preserve them as separate factorization nodes;
-- record qualified transformations/equivalences between them;
-- compare across materially distinct factorizations;
-- report factorization dependence rather than choosing whichever form produces the expected analogy.
+- preserve them as versioned factorization nodes;
+- record exact versus lossy transformation kinds;
+- require exact D factorizations to round-trip;
+- represent recursive definitions with explicit base/step/fixed-point authority;
+- compare across materially distinct qualified factorizations;
+- report factorization-set completeness and dependence;
+- declare one canonical factorization only after appropriate uniqueness/confluence evidence.
 
-A unique canonical decomposition must earn that status through evidence such as confluence/uniqueness under the declared decomposition system.
+## Comparison axes are separate
 
-## Normalization is deliberately narrow
-
-Draft 0.9 separates:
+Draft 0.10 separates:
 
 ```text
-N0  serialization normalization
-N1  alpha/boundary structural normalization
-D   qualified definitional decomposition/expansion
+view policy V
+transformation authority N0/N1/D/E
+relation kind R
+```
+
+Examples of view policy:
+
+```text
+V0 closed structural
+VB boundary/port-preserving
+VS signature-mappable
+VC class-schema/parameterized
+```
+
+Examples of relation kind:
+
+```text
+isomorphism
+strong/weak embedding
+specialization
+homomorphism
+simulation/bisimulation
+quotient/projection
+common core
+certified non-isomorphism
+no witness / unknown / resource limit
+```
+
+A result label cannot silently change the comparison rules.
+
+## Comparison policy is frozen before scoring
+
+For qualification, role assignments, mappability, parameter slots, D/E authorities, factorization bounds, target layer, and optimization criteria are frozen before expected mappings/results are unblinded.
+
+Otherwise the test can manufacture an analogy by deciding after the fact which differences “do not count.”
+
+## Stable labels are namespaced
+
+A stable theory symbol is not globally identified by its numeric spelling alone.
+
+A theory-local semantic label has identity at least:
+
+```text
+(theory/signature namespace, local symbol id)
+```
+
+unless an explicit shared/global namespace exists.
+
+Thus coincidental `^42` in unrelated bundles is not evidence of sameness.
+
+Exact literals remain value identities rather than local labels.
+
+## Normalization is narrow
+
+Current layers are:
+
+```text
+N0  serialization-only normalization
+N1  alpha/representation normalization
+D   qualified definitional factorization/expansion
 E   profile/theorem semantic equivalence
 ```
 
-Only N0/N1 are ordinary pre-comparison canonicalization.
+Only N0/N1 are ordinary pre-comparison normalization.
 
-A theorem equivalence, beta/substitution step, algebraic law, or class expansion must not be smuggled into “canonicalization.”
+A theorem equivalence, substitution step, beta rule, algebraic law, class expansion, or lossy quotient must not be hidden under “canonicalization.”
 
-## Structural classes are schemas, not ontology buckets
+## Structural classes are versioned schemas
 
-A candidate structural class is a reusable schema graph with:
+A class is a reusable parameterized schema graph, not an ontology bucket.
 
-- parameters;
+A qualified revision includes:
+
+- native schema graph;
+- structured parameter slots;
 - boundary/interface ports;
+- rigid/mappable roles;
 - invariants/constraints;
-- rigid versus mappable roles;
-- admissible mappings;
-- decomposition dependencies;
-- residual/specialization semantics;
-- composition/gluing rules.
+- admissible mappings/variance;
+- exact dependency revisions;
+- specialization/composition rules;
+- residual policy;
+- alternative factorizations;
+- falsifiers and qualification evidence.
 
-Class membership requires an explicit schema-to-instance witness.
+Class membership and class-class relations require independently verified witnesses.
 
-The current Experiment 003 catalog deliberately remains a hypothesis lattice. Similar candidate classes may later factor into broader families or compositions.
+Changing a qualified schema produces a new revision; old witnesses do not silently transfer.
 
-## Minimal core bias remains active
+Current Experiment 003 C1–C12 labels remain candidate navigation handles, not qualified immutable classes.
 
-The project still prefers fewer primitives than feels comfortable.
+## Parameters cannot be invented after a failed match
+
+Post-hoc parameterization would let any two structures be made “the same” by turning every difference into a slot.
+
+For an existing class run, parameters, ports, mapping rules, constraints, and residual policy are frozen before instance scoring.
+
+Reusable class promotion requires independent instances or an independently specified schema tested on held-out/adversarial instances.
+
+## Discovery and verification are separate
+
+A comparison agent may emit a mapping/common-core witness.
+
+A fresh verifier must independently check that witness against frozen objects and the frozen policy without access to expected class/domain names.
+
+Likewise, failure to find a mapping is not proof of non-isomorphism.
+
+Current result discipline distinguishes:
+
+```text
+CERTIFIED_NON_ISOMORPHIC
+NO_WITNESS_FOUND
+UNKNOWN
+RESOURCE_LIMIT
+```
+
+A certified negative requires complete search for the declared finite problem or a verified separating certificate.
+
+## Target layer is explicit
+
+Comparison may concern:
+
+```text
+native representation graph
+construction/schema graph
+generated finite structure
+profile denotation/behavior
+proof/derivation behavior
+```
+
+A schema isomorphism does not automatically imply source-theory semantic equivalence.
+
+Mapping opaque primitive/model leaves into shared parameter slots establishes a **parametric structural correspondence** unless additional semantic/profile evidence proves more.
+
+## Minimal-core bias remains active
 
 Useful syntax can survive as a canonical surface without becoming irreducible core semantics.
 
-Current post-0.1 surfaces under primitive-status audit include:
+Post-0.1 surfaces still under primitive-status audit include:
 
 ```text
 #n
@@ -176,7 +282,7 @@ Current post-0.1 surfaces under primitive-status audit include:
 @@
 ```
 
-The distinction is:
+The distinction remains:
 
 ```text
 required semantic distinction
@@ -184,44 +290,47 @@ required semantic distinction
 != proven irreducible primitive
 ```
 
-## Known context-overload corrections
+## Context-overload corrections
 
-For new Draft 0.9 canonical material:
+For new current-semantics artifacts:
 
-- raw `[]` is a structural scope/boundary; conjunction/co-satisfaction must be explicitly constructed/typed rather than depend on hidden “formula context”;
-- fresh allocation must not rely only on `+?n` appearing on a rewrite RHS; freshness requires an explicit operational construction/role;
+- raw `[]` is a structural scope/boundary; conjunction/co-satisfaction must be explicit;
+- fresh allocation must not rely only on `+?n` appearing on a rewrite RHS;
 - `~` is a declarative negation surface, not globally classical negation;
-- `@@` remains a useful instantiation surface but is not yet proven irreducible core.
+- quantifiers must expose or inherit an explicit native domain/generator;
+- `@@` remains a useful surface pending rewrite-level decomposition;
+- structural absence `!X` is not semantic falsity without an explicit completeness/closed-world contract;
+- behavior-changing carrier roles must be native/recoverable rather than external reader context.
 
-Frozen historical experiment artifacts retain their historical decode rules.
+Frozen historical artifacts retain historical decode rules. New structural qualification requires rerendering or an exact legacy-to-current bridge.
 
 ## Composition is central
 
-Structural similarity is insufficient if the parts cannot compose under their real interfaces and constraints.
+Internal similarity is insufficient if components cannot compose under their real interfaces and constraints.
 
-Class/component comparison therefore preserves boundary ports and requires gluing/joint-realizability evidence where composition matters.
+Comparison preserves ports and requires gluing/joint-realizability evidence where composition matters.
 
-Common scope/shared identity can implement part of a composition, but does not prove compatibility by itself.
+Common scope/shared identity is not a proof of compatibility.
 
 ## Qualification
 
-AxiomeSH qualification includes:
+Structural qualification now includes adversarial controls for:
 
-- cold exact reconstruction;
-- isomorphism recognition under unrelated names/IDs;
-- near-isomorphic negative discrimination;
-- boundary-negative discrimination;
-- partial isomorphism with exact residuals;
-- alternative-factorization invariance;
-- misleading/swapped-label controls;
-- rewrite correctness;
-- long composition without scope/identity drift;
-- cross-context continuation;
-- novel synthesis;
-- performance under context pressure;
-- comparison against natural language and established formal representations at matched resources.
+- cross-domain positive matching;
+- alpha/serialization changes;
+- near-isomorphic negatives;
+- same-interior/different-boundary negatives;
+- partial correspondence/residuals;
+- alternative factorizations;
+- misleading/swapped labels;
+- automorphisms/multiple mappings;
+- namespace collisions;
+- policy leakage/post-hoc parameterization;
+- homomorphism/quotient traps;
+- certified-negative versus resource-limited no-witness;
+- legacy/current bridge behavior.
 
-For structural classes specifically, label-blind witnessed comparison is mandatory.
+Unknown is preferable to an unsupported equivalence or unsupported negative.
 
 ## Target agent
 
@@ -241,4 +350,4 @@ If it becomes independently load-bearing, it should move to a dedicated reposito
 
 ## Current operating principle
 
-> **Discover and preserve the structure first. Name it after the evidence. Optimize its transport later.**
+> **Decompose without target-class bias. Freeze the comparison rules. Let structure determine the mapping. Verify the witness independently. Name the result afterward.**
