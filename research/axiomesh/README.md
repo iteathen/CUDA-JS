@@ -3,7 +3,7 @@
 **Status:** research incubation  
 **Research direction:** Josh Oshiro  
 **Current experimental branch:** `experiment/axiomesh-native-reconstruction`  
-**Current candidate authority for new qualification artifacts:** `CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md` + `CORE_SPEC_DRAFT_0_14_CANDIDATE.md`  
+**Current candidate authority for new qualification artifacts:** `CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md` + `CORE_SPEC_DRAFT_0_14_CANDIDATE.md` + `CORE_SPEC_DRAFT_0_15_CANDIDATE.md`  
 **Current phase:** specification-growth freeze; focused structural falsification/qualification
 
 AxiomeSH is an experimental agent-native structural knowledge representation.
@@ -27,9 +27,12 @@ The scoped-hypergraph/rewrite substrate remains a research hypothesis, not a set
 For new qualification work, use:
 
 1. `CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md` — self-contained consolidated base;
-2. `CORE_SPEC_DRAFT_0_14_CANDIDATE.md` — frozen qualification amendment over Draft 0.13.
+2. `CORE_SPEC_DRAFT_0_14_CANDIDATE.md` — frozen qualification amendment over Draft 0.13;
+3. `CORE_SPEC_DRAFT_0_15_CANDIDATE.md` — isolated-external-review corrections over Drafts 0.13/0.14.
 
-Draft 0.14 adds no new logical operator or structural class. It closes the final authority/self-containment gaps found in `experiments/003/SPEC_LINE_REVIEW_008_DRAFT_0_13_FINAL_PASS.md` and freezes speculative growth until focused qualification forces a change.
+Draft 0.15 adds no new logical operator, structural class, or irreducible primitive. It tightens reference-binding placement, occurrence-versus-identity rewrite semantics, rule-side splice boundaries, declarative variable ownership, two-stage residual accounting, factorization-stage-specific indexing, infix parse determinism, NAC evaluation context, minimality metrics, and canonical-serialization/index scoping.
+
+The external review that triggered Draft 0.15 is preserved with accepted/rejected finding rationale in `experiments/004/EXTERNAL_REVIEW_GEMINI_001_DISPOSITION.md`.
 
 Drafts 0.1–0.12 and earlier protocol revisions remain frozen design/experiment evidence. Older artifacts retain the semantics under which they were created and are not silently reinterpreted under the current authority.
 
@@ -89,6 +92,8 @@ Label-assisted or learned semantic retrieval may run in parallel as acceleration
 
 Structural fingerprints, learned indexes, class labels, and source labels are retrieval machinery—not correspondence witnesses.
 
+A fingerprint/index is qualified for an explicit representation/factorization stage. A raw-stage invariant cannot silently prune a topology-changing D factorization, and AxiomeSH does not assume one canonical post-D factorization for indexing convenience.
+
 ## Isomorphism safety
 
 AxiomeSH must avoid both:
@@ -97,6 +102,8 @@ AxiomeSH must avoid both:
 - **false positives:** different objects collapse because constraints, multiplicity, boundaries, domains, residuals, relation signature, parameter choices, source interpretation, or search incompleteness are hidden.
 
 For partial correspondence, every common/residual/boundary/excluded/projected item is explicitly accounted for.
+
+Source-local D/extraction residuals and pairwise comparison residuals are distinct accounting layers. A pairwise witness reconstructs the frozen comparison-stage object; full-source reconstruction additionally follows the source-local transformation record and is claimed only when that transform is exact/reconstructable.
 
 ## Native self-description at the isomorphism boundary
 
@@ -125,12 +132,14 @@ For new current-semantics artifacts:
 - raw `[]` is an unordered occurrence-preserving scope/boundary/container;
 - raw scope is not implicitly conjunction, mathematical set, list, or active execution state;
 - duplicate member occurrences are preserved unless an explicit quotient/profile establishes idempotence;
-- rewrite update is occurrence/multiset preserving by default;
+- direct member occurrence and structural identity are distinct: rewrite subtraction removes selected member occurrences, not the identity object or unrelated incidences;
+- the outer scopes of `scope > scope` are rule-side pattern/replacement containers; direct RHS members splice into the application scope, while literal nested scope construction is written as a member scope such as `[[...]]`;
 - distinct rewrite application events may remain distinct even when successor states are identical;
 - active/inert rewrite status is execution-profile owned;
 - rule serialization order is not priority;
 - fresh allocation is explicit and namespace-relative rather than inferred from `+?n` by RHS position;
-- structural absence `!X` is boundary/completeness-sensitive and is not semantic falsity;
+- structural absence `!X` is a first-class negative-match condition object and is evaluated only by an explicit matcher context; it is not semantic falsity;
+- declarative constructors such as `=>`, `==`, `~`, and choice do not bind variables;
 - quantifiers have represented/inherited domains or generators;
 - object-theory equality is not structural identity.
 
@@ -148,9 +157,9 @@ Nested scopes inherit the enclosing structural identity namespace by default. In
 
 Intentional cross-document sharing requires an explicit shared namespace/import/port/partition relation.
 
-References are non-semantic compression. N0 reference resolution is hygienic and structure-preserving: it preserves identities and binding ownership while repeated reference use preserves occurrence multiplicity without making the reference handle semantic occurrence identity.
+References are non-semantic compression. Reference bindings are serialization directives, not generic semantic terms: they cannot occupy ordered-edge/formula positions whose later N0 disappearance would alter semantic arity. N0 resolution is hygienic and structure-preserving.
 
-Variables have reconstructable owners/roles.
+Variables have reconstructable owners/roles. A closed declarative object containing an otherwise unowned variable is invalid; explicitly open formula/schema objects remain legal when their native interface owns the variable.
 
 ## Decomposition is plural
 
@@ -174,6 +183,8 @@ E   profile/theorem equivalence
 Only N0/N1 are ordinary pre-comparison normalization.
 
 Theorem equivalence, substitution/beta reduction, class expansion, algebraic laws, quotienting, and lossy extraction are explicit D/E/projection operations.
+
+During the current freeze, ordinary `()` remains ordered incidence rather than transparent parser grouping. Un-delimited chained/mixed infix forms are rejected rather than implementation-defined.
 
 ## Comparison axes are separate
 
@@ -212,6 +223,8 @@ Large parameters are allowed; class non-vacuity is about reusable structural con
 
 Known-class recognition and new-class induction are distinct workflows. One object may have multiple verified class memberships.
 
+Any claim that one class/factorization is simpler/minimal requires a declared metric or partial order; absent one, competing exact constructions remain explicit.
+
 Label attachment retains native provenance roles distinguishing source-supplied labels, inferred structural classes, retrieval aliases, and human gloss.
 
 ## Qualified revisions are immutable evidence
@@ -224,19 +237,21 @@ Old witnesses do not silently qualify changed content.
 
 - `CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md`
 - `CORE_SPEC_DRAFT_0_14_CANDIDATE.md`
+- `CORE_SPEC_DRAFT_0_15_CANDIDATE.md`
 - `experiments/003/STRUCTURAL_DISCOVERY_PROTOCOL_006.md`
 - `experiments/003/STRUCTURAL_COMPARISON_PROTOCOL_006.md`
 - `experiments/003/STRUCTURAL_CLASS_SCHEMA_CONTRACT_006.md`
-- `experiments/003/STRUCTURAL_CLASS_CATALOG_005.md` — hypothesis catalog only until a Draft 0.14-aligned successor is needed by qualification evidence
-- `experiments/003/RESULTS_003.md`
+- `experiments/003/STRUCTURAL_CLASS_CATALOG_005.md` — hypothesis catalog only
+- `experiments/004/EXTERNAL_REVIEW_GEMINI_001_DISPOSITION.md`
+- `experiments/004/RESULTS_004.md`
 
 C1–C12 / `^9101..^9112` remain candidate navigation handles, not qualified class revisions.
 
 ## Qualification freeze
 
-No new structural class, core token, or relation kind is added merely because a synthetic case is awkward.
+No new structural class, irreducible primitive, or relation kind is added merely because a synthetic case is awkward.
 
-The next work is focused falsification of the current representation, including occurrence multiplicity, rewrite events, namespaces, variable ownership, reference hygiene, quantifier domains, decomposition cheating, independent extraction/factorization freeze, embedding strength, complete core/residual accounting, automorphisms, certified negatives, index invariants, class non-vacuity, native policy/witness self-representation, source ambiguity, novel-class induction, and structural-only versus label-assisted retrieval.
+The original twenty-case Experiment 004 suite remains frozen. Draft 0.15 adds supplemental qualification controls for reference-binding placement, rule-side splice semantics, declarative variable ownership, two-stage residual reconstruction, factorization-stage index validity, infix parse determinism, first-class NAC evaluation context, and canonical-serialization/index algorithm scoping.
 
 A failure justifies a spec change only after the failure is classified and the existing representation is shown to be insufficient, ambiguous, or materially worse than a proposed correction.
 
