@@ -92,6 +92,7 @@ See:
 - `PRIMITIVE_DECOMPOSITION_AUDIT_003.md`
 - `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md`
 - `STRUCTURAL_CLASS_CATALOG_003.md`
+- `STRUCTURAL_CLASS_REGISTRY_003.axh`
 - `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
 
 ## Native statement bundle
@@ -138,6 +139,8 @@ The initial class catalog currently identifies candidate reusable shapes includi
 - well-founded propagation.
 
 These are **class labels**, not new core primitives.
+
+`STRUCTURAL_CLASS_REGISTRY_003.axh` now assigns stable candidate native class identities `^9101..^9112` and candidate mapping relations. Those IDs are classification/retrieval handles only; the decomposed construction remains semantic authority.
 
 Current decomposed examples map naturally as compositions/specializations:
 
@@ -371,6 +374,7 @@ E1A alias-erasure:
 
 E1C structural-class classification:
   initial class catalog: CREATED
+  native candidate class registry: CREATED (^9101..^9112)
   existing decomposed foundations: MAPPED provisionally
   independent/cross-domain qualification: PENDING
 
