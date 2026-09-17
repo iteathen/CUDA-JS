@@ -1,0 +1,26 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-19",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "positive_instances": [1, 2, 3],
+    "positive_pairwise_relation": "ISOMORPHIC",
+    "example_maps": {
+      "1_to_2": {"1": "10", "2": "11", "3": "12", "4": "13"},
+      "1_to_3": {"1": "20", "2": "21", "3": "22", "4": "23"}
+    },
+    "induced_candidate_schema": [
+      "(A B)",
+      "(A C)",
+      "(B D)",
+      "(C D)"
+    ],
+    "B_C_automorphism": true,
+    "negative_instance_1_matches_candidate_schema": false,
+    "negative_reason": "the two branch endpoints do not reconverge to one shared D identity",
+    "required_class_disposition": "NEW_CANDIDATE_CLASS",
+    "may_force_existing_registry_label": false,
+    "promotion_status": "UNQUALIFIED_PENDING_HELD_OUT_AND_ADVERSARIAL_TESTS"
+  }
+}
