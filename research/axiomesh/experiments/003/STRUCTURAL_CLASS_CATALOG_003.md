@@ -1,29 +1,34 @@
 # Experiment 003 — Structural Class Catalog
 
-**Status:** candidate class map derived from primitive-decomposition work  
-**Spec:** `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`  
+**Status:** candidate class/factorization map derived from primitive-decomposition work  
+**Spec:** `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`  
+**Comparison protocol:** `STRUCTURAL_COMPARISON_PROTOCOL_003.md`  
 **Native registry:** `STRUCTURAL_CLASS_REGISTRY_003.axh`  
-**Authority:** classification aid only; primitive/native definitions remain semantic authority
+**Authority:** classification aid only; primitive/native definitions and witnessed mappings remain semantic authority
 
 ## Rule
 
-Classes are assigned only after decomposition.
+Classes are assigned only after decomposition and witnessed comparison.
 
 The workflow is:
 
 ```text
 source operator/object
--> primitive/native decomposition
--> canonical construction shape
+-> one or more qualified native decompositions
+-> N0/N1 representation normalization
+-> label-blind structural comparison
+-> explicit mapping/common-core/residual witness
 -> class comparison
 -> class/instance label
 ```
 
-A class label does not prove equivalence. It records a candidate common structural form whose instance must still preserve all source constraints.
+A class label does not prove equivalence. It records a candidate reusable structural form whose instance must still preserve all source constraints, boundary ports, and residuals.
+
+`STRUCTURAL_CLASS_REGISTRY_003.axh` is a navigation/hypothesis artifact and MUST NOT be supplied as evidence to label-blind discovery.
 
 ## Native candidate identities
 
-The class registry provides stable candidate identities so agents can refer to classes without rediscovering or renaming them on every pass:
+The current registry retains stable candidate IDs for discussion and retrieval:
 
 | Catalog class | Native class ID | Human construction label |
 |---|---:|---|
@@ -40,80 +45,132 @@ The class registry provides stable candidate identities so agents can refer to c
 | C11 | `^9111` | functional-graph application |
 | C12 | `^9112` | well-founded propagation |
 
-Registry relations are deliberately classification-only:
+The IDs are not evidence that all twelve represent irreducible or even independent classes. Draft 0.9 specifically requires class-family/factorization testing before promotion.
+
+## Class-schema minimum
+
+Every class that advances beyond hypothesis status must carry:
 
 ```text
-^9000  candidate class declaration
-^9001  candidate instance-of
-^9002  candidate composed-of
-^9003  candidate specialization-of
+schema graph
+parameter slots
+boundary/interface ports
+rigid versus mappable roles
+invariants and constraints
+admissible mappings
+required decomposition dependencies
+specialization rules
+composition/gluing rules
+residual policy
+known instances
+alternative qualified factorizations
+membership-witness format
+qualification evidence
 ```
 
-These identities help agents recognize the classes. They do not replace the native construction or independently establish semantic equivalence.
+The current catalog records hypotheses toward that form. It is not a qualified ontology.
 
-## C1 — Universal satisfaction over a generated region
+---
+
+# Family F1 — Evaluation over a generated region
+
+This is the strongest current **family hypothesis** connecting C1, C2, and C3.
+
+Generic shape:
+
+```text
+origin
++ region generator
++ membership/reachability condition
++ body/property
++ evaluation mode/cardinality condition
+-> evaluation result
+```
+
+Candidate ports/parameters:
+
+```text
+origin
+region-generator relation/construction
+body/property
+satisfaction/evaluation relation
+evaluation mode
+boundary policy
+```
+
+The family does **not** erase generator constraints. Linear future order, agent-indexed accessibility, branching-path generation, and arbitrary domain membership remain load-bearing parameters.
+
+## C1 / `^9101` — Universal satisfaction over a generated region
+
+Specialization:
+
+```text
+F1 evaluation mode = universal
+```
 
 Shape:
 
 ```text
-origin
-+ region generator / relation
-+ body/property
--> body holds at every generated member
+for every member produced by the region generator,
+body/property holds
 ```
 
 Known/candidate instances:
 
 - individual knowledge over one agent accessibility image;
-- LTL globally over the reflexive future region;
-- CTL universal-always after the branching/path layer is made explicit;
-- universal quantification over an explicitly generated domain, when represented semantically rather than only by binder syntax.
+- LTL globally over a reflexive future region;
+- CTL universal-always after branching/path structure is explicit;
+- universal quantification over an explicitly generated domain.
 
-Important specializations:
+Required residual/specialization constraints include:
 
-- knowledge constrains the generator by agent-indexed accessibility;
-- LTL globally constrains it to one linear trace/future order;
-- CTL AG requires universal path/state generation, not merely one relation image.
+- epistemic: agent-indexed accessibility and selected modal-frame constraints;
+- LTL: one linear trace/future order;
+- CTL AG: universal branching/path structure, not merely one relation image;
+- quantification: represented domain/generator and binder ownership.
 
-These are therefore related shapes, not interchangeable operators.
+**Status:** candidate specialization of F1; cross-domain witness not yet qualified.
 
-## C2 — Existential satisfaction over a generated region
+## C2 / `^9102` — Existential satisfaction over a generated region
 
-Shape:
+Specialization:
 
 ```text
-origin
-+ region generator / relation
-+ body/property
--> some generated member satisfies body
+F1 evaluation mode = existential
 ```
 
 Known/candidate instances:
 
 - LTL eventually;
-- CTL EF after branching reachability is made explicit;
+- CTL EF after branching reachability is explicit;
 - existential quantification over a represented domain;
 - reachability goals with a target predicate.
 
-## C3 — Immediate-successor evaluation
+**Status:** candidate specialization of F1; cross-domain witness not yet qualified.
 
-Shape:
+## C3 / `^9103` — Immediate-successor evaluation
+
+Candidate specialization:
 
 ```text
-origin
-+ immediate-successor relation
-+ body
--> body holds at the immediate successor
+F1 region = immediate-successor image
+region cardinality/selection = exactly the applicable next position/state
 ```
 
 Known/candidate instances:
 
 - LTL next;
-- program/dynamic one-step postcondition checks where the program semantics supplies one deterministic step.
+- deterministic one-step postcondition checks where the program semantics supplies exactly one next state.
 
-This class is distinct from arbitrary reachability.
+Important negative:
 
-## C4 — Finite path / reflexive-transitive closure
+A nondeterministic program-next modality is not automatically C3. It may instead require C1/C2 over the transition successor region.
+
+**Status:** candidate specialization of F1 rather than presumed independent class. Qualification must test whether retaining C3 adds structure not captured by the F1 specialization.
+
+---
+
+# C4 / `^9104` — Finite path / reflexive-transitive closure
 
 Shape:
 
@@ -121,7 +178,17 @@ Shape:
 primitive one-step edge
 + zero-path witness
 + recursive path-step construction
--> reachable endpoint / explicit path witness
+-> explicit finite path witness / reachable endpoint
+```
+
+Candidate ports/parameters:
+
+```text
+source endpoint
+target endpoint
+primitive step relation
+path witness
+step-constraint profile
 ```
 
 Known/candidate instances:
@@ -129,29 +196,62 @@ Known/candidate instances:
 - common-knowledge reachability over unioned group accessibility edges;
 - reduction closure in Church–Rosser;
 - ordinary graph/state reachability;
-- CTL finite reachability components.
+- finite CTL reachability components.
 
-The current native evidence is `foundations/FOUNDATION_FINITE_PATH_003.axh`.
+Current native evidence:
 
-## C5 — Predicate-selected structure restriction
+`foundations/FOUNDATION_FINITE_PATH_003.axh`
+
+Boundary warning:
+
+The step relation is a parameter/port and MUST NOT be erased merely because two instances use path closure.
+
+**Status:** native construction exists author-side; independent reconstruction and cross-domain witness pending.
+
+---
+
+# C5 / `^9105` — Predicate-selected structure restriction
 
 Shape:
 
 ```text
 source structure
 + selection predicate
--> substructure containing exactly selected members
+-> induced/restricted substructure
 + restricted relations/valuation
+```
+
+Candidate ports/parameters:
+
+```text
+source structure
+selected member predicate
+relations subject to restriction
+valuation/state carried through restriction
+result structure
 ```
 
 Known/candidate instances:
 
 - public-announcement model update;
-- filtered state spaces or guarded quotient/restriction operations where source semantics actually require induced restriction.
+- filtered state spaces;
+- induced restrictions/quotients only when source semantics really require that construction.
 
-Public announcement additionally carries the post-update evaluation convention, so the full operator is a composition of this class with satisfaction.
+Public announcement is a **composition**:
 
-## C6 — Disjoint decomposition / recomposition
+```text
+shared satisfaction
++ C5 restriction
++ post-update satisfaction
+```
+
+It is not exhausted by C5 alone.
+
+**Status:** epistemic restriction construction exists author-side; class witness pending.
+
+---
+
+# C6 / `^9106` — Disjoint decomposition / recomposition
 
 Shape:
 
@@ -162,17 +262,33 @@ whole resource
 -> sub-properties hold on parts
 ```
 
+Candidate ports/parameters:
+
+```text
+whole resource
+left/right part
+compatibility/disjointness relation
+recomposition relation
+sub-property/satisfaction relation
+```
+
 Known/candidate instances:
 
 - separation-logic separating conjunction;
 - resource/frame decomposition;
-- potentially other ownership/resource compositions when the same disjoint-union semantics is genuinely present.
+- other ownership/resource compositions only when the same disjoint-recomposition semantics is present.
 
-The class must not be generalized to arbitrary conjunction or ordinary graph composition.
+Negative control:
 
-## C7 — Transition-preservation judgment
+Ordinary conjunction, arbitrary graph composition, and mere co-presence are not C6.
 
-Shape:
+**Status:** heap/separation construction exists author-side; class witness and boundary negative controls pending.
+
+---
+
+# C7 / `^9107` — Transition-preservation judgment
+
+Current shape:
 
 ```text
 precondition satisfaction
@@ -184,32 +300,61 @@ Known/candidate instances:
 
 - Hoare partial-correctness validity;
 - box-like program modalities under matching transition semantics;
-- invariant preservation across a transition relation.
+- invariant preservation over a transition relation.
 
-Deterministic versus nondeterministic transition semantics remain parameters/constraints.
+## Factorization hypothesis
 
-## C8 — Finite locally validated derivation
+C7 may not be an independent class. It may factor as:
+
+```text
+precondition gate
++ F1/C1 universal evaluation over the transition-generated successor region
+```
+
+with termination/partial-correctness semantics carried as an additional constraint.
+
+Deterministic versus nondeterministic transition semantics remain load-bearing.
+
+**Status:** keep `^9107` as a useful candidate label while testing the factorization above. Do not promote it as an independent class until the residual after F1 factorization is understood.
+
+---
+
+# C8 / `^9108` — Finite locally validated dependency/derivation structure
 
 Shape:
 
 ```text
 finite dependency structure
-+ local rule at each node
++ local validation rule at each node
 + premise/child references
-+ root conclusion
--> valid derivation/proof object
++ distinguished root/result
+-> valid global derivation/object
+```
+
+Candidate ports/parameters:
+
+```text
+root/result
+node set
+child/dependency relation
+local validator/rule relation
+context/boundary data
 ```
 
 Known/candidate instances:
 
 - constructive natural-deduction proof terms;
-- classical natural deduction as a specialization adding classical rule authority;
+- classical natural deduction as specialization adding classical authority;
 - proof-property/meta-theorem benchmarks;
-- potentially rewrite derivations when they share the same local-validity/dependency form.
+- rewrite derivations when they actually share the same local-validity/dependency form.
 
 A cached `derivable` label is an instance surface over existence of a valid object in this class, not the class semantics itself.
 
-## C9 — Finite indexed fold
+**Status:** proof-object construction exists author-side; cross-form derivation-class witness pending.
+
+---
+
+# C9 / `^9109` — Finite indexed fold
 
 Shape:
 
@@ -220,15 +365,30 @@ finite indexed family
 -> folded result
 ```
 
+Candidate ports/parameters:
+
+```text
+finite index structure
+element/value relation
+combiner
+identity/base
+order/associativity requirements where relevant
+result
+```
+
 Known/candidate instances:
 
 - finite conjunction/disjunction expansion;
 - XOR/parity fold;
 - finite aggregate constructions used by parameterized SAT benchmarks.
 
-The combining operation remains a parameter. XOR and OR are not identified merely because both are folds.
+The combiner and its algebraic laws are parameters. XOR, OR, AND, addition, and other folds are not identified merely because all are folds.
 
-## C10 — Bound-body instantiation
+**Status:** candidate family; parity/finite-index foundation pending.
+
+---
+
+# C10 / `^9110` — Bound-body instantiation
 
 Shape:
 
@@ -239,13 +399,11 @@ binder ownership
 -> capture-avoiding replacement of owned occurrences
 ```
 
-Current candidate surface:
+Current surface:
 
 ```text
 ABSTRACTION @@ ARGUMENT
 ```
-
-Draft 0.8 does not assume `@@` is irreducible core syntax. This class records the semantic construction that the syntax currently names.
 
 Known/candidate uses:
 
@@ -253,12 +411,22 @@ Known/candidate uses:
 - substitution into explicitly packaged bound bodies;
 - beta-like structural substitution before a profile supplies mathematical lambda semantics.
 
-## C11 — Functional graph application
+## Factorization hypothesis
 
-Shape:
+C10 may itself be a specialization of ordinary structural rewrite over explicit binder/occurrence ownership.
+
+Draft 0.9 therefore does not assume C10 is an irreducible class or that `@@` is a core primitive.
+
+**Status:** keep the label as a useful construction handle; rewrite-level decomposition comparison is mandatory before class/core promotion.
+
+---
+
+# C11 / `^9111` — Functional graph application
+
+Current shape:
 
 ```text
-function object / graph
+function object/graph
 + input
 + functionality constraint
 (+ totality/codomain constraints when required)
@@ -268,11 +436,25 @@ function object / graph
 Known/candidate instances:
 
 - higher-order function application under extensional graph semantics;
-- source algebraic operations represented extensionally rather than as opaque host calls.
+- source algebraic operations represented extensionally rather than by host calls.
 
-This is separate from C10: structural binder instantiation is not automatically mathematical function application.
+## Factorization hypothesis
 
-## C12 — Well-founded propagation
+C11 may factor into:
+
+```text
+relation-image selection
++ uniqueness constraint
++ optional totality/codomain constraints
+```
+
+It is distinct from C10 unless a specific represented calculus proves a relationship.
+
+**Status:** candidate label retained; HOL/function foundation pending.
+
+---
+
+# C12 / `^9112` — Well-founded propagation
 
 Shape:
 
@@ -283,102 +465,160 @@ relation
 -> property for all nodes
 ```
 
+Candidate ports/parameters:
+
+```text
+carrier/domain
+predecessor relation
+well-foundedness witness/authority
+property/bound body
+local predecessor-to-node rule
+```
+
 Candidate instances:
 
 - well-founded induction;
-- recursive termination arguments when the same well-founded relation semantics is present.
+- recursive termination arguments when the same relation semantics is present.
 
-This remains a candidate class until the Experiment 003 well-founded profile is decomposed concretely.
+**Status:** candidate class pending concrete well-founded decomposition/profile.
 
-## Composite examples
+---
 
-### Knowledge
+# Composite examples
+
+These examples are classification hypotheses, not accepted equivalences.
+
+## Knowledge
 
 ```text
 agent-indexed accessibility leaf
 + shared satisfaction
-+ C1 / ^9101
++ F1/C1 universal-over-generated-region
 ```
 
-### Common knowledge
+Residual/constraints:
 
 ```text
-union/group accessibility construction
-+ C4 / ^9104
-+ C1 / ^9101
+agent identity
+accessibility relation identity
+modal-frame constraints, if any
+world/model boundary
 ```
 
-### LTL G
+## Common knowledge
 
 ```text
-linear trace/future-order structure
-+ C1 / ^9101
+group/union accessibility construction
++ C4 finite-path closure
++ F1/C1 universal-over-generated-region
 ```
 
-### LTL F
+## LTL G
 
 ```text
-linear trace/future-order structure
-+ C2 / ^9102
+linear future-order structure
++ F1/C1 universal-over-generated-region
 ```
 
-### LTL X
+## LTL F
 
 ```text
-discrete trace successor
-+ C3 / ^9103
+linear future-order structure
++ F1/C2 existential-over-generated-region
 ```
 
-### Public announcement
+## LTL X
+
+```text
+discrete immediate-successor structure
++ F1/C3 immediate-successor evaluation
+```
+
+## Public announcement
 
 ```text
 shared satisfaction
-+ C5 / ^9105
++ C5 predicate-selected restriction
 + post-update satisfaction
 ```
 
-### Separating conjunction
+## Separating conjunction
 
 ```text
 heap/resource leaves
-+ C6 / ^9106
++ C6 disjoint decomposition/recomposition
 + recursive satisfaction on each part
 ```
 
-### Hoare validity
+## Hoare validity
 
 ```text
-program transition leaf
-+ satisfaction
-+ C7 / ^9107
+program-transition leaf
++ precondition gate
++ candidate C7
 ```
 
-### Common reduction closure
+with the additional hypothesis that C7 factors through F1/C1 over transition successors.
+
+## Reduction closure
 
 ```text
 one-step reduction leaf
-+ C4 / ^9104
++ C4 finite-path closure
 ```
 
-## Class creation rule
+---
+
+# Membership and comparison evidence
+
+A class mapping is not qualified until a witness records:
+
+```text
+instance
+selected factorization
+class/schema
+schema-node/edge map
+parameter assignment
+boundary/port assignment
+rigid values held fixed
+constraints checked
+common matched structure
+specialization residual
+```
+
+Composite membership additionally requires a gluing/joint-realizability witness.
+
+A direct mapping in `STRUCTURAL_CLASS_REGISTRY_003.axh` is only a hypothesis/index until such a witness exists.
+
+---
+
+# Class creation rule
 
 Do not create a new class because a benchmark introduces a new name.
 
-Create a candidate class only when decomposed native structures reveal a reusable pattern not already captured by an existing class or composition of classes.
+Before adding a class label:
+
+1. decompose the source semantics without access to a target class label where practical;
+2. compare against existing schemas/factorizations label-blindly;
+3. test instance/specialization/composition explanations;
+4. preserve residual constraints;
+5. create a new candidate class only when no simpler class/factorization captures the structure faithfully.
 
 A candidate class becomes qualified only after:
 
 1. at least one exact native construction exists;
-2. its parameters/invariants are explicit;
-3. class-label erasure preserves the construction;
-4. at least one independent cold reconstruction succeeds;
-5. cross-domain instances, if claimed, preserve their domain-specific constraints;
-6. no simpler class/composition captures the same structure.
+2. parameters, invariants, and ports are explicit;
+3. a membership-witness format is supplied;
+4. class-label erasure preserves the construction;
+5. at least one independent cold reconstruction succeeds;
+6. adversarial positive/negative/boundary/partial/factorization/label controls pass;
+7. cross-domain instances, if claimed, preserve their domain-specific residual constraints;
+8. no simpler class or composition captures the same structure.
 
 ## Labels
 
-Both human and native labels are retained because they help agents identify, retrieve, and construct classes of objects.
+Human class labels and native candidate IDs are aids for review, construction, retrieval, and candidate search.
 
-The native IDs in `STRUCTURAL_CLASS_REGISTRY_003.axh` are **candidate classification handles**, not semantic authority. The registry currently maps only already-observed source aliases where the decomposed shape provides a plausible class mapping.
+They are downstream of structural evidence.
 
-The semantic authority remains the decomposed native structure until each class/instance mapping is independently qualified.
+A discovery result must survive hiding or permuting the class/domain labels. The semantic authority remains the decomposed native structure and its witness.
