@@ -1,9 +1,9 @@
 # Experiment 003 — Candidate Core Surface / Primitive Audit
 
-**Status:** active audit after Draft 0.9 isomorphism-safety review  
+**Status:** active audit after Draft 0.10 second-pass isomorphism review  
 **Purpose:** preserve useful syntax/labels without mistaking them for proven irreducible structure or allowing them to contaminate structural comparison
 
-## Governing distinction
+## Governing questions
 
 For every candidate surface ask separately:
 
@@ -12,27 +12,28 @@ semantic distinction required?
 compact/canonical surface useful?
 irreducible primitive demonstrated?
 comparison/isomorphism role safe?
+namespace/target-layer behavior explicit?
 ```
 
-Those are four different questions.
+These are different questions.
 
-A useful surface may remain indefinitely even if its semantics ultimately decompose into lower native structure.
+A useful surface may remain indefinitely even when its semantics decompose into lower native structure.
 
-## Strongest original primitive candidates
+## Strongest original substrate candidates
 
 The strongest current substrate candidates remain:
 
 - structural identity;
-- ordered incidence / hyperedge structure;
+- ordered incidence/hyperedge structure;
 - explicit scope/boundary;
 - pattern-variable ownership for structural matching;
 - structural rewrite;
 - negative application condition, still subject to elimination audit;
 - serialization references as non-semantic compression.
 
-Even these are experimental, not metaphysically privileged.
+Even these remain experimental.
 
-Draft 0.9 adds a further requirement: if a primitive/surface affects isomorphism, its rigid/mappable/boundary role must be explicit under the selected comparison projection.
+Draft 0.10 adds that any surface affecting comparison must have explicit namespace, rigidity/mappability, boundary, and target-layer behavior under the frozen comparison policy.
 
 ---
 
@@ -44,40 +45,64 @@ Primitive status: **NOT ESTABLISHED.**
 
 Possible lower construction: structural numeral/rational object plus canonical value relations.
 
-Reason to retain surface: high compactness and exact-value clarity.
+Reason to retain surface: compactness and exact-value clarity.
 
-Isomorphism rule:
+Comparison rule:
 
 - literals are rigid by default;
-- a class schema may expose a literal position as a parameter slot;
-- parameterizing a slot is not the same as alpha-renaming the literal.
+- a predeclared class schema may expose a literal position as a parameter slot;
+- parameterization is not literal alpha-renaming;
+- post-hoc conversion of a failed literal match into a parameter is forbidden.
 
-Current disposition: **retain canonical value shorthand; audit irreducible token-class status separately from class-schema parameterization.**
+Current disposition: **retain canonical value shorthand; audit token-class irreducibility separately.**
 
 ---
 
 # Stable semantic symbol `^n`
 
-Required distinction: **YES.** Stable theory/class/instance identities must be distinguishable from local alpha-renamable identities.
+Required distinction: **YES.** Stable theory/class/instance labels must differ from local alpha identities.
 
 Primitive status: **NOT ESTABLISHED.**
 
-Possible lower construction: ordinary structural identity plus explicit declaration/role/boundary rigidity.
+Possible lower construction: ordinary structural identity plus explicit declaration/namespace/rigidity role.
 
-Reason to retain surface: efficient stable labels for relations, classes, instances, source vocabulary, retrieval, and dependency closure.
+Reason to retain surface: efficient labels for relations, classes, source vocabulary, retrieval, and dependencies.
 
-Isomorphism risk:
+Draft 0.10 correction:
 
-If every `^n` is rigid in every comparison, independently labelled isomorphic theories will fail to match.
+```text
+semantic identity = (theory/signature namespace, local ^n)
+```
 
-Draft 0.9 correction:
+unless a shared/global namespace is explicitly represented.
 
-- P0/PB comparisons keep stable symbols rigid;
-- PS/PC comparisons may map explicitly selected semantic identities through a witness;
-- mapping exists only inside the comparison result and does not rename either source theory;
-- source/class labels may retrieve candidates but cannot prove a match.
+Therefore:
 
-Current disposition: **retain label surface; add explicit comparison-role/mapping discipline; primitive token-class status remains open.**
+- identical numeric `^n` across independent namespaces is not evidence of sameness;
+- P0/V0-style comparison keeps namespace-qualified semantic identities rigid;
+- VS/VC may search for explicit mappings without mutating either theory;
+- source/class labels may retrieve candidates but cannot prove matches.
+
+Current disposition: **retain label surface; namespace and comparison role are mandatory; primitive token-class status remains open.**
+
+---
+
+# Semantic-symbol-headed application `(^n ...)`
+
+Required convenience: **YES/useful.** Ordered semantic application is compact and reconstructable.
+
+Primitive status of the application interpretation: **NOT ESTABLISHED.**
+
+Risk:
+
+Two symbol-headed edges can look like the same “application class” while the underlying operations differ in arity contract, argument roles, function/relation semantics, domain/codomain constraints, or theory namespace.
+
+Current disposition:
+
+- retain the surface;
+- compare the represented operation/relation contract, not merely the head-token pattern;
+- higher-order/function semantics still require explicit function/relation construction;
+- symbol-headed shape alone is not class or semantic-equivalence evidence.
 
 ---
 
@@ -87,45 +112,39 @@ Required distinction: **YES** at represented-theory/source-formula level.
 
 Primitive status: **NOT ESTABLISHED.**
 
-Possible lower construction: relation/formula object with antecedent/consequent roles plus profile semantics.
+Possible lower construction: formula/relation object with antecedent/consequent roles plus profile semantics.
 
-Important correction:
+Draft 0.2 wording that implication “structurally entails” the consequent is too strong as a universal core claim. Draft 0.5 correctly places proof laws in profiles.
 
-Draft 0.2 wording that implication “structurally entails” its consequent is too strong as a core statement. Draft 0.5 correctly establishes that proof laws are profile-owned.
-
-Current disposition: **retain concise surface; treat its logical satisfaction/proof laws as profile/class owned; do not canonicalize theorem-equivalent formulas merely because `=>` exists.**
+Current disposition: **retain concise surface; do not infer a proof calculus or theorem equivalence from the token.**
 
 ---
 
 # Declarative equality `A == B`
 
-Required distinction: **YES** where the represented theory asserts equality beyond shared object identity.
+Required distinction: **YES** where a theory asserts equality beyond shared object identity.
 
 Primitive status: **NOT ESTABLISHED.**
 
-Possible lower construction: equality-relation object plus profile authority for reflexivity/substitution/congruence/extensionality as applicable.
+Possible lower construction: equality-relation object plus profile authority for reflexivity/substitution/congruence/extensionality.
 
-Isomorphism risk:
+Structural identity, object-theory equality, proposition equivalence, extensional function equality, observational equivalence, and comparison isomorphism remain distinct.
 
-Structural identity, object-theory equality, propositional equivalence, extensional function equality, and observational equivalence must not collapse.
-
-Current disposition: **retain surface; never use `==` as structural identity unless the selected profile explicitly licenses that interpretation.**
+Current disposition: **retain surface; never use it as structural identity without explicit profile authority.**
 
 ---
 
 # Declarative negation `~A`
 
-Required distinction: **YES**, especially distinct from match-level negative condition `!`.
+Required distinction: **YES**, especially distinct from match-level `!`.
 
 Primitive status: **NOT ESTABLISHED.**
 
-Possible lower construction: profile-owned falsity/negation relation or another selected semantic construction.
+Current conceptual role: **declarative negation surface**.
 
-Correction:
+Classical, intuitionistic, paraconsistent, and other laws remain profile-specific.
 
-Draft 0.2's phrase “classical negation” is superseded. `~` is a **declarative negation surface**. Classical, intuitionistic, paraconsistent, and other laws are profile-specific.
-
-Current disposition: **retain surface; profile laws remain external to the token itself.**
+Current disposition: **retain surface; no global proof semantics.**
 
 ---
 
@@ -135,9 +154,9 @@ Required distinction: **YES** for explicit declarative alternatives.
 
 Primitive status: **NOT ESTABLISHED.**
 
-Possible lower construction: explicit alternative object + member relation + satisfaction rule.
+Possible lower construction: alternative object + member relation + satisfaction rule.
 
-Current disposition: **retain surface; audit whether it is a canonical class/profile constructor rather than irreducible syntax.**
+Current disposition: **retain useful surface; audit as canonical class/profile constructor versus irreducible syntax.**
 
 ---
 
@@ -146,82 +165,75 @@ Current disposition: **retain surface; audit whether it is a canonical class/pro
 Required distinctions:
 
 - lexical variable ownership: **YES**;
-- universal/existential formula semantics: **YES** where used.
+- universal/existential quantifier kind: **YES** where used;
+- quantified domain/generator: **YES and previously under-specified**.
 
 Primitive status: **PARTLY OPEN.**
 
-Possible decomposition:
+Required decomposition for current canonical semantics:
 
 ```text
 binder ownership
-+ bound body
-+ domain/generator structure
-+ universal/existential evaluation class
++ quantifier kind
++ explicit/inherited native domain or generator
++ body
++ sort/guard constraints
++ universal/existential evaluation contract
 ```
 
-Isomorphism value:
+A profile-wide default domain is acceptable only when it is native dependency structure.
 
-This separation is important because universal/existential quantification may share structural families with modal/temporal generated-region evaluation without making the source constructs identical.
-
-Current disposition: **retain compact forms; audit lexical binding separately from quantifier semantics.**
+Current disposition: **retain compact forms; binder ownership, quantifier semantics, and domain generation are separate auditable components.**
 
 ---
 
-# `+?n` declarative existential versus operational freshness
+# `+?n` existential versus operational freshness
 
 Required distinctions: **BOTH required.**
 
-Current legacy surface overload: **UNSAFE FOR NEW CANONICAL ARTIFACTS.**
+Legacy overload: **UNSAFE FOR NEW CANONICAL ARTIFACTS.**
 
-Draft 0.2 lets `+?n` mean existential quantification or fresh identity allocation depending on rewrite-RHS context.
+Historical Draft 0.2 artifacts may interpret RHS-position `+?n` as fresh allocation. New artifacts require explicit freshness construction/role.
 
-Risk:
-
-The same serialized term class can change meaning from external position/context, which is hostile to label-independent structural comparison.
-
-Draft 0.9 disposition:
-
-- historical artifacts keep legacy decode behavior;
-- new canonical artifacts must carry fresh allocation through an explicit native construction/role;
-- new content must not rely solely on syntactic position to switch the meaning of `+?n`.
+Current disposition: **legacy decode only; do not rely on syntactic position to switch semantics.**
 
 ---
 
 # Lexical abstraction `\?n BODY`
 
-Required distinction: **YES** for first-class bound bodies in current profiles.
+Required distinction: **YES** for first-class bound bodies.
 
 Primitive status: **NOT ESTABLISHED.**
 
 Possible lower construction:
 
 ```text
-explicit binder identity
+binder identity
 + body relation
 + occurrence ownership
 + scope/boundary
 ```
 
-Current disposition: **retain as canonical named bound-body surface while comparing against lower explicit binder structure.**
+Current disposition: **retain canonical bound-body surface; compare against lower explicit binder structure before primitive promotion.**
 
-A class/schema comparison must treat binder numbering as alpha-renamable but ownership as rigid structure.
+Binder numbering is alpha; ownership is load-bearing.
 
 ---
 
 # Structural instantiation `ABSTRACTION @@ ARGUMENT`
 
-Required operation: **YES** if native profiles manipulate bound bodies without hidden host substitution.
+Required operation: **YES** if native profiles manipulate bound bodies without host substitution.
 
 Primitive status: **ESPECIALLY UNESTABLISHED.**
 
 Possible lower construction: constrained structural rewrite over binder-owned occurrences with explicit capture avoidance/alpha-renaming.
 
-Draft 0.9 correction:
+Current rules:
 
-- `@@` is demoted from “core structural term” to candidate named/canonical operation pending rewrite decomposition;
-- Draft 0.6's optional canonicalizer reduction is superseded;
-- reducing an instantiation is D/E transformation, not N0/N1 canonicalization;
-- if a variable appears as the left operand, the abstraction-shape constraint must be natively represented/derivable.
+- `@@` is a candidate named construction, not assumed irreducible core;
+- reducing it is D/E transformation, not N0/N1 canonicalization;
+- abstraction-shape constraints must be native/derivable;
+- an exact lower factorization must round-trip to the compact surface or be labeled non-exact.
 
 Current disposition: **highest-priority primitive/class factorization challenge.**
 
@@ -231,22 +243,44 @@ Current disposition: **highest-priority primitive/class factorization challenge.
 
 Required distinction: conjunction/co-satisfaction must be representable.
 
-Primitive status of `scope == conjunction`: **NOT ESTABLISHED and structurally risky.**
+Primitive status of `scope == conjunction`: **NOT ESTABLISHED and unsafe as context-only semantics.**
 
-Risk:
-
-`[]` already means structural scope/boundary. Draft 0.2 additionally gives it conjunction semantics “in formula context,” making meaning depend on external interpretation.
-
-Draft 0.9 disposition:
+For new current-semantics artifacts:
 
 ```text
-raw [] in new canonical artifacts = structural scope/boundary/container
-conjunction/co-satisfaction = explicit class/profile construction
+raw [] = structural scope/boundary/container
+conjunction/co-satisfaction = explicit construction/profile role
 ```
 
-Frozen Experiment 002 artifacts retain legacy decode rules.
+Frozen legacy artifacts retain their historical decoder.
 
-This audit is now a correctness issue, not merely primitive-minimization polish.
+---
+
+# Scope/carrier roles generally
+
+A scope can serve grouping, boundary, operational-state/rewrite, represented-data, or bundle roles.
+
+Reuse of one carrier is acceptable only when behavior-changing role is reconstructable from native containment/incidence.
+
+If two identical carriers would behave differently only because an external reader calls one “state” and one “data,” the role must be made explicit.
+
+Current disposition: **carrier reuse allowed; invisible behavior-changing role is not.**
+
+---
+
+# Negative structural match `!X`
+
+Required distinction from declarative negation: **YES.**
+
+Primitive status: **OPEN.**
+
+`!X` is a structural absence condition over a matching scope.
+
+It does not imply semantic falsity in an incompletely represented model.
+
+A theory using absence-as-falsity must expose a closed-world/completeness contract.
+
+Current disposition: **retain candidate matcher surface; audit eliminability and preserve completeness assumptions in comparison.**
 
 ---
 
@@ -256,54 +290,77 @@ Required distinction: bundle vocabulary/dependency closure is useful.
 
 Primitive status: **NO EVIDENCE.**
 
-Possible lower construction: theory-signature object linked to declared stable identities.
-
-Draft 0.9 correction:
-
-Signature exactness is layer-relative:
+Current signature distinctions:
 
 ```text
-Sig_surface(T)
-Deps(T)
-Sig_D(T)
+surface signature
+dependency closure
+selected-factorization signature
 ```
 
-An alias-expanded factorization may legitimately have a different surface signature from the compact source object.
+Multi-document bundle partitioning is transparent only with namespace/binding/activation/boundary preservation.
 
-Current disposition: **retain `^0` convention for experiments; do not treat it as proven substrate primitive or isomorphism evidence.**
+Current disposition: **retain legacy/canonical experiment convention; not a proven substrate primitive or isomorphism cue.**
+
+---
+
+# References `@n`
+
+Semantic role: serialization/compression only.
+
+Current rules:
+
+- reference numbering/spelling is non-semantic;
+- visibility in new unordered serialization scopes is not based on sibling textual order;
+- dependency graph must be acyclic unless a future explicit recursive-reference semantics is introduced;
+- N0 expansion removes reference-binding artifacts from semantic comparison while preserving sharing.
+
+Current disposition: **serialization mechanism, not semantic primitive.**
 
 ---
 
 # Scope multiplicity
 
-Draft 0.2 ordinary scopes are set-like.
+Ordinary scopes remain set-like in the current legacy/candidate surface.
 
-Required distinction: **source multiplicity may be load-bearing.**
+Source multiplicity may nevertheless be load-bearing.
 
-Risk:
+Decomposition must preserve occurrence identity/count before set-like canonicalization when multiplicity matters.
 
-Canonical collapse of duplicate members can create false isomorphisms if the source contained semantically distinct occurrences not materialized as identities/counts.
-
-Draft 0.9 disposition:
-
-Multiplicity must be decided/preserved during decomposition before set-like scope canonicalization. If occurrences matter, encode occurrence identity/count explicitly.
+A canonicalizer may not infer that duplicate source occurrences are irrelevant merely because expanded member structures are isomorphic.
 
 ---
 
-# Canonicalization / normalization surface
+# Stable class labels and schema revisions
 
-Draft 0.9 separates:
+Useful class labels are retained, but a mutable label is not the qualified semantic object.
+
+Current Draft 0.10 rule:
+
+```text
+navigation label -> exact immutable schema revision -> verified witness
+```
+
+Changing schema ports, parameters, constraints, factorization, or residual policy creates a new revision.
+
+Current C1–C12 handles remain unqualified navigation labels.
+
+---
+
+# Canonicalization / normalization
+
+Current layers:
 
 ```text
 N0 serialization normalization
-N1 alpha/boundary structural canonicalization
-D definitional decomposition/expansion
+N1 alpha/representation normalization
+D qualified definitional factorization/expansion
 E profile/theorem equivalence
 ```
 
-Only N0/N1 are default canonicalization.
+Only N0/N1 are default pre-comparison normalization.
 
-No candidate surface may gain semantic authority because a canonicalizer happens to reduce it.
+No candidate surface gains semantic authority because a canonicalizer happens to reduce it.
 
 ---
 
@@ -311,12 +368,12 @@ No candidate surface may gain semantic authority because a canonicalizer happens
 
 No candidate syntax graduates to irreducible core merely because:
 
-- multiple experiments use it;
+- several experiments use it;
 - it is concise;
 - it resembles standard notation;
-- removing it makes artifacts longer;
 - agents recognize it;
-- a class catalog already names it.
+- a class catalog names it;
+- removing it makes artifacts longer.
 
 Promotion requires evidence that either:
 
@@ -327,18 +384,20 @@ Otherwise prefer:
 
 ```text
 qualified lower construction
-+ stable class/domain label
-+ optional compact syntax
++ stable namespaced class/domain label
++ optional compact surface
 ```
 
 ## Immediate test priorities
 
-1. Express Draft 0.6 instantiation as ordinary structural rewrite over explicit binder/occurrence structure and compare with `@@`.
-2. Separate lexical binder ownership from universal/existential evaluation semantics.
+1. Express Draft 0.6 instantiation as structural rewrite over explicit binder/occurrence structure and compare with `@@`.
+2. Separate lexical binding, quantifier kind, and quantified domain/generator.
 3. Replace/test legacy scope-as-conjunction with explicit co-satisfaction construction.
 4. Replace/test legacy `+?n` freshness overloading with explicit fresh-allocation structure.
-5. Test stable semantic labels as declared/mappable structural identities under P0 versus PS/PC comparison.
-6. Measure structural numeral encoding versus `#` shorthand without disturbing rigid exact-value semantics.
-7. Test `^0` exact surface signature against alias-expanded/factorized dependency signatures.
+5. Test stable semantic labels as namespaced declared identities under rigid versus signature-mappable views.
+6. Test semantic-symbol-headed application against explicit relation/function contracts.
+7. Measure structural numeral encoding versus `#` shorthand without disturbing rigid value semantics.
+8. Test `^0` surface signature against dependency/factorization signatures and multi-document bundle partitioning.
+9. Test `!` against lower matcher/constraint constructions and closed/open-world controls.
 
-None of these audits invalidates prior frozen evidence. They determine the minimal substrate and safe comparison semantics of future AxiomeSH.
+These audits determine the minimal substrate and safe comparison semantics of future AxiomeSH without invalidating frozen historical evidence.
