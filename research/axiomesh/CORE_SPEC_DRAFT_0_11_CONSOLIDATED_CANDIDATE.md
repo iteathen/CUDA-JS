@@ -241,6 +241,13 @@ They may alpha-map where the comparison policy permits.
 
 `#n` and reduced `#p/q` are rigid exact values by default.
 
+For rational literals:
+
+- denominator MUST be nonzero;
+- numerator/denominator are reduced to lowest terms;
+- sign is canonicalized to the numerator;
+- floating-point spellings are not canonical exact literals.
+
 Literal token-class irreducibility remains open.
 
 A class schema may expose a literal position as a parameter slot. That is parameterization, not literal renaming.
@@ -300,6 +307,8 @@ contains two occurrences unless an explicit qualified quotient/profile makes the
 This is the information-preserving default.
 
 Frozen historical artifacts may retain earlier set-like semantics.
+
+Identical nested scopes are likewise distinct member occurrences unless an explicit identity/quotient equates them.
 
 ## 8.2 Scope is not implicit conjunction
 
@@ -370,6 +379,10 @@ After N0 resolution, reference-binding syntax is absent from semantic comparison
 
 Variable numbers are local handles.
 
+Repeated occurrence of the **same** pattern/bound variable requires the same binding within its owner.
+
+Different variables are allowed to bind the same structural object unless an explicit distinctness/disequality constraint requires otherwise.
+
 Disjoint sibling binders may reuse the same number.
 
 Nested rebinding of a still-visible same-number binder remains invalid in this candidate.
@@ -380,6 +393,8 @@ Rewrite-local pattern variables are owned by the represented rewrite/profile.
 
 Declarative quantifier/abstraction surfaces own their lexical bodies.
 
+A variable appearing only in a negative application condition MUST already be bound by positive pattern structure or be explicitly scoped/quantified by the matching profile. A NAC does not silently introduce a new existential/universal variable meaning.
+
 Any ownership not reconstructable from native structure/profile is invalid.
 
 ---
@@ -387,6 +402,8 @@ Any ownership not reconstructable from native structure/profile is invalid.
 # 12. Rewrite objects, activation, and occurrences
 
 `[L] > [R]` represents a first-class rewrite object.
+
+Rewrite objects may themselves be referenced, compared, nested, related, or transformed as data. Their existence does not alone imply activation.
 
 ## 12.1 Activation is profile-owned
 
@@ -396,7 +413,15 @@ An execution profile/activation construction determines active rules.
 
 The historical direct-child-active behavior remains a supported legacy profile when explicitly selected.
 
-## 12.2 Occurrence-preserving application
+Serialized rule ordering MUST NOT imply priority unless a selected execution profile explicitly represents priority/order.
+
+## 12.2 Boundary-respecting matching
+
+A rule matches only within its declared application boundary.
+
+It does not implicitly flatten or cross nested structural scopes. Participation of nested structure must be structurally addressed by the rule/profile.
+
+## 12.3 Occurrence-preserving application
 
 New Draft 0.11 rewrite application operates on occurrences:
 
@@ -411,21 +436,33 @@ New Draft 0.11 rewrite application operates on occurrences:
 
 Duplicate RHS occurrences are not silently collapsed.
 
-Set/idempotent rewrite behavior is a derived explicit quotient/profile.
+A set/idempotent rewrite profile may quotient duplicate occurrences only when that rule is explicit.
 
-## 12.3 Fresh allocation
+## 12.4 RHS-only variables
+
+An ordinary variable appearing only on the RHS is invalid unless its value is supplied by an explicit represented construction such as fresh allocation or another profile-defined generator.
+
+No implicit RHS-only freshness exists in Draft 0.11.
+
+## 12.5 Fresh allocation
 
 New Draft 0.11 artifacts do not overload declarative `+?n` as operational freshness solely by RHS position.
 
 Fresh allocation is an explicit native execution-profile construction/constraint.
 
-## 12.4 Negative match
+## 12.6 Negative match
 
 `!X` is structural absence within a declared match/application boundary.
 
 It is not declarative falsity.
 
 Absence-sensitive semantics preserve the relevant boundary and completeness/open-vs-closed-world contract.
+
+## 12.7 Multiway semantics
+
+Absent an explicitly represented execution strategy/priority, every valid rule/match application is a legitimate successor.
+
+Search order, pruning, scheduling, or serialization order is non-semantic unless the selected execution profile explicitly makes it semantic.
 
 ---
 
@@ -451,7 +488,11 @@ It is distinct from `!A` negative structural match.
 
 ## 13.4 Choice
 
-`{A B ...}` is an unordered alternative surface. Exact satisfaction/proof laws are profile/class-owned.
+`{A B ...}` is an unordered alternative surface.
+
+Alternative member order is non-semantic. Alternative occurrence multiplicity is preserved by default unless the selected alternative/profile semantics explicitly establishes idempotence.
+
+Exact satisfaction/proof laws are profile/class-owned.
 
 Choice is not operational multiway rewrite merely because both expose alternatives.
 
@@ -495,7 +536,13 @@ It must be compared against constrained structural rewrite over explicit binder/
 
 It is not generic mathematical function application.
 
-## 14.4 No optional canonical reduction
+## 14.4 Capture avoidance
+
+Any qualified instantiation construction preserves binder ownership and alpha-renames inner binders when needed to avoid capture.
+
+No hidden host substitution callback is semantic authority.
+
+## 14.5 No optional canonical reduction
 
 N0/N1 never silently reduce `@@`.
 
@@ -543,7 +590,11 @@ Otherwise partitioned and concatenated forms require an explicit bridge.
 
 ---
 
-# 16. Human gloss
+# 16. Source fidelity and human gloss
+
+E0 source fidelity is a load-bearing precursor to all later decomposition/comparison work.
+
+A source-to-native rendering must preserve every distinction later needed for proof, composition, or comparison. Where an ingest transformation is nontrivial, its mapping/audit is retained as evidence rather than assumed from the source label.
 
 Human labels may aid review/retrieval but may not supply load-bearing structure absent from native input.
 
