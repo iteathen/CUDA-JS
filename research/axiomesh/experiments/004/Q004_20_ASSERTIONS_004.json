@@ -1,0 +1,24 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-20",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "structure_only": {
+      "exact_isomorphic_pair": [2001, 2002],
+      "example_map": {"1": "10", "2": "11", "3": "12"},
+      "2001_vs_2003": "NON_ISOMORPHIC",
+      "reason_2001_vs_2003": "path chain versus two-outgoing-edge star identity-sharing pattern"
+    },
+    "label_assist": {
+      "same_label_pair": [2001, 2003],
+      "same_label_pair_structurally_valid": false,
+      "true_structural_pair_labels_equal": false
+    },
+    "representation_qualification": {
+      "structural_only_path_surfaces_true_pair": true,
+      "label_equality_alone_is_sufficient": false,
+      "label_assist_may_accelerate_but_not_prove": true
+    }
+  }
+}
