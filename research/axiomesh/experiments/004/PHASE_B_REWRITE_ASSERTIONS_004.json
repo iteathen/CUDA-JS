@@ -1,0 +1,28 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "phase": "B-rewrite",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "cases": {
+    "Q004-02": {
+      "selector": "case object with (^4200 #2)",
+      "selected_application": 2003,
+      "expected_binding": {"?0": "20"},
+      "expected_successor": {
+        "(10 20)_occurrences": 1,
+        "(30 20)_occurrences": 2,
+        "total_direct_occurrences": 3
+      },
+      "forbidden_result": "set/idempotent collapse of the pre-existing and newly added (30 20) occurrences"
+    },
+    "Q004-03": {
+      "selector": "case object with (^4200 #3)",
+      "selected_applications": [3004, 3005],
+      "expected_binding_each": {"?0": "20"},
+      "expected_successor_each": ["(30 20)"],
+      "successor_states_structurally_isomorphic": true,
+      "application_events_distinct": true,
+      "distinct_event_reason": "separate selected application identities and separate reified rule instances"
+    }
+  }
+}
