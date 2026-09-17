@@ -1,0 +1,37 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "phase": "C-negative-index",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "cases": {
+    "Q004-14": {
+      "subcase_1": {
+        "expected_relation_under_V0": "CERTIFIED_NON_ISOMORPHIC",
+        "separating_certificate": "direct member occurrence count differs: 1 versus 2"
+      },
+      "subcase_2": {
+        "actual_relation_under_V0": "ISOMORPHIC",
+        "example_witness": {"20": "30", "21": "31", "22": "32"},
+        "supplied_run_record": "(^5403 #2 #0)",
+        "run_record_interpretation": "bounded/incomplete search returned no witness and supplied no separating certificate",
+        "allowed_report_from_run_record": ["NO_WITNESS_FOUND", "UNKNOWN", "RESOURCE_LIMIT"],
+        "forbidden_report": "CERTIFIED_NON_ISOMORPHIC"
+      }
+    },
+    "Q004-15": {
+      "fingerprint_definition": "for this synthetic fixture, ^5510 records a fingerprint equal to the raw stable head-label numeral",
+      "fingerprints": {"left": 5500, "right": 5501},
+      "under_V0": {
+        "stable_labels_rigid": true,
+        "fingerprint_mismatch_safe_as_separating_invariant_for_fixture": true,
+        "relation": "NON_ISOMORPHIC"
+      },
+      "under_VS_with_explicit_bijection_^5500_to_^5501": {
+        "fingerprint_invariant_valid": false,
+        "mismatch_may_prune": false,
+        "relation": "ISOMORPHIC",
+        "example_local_map": {"40": "50", "41": "51"}
+      }
+    }
+  }
+}
