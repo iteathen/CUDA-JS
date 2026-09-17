@@ -1,274 +1,338 @@
 # Experiment 003 — Primitive Semantic Foundation Architecture
 
-**Status:** active design authority for E1P construction on the experimental branch  
-**Spec:** `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`
+**Status:** active design authority for E1P/E1F construction on the experimental branch  
+**Spec:** `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`  
+**Comparison protocol:** `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
 
 ## Purpose
 
-Build the benchmark logics from common structural foundations rather than reproducing conventional operator names as unrelated opaque predicates.
+Build benchmark logics from common native semantic mechanisms rather than reproducing conventional operator names as unrelated predicates, while avoiding the opposite error of forcing all objects into one preferred decomposition.
 
-The foundation boundary is chosen by semantic mechanism:
-
-```text
-model/state substrate
--> primitive/native construction
--> structural-class recognition
--> named derived operator / domain instance
--> benchmark theorem
-```
-
-This is intentionally different from:
+The foundation path is:
 
 ```text
-benchmark notation
--> one semantic symbol per named operator
+source semantics
+-> one or more qualified factorizations
+-> primitive/model leaves + native constructions
+-> label-blind witnessed comparison
+-> structural-class/family recognition
+-> retained domain/class labels
+-> benchmark theorem/proof profile
 ```
 
-The ordering is load-bearing: **decompose first, classify second, name third**. A familiar label may guide retrieval, but it may not decide the decomposition.
+This differs from both bad extremes:
 
-## Shared primitive substrate
+```text
+benchmark notation -> opaque symbol
+```
 
-Across the benchmark families, the lowest useful theory-level leaves are:
+and:
 
-- finite or explicitly represented object/world/state identities;
+```text
+benchmark notation -> preselected class -> forced decomposition
+```
+
+The ordering is load-bearing: **decompose without target-class bias; compare; then classify/name.**
+
+## Shared candidate substrate
+
+Across benchmark families, current lowest useful theory-level leaves include:
+
+- explicitly represented object/world/state identities;
 - atomic valuation/incidence facts;
-- primitive one-step relations: transition, accessibility, reduction;
-- source-supplied algebraic operations and axioms;
+- primitive one-step transition/accessibility/reduction edges;
+- source-supplied algebraic operation facts/axioms;
 - heap address/value incidence;
 - finite proof-node/rule/child relations;
-- explicit domain/type membership where supplied by the profile.
+- explicit domain/type membership when supplied by the represented profile.
 
-Everything above those leaves should be constructed whenever its semantics are known.
+Each leaf still carries an irreducibility burden. “The source names it” does not by itself make it primitive.
 
-## Structural-class layer
+Leaf provenance should distinguish:
 
-After a construction is decomposed, compare its canonical shape with the candidate class catalog in:
+```text
+observational/model input
+stipulated source relation/axiom
+implementation/environment fact
+currently undecomposed candidate primitive
+qualified representation primitive
+```
 
-`STRUCTURAL_CLASS_CATALOG_003.md`
+## Structural-class/factorization layer
 
-The class layer exists to retain useful labels while exposing common structure.
+After native construction, compare through `STRUCTURAL_COMPARISON_PROTOCOL_003.md`.
 
 A domain object may be:
 
-- an instance of one class;
-- a constrained specialization of a class;
-- a composition of several classes;
-- evidence for a new candidate class.
+- an exact instance of a schema;
+- a specialization with explicit residual constraints;
+- a composition with an explicit gluing witness;
+- an embedding/common-core case;
+- evidence for a new candidate class;
+- representable through several alternative qualified factorizations.
 
-Class assignment MUST follow decomposition. Do not choose a class because two operators have similar names or because an analogy is attractive.
+Class assignment MUST follow a mapping witness.
 
-Named domain aliases remain useful and SHOULD be retained when they help construction/retrieval. Their semantic path is:
+A direct label edge or registry entry is navigation metadata only.
+
+## Boundary rule
+
+Each reusable foundation/classification must identify the external interfaces relevant to composition.
+
+At minimum record where applicable:
 
 ```text
-domain label
--> structural class / class composition
--> native construction
--> primitive model leaves
+input/source ports
+output/target ports
+relation/function parameters
+body/property parameters
+state/model boundary
+rigid identities/literals
+mappable schema slots
+composition/gluing constraints
 ```
 
-Both label-to-class and class-to-primitive erasure must preserve the relevant formal obligation.
+Internal isomorphism does not establish compositional substitutability.
 
-## Foundation F0 — proof objects
+---
 
-A proof is a finite native structure, not a boolean theorem oracle.
+# F0 — Proof objects / finite locally validated dependency structures
 
-Minimum structural roles:
+A proof is a finite native dependency structure, not a boolean theorem oracle.
+
+Minimum roles:
 
 ```text
 proof object
-root node
+root/result node
 node conclusion
-node rule
-node context / discharged assumption boundary where applicable
-ordered or unordered child/premise nodes according to rule
+node rule/validator
+node context/discharge boundary
+child/premise dependencies
 ```
 
-Rule-specific validators determine whether a node is locally admissible. A whole proof is valid only when the root is locally valid and all referenced premise subproofs are valid down to assumptions/axioms.
+A whole proof is valid only if the root and all referenced subproofs validate under the represented profile.
 
-This gives meta-theory something real to quantify over and provides the E5 review surface.
+A cached `derivable(context, formula)` label may name existence of a valid proof object but cannot replace it for proof-property qualification.
 
-A derived `derivable(context, formula)` relation may be cached, but must mean existence of a valid native proof object, not an unexplained fact.
+Candidate class relation: C8 / `^9108` finite locally validated derivation.
 
-Structural-class candidate: finite locally validated derivation.
+Status: native foundation exists author-side; class-membership witness pending.
 
-## Foundation F1 — finite index / fold / parity
+---
+
+# F1 — Finite index / fold / parity
 
 For concrete finite hardness instances:
 
-- materialize the finite index set;
+- materialize the finite index carrier;
 - materialize indexed propositional atoms;
-- expand conjunction/disjunction folds structurally for the measured instance, or provide a native recursive fold definition over the finite index relation;
-- represent XOR/parity by an explicit boolean/parity construction whose truth can be reduced to primitive valuations/finite arithmetic structure.
+- expand or natively define the finite fold;
+- reduce XOR/parity to explicit boolean/parity structure rather than host arithmetic;
+- state combiner laws explicitly when fold order should be irrelevant.
 
-A parity-aware proof rule may be retained as a derived lemma after equivalence to that construction is qualified.
+Candidate class relation: C9 / `^9109` finite indexed fold.
 
-Structural-class candidate: finite indexed fold, parameterized by the combining operation.
+Important residual parameters:
 
-## Foundation F2 — first-order domain and equality
+```text
+combiner identity
+associativity/commutativity requirements
+index ordering semantics
+parity/modulus structure
+```
 
-Leaves:
+XOR and OR are not identified merely because both instantiate a fold.
+
+Status: foundation pending.
+
+---
+
+# F2 — First-order domain / equality / binding
+
+Candidate leaves:
 
 - domain elements;
-- source predicate/function incidence;
+- source predicate incidence;
 - source function graph/operation facts;
-- explicit sort/domain membership.
+- sort/domain membership.
 
 Construct:
 
-- universal/existential reasoning from native binders and qualified structural instantiation;
-- equality substitution/congruence as proof rules over native term structure;
-- sorted quantification as ordinary quantification plus native membership guards unless evidence later justifies a core type primitive.
+- lexical binder ownership;
+- domain-generated universal/existential evaluation;
+- capture-avoiding bound-body instantiation;
+- equality substitution/congruence under the selected equality profile;
+- sorted quantification as domain membership constraints unless evidence supports a stronger primitive.
 
-No external unifier/substitution callback is semantic authority.
+No host unifier/substitution callback is semantic authority.
 
-Draft 0.8 additionally requires primitive-status audit of binder/quantifier/instantiation surfaces themselves before final core promotion. Compact syntax may remain even if the semantic construction is lower-level.
+Draft 0.9 correction:
 
-Structural-class candidates include universal/existential satisfaction over a generated domain and bound-body instantiation.
+- `*?n`/`+?n` are useful compact surfaces but lexical binding and quantifier semantics are separately auditable;
+- `@@` remains a candidate bound-body-instantiation surface until ordinary structural-rewrite factorization is tested;
+- `==` is not structural identity by default.
 
-## Foundation F3 — possible worlds and epistemic satisfaction
+Candidate family relations:
 
-An epistemic model contains:
+- F1/C1 universal generated-region evaluation;
+- F1/C2 existential generated-region evaluation;
+- C10 bound-body instantiation, with rewrite-factorization hypothesis;
+- C11 functional graph application for function-valued terms where appropriate.
+
+Status: FOL/HOL downstream construction remains blocked on instantiation/primitive/factorization qualification.
+
+---
+
+# F3 — Possible worlds / epistemic satisfaction
+
+Epistemic model structure:
 
 ```text
-worlds W
-actual/designated world w0 when needed
+world carrier W
+designated world(s) where needed
 agent identities I
-agent-indexed accessibility R_i ⊆ W×W
-atomic valuation V at worlds
+agent-indexed accessibility R_i
+atomic valuation V
 ```
 
-Atomic satisfaction is a primitive valuation lookup.
+Knowledge is derived from universal satisfaction over the accessibility-generated region.
 
-Knowledge is derived:
+Common knowledge is derived from:
 
 ```text
-Sat(M,w,K_i A)
-iff
-for every v with R_i(w,v), Sat(M,v,A)
+group accessibility construction
++ finite path/closure
++ universal satisfaction over reachable worlds
 ```
 
-Common knowledge is derived from reachability under the reflexive-transitive closure of the union of the relevant agents' accessibility relations, then universal satisfaction along that closure.
+S4/S5 are constraints on accessibility, not magic properties of a `K` token.
 
-S4/S5 are structural constraints on accessibility relations; they are not properties attached magically to a `K` token.
+Candidate class/family hypotheses:
 
-Structural-class mapping:
+- knowledge -> F1/C1 universal generated-region evaluation;
+- common knowledge -> C4 finite path + F1/C1.
 
-- individual knowledge -> universal satisfaction over an accessibility-generated region;
-- common knowledge -> group-relation construction + finite-path closure + universal satisfaction.
+Required residuals/ports include agent identity, accessibility relation identity, modal-frame constraints, and world/model boundary.
 
-Reference basis:
+Status: native author-side foundation exists; label-blind class witnesses pending.
 
-- Stanford Encyclopedia of Philosophy, *Epistemic Logic* / possible-world accessibility semantics.
-- Stanford Encyclopedia of Philosophy, *Dynamic Semantics* / epistemic model structure.
+---
 
-## Foundation F4 — public announcement update
+# F4 — Public announcement / predicate-selected model restriction
 
-For Plaza-style public announcement semantics, construct the post-announcement model by restriction:
+For Plaza-style public announcement semantics:
 
 ```text
-W_phi = { w in W | Sat(M,w,phi) }
+W_phi  = worlds satisfying phi
 R_i_phi = R_i restricted to W_phi × W_phi
-V_phi = V restricted to W_phi
+V_phi  = valuation restricted to W_phi
 ```
 
-The announcement modality then evaluates its body in the restricted model, subject to the chosen truthfulness/precondition convention.
+Post-announcement evaluation occurs in the restricted model under the chosen precondition/truthfulness convention.
 
-Repeated announcements compose explicit model transformations.
-
-Structural-class mapping: predicate-selected structure restriction composed with post-update satisfaction.
-
-Reference basis:
-
-- Stanford Encyclopedia of Philosophy, *Dynamic Epistemic Logic*, Public Announcement Logic technical appendix.
-
-## Foundation F5 — linear temporal traces
-
-An LTL model/run exposes:
+Candidate classification:
 
 ```text
-positions/states along one discrete linear trace
-successor relation
-future ordering/reachability
-atomic valuation at positions
+C5 predicate-selected structure restriction
++ post-update satisfaction
+```
+
+The full public-announcement operator is composite and cannot be reduced to C5 alone.
+
+Status: native author-side foundation exists; composite/gluing witness pending.
+
+---
+
+# F5 — Linear temporal traces
+
+Model structure:
+
+```text
+trace positions/states
+linear/discrete future relation
+atomic valuation
 ```
 
 Derived semantics:
 
 ```text
-X A at t  iff A at successor(t)
-F A at t  iff exists u >= t with A at u
-G A at t  iff forall u >= t, A at u
-A U B at t iff exists u >= t with B at u and A at every v from t before u
+X A at t  iff A at the immediate successor
+F A at t  iff some future/reflexive-future position satisfies A
+G A at t  iff every future/reflexive-future position satisfies A
+A U B at t iff a future endpoint satisfies B and A holds on the preceding interval
 ```
 
-A profile may choose `X` + `U` as a smaller derived basis and define `F/G`, but the chosen construction must be explicit.
+Candidate family hypotheses:
 
-Structural-class mapping:
+- `G` -> F1/C1 universal evaluation over linear future region;
+- `F` -> F1/C2 existential evaluation over linear future region;
+- `X` -> F1/C3 immediate-successor specialization;
+- `U` -> composition of endpoint-existence + interval-universal conditions, not collapsed merely because F/G are available.
 
-- X -> immediate-successor evaluation;
-- F -> existential satisfaction over the reflexive future region;
-- G -> universal satisfaction over the reflexive future region;
-- U -> composed existential endpoint + universal interval condition, not collapsed to F/G merely for convenience.
+The linearity/discreteness/reflexivity choices remain structural residuals/parameters.
 
-Reference basis:
+Status: native author-side foundation exists for exercised FL-011 surface; cross-domain class witnesses pending.
 
-- Stanford Encyclopedia of Philosophy, *Temporal Logic*, sections on `X`, `U`, and LTL.
+---
 
-## Foundation F6 — branching transition systems / CTL
+# F6 — Branching transition systems / CTL
 
-A CTL model exposes:
+Model structure:
 
 ```text
-states
-transition relation
+state carrier
+branching transition relation
 atomic valuation
 paths generated by repeated transitions
 ```
 
-Path quantification is over those generated paths.
+Path/state quantification must remain explicit.
 
-Representative derived semantics:
+Representative constructions:
 
 ```text
-EX A: some successor/path-next state satisfies A
-EG A: some generated path satisfies A at every position
-E[A U B]: some generated path reaches B while A holds beforehand
+EX A       some immediate transition successor satisfies A
+EG A       some generated path satisfies A at every path position
+E[A U B]   some generated path reaches B while A holds beforehand
 ```
 
-Other operators are derived by duality/abbreviation only where the selected CTL semantics licenses it; in particular `AG A` and `not EF not A` should become visibly connected by the construction rather than independent tokens.
+`AG A` and `~EF~A` may be semantically related under the selected CTL profile, but theorem/duality equivalence is an E-layer relation, not N0/N1 canonicalization.
 
-Structural-class mapping is expected to compose path generation/closure with universal or existential satisfaction, but must wait for the concrete CTL native construction before final classification.
+Candidate family hypothesis: path generation/closure composed with F1/C1/C2 generated-region evaluation.
 
-Reference basis:
+Status: concrete native foundation pending; no class mapping is qualified yet.
 
-- Carnegie Mellon model-checking/CTL lecture material defining CTL over Kripke/transition structures.
+---
 
-## Foundation F7 — normative/deontic semantics
+# F7 — Normative/deontic semantics
 
-Do not define a generic obligation foundation before selecting the semantics.
+Do not construct a generic obligation class before selecting the represented semantics.
 
-Possible foundations include:
+Candidate semantic foundations include:
 
-- ideal-world/accessibility semantics;
-- preference/ordering semantics;
-- selection-function semantics;
+- ideal-world/accessibility;
+- preference/ordering;
+- selection function;
 - dyadic conditional obligation;
 - defeasible rule structures.
 
-FL-010 must select one explicitly. Contrary-to-duty behavior is precisely where these choices matter.
+FL-010 is precisely a test where choosing the wrong decomposition changes the result.
 
-Until then, `O`/permission are source notation only and E1P remains blocked.
+`O`/permission remain source labels only until one semantics is explicitly selected and decomposed.
 
-Do not assign a structural class until the chosen semantics has been decomposed.
+Status: blocked; no class assignment allowed yet.
 
-## Foundation F8 — heap/resource/program semantics
+---
+
+# F8 — Heap/resource/program semantics
 
 Represent heap as finite partial address→value structure.
 
-Primitive facts:
+Candidate leaves:
 
 - address/value incidence;
-- program primitive state transitions/read/write operations.
+- concrete program-state transitions/read/write operations.
 
 Derived separation semantics:
 
@@ -282,93 +346,127 @@ exists h1,h2:
   Sat(h2,Q)
 ```
 
-Points-to is satisfaction by the appropriate singleton heap cell structure.
+Points-to uses singleton-heap satisfaction.
 
-Hoare validity is derived from program-transition semantics and pre/post satisfaction. The frame rule is then a theorem/rule about preservation under disjoint extension, not a primitive name.
+Hoare partial correctness is derived from program-transition semantics and pre/post satisfaction.
 
-Structural-class mapping:
+Candidate class hypotheses:
 
-- separating conjunction -> disjoint decomposition/recomposition + sub-satisfaction;
-- Hoare partial correctness -> transition-preservation judgment.
+- separating conjunction -> C6 disjoint decomposition/recomposition + recursive satisfaction;
+- Hoare validity -> candidate C7 transition preservation;
+- Draft 0.9 factorization challenge: C7 may be precondition gating + F1/C1 universal evaluation over transition successors.
 
-Reference basis:
+The frame rule is derived only with explicit locality/disjointness conditions.
 
-- Reynolds/O'Hearn separation-logic semantics; Brookes, *A Semantics for Concurrent Separation Logic*.
+Status: native author-side heap/separation foundation exists; concrete swap/locality and class witnesses pending.
 
-## Foundation F9 — higher-order function/predicate structure
+---
 
-Do not treat mathematical application as an unexplained host operation.
+# F9 — Higher-order function/predicate structure
 
-A profile must expose the intended function model, for example extensionally as a graph relation plus:
+A function-valued object must expose the selected mathematical function model rather than invoke a host function call.
+
+One candidate extensional construction is:
 
 ```text
-functionality
-required totality on domain
-codomain/type membership
-extensional equality when the logic admits it
+function graph
++ input
++ output relation
++ functionality
++ required totality
++ codomain/type constraints
++ extensional equality where admitted
 ```
 
-Application is then the structural relation selecting the graph output for an input.
+Candidate class relation: C11 / `^9111` functional-graph application.
 
-Draft 0.5 abstraction and Draft 0.6 instantiation own binding/substitution structure; they do not by themselves assert mathematical function semantics.
+Draft 0.9 factorization hypothesis:
 
-Lambda/Pi syntax may remain a derived constructor only when its native formation/elimination behavior is represented.
+```text
+relation-image selection
++ uniqueness
++ optional totality/codomain constraints
+```
 
-Structural-class candidates: functional-graph application and bound-body instantiation, kept distinct.
+is a possible lower factorization of C11.
 
-## Foundation F10 — reduction paths / closure
+Lexical abstraction/instantiation supply binding/substitution structure, not mathematical function semantics by themselves.
 
-Primitive leaf:
+Status: HOL/function foundation pending.
+
+---
+
+# F10 — Reduction paths / closure
+
+Primitive/model leaf candidate:
 
 ```text
 one-step reduction a -> b
 ```
 
-Construct zero-or-more reachability from explicit finite path structure or an equivalent native inductive definition:
+Construct finite zero-or-more reachability through explicit path structure.
 
-```text
-path p has first a
-path p has last b
-adjacent members follow one-step reduction
-zero-length path witnesses reflexivity
-```
+Church–Rosser then quantifies over two reduction paths from a common source and requires a common join reachable by further paths.
 
-Church–Rosser then quantifies over two such paths from the same source and requires a common target reachable by two further paths.
+Candidate class relation: C4 / `^9104` finite path/closure.
 
-No opaque `twoheadrightarrow`/closure predicate may carry the missing semantics.
+The one-step reduction relation is a class parameter/port and cannot be erased merely because other domains also use C4.
 
-Structural-class mapping: finite path / reflexive-transitive closure.
+Status: generic finite-path foundation exists; concrete reduction theory for FL-018 pending.
 
-## Foundation sharing / isomorphism targets
+---
 
-The point of decomposing these domains is to expose shared structure:
+# Cross-domain isomorphism targets
 
-- epistemic accessibility, temporal transition, CTL transition, and reduction are all directed relations with different constraints/uses;
-- knowledge, globally, and some quantified forms may share universal-over-generated-region structure while differing in region generation;
-- eventually, EF-like forms, and existential domain queries may share existential-over-generated-region structure;
-- common knowledge closure and reduction closure share finite path/reachability machinery;
-- public announcement and program execution are state/model transformations but with different preservation laws;
-- separation heap union and theory composition both require explicit compatibility/disjointness boundaries, but must not be unified unless their recomposition invariants actually match;
-- proof trees and execution/reduction paths are finite dependency structures but may belong to different classes because proof nodes carry local rule validity while paths carry ordered transition adjacency.
+These are **hypotheses to test under label-blind witnessed comparison**, not semantic declarations.
 
-These similarities should be represented through shared lower-level foundations and class labels where sound, rather than hidden by domain vocabulary or exaggerated into false equivalence.
+Candidate shared shapes include:
+
+- epistemic accessibility, temporal transition, CTL transition, and reduction as directed-relation substrates with different constraints;
+- knowledge, globally, and universal domain evaluation as possible F1/C1 specializations;
+- eventually, EF-like forms, and existential domain evaluation as possible F1/C2 specializations;
+- common-knowledge closure and reduction closure as C4 instances with different step-relation parameters;
+- public announcement and program execution as state/model transformations with different preservation laws;
+- separation heap union and other resource compositions as potential disjoint-recomposition structures only when the invariants really match;
+- proof trees and execution/reduction paths as finite dependency structures with materially different local validators/order constraints unless a stronger common schema is witnessed.
+
+The goal is to expose the **strongest correct common core**, not to maximize the number of operators sharing a label.
+
+## Alternative factorization policy
+
+If a foundation admits multiple faithful decompositions:
+
+- retain them as separate factorization nodes;
+- record qualified transformations/equivalences between them;
+- do not select one solely because it matches another domain;
+- run structural comparison across materially distinct factorization pairs;
+- report factorization dependence if the structural relationship changes.
 
 ## Implementation rule
 
-A foundation module must document:
+Every foundation module must document:
 
 ```text
-primitive leaves
-native construction
-candidate structural class(es)
+source semantics preserved
+primitive/model leaves + provenance
+native construction(s)
+alternative factorizations
+N0/N1 normalization behavior
+candidate structural class/family relations
+ports/boundaries
+parameters/rigid values
 constructed relations/operators
 domain/source labels
-which aliases it normalizes
-instance/class erasure path
+alias expansion path
+class-membership witness status
+residual/specialization constraints
 falsifiers
-cold qualification cases
+cold reconstruction cases
+label-blind/near-isomorphic/boundary controls
 ```
 
-No foundation is accepted merely because its equations are familiar. It must be encoded natively and independently reconstructed before downstream E3/E4 evidence depends on it.
+No foundation is accepted because its equations are familiar.
 
-No new structural class is accepted merely because a new source-domain name appears. Class creation follows observed decomposed shape.
+No structural class is accepted because its label is familiar.
+
+No cross-domain analogy is accepted without the witness and residuals needed to falsify it.
