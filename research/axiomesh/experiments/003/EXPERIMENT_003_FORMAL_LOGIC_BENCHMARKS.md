@@ -1,8 +1,8 @@
 # Experiment 003 — Cross-Logic Proof Benchmark Campaign
 
 **Branch:** `experiment/axiomesh-native-reconstruction`  
-**Candidate spec lineage:** Draft 0.5 → Draft 0.6 → Draft 0.7  
-**Status:** benchmark corpus constructed; primitive semantic decomposition now mandatory before proof qualification
+**Candidate spec lineage:** Draft 0.5 → Draft 0.6 → Draft 0.7 → Draft 0.8  
+**Status:** benchmark corpus constructed; primitive semantic decomposition and structural-class classification now mandatory before proof qualification
 
 ## Purpose
 
@@ -20,24 +20,29 @@ The suite contains 18 benchmark families spanning:
 
 The primary risk is not syntax coverage. The risk is semantic disguise: reproducing conventional notation as opaque native IDs would preserve names while hiding the relational structure AxiomeSH is intended to expose.
 
+Draft 0.8 adds the complementary correction that useful names should not be discarded after decomposition. Labels are retained to identify reusable structural classes and source-domain instances.
+
 ## Governing rules
 
 For every benchmark:
 
 ```text
-statement representation != primitive semantic construction != proof profile != proof != reviewed proof
+statement representation != primitive semantic construction != structural class != proof profile != proof != reviewed proof
 ```
 
 and:
 
 ```text
-named operator
--> semantic definition
+source concept
+-> semantic decomposition
 -> native relational/state construction
--> primitive model leaves
+-> structural-class recognition
+-> source/domain label
 ```
 
 A named operator represented only as `^n` is not primitive-semantic completion.
+
+A useful label may remain after its construction is known, and should be retained when it improves retrieval, construction, or cross-domain comparison.
 
 ## Gates
 
@@ -67,19 +72,6 @@ The existing `FORMAL_LOGIC_BENCHMARKS_003.axh` is primarily this statement/forma
 
 Every conventional derived operator used by the proof obligation must be grounded in a native construction over core forms plus explicitly identified primitive model leaves.
 
-This gate rejects semantic shortcuts such as:
-
-```text
-^knowledge
-^globally
-^obligation
-^separating_conjunction
-^provable
-^closure
-```
-
-when those IDs merely rename known compound semantics.
-
 A compact alias may remain only if its native definition is present and exact.
 
 ### E1A — alias-erasure audit
@@ -94,11 +86,40 @@ alias bundle
 
 must preserve the load-bearing formal problem.
 
+### E1C — structural-class classification
+
+After decomposition, compare the canonical construction against the existing class catalog.
+
+Classify the object as one or more of:
+
+```text
+instance
+specialization
+composition
+new candidate structural class
+```
+
+Classification follows decomposition. Source naming is not evidence of structural class membership.
+
+### E1E — class/instance erasure
+
+For retained labels/classes, verify:
+
+```text
+source/domain label
+-> structural class instance
+-> primitive-normal construction
+```
+
+without changing the obligation.
+
+This preserves helpful labels while preventing them from becoming semantic hiding places.
+
 ### E2 — cold reconstruction
 
 A fresh decoder receives only the applicable specs, native signature, frozen cold prompt, and native benchmark bundle. It reconstructs all benchmark objects and reports ambiguity or hidden dependency.
 
-E2 statement reconstruction does not imply E1P.
+E2 statement reconstruction does not imply E1P/E1C.
 
 ### E3 — proof-profile completeness
 
@@ -118,7 +139,7 @@ Proof objects must expose the actual rule/dependency structure used.
 
 ### E5 — independent proof review
 
-Review each proof step against the supplied profile and primitive semantic foundations. Record correctness, proof size, search effort, representation difficulty, alias expansion, and any semantic leakage.
+Review each proof step against the supplied profile and primitive semantic foundations. Record correctness, proof size, search effort, representation difficulty, alias/class expansion, and any semantic leakage.
 
 ## Specification pressure lineage
 
@@ -148,11 +169,35 @@ Review of the cross-logic scaffold showed that theory-owned symbols alone are to
 
 Draft 0.7 requires transparent construction of derived logic operators from shared lower-level structures and explicitly identified primitive model leaves.
 
+### Draft 0.8 — structural classes and retained labels
+
+Review of the expanded specs showed a second risk: treating every useful surface distinction as proof that the core itself needed another irreducible primitive.
+
+Draft 0.8 therefore requires:
+
+```text
+decompose first
+-> recognize reusable structural class
+-> attach useful labels
+-> preserve exact expansion
+```
+
+Earlier candidate syntax remains usable, but its final classification may be:
+
+- irreducible core primitive;
+- canonical surface over lower structure;
+- serialization/value shorthand;
+- profile-owned derived constructor;
+- redundant/rejected.
+
 Artifacts:
 
 - `../../CORE_SPEC_DRAFT_0_7_CANDIDATE.md`
+- `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`
 - `PRIMITIVE_DECOMPOSITION_AUDIT_003.md`
 - `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md`
+- `STRUCTURAL_CLASS_CATALOG_003.md`
+- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
 
 ## Primitive versus derived examples
 
@@ -178,7 +223,26 @@ Presumptively derived constructions include:
 - reflexive-transitive closure;
 - higher-order application/lambda/Pi behavior used by proofs.
 
-These derived forms may retain compact names only after their native expansions exist.
+These derived forms may retain compact names after their native expansions exist.
+
+## Structural-class examples
+
+Candidate shared classes already visible in the decomposed work include:
+
+- universal satisfaction over a generated region;
+- existential satisfaction over a generated region;
+- immediate-successor evaluation;
+- finite path/reflexive-transitive closure;
+- predicate-selected structure restriction;
+- disjoint decomposition/recomposition;
+- transition-preservation judgment;
+- finite locally validated derivation;
+- finite indexed fold;
+- bound-body instantiation;
+- functional-graph application;
+- well-founded propagation.
+
+These are labels for construction classes, not newly promoted core primitives.
 
 ## Benchmark families
 
@@ -213,7 +277,7 @@ The remaining work is organized by reusable semantic mechanism rather than bench
 - higher-order function/predicate/application structure;
 - finite reduction paths/closure.
 
-Shared relational shapes should share foundations where sound.
+Shared relational shapes should share structural classes where sound.
 
 ## Artifacts
 
@@ -225,6 +289,8 @@ Shared relational shapes should share foundations where sound.
 - `PROOF_EXECUTION_PROTOCOL_003.md` — E3-E5 protocol.
 - `PRIMITIVE_DECOMPOSITION_AUDIT_003.md` — benchmark-by-benchmark decomposition disposition.
 - `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md` — shared semantic foundation design.
+- `STRUCTURAL_CLASS_CATALOG_003.md` — candidate reusable construction classes and domain mappings.
+- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md` — audit of whether newer syntax is primitive or merely a useful surface.
 - `RESULTS_003.md` — durable qualification state.
 
 ## Success condition
@@ -237,10 +303,15 @@ The meaningful end state is:
 18 source-faithful problems
 -> native statement reconstruction
 -> primitive semantic decomposition
--> alias-erasure qualification
+-> structural-class recognition
+-> retained useful domain/class labels
+-> two-stage erasure qualification
 -> explicit native proof profiles
 -> correct proof/counterresults
 -> independent proof review
 ```
 
-with named notation stripped away far enough that the actual relational similarities and differences among classical, constructive, epistemic, temporal, spatial, and higher-order systems are visible to the agent.
+The objective is both directions at once:
+
+- expose the primitive relational structure far enough to reveal true cross-domain isomorphisms;
+- retain stable labels/classes so agents can recognize and reconstruct higher-level objects without rediscovering them from scratch.
