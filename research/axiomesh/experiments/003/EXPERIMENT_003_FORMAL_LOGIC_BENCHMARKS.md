@@ -1,369 +1,263 @@
 # Experiment 003 — Cross-Logic Proof Benchmark Campaign
 
 **Branch:** `experiment/axiomesh-native-reconstruction`  
-**Candidate spec lineage:** Draft 0.5 → Draft 0.6 → Draft 0.7 → Draft 0.8 → Draft 0.9  
-**Status:** benchmark corpus constructed; primitive decomposition, witnessed structural comparison, and structural-class qualification are mandatory before proof qualification
+**Candidate spec lineage:** Draft 0.5 → Draft 0.6 → Draft 0.7 → Draft 0.8 → Draft 0.9 → Draft 0.10  
+**Status:** benchmark corpus/scaffold constructed; primitive decomposition and isomorphism-safe qualification are mandatory before proof claims
 
 ## Purpose
 
-Experiment 003 tests whether AxiomeSH can represent and support agent reasoning across formal systems whose proof rules differ materially, rather than succeeding only on one structural research corpus.
+Experiment 003 tests whether AxiomeSH can support agent reasoning across 18 benchmark families spanning propositional, first-order/equality, epistemic/modal/deontic, temporal/dynamic/spatial, intuitionistic/constructive, and higher-order/type-theoretic domains.
 
-The suite contains 18 benchmark families spanning:
+The primary risk is no longer syntax coverage. It is structural contamination:
 
-- classical propositional logic;
-- SAT/CNF hardness and parity;
-- first-order logic and equality;
-- modal/epistemic/deontic logic;
-- temporal and program logic;
-- intuitionistic/constructive logic;
-- higher-order logic and type theory.
+- opaque names hiding compound semantics;
+- labels or registry hints deciding the class they later “discover”;
+- a preferred decomposition manufacturing an analogy;
+- post-hoc parameterization absorbing every difference;
+- namespace collisions making unrelated symbols appear identical;
+- canonicalization silently applying semantic equivalence;
+- incomplete search being reported as non-isomorphism;
+- schema-level similarity being promoted to source-theory semantic equivalence;
+- boundary/residual constraints disappearing to produce a cleaner match.
 
-The primary risk is not syntax coverage. The risk is semantic disguise or structural contamination:
+Useful labels remain because they help retrieval and construction, but they are evidentially downstream of structure.
 
-- familiar notation becoming opaque native IDs;
-- labels deciding the class they are supposed to identify;
-- a preferred decomposition manufacturing an apparent isomorphism;
-- canonicalization silently applying semantic equivalences;
-- boundary/residual constraints being discarded to make structures look alike.
+## Governing pipeline
 
-Useful names remain after decomposition for retrieval/construction, but they are evidentially downstream of the structural result.
-
-## Governing rules
+```text
+source semantics
+-> qualified/versioned factorization set
+-> N0/N1 representation normalization
+-> frozen comparison policy
+-> label-blind structural search
+-> candidate witness/certificate
+-> independent witness verification
+-> relation/common-core/residual result
+-> structural-class recognition
+-> retained labels
+-> explicit proof profile
+-> proof/counterresult
+-> independent proof review
+```
 
 For every benchmark:
 
 ```text
 statement representation
-!= primitive semantic construction
-!= structural comparison/class witness
+!= semantic construction
+!= structural-class relationship
 != proof profile
 != proof
 != reviewed proof
 ```
 
-The construction/discovery order is:
-
-```text
-source semantics
--> one or more qualified decompositions/factorizations
--> N0/N1 representation normalization
--> label-blind structural comparison
--> explicit mapping/common-core/residual witness
--> structural-class recognition
--> retained source/class labels
-```
-
-A named operator represented only as `^n` is not primitive-semantic completion.
-
-A class/domain label may retrieve candidate objects but may not establish the relationship it names.
-
-## Gates
+## Qualification gates
 
 ### E0 — source fidelity
 
-Preserve the supplied theorem/premises/domain/test intent without silently repairing under-specified or noncanonical statements.
+Preserve the supplied theorem/premises/domain/test intent without silent repair.
 
 ### E1 — native statement expressibility
 
-Represent every supplied load-bearing statement distinction natively, including formula structure, literals, binding, premises/goals, parameterization, profile identity, and readiness.
-
-The existing `FORMAL_LOGIC_BENCHMARKS_003.axh` is primarily a statement/formalization scaffold.
+Represent all supplied load-bearing statement distinctions natively. `FORMAL_LOGIC_BENCHMARKS_003.axh` is primarily this statement/formalization scaffold.
 
 ### E1P — primitive semantic decomposition
 
-Every conventional derived operator used by the proof obligation must be grounded in a native construction over currently admitted structural forms plus explicitly justified primitive/model leaves.
+Ground conventional derived operators in native construction plus justified primitive/model leaves.
 
-A compact alias may remain only if its native construction is available.
+### E1A — alias/factorization expansion
 
-### E1A — alias expansion/erasure
-
-For every retained derived alias, verify that expanding the alias reaches a qualified lower native construction without losing the obligation.
-
-Draft 0.9 tightens this: the result is a **qualified factorization node**, not automatically a unique “primitive-normal form.”
+Retained aliases must reach qualified lower constructions. Expansion produces a factorization node; uniqueness is not assumed.
 
 ### E1C — structural-class classification
 
-After decomposition and structural comparison, classify an object as:
-
-```text
-exact instance
-specialization
-composition
-embedding/common-core case
-new candidate structural class
-```
-
-Classification follows a mapping witness. Source naming is not evidence.
+Classification follows structural evidence and a verified membership witness. Source vocabulary is not membership evidence.
 
 ### E1E — class/instance expansion
 
-For retained class/domain labels, verify:
-
-```text
-source/domain label
--> class/schema instance
--> qualified native factorization
-```
-
-while retaining residual constraints and ports.
+Retained class/domain labels must expand through a versioned schema/factorization without losing residual constraints or ports.
 
 ### E1N — normalization-layer audit
 
-Verify that:
-
-```text
-N0 serialization normalization
-N1 alpha/boundary structural normalization
-D definitional expansion
-E profile/theorem equivalence
-```
-
-remain separate.
-
-N0/N1 must not silently perform D/E transformations.
+Keep N0/N1 separate from D definitions and E theorem/profile equivalences.
 
 ### E1F — factorization audit
 
-Record materially different qualified decompositions/factorizations.
+Preserve materially distinct qualified factorizations or report dependence/incompleteness explicitly.
 
-Structural results must either:
+### E1W — witnessed comparison
 
-- survive the alternative factorizations; or
-- report their factorization dependence explicitly.
-
-A preferred factorization may not be selected merely because it produces the expected analogy.
-
-### E1W — witnessed structural comparison
-
-Every isomorphism/class claim must carry a witness containing at least:
-
-```text
-comparison projection
-selected factorizations
-node/edge mapping
-binding mapping
-boundary/port mapping
-semantic-label mapping if allowed
-schema-parameter mapping
-constraints checked
-common core
-residual A
-residual B
-```
-
-A bare class edge/boolean result is insufficient.
+Every structural relationship carries the mapping/correspondence, boundaries, parameters, constraints, common core, residuals, factorization set, and relation kind.
 
 ### E1B — boundary/composition audit
 
-Test external ports and joint realizability.
-
-Same interior does not imply component substitutability.
-
-Composite class claims require an explicit gluing/compatibility witness.
+Test ports, gluing, compatibility, and joint realizability.
 
 ### E1L — label-blind audit
 
-Hide or permute source/domain and class labels and rerun the structural discovery.
+Hide/permute non-evidential source/class labels. The structural answer must survive.
 
-The witnessed structural relationship must remain unchanged except for corresponding identifier renaming.
+### E1M — mapping multiplicity audit
 
-`STRUCTURAL_CLASS_REGISTRY_003.axh` is explicitly forbidden as discovery evidence during this gate.
+Preserve materially distinct witnesses/maximal cores or justify their automorphism/equivalence quotient.
+
+### E1Q — comparison-policy freeze audit
+
+Freeze view, role rules, D/E authorities, factorization bounds, target layer, and scoring objective before expected mappings/results are unblinded.
+
+### E1D — decomposition exactness/recursion audit
+
+Exact D edges must round-trip. Recursive definitions require explicit base/step/fixed-point authority.
+
+### E1S — symbol/bundle namespace audit
+
+Stable semantic labels are namespace-qualified. Multi-document partitioning must preserve namespaces/binding/activation/boundaries.
+
+### E1V — independent witness/certificate verification
+
+Discovery and verification are separate. A mapping or negative certificate must be independently checkable against frozen inputs/policy.
+
+### E1T — target-layer/conclusion-scope audit
+
+Do not promote representation/schema similarity into denotational/source-theory equivalence without a qualified bridge.
 
 ### E2 — cold reconstruction
 
-A fresh decoder receives only applicable specs, native signatures, frozen cold prompt, and native benchmark bundle. It reconstructs benchmark objects and reports ambiguity/hidden dependency.
-
-E2 statement reconstruction does not imply E1P/E1C/E1W.
+A fresh decoder reconstructs benchmark objects from the permitted native bundle/specs. E2 does not imply the structural gates above.
 
 ### E3 — proof-profile completeness
 
-Each benchmark receives a self-contained native proof/semantic profile sufficient to determine admissible proof steps from native foundations rather than model priors or opaque host operations.
+Supply complete native semantic/proof authority for the benchmark.
 
 ### E4 — proof execution
 
-A fresh agent produces the appropriate proof object, countermodel/non-derivability result, consistency result, witness/program, or parameterized result.
+Produce the appropriate proof object, countermodel/non-derivability result, consistency result, extracted witness/program, or bounded result.
 
 ### E5 — independent proof review
 
-Review every proof step against the supplied profile/foundations and record correctness, proof size, search effort, representation difficulty, factorization/class expansion, and semantic leakage.
+Check every proof step and all representation/factorization dependencies.
 
 ## Specification pressure lineage
 
-### Draft 0.5 — first-class lexical abstraction
+### Draft 0.5
 
-Introduced the bound-body surface:
+Added first-class bound-body surface:
 
 ```text
 \?n term
 ```
 
-Its useful surface remains; irreducible primitive status is still open.
+Useful surface retained; primitive status open.
 
-### Draft 0.6 — structural instantiation
+### Draft 0.6
 
-Introduced:
+Added:
 
 ```text
 ABSTRACTION @@ ARGUMENT
 ```
 
-Draft 0.9 demotes `@@` from assumed core status to candidate bound-body-instantiation surface until ordinary structural-rewrite decomposition is compared.
+Useful construction surface retained; Draft 0.9/0.10 require comparison against constrained structural rewrite before primitive promotion.
 
-### Draft 0.7 — primitive semantic decomposition
+### Draft 0.7
 
-Requires known compound operators to expose their native semantic construction rather than stop at a stable label.
+Required decomposition of known compound operators instead of stopping at stable labels.
 
-### Draft 0.8 — structural classes and retained labels
+### Draft 0.8
 
-Keeps useful labels while requiring decomposition before class recognition.
+Retained useful labels and introduced structural-class recognition after decomposition.
 
-### Draft 0.9 — isomorphism-safe factoring and witnessed comparison
+### Draft 0.9
 
-Corrects the remaining risks:
+Made isomorphism safety constitutional: plural factorizations, explicit comparison projections, witnessed common-core/residual results, boundaries/ports, label-blind controls, and demotion of unproven surface syntax from assumed primitive status.
 
-- decomposition is plural by default, not one mandatory normal form;
-- normalization is separated from definitional/theorem equivalence;
-- class schemas require ports/constraints;
-- class membership requires a witness;
-- partial isomorphism returns common core plus residuals;
-- mapped semantic labels require explicit comparison projection;
-- label-blind and boundary-negative controls are mandatory;
-- context-only semantic overloads are prohibited in new canonical artifacts.
+### Draft 0.10
+
+Second-pass line review found and corrected remaining comparison defects:
+
+- view policy, transformation authority, and relation kind are separate axes;
+- comparison policy cannot adapt after seeing the expected answer;
+- stable `^n` identities are theory/signature namespaced;
+- exact decompositions require round trips and guards;
+- recursive definition cycles require fixed-point authority;
+- quantifier domains/generators are explicit dependencies;
+- behavior-changing carrier roles and absence-completeness assumptions are preserved;
+- schema parameters may be structured objects and cannot be added post hoc;
+- class-class relations require witnesses;
+- qualified schema/dependency revisions are immutable/versioned;
+- discovery and witness verification are separate;
+- “no witness found” is not “non-isomorphic”;
+- factorization-set completeness scopes negative/global claims;
+- strong/weak embedding and relational correspondences are distinct;
+- representation/schema isomorphism is separated from denotational equivalence;
+- mapping opaque leaves yields parametric structural analogy, not automatic semantic equivalence;
+- class promotion requires independent/held-out evidence;
+- circular class/decomposition evidence is prohibited;
+- legacy artifacts require rerendering or exact current-semantics bridges for new structural qualification.
+
+Primary corrective artifacts:
+
+- `../../CORE_SPEC_DRAFT_0_10_CANDIDATE.md`
+- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md`
+- `SPEC_LINE_REVIEW_004_ISOMORPHISM_SECOND_PASS.md`
+- `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
+- `STRUCTURAL_CLASS_SCHEMA_CONTRACT_004.md`
+- `STRUCTURAL_CLASS_CATALOG_004.md`
+- `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md`
+- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
+
+## Current benchmark bundle
+
+Native benchmark objects remain `3001..3018`, corresponding to `FL-001..FL-018` in `SOURCE_BENCHMARKS_003.md`.
 
 Artifacts:
 
-- `../../CORE_SPEC_DRAFT_0_7_CANDIDATE.md`
-- `../../CORE_SPEC_DRAFT_0_8_CANDIDATE.md`
-- `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`
-- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md`
-- `PRIMITIVE_DECOMPOSITION_AUDIT_003.md`
-- `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md`
-- `STRUCTURAL_CLASS_CATALOG_003.md`
-- `STRUCTURAL_CLASS_REGISTRY_003.axh`
-- `STRUCTURAL_CLASS_REGISTRY_003.md`
-- `STRUCTURAL_COMPARISON_PROTOCOL_003.md`
-- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md`
-
-## Primitive versus derived examples
-
-Potential primitive/model leaves include:
-
-- atomic proposition valuation;
-- domain/object identities and source predicate facts;
-- one-step accessibility/transition/reduction edges;
-- heap address/value incidence;
-- source algebraic operations constrained by explicit axioms.
-
-A source-provided name is not enough to justify primitive status. Leaf provenance must identify whether it is observational input, stipulated source relation, implementation fact, undecomposed candidate, or qualified representation primitive.
-
-Presumptively derived constructions include:
-
-- finite AND/OR folds;
-- XOR/parity evaluation;
-- biconditional;
-- epistemic knowledge/common knowledge;
-- public-announcement update;
-- deontic obligation/permission after choosing a semantics;
-- LTL/CTL operators;
-- separating conjunction/Hoare validity/frame rule;
-- theorem/derivability predicates;
-- reflexive-transitive closure;
-- higher-order application/lambda/Pi behavior used by proofs.
-
-These derived forms may retain compact names after their native constructions exist.
-
-## Structural-class/factorization examples
-
-Current candidate labels include C1–C12, but Draft 0.9 treats the catalog as a hypothesis lattice rather than a flat ontology.
-
-Current factorization hypotheses include:
-
-```text
-C1 universal evaluation
-C2 existential evaluation
-C3 immediate-successor evaluation
-```
-
-as possible specializations of a broader evaluation-over-generated-region family.
-
-Likewise:
-
-- C7 transition preservation may factor through universal evaluation over transition successors;
-- C10 bound-body instantiation may factor through constrained structural rewrite;
-- C11 functional application may factor through relation-image selection + uniqueness/totality constraints.
-
-The labels remain useful while those relationships are tested.
-
-## Benchmark families
-
-Native benchmark objects are `3001..3018`, corresponding in order to `FL-001..FL-018` in `SOURCE_BENCHMARKS_003.md`.
-
-The initial native bundle preserves source statement structure/readiness. It is not a unique primitive-normal form for every logic.
-
-## Source caveats retained as test data
-
-- PHP, XOR parity, and muddy children require frozen concrete instances for measured runs.
-- Steamroller requires exact premise import before proof scoring.
-- Chisholm is profile-sensitive and cannot receive a generic obligation semantics by convenience.
-- Cantor's supplied statement is preserved and not silently replaced by a different canonical theorem formulation.
-- Well-founded induction requires explicit well-foundedness authority.
-- Church–Rosser requires a concrete reduction/inductive theory.
-
-## Foundation ownership
-
-Work is organized by reusable semantic mechanism rather than benchmark name:
-
-- proof objects and derivation trees;
-- finite index/fold/parity;
-- FOL domain/equality/binder instantiation;
-- possible worlds/accessibility/satisfaction;
-- public-announcement restriction/update;
-- linear trace temporal semantics;
-- branching transition/path semantics;
-- selected normative/deontic semantics;
-- heap/resource/program semantics;
-- higher-order function/predicate/application structure;
-- finite reduction paths/closure.
-
-Shared relational shapes should share qualified structural classes/factorizations only when a witness preserves all residual constraints.
-
-## Artifacts
-
-- `SOURCE_BENCHMARKS_003.md` — frozen human/source intent.
-- `FORMAL_LOGIC_BENCHMARKS_003.axh` — native statement/formalization scaffold.
-- `SEMANTIC_SIGNATURE_003_DRAFT_0_5.axh` — exact **surface** signature for that scaffold.
-- `SEMANTIC_GLOSS_003.json` — reviewer/scorer names only.
-- `COLD_RECONSTRUCTION_PROMPT_003.md` — E2 statement reconstruction protocol.
-- `PROOF_EXECUTION_PROTOCOL_003.md` — E3-E5 protocol.
-- `PRIMITIVE_DECOMPOSITION_AUDIT_003.md` — benchmark-by-benchmark decomposition disposition.
-- `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md` — shared semantic foundation design.
-- `STRUCTURAL_CLASS_CATALOG_003.md` — candidate class/factorization hypotheses.
-- `STRUCTURAL_CLASS_REGISTRY_003.axh` — navigation hypothesis registry, excluded from label-blind discovery.
-- `STRUCTURAL_COMPARISON_PROTOCOL_003.md` — witnessed comparison/isomorphism protocol.
-- `CORE_SURFACE_PRIMITIVE_AUDIT_003.md` — candidate-core primitive/surface audit.
-- `SPEC_LINE_REVIEW_003_ISOMORPHISM.md` — line-by-line lineage review and correction record.
+- `SOURCE_BENCHMARKS_003.md` — frozen source intent;
+- `FORMAL_LOGIC_BENCHMARKS_003.axh` — statement/formalization scaffold;
+- `SEMANTIC_SIGNATURE_003_DRAFT_0_5.axh` — exact **surface** signature for that historical scaffold;
+- `SEMANTIC_GLOSS_003.json` — reviewer/scorer names only;
+- `COLD_RECONSTRUCTION_PROMPT_003.md` — E2 protocol;
+- `PROOF_EXECUTION_PROTOCOL_003.md` — E3-E5 protocol;
+- `PRIMITIVE_DECOMPOSITION_AUDIT_003.md` — benchmark decomposition disposition;
+- `PRIMITIVE_FOUNDATION_ARCHITECTURE_003.md` — shared semantic foundations;
+- `STRUCTURAL_CLASS_CATALOG_004.md` — current candidate class/factorization catalog;
+- `STRUCTURAL_CLASS_SCHEMA_CONTRACT_004.md` — class revision/witness contract;
+- `STRUCTURAL_CLASS_REGISTRY_003.axh` — historical/current navigation hypotheses only, forbidden as blind discovery evidence;
+- `STRUCTURAL_COMPARISON_PROTOCOL_003.md` — current comparison protocol;
 - `RESULTS_003.md` — durable qualification state.
+
+## Source caveats
+
+Still retained:
+
+- PHP, XOR parity, and muddy children require frozen concrete instances for measured runs;
+- Steamroller requires exact premise import;
+- Chisholm requires an explicitly selected deontic semantics;
+- the supplied Cantor statement is not silently replaced by a different theorem statement;
+- well-founded induction requires explicit well-foundedness authority;
+- Church–Rosser requires a concrete reduction/inductive theory.
 
 ## Success condition
 
-Experiment 003 does not pass because all 18 formulas parse, because familiar operators have native IDs, or because a classifier returns expected class labels.
+Experiment 003 does not pass because formulas parse, operators have numeric IDs, or a classifier returns expected labels.
 
-The meaningful end state is:
+The end state is:
 
 ```text
 18 source-faithful problems
--> native statement reconstruction
--> primitive semantic decomposition
--> alternative-factorization preservation
--> label-blind witnessed structural comparison
+-> native reconstruction
+-> semantic decomposition
+-> factorization preservation
+-> frozen-policy label-blind comparison
+-> independently verified mappings/certificates
 -> common-core/residual recovery
--> structural-class recognition
--> retained useful domain/class labels
--> explicit native proof profiles
+-> versioned structural-class recognition
+-> retained useful labels
+-> complete native proof profiles
 -> correct proof/counterresults
 -> independent proof review
 ```
 
-The central structural test is:
+The central structural question is:
 
-> Can AxiomeSH expose the strongest correct cross-domain correspondence while preserving every load-bearing difference needed to falsify that correspondence?
+> Can AxiomeSH recover the strongest justified cross-domain correspondence without labels, policy choices, factorization choices, search limits, or hidden semantics deciding the answer?
