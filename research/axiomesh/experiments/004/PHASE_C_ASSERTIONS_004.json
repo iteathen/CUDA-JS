@@ -1,0 +1,47 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "phase": "C-comparison",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "frozen_view": "V0",
+  "cases": {
+    "Q004-11": {
+      "selector": "case object with (^5000 #11)",
+      "expected": {
+        "isomorphism": false,
+        "strong_embedding_left_into_right": false,
+        "weak_embedding_left_into_right": true,
+        "weak_embedding_map": {"10": "20", "11": "21"},
+        "target_residual": ["(^5101 20 21)"]
+      },
+      "reason": "The extra included ^5101 relation among mapped target objects blocks reflection required by strong embedding but may remain explicit residual under weak embedding."
+    },
+    "Q004-12": {
+      "selector": "case object with (^5000 #12)",
+      "expected": {
+        "V0_common_core": ["(^5200 A0 A1)"],
+        "core_node_map_example": {"30": "40", "31": "41"},
+        "A_only_residual_node": "32",
+        "B_only_residual_node": "42",
+        "A_boundary_cut": "(^5201 31 32)",
+        "B_boundary_cut": "(^5202 41 42)",
+        "may_drop_cut_relations": false,
+        "may_map_^5201_to_^5202_under_V0": false
+      },
+      "reason": "The common core is the rigid ^5200 relation; source-specific incident relations remain explicit boundary cuts/residual structure."
+    },
+    "Q004-13": {
+      "selector": "case object with (^5000 #13)",
+      "expected": {
+        "isomorphic_under_V0": true,
+        "minimum_distinct_isomorphism_witnesses": 2,
+        "witnesses": [
+          {"50": "60", "51": "61", "52": "62"},
+          {"50": "60", "51": "62", "52": "61"}
+        ],
+        "may_silently_choose_one": false
+      },
+      "reason": "Leaf symmetry produces at least two automorphic isomorphism witnesses; deterministic canonical labeling is not evidence that only one mapping exists."
+    }
+  }
+}
