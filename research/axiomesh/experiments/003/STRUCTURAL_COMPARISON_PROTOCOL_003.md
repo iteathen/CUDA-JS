@@ -1,74 +1,165 @@
 # Experiment 003 — Structural Comparison / Isomorphism Protocol
 
 **Status:** candidate qualification protocol  
-**Spec:** `../../CORE_SPEC_DRAFT_0_9_CANDIDATE.md`  
-**Purpose:** make structural-class and cross-domain correspondence claims independent of labels, serialization, arbitrary factorization choice, and accidental mapping selection.
+**Spec:** `../../CORE_SPEC_DRAFT_0_10_CANDIDATE.md`  
+**Purpose:** make structural-class and cross-domain correspondence claims independent of labels, serialization, arbitrary factorization choice, adaptive comparison policy, and incomplete search.
 
-## 1. Inputs
+## 1. Separate comparison axes
 
-A comparison run receives:
+Every run freezes three independent axes before discovery.
+
+### View policy
 
 ```text
-source-preserving native object A
-source-preserving native object B
-qualified decomposition/factorization dependencies
-comparison-role declarations
-boundary/port declarations where applicable
-comparison projection/mapping policy
+V0  closed structural view
+VB  boundary/port-preserving view
+VS  signature-mappable structural view
+VC  class-schema/parameterized view
 ```
 
-The run MUST NOT receive as discovery evidence:
+### Transformation authority
+
+```text
+N0  serialization-only normalization
+N1  alpha/representation normalization
+D   explicitly allowed qualified factorization rules
+E   explicitly allowed profile/theorem equivalences
+```
+
+### Target relation kind
+
+Search may establish one or more of:
+
+```text
+ISOMORPHISM
+STRONG_EMBEDDING
+WEAK_EMBEDDING
+SPECIALIZATION
+HOMOMORPHISM
+SIMULATION
+BISIMULATION
+QUOTIENT_OR_PROJECTION
+COMMON_CORE
+CERTIFIED_NON_ISOMORPHIC
+NO_WITNESS_FOUND
+UNKNOWN
+RESOURCE_LIMIT
+```
+
+The relation kind does not change the view policy retroactively.
+
+## 2. Freeze qualification policy before unblinding
+
+Before expected mappings/results are visible, freeze:
+
+```text
+target layer
+view policy
+role-assignment rules
+admissible N0/N1 rules
+allowed D definitions/factorizations
+allowed E/profile equivalences
+factorization search bounds
+relation kinds being sought
+common-core optimization criterion, if any
+resource budget
+```
+
+Source-given interface/rigidity facts remain visible because they are part of the objects.
+
+Pair-specific mapping hints, expected class labels, expected residuals, or scorer mappings are forbidden as independent discovery authority.
+
+A pair-specific hypothesis may be tested in an exploratory run, but the result must be labeled hypothesis-conditioned rather than blind qualification.
+
+## 3. Inputs
+
+A blind comparison run receives:
+
+```text
+source-preserving native object A + revision
+source-preserving native object B + revision
+qualified decomposition dependencies
+stable-symbol namespace declarations
+source-semantic role declarations
+boundary/port declarations where source-given
+frozen comparison policy
+```
+
+It MUST NOT receive as discovery evidence:
 
 - human glosses naming the expected analogy;
 - previously asserted class membership edges;
 - `STRUCTURAL_CLASS_REGISTRY_003.axh` mappings;
 - expected node/edge mappings;
-- expected common cores/residuals;
-- expected class names;
-- scorer answers.
+- expected common core/residuals;
+- expected class schema;
+- pair-specific role changes chosen after seeing the expected answer.
 
-Those may be opened only after the structural result is frozen.
+## 4. Stable-symbol namespaces
 
-## 2. Prepare factorization sets
-
-For each object, collect the currently qualified decomposition/factorization nodes.
-
-Do not assume one preferred primitive-normal form.
-
-For each factorization record:
+Before comparison, resolve each stable semantic identity as:
 
 ```text
-source object
-factorization id
-D/E dependencies used
-primitive/model leaves introduced or exposed
-preservation contract
-known information loss, if any
-open/unresolved decomposition decisions
+(namespace, local symbol id)
 ```
 
-If only one factorization is known, record that fact rather than claiming uniqueness.
+unless a shared/global namespace is explicitly represented.
 
-A lossy projection is not an exact factorization and must remain marked as such.
+Coincidental numeric `^n` equality across independent namespaces is ignored as semantic evidence.
 
-## 3. N0 serialization normalization
+Exact literals remain rigid global values unless VC exposes a literal position as a predeclared schema parameter.
+
+## 5. Prepare qualified factorization sets
+
+For each object, collect currently qualified factorization nodes allowed by the frozen D policy.
+
+Record for every factorization:
+
+```text
+factorization id/revision
+source object revision
+D dependency revisions
+applicability guards
+primitive/model leaves exposed
+round-trip status
+loss/projection status if non-exact
+open decomposition decisions
+```
+
+Do not claim uniqueness unless confluence/uniqueness is separately qualified.
+
+Record factorization-set completeness:
+
+```text
+complete under declared D system
+all currently qualified nodes
+bounded-depth subset
+bounded-cost subset
+explicit selected subset
+```
+
+## 6. Exact decomposition check
+
+An exact D factorization must reconstruct the source modulo N0/N1 and declared transparent surfaces.
+
+If it cannot, relabel it as refinement/abstraction/projection/quotient/approximation and preserve the information loss.
+
+Recursive definitions must expose base/step/fixed-point authority rather than terminate only through circular aliases.
+
+## 7. N0 serialization normalization
 
 Normalize only transport-transparent features:
 
-- reference spelling/numbering;
-- transparent reference expansion;
+- reference spelling/numbering after transparent resolution;
 - whitespace/presentation;
-- deterministic serialization ordering.
+- deterministic serialization ordering;
+- qualified multi-document partitioning when a partition witness proves transparency.
 
-For Draft 0.9 canonical artifacts, reference dependency is order-independent inside its explicit serialization scope; textual before/after position is not semantic.
+Do not expand aliases, apply theorem rules, reduce `@@`, perform beta/substitution, infer class membership, or use peer-object information.
 
-After transparent expansion, reference bindings are excluded from the semantic comparison graph.
+## 8. N1 structural normalization
 
-Do not expand derived aliases, apply theorem rules, reduce `@@`, or rewrite formulas during N0.
-
-## 4. N1 structural alpha normalization
-
-Normalize only alpha-equivalent representational choices:
+Under the frozen local-role policy normalize only representation choices such as:
 
 - alpha-renamable local identities;
 - bound-variable numbers;
@@ -76,285 +167,341 @@ Normalize only alpha-equivalent representational choices:
 
 Preserve:
 
-- ordered incidence/position;
+- ordered incidence;
 - scope/boundary nesting;
 - binding ownership;
-- rigid literals/identities;
+- stable namespace-qualified identities;
+- exact literals;
 - represented multiplicity;
 - operational/declarative direction;
 - port roles;
+- quantifier domains/generators;
+- absence/completeness contracts;
 - source/model constraints.
 
-A mapping between the boundary identifiers of A and B is not N1. It belongs in the comparison witness.
+A mapping to the peer object is not N1 canonicalization.
 
-## 5. Select comparison projection
+## 9. Label-blind discovery view
 
-Every run names one or more allowed mapping modes.
-
-Candidate projections from Draft 0.9:
-
-```text
-P0 closed structural isomorphism
-PB boundary-preserving isomorphism
-PS mapped-signature isomorphism
-PC structural-class/schema comparison
-PE profile-specific semantic equivalence
-PQ explicit quotient/projection comparison
-```
-
-Important distinctions:
-
-- P0/PB/PS exact-isomorphism results require bijective structure-preserving maps over the compared structure;
-- embeddings require injective structure-preserving maps;
-- homomorphisms may be non-injective and are not isomorphisms;
-- PQ may collapse distinctions and must report the loss;
-- PE may establish semantic equivalence without structural isomorphism.
-
-Ordered tuple positions remain rigid unless a qualified D factorization or class-schema port mapping has explicitly exposed an alternative role correspondence. PS does not arbitrarily permute incidence positions.
-
-## 6. Build the label-blind discovery view
-
-Remove, hide, or randomize only labels whose explicit comparison role marks them non-evidential under the selected projection:
+Hide or consistently randomize all labels marked non-evidential under the frozen view:
 
 ```text
 source/domain instance labels
 structural-class labels
-derived alias labels already expanded for the run
-provenance/retrieval-only labels
-candidate-mappable semantic labels when the projection permits mapping
+derived alias labels
+provenance/retrieval-only labels when excluded by the view
+candidate-mappable semantic labels
 ```
 
-Do not remove a relation merely because humans regard its name as a label if it is actually a rigid source/model fact.
+Rigid model facts remain visible even if they have names.
 
-Rigid literals/model constants remain rigid unless a qualified class schema explicitly exposes a position as a parameter slot.
+Record the randomization seed/map for reproducibility.
 
-Record the randomization/renaming mapping for reproducibility.
+## 10. Quantifier and carrier-role completeness
 
-## 7. Structural search
-
-Search for the strongest **correctly typed** witnessed relation supported by the selected factorization pair and projection.
-
-Possible dispositions include:
+Before treating two formula structures as comparable, verify that load-bearing roles are explicit or recoverable:
 
 ```text
-EXACT_ISOMORPHISM
-BOUNDARY_PRESERVING_ISOMORPHISM
-MAPPED_SIGNATURE_ISOMORPHISM
-SPECIALIZATION
-EMBEDDING
-STRUCTURAL_HOMOMORPHISM
-QUOTIENT_OR_PROJECTION
-COMMON_CORE_WITH_RESIDUALS
-NON_ISOMORPHIC_UNDER_PROJECTION
-UNRESOLVED_FACTORING_OR_EQUIVALENCE
+binder ownership
+quantifier kind
+domain/generator
+sort/guard constraints
+carrier role when behavior depends on it
 ```
 
-Do not relabel a weaker homomorphism/quotient as an isomorphism.
+Raw `[]` does not acquire conjunction semantics by unrepresented context in current artifacts.
 
-Do not enlarge a common core by dropping constraints or relations among already-mapped objects.
+Absence-sensitive structures preserve any closed/open-world completeness contract.
 
-## 8. Common-core integrity
+## 11. Structural search
 
-For a proposed common core C:
+Search under each materially relevant allowed factorization pair.
 
-- every load-bearing relation among mapped objects that is required by the selected projection must be preserved;
-- any unmatched relation incident on a mapped object belongs to a residual/boundary cut and remains explicit;
-- source multiplicity already represented as occurrence/count structure remains visible;
-- boundary/port relations are preserved according to the projection.
+Do not change the view or parameter slots to improve the match.
 
-A larger graph obtained by silently discarding an inconvenient relation is not a valid common core.
+For relation kinds:
 
-## 9. Witness format
+- isomorphism requires bijective preservation/reflection under the view;
+- strong embedding requires injective preservation and reflection of the compared relations among mapped objects;
+- weak embedding preserves source relations but may admit explicit target residual relations;
+- homomorphism may identify source objects;
+- simulation/bisimulation use the profile-defined relational correspondence;
+- quotient/projection records collapsed distinctions;
+- common-core search records whether the core is induced/strong or weak.
 
-A comparison witness must record at least:
+Do not enlarge a common core by silently dropping load-bearing constraints.
+
+## 12. Common-core optimization discipline
+
+If claiming a **maximum** common core, state the objective/partial order and provide an optimality certificate or complete-search justification.
+
+Otherwise report:
 
 ```text
-object A / factorization A
-object B / factorization B
-comparison projection
-mapping kind: bijection / injection / homomorphism / quotient
-node/object mapping
+maximal core found
+set of non-dominated materially distinct cores found
+search incomplete
+```
+
+Never convert implementation tie-breaking into semantic uniqueness.
+
+## 13. Candidate witness format
+
+A positive/partial correspondence witness records at least:
+
+```text
+object A / revision / factorization
+object B / revision / factorization
+target layer
+view policy
+N0/N1 policy
+D/E authorities and revisions
+relation kind
+node/object mapping or correspondence relation
 edge/incidence mapping
 binding mapping
 boundary/port mapping
-semantic-label mapping, if any
-schema-parameter mapping, if any
+semantic-label mapping if any
+schema-parameter mapping if any
 rigid identities/literals held fixed
-constraints checked
-common core C
+constraints/invariants checked
+common core(s)
 residual Delta_A
 residual Delta_B
-collapsed/projected distinctions, if any
-unresolved conditions
+collapsed/projected distinctions
+factorization-set completeness
+search budget
+optimality status
 ```
 
-A witness is invalid if reconstructing the relationship requires information available only from a class/domain label withheld from discovery.
+A witness is invalid if reconstructing the relation requires knowledge only available from a class/domain label or expected answer.
 
-## 10. Structural-class membership
+## 14. Independent witness verification
 
-After structural evidence exists, a separate membership witness maps a class schema into the instance.
+Discovery and verification are separate.
 
-Required fields:
+A fresh verifier receives:
 
 ```text
-class schema id
-instance id
-selected instance factorization
+frozen source/factorization objects
+frozen comparison policy
+candidate witness/certificate
+```
+
+but not expected class/domain names.
+
+The verifier checks:
+
+- dependency/factorization revisions;
+- namespace correctness;
+- mapping/correspondence domain and codomain;
+- incidence/order/scope/binding preservation;
+- strong/weak relation conditions;
+- rigid-role preservation;
+- port/parameter validity;
+- quantifier-domain/guard preservation;
+- absence/completeness assumptions;
+- residual completeness including boundary-cut relations;
+- projection loss disclosure;
+- claimed optimality/negative certificate.
+
+Only verified witnesses become qualification evidence.
+
+## 15. Negative results
+
+Failure to find a witness produces one of:
+
+```text
+NO_WITNESS_FOUND
+UNKNOWN
+RESOURCE_LIMIT
+```
+
+not `NON_ISOMORPHIC`.
+
+`CERTIFIED_NON_ISOMORPHIC` requires:
+
+- complete search for the declared finite problem; or
+- a verified separating invariant/certificate.
+
+The certificate and policy are stored with the result.
+
+## 16. Structural-class membership
+
+After structural search, a separate membership witness maps an immutable/versioned class schema into the instance.
+
+Required fields include:
+
+```text
+class label + schema revision
+instance + factorization revision
 schema node/edge map
-mapping kind
-parameter assignment
+structured parameter assignment
 port/boundary assignment
+rigid/mappable roles
 invariants checked
 extra specialization constraints
 residual
+view/authority policy
 ```
 
-Distinguish:
+A direct `instance -> class` relation remains navigation/hypothesis metadata until this witness verifies.
 
-- **exact instance** — schema/instance match with no unexplained load-bearing residual;
-- **specialization** — class match plus explicit additional constraints, with direction stated;
-- **embedding** — injective structural inclusion without automatically asserting class specialization;
-- **composition** — multiple class witnesses plus gluing/joint-realizability evidence.
+## 17. No post-hoc schema parameters
 
-A direct `instance -> class` relation is only a navigation/hypothesis edge unless this witness exists.
+For an existing class run, schema graph, parameter slots, ports, variance/mapping rules, constraints, and residual policy are frozen before instance scoring.
 
-## 11. Composition witness
+Changing them creates a new schema revision and requires requalification.
+
+For a new class, parameterization must be justified by independent instances or an independently specified construction law and then tested on held-out/adversarial cases.
+
+## 18. Class-class relations
+
+Specialization/factorization/composition/quotient/equivalence between classes requires a schema-to-schema witness using exact schema revisions.
+
+A class-family diagram is not authority without these witnesses.
+
+## 19. Composition witness
 
 For an object classified as a composition of classes, record:
 
 ```text
-component class witnesses
+component schema revisions and verified witnesses
 overlap/gluing map
 shared ports/identities
-port variance/mapping policy
 compatibility constraints
 joint-realizability evidence
 composition residual
 ```
 
-Shared identity alone is not sufficient.
+Shared identity alone is insufficient.
 
-## 12. Alternative-factorization check
+## 20. Alternative-factorization check
 
-Repeat the comparison over all materially distinct qualified exact factorization pairs whose cost is reasonable.
+Repeat comparison across all materially distinct qualified factorization pairs permitted by the frozen policy and budget.
 
-Classify the result:
+Classify the outcome:
 
 ```text
-factorization invariant
+factorization invariant over searched set
 factorization dependent but explained
-unresolved because factorization equivalence is incomplete
+unresolved because factorization equivalence/search is incomplete
 ```
 
-Never select only the factorization pair that yields the expected analogy.
+The result records factorization-set completeness. Never select only the pair producing the desired analogy.
 
-A comparison may use a lossy projection factorization only when the selected disposition explicitly permits projection/quotient and the information loss is reported.
+## 21. Multiple mappings and automorphisms
 
-## 13. Multiple mappings / automorphisms
+If several witnesses differ materially in port assignment, residuals, parameter mapping, or downstream composition, preserve them.
 
-A pair may admit multiple valid maps because of symmetry or several distinct partial correspondences.
+They may be quotient-collapsed only under an explicitly verified automorphism/equivalence showing the distinction irrelevant to the requested comparison.
 
-If different witnesses produce materially different:
+## 22. Target-layer discipline
 
-- boundary/port assignments;
-- schema parameters;
-- residuals;
-- downstream composition possibilities;
+Every result names one target layer:
 
-preserve those witnesses separately.
+```text
+serialized/native representation graph
+construction/schema graph
+generated finite structure
+profile denotation/behavior
+proof/derivation behavior
+```
 
-They may be quotiented only after an explicit automorphism/equivalence argument establishes that the difference is irrelevant to the requested comparison.
+A result at one layer does not automatically imply another.
 
-Do not let traversal order or implementation tie-breaking silently choose the answer.
+A bridge between layers requires a qualified D/E witness.
 
-## 14. Maximal versus maximum common cores
+Mapping opaque leaves into shared slots establishes parametric structural correspondence, not source-theory semantic equivalence unless additional E evidence exists.
 
-Several incomparable maximal common cores may exist.
+## 23. Mandatory adversarial controls
 
-A run may claim a **maximum** only when it states the optimization measure/partial order and establishes maximality under that criterion.
+For every proposed reusable class/comparison method, run at least:
 
-If no justified unique criterion exists, return the materially distinct non-dominated maximal cores rather than choosing one arbitrarily.
-
-## 15. Mandatory adversarial controls
-
-For every proposed reusable class/comparison procedure run:
-
-1. **cross-domain positive** — unrelated vocabulary, same target schema;
-2. **alpha/serialization positive** — local identities/references/order changed;
-3. **near-isomorphic negative** — one load-bearing relation/constraint changed;
+1. **cross-domain positive** — unrelated vocabulary, same target structure;
+2. **alpha/serialization positive** — identities/references/order changed;
+3. **near-isomorphic negative** — one load-bearing constraint changed;
 4. **boundary negative** — identical interior, incompatible ports;
-5. **partial pair** — common core plus distinct residuals/cut relations;
-6. **alternative-factorization pair** — equivalent object through different decompositions;
-7. **misleading-label pair** — class/domain labels swapped/randomized;
-8. **symmetry/automorphism pair** — multiple valid mappings requiring preservation or justified quotient;
-9. **homomorphism trap** — many-to-one structure-preserving map that must not be reported as isomorphism;
-10. **projection trap** — attractive common quotient that loses a load-bearing distinction and therefore must report the loss.
+5. **partial pair** — common core plus distinct residuals;
+6. **alternative-factorization pair** — equivalent source through different decompositions;
+7. **misleading-label pair** — domain/class labels swapped/randomized;
+8. **symmetry/automorphism pair** — multiple candidate mappings;
+9. **namespace-collision pair** — same numeric `^n`, different namespaces;
+10. **policy-leak pair** — a tempting match obtainable only by post-hoc mappability/parameter changes;
+11. **search-negative control** — distinguish certified negative from resource-limited no-witness;
+12. **legacy/current bridge pair** where historical artifacts participate.
 
-A class is not qualified from positive examples alone.
+A reusable cross-domain class is not promoted from one motivating positive example.
 
-## 16. Unblinding / review
+## 24. Circular-evidence audit
 
-After the structural result and all materially distinct witnesses are frozen, reviewers may open:
+Build a dependency graph for each membership/comparison claim.
+
+Reject qualification if the target class/mapping hypothesis is used to justify the decomposition that is then cited as evidence for the target claim.
+
+Already-qualified generic lower libraries are allowed; target membership and registry hints are not.
+
+## 25. Class-registry policy
+
+`STRUCTURAL_CLASS_REGISTRY_003.axh` is navigation/hypothesis metadata only.
+
+It is forbidden as discovery input.
+
+Registry qualification attaches to an exact schema revision and verified witness. Changing a schema revision does not silently preserve qualification.
+
+## 26. Legacy artifact policy
+
+Frozen Draft 0.2–0.8 artifacts remain valid historical evidence under their original decoder.
+
+To participate in current comparison qualification they require either:
+
+- current-semantics rerendering; or
+- an exact verified legacy-to-current bridge recording changed conventions.
+
+Historical reproducibility is not current structural qualification.
+
+## 27. Unblinding / review
+
+After the candidate result and witness/certificate are frozen and independently verified, reviewers may open:
 
 - source-domain names;
 - human glosses;
 - candidate class registry;
 - expected mappings;
-- theorem/domain references;
-- scorer residuals.
+- theorem/domain references.
 
-Review may discover a search/decoder/specification error, but it must not rewrite the frozen result.
+Review may classify an error but must not rewrite the frozen discovery result.
 
 Discrepancy categories include:
 
 ```text
-comparison algorithm error
+comparison-search error
+witness-verification error
 normalization-layer violation
-unrecorded D/E transformation
+policy/adaptive-role leakage
+namespace collision
 hidden label dependence
 missing boundary/port structure
 missing source constraint
-bad decomposition
+bad/inexact decomposition
+recursive-definition defect
 factorization dependence
-class-schema defect
-mapping-kind confusion
-lost automorphism/alternative witness
-false positive isomorphism
-false negative isomorphism
-incorrect core/residual cut
-correct common-core/residual result
+class-schema/version defect
+circular evidence
+false positive correspondence
+false negative/no-witness result
+negative-certificate error
+correct witnessed result
 ```
 
-## 17. Class-registry policy
+## 28. Result quality rule
 
-`STRUCTURAL_CLASS_REGISTRY_003.axh` is navigation/hypothesis metadata.
+A smaller exact witnessed common core is preferable to a larger false correspondence.
 
-It is deliberately forbidden as input to label-blind discovery qualification.
+Unknown is preferable to an unsupported negative.
 
-Current mappings are explicit unqualified hypothesis objects.
+A parameterized structural analogy is preferable to an unsupported claim of semantic equivalence.
 
-A mapping becomes qualified only after a witness produced under this protocol is independently reviewed and associated with it.
+The central question is:
 
-## 18. Result quality
-
-A smaller exact common core is preferred to a larger false correspondence.
-
-The system should expose:
-
-```text
-C
-Delta_A
-Delta_B
-mapping witness(es)
-projection/factorization assumptions
-```
-
-rather than discard residuals or mapping ambiguity to obtain a cleaner label.
-
-The central qualification question is not:
-
-> Did the agent assign the intended class name?
-
-It is:
-
-> Did the agent recover the strongest correct structural relationship under the declared projection, while preserving every residual, boundary, and mapping distinction needed to falsify that relationship?
+> Did the agent recover the strongest justified relationship under the frozen policy, with independently checkable mappings, residuals, boundaries, dependencies, and uncertainty about incomplete search/factorizations left explicit?
