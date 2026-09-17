@@ -1,6 +1,6 @@
 # AxiomeSH Experiment 004 — Results
 
-**Status:** Draft 0.14 corrections frozen; structural-discovery protocols 006 created; 17 of 20 frozen qualification targets now have native/synthetic fixtures or frozen cold prompts; isolated qualification remains pending.
+**Status:** Draft 0.14 corrections frozen; protocols 006 created; all 20 frozen qualification targets now have native/synthetic fixtures and/or frozen cold prompts; isolated qualification remains pending.
 
 ## Current authority
 
@@ -12,21 +12,15 @@
 ../003/STRUCTURAL_CLASS_SCHEMA_CONTRACT_006.md
 ```
 
-Draft 0.14 adds no logical operator or structural class. It closes the final-pass authority gaps and freezes speculative language growth while Experiment 004 attempts to falsify the current representation.
+Draft 0.14 adds no logical operator or structural class. It closes final-pass authority gaps and freezes speculative language growth while Experiment 004 attempts to falsify the current representation.
 
-## Frozen campaign
-
-`EXPERIMENT_004_CORE_DISCOVERY_QUALIFICATION.md` defines 20 targets spanning raw occurrence semantics through corpus-scale structural retrieval.
-
-No new class/core token is permitted merely to make a case pass.
-
-A failing case is classified before repair.
+`EXPERIMENT_004_CORE_DISCOVERY_QUALIFICATION.md` freezes exactly 20 targets. No new class/core token is permitted merely to make a case pass.
 
 ---
 
-## Phase A — raw structural semantics
+## Q004-01 / 04 / 05 / 06 / 07 / 08 — raw structural semantics
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 PHASE_A_CASES_004.axh
@@ -37,7 +31,7 @@ COLD_PHASE_A_PROMPT_004.md
 PHASE_A_AUTHOR_AUDIT_004.md
 ```
 
-Frozen cases:
+Targets:
 
 ```text
 Q004-01  scope occurrence multiplicity
@@ -48,24 +42,15 @@ Q004-07  structural/stable-label namespace collision
 Q004-08  same quantified body / different linked domain-generator
 ```
 
-Author-side fixture checks:
+Author-side fixture/signature review: COMPLETE.
 
-```text
-surface signature closure: PASS
-case selectors: PRESENT
-hidden assertions: FROZEN
-cold prompt: FROZEN
-isolated cold run: PENDING
-post-freeze scorer review: PENDING
-```
-
-Author-side expected distinctions are not qualification evidence.
+Isolated run: PENDING.
 
 ---
 
-## Rewrite-event probes
+## Q004-02 / 03 — rewrite/event semantics
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 PHASE_B_REWRITE_CASES_004.axh
@@ -74,28 +59,58 @@ COLD_PHASE_B_REWRITE_PROMPT_004.md
 PHASE_B_REWRITE_AUTHOR_AUDIT_004.md
 ```
 
-Cases:
+Targets:
 
 ```text
 Q004-02  occurrence/multiset rewrite update
 Q004-03  structurally identical successor / distinct application events
 ```
 
-Author-side checks:
+Author-side fixture review: COMPLETE.
 
-```text
-Q004-02 selected binding unambiguous: YES
-Q004-02 duplicate RHS/pre-existing occurrence pressure: PRESENT
-Q004-03 two reified rule objects: PRESENT
-Q004-03 two selected application-event identities: PRESENT
-isolated cold run: PENDING
-```
+Isolated run: PENDING.
 
 ---
 
-## Pairwise comparison / common-core / automorphism
+## Q004-09 — decomposition coverage versus archival round trip
 
-Constructed artifacts:
+Artifacts:
+
+```text
+Q004_09_DECOMPOSITION_CHEAT_004.axh
+Q004_09_ASSERTIONS_004.json           scorer only
+COLD_Q004_09_PROMPT.md
+```
+
+The fixture contrasts an exposed source-target structural mapping with an empty exposed target whose reconstruction residual carries the entire original source.
+
+The test asks whether lossless recovery can be distinguished from semantic-decomposition coverage.
+
+Isolated run: PENDING.
+
+---
+
+## Q004-10 — independent extraction freeze
+
+Artifacts:
+
+```text
+Q004_10_EXTRACTION_FREEZE_004.axh
+Q004_10_ASSERTIONS_004.json           scorer only
+COLD_Q004_10_PROMPT.md
+```
+
+The pre-pair frozen extractions do not match. A later pair-conditioned exploratory extraction does match.
+
+The qualification test requires the exploratory match to remain exploratory rather than rewriting the frozen blind result.
+
+Isolated run: PENDING.
+
+---
+
+## Q004-11 / 12 / 13 — pairwise comparison/common-core/automorphism
+
+Artifacts:
 
 ```text
 PHASE_C_COMPARISON_CASES_004.axh
@@ -104,23 +119,23 @@ COLD_PHASE_C_PROMPT_004.md
 PHASE_C_AUTHOR_AUDIT_004.md
 ```
 
-Cases:
+Targets:
 
 ```text
-Q004-11  strong versus weak embedding under frozen relation signature
+Q004-11  strong versus weak embedding
 Q004-12  complete common-core / residual / boundary-cut accounting
 Q004-13  multiple automorphism/isomorphism witnesses
 ```
 
 Author-side fixture review: COMPLETE.
 
-Isolated cold run: PENDING.
+Isolated run: PENDING.
 
 ---
 
-## Negative-result and index-view discipline
+## Q004-14 / 15 — negative and index-view discipline
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 PHASE_C_NEGATIVE_INDEX_CASES_004.axh
@@ -129,7 +144,7 @@ COLD_PHASE_C_NEGATIVE_INDEX_PROMPT_004.md
 PHASE_C_NEGATIVE_INDEX_AUTHOR_AUDIT_004.md
 ```
 
-Cases:
+Targets:
 
 ```text
 Q004-14  certified negative versus bounded no-witness
@@ -138,13 +153,38 @@ Q004-15  fingerprint/invariant safety under V0 versus VS
 
 Author-side fixture review: COMPLETE.
 
-Isolated cold run: PENDING.
+Isolated run: PENDING.
 
 ---
 
-## Native policy / witness / result self-representation
+## Q004-16 — class non-vacuity/selectivity
 
-Constructed artifacts:
+Artifacts:
+
+```text
+Q004_16_CLASS_NONVACUITY_004.axh
+Q004_16_ASSERTIONS_004.json           scorer only
+COLD_Q004_16_PROMPT.md
+```
+
+The fixture contrasts:
+
+```text
+1601  arbitrary pass-through slot with no structural constraint
+1602  large structured parameter + reusable two-edge-chain constraint
+```
+
+Two assignments satisfy the constrained pattern and one structurally large near miss does not.
+
+The case tests that parameter size is not the vacuity criterion while pass-through structure is.
+
+Isolated run: PENDING.
+
+---
+
+## Q004-17 — native policy/witness/result self-representation
+
+Artifacts:
 
 ```text
 Q004_17_NATIVE_RECORDS_004.axh
@@ -152,21 +192,15 @@ Q004_17_ASSERTIONS_004.json           scorer only
 COLD_Q004_17_PROMPT.md
 ```
 
-Case:
+The cold decoder must reconstruct raw policy-like, witness-like, and result-like record topology—including mapping/residual scopes—from native structure without authoritative human gloss.
 
-```text
-Q004-17  reconstruct policy/witness/result record topology from native structure without authoritative gloss
-```
-
-Native record topology and hidden scorer assertions are frozen.
-
-Cold reconstruction: PENDING.
+Isolated run: PENDING.
 
 ---
 
-## Source ambiguity
+## Q004-18 — source ambiguity
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 Q004_18_SOURCE_AMBIGUITY_004.axh
@@ -174,21 +208,17 @@ Q004_18_ASSERTIONS_004.json           scorer only
 COLD_Q004_18_PROMPT.md
 ```
 
-Case:
+One represented source has two explicit interpretations. One matches the target; one does not.
 
-```text
-Q004-18  one source object / multiple represented interpretations / conditional structural results
-```
+The source-level result must remain conditional rather than silently choosing the convenient interpretation.
 
-The fixture intentionally contains one interpretation structurally matching the target and another that does not; the protocol forbids silently choosing the convenient reading.
-
-Cold run: PENDING.
+Isolated run: PENDING.
 
 ---
 
-## Novel-class induction
+## Q004-19 — novel-class induction
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 Q004_19_NOVEL_CLASS_004.axh
@@ -196,21 +226,17 @@ Q004_19_ASSERTIONS_004.json           scorer only
 COLD_Q004_19_PROMPT.md
 ```
 
-Case:
+Three positive objects are alpha-renamed directed reconvergent diamonds; a near miss branches to two separate sinks.
 
-```text
-Q004-19  repeated directed-diamond pattern + reconvergence near-miss
-```
+No registry/catalog is permitted to the cold agent. The allowed result is a raw `NEW_CANDIDATE_CLASS` hypothesis/schema only if native common structure supports it; promotion remains blocked on held-out/adversarial evidence.
 
-No registry/catalog is permitted to the cold agent. Expected disposition is a raw new-candidate schema hypothesis only if supported by the native common structure; promotion remains blocked on held-out/adversarial evidence.
-
-Cold run: PENDING.
+Isolated run: PENDING.
 
 ---
 
-## Structural-only versus label-assisted retrieval
+## Q004-20 — structural-only versus label-assisted retrieval
 
-Constructed artifacts:
+Artifacts:
 
 ```text
 Q004_20_STRUCTURE_CORPUS_004.axh
@@ -220,65 +246,76 @@ COLD_Q004_20_STRUCTURE_ONLY_PROMPT.md
 COLD_Q004_20_LABEL_ASSISTED_PROMPT.md
 ```
 
-Case design:
+Frozen corpus design:
 
 ```text
-#2001 and #2002: structurally isomorphic, different assist labels
-#2001 and #2003: same assist label, structurally non-isomorphic
+#2001 and #2002  structurally isomorphic, different assist labels
+#2001 and #2003  same assist label, structurally non-isomorphic
 ```
 
-The structural-only run cannot access the label-assist document.
+The structural-only run cannot access the assist document. The assisted run may use it for candidacy but must verify structurally.
 
 Both runs: PENDING.
 
 ---
 
-## Remaining frozen targets not yet fully rendered
+## Meta/discovery author audit
+
+`PHASE_D_AUTHOR_AUDIT_004.md` reviews Q004-09, Q004-10, and Q004-16..20 for fixture construction errors without claiming cold qualification.
+
+---
+
+## Fixture coverage
 
 ```text
-Q004-09  semantic D round trip vs source-copy/residual cheat
-Q004-10  independent factorization/extraction freeze before pairing
-Q004-16  vacuous class negative + large structured-parameter positive
+frozen targets:                  20
+native/synthetic fixture ready:  20
+hidden scorer assertion ready:   20 targets covered
+cold prompt ready:               20 targets covered across grouped/individual prompts
+author-side fixture audits:      COMPLETE for all constructed groups
+isolated cold runs:              0 accepted
+independent verifier runs:       0 accepted
 ```
 
-These depend most heavily on the native meta-record/self-description surface exercised by Q004-17, so they remain the final fixture-construction group rather than being approximated with sidecar-only semantics.
+Author-side expected distinctions are not qualification evidence.
 
 ---
 
 ## Qualification claims currently allowed
 
-Only author-side construction claims are allowed:
+Only construction/status claims are allowed:
 
-- Draft 0.14 correction artifact exists and is frozen for the campaign;
-- protocols 006 encode the current authority requirements;
-- 17/20 targets have frozen native/synthetic fixtures or prompt protocols;
-- scorer assertions are separated from cold inputs where created;
+- Draft 0.14 correction artifact exists and is frozen;
+- discovery/comparison/class protocols 006 encode the current authority;
+- all 20 synthetic targets have frozen fixtures/assertions/prompts;
+- scorer material is separated from cold inputs;
 - no isolated decoder/verifier result has yet been accepted.
 
 ## Claims not yet allowed
 
 Experiment 004 does **not** yet establish:
 
-- that Draft 0.13/0.14 raw occurrence semantics are independently reconstructable;
-- that rewrite multiset/event semantics qualify;
-- that namespace/reference/variable rules are unambiguous to a fresh decoder;
-- that native policy/witness self-representation succeeds;
-- that common-core/embedding/index distinctions are reconstructed correctly by isolated agents;
-- that source ambiguity remains preserved in practice;
+- that Draft 0.13/0.14 semantics are independently reconstructable;
+- that rewrite/event/reference/namespace/quantifier rules qualify;
+- that semantic-decomposition and extraction-freeze distinctions are recovered cold;
+- that common-core/embedding/index distinctions are reconstructed correctly;
+- that class non-vacuity or native policy/witness self-representation succeeds;
+- that source ambiguity is preserved by an isolated decoder;
 - that novel-class induction behaves correctly;
 - that any candidate structural class is qualified;
-- that structural-only retrieval achieves useful recall at corpus scale;
+- that structural-only retrieval achieves useful corpus-scale recall;
 - that the current specification requires no further correction.
 
 ## Next execution seam
 
 ```text
-construct Q004-09 / Q004-10 / Q004-16 using the frozen native-record discipline
--> freeze their hidden scorer assertions/prompts
--> execute isolated cold runs in fresh contexts
--> freeze outputs
--> unblind and classify discrepancies
--> only then consider any spec mutation
+all 20 fixtures frozen
+-> execute isolated cold runs in fresh contexts with exact permitted-input lists
+-> freeze each output before opening assertions
+-> unblind scorer assertions
+-> classify every discrepancy before repair
+-> independently verify positive mappings/certificates
+-> only then consider any specification mutation
 ```
 
 If a disconnect occurs, re-fetch the live branch and inspect every commit after the last known checkpoint before continuing.
