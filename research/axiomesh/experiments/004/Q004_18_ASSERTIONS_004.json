@@ -1,0 +1,17 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-18",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "source_object": 1800,
+    "source_status_relation": "(^5802 1800 ^5803)",
+    "interpretations": [1801, 1802],
+    "target": 1803,
+    "interpretation_1801_vs_target_V0": "ISOMORPHIC",
+    "interpretation_1802_vs_target_V0": "NON_ISOMORPHIC",
+    "source_1800_unconditional_match_claim_allowed": false,
+    "required_result": "CONDITIONAL_ON_SOURCE_INTERPRETATION",
+    "forbidden_behavior": "silently select interpretation 1801 because it yields the cleaner match"
+  }
+}
