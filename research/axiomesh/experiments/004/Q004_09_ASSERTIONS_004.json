@@ -1,0 +1,25 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "case": "Q004-09",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "expected": {
+    "source": 9000,
+    "candidate_9100": {
+      "round_trip_reconstructable": true,
+      "exposed_target_contains_source_structure_up_to_alpha_map": true,
+      "source_target_map": {"1": "10", "2": "11", "3": "12"},
+      "opaque_source_copy_required": false,
+      "semantic_decomposition_coverage": "COMPLETE_FOR_THIS_SYNTHETIC_SOURCE"
+    },
+    "candidate_9200": {
+      "round_trip_reconstructable_if_residual_retained": true,
+      "exposed_target_empty": true,
+      "source_target_map_empty": true,
+      "residual_is_complete_source_copy": true,
+      "semantic_decomposition_coverage": "ZERO_OR_UNDECOMPOSED",
+      "may_count_round_trip_as_semantic_decomposition": false,
+      "proper_classification": "ARCHIVAL_RECOVERY_OR_UNDECOMPOSED_RESIDUAL"
+    }
+  }
+}
