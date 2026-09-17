@@ -1,0 +1,92 @@
+{
+  "experiment": "AxiomeSH Experiment 004",
+  "phase": "A",
+  "scorer_only": true,
+  "cold_decoder_access": false,
+  "authority": [
+    "CORE_SPEC_DRAFT_0_13_CONSOLIDATED_CANDIDATE.md",
+    "CORE_SPEC_DRAFT_0_14_CANDIDATE.md"
+  ],
+  "cases": {
+    "Q004-01": {
+      "selector": "case object with (^4000 #1)",
+      "expected": {
+        "relation_under_V0": "NON_ISOMORPHIC",
+        "left_direct_member_occurrences": 2,
+        "right_direct_member_occurrences": 1,
+        "duplicate_member_occurrences_semantic": true
+      },
+      "load_bearing_reason": "Draft 0.13 occurrence-preserving scope semantics distinguish two isomorphic member occurrences from one."
+    },
+    "Q004-04": {
+      "selector": "case object with (^4000 #4)",
+      "expected": {
+        "relation_under_V0": "NON_ISOMORPHIC",
+        "left_contains_nested_scope_boundary": true,
+        "right_corresponding_members_are_flat": true,
+        "N0_or_N1_may_flatten": false
+      },
+      "load_bearing_reason": "Scope nesting/boundary structure is preserved by structural comparison."
+    },
+    "Q004-05": {
+      "selector": "case object with (^4000 #5)",
+      "subcases": {
+        "1": {
+          "expected_pattern_match": true,
+          "expected_binding": {"?0": "60", "?1": "60"},
+          "reason": "Distinct rewrite-pattern variables may alias by default."
+        },
+        "2": {
+          "expected_pattern_match": false,
+          "reason": "Repeated occurrence of the same variable requires one binding; 60 and 61 cannot both bind ?0."
+        },
+        "3": {
+          "expected_qualification": "INVALID_UNOWNED_OR_UNBOUND_NAC_VARIABLE",
+          "expected_pattern_match": null,
+          "reason": "?1 occurs only inside the NAC and is neither positively bound nor explicitly owned by an allowed matching profile."
+        },
+        "4": {
+          "expected_pattern_match": true,
+          "expected_binding": {"?0": "60"},
+          "reason": "?0 is positively bound and the target scope contains no matching (51 60) occurrence."
+        }
+      }
+    },
+    "Q004-06": {
+      "selector": "case object with (^4000 #6)",
+      "expected": {
+        "reference_binding_semantic_after_N0": false,
+        "left_occurrences_after_resolution": 2,
+        "left_occurrences_share_structural_identities": true,
+        "left_vs_right_relation_under_V0": "ISOMORPHIC",
+        "left_vs_extra_relation_under_V0": "NON_ISOMORPHIC"
+      },
+      "expected_left_right_alpha_map": {"70": "80", "71": "81"},
+      "reason": "Reference resolution preserves sharing and use-site occurrence multiplicity while reference spelling is non-semantic."
+    },
+    "Q004-07": {
+      "selector": "independent top-level bundles Q004_07_NAMESPACE_A.axh and Q004_07_NAMESPACE_B.axh",
+      "expected": {
+        "bare_1_same_cross_bundle_object": false,
+        "numeric_^7000_same_cross_bundle_semantic_symbol": false,
+        "relation_under_V0": "NON_ISOMORPHIC",
+        "relation_under_VS_with_explicit_^7000_A_to_^7000_B_bijection": "ISOMORPHIC"
+      },
+      "expected_VS_local_alpha_map": {"1_A": "1_B", "2_A": "2_B"},
+      "reason": "Structural and stable semantic identities are namespace-qualified; mapped-signature comparison can explicitly relate independent labels without mutating either source."
+    },
+    "Q004-08": {
+      "selector": "case object with (^4000 #8)",
+      "expected": {
+        "compact_quantifier_kind_same": true,
+        "quantified_body_shape_same": true,
+        "associated_domain_generator_marker_mappable": true,
+        "left_domain_member_occurrences": 1,
+        "right_domain_member_occurrences": 2,
+        "complete_constructions_relation_under_V0": "NON_ISOMORPHIC",
+        "binder_body_alone_sufficient_for_semantic_interchangeability": false
+      },
+      "reason": "Quantifier kind/body do not erase load-bearing domain/generator structure."
+    }
+  }
+}
