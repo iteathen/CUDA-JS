@@ -1,24 +1,26 @@
 # Experiment 003 — Proof Execution Protocol
 
 **Scope:** E3 proof-profile completeness → E4 proof execution → E5 proof review  
-**Current spec:** `../../CORE_SPEC_DRAFT_0_10_CANDIDATE.md`
+**Current spec:** `../../CORE_SPEC_DRAFT_0_12_CANDIDATE.md`
 
 ## Principle
 
 A proof benchmark is not qualified by reconstructing its statement, by naming a familiar proof rule, or by failing to find a counterexample.
 
-Before E3/E4, all applicable structural gates E1P–E1T must pass for the semantic foundations, factorization bridges, class relations, or comparison results on which the proof bundle depends.
+Before E3/E4, every applicable E1 structural/discovery gate defined by the current specification must pass for semantic foundations, factorization bridges, class relations, retrieval/extraction paths, or comparison results on which the proof bundle depends. This includes Draft 0.12 identity, coverage, index, and isolation gates when they are relevant.
 
 For each benchmark, execution input must be a self-contained native dependency bundle containing at least:
 
 ```text
 surface signature + stable-symbol namespace
+structural identity/bundle namespace contract
 native dependency closure
 benchmark statement/premises
 logic/profile axioms and inference rules
 problem-specific definitions/instances
 explicit quantifier domains/generators where used
 qualified D/E dependencies and exact revisions
+legacy-current bridge revisions if used
 ```
 
 A result depending on unstated rules from model priors or hidden host semantics is not a native proof result.
@@ -29,9 +31,7 @@ Before proof execution, audit the benchmark module for all authority needed by i
 
 ### Classical propositional / FOL
 
-Make classical rules, quantifier rules, domain assumptions, equality substitution/congruence, and any nonempty-domain requirement explicit.
-
-Quantifier surfaces alone do not supply their domains.
+Make classical rules, quantifier rules, domain assumptions, equality substitution/congruence, and any nonempty-domain requirement explicit. Quantifier surfaces alone do not supply their domains.
 
 ### SAT / parity hardness
 
@@ -39,7 +39,7 @@ Freeze concrete instances and the proof system being measured. Resolution, exten
 
 ### Epistemic/modal
 
-Supply accessibility/model structure, frame constraints, recursive satisfaction, and the intended modal/DEL rules. Public announcement is model restriction/update, not ordinary implication.
+Supply accessibility/model structure, frame constraints, recursive satisfaction, and intended modal/DEL rules. Public announcement is model restriction/update, not ordinary implication.
 
 ### Deontic
 
@@ -63,13 +63,14 @@ Supply function/application model, abstraction/substitution authority, type/sort
 
 ## Dependency revision rule
 
-A proof object records the exact revisions of:
+A proof object records exact revisions of:
 
 ```text
 source statement
 profile/foundation modules
 class schemas if used
 D/E definitions/equivalences
+namespace/bundle contract
 legacy-to-current bridges if any
 ```
 
@@ -77,7 +78,7 @@ Changing a dependency does not silently preserve proof qualification.
 
 ## E4 — execution dispositions
 
-Return one primary disposition from a set that distinguishes verified mathematical/logical results from search failure:
+Return one primary disposition:
 
 ```text
 PROVED
@@ -99,19 +100,15 @@ RESOURCE_LIMIT
 
 ### Countermodel / disproof
 
-`COUNTERMODEL / DISPROVED` requires an explicit model/structure satisfying the profile/premises and falsifying the goal, with independent model validation.
+`COUNTERMODEL / DISPROVED` requires an explicit model/structure satisfying the profile/premises and falsifying the goal, with independent validation.
 
 ### Consistency
 
-`CONSISTENT_CERTIFIED_UNDER_PROFILE` requires a valid model or another sound consistency certificate for the represented theory/profile.
-
-Failure to derive contradiction is only `NO_PROOF_FOUND`/`UNKNOWN`, not a consistency proof.
+`CONSISTENT_CERTIFIED_UNDER_PROFILE` requires a valid model or another sound consistency certificate. Failure to derive contradiction is only `NO_PROOF_FOUND`/`UNKNOWN`.
 
 ### Non-derivability
 
-`NON_DERIVABLE_CERTIFIED_UNDER_PROFILE` requires a sound countermodel/semantic completeness bridge, a complete decision procedure for the frozen finite problem, or another independently verified non-derivability certificate.
-
-Failure to find a proof is `NO_PROOF_FOUND`, not non-derivability.
+`NON_DERIVABLE_CERTIFIED_UNDER_PROFILE` requires a sound countermodel/semantic completeness bridge, a complete decision procedure for the frozen finite problem, or another independently verified certificate. Failure to find a proof is `NO_PROOF_FOUND`.
 
 ### Parameterized families
 
@@ -119,34 +116,29 @@ Report every frozen instance separately and state instance size/proof system.
 
 ## E5 — independent proof review
 
-A fresh reviewer receives:
-
-- frozen source/profile/dependency revisions;
-- the agent result and proof/countermodel/certificate;
-- the current verification protocol;
-- scorer/reference theorem status only after the candidate result is frozen where blind review is intended.
+A fresh reviewer receives frozen source/profile/dependency revisions plus the proof/countermodel/certificate and current verification protocol. Scorer/reference theorem status is withheld until result freeze where blind review is intended.
 
 The reviewer checks at least:
 
-1. every premise/axiom/dependency used is present at the recorded revision;
+1. every premise/axiom/dependency exists at the recorded revision;
 2. every inference step instantiates an admissible native rule or verified derived rule;
 3. substitutions respect lexical ownership and capture avoidance;
-4. quantified steps use the correct explicit domain/generator and guards;
+4. quantified steps use the correct explicit domain/generator/guards;
 5. equality rewriting uses the correct equality notion/profile;
-6. modal/temporal/deontic/spatial rules use the selected semantic model/profile;
-7. no classical rule leaks into an intuitionistic proof unless explicitly admitted;
-8. higher-order application/abstraction follows the represented function/binding rules;
+6. modal/temporal/deontic/spatial rules use the selected model/profile;
+7. no classical rule leaks into intuitionistic proof unless admitted;
+8. higher-order application/abstraction follows represented function/binding rules;
 9. no source caveat or missing premise was silently repaired;
 10. the conclusion matches the native goal exactly;
-11. any class/factorization bridge used has a verified witness at the recorded revision;
+11. any class/factorization bridge has a verified witness at the recorded revision;
 12. negative/consistency claims have the required certificate rather than merely exhausted effort;
-13. target-layer conclusions are not promoted beyond what the proof/certificate establishes.
+13. target-layer conclusions are not promoted beyond what the certificate establishes;
+14. namespace/identity assumptions are preserved;
+15. excluded archival/scorer material was not used as proof/discovery authority where isolation was required.
 
 ## Proof-object versus surface labels
 
-A label such as `derivable`, `theorem`, `consistent`, or a rule name may remain as a retrieval/construction handle.
-
-It is not proof authority by itself.
+Labels such as `derivable`, `theorem`, `consistent`, or a rule name may remain retrieval/construction handles. They are not proof authority by themselves.
 
 The proof/certificate must expand to native dependency/rule/model structure sufficient for independent checking.
 
@@ -165,8 +157,9 @@ Record at minimum:
 - retries/search branches when observable;
 - search completeness status;
 - representation/profile ambiguities;
-- whether human gloss was required for a load-bearing operation;
-- whether any current-semantics bridge from a legacy artifact was required.
+- human-gloss dependence, if any;
+- legacy-current bridge use, if any;
+- namespace/identity bridge use, if any.
 
 For hardness families also record proof system and concrete instance size.
 
@@ -181,10 +174,10 @@ Still required include:
 - completed/qualified modal/DEL foundations;
 - selected deontic profile;
 - qualified LTL/CTL proof semantics;
-- concrete separation/program semantics including swap/locality where used;
-- independently qualified classical/intuitionistic proof profiles;
+- concrete separation/program semantics including swap/locality;
+- independently qualified classical/intuitionistic profiles;
 - HOL/application/abstraction/type rules;
 - well-founded induction authority;
 - concrete Church–Rosser reduction theory.
 
-These should be built by semantic ownership and primitive construction, not by introducing one opaque universal prover or treating familiar proof-system names as authority.
+These should be built by semantic ownership and primitive construction, not by introducing an opaque universal prover or treating familiar proof-system names as authority.
