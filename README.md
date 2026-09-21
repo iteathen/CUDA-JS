@@ -4,6 +4,12 @@ CUDA-JS is an experimental Node.js runtime and toolchain for running GPU work th
 
 **Package:** `cuda-js@0.1.0-alpha.21`. **Publication:** Not published to npm. **Production support:** none; public alpha testing only. Native evidence exists for specific Windows x64 profiles. Native Linux CUDA remains unqualified.
 
+## Evidence and external grounding
+
+Start with [EVIDENCE.md](EVIDENCE.md), the machine-readable [claim registry](evidence/claims.json), and the [external-evidence index](evidence/external/README.md).
+
+The current evidence distinguishes repository-controlled portable qualification from exact-profile hardware measurements and external source grounding. In particular, the committed CUDA 13.3 provenance was independently rechecked against the recorded official NVIDIA package: the package, `cuda.h`, `cudaTypedefs.h`, and package license hashes all matched exactly. That is a **REFERENCE-GROUNDED source-identity claim only**; it does not establish runtime correctness, Linux GPU qualification, performance, or third-party reproduction of CUDA-JS execution.
+
 ## Why CUDA-JS
 
 - **No compiled addon.** No `node-gyp`, no prebuilt binaries pinned to a Node module ABI, and no CUDA Toolkit required just to install the package. CUDA ABI facts are generated from pinned CUDA headers into normalized schemas/products rather than hand-typed one function at a time.
