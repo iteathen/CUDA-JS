@@ -11,10 +11,10 @@
       "revision": "main",
       "falsifier": "Maintained portable/package/frontend checks fail.",
       "evidence": [
-        "README.md",
-        "conformance",
-        "scripts",
-        "tests"
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/README.md",
+        "https://github.com/iteathen/CUDA-JS/tree/main/conformance",
+        "https://github.com/iteathen/CUDA-JS/tree/main/scripts",
+        "https://github.com/iteathen/CUDA-JS/tree/main/tests"
       ],
       "limitations": [
         "Does not establish native CUDA support or performance."
@@ -30,9 +30,9 @@
       "revision": "evidence run source revision 8029352fe877820fa746df833d6343bb8a617bba",
       "falsifier": "Any reacquired official package/input hash differs from the committed provenance record.",
       "evidence": [
-        "schemas/cuda-13.3/provenance.json",
-        "evidence/external/NVIDIA_CUDA_13_3.md",
-        "evidence/external/results/2026-09-20-nvidia-cuda-13.3-provenance.summary.json"
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/schemas/cuda-13.3/provenance.json",
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/evidence/external/NVIDIA_CUDA_13_3.md",
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/evidence/external/results/2026-09-20-nvidia-cuda-13.3-provenance.summary.json"
       ],
       "limitations": [
         "Establishes exact external source identity/provenance only.",
@@ -50,8 +50,8 @@
       "revision": "profile-specific",
       "falsifier": "The recorded command cannot reproduce the claimed native behavior on the stated revision/environment or provenance is incomplete.",
       "evidence": [
-        "docs/HARDWARE_SUPPORT.md",
-        "conformance/hardware/README.md"
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/docs/HARDWARE_SUPPORT.md",
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/conformance/hardware/README.md"
       ],
       "limitations": [
         "Does not generalize to Linux, other Node/V8 versions, other hardware, or broad performance claims."
@@ -67,8 +67,8 @@
       "revision": "main",
       "falsifier": "Absence or failure of a complete native Linux qualification rejects the claim.",
       "evidence": [
-        "README.md",
-        "docs/HARDWARE_SUPPORT.md"
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/README.md",
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/docs/HARDWARE_SUPPORT.md"
       ],
       "limitations": [
         "Linux implementation/readiness is not native qualification."
@@ -84,7 +84,7 @@
       "revision": null,
       "falsifier": "An attempted reproduction fails under the stated supported environment or no independent packet exists.",
       "evidence": [
-        "evidence/external/README.md"
+        "https://raw.githubusercontent.com/iteathen/CUDA-JS/main/evidence/external/README.md"
       ],
       "limitations": [
         "Project-controlled runs and model review are not external reproduction."
