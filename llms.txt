@@ -10,6 +10,13 @@
 - [Agent access](https://raw.githubusercontent.com/iteathen/CUDA-JS/main/.agent/ACCESS.md): anonymous access routes and precedence notes.
 - [LICENSE](https://raw.githubusercontent.com/iteathen/CUDA-JS/main/LICENSE): license terms.
 
+## Evidence status
+
+- Evidence registry: https://raw.githubusercontent.com/iteathen/CUDA-JS/main/EVIDENCE.md
+- Machine claims: https://raw.githubusercontent.com/iteathen/CUDA-JS/main/evidence/claims.json
+- External source grounding: the recorded official NVIDIA CUDA 13.3 package, cuda.h, cudaTypedefs.h, and package-license SHA-256 values were reacquired and all matched exactly.
+- Scope: source/provenance identity only; this does not establish runtime correctness, Linux GPU qualification, performance, or third-party reproduction of CUDA-JS execution.
+
 ## Anonymous source access
 
 - Repository: https://github.com/iteathen/CUDA-JS
