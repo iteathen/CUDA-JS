@@ -22,6 +22,26 @@
       "external_reproduction": false
     },
     {
+      "id": "CJS-PROV-001",
+      "claim": "The exact CUDA 13.3 NVIDIA package, cuda.h, cudaTypedefs.h, and package license hashes recorded in schemas/cuda-13.3/provenance.json match bytes reacquired from the recorded official NVIDIA package URL.",
+      "evidence_class": "REFERENCE-GROUNDED",
+      "status": "PASS: package and all three recorded input hashes matched",
+      "oracle": "Official NVIDIA CUDA repository package at the exact URL recorded by schemas/cuda-13.3/provenance.json",
+      "revision": "evidence run source revision 8029352fe877820fa746df833d6343bb8a617bba",
+      "falsifier": "Any reacquired official package/input hash differs from the committed provenance record.",
+      "evidence": [
+        "schemas/cuda-13.3/provenance.json",
+        "evidence/external/NVIDIA_CUDA_13_3.md",
+        "evidence/external/results/2026-09-20-nvidia-cuda-13.3-provenance.summary.json"
+      ],
+      "limitations": [
+        "Establishes exact external source identity/provenance only.",
+        "Does not establish ABI semantic completeness, generated-product correctness, CUDA runtime behavior, GPU support, or performance.",
+        "The one-off verification workflow/harness was removed before merge to preserve CUDA-JS repository-control rules."
+      ],
+      "external_reproduction": false
+    },
+    {
       "id": "CJS-WIN-001",
       "claim": "Exact recorded Windows x64 profiles demonstrate only the native behaviors recorded for those exact CUDA-JS revisions and physical environments.",
       "evidence_class": "HARDWARE-MEASURED",
