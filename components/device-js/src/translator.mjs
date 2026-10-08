@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { CONTINUATION_EXECUTION_PROFILE, CONTINUATION_HELPER, CONTINUATION_SUFFIX, continuationFunctions, continuationPreludeLines } from './continuation-profile.mjs';
 
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY, inspectCudaTarget } from '../../cuda-target/index.mjs';
@@ -584,6 +585,11 @@ class FunctionEmitter {
       return { code: `static_cast<unsigned int>(${indexHelpers[path]})`, type: parseType('u32') };
     }
 
+    if (path === CONTINUATION_HELPER) {
+      if (args.length !== 0 || this.fn.kind !== 'kernel' || this.loopDepth !== 0) fail('DEVICE_JS_CONTINUATION_INVALID', 'Tail continuation is kernel-only, zero-argument and outside loops.', node);
+      return { code: 'djs_tail_self()', type: parseType('void', { allowVoid: true }) };
+    }
+
     if (path === 'gpu.atomic.add' || path === 'gpu.atomic.cas') {
       const expected = path.endsWith('.add') ? 3 : 4;
       if (args.length !== expected) fail('DEVICE_JS_HELPER_ARGUMENTS', `${path} has an invalid argument count.`, node);
@@ -873,7 +879,7 @@ function rejectRecursion(callsByFunction) {
   for (const name of [...callsByFunction.keys()].sort()) visit(name, []);
 }
 
-function freezeFunctionPublic(fn, generatedName) {
+function freezeFunctionPublic(fn, generatedName, continuation = false) {
   return Object.freeze({
     name: fn.name,
     kind: fn.kind,
@@ -882,6 +888,7 @@ function freezeFunctionPublic(fn, generatedName) {
     ...(fn.kind === 'kernel' ? {
       functionName: generatedName,
       launchParameters: Object.freeze(fn.parameters.map((parameter) => Object.freeze({ kind: abiKind(parameter.type) }))),
+      ...(continuation ? { executionProfile: CONTINUATION_EXECUTION_PROFILE } : {}),
     } : {}),
   });
 }
@@ -907,9 +914,14 @@ function translateDeviceUnit(request, mode) {
   const imports = mode === 'program' ? normalizeImports(request.imports ?? [], functions) : Object.freeze([]);
   const exports = mode === 'library' ? normalizeExports(request.exports, functions) : Object.freeze([]);
   const ast = parseSource(request.source);
+  const continuation = continuationFunctions(ast, functions);
   const requirements = inspectUnitRequirements(ast, [...functions, ...imports]);
-  const compile = finalizeCompileProfile(normalizeCompile(request.compile ?? {}), requirements, Object.hasOwn(request.compile ?? {}, 'headerProfile'));
-  const contract = withWarpContract(selectedContract(requirements), requirements.usesWarp);
+  let compile = finalizeCompileProfile(normalizeCompile(request.compile ?? {}), requirements, Object.hasOwn(request.compile ?? {}, 'headerProfile'));
+  if (continuation.size) {
+    if (Object.hasOwn(request.compile ?? {}, 'headerProfile') && compile.headerProfile !== 'cuda-device') throw deviceJsError('DEVICE_JS_CONTINUATION_PROFILE_REQUIRED', 'Tail continuation requires the trusted cuda-device header profile.');
+    compile = Object.freeze({ ...compile, headerProfile: 'cuda-device', relocatableDeviceCode: true });
+  }
+  const contract = withWarpContract(selectedContract(requirements), requirements.usesWarp) + (continuation.size ? CONTINUATION_SUFFIX : '');
   const identity = programIdentity(request.source, functions, compile, contract);
   const sourceFunctions = matchSourceFunctions(ast, functions);
   const functionMap = new Map([...functions, ...imports].map((fn) => [fn.name, fn]));
@@ -939,14 +951,15 @@ function translateDeviceUnit(request, mode) {
     ...(requirements.usesDenseNumeric ? denseNumericPreludeLines() : []),
     ...(requirements.usesWarp ? warpPreludeLines() : []),
     ...(usesScopedAtomic ? ['#include <cuda/atomic>', ''] : []),
+    ...(continuation.size ? continuationPreludeLines() : []),
     ...prototypes,
     ...(prototypes.length ? [''] : []),
     ...definitions.flatMap((definition, index) => index === definitions.length - 1 ? [definition] : [definition, '']),
     '',
   ].join('\n');
 
-  const publicFunctions = Object.freeze(functions.map((fn) => freezeFunctionPublic(fn, generatedNames.get(fn.name))));
-  const kernels = Object.freeze(publicFunctions.filter((fn) => fn.kind === 'kernel').map((fn) => Object.freeze({ name: fn.name, functionName: fn.functionName, parameters: fn.launchParameters })));
+  const publicFunctions = Object.freeze(functions.map((fn) => freezeFunctionPublic(fn, generatedNames.get(fn.name), continuation.has(fn.name))));
+  const kernels = Object.freeze(publicFunctions.filter((fn) => fn.kind === 'kernel').map((fn) => Object.freeze({ name: fn.name, functionName: fn.functionName, parameters: fn.launchParameters, ...(fn.executionProfile ? { executionProfile: fn.executionProfile } : {}) })));
   const publicImports = Object.freeze(imports.map((entry) => Object.freeze({
     name: entry.name,
     symbol: entry.symbol,

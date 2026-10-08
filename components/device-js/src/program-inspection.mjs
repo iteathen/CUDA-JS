@@ -2,6 +2,7 @@ import { parse } from 'acorn';
 import { WARP_HELPERS } from './warp-profile.mjs';
 
 const PUBLIC_PROFILE_HELPERS = new Set([
+  'gpu.execution.tailSelf',
   ...WARP_HELPERS,
   'gpu.thread.x',
   'gpu.thread.y',

@@ -15,6 +15,7 @@ const BASE_OPERATIONS = new Set([
   'execution.function.get', 'execution.function.status', 'execution.function.release',
   'execution.submit', 'execution.operation.status', 'execution.operation.release', 'execution.operation.timeout',
   'execution.prepared.create', 'execution.prepared.status', 'execution.prepared.submit', 'execution.prepared.release',
+  'execution.continuation.submit',
   'library.cublaslt.open', 'library.cublaslt.status', 'library.cublaslt.release',
   'library.cublaslt.plan.create', 'library.cublaslt.plan.status', 'library.cublaslt.plan.submit', 'library.cublaslt.plan.release',
 ]);
@@ -109,12 +110,13 @@ function preparedNodes(value, maximumArguments) {
   });
 }
 
-function preparedBindings(value) {
+function preparedBindings(value, allowMailboxes = false) {
   if (!Array.isArray(value) || value.length > PREPARED_OPERATION_DAG_LIMITS.bindings) return false;
   const names = new Set();
   return value.every((entry) => {
     if (!plainObject(entry) || !identifier(entry.name) || names.has(entry.name)) return false;
     names.add(entry.name);
+    if (allowMailboxes && entry.kind === 'publication-mailbox') return exactFields(entry, ['name', 'kind', 'mailbox', 'generation', 'lane']) && isResourceToken(entry.mailbox) && positiveSafeInteger(entry.generation) && identifier(entry.lane);
     if (entry.kind === 'device-memory') return exactFields(entry, ['name', 'kind', 'memory', 'byteOffset']) && isResourceToken(entry.memory) && nonnegativeSafeInteger(entry.byteOffset);
     if (entry.kind === 'device-view') return exactFields(entry, ['name', 'kind', 'view']) && isResourceToken(entry.view);
     return exactFields(entry, ['name', 'kind', 'value']) && scalarArgument({ kind: entry.kind, value: entry.value });
@@ -194,7 +196,7 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
     if (!tokenPayload(message.payload)) throw validationError('DRIVER_EXECUTION_TOKEN', 'Execution resource operation requires one exact token.', {}, message.requestId);
   } else if (message.operation === 'execution.function.get') {
     const payload = message.payload;
-    if (!plainObject(payload) || !exactFields(payload, ['moduleToken', 'name', 'parameters']) || !isResourceToken(payload.moduleToken)
+    if (!plainObject(payload) || !(exactFields(payload, ['moduleToken', 'name', 'parameters']) || (exactFields(payload, ['moduleToken', 'name', 'parameters', 'executionProfile']) && ['ordinary', 'device-continuation-v1'].includes(payload.executionProfile))) || !isResourceToken(payload.moduleToken)
         || typeof payload.name !== 'string' || !parameterSchema(payload.parameters, executionPolicy.maxArguments)) throw validationError('DRIVER_FUNCTION_OPTIONS', 'Function lookup payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.submit') {
     const payload = message.payload;
@@ -206,6 +208,10 @@ export function validateRequest(message, { testHooks = false, memoryPolicy = { m
   } else if (message.operation === 'execution.prepared.create') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['nodes']) || !preparedNodes(payload.nodes, executionPolicy.maxArguments)) throw validationError('DRIVER_PREPARED_OPTIONS', 'Prepared DAG creation payload is invalid.', {}, message.requestId);
+  } else if (message.operation === 'execution.continuation.submit') {
+    const payload = message.payload;
+    if (!plainObject(payload) || !exactFields(payload, ['nodes', 'bindings', 'continuationNode', 'after']) || !preparedNodes(payload.nodes, executionPolicy.maxArguments)
+        || !preparedBindings(payload.bindings, true) || !optionalOperationToken(payload.after) || typeof payload.continuationNode !== 'string' || !/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(payload.continuationNode)) throw validationError('DRIVER_CONTINUATION_OPTIONS', 'Device continuation payload is invalid.', {}, message.requestId);
   } else if (message.operation === 'execution.prepared.submit') {
     const payload = message.payload;
     if (!plainObject(payload) || !exactFields(payload, ['token', 'bindings', 'after']) || !isResourceToken(payload.token)

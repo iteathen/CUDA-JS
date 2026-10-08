@@ -48,6 +48,7 @@ const MAILBOX_ATOMIC_HELPERS = new Set([
 ]);
 
 const VOID_HELPERS = new Set([
+  'gpu.execution.tailSelf',
   'gpu.barrier.block',
   'gpu.fence.device',
   'gpu.atomic.storeRelaxedDevice',

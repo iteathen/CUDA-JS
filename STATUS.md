@@ -7,7 +7,7 @@
 ## Current package and support truth
 
 ```text
-package:                     cuda-js@0.1.0-alpha.21
+package:                     cuda-js@0.1.0-alpha.22
 public API schema:           1
 host source model:           JavaScript/ESM, Worker-owned Node FFI
 exact Node evidence baseline: Node 26.7.0
@@ -23,6 +23,16 @@ physical pair #32:          passed, reviewed and owner-approved; exact Windows p
 Recorded design-governance provenance for this status transition remains protected `7e9221e71bd618bdc404299c3b707ca1ced37c6b`, tree `22c3e9eca3163feac1167942807ec383ed457149`. That tuple is provenance only, not a substitute for live read-back.
 
 ## Stable ownership
+
+### Owner-authorized device continuation candidate
+
+The alpha.22 branch candidate adds the [device continuation child](docs/specs/SPEC-0020-device-continuation-addendum.md)
+under the explicit project-owner instruction. It retains the ordinary prepared
+DAG baseline, one operation lifetime and private DriverActor graph ownership.
+Finite Windows counter/dependent-body, mapped mailbox stop/publication and
+capacity-two device observation evidence exist for the local candidate. Independent
+review, installed-package source freeze and bounded longer-duration evidence are
+still required; no protected integration or support promotion is claimed.
 
 CUDA-JS owns consumer-neutral Device-JS, compiler, artifact, module/function, runtime, provider, memory/resource, operation/publication, lifecycle and compatibility mechanisms. CUDA-JS-Tensor owns generic Tensor mathematics/planning/item/workspace semantics. CUDA-MCGS owns evaluator/search/request/batch/scatter/publication/search-lifecycle semantics. Product/model/checkpoint/domain meaning remains downstream.
 

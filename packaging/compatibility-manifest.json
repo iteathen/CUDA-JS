@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "cuda-js",
-    "version": "0.1.0-alpha.21",
+    "version": "0.1.0-alpha.22",
     "format": "esm",
     "nativeAddon": false,
     "registryPublication": "not-yet-released",
@@ -64,6 +64,7 @@
     "asyncTransfers": "opt-in-capacity-two-internal-pinned-staging-contiguous-h2d-d2h-d2d",
     "publicationMailboxes": "private-mapped-named-u32-one-operation-lease-system-acquire-release",
     "preparedOperationDags": "bounded-kernel-cublaslt-f32-dag-immutable-bindings-derived-library-access-single-stream-semantic-replay",
+    "deviceContinuationCandidate": "kernel-only-finite-dag-final-1x1-controller-device-self-tail-opaque-mailboxes-one-operation-unqualified-v1",
     "preparedOperationDagLimits": {
       "nodes": 32,
       "edges": 64,

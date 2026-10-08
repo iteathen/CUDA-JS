@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "authority": "SPEC-0020-device-continuation-addendum implementation candidate",
+  "reviewState": "owner-authorized candidate; independent integration review pending",
+  "exposure": "private-runtime",
+  "resourceOwner": "DriverActor context owner thread",
+  "profile": "windows-x64-unified-addressing-cc75-or-newer-candidate",
+  "publicHandles": false,
+  "functions": {
+    "cuGraphCreate": { "flags": 0, "output": "private graph definition owned by one continuation operation", "cleanup": "cuGraphDestroy after its executable" },
+    "cuGraphAddKernelNode_v2": { "parameters": "compiler-derived CUDA_KERNEL_NODE_PARAMS_v2 layout; nonnull CUfunction, null CUkernel/context/kernelParams, owned packed extra buffer", "dependencies": "previously created nodes in a validated finite DAG", "cleanup": "definition-owned nodes; no standalone node destruction" },
+    "cuGraphInstantiateWithFlags": { "flags": "exact generated CUDA_GRAPH_INSTANTIATE_FLAG_DEVICE_LAUNCH only", "output": "private executable, no updates or concurrent launch", "cleanup": "cuGraphExecDestroy after operation terminality" },
+    "cuGraphUpload": { "stream": "same execution-owned nonblocking stream used by initial launch", "lifetime": "retain graph and function/binding dependencies through whole operation" },
+    "cuGraphLaunch": { "stream": "execution-owned nonblocking stream", "hostLaunches": "one per logical operation; device tails only thereafter", "completion": "one event after initial host launch represents whole stream environment", "failure": "uncertain submit or event provenance is restart-required; no dependency release" },
+    "cuGraphExecDestroy": { "precondition": "proved terminal graph execution, or graph never launched during construction rollback", "failure": "cleanup unproved; retain dependencies and require restart" },
+    "cuGraphDestroy": { "precondition": "executable destruction proved", "failure": "cleanup unproved; retain dependencies and require restart" }
+  },
+  "deviceHelper": { "name": "gpu.execution.tailSelf", "lowering": "trusted NVIDIA cudaGetCurrentGraphExec and cudaGraphLaunch with cudaStreamGraphTailLaunch", "error": "private generated device trap; ordinary deferred execution failure and poisoned context, never truncated success" },
+  "qualification": "unqualified candidate; finite physical evidence and independent review required; WDDM duration separately unqualified"
+}

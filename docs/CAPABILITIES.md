@@ -12,6 +12,14 @@ Its canonical source-architecture description is **JavaScript-authored and JIT/n
 
 ## Executive summary
 
+The owner-authorized [device continuation candidate](specs/SPEC-0020-device-continuation-addendum.md)
+adds one `submitDeviceContinuation()` operation over a finite kernel DAG and
+`gpu.execution.tailSelf()` in a sole final controller. Graph handles remain private;
+opaque mailbox stop/publication composes with the existing operation lifetime.
+Ordinary prepared-DAG execution remains the existing semantic profile. This
+candidate is not integrated or support-qualified; exact finite Windows evidence
+does not establish arbitrary-duration WDDM safety.
+
 The accepted [Device-JS warp-32 child](specs/SPEC-0022-warp32-addendum.md) adds
 typed width, lane identity and masked Boolean ballot. It executes entirely on GPU,
 propagates through typed device libraries, and requires explicit collective

@@ -3,7 +3,7 @@
   "updated": "2026-09-15",
   "status": "warp32_implemented_exact_profile_evidence",
   "objective": "Preserve consumer-neutral CUDA-JS mechanisms and the accepted exact physical pair; qualify future changed profiles separately.",
-  "package_candidate": "cuda-js@0.1.0-alpha.21",
+  "package_candidate": "cuda-js@0.1.0-alpha.22",
   "public_api_schema": 1,
   "live_state_policy": {
     "protected_commit_identity": "remote-readback-only",

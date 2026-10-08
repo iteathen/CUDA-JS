@@ -481,12 +481,14 @@ for (const relative of files) {
       && !relative.startsWith('conformance/f7/')
       && !relative.startsWith('conformance/f8/')
       && !relative.startsWith('conformance/f9/')
+      && !relative.startsWith('conformance/device-continuation/')
       && !relative.startsWith('conformance/hardware/')
       && !relative.startsWith('conformance/node/')
       && !relative.startsWith('scripts/')
       && !relative.startsWith('tools/cuda-schema/')
       && !relative.startsWith('schemas/cuda-13.3/linux-x64/generated/')
-      && !relative.startsWith('schemas/cuda-13.3/win-x64/generated/')) {
+      && !relative.startsWith('schemas/cuda-13.3/win-x64/generated/')
+      && !relative.startsWith('schemas/cuda-13.3/win-x64/device-graph/generated/')) {
     errors.push(`JavaScript source is outside an authorized accepted-or-named-experiment boundary: ${relative}`);
   }
 }

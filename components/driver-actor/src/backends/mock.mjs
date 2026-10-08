@@ -100,6 +100,10 @@ export async function createBackend({ runtimeId, epoch, memoryPolicy, executionP
       async destroyEvent() { recordDisposal('event'); return { mockEventReleased: true }; },
       async devicePointer({ native, byteOffset }) { return addresses.get(native) + BigInt(byteOffset); },
       async submitLaunch() {},
+      supportsDeviceContinuation() { return true; },
+      async prepareGraph() { return { kind: 'mock-graph', id: nextNative++ }; },
+      async submitGraph() {},
+      async destroyGraph() { recordDisposal('device-graph'); return { mockGraphReleased: true }; },
       async recordEvent() {},
       async queryEvent({ eventNative, operationId }) {
         eventNative.polls += 1;

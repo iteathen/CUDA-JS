@@ -266,6 +266,10 @@ export async function compileDeviceProgram(runtime, request) {
     const translated = inspected.translated;
     if (!hasImports) {
       const compiler = await runtime.compile({ source: translated.generatedSource, name: translated.generatedName, options: translated.compile });
+      if (translated.kernels.some((kernel) => kernel.executionProfile === 'device-continuation-v1')) {
+        const linker = await runtime.link({ inputs: [compiler.artifact], options: { architecture: pairedCudaTarget(translated.compile.architecture, 'sm') } });
+        return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(translated), compiler, linker });
+      }
       return freezePublic({ schemaVersion: 1, deviceProgram: publicProgram(translated), compiler });
     }
     const normalized = inspected.normalizedImports;

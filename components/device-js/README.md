@@ -11,6 +11,11 @@ signature alone does not make a collective safe for independent single-thread us
 
 ## Entry points
 
+The [continuation candidate](../../docs/specs/SPEC-0020-device-continuation-addendum.md)
+adds the closed `gpu.execution.tailSelf()` helper and an execution-profile marker
+on its controller kernel. The controller requires the dedicated continuation
+submission; native graph resources and device-runtime realization stay private.
+
 - [Component interface](index.mjs).
 - [Runtime and platform requirements](../../README.md).
 - [Capability map](../../docs/CAPABILITIES.md) and [specification index](../../docs/specs/README.md).

@@ -49,7 +49,8 @@ test('public Device-JS declaration contract unions exactly match admitted runtim
   assert.deepEqual(literalUnion(text, 'DeviceJsBaseLibraryContract'), libraryContracts);
   assert.deepEqual(literalUnion(text, 'DeviceJsBaseProgramContract'), programContracts);
   for (const kind of ['Library', 'Program']) {
-    assert(text.includes('export type DeviceJs' + kind + 'Contract = DeviceJsBase' + kind + 'Contract | `${DeviceJsBase' + kind + 'Contract}+SPEC-0022-warp32-v1`;'));
+    const continuation = kind === 'Program' ? ' | `${DeviceJsBaseProgramContract}+SPEC-0020-device-continuation-v1` | `${DeviceJsBaseProgramContract}+SPEC-0022-warp32-v1+SPEC-0020-device-continuation-v1`' : '';
+    assert(text.includes('export type DeviceJs' + kind + 'Contract = DeviceJsBase' + kind + 'Contract | `${DeviceJsBase' + kind + 'Contract}+SPEC-0022-warp32-v1`' + continuation + ';'));
   }
   assert.match(text, /readonly contract: DeviceJsLibraryContract;/u);
   assert.match(text, /readonly contract: DeviceJsProgramContract;/u);

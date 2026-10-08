@@ -51,11 +51,12 @@ try {
         else if (request.operation === 'execution.module.load') result = await backend.execution.loadModule({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'execution.module.status') result = backend.execution.moduleStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.module.release') result = await backend.execution.releaseModule(request.payload.token, request.requestId);
-        else if (request.operation === 'execution.function.get') result = await backend.execution.getFunction(request.payload.moduleToken, { name: request.payload.name, parameters: request.payload.parameters, operationId: request.requestId });
+        else if (request.operation === 'execution.function.get') result = await backend.execution.getFunction(request.payload.moduleToken, { name: request.payload.name, parameters: request.payload.parameters, executionProfile: request.payload.executionProfile, operationId: request.requestId });
         else if (request.operation === 'execution.function.status') result = backend.execution.functionStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.function.release') result = await backend.execution.releaseFunction(request.payload.token, request.requestId);
         else if (request.operation === 'execution.submit') result = await backend.execution.submit(request.payload.functionToken, { ...request.payload, operationId: request.requestId });
         else if (request.operation === 'execution.prepared.create') result = await backend.execution.prepareOperationDag({ nodes: request.payload.nodes, operationId: request.requestId });
+        else if (request.operation === 'execution.continuation.submit') result = await backend.execution.submitDeviceContinuation({ ...request.payload, operationId: request.requestId });
         else if (request.operation === 'execution.prepared.status') result = backend.execution.preparedOperationDagStatus(request.payload.token, request.requestId);
         else if (request.operation === 'execution.prepared.submit') result = await backend.execution.submitPreparedOperationDag(request.payload.token, { bindings: request.payload.bindings, after: request.payload.after, operationId: request.requestId });
         else if (request.operation === 'execution.prepared.release') result = await backend.execution.releasePreparedOperationDag(request.payload.token, request.requestId);

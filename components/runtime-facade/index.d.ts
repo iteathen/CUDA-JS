@@ -252,7 +252,7 @@ export type CudaOperationState = 'pending' | 'completed' | 'failed' | 'orphaned'
 export interface CudaOperationStatus {
   readonly schemaVersion: 1;
   readonly status: 'pending' | 'completed' | 'failed' | 'orphaned';
-  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device' | 'prepared-batch' | 'cublaslt-f32-matmul';
+  readonly kind?: 'host-to-device' | 'device-to-host' | 'device-to-device' | 'prepared-batch' | 'device-continuation' | 'cublaslt-f32-matmul';
   readonly grid?: LaunchDimensions;
   readonly block?: LaunchDimensions;
   readonly sharedMemoryBytes?: number;
@@ -281,6 +281,7 @@ export interface CudaFunction {
   readonly kind: 'function';
   readonly name: string;
   readonly parameters: readonly FunctionParameter[];
+  readonly executionProfile: 'ordinary' | 'device-continuation-v1';
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
   submit(options: CudaLaunchOptions): Promise<CudaOperation>;
@@ -310,7 +311,7 @@ export interface CudaModule {
   readonly sha256: string;
   readonly state: string;
   status(): Promise<Readonly<Record<string, unknown>>>;
-  getFunction(options: { name: string; parameters: readonly FunctionParameter[] }): Promise<CudaFunction>;
+  getFunction(options: { name: string; parameters: readonly FunctionParameter[]; executionProfile?: 'ordinary' | 'device-continuation-v1' }): Promise<CudaFunction>;
   close(): Promise<Readonly<Record<string, unknown>>>;
 }
 
@@ -362,6 +363,12 @@ export interface CudaCublasLt {
 }
 
 export interface CudaRuntime {
+  submitDeviceContinuation(options: {
+    nodes: readonly CudaPreparedKernelNode[];
+    bindings: Readonly<Record<string, CudaPreparedBindingValue | { kind: 'publication-mailbox'; mailbox: CudaPublicationMailbox; lane: string }>>;
+    continuationNode: string;
+    after?: CudaOperation | null;
+  }): Promise<CudaOperation>;
   readonly state: string;
   readonly health: string;
   readonly compilerEnabled: boolean;
@@ -424,7 +431,7 @@ export type DeviceJsBaseProgramContract =
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0030-tanh-v1'
   | 'SPEC-0013-v1+SPEC-0022-atomic-observation-v1+SPEC-0022-device-publication-v1+SPEC-0014-publication-mailbox-v1+SPEC-0030-dense-numeric-v1+SPEC-0030-erf-v1+SPEC-0030-tanh-v1+SPEC-0028-device-library-v1';
 
-export type DeviceJsProgramContract = DeviceJsBaseProgramContract | `${DeviceJsBaseProgramContract}+SPEC-0022-warp32-v1`;
+export type DeviceJsProgramContract = DeviceJsBaseProgramContract | `${DeviceJsBaseProgramContract}+SPEC-0022-warp32-v1` | `${DeviceJsBaseProgramContract}+SPEC-0020-device-continuation-v1` | `${DeviceJsBaseProgramContract}+SPEC-0022-warp32-v1+SPEC-0020-device-continuation-v1`;
 
 export interface DeviceJsCompileRequest {
   source: string;
@@ -475,7 +482,7 @@ export interface DeviceJsProgramDescriptor {
   readonly sha256: string;
   readonly parser: Readonly<{ name: 'acorn'; version: string }>;
   readonly functions: readonly Readonly<Record<string, unknown>>[];
-  readonly kernels: readonly Readonly<{ name: string; functionName: string; parameters: readonly FunctionParameter[] }>[];
+  readonly kernels: readonly Readonly<{ name: string; functionName: string; parameters: readonly FunctionParameter[]; executionProfile?: 'device-continuation-v1' }>[];
   readonly imports?: readonly Readonly<Record<string, unknown>>[];
 }
 

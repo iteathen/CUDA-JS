@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "profile": "cuda-13.3-win64-device-continuation-candidate",
+  "source": {
+    "headerSha256": "31df84e16179b6d97db4b3c0bae7697392a370b41983f4a8962f0e5a8069b577",
+    "compiler": "clang version 20.1.8",
+    "target": "x86_64-pc-windows-msvc",
+    "llvmRelease": "llvmorg-20.1.8",
+    "llvmArchiveSha256": "f229769f11d6a6edc8ada599c0cda964b7dee6ab1a08c6cf9dd7f513e85b107f"
+  },
+  "functions": {
+    "cuGraphCreate": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "phGraph",
+          "sourceType": "CUgraph *"
+        },
+        {
+          "name": "flags",
+          "sourceType": "unsigned int"
+        }
+      ],
+      "sourceLine": 20034
+    },
+    "cuGraphAddKernelNode_v2": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "phGraphNode",
+          "sourceType": "CUgraphNode *"
+        },
+        {
+          "name": "hGraph",
+          "sourceType": "CUgraph"
+        },
+        {
+          "name": "dependencies",
+          "sourceType": "const CUgraphNode *"
+        },
+        {
+          "name": "numDependencies",
+          "sourceType": "size_t"
+        },
+        {
+          "name": "nodeParams",
+          "sourceType": "const CUDA_KERNEL_NODE_PARAMS *"
+        }
+      ]
+    },
+    "cuGraphInstantiateWithFlags": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "phGraphExec",
+          "sourceType": "CUgraphExec *"
+        },
+        {
+          "name": "hGraph",
+          "sourceType": "CUgraph"
+        },
+        {
+          "name": "flags",
+          "sourceType": "unsigned long long"
+        }
+      ]
+    },
+    "cuGraphUpload": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "hGraphExec",
+          "sourceType": "CUgraphExec"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "sourceLine": 22566
+    },
+    "cuGraphLaunch": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "hGraphExec",
+          "sourceType": "CUgraphExec"
+        },
+        {
+          "name": "hStream",
+          "sourceType": "CUstream"
+        }
+      ],
+      "sourceLine": 22596
+    },
+    "cuGraphExecDestroy": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "hGraphExec",
+          "sourceType": "CUgraphExec"
+        }
+      ],
+      "sourceLine": 22622
+    },
+    "cuGraphDestroy": {
+      "returnType": "CUresult",
+      "parameters": [
+        {
+          "name": "hGraph",
+          "sourceType": "CUgraph"
+        }
+      ],
+      "sourceLine": 22642
+    }
+  },
+  "kernelNode": {
+    "type": "CUDA_KERNEL_NODE_PARAMS_v2_st",
+    "size": 72,
+    "alignment": 8,
+    "offsets": {
+      "func": 0,
+      "gridDimX": 8,
+      "gridDimY": 12,
+      "gridDimZ": 16,
+      "blockDimX": 20,
+      "blockDimY": 24,
+      "blockDimZ": 28,
+      "sharedMemBytes": 32,
+      "kernelParams": 40,
+      "extra": 48,
+      "kern": 56,
+      "ctx": 64
+    }
+  },
+  "flags": {
+    "deviceLaunch": 4
+  }
+}

@@ -11,7 +11,7 @@ const LIMITS = Object.freeze({
   maxGridDimX: 2_147_483_647, maxGridDimY: 65_535, maxGridDimZ: 65_535, maxSharedMemoryPerBlock: 49_152,
 });
 
-function fixture({ query = () => 'complete', submit = () => {}, deviceLimits = LIMITS } = {}) {
+function fixture({ query = () => 'complete', submit = () => {}, deviceLimits = LIMITS, continuation = false, graphFailure = null } = {}) {
   const registry = new ResourceRegistry({ runtimeId: 'prepared-execution-test', epoch: 1, nonce: (() => { let value = 0; return () => (++value).toString(16).padStart(32, '0'); })() });
   const library = registry.allocate({ kind: 'library', value: {}, dispose() {} });
   const context = registry.allocate({ kind: 'context', value: {}, parent: library, dispose() {} });
@@ -30,17 +30,83 @@ function fixture({ query = () => 'complete', submit = () => {}, deviceLimits = L
   let handle = 10n;
   const calls = { createEvent: 0, devicePointer: 0, submitLaunch: 0 };
   const submissions = [];
+  const graphCalls = [];
   const operations = {
     async createStream() { return ++handle; }, async destroyStream() {}, async loadModule() { return ++handle; }, async unloadModule() {}, async getFunction() { return ++handle; },
     async createEvent() { calls.createEvent += 1; return ++handle; }, async destroyEvent() {},
     async devicePointer({ native, byteOffset }) { calls.devicePointer += 1; return native + BigInt(byteOffset); },
     async submitLaunch(request) { calls.submitLaunch += 1; submissions.push(request); return submit(request, calls.submitLaunch); }, async recordEvent() {}, async queryEvent(request) { return query(request); },
     health() { return { current: 'healthy', history: [] }; },
+    supportsDeviceContinuation() { return continuation; },
+    async prepareGraph(request) { graphCalls.push({ stage: 'prepare', request }); if (graphFailure === 'prepare') throw new Error('graph prepare rejected'); return { definition: ++handle, executable: ++handle }; },
+    async submitGraph() { graphCalls.push({ stage: 'launch' }); if (graphFailure === 'launch') throw new Error('graph launch uncertain'); },
+    async destroyGraph() { graphCalls.push({ stage: 'destroy' }); if (graphFailure === 'destroy') throw new Error('graph cleanup unproved'); },
     restartRequired({ code, message, details, operationId }) { return new ExecutionError(code, 'restart-required', message, details, { operationId, healthBefore: 'healthy', healthAfter: 'restart-required' }); },
   };
   const execution = new ExecutionManager({ registry, contextToken: context, memory, policy: {}, deviceLimits, operations });
-  return { registry, memory, execution, calls, submissions };
+  return { registry, memory, execution, calls, submissions, graphCalls };
 }
+
+test('device continuation owns one graph and operation through all rounds and closes dependencies after graph', async () => {
+  let polls = 0;
+  const fx = await preparedFixture({ continuation: true, query: () => ++polls < 3 ? 'pending' : 'complete' });
+  const controller = await fx.execution.getFunction(fx.module.module, { name: 'controller', parameters: fx.fn.parameters, executionProfile: 'device-continuation-v1', operationId: 3 });
+  const body = node({ id: 'body', functionToken: fx.fn.function });
+  const final = { ...node({ id: 'controller', functionToken: controller.function, after: ['body'] }), block: { x: 1, y: 1, z: 1 } };
+  const op = await fx.execution.submitDeviceContinuation({ nodes: [body, final], bindings: bindings(fx.allocation), continuationNode: 'controller', operationId: 4 });
+  assert.equal(op.kind, 'device-continuation');
+  assert.deepEqual(fx.graphCalls.map((entry) => entry.stage), ['prepare', 'launch']);
+  assert.equal(fx.calls.submitLaunch, 0);
+  assert.equal(fx.calls.createEvent, 1);
+  assert.equal((await fx.execution.operationStatus(op.operation, 5)).status, 'pending');
+  await assert.rejects(fx.execution.releaseOperation(op.operation), (error) => error.code === 'EXECUTION_OPERATION_BUSY');
+  await assert.rejects(fx.execution.releaseFunction(controller.function), (error) => error.code === 'RESOURCE_BUSY');
+  assert.equal((await fx.execution.operationStatus(op.operation, 6)).status, 'pending');
+  assert.equal((await fx.execution.operationStatus(op.operation, 7)).status, 'completed');
+  assert.deepEqual(fx.graphCalls.map((entry) => entry.stage), ['prepare', 'launch', 'destroy']);
+  assert.equal(fx.execution.summary().preparedDagCount, 0);
+  await fx.execution.releaseOperation(op.operation, 8);
+  await fx.execution.releaseFunction(controller.function, 9);
+});
+
+test('device continuation rejects unsupported runtime and malformed controller before native graph mutation', async () => {
+  const unsupported = await preparedFixture();
+  await assert.rejects(unsupported.execution.submitDeviceContinuation({ nodes: [], bindings: [], continuationNode: 'controller' }), (error) => error.code === 'EXECUTION_CONTINUATION_UNSUPPORTED');
+  const fx = await preparedFixture({ continuation: true });
+  const controller = await fx.execution.getFunction(fx.module.module, { name: 'controller', parameters: fx.fn.parameters, executionProfile: 'device-continuation-v1', operationId: 3 });
+  await assert.rejects(fx.execution.submit(controller.function, { grid: { x: 1, y: 1, z: 1 }, block: { x: 1, y: 1, z: 1 }, arguments: [{ kind: 'device-memory', memory: fx.allocation.memory }, { kind: 'u32', value: 8 }] }), (error) => error.code === 'EXECUTION_CONTINUATION_REQUIRED');
+  const bad = node({ id: 'controller', functionToken: controller.function });
+  await assert.rejects(fx.execution.submitDeviceContinuation({ nodes: [bad], bindings: bindings(fx.allocation), continuationNode: 'controller' }), (error) => error.code === 'EXECUTION_CONTINUATION_CONTROLLER');
+  assert.equal(fx.graphCalls.length, 0);
+  assert.equal(fx.calls.createEvent, 0);
+});
+
+test('device continuation retains leases when graph launch or terminal cleanup is unproved', async () => {
+  for (const graphFailure of ['launch', 'destroy']) {
+    const fx = await preparedFixture({ continuation: true, graphFailure });
+    const controller = await fx.execution.getFunction(fx.module.module, { name: 'controller', parameters: fx.fn.parameters, executionProfile: 'device-continuation-v1', operationId: 3 });
+    const final = { ...node({ id: 'controller', functionToken: controller.function }), block: { x: 1, y: 1, z: 1 } };
+    let op;
+    if (graphFailure === 'launch') await assert.rejects(fx.execution.submitDeviceContinuation({ nodes: [final], bindings: bindings(fx.allocation), continuationNode: 'controller', operationId: 4 }), (error) => error.category === 'restart-required');
+    else {
+      op = await fx.execution.submitDeviceContinuation({ nodes: [final], bindings: bindings(fx.allocation), continuationNode: 'controller', operationId: 4 });
+      await assert.rejects(fx.execution.operationStatus(op.operation, 5), (error) => error.category === 'restart-required');
+    }
+    assert(fx.registry.inventory().resources.find((entry) => entry.kind === 'device-memory').leases > 0);
+    await assert.rejects(fx.execution.releaseFunction(controller.function), (error) => error.code === 'RESOURCE_BUSY');
+  }
+});
+
+test('device continuation preserves 32-node DAG capacity with transitive controller dependencies', async () => {
+  const fx = await preparedFixture({ continuation: true });
+  const controller = await fx.execution.getFunction(fx.module.module, { name: 'controller', parameters: fx.fn.parameters, executionProfile: 'device-continuation-v1', operationId: 3 });
+  const nodes = Array.from({ length: 31 }, (_, index) => node({ id: `body${index}`, functionToken: fx.fn.function, after: index === 0 ? [] : [`body${index - 1}`] }));
+  nodes.push({ ...node({ id: 'controller', functionToken: controller.function, after: ['body30'] }), block: { x: 1, y: 1, z: 1 } });
+  const op = await fx.execution.submitDeviceContinuation({ nodes, bindings: bindings(fx.allocation), continuationNode: 'controller', operationId: 4 });
+  assert.equal(op.nodeCount, 32);
+  assert.equal(op.edgeCount, 31);
+  assert.equal((await fx.execution.operationStatus(op.operation, 5)).status, 'completed');
+});
 
 async function preparedFixture(value = {}) {
   const fx = fixture(value);
