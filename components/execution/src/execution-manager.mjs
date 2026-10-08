@@ -493,6 +493,7 @@ export class ExecutionManager {
       pendingOperationCount: this.#pendingOperations.size,
       privateStream: this.#streamTokens.length > 0,
       privateStreamCount: this.#streamTokens.length,
+      ...(typeof this.#operations.continuationMetrics === 'function' ? { deviceContinuation: this.#operations.continuationMetrics() } : {}),
       ...(rollbackFailure ? {
         unprovedRollbackCount: 1,
         rollbackFailure: failureRecord(rollbackFailure, { includeDetails: true, trustedDetails: true }),
@@ -553,15 +554,16 @@ export class ExecutionManager {
 
   moduleStatus(token, operationId = null) { return this.#moduleDescriptor(token, this.#registry.get(token, { kind: 'module' }), operationId); }
 
-  async getFunction(moduleToken, { name, parameters, operationId = null }) {
+  async getFunction(moduleToken, { name, parameters, executionProfile = 'ordinary', operationId = null }) {
     this.#assertAdmission();
+    if (!['ordinary', 'device-continuation-v1'].includes(executionProfile)) fail('EXECUTION_FUNCTION_PROFILE', 'unsupported', 'Unknown function execution profile.');
     const normalizedName = functionName(name);
     const normalizedParameters = normalizeParameters(parameters, this.#policy.maxArguments);
     const moduleLease = this.#registry.acquire(moduleToken, { kind: 'module' });
     let native;
     try { native = await this.#operations.getFunction({ moduleNative: moduleLease.value.native, name: normalizedName, operationId }); }
     finally { moduleLease.release(); }
-    const token = this.#registry.allocate({ kind: 'function', value: Object.freeze({ native, module: moduleToken, name: normalizedName, parameters: normalizedParameters }), parent: moduleToken, dispose: async () => Object.freeze({ kind: 'function', invalidated: true }) });
+    const token = this.#registry.allocate({ kind: 'function', value: Object.freeze({ native, module: moduleToken, name: normalizedName, parameters: normalizedParameters, executionProfile }), parent: moduleToken, dispose: async () => Object.freeze({ kind: 'function', invalidated: true }) });
     this.#functionCount += 1;
     this.#functionDescriptors.set(`${token.slot}:${token.generation}`, Object.freeze({ name: normalizedName }));
     return this.#functionDescriptor(token, this.#registry.get(token, { kind: 'function' }), operationId);
@@ -569,7 +571,7 @@ export class ExecutionManager {
 
   functionStatus(token, operationId = null) { return this.#functionDescriptor(token, this.#registry.get(token, { kind: 'function' }), operationId); }
 
-  async prepareOperationDag({ nodes: nodeValues, operationId = null }) {
+  async prepareOperationDag({ nodes: nodeValues, deviceContinuation = null, operationId = null }) {
     this.#assertAdmission();
     if (!Array.isArray(nodeValues)) fail('PREPARED_DAG_REQUEST_INVALID', 'validation', 'Prepared operation DAG nodes must be an array.');
     const dependencyLeases = new Map();
@@ -603,7 +605,9 @@ export class ExecutionManager {
           acquiredFunctionLease.release();
         }
         const parameters = functionLease.value.parameters;
-        if (parameters.some((parameter) => parameter.kind.startsWith('publication-mailbox-'))) {
+        if (functionLease.value.executionProfile === 'device-continuation-v1' && deviceContinuation !== node.id) fail('EXECUTION_CONTINUATION_REQUIRED', 'validation', 'Continuation kernels require the dedicated continuation controller.');
+        if (deviceContinuation === node.id && functionLease.value.executionProfile !== 'device-continuation-v1') fail('EXECUTION_CONTINUATION_CONTROLLER', 'validation', 'The controller function must declare the continuation execution profile.');
+        if (deviceContinuation === null && parameters.some((parameter) => parameter.kind.startsWith('publication-mailbox-'))) {
           fail('PREPARED_DAG_PARAMETER_UNSUPPORTED', 'unsupported', 'The first prepared DAG profile does not accept publication-mailbox parameters.', { inputIndex });
         }
         if (!Array.isArray(node.arguments) || node.arguments.length !== parameters.length) fail('PREPARED_DAG_ARGUMENTS_INVALID', 'validation', 'Prepared node argument count must match its function schema.', { inputIndex });
@@ -614,7 +618,7 @@ export class ExecutionManager {
             privateArguments.push(Object.freeze({ binding: entry.binding, kind: parameter.kind }));
             return { binding: entry.binding, kind: parameter.kind };
           }
-          if (!exactFields(entry, ['kind', 'value']) || entry.kind !== parameter.kind || parameter.kind === 'device-memory') {
+          if (!exactFields(entry, ['kind', 'value']) || entry.kind !== parameter.kind || parameter.kind === 'device-memory' || parameter.kind.startsWith('publication-mailbox-')) {
             fail('PREPARED_DAG_ARGUMENT_INVALID', 'validation', 'Prepared arguments must be exact named bindings or fixed scalar values.', { inputIndex, argumentIndex });
           }
           const packed = packParameterValues([parameter], [entry.value]).buffer;
@@ -658,9 +662,22 @@ export class ExecutionManager {
         nodes: semanticNodes,
         executionProfile: { maxPendingGpuOperations: this.#policy.maxPendingGpuOperations, deviceLimits: this.#limits },
       });
+      if (deviceContinuation !== null) {
+        const byId = new Map(normalized.nodes.map((node) => [node.id, node]));
+        const ancestors = new Set();
+        const pending = [...byId.get(deviceContinuation).after];
+        while (pending.length) {
+          const id = pending.pop();
+          if (ancestors.has(id)) continue;
+          ancestors.add(id);
+          pending.push(...byId.get(id).after);
+        }
+        if (ancestors.size !== normalized.nodes.length - 1) fail('EXECUTION_CONTINUATION_CONTROLLER', 'validation', 'The final controller must depend directly or transitively on every body node.');
+      }
       const record = {
-        contract: normalized.contract,
-        sha256: normalized.sha256,
+        contract: deviceContinuation === null ? normalized.contract : 'SPEC-0020-device-continuation-v1',
+        sha256: deviceContinuation === null ? normalized.sha256 : createHash('sha256').update(JSON.stringify({ contract: 'SPEC-0020-device-continuation-v1', dag: normalized.sha256, continuationNode: deviceContinuation })).digest('hex'),
+        deviceContinuation,
         nodeCount: normalized.nodeCount,
         edgeCount: normalized.edgeCount,
         bindings: normalized.bindings,
@@ -711,9 +728,11 @@ export class ExecutionManager {
     if (this.#pendingOperations.size >= this.#policy.maxPendingGpuOperations) fail('EXECUTION_BUSY', 'backpressure', 'The bounded pending-operation capacity is exhausted.', { operationId, maximum: this.#policy.maxPendingGpuOperations });
     const preparedLease = this.#registry.acquire(preparedToken, { kind: 'prepared-dag' });
     const memoryLeases = [];
+    const mailboxLeases = [];
     let dependencyLease = null;
     let eventToken = null;
     let eventNative = null;
+    let graphToken = null;
     let submittedNodeCount = 0;
     let ownershipTransferred = false;
     try {
@@ -724,9 +743,22 @@ export class ExecutionManager {
         supplied.set(entry.name, entry);
       }
       const resolved = new Map();
+      const mailboxGroups = new Map();
       for (const binding of preparedLease.value.bindings) {
         const entry = supplied.get(binding.name);
         if (!entry) fail('PREPARED_DAG_BINDING_MISSING', 'validation', 'Prepared DAG submission is missing a required binding.', { binding: binding.name });
+        if (binding.kind.startsWith('publication-mailbox-')) {
+          if (preparedLease.value.deviceContinuation === null || preparedLease.value.deviceContinuation === undefined || !exactFields(entry, ['name', 'kind', 'mailbox', 'generation', 'lane']) || entry.kind !== 'publication-mailbox') fail('PREPARED_DAG_BINDING_KIND', 'validation', 'Only device continuation admits an exact opaque mailbox lane binding.');
+          if (!this.#mailboxes) fail('EXECUTION_MAILBOX_UNAVAILABLE', 'unsupported', 'Mailbox support is unavailable.');
+          const key = tokenIdentity(entry.mailbox);
+          const group = mailboxGroups.get(key) ?? { token: entry.mailbox, generation: entry.generation, names: [], bindings: [] };
+          if (group.generation !== entry.generation) fail('EXECUTION_MAILBOX_GENERATION_MISMATCH', 'validation', 'A mailbox must use one generation per operation.');
+          group.names.push(binding.name);
+          group.bindings.push({ lane: entry.lane, direction: binding.kind === 'publication-mailbox-host-to-device-u32' ? 'host-to-device' : 'device-to-host' });
+          mailboxGroups.set(key, group);
+          resolved.set(binding.name, { kind: binding.kind, value: null, argument: { kind: 'publication-mailbox', mailbox: entry.mailbox, generation: entry.generation, lane: entry.lane } });
+          continue;
+        }
         if (binding.kind !== 'device-memory') {
           if (!exactFields(entry, ['name', 'kind', 'value']) || entry.kind !== binding.kind) fail('PREPARED_DAG_BINDING_KIND', 'validation', 'Prepared scalar binding kind is invalid.', { binding: binding.name });
           packParameterValues([{ kind: binding.kind }], [entry.value]);
@@ -769,6 +801,11 @@ export class ExecutionManager {
         resolved.set(binding.name, Object.freeze({ kind: 'device-memory', argument, lease }));
       }
       if (supplied.size !== resolved.size) fail('PREPARED_DAG_BINDING_EXTRA', 'validation', 'Prepared DAG submission contains an unknown binding.');
+      for (const group of mailboxGroups.values()) {
+        const lease = this.#mailboxes.acquireForExecution(group.token, group.generation, group.bindings);
+        mailboxLeases.push(lease);
+        group.names.forEach((name, index) => { resolved.get(name).value = lease.pointers[index]; });
+      }
 
       let dependency = null;
       if (after !== null) {
@@ -867,7 +904,21 @@ export class ExecutionManager {
       eventNative = await this.#operations.createEvent({ operationId });
       eventToken = this.#registry.allocate({ kind: 'event', value: Object.freeze({ native: eventNative }), parent: streamToken, dispose: async (record) => Object.freeze({ kind: 'event', destroyed: true, backend: await this.#operations.destroyEvent({ native: record.native, operationId: null }) ?? null }) });
       const launchesById = new Map(launches.map((launch) => [launch.node.id, launch]));
-      for (const node of preparedLease.value.nodes) {
+      if (preparedLease.value.deviceContinuation !== null && preparedLease.value.deviceContinuation !== undefined) {
+        const native = await this.#operations.prepareGraph({
+          launches: launches.map(({ node, parameterBuffer }) => ({ id: node.id, after: semanticById.get(node.id).after, functionNative: node.functionValue.native, config: { grid: node.grid, block: node.block, sharedMemoryBytes: node.sharedMemoryBytes }, parameterBuffer })),
+          streamNative: stream.native, operationId,
+        });
+        try {
+          graphToken = this.#registry.allocate({ kind: 'device-graph', value: { native }, parent: this.#contextToken, dispose: async (record) => this.#operations.destroyGraph({ native: record.native, operationId: null }) });
+        } catch (error) {
+          try { await this.#operations.destroyGraph({ native, operationId }); }
+          catch { throw this.#operations.restartRequired({ code: 'EXECUTION_GRAPH_ROLLBACK_UNPROVED', message: 'Graph registration failed and graph cleanup is unproved.', details: {}, operationId }); }
+          throw error;
+        }
+        submittedNodeCount = preparedLease.value.nodeCount;
+        await this.#operations.submitGraph({ native, streamNative: stream.native, operationId });
+      } else for (const node of preparedLease.value.nodes) {
         if (node.kind === 'kernel') {
           const launch = launchesById.get(node.id);
           await this.#operations.submitLaunch({
@@ -886,7 +937,8 @@ export class ExecutionManager {
       catch (error) { throw this.#operations.restartRequired({ code: 'PREPARED_DAG_EVENT_PROVENANCE_LOST', message: 'Prepared DAG nodes were submitted but final completion provenance could not be established.', details: { nodeCount: preparedLease.value.nodeCount, submittedNodeCount }, operationId }); }
 
       const record = {
-        kind: 'prepared-batch', state: 'pending', eventToken, streamToken, preparedToken, preparedLease, memoryLeases, dependencyLease,
+        kind: graphToken === null ? 'prepared-batch' : 'device-continuation', state: 'pending', eventToken, streamToken, preparedToken, preparedLease, memoryLeases, mailboxLeases, dependencyLease, graphToken,
+        privatePrepared: graphToken !== null,
         accesses: aggregateAccesses, preparedSha256: preparedLease.value.sha256, nodeCount: preparedLease.value.nodeCount, edgeCount: preparedLease.value.edgeCount,
         submissionSequence: operationId, startedAt: this.#clock(), pollCount: 0, terminal: null,
       };
@@ -907,6 +959,7 @@ export class ExecutionManager {
       this.#pendingOperations.set(tokenIdentity(operationToken), Object.freeze({ operationToken, streamToken, record }));
       return this.#operationDescriptor(operationToken, record, operationId);
     } catch (error) {
+      if (error?.category === 'restart-required') { ownershipTransferred = true; throw error; }
       if (submittedNodeCount > 0) {
         ownershipTransferred = true;
         if (error?.category === 'restart-required') throw error;
@@ -939,13 +992,30 @@ export class ExecutionManager {
           });
         }
       }
+      if (graphToken !== null) await this.#registry.close(graphToken);
       throw error;
     } finally {
       if (!ownershipTransferred) {
         for (let index = memoryLeases.length - 1; index >= 0; index -= 1) memoryLeases[index].release();
+        for (let index = mailboxLeases.length - 1; index >= 0; index -= 1) mailboxLeases[index].release();
         dependencyLease?.release();
         preparedLease.release();
       }
+    }
+  }
+
+  async submitDeviceContinuation({ nodes, bindings, continuationNode, after = null, operationId = null }) {
+    this.#assertAdmission();
+    if (typeof this.#operations.supportsDeviceContinuation !== 'function' || !this.#operations.supportsDeviceContinuation()) fail('EXECUTION_CONTINUATION_UNSUPPORTED', 'unsupported', 'Device-owned continuation is unavailable on this runtime profile.');
+    if (!Array.isArray(nodes) || nodes.length < 1 || nodes.some((node) => node.kind !== 'kernel')) fail('EXECUTION_CONTINUATION_CONTROLLER', 'validation', 'Continuation requires a finite kernel-only DAG.');
+    const controller = nodes.find((node) => node.id === continuationNode);
+    if (!controller || !controller.grid || !controller.block || ['x', 'y', 'z'].some((axis) => controller.grid[axis] !== 1 || controller.block[axis] !== 1)
+        || !Array.isArray(controller.after)) fail('EXECUTION_CONTINUATION_CONTROLLER', 'validation', 'The sole final controller requires grid and block of 1x1x1.');
+    const prepared = await this.prepareOperationDag({ nodes, deviceContinuation: continuationNode, operationId });
+    try { return await this.submitPreparedOperationDag(prepared.prepared, { bindings, after, operationId }); }
+    catch (error) {
+      if (error?.category !== 'restart-required') await this.releasePreparedOperationDag(prepared.prepared, operationId);
+      throw error;
     }
   }
 
@@ -965,6 +1035,7 @@ export class ExecutionManager {
     let submitted = false;
     let ownershipTransferred = false;
     try {
+      if (functionLease.value.executionProfile === 'device-continuation-v1') fail('EXECUTION_CONTINUATION_REQUIRED', 'validation', 'Continuation kernels reject ordinary submission.');
       const values = [];
       const mailboxGroups = new Map();
       if (argumentValues.length !== functionLease.value.parameters.length) fail('EXECUTION_ARGUMENT_COUNT', 'validation', 'Launch argument count must exactly match the declared parameter count.', { expected: functionLease.value.parameters.length, actual: argumentValues.length });
@@ -1322,7 +1393,7 @@ export class ExecutionManager {
       schemaVersion: 1, operation: token, kind: record.kind, status: record.state, module: record.module, function: record.functionToken, grid: record.grid, block: record.block,
       sharedMemoryBytes: record.sharedMemoryBytes, argumentKinds: record.argumentKinds, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
-    } : record.kind === 'prepared-batch' ? {
+    } : ['prepared-batch', 'device-continuation'].includes(record.kind) ? {
       schemaVersion: 1, operation: token, kind: record.kind, status: record.state, prepared: record.preparedToken,
       preparedSha256: record.preparedSha256, nodeCount: record.nodeCount, edgeCount: record.edgeCount, pollCount: record.pollCount,
       elapsedMilliseconds: Math.min(elapsed, Number.MAX_SAFE_INTEGER), operationSequence: record.submissionSequence, observationSequence, health: this.#operations.health(),
@@ -1341,6 +1412,7 @@ export class ExecutionManager {
   }
 
   async #terminalizeCompleted(token, record, operationId) {
+    await this.#cleanupContinuationGraph(record, operationId);
     if (record.complete !== null && record.complete !== undefined) {
       try { record.result = Object.freeze(await record.complete()); }
       catch (error) {
@@ -1374,6 +1446,7 @@ export class ExecutionManager {
     }
     record.eventToken = null;
     this.#releaseExecutionLeases(record);
+    if (record.privatePrepared) await this.releasePreparedOperationDag(record.preparedToken, operationId);
     record.state = 'completed';
     record.terminal = true;
     this.#completionCount += 1;
@@ -1381,6 +1454,7 @@ export class ExecutionManager {
   }
 
   async #terminalizeFailure(token, record, error, operationId) {
+    await this.#cleanupContinuationGraph(record, operationId, error);
     try { await this.#registry.close(record.eventToken); }
     catch (cleanupError) {
       const combined = combinedRollbackError({
@@ -1404,10 +1478,28 @@ export class ExecutionManager {
     }
     record.eventToken = null;
     this.#releaseExecutionLeases(record);
+    if (record.privatePrepared) await this.releasePreparedOperationDag(record.preparedToken, operationId);
     record.state = 'failed';
     record.failure = failureRecord(error, { includeDetails: true });
     record.terminal = true;
     this.#pendingOperations.delete(tokenIdentity(token));
+  }
+
+  async #cleanupContinuationGraph(record, operationId, primaryError = null) {
+    if (record.graphToken === null || record.graphToken === undefined) return;
+    try { await this.#registry.close(record.graphToken); }
+    catch (cause) {
+      const error = combinedRollbackError({
+        code: 'EXECUTION_GRAPH_CLEANUP_UNPROVED', message: 'Terminal graph cleanup could not be proved; dependencies remain retained.',
+        operation: 'execution.operation.status', operationId, primaryError,
+        primaryFallbackCode: 'EXECUTION_ASYNC_FAILURE', primaryFallbackOperation: 'execution.event.query',
+        cleanupErrors: [cause], cleanupFallbackCode: 'EXECUTION_GRAPH_CLEANUP_UNPROVED', cleanupFallbackOperation: 'execution.graph.destroy',
+        registry: this.#registry, unprovedResources: [{ kind: 'device-graph', registered: true }], minimumHealth: 'restart-required', restartRequired: this.#operations.restartRequired,
+      });
+      this.#markOrphaned(record, error, { includeDetails: true });
+      throw error;
+    }
+    record.graphToken = null;
   }
 
   #markOrphaned(record, error, { includeDetails = false } = {}) {
@@ -1437,7 +1529,7 @@ export class ExecutionManager {
   }
 
   #moduleDescriptor(token, record, operationId) { return Object.freeze({ schemaVersion: 1, module: token, format: record.format, byteLength: record.byteLength, sha256: record.sha256, operationSequence: operationId }); }
-  #functionDescriptor(token, record, operationId) { return Object.freeze({ schemaVersion: 1, function: token, module: record.module, name: record.name, parameters: record.parameters, operationSequence: operationId }); }
+  #functionDescriptor(token, record, operationId) { return Object.freeze({ schemaVersion: 1, function: token, module: record.module, name: record.name, parameters: record.parameters, ...(record.executionProfile === 'device-continuation-v1' ? { executionProfile: record.executionProfile } : {}), operationSequence: operationId }); }
 
   #preparedDagDescriptor(token, record, operationId) {
     return Object.freeze({

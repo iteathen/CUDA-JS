@@ -383,6 +383,11 @@ function translatePreparedSubmission(entry, bindingsOrRequest, options, operatio
   const bindings = entry.bindings.map((binding) => {
     if (!Object.hasOwn(request.bindings, binding.name)) throw facadeError('CUDA_JS_PREPARED_BINDING_MISSING', 'validation', 'Prepared submission is missing a named binding.', { binding: binding.name }, operation);
     const value = request.bindings[binding.name];
+    if (binding.kind.startsWith('publication-mailbox-')) {
+      if (!entry.deviceContinuation || !plainObject(value) || Object.keys(value).sort().join('\0') !== ['kind', 'lane', 'mailbox'].sort().join('\0') || value.kind !== 'publication-mailbox' || typeof value.lane !== 'string') throw facadeError('CUDA_JS_MAILBOX_ARGUMENT_INVALID', 'validation', 'Continuation mailbox binding requires exactly kind, mailbox and lane.', {}, operation);
+      const mailbox = resourceFor(value.mailbox, entry.runtime, 'publication-mailbox', operation);
+      return { name: binding.name, kind: 'publication-mailbox', mailbox: mailbox.token, generation: mailbox.generation, lane: value.lane };
+    }
     if (binding.kind !== 'device-memory') return { name: binding.name, kind: binding.kind, value };
     const capability = resourceData.get(value);
     if (capability?.kind === 'device-view') {
@@ -401,7 +406,7 @@ function translatePreparedSubmission(entry, bindingsOrRequest, options, operatio
 function publicOperationStatus(result) {
   const output = { schemaVersion: 1, status: result.status, grid: result.grid, block: result.block, sharedMemoryBytes: result.sharedMemoryBytes, argumentKinds: result.argumentKinds, pollCount: result.pollCount, elapsedMilliseconds: result.elapsedMilliseconds, operationSequence: result.operationSequence, health: result.health };
   if (result.kind && result.kind !== 'kernel') output.kind = result.kind;
-  if (result.kind === 'prepared-batch') {
+  if (['prepared-batch', 'device-continuation'].includes(result.kind)) {
     output.preparedSha256 = result.preparedSha256;
     output.nodeCount = result.nodeCount;
     output.edgeCount = result.edgeCount;
@@ -520,7 +525,7 @@ class CudaModule {
   get sha256() { return resourceData.get(this)?.sha256 ?? null; }
   get state() { return resourceData.get(this)?.state ?? 'invalid'; }
   async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'module.status'); const result = await invoke('module.status', () => runtimeData.get(entry.runtime).driver.moduleStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'module', state: entry.state, format: result.format, byteLength: result.byteLength, sha256: result.sha256 }); }
-  async getFunction(options) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'function.get'); const result = await invoke('function.get', () => runtimeData.get(entry.runtime).driver.getFunction(entry.token, options)); return registerResource(entry.runtime, 'function', result.function, { module: this, name: result.name, parameters: result.parameters }, CudaFunction); }
+  async getFunction(options) { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'module', 'function.get'); const result = await invoke('function.get', () => runtimeData.get(entry.runtime).driver.getFunction(entry.token, options)); return registerResource(entry.runtime, 'function', result.function, { module: this, name: result.name, parameters: result.parameters, executionProfile: result.executionProfile ?? 'ordinary' }, CudaFunction); }
   async close() { return closeResource(this, 'module.close', (entry) => runtimeData.get(entry.runtime).driver.releaseModule(entry.token)); }
 }
 
@@ -540,6 +545,7 @@ class CudaFunction {
   get kind() { return 'function'; }
   get name() { return resourceData.get(this)?.name ?? null; }
   get parameters() { return resourceData.get(this)?.parameters ?? null; }
+  get executionProfile() { return resourceData.get(this)?.executionProfile ?? null; }
   get state() { return resourceData.get(this)?.state ?? 'invalid'; }
   async status() { const entry = resourceFor(this, resourceData.get(this)?.runtime, 'function', 'function.status'); const result = await invoke('function.status', () => runtimeData.get(entry.runtime).driver.functionStatus(entry.token)); return freezePublic({ schemaVersion: 1, kind: 'function', state: entry.state, name: result.name, parameters: result.parameters }); }
   async submit(options) {
@@ -668,6 +674,27 @@ class CudaRuntime {
     return registerResource(this, 'prepared-operation-dag', result.prepared, {
       contract: result.contract, sha256: result.sha256, nodeCount: result.nodeCount, edgeCount: result.edgeCount, bindings, realization: result.realization,
     }, CudaPreparedOperationDag);
+  }
+
+  async submitDeviceContinuation(options) {
+    const operation = 'continuation.submit';
+    const data = dataFor(this, operation);
+    if (!plainObject(options) || Object.keys(options).some((key) => !['nodes', 'bindings', 'continuationNode', 'after'].includes(key)) || !Array.isArray(options.nodes) || options.nodes.some((node) => node?.kind !== undefined && node.kind !== 'kernel')) throw facadeError('CUDA_JS_CONTINUATION_OPTIONS', 'validation', 'Device continuation requires a kernel-only DAG, bindings and continuationNode.', {}, operation);
+    const dag = translatePreparedDag(this, { nodes: options.nodes }, operation);
+    const schema = new Map();
+    for (let index = 0; index < options.nodes.length; index += 1) {
+      const fn = resourceFor(options.nodes[index].function, this, 'function', operation);
+      for (let argumentIndex = 0; argumentIndex < dag.nodes[index].arguments.length; argumentIndex += 1) {
+        const argument = dag.nodes[index].arguments[argumentIndex];
+        if (!Object.hasOwn(argument, 'binding')) continue;
+        const kind = fn.parameters[argumentIndex].kind;
+        if (schema.has(argument.binding) && schema.get(argument.binding) !== kind) throw facadeError('CUDA_JS_CONTINUATION_BINDING', 'validation', 'A continuation binding has conflicting kinds.', {}, operation);
+        schema.set(argument.binding, kind);
+      }
+    }
+    const submitted = translatePreparedSubmission({ runtime: this, deviceContinuation: true, bindings: [...schema].map(([name, kind]) => ({ name, kind })) }, { bindings: options.bindings, after: options.after ?? null }, undefined, operation);
+    const result = await invoke(operation, () => data.driver.submitDeviceContinuation({ ...dag, ...submitted, continuationNode: options.continuationNode }));
+    return registerResource(this, 'operation', result.operation, { gpuState: result.status, lastStatus: publicOperationStatus(result) }, CudaOperation);
   }
   async openCublasLt(options) {
     if (options !== undefined) throw facadeError('CUDA_JS_CUBLASLT_OPTIONS_UNSUPPORTED', 'validation', 'The first cuBLASLt adapter profile does not accept open options.', {}, 'library.cublaslt.open');

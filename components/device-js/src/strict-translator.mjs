@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { CONTINUATION_SUFFIX, continuationPreludeLines } from './continuation-profile.mjs';
 
 import { parse, version as acornVersion } from 'acorn';
 import { CUDA_TARGET_POLICY_IDENTITY } from '../../cuda-target/index.mjs';
@@ -99,6 +100,7 @@ function memberPath(node) {
 }
 
 function contractUsesDenseNumeric(contract) {
+  contract = contract.replace(CONTINUATION_SUFFIX, '');
   contract = withoutWarpContract(contract);
   return [
     DEVICE_JS_DENSE_NUMERIC_CONTRACT,
@@ -109,6 +111,7 @@ function contractUsesDenseNumeric(contract) {
 }
 
 function libraryContractFor(contract) {
+  if (contract.endsWith(CONTINUATION_SUFFIX)) return libraryContractFor(contract.slice(0, -CONTINUATION_SUFFIX.length)) + CONTINUATION_SUFFIX;
   if (contractUsesWarp(contract)) return withWarpContract(libraryContractFor(withoutWarpContract(contract)), true);
   if (contract === DEVICE_JS_DENSE_NUMERIC_ERF_TANH_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_ERF_TANH_LIBRARY_CONTRACT;
   if (contract === DEVICE_JS_DENSE_NUMERIC_ERF_CONTRACT) return DEVICE_JS_DENSE_NUMERIC_ERF_LIBRARY_CONTRACT;
@@ -244,6 +247,7 @@ function canonicalizeGeneratedSource(raw, sortedFunctions, { usesScopedAtomic, u
   if (usesDenseNumeric) lines.push(...denseNumericPreludeLines());
   if (usesWarp) lines.push(...warpPreludeLines());
   if (usesScopedAtomic) lines.push('#include <cuda/atomic>', '');
+  if (contract.endsWith(CONTINUATION_SUFFIX)) lines.push(...continuationPreludeLines());
   for (const entry of imports) {
     const parameters = entry.parameters
       .map((parameter, parameterIndex) => `${cppType(parameter.type)} p${parameterIndex}`)
@@ -280,7 +284,7 @@ function deepFreeze(value) {
 export function translateDeviceProgram(request) {
   const raw = translateRawDeviceProgram(request);
   const ast = parseAcceptedSource(request.source);
-  const requirements = validateAdditionalContract(ast, raw.functions, raw.contract);
+  const requirements = validateAdditionalContract(ast, raw.functions, raw.contract.replace(CONTINUATION_SUFFIX, ''));
 
   const sortedFunctions = raw.functions
     .map((fn) => ({
@@ -288,6 +292,7 @@ export function translateDeviceProgram(request) {
       kind: fn.kind,
       parameters: fn.parameters.map((parameter) => ({ name: parameter.name, type: parameter.type })),
       returns: fn.returns,
+      ...(fn.executionProfile ? { executionProfile: fn.executionProfile } : {}),
       ...(fn.kind === 'kernel'
         ? { launchParameters: fn.launchParameters.map((parameter) => ({ ...parameter })) }
         : {}),
@@ -324,6 +329,7 @@ export function translateDeviceProgram(request) {
       name: fn.name,
       functionName: fn.functionName,
       parameters: fn.launchParameters.map((parameter) => ({ ...parameter })),
+      ...(fn.executionProfile ? { executionProfile: fn.executionProfile } : {}),
     }));
 
   return deepFreeze({

@@ -1,6 +1,6 @@
 {
   "name": "cuda-js",
-  "version": "0.1.0-alpha.21",
+  "version": "0.1.0-alpha.22",
   "description": "A capability-safe, Worker-owned Node runtime for bounded CUDA Driver, NVRTC, and nvJitLink operations.",
   "private": false,
   "license": "AGPL-3.0-or-later",
@@ -46,7 +46,8 @@
     "schemas/cuda-13.3/linux-x64/compiler-provider-manifest.json",
     "schemas/cuda-13.3/win-x64/compiler-provider-manifest.json",
     "schemas/cuda-13.3/win-x64/cublaslt-provider-manifest.json",
-    "schemas/cuda-13.3/win-x64/generated/cublaslt-ffi-definitions.mjs"
+    "schemas/cuda-13.3/win-x64/generated/cublaslt-ffi-definitions.mjs",
+    "schemas/cuda-13.3/win-x64/device-graph/generated/ffi-definitions.mjs"
   ],
   "dependencies": {
     "acorn": "8.15.0"

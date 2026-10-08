@@ -1,4 +1,5 @@
 import ffi from 'node:ffi';
+import { createDeviceContinuationPorts } from './device-continuation.mjs';
 
 import { ExecutionManager } from '../../../execution/index.mjs';
 import { HostMemoryTransferManager } from '../../../host-memory-transfer/index.mjs';
@@ -405,6 +406,11 @@ export async function createNativeBackend({ runtimeId, epoch, memoryPolicy, exec
       policy: executionPolicy,
       deviceLimits: attributes,
       operations: {
+        ...createDeviceContinuationPorts({ library, ffi, requireCurrent, requireSuccess, attributes, restartRequired: ({ code, message, details, operationId }) => {
+          const before = health.current;
+          health.transition('restart-required', { reason: code, operationId });
+          return new DriverRuntimeError(code, 'restart-required', message, details, { operationId, healthBefore: before, healthAfter: health.current });
+        } }),
         async createStream({ operationId }) {
           requireCurrent(operationId);
           const output = pointerOut();

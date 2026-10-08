@@ -320,8 +320,9 @@ class DriverRuntime {
 
   async getFunction(moduleToken, options) {
     if (!isResourceToken(moduleToken)) throw validationError('DRIVER_MODULE_TOKEN', 'getFunction requires an exact opaque module token.');
-    if (!plainObject(options) || Object.keys(options).sort().join('\0') !== ['name', 'parameters'].join('\0') || !Array.isArray(options.parameters)) throw validationError('DRIVER_FUNCTION_OPTIONS', 'getFunction requires exactly name and parameters.');
-    return this.#request('execution.function.get', { moduleToken, name: options.name, parameters: options.parameters.map((entry) => plainObject(entry) ? { ...entry } : entry) });
+    if (!plainObject(options) || Object.keys(options).some((key) => !['name', 'parameters', 'executionProfile'].includes(key)) || !Object.hasOwn(options, 'name') || !Array.isArray(options.parameters)
+        || (options.executionProfile !== undefined && !['ordinary', 'device-continuation-v1'].includes(options.executionProfile))) throw validationError('DRIVER_FUNCTION_OPTIONS', 'getFunction requires name, parameters and an optional closed execution profile.');
+    return this.#request('execution.function.get', { moduleToken, name: options.name, parameters: options.parameters.map((entry) => plainObject(entry) ? { ...entry } : entry), ...(options.executionProfile === undefined ? {} : { executionProfile: options.executionProfile }) });
   }
 
   async functionStatus(token) {
@@ -335,6 +336,12 @@ class DriverRuntime {
 
   async prepareOperationDag(options) {
     return this.#request('execution.prepared.create', preparedDagPayload(options));
+  }
+
+  async submitDeviceContinuation(options) {
+    if (!plainObject(options) || Object.keys(options).some((key) => !['nodes', 'bindings', 'continuationNode', 'after'].includes(key)) || !Array.isArray(options.bindings) || typeof options.continuationNode !== 'string') throw validationError('DRIVER_CONTINUATION_OPTIONS', 'Continuation submission requires nodes, bindings and continuationNode.');
+    const dag = preparedDagPayload({ nodes: options.nodes });
+    return this.#request('execution.continuation.submit', { ...dag, bindings: options.bindings.map((entry) => plainObject(entry) ? { ...entry } : entry), continuationNode: options.continuationNode, after: options.after ?? null });
   }
 
   async preparedOperationDagStatus(token) {
